@@ -44,20 +44,10 @@ export default function Home() {
   // After login: check profile + load posts
   useEffect(() => {
     if (!user) return;
-    checkProfile();
     loadPosts();
   }, [user]);
 
-  async function checkProfile() {
-    const { data } = await supabase
-      .from("profiles")
-      .select("username")
-      .eq("id", user.id)
-      .single();
-
-    if (data?.username) setHasProfile(true);
-    else setHasProfile(false);
-  }
+ 
 
   const normalizedUsername = useMemo(() => username.trim().toLowerCase(), [username]);
 
@@ -69,30 +59,24 @@ export default function Home() {
     return "";
   }, [normalizedUsername]);
 
-  async function createProfile() {
-    if (profileBusy) return;
-    if (usernameError) return;
-
-    setProfileBusy(true);
-
-    // upsert prevents weird “already exists” states
-    const { error } = await supabase.from("profiles").upsert(
-      {
-        id: user.id,
-        username: normalizedUsername,
-      },
-      { onConflict: "id" }
-    );
-
-    setProfileBusy(false);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    setHasProfile(true);
+async function createProfile() {
+  if (username.trim().length < 3) {
+    alert("Username must be at least 3 characters");
+    return;
   }
+
+  const { error } = await supabase.from("profiles").upsert({
+    id: user.id,
+    username: username.trim(),
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  setHasProfile(true); // ✅ ONLY HERE
+}
 
   async function loadPosts() {
     const { data } = await supabase
@@ -328,7 +312,7 @@ const styles: any = {
   textarea: {
     width: "100%",
     height: 70,
-    marginBottom: 8,
+    marginBottom: 7,
     padding: 10,
     border: "1px solid #ddd",
     borderRadius: 12,
