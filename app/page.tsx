@@ -413,7 +413,7 @@ export default function HomePage() {
     <div className="feed">
       <div className="header">
         <div className="headerInner">
-          <div className="brand">Nihongo Feed</div>
+          <div className="brand">フィード</div>
 
           {/* RIGHT SIDE: login or me */}
           {!userId ? (
