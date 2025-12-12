@@ -5,9 +5,10 @@ import { supabase } from "@/lib/supabase";
 
 type DbPostRow = {
   id: string;
-  content: string;
+  content: string | null;
   created_at: string;
   user_id: string;
+  image_url?: string | null;
   profiles: { username: string | null } | { username: string | null }[] | null;
 };
 
@@ -17,6 +18,7 @@ type Post = {
   created_at: string;
   user_id: string;
   username: string;
+  image_url: string | null;
   likes: number;
   likedByMe: boolean;
 };
@@ -24,26 +26,43 @@ type Post = {
 export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [text, setText] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
   const [busy, setBusy] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUserId(session?.user?.id ?? null);
+    let mounted = true;
+
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data.user?.id ?? null;
+      if (!mounted) return;
+      setUserId(uid);
+      void loadAll(uid);
     });
-    void loadAll();
-    return () => sub.subscription.unsubscribe();
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      const uid = session?.user?.id ?? null;
+      setUserId(uid);
+      void loadAll(uid);
+    });
+
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function loadAll() {
+  async function loadAll(uid: string | null = userId) {
     setLoading(true);
 
+    // ⚠️ Asegúrate de que exista posts.image_url en tu tabla.
     const { data, error } = await supabase
       .from("posts")
-      .select("id, content, created_at, user_id, profiles(username)")
+      .select("id, content, created_at, user_id, image_url, profiles(username)")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -52,22 +71,25 @@ export default function HomePage() {
       return;
     }
 
-    const normalized =
+    const normalized: Post[] =
       (data as unknown as DbPostRow[] | null)?.map((row) => {
         const p: any = row.profiles as any;
-        const username = (Array.isArray(p) ? p?.[0]?.username : p?.username) ?? "unknown";
+        const username =
+          (Array.isArray(p) ? p?.[0]?.username : p?.username) ?? "unknown";
+
         return {
           id: row.id,
-          content: row.content,
+          content: (row.content ?? "").toString(),
           created_at: row.created_at,
           user_id: row.user_id,
           username,
+          image_url: (row as any).image_url ?? null,
           likes: 0,
           likedByMe: false,
         };
       }) ?? [];
 
-    // load likes for these posts (count + whether I liked)
+    // likes (count + mine)
     const postIds = normalized.map((p) => p.id);
     if (postIds.length) {
       const { data: likesData } = await supabase
@@ -82,7 +104,7 @@ export default function HomePage() {
         const cur = likeMap.get(r.post_id);
         if (!cur) return;
         cur.count += 1;
-        if (userId && r.user_id === userId) cur.mine = true;
+        if (uid && r.user_id === uid) cur.mine = true;
         likeMap.set(r.post_id, cur);
       });
 
@@ -98,62 +120,68 @@ export default function HomePage() {
     setPosts(normalized);
     setLoading(false);
   }
-const [imageFile, setImageFile] = useState<File | null>(null);
 
   async function createPost() {
-  if (!userId) {
-    alert("Log in first.");
-    return;
-  }
-  if (busy) return;
-  if (!text.trim() && !imageFile) return;
-
-  setBusy(true);
-
-  // 1) create post first
-  const { data: post, error: postError } = await supabase
-    .from("posts")
-    .insert({
-      content: text.trim(),
-      user_id: userId,
-    })
-    .select()
-    .single();
-
-  if (postError || !post) {
-    setBusy(false);
-    alert(postError?.message);
-    return;
-  }
-
-  // 2) upload image if exists
-  if (imageFile) {
-    const ext = imageFile.name.split(".").pop();
-    const path = `posts/${post.id}.${ext}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("post-images")
-      .upload(path, imageFile, {
-        upsert: true,
-      });
-
-    if (!uploadError) {
-      const { data } = supabase.storage
-        .from("post-images")
-        .getPublicUrl(path);
-
-      await supabase
-        .from("posts")
-        .update({ image_url: data.publicUrl })
-        .eq("id", post.id);
+    if (!userId) {
+      alert("Log in first.");
+      return;
     }
+    if (busy) return;
+    if (!text.trim() && !imageFile) return;
+
+    setBusy(true);
+
+    // 1) crear post (content puede ir vacío si es solo imagen)
+    const { data: post, error: postError } = await supabase
+      .from("posts")
+      .insert({
+        content: text.trim(),
+        user_id: userId,
+      })
+      .select("id")
+      .single();
+
+    if (postError || !post) {
+      setBusy(false);
+      alert(postError?.message ?? "Post error");
+      return;
+    }
+
+    // 2) subir imagen (si hay)
+    if (imageFile) {
+      const ext = (imageFile.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `posts/${post.id}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("post-images")
+        .upload(path, imageFile, { upsert: true });
+
+      if (uploadError) {
+        setBusy(false);
+        alert(uploadError.message);
+        return;
+      }
+
+      const { data: pub } = supabase.storage.from("post-images").getPublicUrl(path);
+
+      const { error: updateError } = await supabase
+        .from("posts")
+        .update({ image_url: pub.publicUrl })
+        .eq("id", post.id);
+
+      if (updateError) {
+        setBusy(false);
+        alert(updateError.message);
+        return;
+      }
+    }
+
+    setText("");
+    setImageFile(null);
+    setBusy(false);
+    void loadAll(userId);
   }
 
-  setText("");
-  setImageFile(null);
-  setBusy(false);
-  void loadAll();
-}
   async function toggleLike(postId: string) {
     if (!userId) {
       alert("Log in first.");
@@ -167,13 +195,16 @@ const [imageFile, setImageFile] = useState<File | null>(null);
     setPosts((prev) =>
       prev.map((x) =>
         x.id === postId
-          ? { ...x, likedByMe: !x.likedByMe, likes: x.likedByMe ? x.likes - 1 : x.likes + 1 }
+          ? {
+              ...x,
+              likedByMe: !x.likedByMe,
+              likes: x.likedByMe ? x.likes - 1 : x.likes + 1,
+            }
           : x
       )
     );
 
     if (p.likedByMe) {
-      // unlike
       const { error } = await supabase
         .from("reactions")
         .delete()
@@ -182,10 +213,9 @@ const [imageFile, setImageFile] = useState<File | null>(null);
 
       if (error) {
         alert(error.message);
-        void loadAll();
+        void loadAll(userId);
       }
     } else {
-      // like
       const { error } = await supabase.from("reactions").insert({
         post_id: postId,
         user_id: userId,
@@ -193,7 +223,7 @@ const [imageFile, setImageFile] = useState<File | null>(null);
 
       if (error) {
         alert(error.message);
-        void loadAll();
+        void loadAll(userId);
       }
     }
   }
@@ -203,25 +233,41 @@ const [imageFile, setImageFile] = useState<File | null>(null);
       <div className="header">Nihongo Feed</div>
 
       <div className="composer">
-<textarea
-  value={text}
-  onChange={(e) => setText(e.target.value)}
-/>
+        <div className="composer-row">
+          <textarea
+            className="textarea"
+            placeholder="日本語で書いてね…"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
 
-<input
-  type="file"
-  accept="image/*"
-  onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-/>
-
-
-        <div className="row">
-          <div className="muted" style={{ fontSize: 12 }}>
-            {userId ? "ログイン中" : "未ログイン"}
-          </div>
-          <button className="btn btnPrimary" onClick={createPost} disabled={busy || !text.trim()}>
+          <button
+            className="postBtn"
+            onClick={createPost}
+            disabled={busy || (!text.trim() && !imageFile)}
+          >
             {busy ? "投稿中…" : "投稿"}
           </button>
+        </div>
+
+        <div className="fileRow">
+          <input
+            id="image"
+            className="fileInput"
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+          />
+
+          <label className="fileBtn" htmlFor="image">
+            画像
+          </label>
+
+          <div className="fileName">{imageFile ? imageFile.name : "画像なし"}</div>
+
+          <div className="muted" style={{ marginLeft: "auto", fontSize: 12 }}>
+            {userId ? "ログイン中" : "未ログイン"}
+          </div>
         </div>
       </div>
 
@@ -232,21 +278,40 @@ const [imageFile, setImageFile] = useState<File | null>(null);
       ) : (
         posts.map((p) => {
           const initial = (p.username?.[0] || "?").toUpperCase();
+
           return (
             <div className="post" key={p.id}>
               <div className="post-header">
                 <div className="avatar">{initial}</div>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: 13 }}>@{p.username}</div>
-                  <div className="meta">{new Date(p.created_at).toLocaleString()}</div>
+                  <div className="muted" style={{ fontSize: 12 }}>
+                    {new Date(p.created_at).toLocaleString()}
+                  </div>
                 </div>
               </div>
 
-              <div className="post-content">{p.content}</div>
+              {p.content ? <div className="post-content">{p.content}</div> : null}
 
-              <div className="actions">
+              {p.image_url ? (
+                <div style={{ padding: "0 12px 12px" }}>
+                  <img
+                    src={p.image_url}
+                    alt="post"
+                    style={{
+                      width: "100%",
+                      display: "block",
+                      borderRadius: 12,
+                      border: "1px solid var(--line)",
+                    }}
+                  />
+                </div>
+              ) : null}
+
+              <div className="actions" style={{ padding: "0 12px 12px" }}>
                 <button className="likeBtn" onClick={() => toggleLike(p.id)}>
-                  {p.likedByMe ? "💙" : "🤍"} いいね <span className="muted">{p.likes}</span>
+                  {p.likedByMe ? "💙" : "🤍"} いいね{" "}
+                  <span className="muted">{p.likes}</span>
                 </button>
               </div>
             </div>
