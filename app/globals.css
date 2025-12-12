@@ -1,56 +1,82 @@
-* {
-  box-sizing: border-box;
+:root{
+  --bg:#f6f6f6;
+  --card:#ffffff;
+  --text:#111111;
+  --muted:#6b6b6b;
+  --line:rgba(0,0,0,.08);
+  --shadow:0 12px 34px rgba(0,0,0,.08);
+  --max:420px;
+  --r:18px;
+  --r2:12px;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Hiragino Sans","Noto Sans JP",system-ui,Segoe UI,Roboto,sans-serif;
 }
 
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #f2f2f2;
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
 }
 
-.feed {
-  max-width: 420px;
-  margin: 0 auto;
-  background: white;
-  min-height: 100vh;
-  border-left: 1px solid #ddd;
-  border-right: 1px solid #ddd;
+.feed{
+  max-width:var(--max);
+  margin:24px auto;
+  background:var(--card);
+  min-height:calc(100vh - 48px);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  overflow:hidden;
+  box-shadow:var(--shadow);
 }
 
-.header {
-  padding: 16px;
-  font-weight: bold;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-  position: sticky;
-  top: 0;
-  background: white;
+.header{
+  padding:14px 16px;
+  font-weight:800;
+  text-align:center;
+  border-bottom:1px solid var(--line);
+  position:sticky;
+  top:0;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:saturate(180%) blur(10px);
+  letter-spacing:.2px;
 }
 
-.post {
-  border-bottom: 1px solid #eee;
+.post{
+  border-bottom:1px solid var(--line);
 }
 
-.post-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
+.post-header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 12px 8px;
 }
 
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: bold;
+.avatar{
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#f1f1f1,#dcdcdc);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  font-weight:800;
+  color:#222;
+  border:1px solid var(--line);
 }
 
-.post-content {
-  padding: 0 12px 12px;
-  font-size: 14px;
+.post-content{
+  padding:0 12px 14px;
+  font-size:14px;
+  line-height:1.55;
+}
+
+.post-content p{ margin:0; }
+
+small, .muted{
+  color:var(--muted);
+  font-size:12px;
 }
