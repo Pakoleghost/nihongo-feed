@@ -1,22 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 type Post = {
   id: string;
   content: string;
   created_at: string;
-  profiles?: { username: string };
+  profiles?: { username: string } | null;
 };
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
+
+  // auth
   const [email, setEmail] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
+
+  // username gate
   const [username, setUsername] = useState("");
   const [hasProfile, setHasProfile] = useState(false);
+  const [profileBusy, setProfileBusy] = useState(false);
+
+  // feed
   const [posts, setPosts] = useState<Post[]>([]);
   const [text, setText] = useState("");
+  const [postBusy, setPostBusy] = useState(false);
+
+  const SITE_URL =
+    process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "");
 
   // Auth
   useEffect(() => {
@@ -29,10 +41,9 @@ export default function Home() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Check profile + load posts
+  // After login: check profile + load posts
   useEffect(() => {
     if (!user) return;
-
     checkProfile();
     loadPosts();
   }, [user]);
@@ -45,15 +56,35 @@ export default function Home() {
       .single();
 
     if (data?.username) setHasProfile(true);
+    else setHasProfile(false);
   }
 
-  async function createProfile() {
-    if (!username.trim()) return;
+  const normalizedUsername = useMemo(() => username.trim().toLowerCase(), [username]);
 
-    const { error } = await supabase.from("profiles").insert({
-      id: user.id,
-      username,
-    });
+  const usernameError = useMemo(() => {
+    if (!normalizedUsername) return "Type a username.";
+    if (normalizedUsername.length < 3) return "Minimum 3 characters.";
+    if (normalizedUsername.length > 20) return "Maximum 20 characters.";
+    if (!/^[a-z0-9_]+$/.test(normalizedUsername)) return "Use only a-z, 0-9, underscore (_).";
+    return "";
+  }, [normalizedUsername]);
+
+  async function createProfile() {
+    if (profileBusy) return;
+    if (usernameError) return;
+
+    setProfileBusy(true);
+
+    // upsert prevents weird “already exists” states
+    const { error } = await supabase.from("profiles").upsert(
+      {
+        id: user.id,
+        username: normalizedUsername,
+      },
+      { onConflict: "id" }
+    );
+
+    setProfileBusy(false);
 
     if (error) {
       alert(error.message);
@@ -73,64 +104,98 @@ export default function Home() {
   }
 
   async function createPost() {
+    if (postBusy) return;
     if (!text.trim()) return;
 
-    await supabase.from("posts").insert({
-      content: text,
+    setPostBusy(true);
+
+    const { error } = await supabase.from("posts").insert({
+      content: text.trim(),
       user_id: user.id,
     });
+
+    setPostBusy(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
 
     setText("");
     loadPosts();
   }
 
   async function sendMagicLink() {
+    if (authBusy) return;
     if (!email.trim()) return;
 
-    await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
+    setAuthBusy(true);
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: { emailRedirectTo: SITE_URL },
     });
 
-    alert("Check your email.");
+    setAuthBusy(false);
+
+    if (error) alert(error.message);
+    else alert("Check your email.");
   }
 
   async function logout() {
     await supabase.auth.signOut();
     setHasProfile(false);
+    setUsername("");
   }
 
-  // LOGIN SCREEN
+  // LOGIN
   if (!user) {
     return (
       <main style={styles.page}>
         <div style={styles.card}>
-          <h2>Nihongo Feed 🇯🇵</h2>
+          <h2 style={{ margin: 0 }}>Nihongo Feed 🇯🇵</h2>
+
           <input
             placeholder="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             style={styles.input}
+            autoComplete="email"
           />
-          <button onClick={sendMagicLink}>Send link</button>
+
+          <button onClick={sendMagicLink} disabled={authBusy || !email.trim()}>
+            {authBusy ? "Sending..." : "Send link"}
+          </button>
         </div>
       </main>
     );
   }
 
-  // USERNAME SCREEN
+  // USERNAME GATE
   if (!hasProfile) {
     return (
       <main style={styles.page}>
         <div style={styles.card}>
-          <h2>Choose a username</h2>
+          <h2 style={{ margin: 0 }}>Choose a username</h2>
+
           <input
             placeholder="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             style={styles.input}
+            autoFocus
+            autoComplete="off"
           />
-          <button onClick={createProfile}>Save</button>
+
+          {!!usernameError && <div style={styles.hint}>{usernameError}</div>}
+
+          <button onClick={createProfile} disabled={profileBusy || !!usernameError}>
+            {profileBusy ? "Saving..." : "Save"}
+          </button>
+
+          <button onClick={logout} style={{ marginTop: 8 }}>
+            Log out
+          </button>
         </div>
       </main>
     );
@@ -142,7 +207,9 @@ export default function Home() {
       <div style={styles.phone}>
         <header style={styles.header}>
           Nihongo Feed
-          <button onClick={logout} style={{ float: "right" }}>↩</button>
+          <button onClick={logout} style={styles.logoutBtn}>
+            ↩
+          </button>
         </header>
 
         <div style={{ padding: 12 }}>
@@ -152,17 +219,17 @@ export default function Home() {
             onChange={(e) => setText(e.target.value)}
             style={styles.textarea}
           />
-          <button onClick={createPost}>Post</button>
+          <button onClick={createPost} disabled={postBusy || !text.trim()}>
+            {postBusy ? "Posting..." : "Post"}
+          </button>
         </div>
 
         <div style={styles.feed}>
           {posts.map((p) => (
             <div key={p.id} style={styles.post}>
               <div style={styles.postHeader}>
-                <div style={styles.avatar}>
-                  {p.profiles?.username[0]?.toUpperCase()}
-                </div>
-                <span>{p.profiles?.username}</span>
+                <div style={styles.avatar}>{(p.profiles?.username?.[0] || "?").toUpperCase()}</div>
+                <span style={styles.usernameText}>{p.profiles?.username || "user"}</span>
               </div>
               <div style={styles.postBody}>{p.content}</div>
             </div>
@@ -191,8 +258,14 @@ const styles: any = {
   header: {
     padding: 16,
     borderBottom: "1px solid #eee",
-    fontWeight: 600,
+    fontWeight: 700,
     textAlign: "center",
+    position: "relative",
+  },
+  logoutBtn: {
+    position: "absolute",
+    right: 12,
+    top: 12,
   },
   feed: {
     padding: 12,
@@ -220,27 +293,45 @@ const styles: any = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    fontWeight: 800,
+  },
+  usernameText: {
+    fontSize: 14,
     fontWeight: 700,
   },
   postBody: {
     padding: 12,
     fontSize: 14,
+    lineHeight: 1.45,
   },
   card: {
     background: "#fff",
     padding: 24,
     borderRadius: 12,
-    width: 320,
+    width: 340,
     display: "flex",
     flexDirection: "column",
     gap: 12,
+    boxShadow: "0 10px 30px rgba(0,0,0,.10)",
   },
   input: {
-    padding: 8,
+    padding: 10,
+    border: "1px solid #ddd",
+    borderRadius: 10,
+    fontSize: 14,
+  },
+  hint: {
+    fontSize: 13,
+    color: "#b00020",
+    marginTop: -6,
   },
   textarea: {
     width: "100%",
     height: 70,
     marginBottom: 8,
+    padding: 10,
+    border: "1px solid #ddd",
+    borderRadius: 12,
+    fontSize: 14,
   },
 };
