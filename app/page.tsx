@@ -1,20 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 type DbPostRow = {
   id: string;
-  content: string;
-  created_at: string;
-  user_id: string;
-  profiles: { username: string | null } | { username: string | null }[] | null;
-};
-
-type DbCommentRow = {
-  id: string;
-  post_id: string;
-  content: string;
+  content: string | null;
+  image_path: string | null;
   created_at: string;
   user_id: string;
   profiles: { username: string | null } | { username: string | null }[] | null;
@@ -23,528 +15,358 @@ type DbCommentRow = {
 type Post = {
   id: string;
   content: string;
-  created_at: string;
-  user_id: string;
-  username: string;
-
-  reactionCounts: Record<string, number>;
-  myReactions: Set<string>;
-  commentsCount: number;
-};
-
-type Comment = {
-  id: string;
-  post_id: string;
-  content: string;
+  image_path: string | null;
   created_at: string;
   user_id: string;
   username: string;
 };
-
-const REACTION_TYPES = ["heart", "like", "star"] as const;
-type ReactionType = (typeof REACTION_TYPES)[number];
-
-function getUsernameFromProfiles(
-  profiles: { username: string | null } | { username: string | null }[] | null
-) {
-  if (!profiles) return "unknown";
-  if (Array.isArray(profiles)) return profiles?.[0]?.username ?? "unknown";
-  return profiles.username ?? "unknown";
-}
 
 export default function HomePage() {
-  const [user, setUser] = useState<any>(null);
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const SITE_URL =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "");
 
+  // auth
+  const [user, setUser] = useState<any>(null);
+  const [email, setEmail] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
+
+  // username gate
+  const [username, setUsername] = useState("");
+  const [hasProfile, setHasProfile] = useState(false);
+  const [profileBusy, setProfileBusy] = useState(false);
+
+  // feed
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [newPost, setNewPost] = useState("");
-  const [posting, setPosting] = useState(false);
+  // composer
+  const [text, setText] = useState("");
+  const [image, setImage] = useState<File | null>(null);
+  const [postBusy, setPostBusy] = useState(false);
+  const fileRef = useRef<HTMLInputElement | null>(null);
 
-  // Auth (optional): feed is public, posting/commenting/reacting requires login
+  // Auth listener
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // Load posts always (public feed)
   useEffect(() => {
-    void loadEverything();
+    void loadPosts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, []);
 
-  async function loadEverything() {
+  // After login: check profile
+  useEffect(() => {
+    if (!user) {
+      setHasProfile(false);
+      setUsername("");
+      return;
+    }
+    void checkProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  const normalizedUsername = useMemo(() => username.trim().toLowerCase(), [username]);
+
+  const usernameError = useMemo(() => {
+    if (!normalizedUsername) return "Type a username.";
+    if (normalizedUsername.length < 3) return "Minimum 3 characters.";
+    if (normalizedUsername.length > 20) return "Maximum 20 characters.";
+    if (!/^[a-z0-9_]+$/.test(normalizedUsername)) return "Use only a-z, 0-9, underscore (_).";
+    return "";
+  }, [normalizedUsername]);
+
+  async function loadPosts() {
     setLoading(true);
 
-    const { data: postRows, error: postErr } = await supabase
+    const { data, error } = await supabase
       .from("posts")
-      .select("id, content, created_at, user_id, profiles(username)")
+      .select("id, content, image_path, created_at, user_id, profiles(username)")
       .order("created_at", { ascending: false });
 
-    if (postErr) {
-      console.error(postErr);
-      setPosts([]);
+    if (error) {
+      console.error(error);
       setLoading(false);
       return;
     }
 
-    const base: Post[] =
-      (postRows as unknown as DbPostRow[] | null)?.map((row) => ({
-        id: row.id,
-        content: row.content,
-        created_at: row.created_at,
-        user_id: row.user_id,
-        username: getUsernameFromProfiles(row.profiles),
-        reactionCounts: { heart: 0, like: 0, star: 0 },
-        myReactions: new Set<string>(),
-        commentsCount: 0,
-      })) ?? [];
+    const normalized: Post[] =
+      (data as unknown as DbPostRow[] | null)?.map((row) => {
+        const p = row.profiles as any;
+        const u = (Array.isArray(p) ? p?.[0]?.username : p?.username) ?? "unknown";
 
-    const ids = base.map((p) => p.id);
-    if (ids.length === 0) {
-      setPosts([]);
-      setLoading(false);
-      return;
-    }
+        return {
+          id: row.id,
+          content: (row.content ?? "").toString(),
+          image_path: row.image_path ?? null,
+          created_at: row.created_at,
+          user_id: row.user_id,
+          username: u,
+        };
+      }) ?? [];
 
-    // Reactions summary
-    // expected schema: reactions(post_id uuid, user_id uuid, type text)
-    const { data: rxRows } = await supabase
-      .from("reactions")
-      .select("post_id, user_id, type")
-      .in("post_id", ids);
-
-    const rxByPost: Record<string, Record<string, number>> = {};
-    const myRxByPost: Record<string, Set<string>> = {};
-
-    for (const id of ids) {
-      rxByPost[id] = { heart: 0, like: 0, star: 0 };
-      myRxByPost[id] = new Set<string>();
-    }
-
-    if (rxRows) {
-      for (const r of rxRows as any[]) {
-        const pid = String(r.post_id);
-        const t = String(r.type) as ReactionType;
-        if (!rxByPost[pid]) continue;
-        if (!REACTION_TYPES.includes(t)) continue;
-
-        rxByPost[pid][t] = (rxByPost[pid][t] ?? 0) + 1;
-
-        if (user?.id && String(r.user_id) === String(user.id)) {
-          myRxByPost[pid].add(t);
-        }
-      }
-    }
-
-    // Comments count
-    const { data: cRows } = await supabase
-      .from("comments")
-      .select("post_id")
-      .in("post_id", ids);
-
-    const cCountByPost: Record<string, number> = {};
-    for (const id of ids) cCountByPost[id] = 0;
-
-    if (cRows) {
-      for (const c of cRows as any[]) {
-        const pid = String(c.post_id);
-        cCountByPost[pid] = (cCountByPost[pid] ?? 0) + 1;
-      }
-    }
-
-    const merged = base.map((p) => ({
-      ...p,
-      reactionCounts: rxByPost[p.id] ?? { heart: 0, like: 0, star: 0 },
-      myReactions: myRxByPost[p.id] ?? new Set<string>(),
-      commentsCount: cCountByPost[p.id] ?? 0,
-    }));
-
-    setPosts(merged);
+    setPosts(normalized);
     setLoading(false);
   }
 
-  async function createPost() {
-    if (!user) return;
-    if (posting) return;
+  async function checkProfile() {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .single();
 
-    const content = newPost.trim();
-    if (!content) return;
+    if (error) {
+      // If row doesn't exist yet, keep hasProfile false
+      setHasProfile(false);
+      return;
+    }
 
-    setPosting(true);
+    if (data?.username) setHasProfile(true);
+    else setHasProfile(false);
+  }
 
-    const { error } = await supabase.from("posts").insert({
-      content,
-      user_id: user.id,
+  async function createProfile() {
+    if (profileBusy) return;
+    if (usernameError) return;
+
+    setProfileBusy(true);
+
+    const { error } = await supabase.from("profiles").upsert({
+      id: user.id,
+      username: normalizedUsername,
     });
 
-    setPosting(false);
+    setProfileBusy(false);
 
     if (error) {
       alert(error.message);
       return;
     }
 
-    setNewPost("");
-    await loadEverything();
+    setHasProfile(true);
   }
 
-  async function toggleReaction(postId: string, type: ReactionType) {
-    if (!user) return;
+  async function sendMagicLink() {
+    if (authBusy) return;
+    if (!email.trim()) return;
 
-    const p = posts.find((x) => x.id === postId);
-    if (!p) return;
+    setAuthBusy(true);
 
-    const has = p.myReactions.has(type);
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: { emailRedirectTo: SITE_URL },
+    });
 
-    // optimistic UI
-    setPosts((prev) =>
-      prev.map((x) => {
-        if (x.id !== postId) return x;
-        const nextSet = new Set(Array.from(x.myReactions));
-        const nextCounts = { ...x.reactionCounts };
+    setAuthBusy(false);
 
-        if (has) {
-          nextSet.delete(type);
-          nextCounts[type] = Math.max(0, (nextCounts[type] ?? 0) - 1);
-        } else {
-          nextSet.add(type);
-          nextCounts[type] = (nextCounts[type] ?? 0) + 1;
-        }
-
-        return { ...x, myReactions: nextSet, reactionCounts: nextCounts };
-      })
-    );
-
-    if (has) {
-      const { error } = await supabase
-        .from("reactions")
-        .delete()
-        .eq("post_id", postId)
-        .eq("user_id", user.id)
-        .eq("type", type);
-
-      if (error) {
-        alert(error.message);
-        await loadEverything();
-      }
-    } else {
-      const { error } = await supabase.from("reactions").insert({
-        post_id: postId,
-        user_id: user.id,
-        type,
-      });
-
-      if (error) {
-        alert(error.message);
-        await loadEverything();
-      }
-    }
+    if (error) alert(error.message);
+    else alert("Check your email.");
   }
 
   async function logout() {
     await supabase.auth.signOut();
-    setUser(null);
+    setHasProfile(false);
+    setUsername("");
   }
 
-  const headerRight = useMemo(() => {
-    if (!user) return <span className="muted">Public</span>;
-    return (
-      <button className="btn-ghost" onClick={logout} title="Log out">
-        ↩
-      </button>
-    );
-  }, [user]);
+  async function createPost() {
+    if (!user) return;
+    if (!hasProfile) return;
+    if (postBusy) return;
+    if (!text.trim() && !image) return;
 
-  if (loading) return <div className="p-6 muted">Loading…</div>;
+    setPostBusy(true);
+
+    let imagePath: string | null = null;
+
+    // 1) Upload image if present
+    if (image) {
+      const ext = (image.name.split(".").pop() || "jpg").toLowerCase();
+      const safeExt = ext.replace(/[^a-z0-9]/g, "") || "jpg";
+      const fileName = `${user.id}/${Date.now()}.${safeExt}`;
+
+      const { error: upErr } = await supabase.storage
+        .from("post-images")
+        .upload(fileName, image, { upsert: false });
+
+      if (upErr) {
+        setPostBusy(false);
+        alert(upErr.message);
+        return;
+      }
+
+      imagePath = fileName;
+    }
+
+    // 2) Insert post row
+    const { error: insErr } = await supabase.from("posts").insert({
+      content: text.trim() ? text.trim() : null,
+      image_path: imagePath,
+      user_id: user.id,
+    });
+
+    setPostBusy(false);
+
+    if (insErr) {
+      alert(insErr.message);
+      return;
+    }
+
+    // 3) Clear composer
+    setText("");
+    setImage(null);
+    if (fileRef.current) fileRef.current.value = "";
+
+    // 4) Refresh feed
+    void loadPosts();
+  }
+
+  const canPost = !!user && hasProfile;
 
   return (
     <div className="feed">
       <div className="header">
-        <span>Nihongo Feed</span>
-        <span style={{ float: "right" }}>{headerRight}</span>
-      </div>
-
-      {/* Composer (only if logged in) */}
-      <div className="composer">
-        {user ? (
-          <>
-            <textarea
-              className="composer-textarea"
-              placeholder="日本語で書いてね…"
-              value={newPost}
-              onChange={(e) => setNewPost(e.target.value)}
-            />
-            <button className="btn" onClick={createPost} disabled={posting || !newPost.trim()}>
-              {posting ? "Posting…" : "Post"}
-            </button>
-          </>
-        ) : (
-          <div className="muted" style={{ padding: 12 }}>
-            View-only. Log in to post, react, and comment.
-          </div>
+        Nihongo Feed
+        {!!user && (
+          <button onClick={logout} style={{ float: "right" }}>
+            ↩
+          </button>
         )}
       </div>
 
-      {posts.map((p) => (
-        <PostCard
-          key={p.id}
-          post={p}
-          authed={!!user}
-          onReact={(t) => void toggleReaction(p.id, t)}
-        />
-      ))}
-
-      {/* Minimal CSS hooks for your globals.css (uses your existing classes too) */}
-      <style jsx global>{`
-        .composer {
-          border-bottom: 1px solid #eee;
-          background: #fff;
-          padding: 12px;
-        }
-        .composer-textarea {
-          width: 100%;
-          height: 80px;
-          resize: vertical;
-          border: 1px solid #ddd;
-          border-radius: 12px;
-          padding: 10px;
-          font-size: 14px;
-          outline: none;
-        }
-        .btn {
-          margin-top: 8px;
-          width: 100%;
-          padding: 10px 12px;
-          border: 1px solid #111;
-          background: #111;
-          color: #fff;
-          border-radius: 12px;
-          font-weight: 700;
-          cursor: pointer;
-        }
-        .btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-        .btn-ghost {
-          border: 1px solid #ddd;
-          background: #fff;
-          border-radius: 10px;
-          padding: 6px 10px;
-          cursor: pointer;
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function PostCard({
-  post,
-  authed,
-  onReact,
-}: {
-  post: Post;
-  authed: boolean;
-  onReact: (type: ReactionType) => void;
-}) {
-  const [openComments, setOpenComments] = useState(false);
-  const [loadingComments, setLoadingComments] = useState(false);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState("");
-  const [commentBusy, setCommentBusy] = useState(false);
-
-  const initial = (post.username?.[0] || "?").toUpperCase();
-
-  async function loadComments() {
-    setLoadingComments(true);
-
-    const { data, error } = await supabase
-      .from("comments")
-      .select("id, post_id, content, created_at, user_id, profiles(username)")
-      .eq("post_id", post.id)
-      .order("created_at", { ascending: true });
-
-    setLoadingComments(false);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    const normalized: Comment[] =
-      (data as unknown as DbCommentRow[] | null)?.map((row) => ({
-        id: row.id,
-        post_id: row.post_id,
-        content: row.content,
-        created_at: row.created_at,
-        user_id: row.user_id,
-        username: getUsernameFromProfiles(row.profiles),
-      })) ?? [];
-
-    setComments(normalized);
-  }
-
-  async function addComment() {
-    if (!authed) return;
-    if (commentBusy) return;
-
-    const content = newComment.trim();
-    if (!content) return;
-
-    setCommentBusy(true);
-
-    const { data: u } = await supabase.auth.getUser();
-    const uid = u.user?.id;
-    if (!uid) {
-      setCommentBusy(false);
-      return;
-    }
-
-    const { error } = await supabase.from("comments").insert({
-      post_id: post.id,
-      user_id: uid,
-      content,
-    });
-
-    setCommentBusy(false);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    setNewComment("");
-    await loadComments();
-  }
-
-  function pill(active: boolean) {
-    return {
-      border: "1px solid #e5e5e5",
-      background: active ? "#111" : "#fff",
-      color: active ? "#fff" : "#111",
-      borderRadius: 999,
-      padding: "6px 10px",
-      fontSize: 13,
-      fontWeight: 700 as const,
-      cursor: authed ? "pointer" : "default",
-      opacity: authed ? 1 : 0.5,
-      userSelect: "none" as const,
-    };
-  }
-
-  return (
-    <div className="post">
-      <div className="post-header">
-        <div className="avatar">{initial}</div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 800, fontSize: 13 }}>@{post.username}</div>
-          <div className="muted" style={{ fontSize: 12 }}>
-            {new Date(post.created_at).toLocaleString()}
+      {/* AUTH / USERNAME */}
+      {!user && (
+        <div style={{ padding: 12, borderBottom: "1px solid #eee" }}>
+          <div className="muted" style={{ marginBottom: 8 }}>
+            Log in to post. Feed is public.
           </div>
+          <input
+            placeholder="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{
+              width: "100%",
+              padding: 10,
+              border: "1px solid #ddd",
+              borderRadius: 10,
+              marginBottom: 8,
+            }}
+            autoComplete="email"
+          />
+          <button onClick={sendMagicLink} disabled={authBusy || !email.trim()}>
+            {authBusy ? "Sending..." : "Send link"}
+          </button>
         </div>
-      </div>
+      )}
 
-      <div className="post-content">{post.content}</div>
-
-      {/* Reactions bar */}
-      <div style={{ padding: "0 12px 12px", display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <span
-          style={pill(post.myReactions.has("heart"))}
-          onClick={() => authed && onReact("heart")}
-          title="Love"
-        >
-          ❤️ {post.reactionCounts.heart ?? 0}
-        </span>
-        <span
-          style={pill(post.myReactions.has("like"))}
-          onClick={() => authed && onReact("like")}
-          title="Like"
-        >
-          👍 {post.reactionCounts.like ?? 0}
-        </span>
-        <span
-          style={pill(post.myReactions.has("star"))}
-          onClick={() => authed && onReact("star")}
-          title="Star"
-        >
-          ⭐ {post.reactionCounts.star ?? 0}
-        </span>
-
-        <span
-          style={{
-            marginLeft: "auto",
-            fontSize: 13,
-            color: "#666",
-            cursor: "pointer",
-            userSelect: "none",
-          }}
-          onClick={async () => {
-            const next = !openComments;
-            setOpenComments(next);
-            if (next && comments.length === 0) await loadComments();
-          }}
-        >
-          💬 {post.commentsCount} {openComments ? "Hide" : "Comments"}
-        </span>
-      </div>
-
-      {/* Comments */}
-      {openComments && (
-        <div style={{ borderTop: "1px solid #eee", padding: 12 }}>
-          {loadingComments ? (
-            <div className="muted">Loading comments…</div>
-          ) : comments.length === 0 ? (
-            <div className="muted">No comments yet.</div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {comments.map((c) => (
-                <div key={c.id} style={{ fontSize: 14 }}>
-                  <div style={{ fontWeight: 800, fontSize: 12, color: "#333" }}>@{c.username}</div>
-                  <div style={{ whiteSpace: "pre-wrap" }}>{c.content}</div>
-                </div>
-              ))}
-            </div>
+      {!!user && !hasProfile && (
+        <div style={{ padding: 12, borderBottom: "1px solid #eee" }}>
+          <div style={{ fontWeight: 800, marginBottom: 8 }}>Choose a username</div>
+          <input
+            placeholder="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            style={{
+              width: "100%",
+              padding: 10,
+              border: "1px solid #ddd",
+              borderRadius: 10,
+              marginBottom: 8,
+            }}
+            autoComplete="off"
+          />
+          {!!usernameError && (
+            <div style={{ fontSize: 12, color: "#b00020", marginBottom: 8 }}>{usernameError}</div>
           )}
-
-          <div style={{ marginTop: 12 }}>
-            <input
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder={authed ? "Add a comment…" : "Log in to comment"}
-              disabled={!authed}
-              style={{
-                width: "100%",
-                padding: 10,
-                border: "1px solid #ddd",
-                borderRadius: 12,
-                fontSize: 14,
-                outline: "none",
-                opacity: authed ? 1 : 0.6,
-              }}
-            />
-            <button
-              onClick={() => void addComment()}
-              disabled={!authed || commentBusy || !newComment.trim()}
-              style={{
-                marginTop: 8,
-                width: "100%",
-                padding: "10px 12px",
-                borderRadius: 12,
-                border: "1px solid #111",
-                background: "#111",
-                color: "#fff",
-                fontWeight: 800,
-                cursor: "pointer",
-                opacity: !authed || !newComment.trim() ? 0.5 : 1,
-              }}
-            >
-              {commentBusy ? "Posting…" : "Comment"}
-            </button>
-          </div>
+          <button onClick={createProfile} disabled={profileBusy || !!usernameError}>
+            {profileBusy ? "Saving..." : "Save"}
+          </button>
         </div>
+      )}
+
+      {/* COMPOSER */}
+      {canPost && (
+        <div style={{ padding: 12, borderBottom: "1px solid #eee" }}>
+          <textarea
+            placeholder="Write in Japanese…"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            style={{
+              width: "100%",
+              height: 70,
+              padding: 10,
+              border: "1px solid #ddd",
+              borderRadius: 12,
+              fontSize: 14,
+              marginBottom: 8,
+            }}
+          />
+
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImage(e.target.files?.[0] || null)}
+            style={{ marginBottom: 8 }}
+          />
+
+          <button onClick={createPost} disabled={postBusy || (!text.trim() && !image)}>
+            {postBusy ? "Posting..." : "Post"}
+          </button>
+        </div>
+      )}
+
+      {/* FEED */}
+      {loading ? (
+        <div className="muted" style={{ padding: 12 }}>
+          Loading…
+        </div>
+      ) : (
+        posts.map((p) => {
+          const initial = (p.username?.[0] || "?").toUpperCase();
+          const imgUrl = p.image_path
+            ? `${SUPABASE_URL}/storage/v1/object/public/post-images/${p.image_path}`
+            : null;
+
+          return (
+            <div className="post" key={p.id}>
+              <div className="post-header">
+                <div className="avatar">{initial}</div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 13 }}>@{p.username}</div>
+                  <div className="muted" style={{ fontSize: 12 }}>
+                    {new Date(p.created_at).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+
+              {imgUrl && (
+                <div style={{ padding: "0 12px 12px" }}>
+                  <img
+                    src={imgUrl}
+                    alt="post image"
+                    style={{
+                      width: "100%",
+                      borderRadius: 12,
+                      border: "1px solid #eee",
+                      display: "block",
+                    }}
+                  />
+                </div>
+              )}
+
+              {p.content && <div className="post-content">{p.content}</div>}
+            </div>
+          );
+        })
       )}
     </div>
   );
