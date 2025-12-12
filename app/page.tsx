@@ -59,7 +59,10 @@ function normalizeProfile(p: any): { username: string; avatar_url: string | null
 }
 
 export default function HomePage() {
+  // auth
   const [userId, setUserId] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
 
   // composer
   const [text, setText] = useState("");
@@ -70,12 +73,12 @@ export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // profile / avatar
+  // my profile
   const [myUsername, setMyUsername] = useState<string>("unknown");
   const [myAvatarUrl, setMyAvatarUrl] = useState<string | null>(null);
   const [avatarBusy, setAvatarBusy] = useState(false);
 
-  // comments ui state
+  // comments
   const [openCommentsFor, setOpenCommentsFor] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
   const [commentBusy, setCommentBusy] = useState(false);
@@ -85,8 +88,8 @@ export default function HomePage() {
     let mounted = true;
 
     supabase.auth.getUser().then(({ data }) => {
-      const uid = data.user?.id ?? null;
       if (!mounted) return;
+      const uid = data.user?.id ?? null;
       setUserId(uid);
       void loadAll(uid);
       if (uid) void loadMyProfile(uid);
@@ -104,6 +107,33 @@ export default function HomePage() {
       sub.subscription.unsubscribe();
     };
   }, []);
+
+  async function sendMagicLink() {
+    const e = email.trim();
+    if (!e) return;
+
+    setAuthBusy(true);
+    const redirectTo = typeof window !== "undefined" ? window.location.origin : undefined;
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email: e,
+      options: { emailRedirectTo: redirectTo },
+    });
+
+    setAuthBusy(false);
+
+    if (error) return alert(error.message);
+    alert("Check your email and open the link to log in.");
+  }
+
+  async function logout() {
+    await supabase.auth.signOut();
+    setUserId(null);
+    setEmail("");
+    setText("");
+    setImageFile(null);
+    setOpenCommentsFor(null);
+  }
 
   async function loadMyProfile(uid: string) {
     const { data, error } = await supabase
@@ -151,47 +181,48 @@ export default function HomePage() {
 
     const postIds = normalized.map((p) => p.id);
 
-    // likes (count + mine)
     if (postIds.length) {
-      const { data: likesData } = await supabase
+      const { data: likesData, error: likesErr } = await supabase
         .from("reactions")
         .select("post_id, user_id")
         .in("post_id", postIds);
 
-      const likeMap = new Map<string, { count: number; mine: boolean }>();
-      for (const pid of postIds) likeMap.set(pid, { count: 0, mine: false });
+      if (!likesErr) {
+        const likeMap = new Map<string, { count: number; mine: boolean }>();
+        for (const pid of postIds) likeMap.set(pid, { count: 0, mine: false });
 
-      (likesData ?? []).forEach((r: any) => {
-        const cur = likeMap.get(r.post_id);
-        if (!cur) return;
-        cur.count += 1;
-        if (uid && r.user_id === uid) cur.mine = true;
-        likeMap.set(r.post_id, cur);
-      });
+        (likesData ?? []).forEach((r: any) => {
+          const cur = likeMap.get(r.post_id);
+          if (!cur) return;
+          cur.count += 1;
+          if (uid && r.user_id === uid) cur.mine = true;
+          likeMap.set(r.post_id, cur);
+        });
 
-      normalized.forEach((p) => {
-        const v = likeMap.get(p.id);
-        if (v) {
-          p.likes = v.count;
-          p.likedByMe = v.mine;
-        }
-      });
+        normalized.forEach((p) => {
+          const v = likeMap.get(p.id);
+          if (v) {
+            p.likes = v.count;
+            p.likedByMe = v.mine;
+          }
+        });
+      }
     }
 
-    // comment counts
     if (postIds.length) {
-      const { data: commentRows } = await supabase
+      const { data: commentRows, error: cErr } = await supabase
         .from("comments")
         .select("post_id")
         .in("post_id", postIds);
 
-      const countMap = new Map<string, number>();
-      for (const pid of postIds) countMap.set(pid, 0);
-      (commentRows ?? []).forEach((r: any) => {
-        countMap.set(r.post_id, (countMap.get(r.post_id) ?? 0) + 1);
-      });
-
-      normalized.forEach((p) => (p.commentCount = countMap.get(p.id) ?? 0));
+      if (!cErr) {
+        const countMap = new Map<string, number>();
+        for (const pid of postIds) countMap.set(pid, 0);
+        (commentRows ?? []).forEach((r: any) => {
+          countMap.set(r.post_id, (countMap.get(r.post_id) ?? 0) + 1);
+        });
+        normalized.forEach((p) => (p.commentCount = countMap.get(p.id) ?? 0));
+      }
     }
 
     setPosts(normalized);
@@ -199,7 +230,7 @@ export default function HomePage() {
   }
 
   async function createPost() {
-    if (!userId) return alert("Log in first.");
+    if (!userId) return;
     if (busy) return;
     if (!text.trim() && !imageFile) return;
 
@@ -233,10 +264,7 @@ export default function HomePage() {
 
       const { data: pub } = supabase.storage.from("post-images").getPublicUrl(path);
 
-      const { error: updateError } = await supabase
-        .from("posts")
-        .update({ image_url: pub.publicUrl })
-        .eq("id", post.id);
+      const { error: updateError } = await supabase.from("posts").update({ image_url: pub.publicUrl }).eq("id", post.id);
 
       if (updateError) {
         setBusy(false);
@@ -252,11 +280,12 @@ export default function HomePage() {
   }
 
   async function toggleLike(postId: string) {
-    if (!userId) return alert("Log in first.");
+    if (!userId) return;
 
     const p = posts.find((x) => x.id === postId);
     if (!p) return;
 
+    // optimistic
     setPosts((prev) =>
       prev.map((x) =>
         x.id === postId
@@ -281,7 +310,7 @@ export default function HomePage() {
   }
 
   async function deletePost(postId: string) {
-    if (!userId) return alert("Log in first.");
+    if (!userId) return;
 
     const ok = confirm("Delete this post?");
     if (!ok) return;
@@ -289,9 +318,7 @@ export default function HomePage() {
     const { error } = await supabase.from("posts").delete().eq("id", postId).eq("user_id", userId);
     if (error) return alert(error.message);
 
-    // close comments panel if open
     if (openCommentsFor === postId) setOpenCommentsFor(null);
-
     void loadAll(userId);
   }
 
@@ -322,7 +349,7 @@ export default function HomePage() {
   }
 
   async function addComment(postId: string) {
-    if (!userId) return alert("Log in first.");
+    if (!userId) return;
     if (commentBusy) return;
     if (!commentText.trim()) return;
 
@@ -351,7 +378,7 @@ export default function HomePage() {
   }
 
   async function uploadMyAvatar(file: File) {
-    if (!userId) return alert("Log in first.");
+    if (!userId) return;
     if (avatarBusy) return;
 
     setAvatarBusy(true);
@@ -359,9 +386,7 @@ export default function HomePage() {
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
     const path = `avatars/${userId}.${ext}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from("post-images")
-      .upload(path, file, { upsert: true });
+    const { error: uploadError } = await supabase.storage.from("post-images").upload(path, file, { upsert: true });
 
     if (uploadError) {
       setAvatarBusy(false);
@@ -390,61 +415,90 @@ export default function HomePage() {
         <div className="headerInner">
           <div className="brand">Nihongo Feed</div>
 
-          <div className="me">
-            <div className="meAvatar">
-              {myAvatarUrl ? <img src={myAvatarUrl} alt="me" /> : <span>{headerAvatarInitial}</span>}
-            </div>
-
-            <label className={`miniBtn ${avatarBusy ? "disabled" : ""}`}>
-              {avatarBusy ? "…" : "写真"}
+          {/* RIGHT SIDE: login or me */}
+          {!userId ? (
+            <div className="loginInline">
               <input
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) void uploadMyAvatar(f);
-                  e.currentTarget.value = "";
-                }}
+                className="loginInput"
+                placeholder="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
               />
+              <button className="miniBtn" onClick={sendMagicLink} disabled={authBusy || !email.trim()}>
+                {authBusy ? "…" : "Login"}
+              </button>
+            </div>
+          ) : (
+            <div className="me">
+              <div className="meAvatar">
+                {myAvatarUrl ? <img src={myAvatarUrl} alt="me" /> : <span>{headerAvatarInitial}</span>}
+              </div>
+
+              <label className={`miniBtn ${avatarBusy ? "disabled" : ""}`}>
+                {avatarBusy ? "…" : "写真"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void uploadMyAvatar(f);
+                    e.currentTarget.value = "";
+                  }}
+                />
+              </label>
+
+              <button className="miniBtn" onClick={logout} title="Logout">
+                ↩
+              </button>
+            </div>
+          )}
+        </div>
+
+        {!userId ? (
+          <div className="muted" style={{ fontSize: 12, paddingTop: 8 }}>
+            Public feed. Log in to post, like, or comment.
+          </div>
+        ) : null}
+      </div>
+
+      {/* COMPOSER only if logged in */}
+      {userId ? (
+        <div className="composer">
+          <div className="composer-row">
+            <textarea
+              className="textarea"
+              placeholder="日本語で書いてね…"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+
+            <button className="postBtn" onClick={createPost} disabled={busy || (!text.trim() && !imageFile)}>
+              {busy ? "投稿中…" : "投稿"}
+            </button>
+          </div>
+
+          <div className="fileRow">
+            <input
+              id="image"
+              className="fileInput"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+            />
+
+            <label className="fileBtn" htmlFor="image">
+              画像
             </label>
+
+            <div className="fileName">{imageFile ? imageFile.name : "画像なし"}</div>
+            <div className="muted" style={{ marginLeft: "auto", fontSize: 12 }}>
+              ログイン中
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="composer">
-        <div className="composer-row">
-          <textarea
-            className="textarea"
-            placeholder="日本語で書いてね…"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-
-          <button className="postBtn" onClick={createPost} disabled={busy || (!text.trim() && !imageFile)}>
-            {busy ? "投稿中…" : "投稿"}
-          </button>
-        </div>
-
-        <div className="fileRow">
-          <input
-            id="image"
-            className="fileInput"
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-          />
-
-          <label className="fileBtn" htmlFor="image">
-            画像
-          </label>
-
-          <div className="fileName">{imageFile ? imageFile.name : "画像なし"}</div>
-          <div className="muted" style={{ marginLeft: "auto", fontSize: 12 }}>
-            {userId ? "ログイン中" : "未ログイン"}
-          </div>
-        </div>
-      </div>
+      ) : null}
 
       {loading ? (
         <div style={{ padding: 16 }} className="muted">
@@ -481,22 +535,18 @@ export default function HomePage() {
 
               {p.image_url ? (
                 <div style={{ padding: "0 12px 12px" }}>
-                  <img
-                    src={p.image_url}
-                    alt="post"
-                    className="postImage"
-                  />
+                  <img src={p.image_url} alt="post" className="postImage" />
                 </div>
               ) : null}
 
               <div className="actionsRow">
-                <button className="likeBtn" onClick={() => toggleLike(p.id)}>
+                <button className="likeBtn" onClick={() => (userId ? toggleLike(p.id) : alert("Log in first."))}>
                   <span className="icon">{p.likedByMe ? "💙" : "🤍"}</span>
                   <span>いいね</span>
                   <span className="muted">{p.likes}</span>
                 </button>
 
-                <button className="commentBtn" onClick={() => void openComments(p.id)}>
+                <button className="commentBtn" onClick={() => (userId ? void openComments(p.id) : alert("Log in first."))}>
                   <span className="icon">💬</span>
                   <span>コメント</span>
                   <span className="muted">{p.commentCount}</span>
