@@ -59,12 +59,19 @@ function normalizeProfile(p: any): { username: string; avatar_url: string | null
 }
 
 export default function HomePage() {
-  // auth
   const [userId, setUserId] = useState<string | null>(null);
+
+  // LOGIN UI
   const [email, setEmail] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
 
-  // composer
+  // USERNAME GATE
+  const [checkingProfile, setCheckingProfile] = useState(true);
+  const [needsUsername, setNeedsUsername] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
+  const [saveBusy, setSaveBusy] = useState(false);
+
+  // feed composer
   const [text, setText] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -84,6 +91,11 @@ export default function HomePage() {
   const [commentBusy, setCommentBusy] = useState(false);
   const [commentsByPost, setCommentsByPost] = useState<Record<string, Comment[]>>({});
 
+  const SITE_URL =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "");
+
+  // auth bootstrap
   useEffect(() => {
     let mounted = true;
 
@@ -91,15 +103,11 @@ export default function HomePage() {
       if (!mounted) return;
       const uid = data.user?.id ?? null;
       setUserId(uid);
-      void loadAll(uid);
-      if (uid) void loadMyProfile(uid);
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       const uid = session?.user?.id ?? null;
       setUserId(uid);
-      void loadAll(uid);
-      if (uid) void loadMyProfile(uid);
     });
 
     return () => {
@@ -108,47 +116,111 @@ export default function HomePage() {
     };
   }, []);
 
-  async function sendMagicLink() {
-    const e = email.trim();
-    if (!e) return;
+  // after login: check profile gate
+  useEffect(() => {
+    if (!userId) {
+      setCheckingProfile(false);
+      setNeedsUsername(false);
+      return;
+    }
+    void checkMyProfile(userId);
+  }, [userId]);
 
-    setAuthBusy(true);
-    const redirectTo = typeof window !== "undefined" ? window.location.origin : undefined;
+  async function checkMyProfile(uid: string) {
+    setCheckingProfile(true);
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email: e,
-      options: { emailRedirectTo: redirectTo },
-    });
-
-    setAuthBusy(false);
-
-    if (error) return alert(error.message);
-    alert("Check your email and open the link to log in.");
-  }
-
-  async function logout() {
-    await supabase.auth.signOut();
-    setUserId(null);
-    setEmail("");
-    setText("");
-    setImageFile(null);
-    setOpenCommentsFor(null);
-  }
-
-  async function loadMyProfile(uid: string) {
     const { data, error } = await supabase
       .from("profiles")
       .select("username, avatar_url")
       .eq("id", uid)
       .single();
 
-    if (error) return;
+    // if no row yet, we need username
+    if (error) {
+      setNeedsUsername(true);
+      setMyUsername("unknown");
+      setMyAvatarUrl(null);
+      setCheckingProfile(false);
+      return;
+    }
 
-    setMyUsername((data?.username ?? "unknown").toString());
-    setMyAvatarUrl(data?.avatar_url ?? null);
+    const u = (data?.username ?? "").toString().trim();
+    const a = data?.avatar_url ?? null;
+
+    setMyUsername(u || "unknown");
+    setMyAvatarUrl(a);
+    setNeedsUsername(!u); // ✅ only gate if empty username
+    setCheckingProfile(false);
+
+    // load feed once we pass gate
+    if (u) {
+      void loadAll(uid);
+    }
   }
 
-  async function loadAll(uid: string | null = userId) {
+  const normalizedNewUsername = useMemo(() => newUsername.trim().toLowerCase(), [newUsername]);
+
+  const usernameError = useMemo(() => {
+    if (!normalizedNewUsername) return "Type a username.";
+    if (normalizedNewUsername.length < 3) return "Minimum 3 characters.";
+    if (normalizedNewUsername.length > 20) return "Maximum 20 characters.";
+    if (!/^[a-z0-9_]+$/.test(normalizedNewUsername)) return "Use only a-z, 0-9, underscore (_).";
+    return "";
+  }, [normalizedNewUsername]);
+
+  async function saveUsername() {
+    if (!userId) return;
+    if (saveBusy) return;
+    if (usernameError) return;
+
+    setSaveBusy(true);
+
+    // upsert profile with username
+    const { error } = await supabase.from("profiles").upsert({
+      id: userId,
+      username: normalizedNewUsername,
+      avatar_url: myAvatarUrl,
+    });
+
+    setSaveBusy(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setMyUsername(normalizedNewUsername);
+    setNeedsUsername(false);
+    await loadAll(userId);
+  }
+
+  async function sendMagicLink() {
+    if (authBusy) return;
+    if (!email.trim()) return;
+
+    setAuthBusy(true);
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: { emailRedirectTo: SITE_URL },
+    });
+
+    setAuthBusy(false);
+
+    if (error) alert(error.message);
+    else alert("Check your email.");
+  }
+
+  async function logout() {
+    await supabase.auth.signOut();
+    setUserId(null);
+    setEmail("");
+    setNeedsUsername(false);
+    setNewUsername("");
+    setPosts([]);
+  }
+
+  async function loadAll(uid: string) {
     setLoading(true);
 
     const { data, error } = await supabase
@@ -182,47 +254,38 @@ export default function HomePage() {
     const postIds = normalized.map((p) => p.id);
 
     if (postIds.length) {
-      const { data: likesData, error: likesErr } = await supabase
-        .from("reactions")
-        .select("post_id, user_id")
-        .in("post_id", postIds);
+      const { data: likesData } = await supabase.from("reactions").select("post_id, user_id").in("post_id", postIds);
 
-      if (!likesErr) {
-        const likeMap = new Map<string, { count: number; mine: boolean }>();
-        for (const pid of postIds) likeMap.set(pid, { count: 0, mine: false });
+      const likeMap = new Map<string, { count: number; mine: boolean }>();
+      for (const pid of postIds) likeMap.set(pid, { count: 0, mine: false });
 
-        (likesData ?? []).forEach((r: any) => {
-          const cur = likeMap.get(r.post_id);
-          if (!cur) return;
-          cur.count += 1;
-          if (uid && r.user_id === uid) cur.mine = true;
-          likeMap.set(r.post_id, cur);
-        });
+      (likesData ?? []).forEach((r: any) => {
+        const cur = likeMap.get(r.post_id);
+        if (!cur) return;
+        cur.count += 1;
+        if (uid && r.user_id === uid) cur.mine = true;
+        likeMap.set(r.post_id, cur);
+      });
 
-        normalized.forEach((p) => {
-          const v = likeMap.get(p.id);
-          if (v) {
-            p.likes = v.count;
-            p.likedByMe = v.mine;
-          }
-        });
-      }
+      normalized.forEach((p) => {
+        const v = likeMap.get(p.id);
+        if (v) {
+          p.likes = v.count;
+          p.likedByMe = v.mine;
+        }
+      });
     }
 
     if (postIds.length) {
-      const { data: commentRows, error: cErr } = await supabase
-        .from("comments")
-        .select("post_id")
-        .in("post_id", postIds);
+      const { data: commentRows } = await supabase.from("comments").select("post_id").in("post_id", postIds);
 
-      if (!cErr) {
-        const countMap = new Map<string, number>();
-        for (const pid of postIds) countMap.set(pid, 0);
-        (commentRows ?? []).forEach((r: any) => {
-          countMap.set(r.post_id, (countMap.get(r.post_id) ?? 0) + 1);
-        });
-        normalized.forEach((p) => (p.commentCount = countMap.get(p.id) ?? 0));
-      }
+      const countMap = new Map<string, number>();
+      for (const pid of postIds) countMap.set(pid, 0);
+      (commentRows ?? []).forEach((r: any) => {
+        countMap.set(r.post_id, (countMap.get(r.post_id) ?? 0) + 1);
+      });
+
+      normalized.forEach((p) => (p.commentCount = countMap.get(p.id) ?? 0));
     }
 
     setPosts(normalized);
@@ -230,7 +293,7 @@ export default function HomePage() {
   }
 
   async function createPost() {
-    if (!userId) return;
+    if (!userId) return alert("Log in first.");
     if (busy) return;
     if (!text.trim() && !imageFile) return;
 
@@ -252,9 +315,7 @@ export default function HomePage() {
       const ext = (imageFile.name.split(".").pop() || "jpg").toLowerCase();
       const path = `posts/${post.id}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("post-images")
-        .upload(path, imageFile, { upsert: true });
+      const { error: uploadError } = await supabase.storage.from("post-images").upload(path, imageFile, { upsert: true });
 
       if (uploadError) {
         setBusy(false);
@@ -280,12 +341,11 @@ export default function HomePage() {
   }
 
   async function toggleLike(postId: string) {
-    if (!userId) return;
+    if (!userId) return alert("Log in first.");
 
     const p = posts.find((x) => x.id === postId);
     if (!p) return;
 
-    // optimistic
     setPosts((prev) =>
       prev.map((x) =>
         x.id === postId
@@ -310,8 +370,7 @@ export default function HomePage() {
   }
 
   async function deletePost(postId: string) {
-    if (!userId) return;
-
+    if (!userId) return alert("Log in first.");
     const ok = confirm("Delete this post?");
     if (!ok) return;
 
@@ -349,7 +408,7 @@ export default function HomePage() {
   }
 
   async function addComment(postId: string) {
-    if (!userId) return;
+    if (!userId) return alert("Log in first.");
     if (commentBusy) return;
     if (!commentText.trim()) return;
 
@@ -378,7 +437,7 @@ export default function HomePage() {
   }
 
   async function uploadMyAvatar(file: File) {
-    if (!userId) return;
+    if (!userId) return alert("Log in first.");
     if (avatarBusy) return;
 
     setAvatarBusy(true);
@@ -395,9 +454,11 @@ export default function HomePage() {
 
     const { data: pub } = supabase.storage.from("post-images").getPublicUrl(path);
 
-    const { error: updateError } = await supabase
-      .from("profiles")
-      .upsert({ id: userId, username: myUsername, avatar_url: pub.publicUrl });
+    const { error: updateError } = await supabase.from("profiles").upsert({
+      id: userId,
+      username: myUsername === "unknown" ? normalizedNewUsername || null : myUsername,
+      avatar_url: pub.publicUrl,
+    });
 
     setAvatarBusy(false);
 
@@ -409,96 +470,189 @@ export default function HomePage() {
 
   const headerAvatarInitial = useMemo(() => (myUsername?.[0] || "?").toUpperCase(), [myUsername]);
 
+  // --------- SCREENS ---------
+
+  // LOGIN SCREEN
+  if (!userId) {
+    return (
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ width: 360, background: "#111", color: "#fff", borderRadius: 16, padding: 18 }}>
+          <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: 2 }}>フィード</div>
+          <div style={{ opacity: 0.7, marginTop: 6, marginBottom: 14, fontSize: 13 }}>Log in with email</div>
+
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="email"
+            style={{
+              width: "100%",
+              padding: 12,
+              borderRadius: 12,
+              border: "1px solid rgba(255,255,255,.15)",
+              background: "rgba(255,255,255,.06)",
+              color: "#fff",
+              outline: "none",
+              marginBottom: 10,
+            }}
+          />
+
+          <button
+            onClick={sendMagicLink}
+            disabled={authBusy || !email.trim()}
+            style={{
+              width: "100%",
+              padding: 12,
+              borderRadius: 12,
+              border: "0",
+              background: "#fff",
+              color: "#111",
+              fontWeight: 800,
+              cursor: "pointer",
+              opacity: authBusy || !email.trim() ? 0.6 : 1,
+            }}
+          >
+            {authBusy ? "Sending…" : "Send link"}
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // PROFILE CHECK LOADING
+  if (checkingProfile) {
+    return <div style={{ padding: 24, color: "#777" }}>Loading…</div>;
+  }
+
+  // USERNAME SCREEN
+  if (needsUsername) {
+    return (
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ width: 360, background: "#111", color: "#fff", borderRadius: 16, padding: 18 }}>
+          <div style={{ fontSize: 18, fontWeight: 900 }}>Choose a username</div>
+          <div style={{ opacity: 0.7, marginTop: 6, marginBottom: 14, fontSize: 13 }}>
+            This will show on your posts.
+          </div>
+
+          <input
+            value={newUsername}
+            onChange={(e) => setNewUsername(e.target.value)}
+            placeholder="username"
+            style={{
+              width: "100%",
+              padding: 12,
+              borderRadius: 12,
+              border: "1px solid rgba(255,255,255,.15)",
+              background: "rgba(255,255,255,.06)",
+              color: "#fff",
+              outline: "none",
+              marginBottom: 8,
+            }}
+            autoFocus
+          />
+
+          {usernameError ? <div style={{ color: "#ffb4b4", fontSize: 12, marginBottom: 10 }}>{usernameError}</div> : null}
+
+          <button
+            onClick={saveUsername}
+            disabled={saveBusy || !!usernameError}
+            style={{
+              width: "100%",
+              padding: 12,
+              borderRadius: 12,
+              border: "0",
+              background: "#fff",
+              color: "#111",
+              fontWeight: 800,
+              cursor: "pointer",
+              opacity: saveBusy || !!usernameError ? 0.6 : 1,
+            }}
+          >
+            {saveBusy ? "Saving…" : "Save"}
+          </button>
+
+          <button
+            onClick={logout}
+            style={{
+              width: "100%",
+              marginTop: 10,
+              padding: 10,
+              borderRadius: 12,
+              border: "1px solid rgba(255,255,255,.15)",
+              background: "transparent",
+              color: "#fff",
+              cursor: "pointer",
+            }}
+          >
+            Log out
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // FEED
   return (
     <div className="feed">
       <div className="header">
         <div className="headerInner">
           <div className="brand">フィード</div>
 
-          {/* RIGHT SIDE: login or me */}
-          {!userId ? (
-            <div className="loginInline">
+          <div className="me">
+            <div className="meAvatar">
+              {myAvatarUrl ? <img src={myAvatarUrl} alt="me" /> : <span>{headerAvatarInitial}</span>}
+            </div>
+
+            <label className={`miniBtn ${avatarBusy ? "disabled" : ""}`}>
+              {avatarBusy ? "…" : "写真"}
               <input
-                className="loginInput"
-                placeholder="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void uploadMyAvatar(f);
+                  e.currentTarget.value = "";
+                }}
               />
-              <button className="miniBtn" onClick={sendMagicLink} disabled={authBusy || !email.trim()}>
-                {authBusy ? "…" : "Login"}
-              </button>
-            </div>
-          ) : (
-            <div className="me">
-              <div className="meAvatar">
-                {myAvatarUrl ? <img src={myAvatarUrl} alt="me" /> : <span>{headerAvatarInitial}</span>}
-              </div>
-
-              <label className={`miniBtn ${avatarBusy ? "disabled" : ""}`}>
-                {avatarBusy ? "…" : "写真"}
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) void uploadMyAvatar(f);
-                    e.currentTarget.value = "";
-                  }}
-                />
-              </label>
-
-              <button className="miniBtn" onClick={logout} title="Logout">
-                ↩
-              </button>
-            </div>
-          )}
-        </div>
-
-        {!userId ? (
-          <div className="muted" style={{ fontSize: 12, paddingTop: 8 }}>
-            Public feed. Log in to post, like, or comment.
-          </div>
-        ) : null}
-      </div>
-
-      {/* COMPOSER only if logged in */}
-      {userId ? (
-        <div className="composer">
-          <div className="composer-row">
-            <textarea
-              className="textarea"
-              placeholder="日本語で書いてね…"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
-
-            <button className="postBtn" onClick={createPost} disabled={busy || (!text.trim() && !imageFile)}>
-              {busy ? "投稿中…" : "投稿"}
-            </button>
-          </div>
-
-          <div className="fileRow">
-            <input
-              id="image"
-              className="fileInput"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-            />
-
-            <label className="fileBtn" htmlFor="image">
-              画像
             </label>
 
-            <div className="fileName">{imageFile ? imageFile.name : "画像なし"}</div>
-            <div className="muted" style={{ marginLeft: "auto", fontSize: 12 }}>
-              ログイン中
-            </div>
+            <button className="miniBtn" onClick={logout} style={{ marginLeft: 8 }}>
+              出る
+            </button>
           </div>
         </div>
-      ) : null}
+      </div>
+
+      <div className="composer">
+        <div className="composer-row">
+          <textarea
+            className="textarea"
+            placeholder="日本語で書いてね…"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+
+          <button className="postBtn" onClick={createPost} disabled={busy || (!text.trim() && !imageFile)}>
+            {busy ? "投稿中…" : "投稿"}
+          </button>
+        </div>
+
+        <div className="fileRow">
+          <input
+            id="image"
+            className="fileInput"
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+          />
+
+          <label className="fileBtn" htmlFor="image">
+            画像
+          </label>
+
+          <div className="fileName">{imageFile ? imageFile.name : "画像なし"}</div>
+        </div>
+      </div>
 
       {loading ? (
         <div style={{ padding: 16 }} className="muted">
@@ -540,13 +694,13 @@ export default function HomePage() {
               ) : null}
 
               <div className="actionsRow">
-                <button className="likeBtn" onClick={() => (userId ? toggleLike(p.id) : alert("Log in first."))}>
+                <button className="likeBtn" onClick={() => toggleLike(p.id)}>
                   <span className="icon">{p.likedByMe ? "💙" : "🤍"}</span>
                   <span>いいね</span>
                   <span className="muted">{p.likes}</span>
                 </button>
 
-                <button className="commentBtn" onClick={() => (userId ? void openComments(p.id) : alert("Log in first."))}>
+                <button className="commentBtn" onClick={() => void openComments(p.id)}>
                   <span className="icon">💬</span>
                   <span>コメント</span>
                   <span className="muted">{p.commentCount}</span>
