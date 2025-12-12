@@ -98,6 +98,7 @@ export default function HomePage() {
     setPosts(normalized);
     setLoading(false);
   }
+const [imageFile, setImageFile] = useState<File | null>(null);
 
   async function createPost() {
   if (!userId) {
@@ -204,9 +205,14 @@ export default function HomePage() {
       <div className="composer">
         <textarea
           className="textarea"
-          placeholder="日本語で書いてね…"
+          placeholder="日本語で書いて…"
           value={text}
           onChange={(e) => setText(e.target.value)}
+<input
+  type="file"
+  accept="image/*"
+  onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+/>
         />
         <div className="row">
           <div className="muted" style={{ fontSize: 12 }}>
