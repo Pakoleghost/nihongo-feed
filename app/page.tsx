@@ -203,17 +203,18 @@ const [imageFile, setImageFile] = useState<File | null>(null);
       <div className="header">Nihongo Feed</div>
 
       <div className="composer">
-        <textarea
-          className="textarea"
-          placeholder="日本語で書いて…"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
+<textarea
+  value={text}
+  onChange={(e) => setText(e.target.value)}
+/>
+
 <input
   type="file"
   accept="image/*"
   onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
 />
-        />
+
+
         <div className="row">
           <div className="muted" style={{ fontSize: 12 }}>
             {userId ? "ログイン中" : "未ログイン"}
