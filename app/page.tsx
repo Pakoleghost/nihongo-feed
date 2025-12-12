@@ -100,29 +100,59 @@ export default function HomePage() {
   }
 
   async function createPost() {
-    if (!userId) {
-      alert("Log in first.");
-      return;
-    }
-    if (busy) return;
-    if (!text.trim()) return;
+  if (!userId) {
+    alert("Log in first.");
+    return;
+  }
+  if (busy) return;
+  if (!text.trim() && !imageFile) return;
 
-    setBusy(true);
-    const { error } = await supabase.from("posts").insert({
+  setBusy(true);
+
+  // 1) create post first
+  const { data: post, error: postError } = await supabase
+    .from("posts")
+    .insert({
       content: text.trim(),
       user_id: userId,
-    });
+    })
+    .select()
+    .single();
+
+  if (postError || !post) {
     setBusy(false);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    setText("");
-    void loadAll();
+    alert(postError?.message);
+    return;
   }
 
+  // 2) upload image if exists
+  if (imageFile) {
+    const ext = imageFile.name.split(".").pop();
+    const path = `posts/${post.id}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("post-images")
+      .upload(path, imageFile, {
+        upsert: true,
+      });
+
+    if (!uploadError) {
+      const { data } = supabase.storage
+        .from("post-images")
+        .getPublicUrl(path);
+
+      await supabase
+        .from("posts")
+        .update({ image_url: data.publicUrl })
+        .eq("id", post.id);
+    }
+  }
+
+  setText("");
+  setImageFile(null);
+  setBusy(false);
+  void loadAll();
+}
   async function toggleLike(postId: string) {
     if (!userId) {
       alert("Log in first.");
