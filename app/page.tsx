@@ -7,7 +7,15 @@ type Post = {
   id: string;
   content: string;
   created_at: string;
-  profiles?: { username: string } | null;
+  profiles: { username: string } | null;
+};
+
+// Supabase may return profiles as array or object depending on relationship shape
+type RawPost = {
+  id: string;
+  content: string;
+  created_at: string;
+  profiles: { username: string }[] | { username: string } | null;
 };
 
 export default function Home() {
@@ -28,7 +36,8 @@ export default function Home() {
   const [postBusy, setPostBusy] = useState(false);
 
   const SITE_URL =
-    process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "");
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "");
 
   // Auth
   useEffect(() => {
@@ -41,55 +50,108 @@ export default function Home() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // After login: check profile + load posts
-  useEffect(() => {
-    if (!user) return;
-    loadPosts();
-  }, [user]);
-
- 
-
-  const normalizedUsername = useMemo(() => username.trim().toLowerCase(), [username]);
+  const normalizedUsername = useMemo(
+    () => username.trim().toLowerCase(),
+    [username]
+  );
 
   const usernameError = useMemo(() => {
     if (!normalizedUsername) return "Type a username.";
     if (normalizedUsername.length < 3) return "Minimum 3 characters.";
     if (normalizedUsername.length > 20) return "Maximum 20 characters.";
-    if (!/^[a-z0-9_]+$/.test(normalizedUsername)) return "Use only a-z, 0-9, underscore (_).";
+    if (!/^[a-z0-9_]+$/.test(normalizedUsername))
+      return "Use only a-z, 0-9, underscore (_).";
     return "";
   }, [normalizedUsername]);
 
-async function createProfile() {
-  if (username.trim().length < 3) {
-    alert("Username must be at least 3 characters");
-    return;
+  // After login: check profile + load posts
+  useEffect(() => {
+    if (!user) return;
+    checkProfile();
+    loadPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  async function checkProfile() {
+    if (!user) return;
+
+    setProfileBusy(true);
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    setProfileBusy(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    if (data?.username) {
+      setHasProfile(true);
+      setUsername(data.username);
+    } else {
+      setHasProfile(false);
+    }
   }
 
-  const { error } = await supabase.from("profiles").upsert({
-    id: user.id,
-    username: username.trim(),
-  });
+  async function createProfile() {
+    if (profileBusy) return;
+    if (usernameError) {
+      alert(usernameError);
+      return;
+    }
+    if (!user) return;
 
-  if (error) {
-    alert(error.message);
-    return;
+    setProfileBusy(true);
+
+    const { error } = await supabase.from("profiles").upsert({
+      id: user.id,
+      username: normalizedUsername,
+    });
+
+    setProfileBusy(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setHasProfile(true);
   }
-
-  setHasProfile(true); // ✅ ONLY HERE
-}
 
   async function loadPosts() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("posts")
       .select("id, content, created_at, profiles(username)")
       .order("created_at", { ascending: false });
 
-    if (data) setPosts(data as Post[]);
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    const rows = (data ?? []) as RawPost[];
+
+    const normalized: Post[] = rows.map((r) => ({
+      id: r.id,
+      content: r.content,
+      created_at: r.created_at,
+      profiles: Array.isArray(r.profiles)
+        ? r.profiles[0] ?? null
+        : r.profiles ?? null,
+    }));
+
+    setPosts(normalized);
   }
 
   async function createPost() {
     if (postBusy) return;
     if (!text.trim()) return;
+    if (!user) return;
 
     setPostBusy(true);
 
@@ -212,8 +274,12 @@ async function createProfile() {
           {posts.map((p) => (
             <div key={p.id} style={styles.post}>
               <div style={styles.postHeader}>
-                <div style={styles.avatar}>{(p.profiles?.username?.[0] || "?").toUpperCase()}</div>
-                <span style={styles.usernameText}>{p.profiles?.username || "user"}</span>
+                <div style={styles.avatar}>
+                  {(p.profiles?.username?.[0] || "?").toUpperCase()}
+                </div>
+                <span style={styles.usernameText}>
+                  {p.profiles?.username || "user"}
+                </span>
               </div>
               <div style={styles.postBody}>{p.content}</div>
             </div>
