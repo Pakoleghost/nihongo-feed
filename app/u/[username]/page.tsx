@@ -35,7 +35,10 @@ function normalizeProfile(p: any): { username: string; avatar_url: string | null
 }
 
 export default function UserProfilePage({ params }: { params: { username: string } }) {
-  const username = useMemo(() => decodeURIComponent(params.username || "").trim().toLowerCase(), [params.username]);
+  const username = useMemo(() => {
+    const v = decodeURIComponent(params.username || "").trim().toLowerCase();
+    return v;
+  }, [params.username]);
 
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -52,19 +55,23 @@ export default function UserProfilePage({ params }: { params: { username: string
       return;
     }
     void loadProfile(username);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username]);
 
   async function loadProfile(u: string) {
     setLoading(true);
     setNotFound(false);
 
-    // 1) encontrar user id por username
+    // 1) encontrar user id por username (case-insensitive)
     const { data: prof, error: profErr } = await supabase
       .from("profiles")
       .select("id, username, avatar_url")
-.eq("username", username.toLowerCase())      .single();
+      .ilike("username", u)
+      .limit(1)
+      .single();
 
     if (profErr || !prof?.id) {
+      console.error("profile lookup error:", profErr);
       setNotFound(true);
       setLoading(false);
       return;
@@ -73,11 +80,15 @@ export default function UserProfilePage({ params }: { params: { username: string
     setAvatarUrl(prof.avatar_url ?? null);
 
     // 2) posts del usuario
-    const { data: postRows } = await supabase
+    const { data: postRows, error: postErr } = await supabase
       .from("posts")
       .select("id, content, created_at, user_id, image_url, profiles(username, avatar_url)")
       .eq("user_id", prof.id)
       .order("created_at", { ascending: false });
+
+    if (postErr) {
+      console.error("posts error:", postErr);
+    }
 
     const normalizedPosts: Post[] =
       (postRows as unknown as DbPostRow[] | null)?.map((row) => {
@@ -97,13 +108,14 @@ export default function UserProfilePage({ params }: { params: { username: string
     setPostCount(normalizedPosts.length);
 
     // 3) comentarios del usuario (conteo)
-    const { count } = await supabase
+    const { count, error: cErr } = await supabase
       .from("comments")
       .select("id", { count: "exact", head: true })
       .eq("user_id", prof.id);
 
-    setCommentCount(count ?? 0);
+    if (cErr) console.error("comments count error:", cErr);
 
+    setCommentCount(count ?? 0);
     setLoading(false);
   }
 
@@ -116,7 +128,7 @@ export default function UserProfilePage({ params }: { params: { username: string
       <div style={{ padding: 24 }}>
         <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>Profile not found</div>
         <div style={{ marginTop: 8 }}>
-          <Link href="/" style={{ color: "inherit" }}>
+          <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
             ← Back to feed
           </Link>
         </div>
@@ -148,7 +160,15 @@ export default function UserProfilePage({ params }: { params: { username: string
             fontWeight: 900,
           }}
         >
-          {avatarUrl ? <img src={avatarUrl} alt={username} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initial}
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={username}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            initial
+          )}
         </div>
 
         <div>
@@ -195,4 +215,4 @@ export default function UserProfilePage({ params }: { params: { username: string
       )}
     </div>
   );
-}　　　
+}
