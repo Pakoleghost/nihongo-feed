@@ -609,12 +609,8 @@ export default function HomePage() {
 
           <div className="me">
             {/* Added link to the leaderboard so users can navigate to the ranking page */}
-            <Link
-              href="/leaderboard"
-              className="miniBtn"
-              style={{ textDecoration: "none", marginRight: 8 }}
-            >
-              🏆 Leaderboard
+            <Link href="/leaderboard" className="miniBtn" style={{ marginRight: 8 }}>
+              Leaderboard
             </Link>
             <div className="meAvatar">
               {myAvatarUrl ? <img src={myAvatarUrl} alt="me" /> : <span>{headerAvatarInitial}</span>}
@@ -680,8 +676,8 @@ export default function HomePage() {
           return (
             <div className="post" key={p.id}>
               <div className="post-header">
-                {p.username ? (
-                  <Link href={profileHref} className="avatar" style={linkStyle} aria-label={`Open profile ${p.username}`}>
+                {profileHref ? (
+                  <Link href={profileHref} className="avatar" style={linkStyle} aria-label={`Open profile ${p.username || "unknown"}`}>
                     {p.avatar_url ? <img src={p.avatar_url} alt={p.username} /> : <span>{initial}</span>}
                   </Link>
                 ) : (
@@ -750,8 +746,8 @@ export default function HomePage() {
 
                         return (
                           <div key={c.id} className="comment">
-                            {c.username ? (
-                              <Link href={cProfileHref} className="cAvatar" style={linkStyle} aria-label={`Open profile ${c.username}`}>
+                            {cProfileHref ? (
+                              <Link href={cProfileHref} className="cAvatar" style={linkStyle} aria-label={`Open profile ${c.username || "unknown"}`}>
                                 {c.avatar_url ? <img src={c.avatar_url} alt={c.username} /> : <span>{ci}</span>}
                               </Link>
                             ) : (
