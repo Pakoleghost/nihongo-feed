@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import Link from "next/link";
 
 type DbPostRow = {
   id: string;
@@ -666,14 +667,15 @@ export default function HomePage() {
           return (
             <div className="post" key={p.id}>
               <div className="post-header">
-                <div className="avatar">
-                  {p.avatar_url ? <img src={p.avatar_url} alt={p.username} /> : <span>{initial}</span>}
-                </div>
+                <Link href={`/u/${p.username}`} className="avatar">
+  {p.avatar_url ? <img src={p.avatar_url} alt={p.username} /> : <span>{initial}</span>}
+</Link>
 
                 <div className="postMeta">
                   <div className="nameRow">
-                    <div className="handle">@{p.username}</div>
-                    {canDelete ? (
+<Link href={`/u/${p.username}`} className="handle">
+  @{p.username}
+</Link>                    {canDelete ? (
                       <button className="ghostBtn" onClick={() => deletePost(p.id)} title="Delete">
                         削除
                       </button>
