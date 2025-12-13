@@ -608,7 +608,17 @@ export default function HomePage() {
           <div className="brand">フィード</div>
 
           <div className="me">
-            <div className="meAvatar">{myAvatarUrl ? <img src={myAvatarUrl} alt="me" /> : <span>{headerAvatarInitial}</span>}</div>
+            {/* Added link to the leaderboard so users can navigate to the ranking page */}
+            <Link
+              href="/leaderboard"
+              className="miniBtn"
+              style={{ textDecoration: "none", marginRight: 8 }}
+            >
+              🏆 Leaderboard
+            </Link>
+            <div className="meAvatar">
+              {myAvatarUrl ? <img src={myAvatarUrl} alt="me" /> : <span>{headerAvatarInitial}</span>}
+            </div>
 
             <label className={`miniBtn ${avatarBusy ? "disabled" : ""}`}>
               {avatarBusy ? "…" : "写真"}
@@ -664,7 +674,8 @@ export default function HomePage() {
         posts.map((p) => {
           const initial = (p.username?.[0] || "?").toUpperCase();
           const canDelete = !!userId && p.user_id === userId;
-          const profileHref = p.username ? `/u/${encodeURIComponent(p.username)}` : "";
+          // Link posts and avatars using the user_id rather than the username to ensure stable routing.
+          const profileHref = p.user_id ? `/u/${encodeURIComponent(p.user_id)}` : "";
 
           return (
             <div className="post" key={p.id}>
@@ -734,7 +745,8 @@ export default function HomePage() {
                     ) : (
                       (commentsByPost[p.id] ?? []).map((c) => {
                         const ci = (c.username?.[0] || "?").toUpperCase();
-                        const cProfileHref = c.username ? `/u/${encodeURIComponent(c.username)}` : "";
+                        // Use comment author's user_id for profile links, falling back to empty string if missing
+                        const cProfileHref = c.user_id ? `/u/${encodeURIComponent(c.user_id)}` : "";
 
                         return (
                           <div key={c.id} className="comment">

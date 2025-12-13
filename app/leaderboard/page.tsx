@@ -110,7 +110,11 @@ export default function LeaderboardPage() {
         <div style={{ padding: 16 }} className="muted">No data.</div>
       ) : (
         items.map((x, idx) => {
-          const href = x.username && x.username !== "unknown" ? `/u/${encodeURIComponent(x.username)}` : "";
+          const href = x.user_id
+            ? `/u/${encodeURIComponent(x.user_id)}`
+            : x.username && x.username !== "unknown"
+            ? `/u/${encodeURIComponent(x.username)}`
+            : "";
           const initial = (x.username?.[0] || "?").toUpperCase();
 
           return (
