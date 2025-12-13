@@ -6,7 +6,6 @@ import { supabase } from "@/lib/supabase";
 function levelBadgeStyle(levelRaw: string): React.CSSProperties {
   const level = (levelRaw || "").toString().trim().toUpperCase();
 
-  // simple mapping. adjust anytime.
   const map: Record<string, { bg: string; fg: string; brd: string }> = {
     A1: { bg: "#eef2ff", fg: "#1e3a8a", brd: "#c7d2fe" },
     A2: { bg: "#ecfeff", fg: "#155e75", brd: "#a5f3fc" },
@@ -32,6 +31,22 @@ function levelBadgeStyle(levelRaw: string): React.CSSProperties {
     fontSize: 12,
     fontWeight: 800,
     lineHeight: 1,
+    whiteSpace: "nowrap",
+  };
+}
+
+function chipStyle(): React.CSSProperties {
+  return {
+    display: "inline-flex",
+    alignItems: "center",
+    padding: "6px 10px",
+    borderRadius: 999,
+    border: "1px solid rgba(0,0,0,.10)",
+    background: "rgba(255,255,255,.75)",
+    fontSize: 12,
+    fontWeight: 800,
+    color: "#111827",
+    whiteSpace: "nowrap",
   };
 }
 
@@ -61,7 +76,7 @@ export default function ProfileHeaderClient(props: {
   } = props;
 
   const [saving, setSaving] = useState(false);
-  const [bioDraft, setBioDraft] = useState(bio || "");
+  const [bioDraft, setBioDraft] = useState((bio || "").toString());
   const [avatar, setAvatar] = useState<string | null>(avatarUrl);
   const [banner, setBanner] = useState<string | null>(bannerUrl);
 
@@ -110,6 +125,20 @@ export default function ProfileHeaderClient(props: {
     }
   }
 
+  async function clearBanner() {
+    if (!isMe) return;
+    try {
+      setSaving(true);
+      const { error } = await supabase.from("profiles").update({ banner_url: null }).eq("id", profileId);
+      if (error) throw error;
+      setBanner(null);
+    } catch (e: any) {
+      alert(e?.message ?? String(e));
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function saveBio() {
     if (!isMe) return;
     try {
@@ -118,6 +147,8 @@ export default function ProfileHeaderClient(props: {
 
       const { error } = await supabase.from("profiles").update({ bio: next }).eq("id", profileId);
       if (error) throw error;
+
+      setBioDraft(next);
     } catch (e: any) {
       alert(e?.message ?? String(e));
     } finally {
@@ -125,49 +156,72 @@ export default function ProfileHeaderClient(props: {
     }
   }
 
+  const bannerBg = banner
+    ? `url(${banner}) center/cover no-repeat`
+    : "linear-gradient(135deg, #0f172a, #334155)";
+
   return (
     <div style={{ marginTop: 12 }}>
-      {/* Banner */}
+      {/* Banner (notes.com-ish: wide, clean, clickable for owner) */}
       <div
         style={{
-          height: 160,
+          height: 180,
           borderRadius: 18,
           overflow: "hidden",
           margin: "0 12px",
           border: "1px solid rgba(0,0,0,.08)",
-          background: banner ? `url(${banner}) center/cover no-repeat` : "linear-gradient(135deg, #111827, #6b7280)",
+          background: bannerBg,
           position: "relative",
         }}
       >
         {isMe ? (
-          <label
-            style={{
-              position: "absolute",
-              right: 10,
-              bottom: 10,
-              background: "rgba(255,255,255,.9)",
-              border: "1px solid rgba(0,0,0,.12)",
-              borderRadius: 999,
-              padding: "8px 10px",
-              fontSize: 12,
-              fontWeight: 800,
-              cursor: saving ? "not-allowed" : "pointer",
-              opacity: saving ? 0.6 : 1,
-            }}
-          >
-            {saving ? "…" : "Change banner"}
-            <input
-              type="file"
-              accept="image/*"
-              style={{ display: "none" }}
-              disabled={saving}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) void onPickBanner(f);
-                e.currentTarget.value = "";
+          <div style={{ position: "absolute", right: 10, bottom: 10, display: "flex", gap: 8 }}>
+            <label
+              style={{
+                background: "rgba(255,255,255,.92)",
+                border: "1px solid rgba(0,0,0,.12)",
+                borderRadius: 999,
+                padding: "8px 10px",
+                fontSize: 12,
+                fontWeight: 800,
+                cursor: saving ? "not-allowed" : "pointer",
+                opacity: saving ? 0.6 : 1,
               }}
-            />
-          </label>
+            >
+              {saving ? "…" : "Change banner"}
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                disabled={saving}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void onPickBanner(f);
+                  e.currentTarget.value = "";
+                }}
+              />
+            </label>
+
+            {banner ? (
+              <button
+                type="button"
+                onClick={() => void clearBanner()}
+                disabled={saving}
+                style={{
+                  background: "rgba(255,255,255,.92)",
+                  border: "1px solid rgba(0,0,0,.12)",
+                  borderRadius: 999,
+                  padding: "8px 10px",
+                  fontSize: 12,
+                  fontWeight: 800,
+                  cursor: saving ? "not-allowed" : "pointer",
+                  opacity: saving ? 0.6 : 1,
+                }}
+              >
+                Remove
+              </button>
+            ) : null}
+          </div>
         ) : null}
       </div>
 
@@ -175,23 +229,25 @@ export default function ProfileHeaderClient(props: {
       <div
         className="post"
         style={{
-          marginTop: -34,
+          marginTop: -44,
           marginLeft: 12,
           marginRight: 12,
           borderRadius: 18,
+          overflow: "hidden",
         }}
       >
-        <div style={{ display: "flex", gap: 14, padding: 14, alignItems: "center" }}>
+        {/* Top row: avatar + username + badges */}
+        <div style={{ display: "flex", gap: 14, padding: 16, alignItems: "center" }}>
           {/* Avatar */}
-          <div style={{ position: "relative", width: 86, height: 86, flex: "0 0 auto" }}>
+          <div style={{ position: "relative", width: 96, height: 96, flex: "0 0 auto" }}>
             <div
               style={{
-                width: 86,
-                height: 86,
+                width: 96,
+                height: 96,
                 borderRadius: 999,
                 overflow: "hidden",
                 border: "4px solid #fff",
-                boxShadow: "0 8px 24px rgba(0,0,0,.12)",
+                boxShadow: "0 10px 30px rgba(0,0,0,.14)",
                 background: "#111",
                 display: "grid",
                 placeItems: "center",
@@ -200,12 +256,13 @@ export default function ProfileHeaderClient(props: {
               {avatar ? (
                 <img src={avatar} alt={username} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
-                <span style={{ color: "#fff", fontWeight: 900, fontSize: 28 }}>{initial}</span>
+                <span style={{ color: "#fff", fontWeight: 900, fontSize: 32 }}>{initial}</span>
               )}
             </div>
 
             {isMe ? (
               <label
+                title="Change avatar"
                 style={{
                   position: "absolute",
                   right: -2,
@@ -213,7 +270,7 @@ export default function ProfileHeaderClient(props: {
                   background: "#fff",
                   border: "1px solid rgba(0,0,0,.12)",
                   borderRadius: 999,
-                  padding: "6px 8px",
+                  padding: "7px 9px",
                   fontSize: 12,
                   cursor: saving ? "not-allowed" : "pointer",
                   opacity: saving ? 0.6 : 1,
@@ -238,36 +295,22 @@ export default function ProfileHeaderClient(props: {
           {/* Meta */}
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-              <div style={{ fontWeight: 900, fontSize: 18, color: "#111" }}>@{username}</div>
+              <div style={{ fontWeight: 900, fontSize: 20, color: "#111", lineHeight: 1.1 }}>
+                @{(username || "unknown").toString().trim().toLowerCase()}
+              </div>
 
               {level ? <span style={levelBadgeStyle(level)}>{level.toUpperCase()}</span> : null}
-              {group ? (
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    padding: "6px 10px",
-                    borderRadius: 999,
-                    border: "1px solid #e5e7eb",
-                    background: "#f9fafb",
-                    fontSize: 12,
-                    fontWeight: 800,
-                    color: "#111827",
-                  }}
-                >
-                  {group}
-                </span>
-              ) : null}
+              {group ? <span style={chipStyle()}>{group}</span> : null}
             </div>
 
-            <div className="muted" style={{ marginTop: 4, fontSize: 12 }}>
+            <div className="muted" style={{ marginTop: 6, fontSize: 12 }}>
               Posts: {postCount} · Comments: {commentCount}
             </div>
           </div>
         </div>
 
         {/* Bio */}
-        <div style={{ padding: "0 14px 14px" }}>
+        <div style={{ padding: "0 16px 16px" }}>
           {isMe ? (
             <>
               <textarea
@@ -276,7 +319,7 @@ export default function ProfileHeaderClient(props: {
                 placeholder="Write a short bio…"
                 style={{
                   width: "100%",
-                  minHeight: 78,
+                  minHeight: 86,
                   resize: "none",
                   borderRadius: 14,
                   border: "1px solid rgba(0,0,0,.12)",
@@ -289,21 +332,20 @@ export default function ProfileHeaderClient(props: {
                   {(bioDraft || "").length}/280
                 </div>
                 <button
+                  type="button"
                   className="miniBtn"
-                  onClick={saveBio}
+                  onClick={() => void saveBio()}
                   disabled={saving}
                   style={{ opacity: saving ? 0.6 : 1 }}
                 >
-                  {saving ? "Saving…" : "Save bio"}
+                  {saving ? "Saving…" : "Save"}
                 </button>
               </div>
             </>
           ) : bio ? (
             <div style={{ whiteSpace: "pre-wrap", color: "#111", fontSize: 14 }}>{bio}</div>
           ) : (
-            <div className="muted" style={{ fontSize: 13 }}>
-              No bio yet.
-            </div>
+            <div className="muted" style={{ fontSize: 13 }}>No bio yet.</div>
           )}
         </div>
       </div>
