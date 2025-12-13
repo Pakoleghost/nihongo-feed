@@ -6,18 +6,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-type DbPostRow = {
-  id: string;
-  content: string | null;
-  created_at: string;
-  user_id: string;
-  image_url?: string | null;
-  profiles:
-    | { username: string | null; avatar_url: string | null }
-    | { username: string | null; avatar_url: string | null }[]
-    | null;
-};
-
 type Post = {
   id: string;
   content: string;
@@ -27,13 +15,6 @@ type Post = {
   avatar_url: string | null;
   image_url: string | null;
 };
-
-function normalizeProfile(p: any): { username: string; avatar_url: string | null } {
-  const obj = Array.isArray(p) ? p?.[0] : p;
-  const raw = (obj?.username ?? "").toString().trim().toLowerCase();
-  const username = raw && raw !== "unknown" ? raw : "";
-  return { username, avatar_url: obj?.avatar_url ?? null };
-}
 
 export default function UserProfilePage() {
   const params = useParams<{ username?: string }>();
@@ -69,6 +50,7 @@ export default function UserProfilePage() {
       .from("profiles")
       .select("id, username, avatar_url")
       .ilike("username", u)
+      .limit(1)
       .single();
 
     if (profErr || !prof?.id) {
@@ -82,9 +64,10 @@ export default function UserProfilePage() {
     // 2) posts del usuario
     const { data: postRows, error: postErr } = await supabase
       .from("posts")
-      .select("id, content, created_at, user_id, image_url, profiles(username, avatar_url)")
+      .select("id, content, created_at, user_id, image_url")
       .eq("user_id", prof.id)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(200);
 
     if (postErr) {
       // si falla esto, no lo marques como notFound. Es otro error.
@@ -94,18 +77,19 @@ export default function UserProfilePage() {
     }
 
     const normalizedPosts: Post[] =
-      (postRows as unknown as DbPostRow[] | null)?.map((row) => {
-        const p = normalizeProfile(row.profiles as any);
-        return {
-          id: row.id,
-          content: (row.content ?? "").toString(),
-          created_at: row.created_at,
-          user_id: row.user_id,
-          username: p.username || u,
-          avatar_url: p.avatar_url ?? null,
-          image_url: (row as any).image_url ?? null,
-        };
-      }) ?? [];
+      (postRows as unknown as Array<{ id: string; content: string | null; created_at: string; user_id: string; image_url?: string | null }> | null)?.map(
+        (row) => {
+          return {
+            id: row.id,
+            content: (row.content ?? "").toString(),
+            created_at: row.created_at,
+            user_id: row.user_id,
+            username: ((prof.username ?? u) as string).toString().trim().toLowerCase(),
+            avatar_url: prof.avatar_url ?? null,
+            image_url: (row as any).image_url ?? null,
+          };
+        }
+      ) ?? [];
 
     setPosts(normalizedPosts);
     setPostCount(normalizedPosts.length);
