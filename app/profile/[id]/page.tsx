@@ -78,8 +78,7 @@ export default async function ProfileByIdPage(props: { params: { id?: string } }
   // 1) Profile
   const { data: prof, error: profErr } = await supabase
     .from("profiles")
-    .select('id, username, avatar_url, banner_url, bio, level, "group"')
-    .eq("id", rawId)
+.select('id, username, avatar_url, bio, level, "group"')    .eq("id", rawId)
     .maybeSingle();
 
   if (profErr) return <Shell title="Error loading profile" subtitle={profErr.message} />;

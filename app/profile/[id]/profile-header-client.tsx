@@ -3,352 +3,296 @@
 import { useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-function levelBadgeStyle(levelRaw: string): React.CSSProperties {
-  const level = (levelRaw || "").toString().trim().toUpperCase();
-
-  const map: Record<string, { bg: string; fg: string; brd: string }> = {
-    A1: { bg: "#eef2ff", fg: "#1e3a8a", brd: "#c7d2fe" },
-    A2: { bg: "#ecfeff", fg: "#155e75", brd: "#a5f3fc" },
-    B1: { bg: "#f0fdf4", fg: "#166534", brd: "#bbf7d0" },
-    B2: { bg: "#fffbeb", fg: "#92400e", brd: "#fde68a" },
-    C1: { bg: "#fff1f2", fg: "#9f1239", brd: "#fecdd3" },
-    N5: { bg: "#eef2ff", fg: "#1e3a8a", brd: "#c7d2fe" },
-    N4: { bg: "#ecfeff", fg: "#155e75", brd: "#a5f3fc" },
-    N3: { bg: "#f0fdf4", fg: "#166534", brd: "#bbf7d0" },
-    N2: { bg: "#fffbeb", fg: "#92400e", brd: "#fde68a" },
-    N1: { bg: "#fff1f2", fg: "#9f1239", brd: "#fecdd3" },
-  };
-
-  const v = map[level] ?? { bg: "#f3f4f6", fg: "#111827", brd: "#e5e7eb" };
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    padding: "6px 10px",
-    borderRadius: 999,
-    border: `1px solid ${v.brd}`,
-    background: v.bg,
-    color: v.fg,
-    fontSize: 12,
-    fontWeight: 800,
-    lineHeight: 1,
-    whiteSpace: "nowrap",
-  };
-}
-
-function chipStyle(): React.CSSProperties {
-  return {
-    display: "inline-flex",
-    alignItems: "center",
-    padding: "6px 10px",
-    borderRadius: 999,
-    border: "1px solid rgba(0,0,0,.10)",
-    background: "rgba(255,255,255,.75)",
-    fontSize: 12,
-    fontWeight: 800,
-    color: "#111827",
-    whiteSpace: "nowrap",
-  };
-}
-
-export default function ProfileHeaderClient(props: {
-  isMe: boolean;
+type Props = {
   profileId: string;
   username: string;
   avatarUrl: string | null;
-  bannerUrl: string | null;
-  bio: string;
-  level: string;
-  group: string;
-  postCount: number;
-  commentCount: number;
-}) {
-  const {
-    isMe,
-    profileId,
-    username,
-    avatarUrl,
-    bannerUrl,
-    bio,
-    level,
-    group,
-    postCount,
-    commentCount,
-  } = props;
+  bio: string | null;
+  level?: string | null;
+  group?: string | null;
+  postCount?: number;
+  commentCount?: number;
+  isMe: boolean;
+};
 
-  const [saving, setSaving] = useState(false);
-  const [bioDraft, setBioDraft] = useState((bio || "").toString());
-  const [avatar, setAvatar] = useState<string | null>(avatarUrl);
-  const [banner, setBanner] = useState<string | null>(bannerUrl);
-
+export default function ProfileHeaderClient({
+  profileId,
+  username,
+  avatarUrl,
+  bio,
+  level,
+  group,
+  postCount = 0,
+  commentCount = 0,
+  isMe,
+}: Props) {
   const initial = useMemo(() => (username?.[0] || "?").toUpperCase(), [username]);
 
-  async function uploadToBucket(file: File, path: string) {
-    const { error } = await supabase.storage.from("post-images").upload(path, file, { upsert: true });
-    if (error) throw error;
-    const { data } = supabase.storage.from("post-images").getPublicUrl(path);
-    return data.publicUrl;
-  }
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  async function onPickAvatar(file: File) {
-    if (!isMe) return;
-    try {
-      setSaving(true);
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const url = await uploadToBucket(file, `avatars/${profileId}.${ext}`);
+  const [bioOpen, setBioOpen] = useState(false);
+  const [bioText, setBioText] = useState((bio ?? "").toString());
+  const [savingBio, setSavingBio] = useState(false);
 
-      const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", profileId);
-      if (error) throw error;
+  const [avatarBusy, setAvatarBusy] = useState(false);
 
-      setAvatar(url);
-    } catch (e: any) {
-      alert(e?.message ?? String(e));
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function onPickBanner(file: File) {
-    if (!isMe) return;
-    try {
-      setSaving(true);
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const url = await uploadToBucket(file, `banners/${profileId}.${ext}`);
-
-      const { error } = await supabase.from("profiles").update({ banner_url: url }).eq("id", profileId);
-      if (error) throw error;
-
-      setBanner(url);
-    } catch (e: any) {
-      alert(e?.message ?? String(e));
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function clearBanner() {
-    if (!isMe) return;
-    try {
-      setSaving(true);
-      const { error } = await supabase.from("profiles").update({ banner_url: null }).eq("id", profileId);
-      if (error) throw error;
-      setBanner(null);
-    } catch (e: any) {
-      alert(e?.message ?? String(e));
-    } finally {
-      setSaving(false);
-    }
-  }
+  const badge = useMemo(() => {
+    const v = (level ?? "").toString().trim();
+    if (!v) return null;
+    return v;
+  }, [level]);
 
   async function saveBio() {
-    if (!isMe) return;
-    try {
-      setSaving(true);
-      const next = (bioDraft || "").toString().slice(0, 280);
+    if (!isMe || savingBio) return;
+    setSavingBio(true);
 
-      const { error } = await supabase.from("profiles").update({ bio: next }).eq("id", profileId);
-      if (error) throw error;
+    const next = bioText.trim();
 
-      setBioDraft(next);
-    } catch (e: any) {
-      alert(e?.message ?? String(e));
-    } finally {
-      setSaving(false);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ bio: next })
+      .eq("id", profileId);
+
+    setSavingBio(false);
+
+    if (error) {
+      alert(error.message);
+      return;
     }
+
+    setBioOpen(false);
+    setMenuOpen(false);
   }
 
-  const bannerBg = banner
-    ? `url(${banner}) center/cover no-repeat`
-    : "linear-gradient(135deg, #0f172a, #334155)";
+  async function uploadAvatar(file: File) {
+    if (!isMe || avatarBusy) return;
+    setAvatarBusy(true);
+
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const path = `avatars/${profileId}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("post-images")
+      .upload(path, file, { upsert: true });
+
+    if (uploadError) {
+      setAvatarBusy(false);
+      alert(uploadError.message);
+      return;
+    }
+
+    const { data: pub } = supabase.storage.from("post-images").getPublicUrl(path);
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ avatar_url: pub.publicUrl })
+      .eq("id", profileId);
+
+    setAvatarBusy(false);
+
+    if (updateError) {
+      alert(updateError.message);
+      return;
+    }
+
+    // simplest: hard refresh so Server Component re-fetches new avatar_url
+    window.location.reload();
+  }
 
   return (
-    <div style={{ marginTop: 12 }}>
-      {/* Banner (notes.com-ish: wide, clean, clickable for owner) */}
-      <div
-        style={{
-          height: 180,
-          borderRadius: 18,
-          overflow: "hidden",
-          margin: "0 12px",
-          border: "1px solid rgba(0,0,0,.08)",
-          background: bannerBg,
-          position: "relative",
-        }}
-      >
-        {isMe ? (
-          <div style={{ position: "absolute", right: 10, bottom: 10, display: "flex", gap: 8 }}>
-            <label
-              style={{
-                background: "rgba(255,255,255,.92)",
-                border: "1px solid rgba(0,0,0,.12)",
-                borderRadius: 999,
-                padding: "8px 10px",
-                fontSize: 12,
-                fontWeight: 800,
-                cursor: saving ? "not-allowed" : "pointer",
-                opacity: saving ? 0.6 : 1,
-              }}
-            >
-              {saving ? "…" : "Change banner"}
-              <input
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                disabled={saving}
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) void onPickBanner(f);
-                  e.currentTarget.value = "";
-                }}
-              />
-            </label>
+    <div className="post" style={{ marginTop: 12 }}>
+      <div className="post-header" style={{ alignItems: "flex-start" }}>
+        <div
+          className="avatar"
+          aria-label="Profile avatar"
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: 999,
+            overflow: "hidden",
+          }}
+        >
+          {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{initial}</span>}
+        </div>
 
-            {banner ? (
-              <button
-                type="button"
-                onClick={() => void clearBanner()}
-                disabled={saving}
-                style={{
-                  background: "rgba(255,255,255,.92)",
-                  border: "1px solid rgba(0,0,0,.12)",
-                  borderRadius: 999,
-                  padding: "8px 10px",
-                  fontSize: 12,
-                  fontWeight: 800,
-                  cursor: saving ? "not-allowed" : "pointer",
-                  opacity: saving ? 0.6 : 1,
-                }}
-              >
-                Remove
-              </button>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
+        <div className="postMeta" style={{ width: "100%" }}>
+          <div className="nameRow" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                <div className="handle" style={{ color: "inherit", fontWeight: 900 }}>
+                  @{username || "unknown"}
+                </div>
 
-      {/* Card */}
-      <div
-        className="post"
-        style={{
-          marginTop: -44,
-          marginLeft: 12,
-          marginRight: 12,
-          borderRadius: 18,
-          overflow: "hidden",
-        }}
-      >
-        {/* Top row: avatar + username + badges */}
-        <div style={{ display: "flex", gap: 14, padding: 16, alignItems: "center" }}>
-          {/* Avatar */}
-          <div style={{ position: "relative", width: 96, height: 96, flex: "0 0 auto" }}>
-            <div
-              style={{
-                width: 96,
-                height: 96,
-                borderRadius: 999,
-                overflow: "hidden",
-                border: "4px solid #fff",
-                boxShadow: "0 10px 30px rgba(0,0,0,.14)",
-                background: "#111",
-                display: "grid",
-                placeItems: "center",
-              }}
-            >
-              {avatar ? (
-                <img src={avatar} alt={username} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <span style={{ color: "#fff", fontWeight: 900, fontSize: 32 }}>{initial}</span>
-              )}
+                {badge ? (
+                  <span
+                    style={{
+                      fontSize: 12,
+                      padding: "4px 8px",
+                      borderRadius: 999,
+                      border: "1px solid rgba(255,255,255,.15)",
+                      background: "rgba(255,255,255,.06)",
+                    }}
+                    className="muted"
+                    title={group ? `Group: ${group}` : undefined}
+                  >
+                    {badge}
+                  </span>
+                ) : null}
+              </div>
+
+              <div className="muted" style={{ fontSize: 12 }}>
+                Posts: <span className="muted">{postCount}</span> · Comments:{" "}
+                <span className="muted">{commentCount}</span>
+              </div>
             </div>
 
             {isMe ? (
-              <label
-                title="Change avatar"
-                style={{
-                  position: "absolute",
-                  right: -2,
-                  bottom: -2,
-                  background: "#fff",
-                  border: "1px solid rgba(0,0,0,.12)",
-                  borderRadius: 999,
-                  padding: "7px 9px",
-                  fontSize: 12,
-                  cursor: saving ? "not-allowed" : "pointer",
-                  opacity: saving ? 0.6 : 1,
-                }}
-              >
-                📷
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  disabled={saving}
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) void onPickAvatar(f);
-                    e.currentTarget.value = "";
-                  }}
-                />
-              </label>
+              <div style={{ position: "relative" }}>
+                <button
+                  className="miniBtn"
+                  onClick={() => setMenuOpen((v) => !v)}
+                  aria-label="Profile options"
+                  title="Options"
+                  style={{ padding: "6px 10px" }}
+                >
+                  ⋯
+                </button>
+
+                {menuOpen ? (
+                  <div
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                      top: 38,
+                      zIndex: 50,
+                      width: 220,
+                      background: "#111",
+                      border: "1px solid rgba(255,255,255,.12)",
+                      borderRadius: 12,
+                      overflow: "hidden",
+                      boxShadow: "0 8px 24px rgba(0,0,0,.35)",
+                    }}
+                  >
+                    <button
+                      className="miniBtn"
+                      style={{
+                        width: "100%",
+                        justifyContent: "flex-start",
+                        borderRadius: 0,
+                        border: 0,
+                        background: "transparent",
+                      }}
+                      onClick={() => setBioOpen(true)}
+                    >
+                      Edit bio
+                    </button>
+
+                    <label
+                      className="miniBtn"
+                      style={{
+                        width: "100%",
+                        justifyContent: "flex-start",
+                        borderRadius: 0,
+                        border: 0,
+                        background: "transparent",
+                        opacity: avatarBusy ? 0.6 : 1,
+                        cursor: avatarBusy ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {avatarBusy ? "Updating…" : "Change profile picture"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        disabled={avatarBusy}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) void uploadAvatar(f);
+                          e.currentTarget.value = "";
+                        }}
+                      />
+                    </label>
+
+                    <button
+                      className="miniBtn"
+                      style={{
+                        width: "100%",
+                        justifyContent: "flex-start",
+                        borderRadius: 0,
+                        borderTop: "1px solid rgba(255,255,255,.08)",
+                        background: "transparent",
+                      }}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             ) : null}
           </div>
 
-          {/* Meta */}
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-              <div style={{ fontWeight: 900, fontSize: 20, color: "#111", lineHeight: 1.1 }}>
-                @{(username || "unknown").toString().trim().toLowerCase()}
-              </div>
+          <div style={{ marginTop: 10, whiteSpace: "pre-wrap" }} className={bio ? "" : "muted"}>
+            {bio?.trim() ? bio : "No bio yet."}
+          </div>
+        </div>
+      </div>
 
-              {level ? <span style={levelBadgeStyle(level)}>{level.toUpperCase()}</span> : null}
-              {group ? <span style={chipStyle()}>{group}</span> : null}
-            </div>
+      {/* Simple modal for bio */}
+      {bioOpen ? (
+        <div
+          onClick={() => setBioOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,.55)",
+            zIndex: 60,
+            display: "grid",
+            placeItems: "center",
+            padding: 16,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(520px, 92vw)",
+              background: "#111",
+              border: "1px solid rgba(255,255,255,.12)",
+              borderRadius: 16,
+              padding: 14,
+            }}
+          >
+            <div style={{ color: "#fff", fontWeight: 900, fontSize: 16 }}>Edit bio</div>
 
-            <div className="muted" style={{ marginTop: 6, fontSize: 12 }}>
-              Posts: {postCount} · Comments: {commentCount}
+            <textarea
+              value={bioText}
+              onChange={(e) => setBioText(e.target.value)}
+              placeholder="Write something short…"
+              style={{
+                width: "100%",
+                marginTop: 10,
+                minHeight: 120,
+                resize: "vertical",
+                padding: 12,
+                borderRadius: 12,
+                border: "1px solid rgba(255,255,255,.15)",
+                background: "rgba(255,255,255,.06)",
+                color: "#fff",
+                outline: "none",
+              }}
+            />
+
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 12 }}>
+              <button className="miniBtn" onClick={() => setBioOpen(false)} disabled={savingBio}>
+                Cancel
+              </button>
+              <button className="miniBtn" onClick={() => void saveBio()} disabled={savingBio}>
+                {savingBio ? "Saving…" : "Save"}
+              </button>
             </div>
           </div>
         </div>
-
-        {/* Bio */}
-        <div style={{ padding: "0 16px 16px" }}>
-          {isMe ? (
-            <>
-              <textarea
-                value={bioDraft}
-                onChange={(e) => setBioDraft(e.target.value)}
-                placeholder="Write a short bio…"
-                style={{
-                  width: "100%",
-                  minHeight: 86,
-                  resize: "none",
-                  borderRadius: 14,
-                  border: "1px solid rgba(0,0,0,.12)",
-                  padding: 12,
-                  outline: "none",
-                }}
-              />
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, alignItems: "center" }}>
-                <div className="muted" style={{ fontSize: 12 }}>
-                  {(bioDraft || "").length}/280
-                </div>
-                <button
-                  type="button"
-                  className="miniBtn"
-                  onClick={() => void saveBio()}
-                  disabled={saving}
-                  style={{ opacity: saving ? 0.6 : 1 }}
-                >
-                  {saving ? "Saving…" : "Save"}
-                </button>
-              </div>
-            </>
-          ) : bio ? (
-            <div style={{ whiteSpace: "pre-wrap", color: "#111", fontSize: 14 }}>{bio}</div>
-          ) : (
-            <div className="muted" style={{ fontSize: 13 }}>No bio yet.</div>
-          )}
-        </div>
-      </div>
+      ) : null}
     </div>
   );
 }
