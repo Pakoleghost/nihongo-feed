@@ -3,6 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 type DbPostRow = {
@@ -34,11 +35,13 @@ function normalizeProfile(p: any): { username: string; avatar_url: string | null
   return { username, avatar_url: obj?.avatar_url ?? null };
 }
 
-export default function UserProfilePage({ params }: { params: { username: string } }) {
+export default function UserProfilePage() {
+  const params = useParams<{ username?: string }>();
+
   const username = useMemo(() => {
-    const v = decodeURIComponent(params.username || "").trim().toLowerCase();
-    return v;
-  }, [params.username]);
+    const raw = (params?.username ?? "").toString();
+    return decodeURIComponent(raw).trim().toLowerCase();
+  }, [params]);
 
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -55,7 +58,6 @@ export default function UserProfilePage({ params }: { params: { username: string
       return;
     }
     void loadProfile(username);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username]);
 
   async function loadProfile(u: string) {
@@ -67,11 +69,9 @@ export default function UserProfilePage({ params }: { params: { username: string
       .from("profiles")
       .select("id, username, avatar_url")
       .ilike("username", u)
-      .limit(1)
       .single();
 
     if (profErr || !prof?.id) {
-      console.error("profile lookup error:", profErr);
       setNotFound(true);
       setLoading(false);
       return;
@@ -80,14 +80,17 @@ export default function UserProfilePage({ params }: { params: { username: string
     setAvatarUrl(prof.avatar_url ?? null);
 
     // 2) posts del usuario
-    const { data: postRows, error: postErr } = await supabase
+    const { data: postRows, error: postsErr } = await supabase
       .from("posts")
       .select("id, content, created_at, user_id, image_url, profiles(username, avatar_url)")
       .eq("user_id", prof.id)
       .order("created_at", { ascending: false });
 
-    if (postErr) {
-      console.error("posts error:", postErr);
+    if (postsErr) {
+      // si falla esto, no lo marques como notFound. Es otro error.
+      alert(postsErr.message);
+      setLoading(false);
+      return;
     }
 
     const normalizedPosts: Post[] =
@@ -113,15 +116,17 @@ export default function UserProfilePage({ params }: { params: { username: string
       .select("id", { count: "exact", head: true })
       .eq("user_id", prof.id);
 
-    if (cErr) console.error("comments count error:", cErr);
+    if (cErr) {
+      alert(cErr.message);
+      setLoading(false);
+      return;
+    }
 
     setCommentCount(count ?? 0);
     setLoading(false);
   }
 
-  if (loading) {
-    return <div style={{ padding: 24, color: "#777" }}>Loading…</div>;
-  }
+  if (loading) return <div style={{ padding: 24, color: "#777" }}>Loading…</div>;
 
   if (notFound) {
     return (
