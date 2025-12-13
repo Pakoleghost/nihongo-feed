@@ -3,8 +3,6 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import ProfileHeaderClient from "./profile-header-client";
 
-export const dynamic = "force-dynamic";
-
 type Post = {
   id: string;
   content: string;
@@ -13,47 +11,21 @@ type Post = {
   image_url: string | null;
 };
 
-type Profile = {
+type ProfileRow = {
   id: string;
-  username: string;
+  username: string | null;
   avatar_url: string | null;
-  banner_url: string | null;
-  bio: string;
-  level: string;
-  group: string;
+  bio?: string | null;
+  level?: string | null;
+  group?: string | null;
 };
 
-function Shell({ title, subtitle }: { title: string; subtitle?: string }) {
-  return (
-    <div className="feed">
-      <div className="header">
-        <div className="headerInner">
-          <div className="brand">フィード</div>
-          <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
-            ← Back
-          </Link>
-        </div>
-      </div>
-
-      <div style={{ padding: 16 }}>
-        <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>{title}</div>
-        {subtitle ? (
-          <div className="muted" style={{ marginTop: 6 }}>
-            {subtitle}
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-export default async function ProfileByIdPage(props: { params: { id?: string } }) {
-  // Next 15-safe: handle either direct object or promise-like
-  const paramsAny: any = props.params as any;
-  const idVal = typeof paramsAny?.then === "function" ? (await paramsAny).id : props.params.id;
-
-  const rawId = decodeURIComponent((idVal ?? "").toString()).trim();
-  if (!rawId) return <Shell title="Profile not found" subtitle="Missing id." />;
+export default async function ProfileByIdPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const rawId = decodeURIComponent(params.id || "").trim();
 
   const cookieStore = await cookies();
 
@@ -70,55 +42,81 @@ export default async function ProfileByIdPage(props: { params: { id?: string } }
     }
   );
 
-  // Viewer (used to decide if profile is editable)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const Shell = ({ title, subtitle }: { title: string; subtitle?: string }) => (
+    <div className="feed">
+      <div className="header">
+        <div className="headerInner">
+          <div className="brand">フィード</div>
+          <div className="me">
+            <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
+              ← Back
+            </Link>
+            <Link
+              href="/leaderboard"
+              className="miniBtn"
+              style={{ marginLeft: 8, textDecoration: "none" }}
+            >
+              Leaderboard
+            </Link>
+          </div>
+        </div>
+      </div>
 
-  // 1) Profile
+      <div style={{ padding: 16 }}>
+        <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>{title}</div>
+        {subtitle ? (
+          <div className="muted" style={{ marginTop: 6 }}>
+            {subtitle}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+
+  if (!rawId) return <Shell title="Profile not found" subtitle="Missing id." />;
+
+  // who is viewing?
+  const { data: authData } = await supabase.auth.getUser();
+  const viewerId = authData?.user?.id ?? null;
+
+  // profile
   const { data: prof, error: profErr } = await supabase
     .from("profiles")
-.select('id, username, avatar_url, bio, level, "group"')    .eq("id", rawId)
-    .maybeSingle();
+    .select("id, username, avatar_url, bio, level, group")
+    .eq("id", rawId)
+    .maybeSingle<ProfileRow>();
 
   if (profErr) return <Shell title="Error loading profile" subtitle={profErr.message} />;
   if (!prof) return <Shell title="Profile not found" subtitle="No existe este usuario." />;
 
-  const profile: Profile = {
-    id: (prof as any).id,
-    username: ((prof as any).username ?? "").toString().trim().toLowerCase(),
-    avatar_url: (prof as any).avatar_url ?? null,
-    banner_url: (prof as any).banner_url ?? null,
-    bio: ((prof as any).bio ?? "").toString(),
-    level: ((prof as any).level ?? "").toString(),
-    group: ((prof as any).group ?? "").toString(),
-  };
+  const profileId = (prof.id ?? "").toString();
+  const username = (prof.username ?? "").toString().trim().toLowerCase() || "unknown";
+  const avatarUrl = prof.avatar_url ?? null;
 
-  const isMe = !!user?.id && user.id === profile.id;
+  const isOwn = !!viewerId && viewerId === profileId;
 
-  // 2) Posts
+  // posts
   const { data: postRows, error: postsErr } = await supabase
     .from("posts")
     .select("id, content, created_at, user_id, image_url")
-    .eq("user_id", profile.id)
+    .eq("user_id", profileId)
     .order("created_at", { ascending: false });
 
   if (postsErr) return <Shell title="Error loading posts" subtitle={postsErr.message} />;
 
   const posts: Post[] =
-    (postRows ?? []).map((r: any) => ({
-      id: r.id,
-      content: (r.content ?? "").toString(),
-      created_at: r.created_at,
-      user_id: r.user_id,
-      image_url: r.image_url ?? null,
+    (postRows as any[] | null)?.map((row) => ({
+      id: row.id,
+      content: (row.content ?? "").toString(),
+      created_at: row.created_at,
+      user_id: row.user_id,
+      image_url: row.image_url ?? null,
     })) ?? [];
 
-  // 3) Comment count (best-effort)
   const { count: commentCount } = await supabase
     .from("comments")
     .select("id", { count: "exact", head: true })
-    .eq("user_id", profile.id);
+    .eq("user_id", profileId);
 
   return (
     <div className="feed">
@@ -129,26 +127,31 @@ export default async function ProfileByIdPage(props: { params: { id?: string } }
             <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
               ← Back
             </Link>
-            <Link href="/leaderboard" className="miniBtn" style={{ marginLeft: 8, textDecoration: "none" }}>
+            <Link
+              href="/leaderboard"
+              className="miniBtn"
+              style={{ marginLeft: 8, textDecoration: "none" }}
+            >
               Leaderboard
             </Link>
           </div>
         </div>
       </div>
 
-<ProfileHeaderClient
-  isMe={isMe}
-  profileId={profile.id}
-  username={profile.username}
-  avatarUrl={profile.avatar_url}
-  bio={profile.bio}
-  level={profile.level}
-  group={profile.group}
-  postCount={posts.length}
-  commentCount={commentCount ?? 0}
-/>
+      <div className="post" style={{ marginTop: 12 }}>
+        <ProfileHeaderClient
+          isOwn={isOwn}
+          profileId={profileId}
+          username={username}
+          avatarUrl={avatarUrl}
+          bio={(prof.bio ?? "").toString().trim()}
+          level={(prof.level ?? "").toString().trim()}
+          group={(prof.group ?? "").toString().trim()}
+          postCount={posts.length}
+          commentCount={commentCount ?? 0}
+        />
+      </div>
 
-      {/* Posts list */}
       {posts.length === 0 ? (
         <div style={{ padding: 16 }} className="muted">
           No posts yet.
@@ -157,7 +160,16 @@ export default async function ProfileByIdPage(props: { params: { id?: string } }
         posts.map((p) => (
           <div className="post" key={p.id}>
             <div className="post-header">
+              <div className="avatar" aria-label="Profile avatar">
+                {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{username[0]?.toUpperCase() || "?"}</span>}
+              </div>
+
               <div className="postMeta">
+                <div className="nameRow">
+                  <span className="handle" style={{ color: "inherit" }}>
+                    @{username}
+                  </span>
+                </div>
                 <div className="muted" style={{ fontSize: 12 }}>
                   {new Date(p.created_at).toLocaleString()}
                 </div>

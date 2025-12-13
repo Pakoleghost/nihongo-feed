@@ -1,156 +1,121 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-type Props = {
+function levelChip(level: string) {
+  const v = (level || "").toLowerCase().trim();
+  if (!v) return null;
+
+  // simple color coding without needing Tailwind config
+  const bg =
+    v.includes("n5") || v.includes("a1") ? "#2d6a4f" :
+    v.includes("n4") || v.includes("a2") ? "#1d4ed8" :
+    v.includes("n3") || v.includes("b1") ? "#7c3aed" :
+    v.includes("n2") || v.includes("b2") ? "#b45309" :
+    v.includes("n1") || v.includes("c1") || v.includes("c2") ? "#b91c1c" :
+    "#374151";
+
+  return (
+    <span
+      style={{
+        background: bg,
+        color: "#fff",
+        fontSize: 12,
+        fontWeight: 700,
+        padding: "4px 8px",
+        borderRadius: 999,
+        lineHeight: 1,
+        display: "inline-flex",
+        alignItems: "center",
+      }}
+      title="Level"
+    >
+      {level}
+    </span>
+  );
+}
+
+export default function ProfileHeaderClient(props: {
+  isOwn: boolean;
   profileId: string;
   username: string;
   avatarUrl: string | null;
-  bio: string | null;
-  level?: string | null;
-  group?: string | null;
-  postCount?: number;
-  commentCount?: number;
-  isMe: boolean;
-};
+  bio: string;
+  level: string;
+  group: string;
+  postCount: number;
+  commentCount: number;
+}) {
+  const { isOwn, profileId, username, avatarUrl, bio, level, group, postCount, commentCount } = props;
 
-export default function ProfileHeaderClient({
-  profileId,
-  username,
-  avatarUrl,
-  bio,
-  level,
-  group,
-  postCount = 0,
-  commentCount = 0,
-  isMe,
-}: Props) {
-  const initial = useMemo(() => (username?.[0] || "?").toUpperCase(), [username]);
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editBioOpen, setEditBioOpen] = useState(false);
+  const [bioDraft, setBioDraft] = useState(bio || "");
 
-  const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  const [bioOpen, setBioOpen] = useState(false);
-  const [bioText, setBioText] = useState((bio ?? "").toString());
-  const [savingBio, setSavingBio] = useState(false);
-
-  const [avatarBusy, setAvatarBusy] = useState(false);
-
   useEffect(() => {
-    if (!menuOpen) return;
-
-    function onDown(e: MouseEvent) {
-      const el = menuRef.current;
-      if (!el) return;
-      if (el.contains(e.target as Node)) return;
-      setMenuOpen(false);
+    function onDocClick(e: MouseEvent) {
+      if (!menuRef.current) return;
+      if (!menuRef.current.contains(e.target as any)) setOpen(false);
     }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
 
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [menuOpen]);
-
-  const badge = useMemo(() => {
-    const v = (level ?? "").toString().trim();
-    if (!v) return null;
-    return v;
-  }, [level]);
+  const initial = (username?.[0] || "?").toUpperCase();
 
   async function saveBio() {
-    if (!isMe || savingBio) return;
-    setSavingBio(true);
-
-    const next = bioText.trim();
+    setSaving(true);
+    const next = (bioDraft || "").trim();
 
     const { error } = await supabase
       .from("profiles")
       .update({ bio: next })
       .eq("id", profileId);
 
-    setSavingBio(false);
+    setSaving(false);
 
     if (error) {
       alert(error.message);
       return;
     }
 
-    setBioOpen(false);
-    setMenuOpen(false);
-  }
-
-  async function uploadAvatar(file: File) {
-    if (!isMe || avatarBusy) return;
-    setAvatarBusy(true);
-
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const path = `avatars/${profileId}.${ext}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("post-images")
-      .upload(path, file, { upsert: true });
-
-    if (uploadError) {
-      setAvatarBusy(false);
-      alert(uploadError.message);
-      return;
-    }
-
-    const { data: pub } = supabase.storage.from("post-images").getPublicUrl(path);
-
-    const { error: updateError } = await supabase
-      .from("profiles")
-      .update({ avatar_url: pub.publicUrl })
-      .eq("id", profileId);
-
-    setAvatarBusy(false);
-
-    if (updateError) {
-      alert(updateError.message);
-      return;
-    }
-
-    // simplest: hard refresh so Server Component re-fetches new avatar_url
+    setEditBioOpen(false);
+    setOpen(false);
+    // simplest: reload to reflect server-rendered page
     window.location.reload();
   }
 
+  function changePhoto() {
+    // placeholder: you can wire this to your existing upload flow later
+    alert("TODO: wire this to your avatar upload flow (Supabase Storage).");
+    setOpen(false);
+  }
+
   return (
-    <div className="post" style={{ marginTop: 12 }}>
+    <div>
       <div className="post-header" style={{ alignItems: "flex-start" }}>
-        <div
-          className="avatar"
-          aria-label="Profile avatar"
-          style={{
-            width: 64,
-            height: 64,
-            borderRadius: 999,
-            overflow: "hidden",
-          }}
-        >
+        <div className="avatar" aria-label="Profile avatar" style={{ width: 56, height: 56 }}>
           {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{initial}</span>}
         </div>
 
         <div className="postMeta" style={{ width: "100%" }}>
           <div className="nameRow" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-                <div className="handle" style={{ color: "inherit", fontWeight: 900 }}>
-                  @{username || "unknown"}
-                </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span className="handle" style={{ color: "inherit" }}>
+                  @{username}
+                </span>
 
-                {badge ? (
-                  <span
-                    style={{
-                      fontSize: 12,
-                      padding: "4px 8px",
-                      borderRadius: 999,
-                      border: "1px solid rgba(255,255,255,.15)",
-                      background: "rgba(255,255,255,.06)",
-                    }}
-                    className="muted"
-                    title={group ? `Group: ${group}` : undefined}
-                  >
-                    {badge}
+                {levelChip(level)}
+
+                {group ? (
+                  <span className="muted" style={{ fontSize: 12 }}>
+                    {group}
                   </span>
                 ) : null}
               </div>
@@ -161,174 +126,159 @@ export default function ProfileHeaderClient({
               </div>
             </div>
 
-            {isMe ? (
+            {/* 3-dot menu */}
+            {isOwn ? (
               <div ref={menuRef} style={{ position: "relative" }}>
                 <button
                   type="button"
-                  onClick={() => setMenuOpen((v) => !v)}
-                  aria-label="Profile options"
-                  title="Options"
+                  onClick={() => setOpen((v) => !v)}
+                  aria-label="Profile menu"
+                  className="miniBtn"
                   style={{
-                    width: 38,
-                    height: 38,
-                    display: "grid",
-                    placeItems: "center",
-                    borderRadius: 12,
-                    border: "1px solid rgba(0,0,0,.12)",
-                    background: "rgba(255,255,255,.92)",
-                    color: "#111",
-                    fontSize: 22,
-                    fontWeight: 900,
-                    lineHeight: 1,
+                    border: "1px solid rgba(0,0,0,0.12)",
+                    background: "#fff",
                     cursor: "pointer",
-                    userSelect: "none",
+                    padding: "6px 10px",
+                    borderRadius: 10,
+                    lineHeight: 1,
                   }}
                 >
                   ⋯
                 </button>
 
-                {menuOpen ? (
+                {open ? (
                   <div
                     style={{
                       position: "absolute",
                       right: 0,
-                      top: 44,
-                      zIndex: 50,
+                      top: 36,
                       width: 220,
-                      background: "#111",
-                      border: "1px solid rgba(255,255,255,.12)",
+                      background: "#fff",
+                      border: "1px solid rgba(0,0,0,0.12)",
                       borderRadius: 12,
+                      boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
                       overflow: "hidden",
-                      boxShadow: "0 8px 24px rgba(0,0,0,.35)",
+                      zIndex: 50,
                     }}
                   >
                     <button
                       type="button"
+                      onClick={() => {
+                        setEditBioOpen(true);
+                        setOpen(false);
+                      }}
                       style={{
                         width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        padding: "10px 12px",
-                        border: 0,
-                        background: "transparent",
-                        color: "#fff",
-                        cursor: "pointer",
                         textAlign: "left",
+                        padding: "10px 12px",
+                        background: "transparent",
+                        border: 0,
+                        cursor: "pointer",
                       }}
-                      onClick={() => setBioOpen(true)}
                     >
                       Edit bio
                     </button>
 
-                    <label
-                      style={{
-                        width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        padding: "10px 12px",
-                        border: 0,
-                        background: "transparent",
-                        color: "#fff",
-                        opacity: avatarBusy ? 0.6 : 1,
-                        cursor: avatarBusy ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      {avatarBusy ? "Updating…" : "Change profile picture"}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        style={{ display: "none" }}
-                        disabled={avatarBusy}
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) void uploadAvatar(f);
-                          e.currentTarget.value = "";
-                        }}
-                      />
-                    </label>
-
                     <button
                       type="button"
+                      onClick={changePhoto}
                       style={{
                         width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "10px 12px",
-                        border: 0,
-                        borderTop: "1px solid rgba(255,255,255,.08)",
-                        background: "transparent",
-                        color: "#fff",
-                        cursor: "pointer",
                         textAlign: "left",
+                        padding: "10px 12px",
+                        background: "transparent",
+                        border: 0,
+                        cursor: "pointer",
+                        borderTop: "1px solid rgba(0,0,0,0.08)",
                       }}
-                      onClick={() => setMenuOpen(false)}
                     >
-                      Close
+                      Change profile photo
                     </button>
+
+                    <div style={{ padding: "10px 12px", borderTop: "1px solid rgba(0,0,0,0.08)" }}>
+                      <Link href="/" style={{ textDecoration: "none" }}>
+                        Back to feed
+                      </Link>
+                    </div>
                   </div>
                 ) : null}
               </div>
             ) : null}
           </div>
 
-          <div style={{ marginTop: 10, whiteSpace: "pre-wrap" }} className={bio ? "" : "muted"}>
+          <div className="muted" style={{ marginTop: 8 }}>
             {bio?.trim() ? bio : "No bio yet."}
           </div>
         </div>
       </div>
 
-      {/* Simple modal for bio */}
-      {bioOpen ? (
+      {/* Edit bio modal */}
+      {editBioOpen ? (
         <div
-          onClick={() => setBioOpen(false)}
+          onClick={() => !saving && setEditBioOpen(false)}
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,.55)",
-            zIndex: 60,
-            display: "grid",
-            placeItems: "center",
+            background: "rgba(0,0,0,0.35)",
+            zIndex: 100,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             padding: 16,
           }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              width: "min(520px, 92vw)",
-              background: "#111",
-              border: "1px solid rgba(255,255,255,.12)",
+              width: "min(520px, 100%)",
+              background: "#fff",
               borderRadius: 16,
               padding: 14,
+              boxShadow: "0 12px 40px rgba(0,0,0,0.2)",
             }}
           >
-            <div style={{ color: "#fff", fontWeight: 900, fontSize: 16 }}>Edit bio</div>
+            <div style={{ fontWeight: 900, marginBottom: 10 }}>Edit bio</div>
 
             <textarea
-              value={bioText}
-              onChange={(e) => setBioText(e.target.value)}
-              placeholder="Write something short…"
+              value={bioDraft}
+              onChange={(e) => setBioDraft(e.target.value)}
+              rows={4}
               style={{
                 width: "100%",
-                marginTop: 10,
-                minHeight: 120,
                 resize: "vertical",
-                padding: 12,
                 borderRadius: 12,
-                border: "1px solid rgba(255,255,255,.15)",
-                background: "rgba(255,255,255,.06)",
-                color: "#fff",
+                border: "1px solid rgba(0,0,0,0.18)",
+                padding: 10,
                 outline: "none",
+                fontFamily: "inherit",
               }}
+              placeholder="Write something short."
             />
 
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 12 }}>
-              <button className="miniBtn" onClick={() => setBioOpen(false)} disabled={savingBio}>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
+              <button
+                type="button"
+                className="miniBtn"
+                disabled={saving}
+                onClick={() => setEditBioOpen(false)}
+                style={{ cursor: saving ? "not-allowed" : "pointer" }}
+              >
                 Cancel
               </button>
-              <button className="miniBtn" onClick={() => void saveBio()} disabled={savingBio}>
-                {savingBio ? "Saving…" : "Save"}
+
+              <button
+                type="button"
+                className="miniBtn"
+                disabled={saving}
+                onClick={saveBio}
+                style={{
+                  cursor: saving ? "not-allowed" : "pointer",
+                  background: "#111",
+                  color: "#fff",
+                  border: "1px solid #111",
+                }}
+              >
+                {saving ? "Saving..." : "Save"}
               </button>
             </div>
           </div>
