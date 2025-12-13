@@ -104,7 +104,14 @@ export default function ProfileHeaderClient(props: {
         </div>
 
         <div className="postMeta" style={{ width: "100%" }}>
-          <div className="nameRow" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div
+            className="nameRow"
+            style={{
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              gap: 12,
+            }}
+          >
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span className="handle" style={{ color: "inherit" }}>
@@ -133,14 +140,21 @@ export default function ProfileHeaderClient(props: {
                   type="button"
                   onClick={() => setOpen((v) => !v)}
                   aria-label="Profile menu"
-                  className="miniBtn"
                   style={{
-                    border: "1px solid rgba(0,0,0,0.12)",
-                    background: "#fff",
+                    width: 40,
+                    height: 40,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 999,
+                    border: "1px solid rgba(255,255,255,0.3)",
+                    background: "#111",
+                    color: "#fff",
+                    fontSize: 22,
+                    fontWeight: 900,
                     cursor: "pointer",
-                    padding: "6px 10px",
-                    borderRadius: 10,
-                    lineHeight: 1,
+                    position: "relative",
+                    zIndex: 10,
                   }}
                 >
                   ⋯
