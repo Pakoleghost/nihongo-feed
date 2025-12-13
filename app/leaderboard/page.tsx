@@ -7,7 +7,6 @@ import { supabase } from "@/lib/supabase";
 type Row = {
   user_id: string;
   username: string | null;
-  avatar_url?: string | null;
   streak_days: number | null;
   post_count: number | null;
   comment_count: number | null;
@@ -27,7 +26,7 @@ function norm(r: Row): Item {
   return {
     user_id: r.user_id,
     username: u || "unknown",
-    avatar_url: r.avatar_url ?? null,
+    avatar_url: null,
     streak_days: Number(r.streak_days ?? 0),
     post_count: Number(r.post_count ?? 0),
     comment_count: Number(r.comment_count ?? 0),
@@ -47,25 +46,13 @@ export default function LeaderboardPage() {
     setLoading(true);
     setErr("");
 
-    // Try with avatar_url first
-    let res = await supabase
+    const res = await supabase
       .from("leaderboard")
-      .select("user_id, username, avatar_url, streak_days, post_count, comment_count")
+      .select("user_id, username, streak_days, post_count, comment_count")
       .order("streak_days", { ascending: false })
       .order("comment_count", { ascending: false })
       .order("post_count", { ascending: false })
       .limit(50);
-
-    // If the view/table exists but lacks avatar_url, retry without it.
-    if (res.error && /avatar_url/i.test(res.error.message)) {
-      res = await supabase
-        .from("leaderboard")
-        .select("user_id, username, streak_days, post_count, comment_count")
-        .order("streak_days", { ascending: false })
-        .order("comment_count", { ascending: false })
-        .order("post_count", { ascending: false })
-        .limit(50);
-    }
 
     if (res.error) {
       setErr(res.error.message);
