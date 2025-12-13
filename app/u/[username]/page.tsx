@@ -11,10 +11,14 @@ type Post = {
 };
 
 type Profile = {
-  id: string;
+  id: string; // profiles.id (uuid) == auth.users.id
   username: string;
   avatar_url: string | null;
 };
+
+function isUuidLike(s: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+}
 
 export default async function UserProfilePage({
   params,
@@ -28,7 +32,7 @@ export default async function UserProfilePage({
     .replace(/^@+/, "")
     .trim();
 
-  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawParam);
+  const isUuid = isUuidLike(rawParam);
 
   const cookieStore = await cookies();
 
@@ -40,84 +44,68 @@ export default async function UserProfilePage({
         getAll() {
           return cookieStore.getAll();
         },
-        // In a Server Component we only need read access for this page.
-        // Writing cookies is not required here.
+        // Server Component: read-only cookies is enough here
         setAll() {},
       },
     }
   );
 
-  if (!rawParam) {
-    return (
-      <div className="feed">
-        <div className="header">
-          <div className="headerInner">
-            <div className="brand">フィード</div>
+  const Shell = ({
+    title,
+    subtitle,
+  }: {
+    title: string;
+    subtitle?: string;
+  }) => (
+    <div className="feed">
+      <div className="header">
+        <div className="headerInner">
+          <div className="brand">フィード</div>
+
+          <div className="me">
             <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
               ← Back
             </Link>
-          </div>
-        </div>
-        <div style={{ padding: 16 }}>
-          <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>Profile not found</div>
-          <div className="muted" style={{ marginTop: 6 }}>
-            No existe este usuario.
+
+            <Link
+              href="/leaderboard"
+              className="miniBtn"
+              style={{ marginLeft: 8, textDecoration: "none" }}
+            >
+              Leaderboard
+            </Link>
           </div>
         </div>
       </div>
-    );
+
+      <div style={{ padding: 16 }}>
+        <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>{title}</div>
+        {subtitle ? (
+          <div className="muted" style={{ marginTop: 6 }}>
+            {subtitle}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+
+  if (!rawParam) {
+    return <Shell title="Profile not found" subtitle="No existe este usuario." />;
   }
 
-  // 1) Profile
-  const profileQuery = supabase
-    .from("profiles")
-    .select("id, username, avatar_url");
+  // 1) Load profile
+  const profileQuery = supabase.from("profiles").select("id, username, avatar_url");
 
   const { data: prof, error: profErr } = isUuid
-    ? await profileQuery.eq("id", rawParam).maybeSingle() // uuid matches profiles.id
+    ? await profileQuery.eq("id", rawParam).maybeSingle()
     : await profileQuery.eq("username", normalizedUsername).maybeSingle();
 
   if (profErr) {
-    return (
-      <div className="feed">
-        <div className="header">
-          <div className="headerInner">
-            <div className="brand">フィード</div>
-            <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
-              ← Back
-            </Link>
-          </div>
-        </div>
-        <div style={{ padding: 16 }}>
-          <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>Error loading profile</div>
-          <div className="muted" style={{ marginTop: 6 }}>
-            {String((profErr as any)?.message ?? "Unknown error")}
-          </div>
-        </div>
-      </div>
-    );
+    return <Shell title="Error loading profile" subtitle={String(profErr.message ?? profErr)} />;
   }
 
   if (!prof) {
-    return (
-      <div className="feed">
-        <div className="header">
-          <div className="headerInner">
-            <div className="brand">フィード</div>
-            <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
-              ← Back
-            </Link>
-          </div>
-        </div>
-
-        <div style={{ padding: 16 }}>
-          <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>Profile not found</div>
-          <div className="muted" style={{ marginTop: 6 }}>
-            No existe este usuario.
-          </div>
-        </div>
-      </div>
-    );
+    return <Shell title="Profile not found" subtitle="No existe este usuario." />;
   }
 
   const profile: Profile = {
@@ -127,36 +115,24 @@ export default async function UserProfilePage({
   };
 
   if (!profile.id) {
-    return (
-      <div className="feed">
-        <div className="header">
-          <div className="headerInner">
-            <div className="brand">フィード</div>
-            <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
-              ← Back
-            </Link>
-          </div>
-        </div>
-
-        <div style={{ padding: 16 }}>
-          <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>Profile incomplete</div>
-          <div className="muted" style={{ marginTop: 6 }}>
-            El perfil existe, pero no tiene id.
-          </div>
-        </div>
-      </div>
-    );
+    return <Shell title="Profile incomplete" subtitle="El perfil existe, pero no tiene id." />;
   }
 
   const initial = (profile.username?.[0] || "?").toUpperCase();
-  const profileHref = `/u/${encodeURIComponent(profile.id)}`; // stable internal link
+
+  // Canonical (stable) URL is uuid-based, but keep /u/:username working too.
+  const canonicalHref = `/u/${encodeURIComponent(profile.id)}`;
 
   // 2) Posts
-  const { data: postRows } = await supabase
+  const { data: postRows, error: postsErr } = await supabase
     .from("posts")
     .select("id, content, created_at, user_id, image_url")
     .eq("user_id", profile.id)
     .order("created_at", { ascending: false });
+
+  if (postsErr) {
+    return <Shell title="Error loading posts" subtitle={String(postsErr.message ?? postsErr)} />;
+  }
 
   const posts: Post[] =
     (postRows as any[] | null)?.map((row) => ({
@@ -170,10 +146,13 @@ export default async function UserProfilePage({
   const postCount = posts.length;
 
   // 3) Comment count (best-effort)
-  const { count: commentCount } = await supabase
+  const { count: commentCount, error: commentsErr } = await supabase
     .from("comments")
     .select("id", { count: "exact", head: true })
     .eq("user_id", profile.id);
+
+  // If comment count fails, just show 0 (don’t break the page)
+  const safeCommentCount = commentsErr ? 0 : commentCount ?? 0;
 
   return (
     <div className="feed">
@@ -191,7 +170,7 @@ export default async function UserProfilePage({
               className="miniBtn"
               style={{ marginLeft: 8, textDecoration: "none" }}
             >
-              🏆 Leaderboard
+              Leaderboard
             </Link>
           </div>
         </div>
@@ -210,14 +189,26 @@ export default async function UserProfilePage({
 
           <div className="postMeta">
             <div className="nameRow">
-              <Link href={profileHref} className="handle" style={{ textDecoration: "none" }}>
-                @{profile.username}
+              {/* Do NOT link to itself using canonicalHref unless the route is uuid-only.
+                  Keep it as plain text. */}
+              <span className="handle" style={{ color: "inherit" }}>
+                @{profile.username || "unknown"}
+              </span>
+
+              {/* Optional: quick canonical link */}
+              <Link
+                href={canonicalHref}
+                className="ghostBtn"
+                style={{ marginLeft: 10, textDecoration: "none" }}
+                title="Open canonical profile link"
+              >
+                ID
               </Link>
             </div>
 
             <div className="muted" style={{ fontSize: 12 }}>
               Posts: <span className="muted">{postCount}</span> · Comments:{" "}
-              <span className="muted">{commentCount ?? 0}</span>
+              <span className="muted">{safeCommentCount}</span>
             </div>
           </div>
         </div>
@@ -232,7 +223,7 @@ export default async function UserProfilePage({
         posts.map((p) => (
           <div className="post" key={p.id}>
             <div className="post-header">
-              <Link href={profileHref} className="avatar" style={{ textDecoration: "none" }}>
+              <Link href={canonicalHref} className="avatar" style={{ textDecoration: "none" }}>
                 {profile.avatar_url ? (
                   <img src={profile.avatar_url} alt={profile.username} />
                 ) : (
@@ -242,8 +233,8 @@ export default async function UserProfilePage({
 
               <div className="postMeta">
                 <div className="nameRow">
-                  <Link href={profileHref} className="handle" style={{ textDecoration: "none" }}>
-                    @{profile.username}
+                  <Link href={canonicalHref} className="handle" style={{ textDecoration: "none" }}>
+                    @{profile.username || "unknown"}
                   </Link>
                 </div>
 
