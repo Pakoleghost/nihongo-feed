@@ -140,6 +140,9 @@ export default async function ProfileByIdPage({
       </div>
 
       <div className="post" style={{ marginTop: 12 }}>
+const bio = prof.bio ?? "";
+const level = prof.level ?? "";
+const group = prof.group ?? "";
         <ProfileHeaderClient
   isOwn={isOwn}   // ✅ correct prop name
   profileId={profileId}
