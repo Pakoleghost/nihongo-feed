@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 type Props = {
@@ -29,12 +29,27 @@ export default function ProfileHeaderClient({
   const initial = useMemo(() => (username?.[0] || "?").toUpperCase(), [username]);
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const [bioOpen, setBioOpen] = useState(false);
   const [bioText, setBioText] = useState((bio ?? "").toString());
   const [savingBio, setSavingBio] = useState(false);
 
   const [avatarBusy, setAvatarBusy] = useState(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function onDown(e: MouseEvent) {
+      const el = menuRef.current;
+      if (!el) return;
+      if (el.contains(e.target as Node)) return;
+      setMenuOpen(false);
+    }
+
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [menuOpen]);
 
   const badge = useMemo(() => {
     const v = (level ?? "").toString().trim();
@@ -147,13 +162,27 @@ export default function ProfileHeaderClient({
             </div>
 
             {isMe ? (
-              <div style={{ position: "relative" }}>
+              <div ref={menuRef} style={{ position: "relative" }}>
                 <button
-                  className="miniBtn"
+                  type="button"
                   onClick={() => setMenuOpen((v) => !v)}
                   aria-label="Profile options"
                   title="Options"
-                  style={{ padding: "6px 10px" }}
+                  style={{
+                    width: 38,
+                    height: 38,
+                    display: "grid",
+                    placeItems: "center",
+                    borderRadius: 12,
+                    border: "1px solid rgba(0,0,0,.12)",
+                    background: "rgba(255,255,255,.92)",
+                    color: "#111",
+                    fontSize: 22,
+                    fontWeight: 900,
+                    lineHeight: 1,
+                    cursor: "pointer",
+                    userSelect: "none",
+                  }}
                 >
                   ⋯
                 </button>
@@ -163,7 +192,7 @@ export default function ProfileHeaderClient({
                     style={{
                       position: "absolute",
                       right: 0,
-                      top: 38,
+                      top: 44,
                       zIndex: 50,
                       width: 220,
                       background: "#111",
@@ -174,13 +203,18 @@ export default function ProfileHeaderClient({
                     }}
                   >
                     <button
-                      className="miniBtn"
+                      type="button"
                       style={{
                         width: "100%",
-                        justifyContent: "flex-start",
-                        borderRadius: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "10px 12px",
                         border: 0,
                         background: "transparent",
+                        color: "#fff",
+                        cursor: "pointer",
+                        textAlign: "left",
                       }}
                       onClick={() => setBioOpen(true)}
                     >
@@ -188,13 +222,15 @@ export default function ProfileHeaderClient({
                     </button>
 
                     <label
-                      className="miniBtn"
                       style={{
                         width: "100%",
-                        justifyContent: "flex-start",
-                        borderRadius: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "10px 12px",
                         border: 0,
                         background: "transparent",
+                        color: "#fff",
                         opacity: avatarBusy ? 0.6 : 1,
                         cursor: avatarBusy ? "not-allowed" : "pointer",
                       }}
@@ -214,13 +250,18 @@ export default function ProfileHeaderClient({
                     </label>
 
                     <button
-                      className="miniBtn"
+                      type="button"
                       style={{
                         width: "100%",
-                        justifyContent: "flex-start",
-                        borderRadius: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "10px 12px",
+                        border: 0,
                         borderTop: "1px solid rgba(255,255,255,.08)",
                         background: "transparent",
+                        color: "#fff",
+                        cursor: "pointer",
+                        textAlign: "left",
                       }}
                       onClick={() => setMenuOpen(false)}
                     >

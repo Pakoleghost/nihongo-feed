@@ -76,6 +76,33 @@ a:hover {
   align-items: center;
   gap: 10px;
 }
+.profileMenuBtn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.profileMenu {
+  position: absolute;
+  right: 0;
+  top: 32px;
+  background: #1c1c1c;
+  border-radius: 8px;
+  padding: 6px;
+  z-index: 10;
+}
+
+.profileMenu button {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
 
 .meAvatar{
   width: 30px;
