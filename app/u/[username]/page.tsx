@@ -41,7 +41,7 @@ export default function UserProfilePage() {
   const username = useMemo(() => {
     const raw = (params?.username ?? "").toString();
     return decodeURIComponent(raw).trim().toLowerCase();
-  }, [params]);
+  }, [params?.username]);
 
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -80,15 +80,15 @@ export default function UserProfilePage() {
     setAvatarUrl(prof.avatar_url ?? null);
 
     // 2) posts del usuario
-    const { data: postRows, error: postsErr } = await supabase
+    const { data: postRows, error: postErr } = await supabase
       .from("posts")
       .select("id, content, created_at, user_id, image_url, profiles(username, avatar_url)")
       .eq("user_id", prof.id)
       .order("created_at", { ascending: false });
 
-    if (postsErr) {
+    if (postErr) {
       // si falla esto, no lo marques como notFound. Es otro error.
-      alert(postsErr.message);
+      alert(postErr.message);
       setLoading(false);
       return;
     }
