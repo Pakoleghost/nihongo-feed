@@ -53,8 +53,14 @@ type Comment = {
 
 function normalizeProfile(p: any): { username: string; avatar_url: string | null } {
   const obj = Array.isArray(p) ? p?.[0] : p;
+
+  const raw = (obj?.username ?? "").toString().trim().toLowerCase();
+
+  // si no hay username real, NO generes link
+  const username = raw && raw !== "unknown" ? raw : "";
+
   return {
-    username: (obj?.username ?? "unknown").toString(),
+    username,
     avatar_url: obj?.avatar_url ?? null,
   };
 }
@@ -667,15 +673,41 @@ export default function HomePage() {
           return (
             <div className="post" key={p.id}>
               <div className="post-header">
-                <Link href={`/u/${p.username}`} className="avatar">
-  {p.avatar_url ? <img src={p.avatar_url} alt={p.username} /> : <span>{initial}</span>}
-</Link>
+         const profileHref = p.username ? `/u/${encodeURIComponent(p.username)}` : "";
 
-                <div className="postMeta">
-                  <div className="nameRow">
-<Link href={`/u/${p.username}`} className="handle">
-  @{p.username}
-</Link>                    {canDelete ? (
+{p.username ? (
+  <Link
+    href={profileHref}
+    className="avatar text-inherit no-underline"
+    aria-label={`Open profile ${p.username}`}
+  >
+    {p.avatar_url ? <img src={p.avatar_url} alt={p.username} /> : <span>{initial}</span>}
+  </Link>
+) : (
+  <div className="avatar" aria-label="No profile">
+    {p.avatar_url ? <img src={p.avatar_url} alt="unknown" /> : <span>{initial}</span>}
+  </div>
+)}
+
+<div className="postMeta">
+  <div className="nameRow">
+    {p.username ? (
+      <Link
+        href={profileHref}
+        className="handle text-inherit no-underline hover:underline"
+      >
+        @{p.username}
+      </Link>
+    ) : (
+      <span className="handle muted">@unknown</span>
+    )}
+
+    {canDelete ? (
+      <button className="ghostBtn" onClick={() => deletePost(p.id)} title="Delete">
+        削除
+      </button>
+    ) : null}
+  </div>                 {canDelete ? (
                       <button className="ghostBtn" onClick={() => deletePost(p.id)} title="Delete">
                         削除
                       </button>
