@@ -70,12 +70,12 @@ export default async function UserProfilePage({
 
   // 1) Profile
   const profileQuery = supabase
-  .from("profiles")
-  .select("id, username, avatar_url");
+    .from("profiles")
+    .select("id, username, avatar_url");
 
-const { data: prof, error: profErr } = isUuid
-  ? await profileQuery.eq("id", rawParam).maybeSingle()                // uuid matches profiles.id
-  : await profileQuery.eq("username", normalizedUsername).maybeSingle();
+  const { data: prof, error: profErr } = isUuid
+    ? await profileQuery.eq("id", rawParam).maybeSingle() // uuid matches profiles.id
+    : await profileQuery.eq("username", normalizedUsername).maybeSingle();
 
   if (profErr) {
     return (
@@ -119,42 +119,43 @@ const { data: prof, error: profErr } = isUuid
       </div>
     );
   }
-const profile: Profile = {
-  id: (prof.id ?? "").toString(),
-  username: (prof.username ?? "").toString().trim().toLowerCase(),
-  avatar_url: prof.avatar_url ?? null,
-};
 
-if (!profile.id) {
-  return (
-    <div className="feed">
-      <div className="header">
-        <div className="headerInner">
-          <div className="brand">フィード</div>
-          <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
-            ← Back
-          </Link>
+  const profile: Profile = {
+    id: (prof.id ?? "").toString(),
+    username: (prof.username ?? "").toString().trim().toLowerCase(),
+    avatar_url: prof.avatar_url ?? null,
+  };
+
+  if (!profile.id) {
+    return (
+      <div className="feed">
+        <div className="header">
+          <div className="headerInner">
+            <div className="brand">フィード</div>
+            <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
+              ← Back
+            </Link>
+          </div>
+        </div>
+
+        <div style={{ padding: 16 }}>
+          <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>Profile incomplete</div>
+          <div className="muted" style={{ marginTop: 6 }}>
+            El perfil existe, pero no tiene id.
+          </div>
         </div>
       </div>
+    );
+  }
 
-      <div style={{ padding: 16 }}>
-        <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>Profile incomplete</div>
-        <div className="muted" style={{ marginTop: 6 }}>
-          El perfil existe, pero no tiene id.
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const initial = (profile.username?.[0] || "?").toUpperCase();
-const profileHref = `/u/${encodeURIComponent(profile.id)}`; // stable internal link
+  const initial = (profile.username?.[0] || "?").toUpperCase();
+  const profileHref = `/u/${encodeURIComponent(profile.id)}`; // stable internal link
 
   // 2) Posts
   const { data: postRows } = await supabase
     .from("posts")
     .select("id, content, created_at, user_id, image_url")
-.eq("user_id", profile.id)
+    .eq("user_id", profile.id)
     .order("created_at", { ascending: false });
 
   const posts: Post[] =
@@ -172,7 +173,7 @@ const profileHref = `/u/${encodeURIComponent(profile.id)}`; // stable internal l
   const { count: commentCount } = await supabase
     .from("comments")
     .select("id", { count: "exact", head: true })
-.eq("user_id", profile.id)
+    .eq("user_id", profile.id);
 
   return (
     <div className="feed">
