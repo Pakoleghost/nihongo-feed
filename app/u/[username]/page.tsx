@@ -22,11 +22,14 @@ export default async function UserProfilePage({
 }: {
   params: { username: string };
 }) {
-  const username = decodeURIComponent(params.username || "")
-    .trim()
+  const rawParam = decodeURIComponent(params.username || "").trim();
+
+  const normalizedUsername = rawParam
     .toLowerCase()
     .replace(/^@+/, "")
     .trim();
+
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawParam);
 
   const cookieStore = await cookies();
 
@@ -45,7 +48,7 @@ export default async function UserProfilePage({
     }
   );
 
-  if (!username) {
+  if (!rawParam) {
     return (
       <div className="feed">
         <div className="header">
@@ -67,11 +70,13 @@ export default async function UserProfilePage({
   }
 
   // 1) Profile
-  const { data: prof, error: profErr } = await supabase
+  const profileQuery = supabase
     .from("profiles")
-    .select("id, user_id, username, avatar_url")
-    .eq("username", username)
-    .maybeSingle();
+    .select("id, user_id, username, avatar_url");
+
+  const { data: prof, error: profErr } = isUuid
+    ? await profileQuery.eq("user_id", rawParam).maybeSingle()
+    : await profileQuery.eq("username", normalizedUsername).maybeSingle();
 
   const { count: visibleProfilesCount, error: visibleProfilesErr } = await supabase
     .from("profiles")
@@ -80,7 +85,7 @@ export default async function UserProfilePage({
   const { data: profIlike } = await supabase
     .from("profiles")
     .select("id, user_id, username")
-    .ilike("username", username)
+    .ilike("username", normalizedUsername)
     .maybeSingle();
 
   if (profErr) {
@@ -133,7 +138,7 @@ export default async function UserProfilePage({
                 style={{ marginTop: 12, padding: 10, border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10 }}
               >
                 <div style={{ fontWeight: 700, marginBottom: 6 }}>Debug</div>
-                <div>searched: <span style={{ fontFamily: "monospace" }}>{username}</span></div>
+                <div>searched: <span style={{ fontFamily: "monospace" }}>{isUuid ? rawParam : normalizedUsername}</span></div>
                 <div>profiles visible (count): {visibleProfilesCount ?? "null"}</div>
                 <div>profiles count error: {String((visibleProfilesErr as any)?.message ?? "none")}</div>
                 <div>ilike match found: {profIlike ? "yes" : "no"}</div>
@@ -178,7 +183,7 @@ export default async function UserProfilePage({
 
   const shownUsername = profile.username;
   const initial = (shownUsername?.[0] || "?").toUpperCase();
-  const profileHref = `/u/${encodeURIComponent(shownUsername)}`;
+  const profileHref = `/u/${encodeURIComponent(profile.user_id)}`;
 
   // 2) Posts
   const { data: postRows } = await supabase
