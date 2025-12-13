@@ -62,8 +62,7 @@ export default function UserProfilePage({ params }: { params: { username: string
     const { data: prof, error: profErr } = await supabase
       .from("profiles")
       .select("id, username, avatar_url")
-      .eq("username", u)
-      .single();
+.eq("username", username.toLowerCase())      .single();
 
     if (profErr || !prof?.id) {
       setNotFound(true);
