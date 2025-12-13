@@ -21,7 +21,7 @@ type Post = {
   content: string;
   created_at: string;
   user_id: string;
-  username: string;
+  username: string; // "" si no hay
   avatar_url: string | null;
   image_url: string | null;
   likes: number;
@@ -47,7 +47,7 @@ type Comment = {
   user_id: string;
   content: string;
   created_at: string;
-  username: string;
+  username: string; // "" si no hay
   avatar_url: string | null;
 };
 
@@ -56,7 +56,7 @@ function normalizeProfile(p: any): { username: string; avatar_url: string | null
 
   const raw = (obj?.username ?? "").toString().trim().toLowerCase();
 
-  // si no hay username real, NO generes link
+  // Si no hay username real, NO generes link
   const username = raw && raw !== "unknown" ? raw : "";
 
   return {
@@ -156,13 +156,11 @@ export default function HomePage() {
 
     setMyUsername(u || "unknown");
     setMyAvatarUrl(a);
-    setNeedsUsername(!u); // ✅ only gate if empty username
+    setNeedsUsername(!u); // only gate if empty username
     setCheckingProfile(false);
 
     // load feed once we pass gate
-    if (u) {
-      void loadAll(uid);
-    }
+    if (u) void loadAll(uid);
   }
 
   const normalizedNewUsername = useMemo(() => newUsername.trim().toLowerCase(), [newUsername]);
@@ -182,7 +180,6 @@ export default function HomePage() {
 
     setSaveBusy(true);
 
-    // upsert profile with username
     const { error } = await supabase.from("profiles").upsert({
       id: userId,
       username: normalizedNewUsername,
@@ -249,7 +246,7 @@ export default function HomePage() {
           content: (row.content ?? "").toString(),
           created_at: row.created_at,
           user_id: row.user_id,
-          username: prof.username,
+          username: prof.username, // "" si no hay
           avatar_url: prof.avatar_url,
           image_url: (row as any).image_url ?? null,
           likes: 0,
@@ -261,7 +258,10 @@ export default function HomePage() {
     const postIds = normalized.map((p) => p.id);
 
     if (postIds.length) {
-      const { data: likesData } = await supabase.from("reactions").select("post_id, user_id").in("post_id", postIds);
+      const { data: likesData } = await supabase
+        .from("reactions")
+        .select("post_id, user_id")
+        .in("post_id", postIds);
 
       const likeMap = new Map<string, { count: number; mine: boolean }>();
       for (const pid of postIds) likeMap.set(pid, { count: 0, mine: false });
@@ -322,7 +322,9 @@ export default function HomePage() {
       const ext = (imageFile.name.split(".").pop() || "jpg").toLowerCase();
       const path = `posts/${post.id}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage.from("post-images").upload(path, imageFile, { upsert: true });
+      const { error: uploadError } = await supabase.storage
+        .from("post-images")
+        .upload(path, imageFile, { upsert: true });
 
       if (uploadError) {
         setBusy(false);
@@ -406,7 +408,7 @@ export default function HomePage() {
           user_id: row.user_id,
           content: row.content,
           created_at: row.created_at,
-          username: prof.username,
+          username: prof.username, // "" si no hay
           avatar_url: prof.avatar_url,
         };
       }) ?? [];
@@ -452,7 +454,9 @@ export default function HomePage() {
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
     const path = `avatars/${userId}.${ext}`;
 
-    const { error: uploadError } = await supabase.storage.from("post-images").upload(path, file, { upsert: true });
+    const { error: uploadError } = await supabase.storage
+      .from("post-images")
+      .upload(path, file, { upsert: true });
 
     if (uploadError) {
       setAvatarBusy(false);
@@ -477,9 +481,10 @@ export default function HomePage() {
 
   const headerAvatarInitial = useMemo(() => (myUsername?.[0] || "?").toUpperCase(), [myUsername]);
 
+  const linkStyle: React.CSSProperties = { color: "inherit", textDecoration: "none" };
+
   // --------- SCREENS ---------
 
-  // LOGIN SCREEN
   if (!userId) {
     return (
       <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
@@ -525,20 +530,16 @@ export default function HomePage() {
     );
   }
 
-  // PROFILE CHECK LOADING
   if (checkingProfile) {
     return <div style={{ padding: 24, color: "#777" }}>Loading…</div>;
   }
 
-  // USERNAME SCREEN
   if (needsUsername) {
     return (
       <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
         <div style={{ width: 360, background: "#111", color: "#fff", borderRadius: 16, padding: 18 }}>
           <div style={{ fontSize: 18, fontWeight: 900 }}>Choose a username</div>
-          <div style={{ opacity: 0.7, marginTop: 6, marginBottom: 14, fontSize: 13 }}>
-            This will show on your posts.
-          </div>
+          <div style={{ opacity: 0.7, marginTop: 6, marginBottom: 14, fontSize: 13 }}>This will show on your posts.</div>
 
           <input
             value={newUsername}
@@ -557,7 +558,9 @@ export default function HomePage() {
             autoFocus
           />
 
-          {usernameError ? <div style={{ color: "#ffb4b4", fontSize: 12, marginBottom: 10 }}>{usernameError}</div> : null}
+          {usernameError ? (
+            <div style={{ color: "#ffb4b4", fontSize: 12, marginBottom: 10 }}>{usernameError}</div>
+          ) : null}
 
           <button
             onClick={saveUsername}
@@ -605,9 +608,7 @@ export default function HomePage() {
           <div className="brand">フィード</div>
 
           <div className="me">
-            <div className="meAvatar">
-              {myAvatarUrl ? <img src={myAvatarUrl} alt="me" /> : <span>{headerAvatarInitial}</span>}
-            </div>
+            <div className="meAvatar">{myAvatarUrl ? <img src={myAvatarUrl} alt="me" /> : <span>{headerAvatarInitial}</span>}</div>
 
             <label className={`miniBtn ${avatarBusy ? "disabled" : ""}`}>
               {avatarBusy ? "…" : "写真"}
@@ -645,13 +646,7 @@ export default function HomePage() {
         </div>
 
         <div className="fileRow">
-          <input
-            id="image"
-            className="fileInput"
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-          />
+          <input id="image" className="fileInput" type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
 
           <label className="fileBtn" htmlFor="image">
             画像
@@ -669,50 +664,38 @@ export default function HomePage() {
         posts.map((p) => {
           const initial = (p.username?.[0] || "?").toUpperCase();
           const canDelete = !!userId && p.user_id === userId;
+          const profileHref = p.username ? `/u/${encodeURIComponent(p.username)}` : "";
 
           return (
             <div className="post" key={p.id}>
               <div className="post-header">
-         const profileHref = p.username ? `/u/${encodeURIComponent(p.username)}` : "";
+                {p.username ? (
+                  <Link href={profileHref} className="avatar" style={linkStyle} aria-label={`Open profile ${p.username}`}>
+                    {p.avatar_url ? <img src={p.avatar_url} alt={p.username} /> : <span>{initial}</span>}
+                  </Link>
+                ) : (
+                  <div className="avatar" aria-label="No profile">
+                    {p.avatar_url ? <img src={p.avatar_url} alt="unknown" /> : <span>{initial}</span>}
+                  </div>
+                )}
 
-{p.username ? (
-  <Link
-    href={profileHref}
-    className="avatar text-inherit no-underline"
-    aria-label={`Open profile ${p.username}`}
-  >
-    {p.avatar_url ? <img src={p.avatar_url} alt={p.username} /> : <span>{initial}</span>}
-  </Link>
-) : (
-  <div className="avatar" aria-label="No profile">
-    {p.avatar_url ? <img src={p.avatar_url} alt="unknown" /> : <span>{initial}</span>}
-  </div>
-)}
+                <div className="postMeta">
+                  <div className="nameRow">
+                    {p.username ? (
+                      <Link href={profileHref} className="handle" style={linkStyle}>
+                        @{p.username}
+                      </Link>
+                    ) : (
+                      <span className="handle muted">@unknown</span>
+                    )}
 
-<div className="postMeta">
-  <div className="nameRow">
-    {p.username ? (
-      <Link
-        href={profileHref}
-        className="handle text-inherit no-underline hover:underline"
-      >
-        @{p.username}
-      </Link>
-    ) : (
-      <span className="handle muted">@unknown</span>
-    )}
-
-    {canDelete ? (
-      <button className="ghostBtn" onClick={() => deletePost(p.id)} title="Delete">
-        削除
-      </button>
-    ) : null}
-  </div>                 {canDelete ? (
+                    {canDelete ? (
                       <button className="ghostBtn" onClick={() => deletePost(p.id)} title="Delete">
                         削除
                       </button>
                     ) : null}
                   </div>
+
                   <div className="muted" style={{ fontSize: 12 }}>
                     {new Date(p.created_at).toLocaleString()}
                   </div>
@@ -751,14 +734,31 @@ export default function HomePage() {
                     ) : (
                       (commentsByPost[p.id] ?? []).map((c) => {
                         const ci = (c.username?.[0] || "?").toUpperCase();
+                        const cProfileHref = c.username ? `/u/${encodeURIComponent(c.username)}` : "";
+
                         return (
                           <div key={c.id} className="comment">
-                            <div className="cAvatar">
-                              {c.avatar_url ? <img src={c.avatar_url} alt={c.username} /> : <span>{ci}</span>}
-                            </div>
+                            {c.username ? (
+                              <Link href={cProfileHref} className="cAvatar" style={linkStyle} aria-label={`Open profile ${c.username}`}>
+                                {c.avatar_url ? <img src={c.avatar_url} alt={c.username} /> : <span>{ci}</span>}
+                              </Link>
+                            ) : (
+                              <div className="cAvatar">
+                                {c.avatar_url ? <img src={c.avatar_url} alt="unknown" /> : <span>{ci}</span>}
+                              </div>
+                            )}
+
                             <div className="cBody">
                               <div className="cTop">
-                                <div className="cUser">@{c.username}</div>
+                                <div className="cUser">
+                                  {c.username ? (
+                                    <Link href={cProfileHref} style={linkStyle}>
+                                      @{c.username}
+                                    </Link>
+                                  ) : (
+                                    "@unknown"
+                                  )}
+                                </div>
                                 <div className="muted" style={{ fontSize: 11 }}>
                                   {new Date(c.created_at).toLocaleString()}
                                 </div>
@@ -778,11 +778,7 @@ export default function HomePage() {
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                     />
-                    <button
-                      className="miniPost"
-                      disabled={commentBusy || !commentText.trim()}
-                      onClick={() => void addComment(p.id)}
-                    >
+                    <button className="miniPost" disabled={commentBusy || !commentText.trim()} onClick={() => void addComment(p.id)}>
                       {commentBusy ? "…" : "送信"}
                     </button>
                   </div>
