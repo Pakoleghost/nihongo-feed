@@ -4,42 +4,31 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-type DbPostRow = {
-  id: string;
-  content: string | null;
-  created_at: string;
-  user_id: string;
-  image_url?: string | null;
-  profiles:
-    | { username: string | null; avatar_url: string | null }
-    | { username: string | null; avatar_url: string | null }[]
-    | null;
-};
-
 type Post = {
   id: string;
   content: string;
   created_at: string;
   user_id: string;
-  username: string;
-  avatar_url: string | null;
   image_url: string | null;
 };
 
-function normalizeProfile(p: any): { username: string; avatar_url: string | null } {
-  const obj = Array.isArray(p) ? p?.[0] : p;
-  const raw = (obj?.username ?? "").toString().trim().toLowerCase();
-  const username = raw && raw !== "unknown" ? raw : "";
-  return { username, avatar_url: obj?.avatar_url ?? null };
-}
+type Profile = {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+};
 
 export default function UserProfilePage({ params }: { params: { username: string } }) {
-  const username = useMemo(() => decodeURIComponent(params.username || "").trim().toLowerCase(), [params.username]);
+  const username = useMemo(
+    () => decodeURIComponent(params.username || "").trim().toLowerCase(),
+    [params.username]
+  );
 
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [rlsBlocked, setRlsBlocked] = useState(false);
 
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [postCount, setPostCount] = useState<number>(0);
   const [commentCount, setCommentCount] = useState<number>(0);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -57,70 +46,118 @@ export default function UserProfilePage({ params }: { params: { username: string
   async function loadProfile(u: string) {
     setLoading(true);
     setNotFound(false);
+    setRlsBlocked(false);
+    setProfile(null);
+    setPosts([]);
+    setPostCount(0);
+    setCommentCount(0);
 
-    // 1) perfil por username (case-insensitive)
+    // 1) Fetch profile by exact username (lowercase). Use maybeSingle to avoid hard-fail.
     const { data: prof, error: profErr } = await supabase
       .from("profiles")
       .select("id, username, avatar_url")
-      .ilike("username", u)
-      .limit(1)
-      .single();
+      .eq("username", u)
+      .maybeSingle();
 
-    if (profErr || !prof?.id) {
+    if (profErr) {
       console.error("profile lookup error:", profErr);
+
+      // If RLS blocks, Supabase typically returns 401/403-like behavior or permission error text.
+      const msg = (profErr as any)?.message?.toString?.() ?? "";
+      if (msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("rls")) {
+        setRlsBlocked(true);
+      } else {
+        // Unknown error: still show not found screen, but log already printed.
+        setNotFound(true);
+      }
+
+      setLoading(false);
+      return;
+    }
+
+    if (!prof?.id) {
+      // Clean "not found" (0 rows)
       setNotFound(true);
       setLoading(false);
       return;
     }
 
-    setAvatarUrl(prof.avatar_url ?? null);
+    const normalizedProfile: Profile = {
+      id: prof.id,
+      username: (prof.username ?? "").toString().trim().toLowerCase(),
+      avatar_url: prof.avatar_url ?? null,
+    };
 
-    // 2) posts del usuario (misma forma que el feed)
+    setProfile(normalizedProfile);
+
+    // 2) Fetch posts by user id. DO NOT embed profiles here (avoids RLS join/null issues).
     const { data: postRows, error: postErr } = await supabase
       .from("posts")
-      .select("id, content, created_at, user_id, image_url, profiles(username, avatar_url)")
-      .eq("user_id", prof.id)
+      .select("id, content, created_at, user_id, image_url")
+      .eq("user_id", normalizedProfile.id)
       .order("created_at", { ascending: false });
 
     if (postErr) console.error("posts error:", postErr);
 
     const normalizedPosts: Post[] =
-      (postRows as unknown as DbPostRow[] | null)?.map((row) => {
-        const p = normalizeProfile(row.profiles as any);
-        return {
-          id: row.id,
-          content: (row.content ?? "").toString(),
-          created_at: row.created_at,
-          user_id: row.user_id,
-          username: p.username || u,
-          avatar_url: p.avatar_url ?? null,
-          image_url: (row as any).image_url ?? null,
-        };
-      }) ?? [];
+      (postRows as any[] | null)?.map((row) => ({
+        id: row.id,
+        content: (row.content ?? "").toString(),
+        created_at: row.created_at,
+        user_id: row.user_id,
+        image_url: row.image_url ?? null,
+      })) ?? [];
 
     setPosts(normalizedPosts);
     setPostCount(normalizedPosts.length);
 
-    // 3) conteo de comentarios
+    // 3) Count comments (ok if blocked, we keep page usable)
     const { count, error: cErr } = await supabase
       .from("comments")
       .select("id", { count: "exact", head: true })
-      .eq("user_id", prof.id);
+      .eq("user_id", normalizedProfile.id);
 
     if (cErr) console.error("comments count error:", cErr);
-
     setCommentCount(count ?? 0);
+
     setLoading(false);
   }
 
-  const initial = (username?.[0] || "?").toUpperCase();
-  const profileHref = username ? `/u/${encodeURIComponent(username)}` : "";
+  const shownUsername = profile?.username || username;
+  const initial = (shownUsername?.[0] || "?").toUpperCase();
+  const profileHref = shownUsername ? `/u/${encodeURIComponent(shownUsername)}` : "";
 
   if (loading) {
-    return <div style={{ padding: 16 }} className="muted">Loading…</div>;
+    return (
+      <div style={{ padding: 16 }} className="muted">
+        Loading…
+      </div>
+    );
   }
 
-  if (notFound) {
+  if (rlsBlocked) {
+    return (
+      <div className="feed">
+        <div className="header">
+          <div className="headerInner">
+            <div className="brand">フィード</div>
+            <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
+              ← Back
+            </Link>
+          </div>
+        </div>
+
+        <div style={{ padding: 16 }}>
+          <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>No access</div>
+          <div className="muted" style={{ marginTop: 6 }}>
+            No tienes permisos para ver este perfil (RLS).
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (notFound || !profile) {
     return (
       <div className="feed">
         <div className="header">
@@ -134,7 +171,9 @@ export default function UserProfilePage({ params }: { params: { username: string
 
         <div style={{ padding: 16 }}>
           <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>Profile not found</div>
-          <div className="muted" style={{ marginTop: 6 }}>No existe o no tienes permisos (RLS).</div>
+          <div className="muted" style={{ marginTop: 6 }}>
+            No existe este usuario.
+          </div>
         </div>
       </div>
     );
@@ -158,17 +197,17 @@ export default function UserProfilePage({ params }: { params: { username: string
         </div>
       </div>
 
-      {/* “Header” de perfil con mismas piezas del feed */}
+      {/* Profile header */}
       <div className="post" style={{ marginTop: 12 }}>
         <div className="post-header">
           <div className="avatar" aria-label="Profile avatar">
-            {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{initial}</span>}
+            {profile.avatar_url ? <img src={profile.avatar_url} alt={profile.username} /> : <span>{initial}</span>}
           </div>
 
           <div className="postMeta">
             <div className="nameRow">
               <Link href={profileHref} className="handle" style={{ textDecoration: "none" }}>
-                @{username}
+                @{profile.username}
               </Link>
             </div>
 
@@ -179,43 +218,41 @@ export default function UserProfilePage({ params }: { params: { username: string
         </div>
       </div>
 
-      {/* Lista de posts, mismas cards que feed */}
+      {/* Posts list */}
       {posts.length === 0 ? (
-        <div style={{ padding: 16 }} className="muted">No posts yet.</div>
+        <div style={{ padding: 16 }} className="muted">
+          No posts yet.
+        </div>
       ) : (
-        posts.map((p) => {
-          const pi = (p.username?.[0] || "?").toUpperCase();
+        posts.map((p) => (
+          <div className="post" key={p.id}>
+            <div className="post-header">
+              <Link href={profileHref} className="avatar" style={{ textDecoration: "none" }}>
+                {profile.avatar_url ? <img src={profile.avatar_url} alt={profile.username} /> : <span>{initial}</span>}
+              </Link>
 
-          return (
-            <div className="post" key={p.id}>
-              <div className="post-header">
-                <Link href={profileHref} className="avatar" style={{ textDecoration: "none" }}>
-                  {p.avatar_url ? <img src={p.avatar_url} alt={p.username} /> : <span>{pi}</span>}
-                </Link>
+              <div className="postMeta">
+                <div className="nameRow">
+                  <Link href={profileHref} className="handle" style={{ textDecoration: "none" }}>
+                    @{profile.username}
+                  </Link>
+                </div>
 
-                <div className="postMeta">
-                  <div className="nameRow">
-                    <Link href={profileHref} className="handle" style={{ textDecoration: "none" }}>
-                      @{p.username}
-                    </Link>
-                  </div>
-
-                  <div className="muted" style={{ fontSize: 12 }}>
-                    {new Date(p.created_at).toLocaleString()}
-                  </div>
+                <div className="muted" style={{ fontSize: 12 }}>
+                  {new Date(p.created_at).toLocaleString()}
                 </div>
               </div>
-
-              {p.content ? <div className="post-content">{p.content}</div> : null}
-
-              {p.image_url ? (
-                <div style={{ padding: "0 12px 12px" }}>
-                  <img src={p.image_url} alt="post" className="postImage" />
-                </div>
-              ) : null}
             </div>
-          );
-        })
+
+            {p.content ? <div className="post-content">{p.content}</div> : null}
+
+            {p.image_url ? (
+              <div style={{ padding: "0 12px 12px" }}>
+                <img src={p.image_url} alt="post" className="postImage" />
+              </div>
+            ) : null}
+          </div>
+        ))
       )}
     </div>
   );
