@@ -23,9 +23,10 @@ type ProfileRow = {
 export default async function ProfileByIdPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const rawId = decodeURIComponent(params.id || "").trim();
+  const { id } = await params;
+  const rawId = decodeURIComponent(id || "").trim();
 
   const cookieStore = await cookies();
 
