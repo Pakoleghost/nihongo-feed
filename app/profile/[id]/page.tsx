@@ -136,18 +136,17 @@ export default async function ProfileByIdPage(props: { params: { id?: string } }
         </div>
       </div>
 
-      <ProfileHeaderClient
-        isMe={isMe}
-        profileId={profile.id}
-        username={profile.username || "unknown"}
-        avatarUrl={profile.avatar_url}
-        bannerUrl={profile.banner_url}
-        bio={profile.bio}
-        level={profile.level}
-        group={profile.group}
-        postCount={posts.length}
-        commentCount={commentCount ?? 0}
-      />
+<ProfileHeaderClient
+  isMe={isMe}
+  profileId={profile.id}
+  username={profile.username}
+  avatarUrl={profile.avatar_url}
+  bio={profile.bio}
+  level={profile.level}
+  group={profile.group}
+  postCount={posts.length}
+  commentCount={commentCount ?? 0}
+/>
 
       {/* Posts list */}
       {posts.length === 0 ? (
