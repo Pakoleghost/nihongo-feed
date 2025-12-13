@@ -119,6 +119,10 @@ export default async function ProfileByIdPage({
     .select("id", { count: "exact", head: true })
     .eq("user_id", profileId);
 
+  const bio = prof.bio ?? "";
+  const level = prof.level ?? "";
+  const group = prof.group ?? "";
+
   return (
     <div className="feed">
       <div className="header">
@@ -140,20 +144,17 @@ export default async function ProfileByIdPage({
       </div>
 
       <div className="post" style={{ marginTop: 12 }}>
-const bio = prof.bio ?? "";
-const level = prof.level ?? "";
-const group = prof.group ?? "";
         <ProfileHeaderClient
-  isOwn={isOwn}   // ✅ correct prop name
-  profileId={profileId}
-  username={username}
-  avatarUrl={avatarUrl}
-  bio={bio}
-  level={level}
-  group={group}
-  postCount={posts.length}
-  commentCount={commentCount ?? 0}
-/>
+          isOwn={isOwn}   // ✅ correct prop name
+          profileId={profileId}
+          username={username}
+          avatarUrl={avatarUrl}
+          bio={bio}
+          level={level}
+          group={group}
+          postCount={posts.length}
+          commentCount={commentCount ?? 0}
+        />
       </div>
 
       {posts.length === 0 ? (
