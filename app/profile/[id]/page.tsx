@@ -141,16 +141,16 @@ export default async function ProfileByIdPage({
 
       <div className="post" style={{ marginTop: 12 }}>
         <ProfileHeaderClient
-          isOwn={isOwn}
-          profileId={profileId}
-          username={username}
-          avatarUrl={avatarUrl}
-          bio={(prof.bio ?? "").toString().trim()}
-          level={(prof.level ?? "").toString().trim()}
-          group={(prof.group ?? "").toString().trim()}
-          postCount={posts.length}
-          commentCount={commentCount ?? 0}
-        />
+  isOwn={isOwn}   // ✅ correct prop name
+  profileId={profileId}
+  username={username}
+  avatarUrl={avatarUrl}
+  bio={bio}
+  level={level}
+  group={group}
+  postCount={posts.length}
+  commentCount={commentCount ?? 0}
+/>
       </div>
 
       {posts.length === 0 ? (
