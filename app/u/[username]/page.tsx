@@ -1,8 +1,6 @@
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { cookies } from "next/headers";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
 type Post = {
   id: string;
@@ -13,129 +11,25 @@ type Post = {
 };
 
 type Profile = {
-  id: string;
+  user_id: string;
   username: string;
   avatar_url: string | null;
 };
 
-export default function UserProfilePage({ params }: { params: { username: string } }) {
-  const username = useMemo(
-    () => decodeURIComponent(params.username || "").trim().toLowerCase(),
-    [params.username]
-  );
+export default async function UserProfilePage({
+  params,
+}: {
+  params: { username: string };
+}) {
+  const username = decodeURIComponent(params.username || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^@+/, "")
+    .trim();
 
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-  const [rlsBlocked, setRlsBlocked] = useState(false);
+  const supabase = createServerComponentClient({ cookies });
 
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [postCount, setPostCount] = useState<number>(0);
-  const [commentCount, setCommentCount] = useState<number>(0);
-  const [posts, setPosts] = useState<Post[]>([]);
-
-  useEffect(() => {
-    if (!username) {
-      setNotFound(true);
-      setLoading(false);
-      return;
-    }
-    void loadProfile(username);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [username]);
-
-  async function loadProfile(u: string) {
-    setLoading(true);
-    setNotFound(false);
-    setRlsBlocked(false);
-    setProfile(null);
-    setPosts([]);
-    setPostCount(0);
-    setCommentCount(0);
-
-    // 1) Fetch profile by exact username (lowercase). Use maybeSingle to avoid hard-fail.
-    const { data: prof, error: profErr } = await supabase
-      .from("profiles")
-      .select("id, username, avatar_url")
-      .eq("username", u)
-      .maybeSingle();
-
-    if (profErr) {
-      console.error("profile lookup error:", profErr);
-
-      // If RLS blocks, Supabase typically returns 401/403-like behavior or permission error text.
-      const msg = (profErr as any)?.message?.toString?.() ?? "";
-      if (msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("rls")) {
-        setRlsBlocked(true);
-      } else {
-        // Unknown error: still show not found screen, but log already printed.
-        setNotFound(true);
-      }
-
-      setLoading(false);
-      return;
-    }
-
-    if (!prof?.id) {
-      // Clean "not found" (0 rows)
-      setNotFound(true);
-      setLoading(false);
-      return;
-    }
-
-    const normalizedProfile: Profile = {
-      id: prof.id,
-      username: (prof.username ?? "").toString().trim().toLowerCase(),
-      avatar_url: prof.avatar_url ?? null,
-    };
-
-    setProfile(normalizedProfile);
-
-    // 2) Fetch posts by user id. DO NOT embed profiles here (avoids RLS join/null issues).
-    const { data: postRows, error: postErr } = await supabase
-      .from("posts")
-      .select("id, content, created_at, user_id, image_url")
-      .eq("user_id", normalizedProfile.id)
-      .order("created_at", { ascending: false });
-
-    if (postErr) console.error("posts error:", postErr);
-
-    const normalizedPosts: Post[] =
-      (postRows as any[] | null)?.map((row) => ({
-        id: row.id,
-        content: (row.content ?? "").toString(),
-        created_at: row.created_at,
-        user_id: row.user_id,
-        image_url: row.image_url ?? null,
-      })) ?? [];
-
-    setPosts(normalizedPosts);
-    setPostCount(normalizedPosts.length);
-
-    // 3) Count comments (ok if blocked, we keep page usable)
-    const { count, error: cErr } = await supabase
-      .from("comments")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", normalizedProfile.id);
-
-    if (cErr) console.error("comments count error:", cErr);
-    setCommentCount(count ?? 0);
-
-    setLoading(false);
-  }
-
-  const shownUsername = profile?.username || username;
-  const initial = (shownUsername?.[0] || "?").toUpperCase();
-  const profileHref = shownUsername ? `/u/${encodeURIComponent(shownUsername)}` : "";
-
-  if (loading) {
-    return (
-      <div style={{ padding: 16 }} className="muted">
-        Loading…
-      </div>
-    );
-  }
-
-  if (rlsBlocked) {
+  if (!username) {
     return (
       <div className="feed">
         <div className="header">
@@ -146,18 +40,45 @@ export default function UserProfilePage({ params }: { params: { username: string
             </Link>
           </div>
         </div>
-
         <div style={{ padding: 16 }}>
-          <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>No access</div>
+          <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>Profile not found</div>
           <div className="muted" style={{ marginTop: 6 }}>
-            No tienes permisos para ver este perfil (RLS).
+            No existe este usuario.
           </div>
         </div>
       </div>
     );
   }
 
-  if (notFound || !profile) {
+  // 1) Profile
+  const { data: prof, error: profErr } = await supabase
+    .from("profiles")
+    .select("user_id, username, avatar_url")
+    .eq("username", username)
+    .maybeSingle();
+
+  if (profErr) {
+    return (
+      <div className="feed">
+        <div className="header">
+          <div className="headerInner">
+            <div className="brand">フィード</div>
+            <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
+              ← Back
+            </Link>
+          </div>
+        </div>
+        <div style={{ padding: 16 }}>
+          <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>Error loading profile</div>
+          <div className="muted" style={{ marginTop: 6 }}>
+            {String((profErr as any)?.message ?? "Unknown error")}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!prof?.user_id) {
     return (
       <div className="feed">
         <div className="header">
@@ -179,6 +100,40 @@ export default function UserProfilePage({ params }: { params: { username: string
     );
   }
 
+  const profile: Profile = {
+    user_id: prof.user_id,
+    username: (prof.username ?? "").toString().trim().toLowerCase(),
+    avatar_url: prof.avatar_url ?? null,
+  };
+
+  const shownUsername = profile.username;
+  const initial = (shownUsername?.[0] || "?").toUpperCase();
+  const profileHref = `/u/${encodeURIComponent(shownUsername)}`;
+
+  // 2) Posts
+  const { data: postRows } = await supabase
+    .from("posts")
+    .select("id, content, created_at, user_id, image_url")
+    .eq("user_id", profile.user_id)
+    .order("created_at", { ascending: false });
+
+  const posts: Post[] =
+    (postRows as any[] | null)?.map((row) => ({
+      id: row.id,
+      content: (row.content ?? "").toString(),
+      created_at: row.created_at,
+      user_id: row.user_id,
+      image_url: row.image_url ?? null,
+    })) ?? [];
+
+  const postCount = posts.length;
+
+  // 3) Comment count (best-effort)
+  const { count: commentCount } = await supabase
+    .from("comments")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", profile.user_id);
+
   return (
     <div className="feed">
       <div className="header">
@@ -190,7 +145,11 @@ export default function UserProfilePage({ params }: { params: { username: string
               ← Back
             </Link>
 
-            <Link href="/leaderboard" className="miniBtn" style={{ marginLeft: 8, textDecoration: "none" }}>
+            <Link
+              href="/leaderboard"
+              className="miniBtn"
+              style={{ marginLeft: 8, textDecoration: "none" }}
+            >
               🏆 Leaderboard
             </Link>
           </div>
@@ -201,7 +160,11 @@ export default function UserProfilePage({ params }: { params: { username: string
       <div className="post" style={{ marginTop: 12 }}>
         <div className="post-header">
           <div className="avatar" aria-label="Profile avatar">
-            {profile.avatar_url ? <img src={profile.avatar_url} alt={profile.username} /> : <span>{initial}</span>}
+            {profile.avatar_url ? (
+              <img src={profile.avatar_url} alt={profile.username} />
+            ) : (
+              <span>{initial}</span>
+            )}
           </div>
 
           <div className="postMeta">
@@ -212,7 +175,8 @@ export default function UserProfilePage({ params }: { params: { username: string
             </div>
 
             <div className="muted" style={{ fontSize: 12 }}>
-              Posts: <span className="muted">{postCount}</span> · Comments: <span className="muted">{commentCount}</span>
+              Posts: <span className="muted">{postCount}</span> · Comments:{" "}
+              <span className="muted">{commentCount ?? 0}</span>
             </div>
           </div>
         </div>
@@ -228,7 +192,11 @@ export default function UserProfilePage({ params }: { params: { username: string
           <div className="post" key={p.id}>
             <div className="post-header">
               <Link href={profileHref} className="avatar" style={{ textDecoration: "none" }}>
-                {profile.avatar_url ? <img src={profile.avatar_url} alt={profile.username} /> : <span>{initial}</span>}
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} alt={profile.username} />
+                ) : (
+                  <span>{initial}</span>
+                )}
               </Link>
 
               <div className="postMeta">
