@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 type Row = {
   user_id: string;
   username: string | null;
-  avatar_url: string | null;
+  avatar_url?: string | null;
   streak_days: number | null;
   post_count: number | null;
   comment_count: number | null;
@@ -47,7 +47,8 @@ export default function LeaderboardPage() {
     setLoading(true);
     setErr("");
 
-    const { data, error } = await supabase
+    // Try with avatar_url first
+    let res = await supabase
       .from("leaderboard")
       .select("user_id, username, avatar_url, streak_days, post_count, comment_count")
       .order("streak_days", { ascending: false })
@@ -55,14 +56,25 @@ export default function LeaderboardPage() {
       .order("post_count", { ascending: false })
       .limit(50);
 
-    if (error) {
-      setErr(error.message);
+    // If the view/table exists but lacks avatar_url, retry without it.
+    if (res.error && /avatar_url/i.test(res.error.message)) {
+      res = await supabase
+        .from("leaderboard")
+        .select("user_id, username, streak_days, post_count, comment_count")
+        .order("streak_days", { ascending: false })
+        .order("comment_count", { ascending: false })
+        .order("post_count", { ascending: false })
+        .limit(50);
+    }
+
+    if (res.error) {
+      setErr(res.error.message);
       setItems([]);
       setLoading(false);
       return;
     }
 
-    setItems((data as Row[]).map(norm));
+    setItems(((res.data ?? []) as Row[]).map(norm));
     setLoading(false);
   }
 
@@ -84,7 +96,7 @@ export default function LeaderboardPage() {
         <div className="post-header">
           <div className="postMeta">
             <div className="nameRow" style={{ alignItems: "baseline" }}>
-              <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>🏆 Leaderboard</div>
+              <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>Leaderboard</div>
               <div className="muted" style={{ marginLeft: 10, fontSize: 12 }}>
                 Streak hasta hoy · Comments · Posts
               </div>
@@ -110,11 +122,7 @@ export default function LeaderboardPage() {
         <div style={{ padding: 16 }} className="muted">No data.</div>
       ) : (
         items.map((x, idx) => {
-          const href = x.user_id
-            ? `/u/${encodeURIComponent(x.user_id)}`
-            : x.username && x.username !== "unknown"
-            ? `/u/${encodeURIComponent(x.username)}`
-            : "";
+          const href = x.user_id ? `/profile/${encodeURIComponent(x.user_id)}` : "";
           const initial = (x.username?.[0] || "?").toUpperCase();
 
           return (
