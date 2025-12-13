@@ -671,7 +671,7 @@ export default function HomePage() {
           const initial = (p.username?.[0] || "?").toUpperCase();
           const canDelete = !!userId && p.user_id === userId;
           // Link posts and avatars using the user_id rather than the username to ensure stable routing.
-          const profileHref = p.user_id ? `/u/${encodeURIComponent(p.user_id)}` : "";
+          const profileHref = p.user_id ? `/profile/${encodeURIComponent(p.user_id)}` : "";
 
           return (
             <div className="post" key={p.id}>
@@ -742,7 +742,7 @@ export default function HomePage() {
                       (commentsByPost[p.id] ?? []).map((c) => {
                         const ci = (c.username?.[0] || "?").toUpperCase();
                         // Use comment author's user_id for profile links, falling back to empty string if missing
-                        const cProfileHref = c.user_id ? `/u/${encodeURIComponent(c.user_id)}` : "";
+                        const cProfileHref = c.user_id ? `/profile/${encodeURIComponent(c.user_id)}` : "";
 
                         return (
                           <div key={c.id} className="comment">
