@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs/server";
+import { createServerClient } from "@supabase/ssr";
 
 type Post = {
   id: string;
@@ -27,7 +27,22 @@ export default async function UserProfilePage({
     .replace(/^@+/, "")
     .trim();
 
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = cookies();
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        // In a Server Component we only need read access for this page.
+        // Writing cookies is not required here.
+        setAll() {},
+      },
+    }
+  );
 
   if (!username) {
     return (
