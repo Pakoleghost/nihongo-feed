@@ -72,6 +72,16 @@ export default async function UserProfilePage({
     .eq("username", username)
     .maybeSingle();
 
+  const { count: visibleProfilesCount, error: visibleProfilesErr } = await supabase
+    .from("profiles")
+    .select("id", { count: "exact", head: true });
+
+  const { data: profIlike } = await supabase
+    .from("profiles")
+    .select("id, user_id, username")
+    .ilike("username", username)
+    .maybeSingle();
+
   if (profErr) {
     return (
       <div className="feed">
@@ -110,6 +120,26 @@ export default async function UserProfilePage({
           <div className="muted" style={{ marginTop: 6 }}>
             No existe este usuario.
           </div>
+
+          {/* TEMP DEBUG */}
+          {(() => {
+            // Quick visibility check: can this request see any profiles at all?
+            // If count is 0 for everyone, it's RLS/grants.
+            // If count > 0 but this username doesn't match, it's data/mismatch.
+            return (
+              <div
+                className="muted"
+                style={{ marginTop: 12, padding: 10, border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10 }}
+              >
+                <div style={{ fontWeight: 700, marginBottom: 6 }}>Debug</div>
+                <div>searched: <span style={{ fontFamily: "monospace" }}>{username}</span></div>
+                <div>profiles visible (count): {visibleProfilesCount ?? "null"}</div>
+                <div>profiles count error: {String((visibleProfilesErr as any)?.message ?? "none")}</div>
+                <div>ilike match found: {profIlike ? "yes" : "no"}</div>
+                <div>profile error: {String((profErr as any)?.message ?? "none")}</div>
+              </div>
+            );
+          })()}
         </div>
       </div>
     );
