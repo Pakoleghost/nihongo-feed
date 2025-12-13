@@ -68,7 +68,7 @@ export default async function UserProfilePage({
   // 1) Profile
   const { data: prof, error: profErr } = await supabase
     .from("profiles")
-    .select("user_id, username, avatar_url")
+    .select("id, user_id, username, avatar_url")
     .eq("username", username)
     .maybeSingle();
 
@@ -93,7 +93,7 @@ export default async function UserProfilePage({
     );
   }
 
-  if (!prof?.user_id) {
+  if (!prof) {
     return (
       <div className="feed">
         <div className="header">
@@ -115,11 +115,35 @@ export default async function UserProfilePage({
     );
   }
 
+  const profileUserId = (prof.user_id ?? (prof as any).id ?? "").toString();
+
   const profile: Profile = {
-    user_id: prof.user_id,
+    user_id: profileUserId,
     username: (prof.username ?? "").toString().trim().toLowerCase(),
     avatar_url: prof.avatar_url ?? null,
   };
+
+  if (!profile.user_id) {
+    return (
+      <div className="feed">
+        <div className="header">
+          <div className="headerInner">
+            <div className="brand">フィード</div>
+            <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
+              ← Back
+            </Link>
+          </div>
+        </div>
+
+        <div style={{ padding: 16 }}>
+          <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>Profile incomplete</div>
+          <div className="muted" style={{ marginTop: 6 }}>
+            El perfil existe, pero no tiene user_id. Revisa la fila en la tabla profiles.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const shownUsername = profile.username;
   const initial = (shownUsername?.[0] || "?").toUpperCase();
