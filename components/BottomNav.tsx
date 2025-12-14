@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 type Item = {
   key: string;
@@ -20,6 +20,7 @@ export default function BottomNav({
   profileInitial?: string;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
 
   const items: Item[] = [
     { key: "home", href: "/", label: "Home", icon: "🏠" },
@@ -61,61 +62,127 @@ export default function BottomNav({
         {items.map((it) => {
           const active = isActive(it.href);
           return (
-            <Link
-              key={it.key}
-              href={it.href}
-              style={{
-                textDecoration: "none",
-                color: active ? "#111114" : "rgba(17,17,20,.55)",
-              }}
-              title={it.label}
-            >
-              <div
-                style={{
-                  height: 44,
-                  borderRadius: 14,
-                  display: "grid",
-                  placeItems: "center",
-                  border: active
-                    ? "1px solid rgba(17,17,20,.14)"
-                    : "1px solid rgba(17,17,20,.08)",
-                  background: active ? "rgba(17,17,20,.04)" : "rgba(17,17,20,.02)",
-                  fontWeight: 800,
-                  letterSpacing: 0.5,
-                }}
-              >
-                {it.key === "me" ? (
-                  profileAvatarUrl ? (
-                    <img
-                      src={profileAvatarUrl}
-                      alt="Profile"
-                      style={{ width: 22, height: 22, borderRadius: 999, objectFit: "cover" }}
-                    />
-                  ) : (
-                    <div
-                      aria-label="Profile"
-                      style={{
-                        width: 22,
-                        height: 22,
-                        borderRadius: 999,
-                        display: "grid",
-                        placeItems: "center",
-                        border: active
-                          ? "1px solid rgba(17,17,20,.16)"
-                          : "1px solid rgba(17,17,20,.10)",
-                        color: active ? "#111114" : "rgba(17,17,20,.70)",
-                        fontSize: 12,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {(profileInitial || "?").toUpperCase()}
-                    </div>
-                  )
-                ) : (
-                  <span style={{ fontSize: it.icon === "＋" ? 20 : 18 }}>{it.icon}</span>
-                )}
-              </div>
-            </Link>
+            <>
+              {it.key === "home" ? (
+                <a
+                  key={it.key}
+                  href={it.href}
+                  onClick={(e) => {
+                    if (pathname === "/") {
+                      e.preventDefault();
+                      (window as any).__homeTap?.();
+                    }
+                  }}
+                  style={{
+                    textDecoration: "none",
+                    color: active ? "#111114" : "rgba(17,17,20,.55)",
+                  }}
+                  title={it.label}
+                >
+                  <div
+                    style={{
+                      height: 44,
+                      borderRadius: 14,
+                      display: "grid",
+                      placeItems: "center",
+                      border: active
+                        ? "1px solid rgba(17,17,20,.14)"
+                        : "1px solid rgba(17,17,20,.08)",
+                      background: active ? "rgba(17,17,20,.04)" : "rgba(17,17,20,.02)",
+                      fontWeight: 800,
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    {it.key === "me" ? (
+                      profileAvatarUrl ? (
+                        <img
+                          src={profileAvatarUrl}
+                          alt="Profile"
+                          style={{ width: 22, height: 22, borderRadius: 999, objectFit: "cover" }}
+                        />
+                      ) : (
+                        <div
+                          aria-label="Profile"
+                          style={{
+                            width: 22,
+                            height: 22,
+                            borderRadius: 999,
+                            display: "grid",
+                            placeItems: "center",
+                            border: active
+                              ? "1px solid rgba(17,17,20,.16)"
+                              : "1px solid rgba(17,17,20,.10)",
+                            color: active ? "#111114" : "rgba(17,17,20,.70)",
+                            fontSize: 12,
+                            fontWeight: 900,
+                          }}
+                        >
+                          {(profileInitial || "?").toUpperCase()}
+                        </div>
+                      )
+                    ) : (
+                      <span style={{ fontSize: it.icon === "＋" ? 20 : 18 }}>{it.icon}</span>
+                    )}
+                  </div>
+                </a>
+              ) : (
+                <Link
+                  key={it.key}
+                  href={it.href}
+                  style={{
+                    textDecoration: "none",
+                    color: active ? "#111114" : "rgba(17,17,20,.55)",
+                  }}
+                  title={it.label}
+                >
+                  <div
+                    style={{
+                      height: 44,
+                      borderRadius: 14,
+                      display: "grid",
+                      placeItems: "center",
+                      border: active
+                        ? "1px solid rgba(17,17,20,.14)"
+                        : "1px solid rgba(17,17,20,.08)",
+                      background: active ? "rgba(17,17,20,.04)" : "rgba(17,17,20,.02)",
+                      fontWeight: 800,
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    {it.key === "me" ? (
+                      profileAvatarUrl ? (
+                        <img
+                          src={profileAvatarUrl}
+                          alt="Profile"
+                          style={{ width: 22, height: 22, borderRadius: 999, objectFit: "cover" }}
+                        />
+                      ) : (
+                        <div
+                          aria-label="Profile"
+                          style={{
+                            width: 22,
+                            height: 22,
+                            borderRadius: 999,
+                            display: "grid",
+                            placeItems: "center",
+                            border: active
+                              ? "1px solid rgba(17,17,20,.16)"
+                              : "1px solid rgba(17,17,20,.10)",
+                            color: active ? "#111114" : "rgba(17,17,20,.70)",
+                            fontSize: 12,
+                            fontWeight: 900,
+                          }}
+                        >
+                          {(profileInitial || "?").toUpperCase()}
+                        </div>
+                      )
+                    ) : (
+                      <span style={{ fontSize: it.icon === "＋" ? 20 : 18 }}>{it.icon}</span>
+                    )}
+                  </div>
+                </Link>
+              )}
+            </>
           );
         })}
       </div>
