@@ -774,22 +774,94 @@ export default function HomePage() {
 
     setCommentBusy(true);
 
-    const reply = replyToByPost[postId];
-    const { error } = await supabase.from("comments").insert({
-      post_id: postId,
-      user_id: activeUserId,
-      content: commentText.trim(),
-      parent_comment_id: reply ? reply.commentId : null,
-    });
+    try {
+      const reply = replyToByPost[postId];
+      const parentId = reply ? reply.commentId : null;
 
-    setCommentBusy(false);
+      // Insert comment and get id for notifications deep-link
+      const { data: inserted, error } = await supabase
+        .from("comments")
+        .insert({
+          post_id: postId,
+          user_id: activeUserId,
+          content: commentText.trim(),
+          parent_comment_id: parentId,
+        })
+        .select("id")
+        .single();
 
-    if (error) return alert(error.message);
+      if (error) throw error;
+      const newCommentId = (inserted as any)?.id ? String((inserted as any).id) : null;
 
-    setCommentText("");
-    clearReply(postId);
-    await loadComments(postId);
-    await loadAll(activeUserId);
+      // Best-effort notifications
+      try {
+        // Post owner
+        const { data: postRow } = await supabase
+          .from("posts")
+          .select("user_id")
+          .eq("id", postId)
+          .maybeSingle();
+        const postOwnerId = (postRow as any)?.user_id ? String((postRow as any).user_id) : null;
+
+        // Parent comment owner (if reply)
+        let parentOwnerId: string | null = null;
+        if (parentId) {
+          const { data: parentRow } = await supabase
+            .from("comments")
+            .select("user_id")
+            .eq("id", parentId)
+            .maybeSingle();
+          parentOwnerId = (parentRow as any)?.user_id ? String((parentRow as any).user_id) : null;
+        }
+
+        const inserts: any[] = [];
+
+        // Comment notification to post owner
+        if (postOwnerId && postOwnerId !== activeUserId && newCommentId) {
+          inserts.push({
+            user_id: postOwnerId,
+            actor_id: activeUserId,
+            post_id: Number(postId),
+            comment_id: newCommentId,
+            type: "comment",
+            read: false,
+          });
+        }
+
+        // Reply notification to parent comment owner
+        if (
+          parentOwnerId &&
+          parentOwnerId !== activeUserId &&
+          parentOwnerId !== postOwnerId &&
+          newCommentId
+        ) {
+          inserts.push({
+            user_id: parentOwnerId,
+            actor_id: activeUserId,
+            post_id: Number(postId),
+            comment_id: newCommentId,
+            type: "reply",
+            read: false,
+          });
+        }
+
+        if (inserts.length) {
+          await supabase.from("notifications").insert(inserts);
+        }
+      } catch {
+        // ignore notification failures
+      }
+
+      setCommentText("");
+      clearReply(postId);
+      await loadComments(postId);
+      await loadAll(activeUserId);
+    } catch (e: any) {
+      console.error(e);
+      alert(e?.message ?? "Failed to add comment.");
+    } finally {
+      setCommentBusy(false);
+    }
   }
 
   async function openComments(postId: string) {
