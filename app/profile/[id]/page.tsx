@@ -5,11 +5,11 @@ import React from "react";
 type ProfileHeaderClientProps = {
   isOwn: boolean;
   profileId: string;
-  username: string;
+  username: string | null;
   avatarUrl: string | null;
-  bio: string;
-  level: string;
-  group: string;
+  bio: string | null;
+  level: string | null;
+  group: string | null;
   postCount: number;
   commentCount: number;
 };
@@ -25,6 +25,9 @@ export default function ProfileHeaderClient({
   postCount,
   commentCount,
 }: ProfileHeaderClientProps) {
+  const safeUsername = (username ?? "").toString().trim();
+  const displayUsername = safeUsername || "user";
+  const initial = safeUsername ? safeUsername[0]!.toUpperCase() : "?";
   return (
     <div style={{ padding: 20 }}>
       <div className="profile-header">
@@ -34,10 +37,10 @@ export default function ProfileHeaderClient({
           aria-label="Profile avatar"
         >
           {avatarUrl ? (
-            <img src={avatarUrl} alt={username} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src={avatarUrl} alt={displayUsername} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
             <span style={{ fontSize: 48, lineHeight: "96px", display: "block", textAlign: "center" }}>
-              {username[0]?.toUpperCase() || "?"}
+              {initial}
             </span>
           )}
         </div>
@@ -47,7 +50,7 @@ export default function ProfileHeaderClient({
             className="username"
             style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}
           >
-            @{username}
+            @{displayUsername}
           </div>
 
           <div className="counters" style={{ display: "flex", gap: 16 }}>
