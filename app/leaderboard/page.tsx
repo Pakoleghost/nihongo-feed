@@ -123,7 +123,7 @@ export default function LeaderboardPage() {
     <div className="feed">
       <div className="header">
         <div className="headerInner">
-          <div className="brand">フィード</div>
+          <div className="headerTitle">フィード</div>
         </div>
       </div>
 
