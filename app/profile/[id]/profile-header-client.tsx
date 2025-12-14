@@ -47,27 +47,12 @@ export default function ProfileHeaderClient(props: {
   postCount: number;
   commentCount: number;
 }) {
-  const {
-    isOwn,
-    profileId,
-    username: usernameProp,
-    avatarUrl,
-    bio: bioProp,
-    level: levelProp,
-    group: groupProp,
-    postCount,
-    commentCount,
-  } = props as any;
-
-  const username = (usernameProp ?? "").toString();
-  const bio = (bioProp ?? "").toString();
-  const level = (levelProp ?? "").toString();
-  const group = (groupProp ?? "").toString();
+  const { isOwn, profileId, username, avatarUrl, bio, level, group, postCount, commentCount } = props;
 
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editBioOpen, setEditBioOpen] = useState(false);
-  const [bioDraft, setBioDraft] = useState((bio || "").toString());
+  const [bioDraft, setBioDraft] = useState(bio || "");
 
   const menuRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -82,11 +67,7 @@ export default function ProfileHeaderClient(props: {
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  const safeUsername = username.toString().trim();
-  const initial =
-    typeof safeUsername === "string" && safeUsername.length > 0
-      ? safeUsername.charAt(0).toUpperCase()
-      : "?";
+  const initial = (username?.[0] || "?").toUpperCase();
 
   async function saveBio() {
     setSaving(true);
@@ -130,10 +111,10 @@ export default function ProfileHeaderClient(props: {
       const path = `${profileId}/${Date.now()}.${ext}`;
 
       // Upload to Supabase Storage (bucket name used by the app)
-      const bucket = "avatars";
+      const bucket = "post-images";
       const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
-        contentType: file.type,
         upsert: true,
+        contentType: file.type,
       });
 
       if (upErr) {
@@ -200,12 +181,12 @@ export default function ProfileHeaderClient(props: {
             }}
           >
             <div className="avatar" aria-label="Profile avatar" style={{ width: 56, height: 56 }}>
-              {avatarUrl ? <img src={avatarUrl} alt={safeUsername || "profile"} /> : <span>{initial}</span>}
+              {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{initial}</span>}
             </div>
           </button>
         ) : (
           <div className="avatar" aria-label="Profile avatar" style={{ width: 56, height: 56 }}>
-            {avatarUrl ? <img src={avatarUrl} alt={safeUsername || "profile"} /> : <span>{initial}</span>}
+            {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{initial}</span>}
           </div>
         )}
 
@@ -221,7 +202,7 @@ export default function ProfileHeaderClient(props: {
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span className="handle" style={{ color: "inherit" }}>
-                  @{safeUsername || ""}
+                  @{username}
                 </span>
 
                 {levelChip(level)}
@@ -335,7 +316,7 @@ export default function ProfileHeaderClient(props: {
           </div>
 
           <div className="muted" style={{ marginTop: 8 }}>
-            {bio.trim() ? bio : "No bio yet."}
+            {bio?.trim() ? bio : "No bio yet."}
           </div>
         </div>
       </div>
