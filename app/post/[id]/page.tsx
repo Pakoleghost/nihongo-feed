@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/lib/supabase";
 
@@ -21,6 +21,7 @@ type CommentRow = {
   user_id: string;
   post_id: string | number;
   content: string | null;
+  parent_comment_id: string | null;
 };
 
 export default function PostPage() {
@@ -28,17 +29,163 @@ export default function PostPage() {
   const router = useRouter();
   const postId = params?.id;
 
+  const searchParams = useSearchParams();
+  const highlightCommentId = searchParams?.get("c") ?? null;
+
+  const commentInputRef = useRef<HTMLInputElement | null>(null);
+  const [commentText, setCommentText] = useState("");
+  const [commentBusy, setCommentBusy] = useState(false);
+  const [replyTo, setReplyTo] = useState<{ commentId: string; username: string } | null>(null);
+
   const [userId, setUserId] = useState<string | null>(null);
   const [myProfile, setMyProfile] = useState<MiniProfile | null>(null);
 
   const [post, setPost] = useState<PostRow | null>(null);
   const [postAuthor, setPostAuthor] = useState<MiniProfile | null>(null);
+  const [likeCount, setLikeCount] = useState(0);
 
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [commentAuthors, setCommentAuthors] = useState<Record<string, MiniProfile>>({});
 
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+
+  const reloadComments = useCallback(async () => {
+    if (!postId) return;
+    const { data: cs, error: cErr } = await supabase
+      .from("comments")
+      .select("id, created_at, user_id, post_id, content, parent_comment_id")
+      .eq("post_id", postId as any)
+      .order("created_at", { ascending: true });
+
+    if (cErr) throw cErr;
+    setComments((cs as CommentRow[]) ?? []);
+
+    const ids = Array.from(new Set(((cs as any[]) ?? []).map((x) => x?.user_id).filter(Boolean)));
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id, username, avatar_url").in("id", ids);
+      const map: Record<string, MiniProfile> = {};
+      (profs as any[] | null)?.forEach((pp) => {
+        if (!pp?.id) return;
+        map[String(pp.id)] = { username: pp.username ?? null, avatar_url: pp.avatar_url ?? null };
+      });
+      setCommentAuthors(map);
+    } else {
+      setCommentAuthors({});
+    }
+  }, [postId]);
+
+  const reloadLikes = useCallback(async () => {
+    if (!postId) return;
+    const { count, error } = await supabase
+      .from("likes")
+      .select("id", { count: "exact", head: true })
+      .eq("post_id", postId as any);
+
+    if (error) throw error;
+    setLikeCount(count ?? 0);
+  }, [postId]);
+
+  const addComment = useCallback(async () => {
+    if (!postId) return;
+    const t = commentText.trim();
+    if (!t) return;
+    const { data: u } = await supabase.auth.getUser();
+    const uid = u.user?.id;
+    if (!uid) return alert("Session expired. Please log in again.");
+
+    setCommentBusy(true);
+    try {
+      const { error } = await supabase.from("comments").insert({
+        post_id: postId as any,
+        user_id: uid,
+        content: t,
+        parent_comment_id: replyTo ? replyTo.commentId : null,
+      });
+      if (error) throw error;
+      setCommentText("");
+      setReplyTo(null);
+      await reloadComments();
+      await reloadLikes();
+    } catch (e: any) {
+      console.error(e);
+      alert(e?.message ?? "Failed to add comment.");
+    } finally {
+      setCommentBusy(false);
+    }
+  }, [commentText, postId, reloadComments, reloadLikes, replyTo]);
+
+  const deleteComment = useCallback(
+    async (commentId: string) => {
+      const { data: u } = await supabase.auth.getUser();
+      const uid = u.user?.id;
+      if (!uid) return alert("Session expired. Please log in again.");
+
+      const ok = confirm("Delete this comment?");
+      if (!ok) return;
+
+      const { error } = await supabase.from("comments").delete().eq("id", commentId).eq("user_id", uid);
+      if (error) return alert(error.message);
+
+      await reloadComments();
+      await reloadLikes();
+    },
+    [reloadComments, reloadLikes]
+  );
+
+  const startReply = useCallback((commentId: string, username: string) => {
+    const handle = `@${(username || "unknown").toString()} `;
+    setReplyTo({ commentId, username: username || "unknown" });
+    setCommentText(handle);
+    setTimeout(() => {
+      try {
+        commentInputRef.current?.focus();
+      } catch {
+        // ignore
+      }
+    }, 0);
+  }, []);
+
+  const clearReply = useCallback(() => {
+    setReplyTo(null);
+    setCommentText((prev) => {
+      const p = (prev ?? "").toString();
+      // If the box only contains an @mention prefix, clear it.
+      if (/^@\S+\s*$/.test(p.trim())) return "";
+      return p;
+    });
+  }, []);
+
+useEffect(() => {
+  if (!highlightCommentId) return;
+
+  let cancelled = false;
+  let attempts = 0;
+
+  const tryScroll = () => {
+    if (cancelled) return;
+    attempts += 1;
+
+    const el = document.getElementById(`c-${highlightCommentId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    // Retry a few times while comments/render settle.
+    if (attempts < 25) {
+      setTimeout(tryScroll, 80);
+    }
+  };
+
+  // Start soon, but not immediately.
+  const t = setTimeout(tryScroll, 50);
+
+  return () => {
+    cancelled = true;
+    clearTimeout(t);
+  };
+}, [highlightCommentId, comments.length]);
 
   // For BottomNav profile button
   useEffect(() => {
@@ -105,10 +252,17 @@ export default function PostPage() {
         if (!mounted) return;
         setPostAuthor((a as MiniProfile) ?? null);
 
+        // Likes (count)
+        try {
+          await reloadLikes();
+        } catch (e) {
+          // ignore count failures
+        }
+
         // 3) Comments
         const { data: cs, error: cErr } = await supabase
           .from("comments")
-          .select("id, created_at, user_id, post_id, content")
+          .select("id, created_at, user_id, post_id, content, parent_comment_id")
           .eq("post_id", postId as any)
           .order("created_at", { ascending: true });
 
@@ -143,29 +297,109 @@ export default function PostPage() {
     return () => {
       mounted = false;
     };
-  }, [postId]);
+  }, [postId, reloadLikes]);
 
   const myProfileHref = userId ? `/profile/${encodeURIComponent(userId)}` : "/";
 
   const title = "投稿"; // simple
 
+  const { rootComments, childrenByParent } = useMemo(() => {
+    const byParent: Record<string, CommentRow[]> = {};
+    const roots: CommentRow[] = [];
+
+    for (const c of comments) {
+      const pid = c.parent_comment_id ? String(c.parent_comment_id) : "";
+      if (!pid) {
+        roots.push(c);
+      } else {
+        (byParent[pid] ||= []).push(c);
+      }
+    }
+
+    return { rootComments: roots, childrenByParent: byParent };
+  }, [comments]);
+
+  const goToProfile = useCallback(
+    (id: string) => {
+      router.push(`/profile/${encodeURIComponent(String(id))}`);
+    },
+    [router]
+  );
+
+  const renderComment = useCallback(
+    (c: CommentRow, depth: number) => {
+      const a = commentAuthors[String(c.user_id)];
+      const uname = (a?.username ?? "user").toString();
+      const isMine = userId && String(c.user_id) === String(userId);
+      const isHi = highlightCommentId === c.id;
+      const kids = childrenByParent[String(c.id)] ?? [];
+
+      return (
+        <div key={c.id}>
+          <div
+            id={`c-${c.id}`}
+            style={{
+              border: "1px solid rgba(17,17,20,.10)",
+              borderRadius: 14,
+              padding: 10,
+              background: isHi ? "rgba(17,17,20,.04)" : "#fff",
+              boxShadow: isHi ? "0 0 0 2px rgba(17,17,20,.10) inset" : "none",
+              marginLeft: depth > 0 ? 14 : 0,
+              borderLeft: depth > 0 ? "3px solid rgba(17,17,20,.08)" : undefined,
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => goToProfile(String(c.user_id))}
+              style={{
+                padding: 0,
+                border: 0,
+                background: "transparent",
+                cursor: "pointer",
+                fontWeight: 900,
+                fontSize: 13,
+                textAlign: "left",
+              }}
+            >
+              {`@${uname}`}
+            </button>
+            <div style={{ marginTop: 4, whiteSpace: "pre-wrap" }}>{c.content ?? ""}</div>
+            <div style={{ marginTop: 6, display: "flex", gap: 10, alignItems: "center" }}>
+              <button
+                type="button"
+                onClick={() => startReply(c.id, uname)}
+                style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12, opacity: 0.7 }}
+              >
+                返信
+              </button>
+
+              {isMine ? (
+                <button
+                  type="button"
+                  onClick={() => void deleteComment(c.id)}
+                  style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12, opacity: 0.7 }}
+                >
+                  削除
+                </button>
+              ) : null}
+            </div>
+          </div>
+
+          {kids.length ? (
+            <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
+              {kids.map((k) => renderComment(k, depth + 1))}
+            </div>
+          ) : null}
+        </div>
+      );
+    },
+    [childrenByParent, commentAuthors, deleteComment, goToProfile, highlightCommentId, startReply, userId]
+  );
+
   return (
     <>
       <main className="feed" style={{ minHeight: "100vh", padding: 16, paddingBottom: 80 }}>
-        <div className="header" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button
-            onClick={() => router.back()}
-            style={{
-              border: "1px solid rgba(17,17,20,.10)",
-              background: "#fff",
-              borderRadius: 12,
-              padding: "8px 10px",
-              fontWeight: 800,
-              cursor: "pointer",
-            }}
-          >
-            戻る
-          </button>
+        <div className="header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>{title}</h2>
         </div>
 
@@ -184,36 +418,54 @@ export default function PostPage() {
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 999,
-                    overflow: "hidden",
-                    border: "1px solid rgba(17,17,20,.10)",
-                    background: "#fff",
-                    display: "grid",
-                    placeItems: "center",
-                    fontWeight: 900,
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (post?.user_id) goToProfile(String(post.user_id));
                   }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: 0,
+                    border: 0,
+                    background: "transparent",
+                    cursor: post?.user_id ? "pointer" : "default",
+                    textAlign: "left",
+                  }}
+                  aria-label="Open profile"
                 >
-                  {postAuthor?.avatar_url ? (
-                    <img
-                      src={postAuthor.avatar_url}
-                      alt={(postAuthor.username ?? "").toString()}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <span style={{ opacity: 0.8 }}>
-                      {((postAuthor?.username ?? "?").toString().trim()[0] ?? "?").toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 900 }}>{`@${(postAuthor?.username ?? "user").toString()}`}</div>
-                  <div style={{ fontSize: 12, opacity: 0.6 }}>{new Date(post.created_at).toLocaleString()}</div>
-                </div>
+                  <div
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 999,
+                      overflow: "hidden",
+                      border: "1px solid rgba(17,17,20,.10)",
+                      background: "#fff",
+                      display: "grid",
+                      placeItems: "center",
+                      fontWeight: 900,
+                    }}
+                  >
+                    {postAuthor?.avatar_url ? (
+                      <img
+                        src={postAuthor.avatar_url}
+                        alt={(postAuthor.username ?? "").toString()}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span style={{ opacity: 0.8 }}>
+                        {((postAuthor?.username ?? "?").toString().trim()[0] ?? "?").toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: 900 }}>{`@${(postAuthor?.username ?? "user").toString()}`}</div>
+                    <div style={{ fontSize: 12, opacity: 0.6 }}>{new Date(post!.created_at).toLocaleString()}</div>
+                  </div>
+                </button>
               </div>
 
               {post.content ? <div style={{ marginTop: 12, whiteSpace: "pre-wrap" }}>{post.content}</div> : null}
@@ -224,24 +476,65 @@ export default function PostPage() {
                 </div>
               ) : null}
 
+              <div style={{ marginTop: 12, display: "flex", gap: 14, alignItems: "center", opacity: 0.8, fontSize: 13 }}>
+                <span>{`いいね ${likeCount}`}</span>
+              </div>
               <div style={{ marginTop: 14, fontWeight: 900, opacity: 0.85 }}>コメント</div>
 
               {comments.length === 0 ? (
                 <div style={{ marginTop: 8, opacity: 0.7 }}>まだコメントはありません。</div>
               ) : (
                 <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
-                  {comments.map((c) => {
-                    const a = commentAuthors[String(c.user_id)];
-                    const uname = (a?.username ?? "user").toString();
-                    return (
-                      <div key={c.id} style={{ border: "1px solid rgba(17,17,20,.10)", borderRadius: 14, padding: 10 }}>
-                        <div style={{ fontWeight: 900, fontSize: 13 }}>{`@${uname}`}</div>
-                        <div style={{ marginTop: 4, whiteSpace: "pre-wrap" }}>{c.content ?? ""}</div>
-                      </div>
-                    );
-                  })}
+                  {rootComments.map((c) => renderComment(c, 0))}
                 </div>
               )}
+              <div style={{ marginTop: 12 }}>
+                {replyTo ? (
+                  <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
+                    <span>{`@${replyTo.username} に返信中`}</span>
+                    <button
+                      type="button"
+                      onClick={clearReply}
+                      style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12, opacity: 0.7 }}
+                    >
+                      やめる
+                    </button>
+                  </div>
+                ) : null}
+
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    ref={commentInputRef}
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="コメントを書く…"
+                    style={{
+                      flex: 1,
+                      border: "1px solid rgba(17,17,20,.10)",
+                      borderRadius: 12,
+                      padding: "10px 12px",
+                      outline: "none",
+                      background: "#fff",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void addComment()}
+                    disabled={commentBusy || !commentText.trim()}
+                    style={{
+                      border: "1px solid rgba(17,17,20,.10)",
+                      background: "#fff",
+                      borderRadius: 12,
+                      padding: "10px 12px",
+                      fontWeight: 900,
+                      cursor: commentBusy ? "default" : "pointer",
+                      opacity: commentBusy ? 0.6 : 1,
+                    }}
+                  >
+                    送信
+                  </button>
+                </div>
+              </div>
             </div>
           ) : null}
         </div>
