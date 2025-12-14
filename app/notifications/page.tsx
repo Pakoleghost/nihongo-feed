@@ -10,7 +10,7 @@ type DbNotificationRow = {
   created_at: string;
   type: string | null;
   actor_id: string | null;
-post_id: number | null;
+  post_id: number | null;
   message: string | null;
   read: boolean | null;
   actor_username?: string | null;
@@ -88,8 +88,8 @@ export default function NotificationsPage() {
 
   return (
     <>
-      <main style={{ minHeight: "100vh", padding: 16, color: "#fff", paddingBottom: 80 }}>
-        <div style={{ maxWidth: 720, margin: "0 auto" }}>
+      <main className="feed" style={{ minHeight: "100vh", padding: 16, paddingBottom: 80 }}>
+        <div>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>Notifications</h2>
           <div style={{ marginTop: 10 }}>
             {items.length === 0 ? (
@@ -103,8 +103,8 @@ export default function NotificationsPage() {
                     <li
                       key={n.id}
                       style={{
-                        border: "1px solid rgba(255,255,255,.08)",
-                        background: "rgba(255,255,255,.03)",
+                        border: "1px solid rgba(17,17,20,.10)",
+                        background: "#fff",
                         borderRadius: 14,
                         padding: 12,
                         opacity: n.read ? 0.7 : 1,
@@ -122,7 +122,8 @@ export default function NotificationsPage() {
                       {n.post_id ? (
                         <div style={{ marginTop: 10 }}>
                           <Link
-href={`/?post=${encodeURIComponent(String(n.post_id))}`}                            style={{ fontSize: 12, textDecoration: "none", opacity: 0.85, color: "#fff" }}
+                            href={`/?post=${encodeURIComponent(String(n.post_id))}`}
+                            style={{ fontSize: 12, textDecoration: "none", opacity: 0.85 }}
                           >
                             View post →
                           </Link>
