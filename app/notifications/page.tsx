@@ -19,6 +19,7 @@ type DbNotificationRow = {
 };
 
 type MiniProfile = {
+  id?: string | null;
   username: string | null;
   avatar_url: string | null;
 };
@@ -105,6 +106,7 @@ export default function NotificationsPage() {
             const id = p?.id;
             if (!id) return;
             map[id] = {
+              id,
               username: p?.username ?? null,
               avatar_url: p?.avatar_url ?? null,
             };
@@ -202,9 +204,10 @@ export default function NotificationsPage() {
   const renderActorsJP = useCallback((list: MiniProfile[]) => {
     const clean = list
       .map((a) => ({
+        id: a.id ?? null,
         username: (a.username ?? "").toString().trim(),
       }))
-      .filter((a) => a.username);
+      .filter((a) => a.username || a.id);
 
     if (clean.length === 0) return <span>誰か</span>;
 
@@ -212,22 +215,32 @@ export default function NotificationsPage() {
     const second = clean.length > 1 ? clean[1].username : null;
     const rest = clean.length > 2 ? clean.length - 2 : 0;
 
-    const nameLink = (u: string) => (
-      <Link
-        href={`/u/${encodeURIComponent(u)}`}
-        onClick={(e) => e.stopPropagation()}
-        style={{ fontWeight: 900, textDecoration: "none", color: "inherit" }}
-      >
-        @{u}
-      </Link>
-    );
+    const nameLink = (u: string, id: string | null) => {
+      const label = `@${u || "user"}`;
+      if (!id) return <span style={{ fontWeight: 900 }}>{label}</span>;
 
-    if (clean.length === 1) return <>{nameLink(first)}さん</>;
-    if (clean.length === 2) return <>{nameLink(first)}さん、{nameLink(second!)}さん</>;
+      return (
+        <Link
+          href={`/profile/${encodeURIComponent(String(id))}`}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            fontWeight: 900,
+            textDecoration: "none",
+            color: "inherit",
+          }}
+        >
+          {label}
+        </Link>
+      );
+    };
+
+    if (clean.length === 1) return <>{nameLink(first, clean[0].id)}さん</>;
+    if (clean.length === 2)
+      return <>{nameLink(first, clean[0].id)}さん、{nameLink(second!, clean[1].id)}さん</>;
 
     return (
       <>
-        {nameLink(first)}さん、{nameLink(second!)}さん、他{rest}人
+        {nameLink(first, clean[0].id)}さん、{nameLink(second!, clean[1].id)}さん、他{rest}人
       </>
     );
   }, []);
@@ -375,9 +388,9 @@ export default function NotificationsPage() {
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
                           {/* Actor avatar (first actor) */}
-                          {g.actors[0]?.username ? (
+                          {g.actors[0]?.id ? (
                             <Link
-                              href={`/u/${encodeURIComponent((g.actors[0].username ?? "").toString())}`}
+                              href={`/profile/${encodeURIComponent(String(g.actors[0].id))}`}
                               onClick={(e) => e.stopPropagation()}
                               style={{ textDecoration: "none", color: "inherit" }}
                               aria-label="Open profile"
