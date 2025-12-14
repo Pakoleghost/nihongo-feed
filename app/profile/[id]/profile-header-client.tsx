@@ -180,12 +180,12 @@ export default function ProfileHeaderClient(props: {
               cursor: uploadingAvatar ? "not-allowed" : "pointer",
             }}
           >
-            <div className="avatar" aria-label="Profile avatar" style={{ width: 56, height: 56 }}>
+            <div className="avatar" aria-label="Profile avatar" style={{ width: 80, height: 80 }}>
               {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{initial}</span>}
             </div>
           </button>
         ) : (
-          <div className="avatar" aria-label="Profile avatar" style={{ width: 56, height: 56 }}>
+          <div className="avatar" aria-label="Profile avatar" style={{ width: 80, height: 80 }}>
             {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{initial}</span>}
           </div>
         )}
@@ -201,7 +201,7 @@ export default function ProfileHeaderClient(props: {
           >
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span className="handle" style={{ color: "inherit" }}>
+                <span className="handle" style={{ color: "inherit", fontSize: 22, fontWeight: 800 }}>
                   @{username}
                 </span>
 
