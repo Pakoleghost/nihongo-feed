@@ -1,7 +1,7 @@
 "use client";
 
 import BottomNav from "@/components/BottomNav";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -45,6 +45,8 @@ export default function NotificationsPage() {
   const [myProfile, setMyProfile] = useState<MiniProfile | null>(null);
   const [actors, setActors] = useState<ActorMap>({});
   const [postThumbs, setPostThumbs] = useState<Record<string, string | null>>({});
+
+  const unreadIdsRef = useRef<string[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -156,6 +158,13 @@ export default function NotificationsPage() {
     return () => {
       mounted = false;
       sub.subscription.unsubscribe();
+
+      // Mark remaining unread as read when leaving the page.
+      // Do NOT update local UI here so cards stay "new" until you tap them or you leave.
+      const ids = unreadIdsRef.current;
+      if (ids.length > 0) {
+        void supabase.from("notifications").update({ read: true }).in("id", ids as any);
+      }
     };
   }, []);
 
@@ -403,3 +412,6 @@ export default function NotificationsPage() {
     </>
   );
 }
+  useEffect(() => {
+    unreadIdsRef.current = items.filter((n) => !n.read).map((n) => n.id);
+  }, [items]);
