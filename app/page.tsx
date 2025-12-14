@@ -408,20 +408,23 @@ export default function HomePage() {
     const postIds = normalized.map((p) => p.id);
 
     if (postIds.length) {
+      // Likes are stored in `public.likes` (post_id is bigint in DB).
+      // Supabase will accept numeric strings for bigint filters.
       const { data: likesData } = await supabase
-        .from("reactions")
+        .from("likes")
         .select("post_id, user_id")
-        .in("post_id", postIds);
+        .in("post_id", postIds as any);
 
       const likeMap = new Map<string, { count: number; mine: boolean }>();
       for (const pid of postIds) likeMap.set(pid, { count: 0, mine: false });
 
       (likesData ?? []).forEach((r: any) => {
-        const cur = likeMap.get(r.post_id);
+        const key = String((r as any).post_id);
+        const cur = likeMap.get(key);
         if (!cur) return;
         cur.count += 1;
         if (uid && r.user_id === uid) cur.mine = true;
-        likeMap.set(r.post_id, cur);
+        likeMap.set(key, cur);
       });
 
       normalized.forEach((p) => {
@@ -508,6 +511,7 @@ export default function HomePage() {
     const p = posts.find((x) => x.id === postId);
     if (!p) return;
 
+    // optimistic UI
     setPosts((prev) =>
       prev.map((x) =>
         x.id === postId
@@ -516,18 +520,28 @@ export default function HomePage() {
       )
     );
 
+    // DB uses bigint post_id; accept numeric string.
+    const pid: any = (() => {
+      const n = Number(postId);
+      return Number.isFinite(n) ? n : postId;
+    })();
+
     if (p.likedByMe) {
+      // unlike
       const { error } = await supabase
-        .from("reactions")
+        .from("likes")
         .delete()
-        .eq("post_id", postId)
+        .eq("post_id", pid)
         .eq("user_id", activeUserId);
+
       if (error) {
         alert(error.message);
         void loadAll(activeUserId);
       }
     } else {
-      const { error } = await supabase.from("reactions").insert({ post_id: postId, user_id: activeUserId });
+      // like
+      const { error } = await supabase.from("likes").insert({ post_id: pid, user_id: activeUserId });
+
       if (error) {
         alert(error.message);
         void loadAll(activeUserId);
