@@ -17,11 +17,17 @@ type DbNotificationRow = {
   actor_avatar_url?: string | null;
 };
 
+type MiniProfile = {
+  username: string | null;
+  avatar_url: string | null;
+};
+
 export default function NotificationsPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [items, setItems] = useState<DbNotificationRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [myProfile, setMyProfile] = useState<MiniProfile | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -50,6 +56,15 @@ export default function NotificationsPage() {
 
         if (!mounted) return;
         setItems((data as DbNotificationRow[]) ?? []);
+
+        // Load current user's profile for BottomNav avatar/initial
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("username, avatar_url")
+          .eq("user_id", uid)
+          .maybeSingle();
+
+        if (mounted) setMyProfile((prof as MiniProfile) ?? null);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -69,6 +84,7 @@ export default function NotificationsPage() {
       else {
         setItems([]);
         setErrorMsg(null);
+        setMyProfile(null);
       }
     });
 
@@ -138,10 +154,11 @@ export default function NotificationsPage() {
         </div>
       </main>
 
-<BottomNav
-  profileHref={myProfileHref}
-  profileAvatarUrl={myProfile?.avatar_url ?? null}
-  profileInitial={(myProfile?.username?.[0] ?? "?").toUpperCase()}
-/>    </>
+      <BottomNav
+        profileHref={myProfileHref}
+        profileAvatarUrl={myProfile?.avatar_url ?? null}
+        profileInitial={(myProfile?.username?.[0] ?? "?").toUpperCase()}
+      />
+    </>
   );
 }
