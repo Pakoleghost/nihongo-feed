@@ -183,13 +183,20 @@ export default function HomePage() {
   }, [userId, checkingProfile, needsUsername]);
 
   // Hide header when scrolling down. Show again when scrolling up.
+  // Works whether the page scrolls in window or inside the `.feed` container.
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const el = feedRef.current;
 
+    const isElScrollable = () => {
+      if (!el) return false;
+      // only treat as scroller if it can actually scroll
+      return el.scrollHeight > el.clientHeight + 2;
+    };
+
     const getY = () => {
-      if (el) return el.scrollTop;
+      if (isElScrollable()) return el!.scrollTop;
       return window.scrollY;
     };
 
@@ -197,7 +204,7 @@ export default function HomePage() {
 
     let ticking = false;
 
-    const onScroll = () => {
+    const handle = () => {
       const y = getY();
       if (ticking) return;
       ticking = true;
@@ -220,13 +227,14 @@ export default function HomePage() {
       });
     };
 
-    if (el) {
-      el.addEventListener("scroll", onScroll, { passive: true } as any);
-      return () => el.removeEventListener("scroll", onScroll as any);
-    }
+    // listen to both so it works regardless of which element actually scrolls
+    window.addEventListener("scroll", handle, { passive: true });
+    if (el) el.addEventListener("scroll", handle, { passive: true } as any);
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", handle);
+      if (el) el.removeEventListener("scroll", handle as any);
+    };
   }, []);
 
   async function checkMyProfile(uid: string) {
