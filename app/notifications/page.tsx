@@ -10,7 +10,7 @@ type DbNotificationRow = {
   created_at: string;
   type: string | null;
   actor_id: string | null;
-  post_id: string | null;
+post_id: number | null;
   message: string | null;
   read: boolean | null;
   actor_username?: string | null;
@@ -122,8 +122,7 @@ export default function NotificationsPage() {
                       {n.post_id ? (
                         <div style={{ marginTop: 10 }}>
                           <Link
-                            href={`/?post=${encodeURIComponent(n.post_id)}`}
-                            style={{ fontSize: 12, textDecoration: "none", opacity: 0.85, color: "#fff" }}
+href={`/?post=${encodeURIComponent(String(n.post_id))}`}                            style={{ fontSize: 12, textDecoration: "none", opacity: 0.85, color: "#fff" }}
                           >
                             View post →
                           </Link>
