@@ -1110,18 +1110,8 @@ export default function HomePage() {
         <div className="headerInner">
           <button
             type="button"
-            className="brand"
+            className="headerTitleBtn"
             onClick={() => void onTapBrand()}
-            style={{
-              background: "transparent",
-              border: 0,
-              padding: 0,
-              margin: 0,
-              cursor: "pointer",
-              fontSize: 30,
-              fontWeight: 900,
-              letterSpacing: 0,
-            }}
             aria-label="Scroll to top or refresh"
           >
             フィード
