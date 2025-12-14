@@ -37,6 +37,8 @@ export default function LeaderboardPage() {
   const [err, setErr] = useState("");
   const [mode, setMode] = useState<"streak" | "posts">("streak");
   const [myProfileHref, setMyProfileHref] = useState("/profile");
+  const [viewerUsername, setViewerUsername] = useState<string>("");
+  const [viewerAvatarUrl, setViewerAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     void initAndLoad();
@@ -46,7 +48,25 @@ export default function LeaderboardPage() {
   async function initAndLoad() {
     const { data } = await supabase.auth.getSession();
     const uid = data.session?.user?.id;
-    if (uid) setMyProfileHref(`/profile/${encodeURIComponent(uid)}`);
+
+    if (uid) {
+      setMyProfileHref(`/profile/${encodeURIComponent(uid)}`);
+
+      const { data: vp } = await supabase
+        .from("profiles")
+        .select("username, avatar_url")
+        .eq("id", uid)
+        .maybeSingle<{ username: string | null; avatar_url: string | null }>();
+
+      const uname = (vp?.username ?? "").toString().trim().toLowerCase();
+      setViewerUsername(uname);
+      setViewerAvatarUrl(vp?.avatar_url ?? null);
+    } else {
+      setMyProfileHref("/profile");
+      setViewerUsername("");
+      setViewerAvatarUrl(null);
+    }
+
     await load();
   }
 
@@ -192,7 +212,11 @@ export default function LeaderboardPage() {
           );
         })
       )}
-      <BottomNav profileHref={myProfileHref} />
+      <BottomNav
+        profileHref={myProfileHref}
+        profileAvatarUrl={viewerAvatarUrl}
+        profileInitial={(viewerUsername?.[0] ?? "?").toUpperCase()}
+      />
     </div>
   );
 }
