@@ -1,9 +1,10 @@
-"use client";
+\"use client\";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { requireSession } from "@/lib/authGuard";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
 
 type DbPostRow = {
@@ -69,6 +70,8 @@ function normalizeProfile(p: any): { username: string; avatar_url: string | null
 
 export default function HomePage() {
   const [userId, setUserId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const composerRef = useRef<HTMLTextAreaElement | null>(null);
 
   // LOGIN UI
   const [email, setEmail] = useState("");
@@ -144,6 +147,34 @@ export default function HomePage() {
     }
     void checkMyProfile(userId);
   }, [userId]);
+
+  // open composer when coming from /new (/?compose=1)
+  useEffect(() => {
+    if (!userId) return;
+    if (checkingProfile || needsUsername) return;
+
+    const compose = searchParams.get("compose");
+    if (compose !== "1") return;
+
+    // focus + scroll to composer
+    setTimeout(() => {
+      try {
+        composerRef.current?.focus();
+        composerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch {
+        // ignore
+      }
+    }, 50);
+
+    // clean URL so refresh doesn't reopen
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("compose");
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      // ignore
+    }
+  }, [searchParams, userId, checkingProfile, needsUsername]);
 
   async function checkMyProfile(uid: string) {
     setCheckingProfile(true);
@@ -845,6 +876,7 @@ export default function HomePage() {
         <div className="composer-row">
           <textarea
             className="textarea"
+            ref={composerRef}
             placeholder="日本語で書いてね…"
             value={text}
             onChange={(e) => setText(e.target.value)}
