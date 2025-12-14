@@ -983,7 +983,7 @@ export default function HomePage() {
                     <div className="commentsList">
                       {(commentsByPost[p.id] ?? []).length === 0 ? (
                         <div className="muted" style={{ fontSize: 13, padding: 8 }}>
-                          No comments yet.
+                          まだコメントはありません。
                         </div>
                       ) : (
                         (commentsByPost[p.id] ?? []).map((c) => {

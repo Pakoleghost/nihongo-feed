@@ -227,7 +227,7 @@ export default function ProfileByIdPage() {
 
       {posts.length === 0 ? (
         <div style={{ padding: 16 }} className="muted">
-          No posts yet.
+          まだ投稿はありません。
         </div>
       ) : (
         posts.map((p) => (

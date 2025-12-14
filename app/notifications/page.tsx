@@ -35,6 +35,15 @@ export default function NotificationsPage() {
     const load = async (uid: string) => {
       setLoading(true);
       setErrorMsg(null);
+
+      // Load current user's profile for BottomNav avatar/initial
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("username, avatar_url")
+        .eq("user_id", uid)
+        .maybeSingle();
+      setMyProfile((prof as MiniProfile) ?? null);
+
       try {
         // Expect a table named `notifications` with at least: id, created_at, type, actor_id, post_id, message, read
         const { data, error } = await supabase
@@ -56,15 +65,6 @@ export default function NotificationsPage() {
 
         if (!mounted) return;
         setItems((data as DbNotificationRow[]) ?? []);
-
-        // Load current user's profile for BottomNav avatar/initial
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("username, avatar_url")
-          .eq("user_id", uid)
-          .maybeSingle();
-
-        if (mounted) setMyProfile((prof as MiniProfile) ?? null);
       } finally {
         if (mounted) setLoading(false);
       }

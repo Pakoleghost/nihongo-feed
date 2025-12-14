@@ -346,7 +346,7 @@ export default function ProfileHeaderClient(props: {
               boxShadow: "0 12px 40px rgba(0,0,0,0.2)",
             }}
           >
-            <div style={{ fontWeight: 900, marginBottom: 10 }}>Edit bio</div>
+            <div style={{ fontWeight: 900, marginBottom: 10 }}>プロフィールを編集</div>
 
             <textarea
               value={bioDraft}
