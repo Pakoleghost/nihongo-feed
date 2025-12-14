@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import ProfileHeaderClient from "./profile-header-client";
+import BottomNav from "@/components/BottomNav";
 
 type Post = {
   id: string;
@@ -48,11 +48,7 @@ export default async function ProfileByIdPage({
       <div className="header">
         <div className="headerInner">
           <div className="brand">フィード</div>
-          <div className="me">
-            <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
-              ← Back
-            </Link>
-          </div>
+          <div className="me" />
         </div>
       </div>
 
@@ -72,6 +68,19 @@ export default async function ProfileByIdPage({
   // who is viewing?
   const { data: authData } = await supabase.auth.getUser();
   const viewerId = authData?.user?.id ?? null;
+
+  const { data: viewerProf } = viewerId
+    ? await supabase
+        .from("profiles")
+        .select("username, avatar_url")
+        .eq("id", viewerId)
+        .maybeSingle<{ username: string | null; avatar_url: string | null }>()
+    : { data: null };
+
+  const viewerUsername = (viewerProf?.username ?? "").toString().trim().toLowerCase();
+  const viewerAvatarUrl = viewerProf?.avatar_url ?? null;
+  const myProfileHref = viewerUsername ? `/u/${viewerUsername}` : "/";
+  const myProfileInitial = (viewerUsername?.[0] ?? "?").toUpperCase();
 
   // profile
   const { data: prof, error: profErr } = await supabase
@@ -121,11 +130,7 @@ export default async function ProfileByIdPage({
       <div className="header">
         <div className="headerInner">
           <div className="brand">フィード</div>
-          <div className="me">
-            <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
-              ← Back
-            </Link>
-          </div>
+          <div className="me" />
         </div>
       </div>
 
@@ -177,6 +182,11 @@ export default async function ProfileByIdPage({
           </div>
         ))
       )}
+      <BottomNav
+        profileHref={myProfileHref}
+        profileAvatarUrl={viewerAvatarUrl}
+        profileInitial={myProfileInitial}
+      />
     </div>
   );
 }
