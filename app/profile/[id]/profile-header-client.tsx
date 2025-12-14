@@ -214,7 +214,7 @@ export default function ProfileHeaderClient(props: {
                 ) : null}
               </div>
 
-              <div className="muted" style={{ fontSize: 12 }}>
+              <div className="muted" style={{ fontSize: 16 }}>
                 投稿: <span className="muted">{postCount}</span> · コメント:{" "}
                 <span className="muted">{commentCount}</span>
               </div>
