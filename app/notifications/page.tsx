@@ -2,6 +2,7 @@
 
 import BottomNav from "@/components/BottomNav";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -198,6 +199,39 @@ export default function NotificationsPage() {
     return `${names[0]}さん、${names[1]}さん、他${names.length - 2}人`;
   }, []);
 
+  const renderActorsJP = useCallback((list: MiniProfile[]) => {
+    const clean = list
+      .map((a) => ({
+        username: (a.username ?? "").toString().trim(),
+      }))
+      .filter((a) => a.username);
+
+    if (clean.length === 0) return <span>誰か</span>;
+
+    const first = clean[0].username;
+    const second = clean.length > 1 ? clean[1].username : null;
+    const rest = clean.length > 2 ? clean.length - 2 : 0;
+
+    const nameLink = (u: string) => (
+      <Link
+        href={`/u/${encodeURIComponent(u)}`}
+        onClick={(e) => e.stopPropagation()}
+        style={{ fontWeight: 900, textDecoration: "none", color: "inherit" }}
+      >
+        @{u}
+      </Link>
+    );
+
+    if (clean.length === 1) return <>{nameLink(first)}さん</>;
+    if (clean.length === 2) return <>{nameLink(first)}さん、{nameLink(second!)}さん</>;
+
+    return (
+      <>
+        {nameLink(first)}さん、{nameLink(second!)}さん、他{rest}人
+      </>
+    );
+  }, []);
+
   const grouped = useMemo(() => {
     const normType = (t: string | null) => {
       const v = (t ?? "").toLowerCase();
@@ -265,16 +299,22 @@ export default function NotificationsPage() {
   const openPostFromNotification = useCallback(
     async (g: GroupedNotification) => {
       await markGroupRead(g);
-      if (!g.post_id) return;
-      const id = encodeURIComponent(String(g.post_id));
-      // Safe fallback: always route to home feed with a post query.
-      // If the feed supports deep-linking, it can focus the post.
-      if (g.type === "comment" && g.comment_id) {
-        const cid = encodeURIComponent(String(g.comment_id));
-        router.push(`/post/${id}?c=${cid}`);
+
+      // Normalize IDs (Supabase may return bigint as string)
+      const rawPostId = g.post_id == null ? "" : String(g.post_id).trim();
+      if (!rawPostId) return;
+
+      const postId = encodeURIComponent(rawPostId);
+
+      // If this is a comment notification and we have a comment id, deep-link to highlight it.
+      const rawCommentId = g.comment_id == null ? "" : String(g.comment_id).trim();
+      if (g.type === "comment" && rawCommentId) {
+        const commentId = encodeURIComponent(rawCommentId);
+        router.push(`/post/${postId}?c=${commentId}`);
         return;
       }
-      router.push(`/post/${id}`);
+
+      router.push(`/post/${postId}`);
     },
     [markGroupRead, router]
   );
@@ -301,26 +341,29 @@ export default function NotificationsPage() {
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10 }}>
                 {grouped.map((g) => {
                   const when = timeAgoJP(g.created_at);
-                  const actorText = formatActorsJP(g.actors);
+                  const actorText = renderActorsJP(g.actors);
 
                   const isLike = g.type === "like";
                   const isComment = g.type === "comment";
 
                   const chip = isLike ? "いいね！" : isComment ? "コメント" : "通知";
 
-                  const body = isLike
-                    ? `${actorText}があなたの投稿にいいね！しました。`
-                    : isComment
-                    ? `${actorText}があなたの投稿にコメントしました。`
-                    : (g.latestMessage ?? "通知があります。");
-
+                  const body = isLike ? (
+                    <>{actorText}があなたの投稿にいいね！しました。</>
+                  ) : isComment ? (
+                    <>{actorText}があなたの投稿にコメントしました。</>
+                  ) : (
+                    <>{g.latestMessage ?? "通知があります。"}</>
+                  );
 
                   const thumbUrl = g.post_id != null ? (postThumbs[String(g.post_id)] ?? null) : null;
 
                   return (
                     <li
                       key={g.key}
-                      onClick={() => void openPostFromNotification(g)}
+                      onClick={() => {
+                        if (g.post_id != null) void openPostFromNotification(g);
+                      }}
                       style={{
                         border: "1px solid rgba(17,17,20,.10)",
                         background: g.read ? "#fff" : "rgba(17,17,20,.03)",
@@ -332,34 +375,72 @@ export default function NotificationsPage() {
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
                           {/* Actor avatar (first actor) */}
-                          <div
-                            style={{
-                              width: 28,
-                              height: 28,
-                              borderRadius: 999,
-                              overflow: "hidden",
-                              border: "1px solid rgba(17,17,20,.10)",
-                              flexShrink: 0,
-                              background: "#fff",
-                              display: "grid",
-                              placeItems: "center",
-                              fontSize: 12,
-                              fontWeight: 900,
-                            }}
-                          >
-                            {g.actors[0]?.avatar_url ? (
-                              <img
-                                src={g.actors[0].avatar_url as string}
-                                alt={(g.actors[0]?.username ?? "").toString()}
-                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                                loading="lazy"
-                              />
-                            ) : (
-                              <span style={{ opacity: 0.8 }}>
-                                {((g.actors[0]?.username ?? "?").toString().trim()[0] ?? "?").toUpperCase()}
-                              </span>
-                            )}
-                          </div>
+                          {g.actors[0]?.username ? (
+                            <Link
+                              href={`/u/${encodeURIComponent((g.actors[0].username ?? "").toString())}`}
+                              onClick={(e) => e.stopPropagation()}
+                              style={{ textDecoration: "none", color: "inherit" }}
+                              aria-label="Open profile"
+                            >
+                              <div
+                                style={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: 999,
+                                  overflow: "hidden",
+                                  border: "1px solid rgba(17,17,20,.10)",
+                                  flexShrink: 0,
+                                  background: "#fff",
+                                  display: "grid",
+                                  placeItems: "center",
+                                  fontSize: 12,
+                                  fontWeight: 900,
+                                }}
+                              >
+                                {g.actors[0]?.avatar_url ? (
+                                  <img
+                                    src={g.actors[0].avatar_url as string}
+                                    alt={(g.actors[0]?.username ?? "").toString()}
+                                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  <span style={{ opacity: 0.8 }}>
+                                    {((g.actors[0]?.username ?? "?").toString().trim()[0] ?? "?").toUpperCase()}
+                                  </span>
+                                )}
+                              </div>
+                            </Link>
+                          ) : (
+                            <div
+                              style={{
+                                width: 28,
+                                height: 28,
+                                borderRadius: 999,
+                                overflow: "hidden",
+                                border: "1px solid rgba(17,17,20,.10)",
+                                flexShrink: 0,
+                                background: "#fff",
+                                display: "grid",
+                                placeItems: "center",
+                                fontSize: 12,
+                                fontWeight: 900,
+                              }}
+                            >
+                              {g.actors[0]?.avatar_url ? (
+                                <img
+                                  src={g.actors[0].avatar_url as string}
+                                  alt={(g.actors[0]?.username ?? "").toString()}
+                                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <span style={{ opacity: 0.8 }}>
+                                  {((g.actors[0]?.username ?? "?").toString().trim()[0] ?? "?").toUpperCase()}
+                                </span>
+                              )}
+                            </div>
+                          )}
 
                           <div style={{ minWidth: 0 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
