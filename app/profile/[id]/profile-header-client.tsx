@@ -111,7 +111,7 @@ export default function ProfileHeaderClient(props: {
       const path = `${profileId}/${Date.now()}.${ext}`;
 
       // Upload to Supabase Storage (bucket name used by the app)
-      const bucket = "avatars";
+      const bucket = "post-images";
       const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
         upsert: true,
         contentType: file.type,
