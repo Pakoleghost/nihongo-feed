@@ -17,6 +17,7 @@ type Item = {
   username: string;
   streak: number;
   posts: number;
+  avatar_url: string | null;
 };
 
 function normalize(r: Row): Item {
@@ -26,6 +27,7 @@ function normalize(r: Row): Item {
     username: u || "unknown",
     streak: Number(r.streak ?? 0),
     posts: Number(r.posts ?? 0),
+    avatar_url: null,
   };
 }
 
@@ -73,7 +75,27 @@ export default function LeaderboardPage() {
       return;
     }
 
-    setItems((data ?? []).map(normalize));
+    const base = (data ?? []).map(normalize);
+
+    if (base.length === 0) {
+      setItems([]);
+      setLoading(false);
+      return;
+    }
+
+    const ids = base.map((x) => x.user_id);
+
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, avatar_url")
+      .in("id", ids);
+
+    const map = new Map<string, string | null>();
+    (profs ?? []).forEach((p: any) => {
+      map.set(p.id, p.avatar_url ?? null);
+    });
+
+    setItems(base.map((x) => ({ ...x, avatar_url: map.get(x.user_id) ?? null })));
     setLoading(false);
   }
 
@@ -142,7 +164,11 @@ export default function LeaderboardPage() {
             <div className="post" key={x.user_id}>
               <div className="post-header">
                 <Link href={href} className="avatar" style={{ textDecoration: "none" }}>
-                  <span>{initial}</span>
+                  {x.avatar_url ? (
+                    <img src={x.avatar_url} alt={x.username} />
+                  ) : (
+                    <span>{initial}</span>
+                  )}
                 </Link>
 
                 <div className="postMeta" style={{ width: "100%" }}>
