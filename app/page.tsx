@@ -394,7 +394,7 @@ export default function HomePage() {
       (data as unknown as DbPostRow[] | null)?.map((row) => {
         const prof = normalizeProfile(row.profiles as any);
         return {
-          id: row.id,
+          id: String(row.id),
           content: (row.content ?? "").toString(),
           created_at: row.created_at,
           user_id: row.user_id,
@@ -420,10 +420,10 @@ export default function HomePage() {
         .in("post_id", postIdsNum as any);
 
       const likeMap = new Map<string, { count: number; mine: boolean }>();
-      for (const pid of postIds) likeMap.set(pid, { count: 0, mine: false });
+      for (const pid of postIdsNum) likeMap.set(String(pid), { count: 0, mine: false });
 
       (likesData ?? []).forEach((r: any) => {
-        const key = String((r as any).post_id);
+        const key = String(r.post_id);
         const cur = likeMap.get(key);
         if (!cur) return;
         cur.count += 1;
@@ -432,7 +432,7 @@ export default function HomePage() {
       });
 
       normalized.forEach((p) => {
-        const v = likeMap.get(p.id);
+        const v = likeMap.get(String(p.id));
         if (v) {
           p.likes = v.count;
           p.likedByMe = v.mine;
@@ -441,15 +441,20 @@ export default function HomePage() {
     }
 
     if (postIds.length) {
-      const { data: commentRows } = await supabase.from("comments").select("post_id").in("post_id", postIds);
+      const postIdsNum = postIds.map((id) => Number(id)).filter((n) => Number.isFinite(n));
+      const { data: commentRows } = await supabase
+        .from("comments")
+        .select("post_id")
+        .in("post_id", postIdsNum as any);
 
       const countMap = new Map<string, number>();
-      for (const pid of postIds) countMap.set(pid, 0);
+      for (const pid of postIdsNum) countMap.set(String(pid), 0);
       (commentRows ?? []).forEach((r: any) => {
-        countMap.set(r.post_id, (countMap.get(r.post_id) ?? 0) + 1);
+        const key = String(r.post_id);
+        countMap.set(key, (countMap.get(key) ?? 0) + 1);
       });
 
-      normalized.forEach((p) => (p.commentCount = countMap.get(p.id) ?? 0));
+      normalized.forEach((p) => (p.commentCount = countMap.get(String(p.id)) ?? 0));
     }
 
     setPosts(normalized);
