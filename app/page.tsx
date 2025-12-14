@@ -69,6 +69,9 @@ function normalizeProfile(p: any): { username: string; avatar_url: string | null
 export default function HomePage() {
   const [userId, setUserId] = useState<string | null>(null);
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
+  // header hide/show on scroll
+  const [headerHidden, setHeaderHidden] = useState(false);
+  const lastScrollYRef = useRef(0);
 
   // LOGIN UI
   const [email, setEmail] = useState("");
@@ -177,6 +180,41 @@ export default function HomePage() {
       // ignore
     }
   }, [userId, checkingProfile, needsUsername]);
+
+  // Hide header when scrolling down. Show again when scrolling up.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    lastScrollYRef.current = window.scrollY;
+
+    let ticking = false;
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (ticking) return;
+      ticking = true;
+
+      window.requestAnimationFrame(() => {
+        const last = lastScrollYRef.current;
+        const delta = y - last;
+
+        // small dead-zone so it doesn't flicker
+        if (Math.abs(delta) > 8) {
+          if (delta > 0 && y > 40) {
+            setHeaderHidden(true);
+          } else {
+            setHeaderHidden(false);
+          }
+          lastScrollYRef.current = y;
+        }
+
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   async function checkMyProfile(uid: string) {
     setCheckingProfile(true);
@@ -875,9 +913,18 @@ export default function HomePage() {
   return (
     <>
       <div className="feed" style={{ paddingBottom: 80, minHeight: "100vh" }}>
-      <div className="header">
+      <div
+        className="header"
+        style={{
+          transform: headerHidden ? "translateY(-110%)" : "translateY(0)",
+          transition: "transform 180ms ease",
+          willChange: "transform",
+        }}
+      >
         <div className="headerInner">
-          <div className="brand">フィード</div>
+          <div className="brand" style={{ fontSize: 28, fontWeight: 900 }}>
+            フィード
+          </div>
         </div>
       </div>
 
