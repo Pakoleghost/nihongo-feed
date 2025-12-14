@@ -72,7 +72,7 @@ a:hover {
 
 .brand {
   /* Keep header title consistent across iOS/desktop */
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 900;
   letter-spacing: 0.10em;
   color: #2b2b2b;
@@ -82,7 +82,7 @@ a:hover {
 
 /* Reuse the same header title sizing on any page */
 .headerTitle{
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 900;
   letter-spacing: 0.10em;
   color: #2b2b2b;
@@ -95,7 +95,7 @@ a:hover {
   all: unset;
   cursor: pointer;
   display: inline-block;
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 900;
   letter-spacing: 0.10em;
   color: #2b2b2b;
