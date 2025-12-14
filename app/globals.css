@@ -237,7 +237,7 @@ button{
 
 /* Mobile */
 @media (max-width: 480px){
-  .feed{ margin: 0; border-radius: 0; border-left: 0; border-right: 0; min-height: 100vh; }
+  .feed{ margin: 0; border-radius: 0; border-left: 0; border-right: 0; min-height: 100vh; clip-path: none; }
 }
 
 /* File picker row (used in Home composer) */
