@@ -172,7 +172,7 @@ export default function ProfileByIdPage() {
     <div className="feed" style={{ paddingBottom: 80, minHeight: "100vh" }}>
       <div className="header">
         <div className="headerInner">
-          <div className="brand">フィード</div>
+          <div className="headerTitle">フィード</div>
           <div className="me" />
         </div>
       </div>
@@ -206,7 +206,7 @@ export default function ProfileByIdPage() {
     <div className="feed" style={{ paddingBottom: 80, minHeight: "100vh" }}>
       <div className="header">
         <div className="headerInner">
-          <div className="brand">フィード</div>
+          <div className="headerTitle">フィード</div>
           <div className="me" />
         </div>
       </div>
