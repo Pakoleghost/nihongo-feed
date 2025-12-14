@@ -292,10 +292,6 @@ export default function NotificationsPage() {
                     ? `${actorText}があなたの投稿にコメントしました。`
                     : (g.latestMessage ?? "通知があります。");
 
-                  // Optional comment preview
-                  const commentPreview = isComment && g.latestMessage
-                    ? `「${g.latestMessage}」`
-                    : null;
 
                   const thumbUrl = g.post_id != null ? (postThumbs[String(g.post_id)] ?? null) : null;
 
@@ -363,9 +359,6 @@ export default function NotificationsPage() {
 
                             <div style={{ marginTop: 6, lineHeight: 1.35, fontSize: 13, wordBreak: "break-word" }}>
                               {body}
-                              {commentPreview ? (
-                                <div style={{ marginTop: 6, opacity: 0.75, fontSize: 12 }}>{commentPreview}</div>
-                              ) : null}
                             </div>
                           </div>
                         </div>
