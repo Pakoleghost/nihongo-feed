@@ -276,6 +276,10 @@ export default function NotificationsPage() {
     return "まだ通知はありません。";
   }, [loading, errorMsg]);
 
+  useEffect(() => {
+    unreadIdsRef.current = items.filter((n) => !n.read).map((n) => n.id);
+  }, [items]);
+
   return (
     <>
       <main className="feed" style={{ minHeight: "100vh", padding: 16, paddingBottom: 80 }}>
@@ -412,6 +416,3 @@ export default function NotificationsPage() {
     </>
   );
 }
-  useEffect(() => {
-    unreadIdsRef.current = items.filter((n) => !n.read).map((n) => n.id);
-  }, [items]);
