@@ -82,7 +82,7 @@ export default async function ProfileByIdPage({
     .trim()
     .toLowerCase();
   const viewerAvatarUrl = viewerProf?.avatar_url ?? null;
-  const myProfileHref = viewerUsername ? `/u/${viewerUsername}` : "/";
+  const myProfileHref = viewerId ? `/profile/${encodeURIComponent(viewerId)}` : "/";
   const myProfileInitial = (viewerUsername?.[0] ?? "?").toUpperCase();
 
   // profile
