@@ -1043,10 +1043,11 @@ export default function HomePage() {
       )}
       </div>
 
-<BottomNav
-  profileHref={myProfileHref}
-  profileAvatarUrl={myProfile?.avatar_url ?? null}
-  profileInitial={(myProfile?.username?.[0] ?? "?").toUpperCase()}
-/>    </>
+      <BottomNav
+        profileHref={myProfileHref}
+        profileAvatarUrl={myAvatarUrl ?? null}
+        profileInitial={(myUsername?.[0] ?? "?").toUpperCase()}
+      />
+    </>
   );
 }
