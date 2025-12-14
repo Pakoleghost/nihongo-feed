@@ -348,9 +348,27 @@ export default function NotificationsPage() {
       <main className="feed" style={{ minHeight: "100vh", padding: 16, paddingBottom: 80 }}>
         <div>
           <header className="header" style={{ padding: "10px 0 12px" }}>
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
-              <div className="headerTitle">フィード</div>
-              <div style={{ fontSize: 13, fontWeight: 900, opacity: 0.65 }}>通知</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div className="headerTitle">フィード</div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 900,
+                    letterSpacing: 0.2,
+                    opacity: 0.8,
+                    padding: "3px 10px",
+                    borderRadius: 999,
+                    background: "rgba(17,17,20,.06)",
+                    border: "1px solid rgba(17,17,20,.08)",
+                  }}
+                >
+                  通知
+                </div>
+              </div>
             </div>
           </header>
 
