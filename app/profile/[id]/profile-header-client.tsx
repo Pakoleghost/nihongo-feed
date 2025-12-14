@@ -229,15 +229,6 @@ export default function ProfileHeaderClient(props: {
                   >
                     Edit bio
                   </button>
-
-                  <button
-                    type="button"
-                    className="ghostBtn"
-                    onClick={logout}
-                    disabled={uploadingAvatar}
-                  >
-                    出る
-                  </button>
                 </div>
               ) : null}
             </div>
@@ -284,24 +275,6 @@ export default function ProfileHeaderClient(props: {
                       zIndex: 50,
                     }}
                   >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditBioOpen(true);
-                        setOpen(false);
-                      }}
-                      style={{
-                        width: "100%",
-                        textAlign: "left",
-                        padding: "10px 12px",
-                        background: "transparent",
-                        border: 0,
-                        cursor: "pointer",
-                      }}
-                    >
-                      Edit bio
-                    </button>
-
                     <button
                       type="button"
                       onClick={changePhoto}
