@@ -23,7 +23,6 @@ export default function BottomNav({
 
   const items: Item[] = [
     { key: "home", href: "/", label: "Home", icon: "🏠" },
-    { key: "new", href: "/new", label: "New", icon: "＋" },
     { key: "noti", href: "/notifications", label: "Notifs", icon: "🔔" },
     { key: "rank", href: "/leaderboard", label: "Rank", icon: "🏆" },
     { key: "me", href: profileHref, label: "Me", icon: "" },
@@ -54,7 +53,7 @@ export default function BottomNav({
           margin: "0 auto",
           padding: "10px 12px",
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
+          gridTemplateColumns: "repeat(4, 1fr)",
           gap: 6,
         }}
       >
