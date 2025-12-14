@@ -89,7 +89,7 @@ export default function LeaderboardPage() {
         <div className="post-header">
           <div className="postMeta" style={{ width: "100%" }}>
             <div className="nameRow" style={{ justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontWeight: 900, fontSize: 18 }}>Leaderboard</div>
+              <div style={{ fontWeight: 900, fontSize: 18 }}>ランキング</div>
               <div style={{ display: "flex", gap: 8 }}>
                 <button
                   type="button"
