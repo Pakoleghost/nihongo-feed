@@ -728,15 +728,7 @@ export default function HomePage() {
     return (
       <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
         <div style={{ width: 360, background: "#111", color: "#fff", borderRadius: 16, padding: 18 }}>
-          <div
-            style={{
-              fontSize: 22,
-              fontWeight: 900,
-              letterSpacing: 0,
-              fontFamily:
-                "system-ui, -apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', 'Meiryo', sans-serif",
-            }}
-          >
+          <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: 0 }} className="brand">
             フィード
           </div>
           <div style={{ opacity: 0.7, marginTop: 6, marginBottom: 14, fontSize: 13 }}>
@@ -932,16 +924,7 @@ export default function HomePage() {
         }}
       >
         <div className="headerInner">
-          <div
-            className="brand"
-            style={{
-              fontSize: 30,
-              fontWeight: 900,
-              letterSpacing: 0,
-              fontFamily:
-                "system-ui, -apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', 'Meiryo', sans-serif",
-            }}
-          >
+          <div className="brand" style={{ fontSize: 30, fontWeight: 900, letterSpacing: 0 }}>
             フィード
           </div>
         </div>
