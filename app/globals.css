@@ -41,7 +41,7 @@ a:hover {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  overflow: hidden;
+  clip-path: inset(0 round var(--radius));
 }
 
 /* Header */
