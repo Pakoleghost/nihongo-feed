@@ -265,7 +265,7 @@ export default function NotificationsPage() {
       const id = encodeURIComponent(String(g.post_id));
       // Safe fallback: always route to home feed with a post query.
       // If the feed supports deep-linking, it can focus the post.
-      router.push(`/?post=${id}`);
+router.push(`/post/${id}`);
     },
     [markGroupRead, router]
   );
