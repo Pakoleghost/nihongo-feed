@@ -43,6 +43,8 @@ export default function PostPage() {
   const [post, setPost] = useState<PostRow | null>(null);
   const [postAuthor, setPostAuthor] = useState<MiniProfile | null>(null);
   const [likeCount, setLikeCount] = useState(0);
+  const [likedByMe, setLikedByMe] = useState(false);
+  const [likeBusy, setLikeBusy] = useState(false);
 
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [commentAuthors, setCommentAuthors] = useState<Record<string, MiniProfile>>({});
@@ -84,6 +86,26 @@ export default function PostPage() {
 
     if (error) throw error;
     setLikeCount(count ?? 0);
+  }, [postId]);
+
+  const reloadMyLike = useCallback(async () => {
+    if (!postId) return;
+    const { data: u } = await supabase.auth.getUser();
+    const uid = u.user?.id;
+    if (!uid) {
+      setLikedByMe(false);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("likes")
+      .select("id")
+      .eq("post_id", postId as any)
+      .eq("user_id", uid)
+      .maybeSingle();
+
+    if (error) throw error;
+    setLikedByMe(!!data);
   }, [postId]);
 
   const addComment = useCallback(async () => {
@@ -132,6 +154,47 @@ export default function PostPage() {
     },
     [reloadComments, reloadLikes]
   );
+
+  const toggleLike = useCallback(async () => {
+    if (!postId) return;
+
+    const { data: u } = await supabase.auth.getUser();
+    const uid = u.user?.id;
+    if (!uid) return alert("Session expired. Please log in again.");
+
+    if (likeBusy) return;
+    setLikeBusy(true);
+
+    try {
+      if (likedByMe) {
+        const { error } = await supabase.from("likes").delete().eq("post_id", postId as any).eq("user_id", uid);
+        if (error) throw error;
+        setLikedByMe(false);
+        setLikeCount((c) => Math.max(0, (c ?? 0) - 1));
+      } else {
+        const { error } = await supabase.from("likes").insert({ post_id: postId as any, user_id: uid });
+        if (error) throw error;
+        setLikedByMe(true);
+        setLikeCount((c) => (c ?? 0) + 1);
+      }
+
+      // Sync with DB in case of race conditions.
+      await reloadLikes();
+      await reloadMyLike();
+    } catch (e: any) {
+      console.error(e);
+      alert(e?.message ?? "Failed to update like.");
+      // Re-sync state.
+      try {
+        await reloadLikes();
+        await reloadMyLike();
+      } catch {
+        // ignore
+      }
+    } finally {
+      setLikeBusy(false);
+    }
+  }, [likedByMe, likeBusy, postId, reloadLikes, reloadMyLike]);
 
   const startReply = useCallback((commentId: string, username: string) => {
     const handle = `@${(username || "unknown").toString()} `;
@@ -258,6 +321,12 @@ useEffect(() => {
         } catch (e) {
           // ignore count failures
         }
+        // Likes (mine)
+        try {
+          await reloadMyLike();
+        } catch {
+          // ignore
+        }
 
         // 3) Comments
         const { data: cs, error: cErr } = await supabase
@@ -297,7 +366,7 @@ useEffect(() => {
     return () => {
       mounted = false;
     };
-  }, [postId, reloadLikes]);
+  }, [postId, reloadLikes, reloadMyLike]);
 
   const myProfileHref = userId ? `/profile/${encodeURIComponent(userId)}` : "/";
 
@@ -479,21 +548,29 @@ useEffect(() => {
               ) : null}
 
               <div style={{ marginTop: 12, display: "flex", gap: 14, alignItems: "center" }}>
-                <span
+                <button
+                  type="button"
+                  onClick={() => void toggleLike()}
+                  disabled={likeBusy}
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
+                    gap: 8,
                     padding: "6px 10px",
                     borderRadius: 999,
-                    border: "1px solid rgba(17,17,20,.12)",
-                    background: "rgba(17,17,20,.03)",
+                    border: likedByMe ? "1px solid rgba(17,17,20,.22)" : "1px solid rgba(17,17,20,.12)",
+                    background: likedByMe ? "rgba(17,17,20,.07)" : "rgba(17,17,20,.03)",
                     fontSize: 13,
                     fontWeight: 900,
-                    opacity: 0.9,
+                    opacity: likeBusy ? 0.6 : 0.95,
+                    cursor: likeBusy ? "default" : "pointer",
+                    color: "inherit",
                   }}
+                  aria-label={likedByMe ? "Unlike" : "Like"}
                 >
-                  {`いいね ${likeCount}`}
-                </span>
+                  <span aria-hidden style={{ fontSize: 14, lineHeight: 1 }}>{likedByMe ? "♥" : "♡"}</span>
+                  <span>{`いいね ${likeCount}`}</span>
+                </button>
               </div>
               <div style={{ marginTop: 14, fontWeight: 900, opacity: 0.85 }}>コメント</div>
 
