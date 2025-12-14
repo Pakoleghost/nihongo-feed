@@ -878,10 +878,6 @@ export default function HomePage() {
           <div className="brand">フィード</div>
 
           <div className="me">
-            {/* Added link to the leaderboard so users can navigate to the ranking page */}
-            <Link href="/leaderboard" className="miniBtn" style={{ marginRight: 8 }}>
-              Leaderboard
-            </Link>
             <div className="meAvatar">
               {myAvatarUrl ? <img src={myAvatarUrl} alt="me" /> : <span>{headerAvatarInitial}</span>}
             </div>
