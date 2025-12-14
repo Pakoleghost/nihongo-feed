@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 function levelChip(level: string) {
@@ -337,11 +336,6 @@ export default function ProfileHeaderClient(props: {
                       出る
                     </button>
 
-                    <div style={{ padding: "10px 12px", borderTop: "1px solid rgba(0,0,0,0.08)" }}>
-                      <Link href="/" style={{ textDecoration: "none" }}>
-                        Back to feed
-                      </Link>
-                    </div>
                   </div>
                 ) : null}
               </div>
@@ -410,15 +404,9 @@ export default function ProfileHeaderClient(props: {
 
               <button
                 type="button"
-                className="miniBtn"
+                className="postBtn"
                 disabled={saving}
                 onClick={saveBio}
-                style={{
-                  cursor: saving ? "not-allowed" : "pointer",
-                  background: "#111",
-                  color: "#fff",
-                  border: "1px solid #111",
-                }}
               >
                 {saving ? "Saving..." : "Save"}
               </button>
