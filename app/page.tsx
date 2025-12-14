@@ -36,6 +36,7 @@ type CommentRow = {
   user_id: string;
   content: string;
   created_at: string;
+  parent_comment_id: string | null;
   profiles:
     | { username: string | null; avatar_url: string | null }
     | { username: string | null; avatar_url: string | null }[]
@@ -48,6 +49,7 @@ type Comment = {
   user_id: string;
   content: string;
   created_at: string;
+  parent_comment_id: string | null;
   username: string; // "" si no hay
   avatar_url: string | null;
 };
@@ -134,6 +136,12 @@ export default function HomePage() {
 
   function clearReply(postId: string) {
     setReplyToByPost((prev) => ({ ...prev, [postId]: null }));
+    setCommentText((prev) => {
+      const p = (prev ?? "").toString();
+      // If the box only contains an @mention prefix, clear it.
+      if (/^@\S+\s*$/.test(p.trim())) return "";
+      return p;
+    });
   }
 
   async function deleteComment(postId: string, commentId: string) {
@@ -734,7 +742,7 @@ export default function HomePage() {
   async function loadComments(postId: string) {
     const { data, error } = await supabase
       .from("comments")
-      .select("id, post_id, user_id, content, created_at, profiles(username, avatar_url)")
+      .select("id, post_id, user_id, content, created_at, parent_comment_id, profiles(username, avatar_url)")
       .eq("post_id", postId)
       .order("created_at", { ascending: true });
 
@@ -749,6 +757,7 @@ export default function HomePage() {
           user_id: row.user_id,
           content: row.content,
           created_at: row.created_at,
+          parent_comment_id: row.parent_comment_id ?? null,
           username: prof.username, // "" si no hay
           avatar_url: prof.avatar_url,
         };
@@ -765,10 +774,12 @@ export default function HomePage() {
 
     setCommentBusy(true);
 
+    const reply = replyToByPost[postId];
     const { error } = await supabase.from("comments").insert({
       post_id: postId,
       user_id: activeUserId,
       content: commentText.trim(),
+      parent_comment_id: reply ? reply.commentId : null,
     });
 
     setCommentBusy(false);
@@ -1151,64 +1162,114 @@ export default function HomePage() {
                           まだコメントはありません。
                         </div>
                       ) : (
-                        (commentsByPost[p.id] ?? []).map((c) => {
-                          const ci = (c.username?.[0] || "?").toUpperCase();
-                          // Use comment author's user_id for profile links, falling back to empty string if missing
-                          const cProfileHref = c.user_id ? `/profile/${encodeURIComponent(c.user_id)}` : "";
+                        (() => {
+                          const list = commentsByPost[p.id] ?? [];
+                          const byParent: Record<string, Comment[]> = {};
+                          const roots: Comment[] = [];
 
-                          return (
-                            <div key={c.id} className="comment">
-                              {cProfileHref ? (
-                                <Link href={cProfileHref} className="cAvatar" style={linkStyle} aria-label={`Open profile ${c.username || "unknown"}`}>
-                                  {c.avatar_url ? <img src={c.avatar_url} alt={c.username} /> : <span>{ci}</span>}
-                                </Link>
-                              ) : (
-                                <div className="cAvatar">
-                                  {c.avatar_url ? <img src={c.avatar_url} alt="unknown" /> : <span>{ci}</span>}
-                                </div>
-                              )}
+                          list.forEach((c) => {
+                            const pid = c.parent_comment_id ? String(c.parent_comment_id) : "";
+                            if (!pid) roots.push(c);
+                            else (byParent[pid] ||= []).push(c);
+                          });
 
-                              <div className="cBody">
-                                <div className="cTop">
-                                  <div className="cUser">
-                                    {c.username ? (
-                                      <Link href={cProfileHref} style={linkStyle}>
-                                        @{c.username}
-                                      </Link>
-                                    ) : (
-                                      "@unknown"
-                                    )}
-                                  </div>
-                                  <div className="muted" style={{ fontSize: 11 }}>
-                                    {new Date(c.created_at).toLocaleString()}
-                                  </div>
-                                </div>
-                                <div className="cText">{c.content}</div>
-                                <div style={{ marginTop: 6, display: "flex", gap: 10, alignItems: "center" }}>
-                                  <button
-                                    type="button"
-                                    className="ghostBtn"
-                                    onClick={() => startReply(p.id, c.id, c.username)}
-                                    style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12, opacity: 0.7 }}
-                                  >
-                                    返信
-                                  </button>
+                          const render = (c: Comment, depth: number) => {
+                            const ci = (c.username?.[0] || "?").toUpperCase();
+                            const cProfileHref = c.user_id ? `/profile/${encodeURIComponent(c.user_id)}` : "";
+                            const kids = byParent[String(c.id)] ?? [];
 
-                                  {userId && c.user_id === userId ? (
-                                    <button
-                                      type="button"
-                                      className="ghostBtn"
-                                      onClick={() => void deleteComment(p.id, c.id)}
-                                      style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12, opacity: 0.7 }}
+                            return (
+                              <div key={c.id}>
+                                <div
+                                  className="comment"
+                                  style={{
+                                    marginLeft: depth > 0 ? 14 : 0,
+                                    borderLeft: depth > 0 ? "3px solid rgba(17,17,20,.08)" : undefined,
+                                    paddingLeft: depth > 0 ? 10 : undefined,
+                                  }}
+                                >
+                                  {cProfileHref ? (
+                                    <Link
+                                      href={cProfileHref}
+                                      className="cAvatar"
+                                      style={linkStyle}
+                                      aria-label={`Open profile ${c.username || "unknown"}`}
                                     >
-                                      削除
-                                    </button>
-                                  ) : null}
+                                      {c.avatar_url ? <img src={c.avatar_url} alt={c.username} /> : <span>{ci}</span>}
+                                    </Link>
+                                  ) : (
+                                    <div className="cAvatar">
+                                      {c.avatar_url ? <img src={c.avatar_url} alt="unknown" /> : <span>{ci}</span>}
+                                    </div>
+                                  )}
+
+                                  <div className="cBody">
+                                    <div className="cTop">
+                                      <div className="cUser">
+                                        {c.username ? (
+                                          <Link href={cProfileHref} style={linkStyle}>
+                                            @{c.username}
+                                          </Link>
+                                        ) : (
+                                          "@unknown"
+                                        )}
+                                      </div>
+                                      <div className="muted" style={{ fontSize: 11 }}>
+                                        {new Date(c.created_at).toLocaleString()}
+                                      </div>
+                                    </div>
+
+                                    <div className="cText">{c.content}</div>
+
+                                    <div style={{ marginTop: 6, display: "flex", gap: 10, alignItems: "center" }}>
+                                      <button
+                                        type="button"
+                                        className="ghostBtn"
+                                        onClick={() => startReply(p.id, c.id, c.username)}
+                                        style={{
+                                          padding: 0,
+                                          border: 0,
+                                          background: "transparent",
+                                          cursor: "pointer",
+                                          fontSize: 12,
+                                          opacity: 0.7,
+                                        }}
+                                      >
+                                        返信
+                                      </button>
+
+                                      {userId && c.user_id === userId ? (
+                                        <button
+                                          type="button"
+                                          className="ghostBtn"
+                                          onClick={() => void deleteComment(p.id, c.id)}
+                                          style={{
+                                            padding: 0,
+                                            border: 0,
+                                            background: "transparent",
+                                            cursor: "pointer",
+                                            fontSize: 12,
+                                            opacity: 0.7,
+                                          }}
+                                        >
+                                          削除
+                                        </button>
+                                      ) : null}
+                                    </div>
+                                  </div>
                                 </div>
+
+                                {kids.length ? (
+                                  <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
+                                    {kids.map((k) => render(k, depth + 1))}
+                                  </div>
+                                ) : null}
                               </div>
-                            </div>
-                          );
-                        })
+                            );
+                          };
+
+                          return roots.map((c) => render(c, 0));
+                        })()
                       )}
                     </div>
 
