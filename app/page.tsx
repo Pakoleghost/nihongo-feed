@@ -945,17 +945,7 @@ export default function HomePage() {
           const profileHref = p.user_id ? `/profile/${encodeURIComponent(p.user_id)}` : "";
 
           return (
-            <div
-              className="post"
-              key={p.id}
-              style={{
-                border: "1px solid rgba(0,0,0,.08)",
-                background: "rgba(0,0,0,.03)",
-                borderRadius: 16,
-                marginBottom: 18,
-                overflow: "hidden",
-              }}
-            >
+            <div className="post" key={p.id}>
               <div className="post-header">
                 {profileHref ? (
                   <Link href={profileHref} className="avatar" style={linkStyle} aria-label={`Open profile ${p.username || "unknown"}`}>
