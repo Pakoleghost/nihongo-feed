@@ -347,7 +347,13 @@ export default function NotificationsPage() {
     <>
       <main className="feed" style={{ minHeight: "100vh", padding: 16, paddingBottom: 80 }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>通知</h2>
+          <header className="header" style={{ padding: "10px 0 12px" }}>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+              <div className="headerTitle">フィード</div>
+              <div style={{ fontSize: 13, fontWeight: 900, opacity: 0.65 }}>通知</div>
+            </div>
+          </header>
+
           <div style={{ marginTop: 10 }}>
             {grouped.length === 0 ? (
               <p style={{ margin: 0, opacity: 0.7 }}>{emptyHint}</p>
