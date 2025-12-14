@@ -12,6 +12,7 @@ type DbNotificationRow = {
   type: string | null;
   actor_id: string | null;
   post_id: string | number | null;
+  comment_id?: string | null;
   message: string | null;
   read: boolean | null;
 };
@@ -29,6 +30,7 @@ type GroupedNotification = {
   key: string;
   type: "like" | "comment" | "other";
   post_id: string | number | null;
+  comment_id: string | null;
   created_at: string;
   read: boolean;
   ids: string[];
@@ -67,7 +69,7 @@ export default function NotificationsPage() {
         // Expect a table named `notifications` with at least: id, created_at, type, actor_id, post_id, message, read
         const { data, error } = await supabase
           .from("notifications")
-          .select("id, created_at, user_id, type, actor_id, post_id, message, read")
+          .select("id, created_at, user_id, type, actor_id, post_id, comment_id, message, read")
           .eq("user_id", uid)
           .order("created_at", { ascending: false })
           .limit(50);
@@ -219,6 +221,7 @@ export default function NotificationsPage() {
           key,
           type: t,
           post_id: n.post_id ?? null,
+          comment_id: (n as any).comment_id ?? null,
           created_at: n.created_at,
           read: !!n.read,
           ids: [n.id],
@@ -232,6 +235,7 @@ export default function NotificationsPage() {
         if (new Date(n.created_at).getTime() > new Date(existing.created_at).getTime()) {
           existing.created_at = n.created_at;
           existing.latestMessage = n.message ?? existing.latestMessage;
+          existing.comment_id = (n as any).comment_id ?? existing.comment_id;
         }
         if (actor) {
           const uname = (actor.username ?? "").toString();
@@ -265,7 +269,12 @@ export default function NotificationsPage() {
       const id = encodeURIComponent(String(g.post_id));
       // Safe fallback: always route to home feed with a post query.
       // If the feed supports deep-linking, it can focus the post.
-router.push(`/post/${id}`);
+      if (g.type === "comment" && g.comment_id) {
+        const cid = encodeURIComponent(String(g.comment_id));
+        router.push(`/post/${id}?c=${cid}`);
+        return;
+      }
+      router.push(`/post/${id}`);
     },
     [markGroupRead, router]
   );
