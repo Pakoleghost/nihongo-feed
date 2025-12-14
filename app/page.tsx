@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { requireSession } from "@/lib/authGuard";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
 
 type DbPostRow = {
@@ -69,7 +68,6 @@ function normalizeProfile(p: any): { username: string; avatar_url: string | null
 
 export default function HomePage() {
   const [userId, setUserId] = useState<string | null>(null);
-  const searchParams = useSearchParams();
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
 
   // LOGIN UI
@@ -152,7 +150,10 @@ export default function HomePage() {
     if (!userId) return;
     if (checkingProfile || needsUsername) return;
 
-    const compose = searchParams.get("compose");
+    const compose =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("compose")
+        : null;
     if (compose !== "1") return;
 
     // focus + scroll to composer
@@ -173,7 +174,7 @@ export default function HomePage() {
     } catch {
       // ignore
     }
-  }, [searchParams, userId, checkingProfile, needsUsername]);
+  }, [userId, checkingProfile, needsUsername]);
 
   async function checkMyProfile(uid: string) {
     setCheckingProfile(true);
