@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { requireSession } from "@/lib/authGuard";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
@@ -435,7 +435,7 @@ export default function HomePage() {
     setPosts([]);
   }
 
-  const onTapBrand = async () => {
+  const onTapBrand = useCallback(async () => {
     if (typeof window === "undefined") return;
 
     const el = feedRef.current;
@@ -443,7 +443,7 @@ export default function HomePage() {
     const y = elScrollable ? el!.scrollTop : window.scrollY;
 
     // If not near top, scroll to top.
-    if (y > 20) {
+    if (y > 60) {
       if (elScrollable) el!.scrollTo({ top: 0, behavior: "smooth" });
       else window.scrollTo({ top: 0, behavior: "smooth" });
       return;
@@ -453,7 +453,26 @@ export default function HomePage() {
     const activeUserId = userId ?? (await requireSession());
     if (!activeUserId) return;
     void loadAll(activeUserId);
-  };
+  }, [userId]);
+
+  // Allow BottomNav (or any component) to trigger the same scroll-to-top + soft refresh behavior
+  // as tapping the フィード header title.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Expose a stable global hook.
+    (window as any).__homeTap = () => {
+      void onTapBrand();
+    };
+
+    return () => {
+      try {
+        delete (window as any).__homeTap;
+      } catch {
+        // ignore
+      }
+    };
+  }, [onTapBrand]);
 
   async function loadAll(uid: string) {
     setLoading(true);
