@@ -1000,16 +1000,6 @@ export default function HomePage() {
                   <span>コメント</span>
                   <span className="muted">{p.commentCount}</span>
                 </button>
-                <Link
-                  href={`/post/${encodeURIComponent(p.id)}`}
-                  style={{
-                    textDecoration: "underline",
-                    fontWeight: 500,
-                    fontSize: 13,
-                  }}
-                >
-                  View post →
-                </Link>
               </div>
 
               {openCommentsFor === p.id ? (
