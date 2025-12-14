@@ -435,6 +435,26 @@ export default function HomePage() {
     setPosts([]);
   }
 
+  const onTapBrand = async () => {
+    if (typeof window === "undefined") return;
+
+    const el = feedRef.current;
+    const elScrollable = !!el && el.scrollHeight > el.clientHeight + 2;
+    const y = elScrollable ? el!.scrollTop : window.scrollY;
+
+    // If not near top, scroll to top.
+    if (y > 20) {
+      if (elScrollable) el!.scrollTo({ top: 0, behavior: "smooth" });
+      else window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    // If already at top, refresh the feed data.
+    const activeUserId = userId ?? (await requireSession());
+    if (!activeUserId) return;
+    void loadAll(activeUserId);
+  };
+
   async function loadAll(uid: string) {
     setLoading(true);
 
@@ -938,9 +958,24 @@ export default function HomePage() {
       <div ref={feedRef} className="feed" style={{ paddingBottom: 80, minHeight: "100vh" }}>
       <div className={`header ${headerHidden ? "header--hidden" : ""}`}>
         <div className="headerInner">
-          <div className="brand" style={{ fontSize: 30, fontWeight: 900, letterSpacing: 0 }}>
+          <button
+            type="button"
+            className="brand"
+            onClick={() => void onTapBrand()}
+            style={{
+              background: "transparent",
+              border: 0,
+              padding: 0,
+              margin: 0,
+              cursor: "pointer",
+              fontSize: 30,
+              fontWeight: 900,
+              letterSpacing: 0,
+            }}
+            aria-label="Scroll to top or refresh"
+          >
             フィード
-          </div>
+          </button>
         </div>
       </div>
 
