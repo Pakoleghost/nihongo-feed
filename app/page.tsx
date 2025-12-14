@@ -108,6 +108,52 @@ export default function HomePage() {
   const [commentText, setCommentText] = useState("");
   const [commentBusy, setCommentBusy] = useState(false);
   const [commentsByPost, setCommentsByPost] = useState<Record<string, Comment[]>>({});
+  const commentInputRef = useRef<HTMLInputElement | null>(null);
+  const [replyToByPost, setReplyToByPost] = useState<
+    Record<string, { commentId: string; username: string } | null>
+  >({});
+  function startReply(postId: string, commentId: string, username: string) {
+    // Ensure the comments panel is open for this post
+    if (openCommentsFor !== postId) {
+      setOpenCommentsFor(postId);
+    }
+
+    const handle = username ? `@${username} ` : "@unknown ";
+    setReplyToByPost((prev) => ({ ...prev, [postId]: { commentId, username: username || "unknown" } }));
+    setCommentText(handle);
+
+    // focus input
+    setTimeout(() => {
+      try {
+        commentInputRef.current?.focus();
+      } catch {
+        // ignore
+      }
+    }, 0);
+  }
+
+  function clearReply(postId: string) {
+    setReplyToByPost((prev) => ({ ...prev, [postId]: null }));
+  }
+
+  async function deleteComment(postId: string, commentId: string) {
+    const activeUserId = userId ?? (await requireSession());
+    if (!activeUserId) return;
+
+    const ok = confirm("Delete this comment?");
+    if (!ok) return;
+
+    const { error } = await supabase
+      .from("comments")
+      .delete()
+      .eq("id", commentId)
+      .eq("user_id", activeUserId);
+
+    if (error) return alert(error.message);
+
+    await loadComments(postId);
+    await loadAll(activeUserId);
+  }
   // likes in-flight guard (prevents double-click duplicate inserts)
   const [likeBusyByPost, setLikeBusyByPost] = useState<Record<string, boolean>>({});
 
@@ -730,6 +776,7 @@ export default function HomePage() {
     if (error) return alert(error.message);
 
     setCommentText("");
+    clearReply(postId);
     await loadComments(postId);
     await loadAll(activeUserId);
   }
@@ -738,6 +785,7 @@ export default function HomePage() {
     const next = openCommentsFor === postId ? null : postId;
     setOpenCommentsFor(next);
     setCommentText("");
+    clearReply(postId);
     if (next) await loadComments(next);
   }
 
@@ -1136,6 +1184,27 @@ export default function HomePage() {
                                   </div>
                                 </div>
                                 <div className="cText">{c.content}</div>
+                                <div style={{ marginTop: 6, display: "flex", gap: 10, alignItems: "center" }}>
+                                  <button
+                                    type="button"
+                                    className="ghostBtn"
+                                    onClick={() => startReply(p.id, c.id, c.username)}
+                                    style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12, opacity: 0.7 }}
+                                  >
+                                    返信
+                                  </button>
+
+                                  {userId && c.user_id === userId ? (
+                                    <button
+                                      type="button"
+                                      className="ghostBtn"
+                                      onClick={() => void deleteComment(p.id, c.id)}
+                                      style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12, opacity: 0.7 }}
+                                    >
+                                      削除
+                                    </button>
+                                  ) : null}
+                                </div>
                               </div>
                             </div>
                           );
@@ -1144,7 +1213,37 @@ export default function HomePage() {
                     </div>
 
                     <div className="commentComposer">
+                      {replyToByPost[p.id] ? (
+                        <div
+                          style={{
+                            fontSize: 12,
+                            opacity: 0.7,
+                            marginBottom: 6,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <span>{`@${replyToByPost[p.id]!.username} に返信中`}</span>
+                          <button
+                            type="button"
+                            onClick={() => clearReply(p.id)}
+                            style={{
+                              padding: 0,
+                              border: 0,
+                              background: "transparent",
+                              cursor: "pointer",
+                              fontSize: 12,
+                              opacity: 0.7,
+                            }}
+                          >
+                            やめる
+                          </button>
+                        </div>
+                      ) : null}
+
                       <input
+                        ref={commentInputRef}
                         className="commentInput"
                         placeholder="コメントを書く…"
                         value={commentText}
