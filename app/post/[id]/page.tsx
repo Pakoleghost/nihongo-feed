@@ -112,19 +112,84 @@ export default function PostPage() {
     if (!postId) return;
     const t = commentText.trim();
     if (!t) return;
+
     const { data: u } = await supabase.auth.getUser();
     const uid = u.user?.id;
     if (!uid) return alert("Session expired. Please log in again.");
 
     setCommentBusy(true);
     try {
-      const { error } = await supabase.from("comments").insert({
-        post_id: postId as any,
-        user_id: uid,
-        content: t,
-        parent_comment_id: replyTo ? replyTo.commentId : null,
-      });
+      const parentId = replyTo ? replyTo.commentId : null;
+
+      // 1) Insert comment and get its id for deep-link highlighting
+      const { data: inserted, error } = await supabase
+        .from("comments")
+        .insert({
+          post_id: postId as any,
+          user_id: uid,
+          content: t,
+          parent_comment_id: parentId,
+        })
+        .select("id")
+        .single();
+
       if (error) throw error;
+      const newCommentId = (inserted as any)?.id ? String((inserted as any).id) : null;
+
+      // 2) Best-effort notifications
+      try {
+        // Post owner
+        const postOwnerId = post?.user_id ? String(post.user_id) : null;
+
+        // Parent comment owner (if reply)
+        let parentOwnerId: string | null = null;
+        if (parentId) {
+          const { data: parentRow } = await supabase
+            .from("comments")
+            .select("user_id")
+            .eq("id", parentId)
+            .maybeSingle();
+          parentOwnerId = (parentRow as any)?.user_id ? String((parentRow as any).user_id) : null;
+        }
+
+        const notifInserts: any[] = [];
+
+        // Comment notification to post owner
+        if (postOwnerId && postOwnerId !== uid && newCommentId) {
+          notifInserts.push({
+            user_id: postOwnerId,
+            actor_id: uid,
+            post_id: postId as any,
+            comment_id: newCommentId,
+            type: "comment",
+            read: false,
+          });
+        }
+
+        // Reply notification to parent comment owner
+        if (
+          parentOwnerId &&
+          parentOwnerId !== uid &&
+          parentOwnerId !== postOwnerId &&
+          newCommentId
+        ) {
+          notifInserts.push({
+            user_id: parentOwnerId,
+            actor_id: uid,
+            post_id: postId as any,
+            comment_id: newCommentId,
+            type: "reply",
+            read: false,
+          });
+        }
+
+        if (notifInserts.length) {
+          await supabase.from("notifications").insert(notifInserts);
+        }
+      } catch {
+        // ignore notification failures
+      }
+
       setCommentText("");
       setReplyTo(null);
       await reloadComments();
@@ -135,7 +200,7 @@ export default function PostPage() {
     } finally {
       setCommentBusy(false);
     }
-  }, [commentText, postId, reloadComments, reloadLikes, replyTo]);
+  }, [commentText, postId, post, reloadComments, reloadLikes, replyTo]);
 
   const deleteComment = useCallback(
     async (commentId: string) => {
