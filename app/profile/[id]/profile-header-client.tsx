@@ -215,7 +215,7 @@ export default function ProfileHeaderClient(props: {
               </div>
 
               <div className="muted" style={{ fontSize: 12 }}>
-                Posts: <span className="muted">{postCount}</span> · Comments:{" "}
+                投稿: <span className="muted">{postCount}</span> · コメント:{" "}
                 <span className="muted">{commentCount}</span>
               </div>
 
