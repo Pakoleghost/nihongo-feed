@@ -42,9 +42,10 @@ export default function BottomNav({
         right: 0,
         bottom: 0,
         zIndex: 50,
-        borderTop: "1px solid rgba(255,255,255,.08)",
-        background: "rgba(12,12,12,.92)",
-        backdropFilter: "blur(10px)",
+        borderTop: "1px solid rgba(17,17,20,.10)",
+        background: "rgba(255,255,255,.92)",
+        backdropFilter: "blur(12px)",
+        paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
       <div
@@ -65,7 +66,7 @@ export default function BottomNav({
               href={it.href}
               style={{
                 textDecoration: "none",
-                color: active ? "#fff" : "rgba(255,255,255,.6)",
+                color: active ? "#111114" : "rgba(17,17,20,.55)",
               }}
               title={it.label}
             >
@@ -76,9 +77,9 @@ export default function BottomNav({
                   display: "grid",
                   placeItems: "center",
                   border: active
-                    ? "1px solid rgba(255,255,255,.18)"
-                    : "1px solid rgba(255,255,255,.06)",
-                  background: active ? "rgba(255,255,255,.08)" : "rgba(255,255,255,.03)",
+                    ? "1px solid rgba(17,17,20,.14)"
+                    : "1px solid rgba(17,17,20,.08)",
+                  background: active ? "rgba(17,17,20,.04)" : "rgba(17,17,20,.02)",
                   fontWeight: 800,
                   letterSpacing: 0.5,
                 }}
@@ -100,9 +101,9 @@ export default function BottomNav({
                         display: "grid",
                         placeItems: "center",
                         border: active
-                          ? "1px solid rgba(255,255,255,.22)"
-                          : "1px solid rgba(255,255,255,.14)",
-                        color: active ? "#fff" : "rgba(255,255,255,.85)",
+                          ? "1px solid rgba(17,17,20,.16)"
+                          : "1px solid rgba(17,17,20,.10)",
+                        color: active ? "#111114" : "rgba(17,17,20,.70)",
                         fontSize: 12,
                         fontWeight: 900,
                       }}
