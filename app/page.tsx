@@ -936,14 +936,7 @@ export default function HomePage() {
   return (
     <>
       <div ref={feedRef} className="feed" style={{ paddingBottom: 80, minHeight: "100vh" }}>
-      <div
-        className="header"
-        style={{
-          transform: headerHidden ? "translateY(-110%)" : "translateY(0)",
-          transition: "transform 180ms ease",
-          willChange: "transform",
-        }}
-      >
+      <div className={`header ${headerHidden ? "header--hidden" : ""}`}>
         <div className="headerInner">
           <div className="brand" style={{ fontSize: 30, fontWeight: 900, letterSpacing: 0 }}>
             フィード

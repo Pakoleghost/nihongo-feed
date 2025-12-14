@@ -54,6 +54,9 @@ a:hover {
   background: rgba(255,255,255,.85);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
+  z-index: 20;
+  transition: transform 180ms ease;
+  will-change: transform;
 }
 
 .headerInner{
@@ -61,6 +64,10 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.header--hidden{
+  transform: translateY(-110%);
 }
 
 .brand {
