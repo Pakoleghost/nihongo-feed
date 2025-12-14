@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { requireSession } from "@/lib/authGuard";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import BottomNav from "@/components/BottomNav";
 
 type DbPostRow = {
   id: string;
@@ -802,8 +803,10 @@ export default function HomePage() {
   }
 
   // FEED
+  const myProfileHref = userId ? `/profile/${encodeURIComponent(userId)}` : "/";
   return (
-    <div className="feed">
+    <>
+      <div className="feed" style={{ paddingBottom: 80 }}>
       <div className="header">
         <div className="headerInner">
           <div className="brand">フィード</div>
@@ -997,6 +1000,9 @@ export default function HomePage() {
           );
         })
       )}
-    </div>
+      </div>
+
+      <BottomNav profileHref={myProfileHref} />
+    </>
   );
 }
