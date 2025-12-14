@@ -104,6 +104,8 @@ export default function HomePage() {
   const [commentText, setCommentText] = useState("");
   const [commentBusy, setCommentBusy] = useState(false);
   const [commentsByPost, setCommentsByPost] = useState<Record<string, Comment[]>>({});
+  // likes in-flight guard (prevents double-click duplicate inserts)
+  const [likeBusyByPost, setLikeBusyByPost] = useState<Record<string, boolean>>({});
 
   const BASE_URL = useMemo(() => {
     const env = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim();
@@ -507,44 +509,59 @@ export default function HomePage() {
   }
 
   async function toggleLike(postId: string) {
-    const activeUserId = userId ?? (await requireSession());
-    if (!activeUserId) return;
+    if (likeBusyByPost[postId]) return;
+    setLikeBusyByPost((prev) => ({ ...prev, [postId]: true }));
 
-    const p = posts.find((x) => x.id === postId);
-    if (!p) return;
+    try {
+      const activeUserId = userId ?? (await requireSession());
+      if (!activeUserId) return;
 
-    // optimistic UI
-    setPosts((prev) =>
-      prev.map((x) =>
-        x.id === postId
-          ? { ...x, likedByMe: !x.likedByMe, likes: x.likedByMe ? x.likes - 1 : x.likes + 1 }
-          : x
-      )
-    );
+      const p = posts.find((x) => x.id === postId);
+      if (!p) return;
 
-    // DB uses bigint post_id.
-    const pid = Number(postId);
+      // optimistic UI
+      setPosts((prev) =>
+        prev.map((x) =>
+          x.id === postId
+            ? { ...x, likedByMe: !x.likedByMe, likes: x.likedByMe ? x.likes - 1 : x.likes + 1 }
+            : x
+        )
+      );
 
-    if (p.likedByMe) {
-      // unlike
-      const { error } = await supabase
-        .from("likes")
-        .delete()
-        .eq("post_id", pid)
-        .eq("user_id", activeUserId);
+      // DB uses bigint post_id.
+      const pid = Number(postId);
 
-      if (error) {
-        alert(error.message);
-        void loadAll(activeUserId);
+      if (p.likedByMe) {
+        // unlike
+        const { error } = await supabase
+          .from("likes")
+          .delete()
+          .eq("post_id", pid)
+          .eq("user_id", activeUserId);
+
+        if (error) {
+          alert(error.message);
+          void loadAll(activeUserId);
+        }
+      } else {
+        // like
+        const { error } = await supabase.from("likes").insert({ post_id: pid, user_id: activeUserId });
+
+        if (error) {
+          const msg = (error.message || "").toLowerCase();
+          const code = (error as any).code;
+
+          // Ignore duplicate like errors (unique constraint) because the end state is already "liked".
+          if (code === "23505" || msg.includes("duplicate") || msg.includes("unique")) {
+            // no alert
+          } else {
+            alert(error.message);
+          }
+          void loadAll(activeUserId);
+        }
       }
-    } else {
-      // like
-      const { error } = await supabase.from("likes").insert({ post_id: pid, user_id: activeUserId });
-
-      if (error) {
-        alert(error.message);
-        void loadAll(activeUserId);
-      }
+    } finally {
+      setLikeBusyByPost((prev) => ({ ...prev, [postId]: false }));
     }
   }
 
