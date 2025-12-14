@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { requireSession } from "@/lib/authGuard";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
@@ -71,6 +72,8 @@ export default function HomePage() {
   // LOGIN UI
   const [email, setEmail] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
+  const [password, setPassword] = useState("");
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
 
   // USERNAME GATE
   const [checkingProfile, setCheckingProfile] = useState(true);
@@ -174,14 +177,16 @@ export default function HomePage() {
   }, [normalizedNewUsername]);
 
   async function saveUsername() {
-    if (!userId) return;
     if (saveBusy) return;
     if (usernameError) return;
+
+    const activeUserId = userId ?? (await requireSession());
+    if (!activeUserId) return;
 
     setSaveBusy(true);
 
     const { error } = await supabase.from("profiles").upsert({
-      id: userId,
+      id: activeUserId,
       username: normalizedNewUsername,
       avatar_url: myAvatarUrl,
     });
@@ -195,30 +200,59 @@ export default function HomePage() {
 
     setMyUsername(normalizedNewUsername);
     setNeedsUsername(false);
-    await loadAll(userId);
+    await loadAll(activeUserId);
   }
 
-  async function sendMagicLink() {
+  async function loginWithPassword() {
     if (authBusy) return;
-    if (!email.trim()) return;
+    if (!email.trim() || !password) return;
 
     setAuthBusy(true);
 
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
+      password,
+    });
+
+    setAuthBusy(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setPassword("");
+  }
+
+  async function signUpWithPassword() {
+    if (authBusy) return;
+    if (!email.trim() || !password) return;
+
+    setAuthBusy(true);
+
+    const { error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
       options: { emailRedirectTo: SITE_URL },
     });
 
     setAuthBusy(false);
 
-    if (error) alert(error.message);
-    else alert("Check your email.");
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setPassword("");
+    setAuthMode("login");
+    alert("Check your email to confirm your account, then log in.");
   }
 
   async function logout() {
     await supabase.auth.signOut();
     setUserId(null);
     setEmail("");
+    setPassword("");
     setNeedsUsername(false);
     setNewUsername("");
     setPosts([]);
@@ -300,15 +334,17 @@ export default function HomePage() {
   }
 
   async function createPost() {
-    if (!userId) return alert("Log in first.");
     if (busy) return;
     if (!text.trim() && !imageFile) return;
+
+    const activeUserId = userId ?? (await requireSession());
+    if (!activeUserId) return;
 
     setBusy(true);
 
     const { data: post, error: postError } = await supabase
       .from("posts")
-      .insert({ content: text.trim(), user_id: userId })
+      .insert({ content: text.trim(), user_id: activeUserId })
       .select("id")
       .single();
 
@@ -346,11 +382,12 @@ export default function HomePage() {
     setText("");
     setImageFile(null);
     setBusy(false);
-    void loadAll(userId);
+    void loadAll(activeUserId);
   }
 
   async function toggleLike(postId: string) {
-    if (!userId) return alert("Log in first.");
+    const activeUserId = userId ?? (await requireSession());
+    if (!activeUserId) return;
 
     const p = posts.find((x) => x.id === postId);
     if (!p) return;
@@ -364,30 +401,39 @@ export default function HomePage() {
     );
 
     if (p.likedByMe) {
-      const { error } = await supabase.from("reactions").delete().eq("post_id", postId).eq("user_id", userId);
+      const { error } = await supabase
+        .from("reactions")
+        .delete()
+        .eq("post_id", postId)
+        .eq("user_id", activeUserId);
       if (error) {
         alert(error.message);
-        void loadAll(userId);
+        void loadAll(activeUserId);
       }
     } else {
-      const { error } = await supabase.from("reactions").insert({ post_id: postId, user_id: userId });
+      const { error } = await supabase.from("reactions").insert({ post_id: postId, user_id: activeUserId });
       if (error) {
         alert(error.message);
-        void loadAll(userId);
+        void loadAll(activeUserId);
       }
     }
   }
 
   async function deletePost(postId: string) {
-    if (!userId) return alert("Log in first.");
+    const activeUserId = userId ?? (await requireSession());
+    if (!activeUserId) return;
     const ok = confirm("Delete this post?");
     if (!ok) return;
 
-    const { error } = await supabase.from("posts").delete().eq("id", postId).eq("user_id", userId);
+    const { error } = await supabase
+      .from("posts")
+      .delete()
+      .eq("id", postId)
+      .eq("user_id", activeUserId);
     if (error) return alert(error.message);
 
     if (openCommentsFor === postId) setOpenCommentsFor(null);
-    void loadAll(userId);
+    void loadAll(activeUserId);
   }
 
   async function loadComments(postId: string) {
@@ -417,7 +463,8 @@ export default function HomePage() {
   }
 
   async function addComment(postId: string) {
-    if (!userId) return alert("Log in first.");
+    const activeUserId = userId ?? (await requireSession());
+    if (!activeUserId) return;
     if (commentBusy) return;
     if (!commentText.trim()) return;
 
@@ -425,7 +472,7 @@ export default function HomePage() {
 
     const { error } = await supabase.from("comments").insert({
       post_id: postId,
-      user_id: userId,
+      user_id: activeUserId,
       content: commentText.trim(),
     });
 
@@ -435,7 +482,7 @@ export default function HomePage() {
 
     setCommentText("");
     await loadComments(postId);
-    await loadAll(userId);
+    await loadAll(activeUserId);
   }
 
   async function openComments(postId: string) {
@@ -446,13 +493,14 @@ export default function HomePage() {
   }
 
   async function uploadMyAvatar(file: File) {
-    if (!userId) return alert("Log in first.");
+    const activeUserId = userId ?? (await requireSession());
+    if (!activeUserId) return;
     if (avatarBusy) return;
 
     setAvatarBusy(true);
 
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const path = `avatars/${userId}.${ext}`;
+    const path = `avatars/${activeUserId}.${ext}`;
 
     const { error: uploadError } = await supabase.storage
       .from("post-images")
@@ -466,7 +514,7 @@ export default function HomePage() {
     const { data: pub } = supabase.storage.from("post-images").getPublicUrl(path);
 
     const { error: updateError } = await supabase.from("profiles").upsert({
-      id: userId,
+      id: activeUserId,
       username: myUsername === "unknown" ? normalizedNewUsername || null : myUsername,
       avatar_url: pub.publicUrl,
     });
@@ -476,7 +524,7 @@ export default function HomePage() {
     if (updateError) return alert(updateError.message);
 
     setMyAvatarUrl(pub.publicUrl);
-    void loadAll(userId);
+    void loadAll(activeUserId);
   }
 
   const headerAvatarInitial = useMemo(() => (myUsername?.[0] || "?").toUpperCase(), [myUsername]);
@@ -490,7 +538,9 @@ export default function HomePage() {
       <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
         <div style={{ width: 360, background: "#111", color: "#fff", borderRadius: 16, padding: 18 }}>
           <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: 2 }}>フィード</div>
-          <div style={{ opacity: 0.7, marginTop: 6, marginBottom: 14, fontSize: 13 }}>Log in with email</div>
+          <div style={{ opacity: 0.7, marginTop: 6, marginBottom: 14, fontSize: 13 }}>
+            Log in with email and password
+          </div>
 
           <input
             value={email}
@@ -508,9 +558,26 @@ export default function HomePage() {
             }}
           />
 
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="password"
+            style={{
+              width: "100%",
+              padding: 12,
+              borderRadius: 12,
+              border: "1px solid rgba(255,255,255,.15)",
+              background: "rgba(255,255,255,.06)",
+              color: "#fff",
+              outline: "none",
+              marginBottom: 10,
+            }}
+          />
+
           <button
-            onClick={sendMagicLink}
-            disabled={authBusy || !email.trim()}
+            onClick={authMode === "login" ? loginWithPassword : signUpWithPassword}
+            disabled={authBusy || !email.trim() || !password}
             style={{
               width: "100%",
               padding: 12,
@@ -520,10 +587,31 @@ export default function HomePage() {
               color: "#111",
               fontWeight: 800,
               cursor: "pointer",
-              opacity: authBusy || !email.trim() ? 0.6 : 1,
+              opacity: authBusy || !email.trim() || !password ? 0.6 : 1,
             }}
           >
-            {authBusy ? "Sending…" : "Send link"}
+            {authBusy
+              ? "…"
+              : authMode === "login"
+                ? "Log in"
+                : "Create account"}
+          </button>
+
+          <button
+            onClick={() => setAuthMode((prev) => (prev === "login" ? "signup" : "login"))}
+            style={{
+              width: "100%",
+              padding: 10,
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,.1)",
+              background: "transparent",
+              color: "#fff",
+              fontWeight: 600,
+              cursor: "pointer",
+              marginTop: 10,
+            }}
+          >
+            {authMode === "login" ? "Need an account? Sign up" : "Already have an account? Log in"}
           </button>
         </div>
       </main>
