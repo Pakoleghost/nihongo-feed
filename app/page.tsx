@@ -938,134 +938,136 @@ export default function HomePage() {
           Loading…
         </div>
       ) : (
-        posts.map((p) => {
-          const initial = (p.username?.[0] || "?").toUpperCase();
-          const canDelete = !!userId && p.user_id === userId;
-          // Link posts and avatars using the user_id rather than the username to ensure stable routing.
-          const profileHref = p.user_id ? `/profile/${encodeURIComponent(p.user_id)}` : "";
+        <div style={{ display: "grid", gap: 12 }}>
+          {posts.map((p) => {
+            const initial = (p.username?.[0] || "?").toUpperCase();
+            const canDelete = !!userId && p.user_id === userId;
+            // Link posts and avatars using the user_id rather than the username to ensure stable routing.
+            const profileHref = p.user_id ? `/profile/${encodeURIComponent(p.user_id)}` : "";
 
-          return (
-            <div className="post" key={p.id}>
-              <div className="post-header">
-                {profileHref ? (
-                  <Link href={profileHref} className="avatar" style={linkStyle} aria-label={`Open profile ${p.username || "unknown"}`}>
-                    {p.avatar_url ? <img src={p.avatar_url} alt={p.username} /> : <span>{initial}</span>}
-                  </Link>
-                ) : (
-                  <div className="avatar" aria-label="No profile">
-                    {p.avatar_url ? <img src={p.avatar_url} alt="unknown" /> : <span>{initial}</span>}
-                  </div>
-                )}
+            return (
+              <div className="post" key={p.id}>
+                <div className="post-header">
+                  {profileHref ? (
+                    <Link href={profileHref} className="avatar" style={linkStyle} aria-label={`Open profile ${p.username || "unknown"}`}>
+                      {p.avatar_url ? <img src={p.avatar_url} alt={p.username} /> : <span>{initial}</span>}
+                    </Link>
+                  ) : (
+                    <div className="avatar" aria-label="No profile">
+                      {p.avatar_url ? <img src={p.avatar_url} alt="unknown" /> : <span>{initial}</span>}
+                    </div>
+                  )}
 
-                <div className="postMeta">
-                  <div className="nameRow">
-                    {p.username ? (
-                      <Link href={profileHref} className="handle" style={linkStyle}>
-                        @{p.username}
-                      </Link>
-                    ) : (
-                      <span className="handle muted">@unknown</span>
-                    )}
+                  <div className="postMeta">
+                    <div className="nameRow">
+                      {p.username ? (
+                        <Link href={profileHref} className="handle" style={linkStyle}>
+                          @{p.username}
+                        </Link>
+                      ) : (
+                        <span className="handle muted">@unknown</span>
+                      )}
 
-                    {canDelete ? (
-                      <button className="ghostBtn" onClick={() => deletePost(p.id)} title="Delete">
-                        削除
-                      </button>
-                    ) : null}
-                  </div>
+                      {canDelete ? (
+                        <button className="ghostBtn" onClick={() => deletePost(p.id)} title="Delete">
+                          削除
+                        </button>
+                      ) : null}
+                    </div>
 
-                  <div className="muted" style={{ fontSize: 12 }}>
-                    {new Date(p.created_at).toLocaleString()}
+                    <div className="muted" style={{ fontSize: 12 }}>
+                      {new Date(p.created_at).toLocaleString()}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {p.content ? <div className="post-content">{p.content}</div> : null}
+                {p.content ? <div className="post-content">{p.content}</div> : null}
 
-              {p.image_url ? (
-                <div style={{ padding: "0 12px 12px" }}>
-                  <img src={p.image_url} alt="post" className="postImage" />
+                {p.image_url ? (
+                  <div style={{ padding: "0 12px 12px" }}>
+                    <img src={p.image_url} alt="post" className="postImage" />
+                  </div>
+                ) : null}
+
+                <div className="actionsRow">
+                  <button className="likeBtn" onClick={() => toggleLike(p.id)}>
+                    <span className="icon">{p.likedByMe ? "💙" : "🤍"}</span>
+                    <span>いいね</span>
+                    <span className="muted">{p.likes}</span>
+                  </button>
+
+                  <button className="commentBtn" onClick={() => void openComments(p.id)}>
+                    <span className="icon">💬</span>
+                    <span>コメント</span>
+                    <span className="muted">{p.commentCount}</span>
+                  </button>
                 </div>
-              ) : null}
 
-              <div className="actionsRow">
-                <button className="likeBtn" onClick={() => toggleLike(p.id)}>
-                  <span className="icon">{p.likedByMe ? "💙" : "🤍"}</span>
-                  <span>いいね</span>
-                  <span className="muted">{p.likes}</span>
-                </button>
+                {openCommentsFor === p.id ? (
+                  <div className="comments">
+                    <div className="commentsList">
+                      {(commentsByPost[p.id] ?? []).length === 0 ? (
+                        <div className="muted" style={{ fontSize: 13, padding: 8 }}>
+                          No comments yet.
+                        </div>
+                      ) : (
+                        (commentsByPost[p.id] ?? []).map((c) => {
+                          const ci = (c.username?.[0] || "?").toUpperCase();
+                          // Use comment author's user_id for profile links, falling back to empty string if missing
+                          const cProfileHref = c.user_id ? `/profile/${encodeURIComponent(c.user_id)}` : "";
 
-                <button className="commentBtn" onClick={() => void openComments(p.id)}>
-                  <span className="icon">💬</span>
-                  <span>コメント</span>
-                  <span className="muted">{p.commentCount}</span>
-                </button>
-              </div>
-
-              {openCommentsFor === p.id ? (
-                <div className="comments">
-                  <div className="commentsList">
-                    {(commentsByPost[p.id] ?? []).length === 0 ? (
-                      <div className="muted" style={{ fontSize: 13, padding: 8 }}>
-                        No comments yet.
-                      </div>
-                    ) : (
-                      (commentsByPost[p.id] ?? []).map((c) => {
-                        const ci = (c.username?.[0] || "?").toUpperCase();
-                        // Use comment author's user_id for profile links, falling back to empty string if missing
-                        const cProfileHref = c.user_id ? `/profile/${encodeURIComponent(c.user_id)}` : "";
-
-                        return (
-                          <div key={c.id} className="comment">
-                            {cProfileHref ? (
-                              <Link href={cProfileHref} className="cAvatar" style={linkStyle} aria-label={`Open profile ${c.username || "unknown"}`}>
-                                {c.avatar_url ? <img src={c.avatar_url} alt={c.username} /> : <span>{ci}</span>}
-                              </Link>
-                            ) : (
-                              <div className="cAvatar">
-                                {c.avatar_url ? <img src={c.avatar_url} alt="unknown" /> : <span>{ci}</span>}
-                              </div>
-                            )}
-
-                            <div className="cBody">
-                              <div className="cTop">
-                                <div className="cUser">
-                                  {c.username ? (
-                                    <Link href={cProfileHref} style={linkStyle}>
-                                      @{c.username}
-                                    </Link>
-                                  ) : (
-                                    "@unknown"
-                                  )}
+                          return (
+                            <div key={c.id} className="comment">
+                              {cProfileHref ? (
+                                <Link href={cProfileHref} className="cAvatar" style={linkStyle} aria-label={`Open profile ${c.username || "unknown"}`}>
+                                  {c.avatar_url ? <img src={c.avatar_url} alt={c.username} /> : <span>{ci}</span>}
+                                </Link>
+                              ) : (
+                                <div className="cAvatar">
+                                  {c.avatar_url ? <img src={c.avatar_url} alt="unknown" /> : <span>{ci}</span>}
                                 </div>
-                                <div className="muted" style={{ fontSize: 11 }}>
-                                  {new Date(c.created_at).toLocaleString()}
+                              )}
+
+                              <div className="cBody">
+                                <div className="cTop">
+                                  <div className="cUser">
+                                    {c.username ? (
+                                      <Link href={cProfileHref} style={linkStyle}>
+                                        @{c.username}
+                                      </Link>
+                                    ) : (
+                                      "@unknown"
+                                    )}
+                                  </div>
+                                  <div className="muted" style={{ fontSize: 11 }}>
+                                    {new Date(c.created_at).toLocaleString()}
+                                  </div>
                                 </div>
+                                <div className="cText">{c.content}</div>
                               </div>
-                              <div className="cText">{c.content}</div>
                             </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
+                          );
+                        })
+                      )}
+                    </div>
 
-                  <div className="commentComposer">
-                    <input
-                      className="commentInput"
-                      placeholder="コメントを書く…"
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                    />
-                    <button className="miniPost" disabled={commentBusy || !commentText.trim()} onClick={() => void addComment(p.id)}>
-                      {commentBusy ? "…" : "送信"}
-                    </button>
+                    <div className="commentComposer">
+                      <input
+                        className="commentInput"
+                        placeholder="コメントを書く…"
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                      />
+                      <button className="miniPost" disabled={commentBusy || !commentText.trim()} onClick={() => void addComment(p.id)}>
+                        {commentBusy ? "…" : "送信"}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ) : null}
-            </div>
-          );
-        })
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
       )}
       </div>
 
