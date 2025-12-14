@@ -342,8 +342,8 @@ useEffect(() => {
               border: "1px solid rgba(17,17,20,.10)",
               borderRadius: 14,
               padding: 10,
-              background: isHi ? "rgba(17,17,20,.04)" : "#fff",
-              boxShadow: isHi ? "0 0 0 2px rgba(17,17,20,.10) inset" : "none",
+              background: isHi ? "rgba(17,17,20,.08)" : "#fff",
+              boxShadow: isHi ? "0 0 0 2px rgba(17,17,20,.14) inset" : "none",
               marginLeft: depth > 0 ? 14 : 0,
               borderLeft: depth > 0 ? "3px solid rgba(17,17,20,.08)" : undefined,
             }}
@@ -359,6 +359,7 @@ useEffect(() => {
                 fontWeight: 900,
                 fontSize: 13,
                 textAlign: "left",
+                color: "inherit",
               }}
             >
               {`@${uname}`}
@@ -432,6 +433,7 @@ useEffect(() => {
                     background: "transparent",
                     cursor: post?.user_id ? "pointer" : "default",
                     textAlign: "left",
+                    color: "inherit",
                   }}
                   aria-label="Open profile"
                 >
@@ -476,8 +478,22 @@ useEffect(() => {
                 </div>
               ) : null}
 
-              <div style={{ marginTop: 12, display: "flex", gap: 14, alignItems: "center", opacity: 0.8, fontSize: 13 }}>
-                <span>{`いいね ${likeCount}`}</span>
+              <div style={{ marginTop: 12, display: "flex", gap: 14, alignItems: "center" }}>
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    padding: "6px 10px",
+                    borderRadius: 999,
+                    border: "1px solid rgba(17,17,20,.12)",
+                    background: "rgba(17,17,20,.03)",
+                    fontSize: 13,
+                    fontWeight: 900,
+                    opacity: 0.9,
+                  }}
+                >
+                  {`いいね ${likeCount}`}
+                </span>
               </div>
               <div style={{ marginTop: 14, fontWeight: 900, opacity: 0.85 }}>コメント</div>
 
