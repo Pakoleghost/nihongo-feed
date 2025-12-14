@@ -10,7 +10,15 @@ type Item = {
   icon: string;
 };
 
-export default function BottomNav({ profileHref }: { profileHref: string }) {
+export default function BottomNav({
+  profileHref,
+  profileAvatarUrl,
+  profileInitial,
+}: {
+  profileHref: string;
+  profileAvatarUrl?: string | null;
+  profileInitial?: string;
+}) {
   const pathname = usePathname();
 
   const items: Item[] = [
@@ -18,7 +26,7 @@ export default function BottomNav({ profileHref }: { profileHref: string }) {
     { key: "new", href: "/new", label: "New", icon: "＋" },
     { key: "noti", href: "/notifications", label: "Notifs", icon: "🔔" },
     { key: "rank", href: "/leaderboard", label: "Rank", icon: "🏆" },
-    { key: "me", href: profileHref, label: "Me", icon: "👤" },
+    { key: "me", href: profileHref, label: "Me", icon: "" },
   ];
 
   const isActive = (href: string) => {
@@ -76,7 +84,36 @@ export default function BottomNav({ profileHref }: { profileHref: string }) {
                   letterSpacing: 0.5,
                 }}
               >
-                <span style={{ fontSize: it.icon === "＋" ? 20 : 18 }}>{it.icon}</span>
+                {it.key === "me" ? (
+                  profileAvatarUrl ? (
+                    <img
+                      src={profileAvatarUrl}
+                      alt="Profile"
+                      style={{ width: 22, height: 22, borderRadius: 999, objectFit: "cover" }}
+                    />
+                  ) : (
+                    <div
+                      aria-label="Profile"
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: 999,
+                        display: "grid",
+                        placeItems: "center",
+                        border: active
+                          ? "1px solid rgba(255,255,255,.22)"
+                          : "1px solid rgba(255,255,255,.14)",
+                        color: active ? "#fff" : "rgba(255,255,255,.85)",
+                        fontSize: 12,
+                        fontWeight: 900,
+                      }}
+                    >
+                      {(profileInitial || "?").toUpperCase()}
+                    </div>
+                  )
+                ) : (
+                  <span style={{ fontSize: it.icon === "＋" ? 20 : 18 }}>{it.icon}</span>
+                )}
               </div>
             </Link>
           );

@@ -876,30 +876,6 @@ export default function HomePage() {
       <div className="header">
         <div className="headerInner">
           <div className="brand">フィード</div>
-
-          <div className="me">
-            <div className="meAvatar">
-              {myAvatarUrl ? <img src={myAvatarUrl} alt="me" /> : <span>{headerAvatarInitial}</span>}
-            </div>
-
-            <label className={`miniBtn ${avatarBusy ? "disabled" : ""}`}>
-              {avatarBusy ? "…" : "写真"}
-              <input
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) void uploadMyAvatar(f);
-                  e.currentTarget.value = "";
-                }}
-              />
-            </label>
-
-            <button className="miniBtn" onClick={logout} style={{ marginLeft: 8 }}>
-              出る
-            </button>
-          </div>
         </div>
       </div>
 
@@ -1067,7 +1043,10 @@ export default function HomePage() {
       )}
       </div>
 
-      <BottomNav profileHref={myProfileHref} />
-    </>
+<BottomNav
+  profileHref={myProfileHref}
+  profileAvatarUrl={myProfile?.avatar_url ?? null}
+  profileInitial={(myProfile?.username?.[0] ?? "?").toUpperCase()}
+/>    </>
   );
 }

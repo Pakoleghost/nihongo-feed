@@ -138,7 +138,10 @@ export default function NotificationsPage() {
         </div>
       </main>
 
-      <BottomNav profileHref={myProfileHref} />
-    </>
+<BottomNav
+  profileHref={myProfileHref}
+  profileAvatarUrl={myProfile?.avatar_url ?? null}
+  profileInitial={(myProfile?.username?.[0] ?? "?").toUpperCase()}
+/>    </>
   );
 }

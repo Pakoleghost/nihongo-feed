@@ -56,6 +56,8 @@ export default function ProfileHeaderClient(props: {
   const [bioDraft, setBioDraft] = useState(bio || "");
 
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -91,13 +93,80 @@ export default function ProfileHeaderClient(props: {
   }
 
   function changePhoto() {
-    // placeholder: you can wire this to your existing upload flow later
-    alert("TODO: wire this to your avatar upload flow (Supabase Storage).");
     setOpen(false);
+    fileInputRef.current?.click();
+  }
+
+  async function onPickPhoto(file: File) {
+    try {
+      setUploadingAvatar(true);
+
+      // Basic validation
+      if (!file.type.startsWith("image/")) {
+        alert("Please choose an image file.");
+        return;
+      }
+
+      // Use a stable path per profile id
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${profileId}/${Date.now()}.${ext}`;
+
+      // Upload to Supabase Storage (bucket name used by the app)
+      const bucket = "avatars";
+      const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
+        upsert: true,
+        contentType: file.type,
+      });
+
+      if (upErr) {
+        alert(upErr.message);
+        return;
+      }
+
+      const { data: pub } = supabase.storage.from(bucket).getPublicUrl(path);
+      const nextUrl = pub?.publicUrl || null;
+
+      const { error: profErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: nextUrl })
+        .eq("id", profileId);
+
+      if (profErr) {
+        alert(profErr.message);
+        return;
+      }
+
+      // simplest: reload to reflect server-rendered page
+      window.location.reload();
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }
+
+  async function logout() {
+    setOpen(false);
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    window.location.href = "/";
   }
 
   return (
     <div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          // allow selecting the same file twice
+          e.currentTarget.value = "";
+          if (f) void onPickPhoto(f);
+        }}
+      />
       <div className="post-header" style={{ alignItems: "flex-start" }}>
         <div className="avatar" aria-label="Profile avatar" style={{ width: 56, height: 56 }}>
           {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{initial}</span>}
@@ -196,17 +265,35 @@ export default function ProfileHeaderClient(props: {
                     <button
                       type="button"
                       onClick={changePhoto}
+                      disabled={uploadingAvatar}
                       style={{
                         width: "100%",
                         textAlign: "left",
                         padding: "10px 12px",
                         background: "transparent",
                         border: 0,
-                        cursor: "pointer",
+                        cursor: uploadingAvatar ? "not-allowed" : "pointer",
                         borderTop: "1px solid rgba(0,0,0,0.08)",
                       }}
                     >
                       Change profile photo
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={logout}
+                      disabled={uploadingAvatar}
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "10px 12px",
+                        background: "transparent",
+                        border: 0,
+                        cursor: uploadingAvatar ? "not-allowed" : "pointer",
+                        borderTop: "1px solid rgba(0,0,0,0.08)",
+                      }}
+                    >
+                      出る
                     </button>
 
                     <div style={{ padding: "10px 12px", borderTop: "1px solid rgba(0,0,0,0.08)" }}>

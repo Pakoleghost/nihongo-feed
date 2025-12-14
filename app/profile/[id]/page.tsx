@@ -52,19 +52,12 @@ export default async function ProfileByIdPage({
             <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
               ← Back
             </Link>
-            <Link
-              href="/leaderboard"
-              className="miniBtn"
-              style={{ marginLeft: 8, textDecoration: "none" }}
-            >
-              Leaderboard
-            </Link>
           </div>
         </div>
       </div>
 
       <div style={{ padding: 16 }}>
-        <div style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>{title}</div>
+        <div style={{ fontWeight: 900, fontSize: 18 }}>{title}</div>
         {subtitle ? (
           <div className="muted" style={{ marginTop: 6 }}>
             {subtitle}
@@ -131,13 +124,6 @@ export default async function ProfileByIdPage({
           <div className="me">
             <Link href="/" className="miniBtn" style={{ textDecoration: "none" }}>
               ← Back
-            </Link>
-            <Link
-              href="/leaderboard"
-              className="miniBtn"
-              style={{ marginLeft: 8, textDecoration: "none" }}
-            >
-              Leaderboard
             </Link>
           </div>
         </div>
