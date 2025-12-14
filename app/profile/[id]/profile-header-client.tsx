@@ -168,9 +168,28 @@ export default function ProfileHeaderClient(props: {
         }}
       />
       <div className="post-header" style={{ alignItems: "flex-start" }}>
-        <div className="avatar" aria-label="Profile avatar" style={{ width: 56, height: 56 }}>
-          {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{initial}</span>}
-        </div>
+        {isOwn ? (
+          <button
+            type="button"
+            onClick={changePhoto}
+            disabled={uploadingAvatar}
+            aria-label="Change profile photo"
+            style={{
+              padding: 0,
+              border: 0,
+              background: "transparent",
+              cursor: uploadingAvatar ? "not-allowed" : "pointer",
+            }}
+          >
+            <div className="avatar" aria-label="Profile avatar" style={{ width: 56, height: 56 }}>
+              {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{initial}</span>}
+            </div>
+          </button>
+        ) : (
+          <div className="avatar" aria-label="Profile avatar" style={{ width: 56, height: 56 }}>
+            {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{initial}</span>}
+          </div>
+        )}
 
         <div className="postMeta" style={{ width: "100%" }}>
           <div
@@ -200,6 +219,28 @@ export default function ProfileHeaderClient(props: {
                 Posts: <span className="muted">{postCount}</span> · Comments:{" "}
                 <span className="muted">{commentCount}</span>
               </div>
+
+              {isOwn ? (
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    className="ghostBtn"
+                    onClick={() => setEditBioOpen(true)}
+                    disabled={uploadingAvatar}
+                  >
+                    Edit bio
+                  </button>
+
+                  <button
+                    type="button"
+                    className="ghostBtn"
+                    onClick={logout}
+                    disabled={uploadingAvatar}
+                  >
+                    出る
+                  </button>
+                </div>
+              ) : null}
             </div>
 
             {/* 3-dot menu */}
@@ -216,9 +257,9 @@ export default function ProfileHeaderClient(props: {
                     alignItems: "center",
                     justifyContent: "center",
                     borderRadius: 999,
-                    border: "1px solid rgba(255,255,255,0.3)",
-                    background: "#111",
-                    color: "#fff",
+                    border: "1px solid rgba(0,0,0,0.12)",
+                    background: "#fff",
+                    color: "#111",
                     fontSize: 22,
                     fontWeight: 900,
                     cursor: "pointer",
