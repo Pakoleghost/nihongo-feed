@@ -2,6 +2,7 @@
 
 import BottomNav from "@/components/BottomNav";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 type DbNotificationRow = {
@@ -36,6 +37,7 @@ type GroupedNotification = {
 };
 
 export default function NotificationsPage() {
+  const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [items, setItems] = useState<DbNotificationRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -247,6 +249,18 @@ export default function NotificationsPage() {
     }
   }, []);
 
+  const openPostFromNotification = useCallback(
+    async (g: GroupedNotification) => {
+      await markGroupRead(g);
+      if (!g.post_id) return;
+      const id = encodeURIComponent(String(g.post_id));
+      // Safe fallback: always route to home feed with a post query.
+      // If the feed supports deep-linking, it can focus the post.
+      router.push(`/?post=${id}`);
+    },
+    [markGroupRead, router]
+  );
+
   const emptyHint = useMemo(() => {
     if (loading) return "Loading…";
     if (errorMsg) return errorMsg;
@@ -288,7 +302,7 @@ export default function NotificationsPage() {
                   return (
                     <li
                       key={g.key}
-                      onClick={() => void markGroupRead(g)}
+                      onClick={() => void openPostFromNotification(g)}
                       style={{
                         border: "1px solid rgba(17,17,20,.10)",
                         background: g.read ? "#fff" : "rgba(17,17,20,.03)",
@@ -390,7 +404,7 @@ export default function NotificationsPage() {
 
       <BottomNav
         profileHref={myProfileHref}
-        profileAvatarUrl={myProfile?.avatar_url ?? null}
+        profileAvatarUrl={myProfile?.avatar_url ? myProfile.avatar_url : null}
         profileInitial={((myProfile?.username ?? "?").toString().trim()[0] ?? "?").toUpperCase()}
       />
     </>
