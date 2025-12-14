@@ -77,7 +77,10 @@ export default async function ProfileByIdPage({
         .maybeSingle<{ username: string | null; avatar_url: string | null }>()
     : { data: null };
 
-  const viewerUsername = (viewerProf?.username ?? "").toString().trim().toLowerCase();
+  const viewerUsername = (viewerProf?.username ?? "")
+    .toString()
+    .trim()
+    .toLowerCase();
   const viewerAvatarUrl = viewerProf?.avatar_url ?? null;
   const myProfileHref = viewerUsername ? `/u/${viewerUsername}` : "/";
   const myProfileInitial = (viewerUsername?.[0] ?? "?").toUpperCase();
@@ -136,7 +139,7 @@ export default async function ProfileByIdPage({
 
       <div className="post" style={{ marginTop: 12 }}>
         <ProfileHeaderClient
-          isOwn={isOwn}   // ✅ correct prop name
+          isOwn={isOwn}
           profileId={profileId}
           username={username}
           avatarUrl={avatarUrl}
@@ -157,7 +160,11 @@ export default async function ProfileByIdPage({
           <div className="post" key={p.id}>
             <div className="post-header">
               <div className="avatar" aria-label="Profile avatar">
-                {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{username[0]?.toUpperCase() || "?"}</span>}
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt={username} />
+                ) : (
+                  <span>{username[0]?.toUpperCase() || "?"}</span>
+                )}
               </div>
 
               <div className="postMeta">
@@ -182,6 +189,7 @@ export default async function ProfileByIdPage({
           </div>
         ))
       )}
+
       <BottomNav
         profileHref={myProfileHref}
         profileAvatarUrl={viewerAvatarUrl}
