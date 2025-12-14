@@ -72,6 +72,7 @@ export default function HomePage() {
   // header hide/show on scroll
   const [headerHidden, setHeaderHidden] = useState(false);
   const lastScrollYRef = useRef(0);
+  const feedRef = useRef<HTMLDivElement | null>(null);
 
   // LOGIN UI
   const [email, setEmail] = useState("");
@@ -185,12 +186,19 @@ export default function HomePage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    lastScrollYRef.current = window.scrollY;
+    const el = feedRef.current;
+
+    const getY = () => {
+      if (el) return el.scrollTop;
+      return window.scrollY;
+    };
+
+    lastScrollYRef.current = getY();
 
     let ticking = false;
 
     const onScroll = () => {
-      const y = window.scrollY;
+      const y = getY();
       if (ticking) return;
       ticking = true;
 
@@ -211,6 +219,11 @@ export default function HomePage() {
         ticking = false;
       });
     };
+
+    if (el) {
+      el.addEventListener("scroll", onScroll, { passive: true } as any);
+      return () => el.removeEventListener("scroll", onScroll as any);
+    }
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -914,7 +927,7 @@ export default function HomePage() {
   const myProfileHref = userId ? `/profile/${encodeURIComponent(userId)}` : "/";
   return (
     <>
-      <div className="feed" style={{ paddingBottom: 80, minHeight: "100vh" }}>
+      <div ref={feedRef} className="feed" style={{ paddingBottom: 80, minHeight: "100vh" }}>
       <div
         className="header"
         style={{
