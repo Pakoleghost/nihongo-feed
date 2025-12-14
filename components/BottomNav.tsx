@@ -73,25 +73,29 @@ export default function BottomNav({
                 if (isHome && pathname === "/") {
                   e.preventDefault();
 
-                  // iOS/Safari can report scrollY inconsistently; fall back to document scrollTop.
                   const y =
                     (typeof window !== "undefined" ? window.scrollY : 0) ||
                     (typeof document !== "undefined" ? document.documentElement.scrollTop : 0) ||
                     (typeof document !== "undefined" ? document.body.scrollTop : 0) ||
                     0;
 
-                  // If already near the top, do a soft refresh.
-                  if (y < 60) {
+                  // If already basically at the top, trigger the same "tap フィード" behavior (soft refresh).
+                  if (y < 8) {
                     (window as any).__homeTap?.();
-                    router.refresh();
                     return;
                   }
 
-                  // Otherwise scroll up with movement.
-                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  // If near the top, scroll up with movement, then trigger soft refresh once we're at the top.
+                  if (y < 120) {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                    window.setTimeout(() => {
+                      (window as any).__homeTap?.();
+                    }, 180);
+                    return;
+                  }
 
-                  // Keep any existing home-tap hook
-                  (window as any).__homeTap?.();
+                  // Otherwise just scroll to top with movement.
+                  window.scrollTo({ top: 0, behavior: "smooth" });
                 }
               }}
               style={{
