@@ -180,12 +180,12 @@ export default function ProfileHeaderClient(props: {
               cursor: uploadingAvatar ? "not-allowed" : "pointer",
             }}
           >
-            <div className="avatar" aria-label="Profile avatar" style={{ width: 80, height: 80 }}>
+            <div className="avatar" aria-label="Profile avatar" style={{ width: 96, height: 96 }}>
               {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{initial}</span>}
             </div>
           </button>
         ) : (
-          <div className="avatar" aria-label="Profile avatar" style={{ width: 80, height: 80 }}>
+          <div className="avatar" aria-label="Profile avatar" style={{ width: 96, height: 96 }}>
             {avatarUrl ? <img src={avatarUrl} alt={username} /> : <span>{initial}</span>}
           </div>
         )}
@@ -214,7 +214,7 @@ export default function ProfileHeaderClient(props: {
                 ) : null}
               </div>
 
-              <div className="muted" style={{ fontSize: 16 }}>
+              <div className="muted" style={{ fontSize: 14 }}>
                 投稿: <span className="muted">{postCount}</span> · コメント:{" "}
                 <span className="muted">{commentCount}</span>
               </div>
