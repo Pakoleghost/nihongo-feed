@@ -80,6 +80,31 @@ a:hover {
     "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
 }
 
+/* Reuse the same header title sizing on any page */
+.headerTitle{
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.10em;
+  color: #2b2b2b;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
+}
+
+/* Clickable version (used for tap-to-scroll-to-top) */
+.headerTitleBtn{
+  all: unset;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.10em;
+  color: #2b2b2b;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
+}
+
+.headerTitleBtn:active{ opacity: .75; }
+
 .me{
   display: flex;
   align-items: center;
