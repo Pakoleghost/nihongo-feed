@@ -1,5 +1,4 @@
-\"use client\";
-
+"use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { requireSession } from "@/lib/authGuard";
 import { supabase } from "@/lib/supabase";
