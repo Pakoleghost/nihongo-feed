@@ -94,7 +94,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   // my profile
-  const [myUsername, setMyUsername] = useState<string>("unknown");
+  const [myUsername, setMyUsername] = useState<string>("");
   const [myAvatarUrl, setMyAvatarUrl] = useState<string | null>(null);
   const [avatarBusy, setAvatarBusy] = useState(false);
 
@@ -104,9 +104,14 @@ export default function HomePage() {
   const [commentBusy, setCommentBusy] = useState(false);
   const [commentsByPost, setCommentsByPost] = useState<Record<string, Comment[]>>({});
 
-  const SITE_URL =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (typeof window !== "undefined" ? window.location.origin : "");
+  const BASE_URL = useMemo(() => {
+    const env = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim();
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const raw = env || origin;
+    return raw.replace(/\/$/, "");
+  }, []);
+
+  const EMAIL_REDIRECT_TO = useMemo(() => `${BASE_URL}/auth/callback`, [BASE_URL]);
 
   // auth bootstrap
   useEffect(() => {
@@ -157,16 +162,19 @@ export default function HomePage() {
       return;
     }
 
-    const u = (data?.username ?? "").toString().trim();
+    const uRaw = (data?.username ?? "").toString().trim();
+    const uLower = uRaw.toLowerCase();
     const a = data?.avatar_url ?? null;
 
-    setMyUsername(u || "unknown");
+    const hasRealUsername = !!uRaw && uLower !== "unknown";
+
+    setMyUsername(hasRealUsername ? uRaw : "unknown");
     setMyAvatarUrl(a);
-    setNeedsUsername(!u); // only gate if empty username
+    setNeedsUsername(!hasRealUsername);
     setCheckingProfile(false);
 
     // load feed once we pass gate
-    if (u) void loadAll(uid);
+    if (hasRealUsername) void loadAll(uid);
   }
 
   const normalizedNewUsername = useMemo(() => newUsername.trim().toLowerCase(), [newUsername]);
@@ -252,12 +260,13 @@ export default function HomePage() {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
-      options: { emailRedirectTo: SITE_URL },
+      options: { emailRedirectTo: EMAIL_REDIRECT_TO },
     });
 
     setAuthBusy(false);
 
     if (error) {
+      console.error("Sign up error:", error);
       setAuthMessage(error.message);
       return;
     }
@@ -275,7 +284,7 @@ export default function HomePage() {
     const { error: resendError } = await supabase.auth.resend({
       type: "signup",
       email: trimmedEmail,
-      options: { emailRedirectTo: SITE_URL },
+      options: { emailRedirectTo: EMAIL_REDIRECT_TO },
     });
 
     if (resendError) {
@@ -305,11 +314,12 @@ export default function HomePage() {
     const { error } = await supabase.auth.resend({
       type: "signup",
       email: emailToSend,
-      options: { emailRedirectTo: SITE_URL },
+      options: { emailRedirectTo: EMAIL_REDIRECT_TO },
     });
     setResendBusy(false);
 
     if (error) {
+      console.error("Resend confirmation error:", error);
       setAuthMessage(`Could not resend confirmation email: ${error.message}`);
       return;
     }
