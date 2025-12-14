@@ -408,12 +408,14 @@ export default function HomePage() {
     const postIds = normalized.map((p) => p.id);
 
     if (postIds.length) {
-      // Likes are stored in `public.likes` (post_id is bigint in DB).
-      // Supabase will accept numeric strings for bigint filters.
+      // posts.id are numeric-looking strings, likes.post_id is bigint.
+      // Convert IDs to numbers so the bigint filter matches.
+      const postIdsNum = postIds.map((id) => Number(id)).filter((n) => Number.isFinite(n));
+
       const { data: likesData } = await supabase
         .from("likes")
         .select("post_id, user_id")
-        .in("post_id", postIds as any);
+        .in("post_id", postIdsNum as any);
 
       const likeMap = new Map<string, { count: number; mine: boolean }>();
       for (const pid of postIds) likeMap.set(pid, { count: 0, mine: false });
@@ -520,11 +522,8 @@ export default function HomePage() {
       )
     );
 
-    // DB uses bigint post_id; accept numeric string.
-    const pid: any = (() => {
-      const n = Number(postId);
-      return Number.isFinite(n) ? n : postId;
-    })();
+    // DB uses bigint post_id.
+    const pid = Number(postId);
 
     if (p.likedByMe) {
       // unlike
@@ -851,7 +850,7 @@ export default function HomePage() {
   const myProfileHref = userId ? `/profile/${encodeURIComponent(userId)}` : "/";
   return (
     <>
-      <div className="feed" style={{ paddingBottom: 80 }}>
+      <div className="feed" style={{ paddingBottom: 80, minHeight: "100vh" }}>
       <div className="header">
         <div className="headerInner">
           <div className="brand">フィード</div>
@@ -924,7 +923,17 @@ export default function HomePage() {
           const profileHref = p.user_id ? `/profile/${encodeURIComponent(p.user_id)}` : "";
 
           return (
-            <div className="post" key={p.id}>
+            <div
+              className="post"
+              key={p.id}
+              style={{
+                border: "1px solid rgba(0,0,0,.08)",
+                background: "rgba(0,0,0,.03)",
+                borderRadius: 16,
+                marginBottom: 18,
+                overflow: "hidden",
+              }}
+            >
               <div className="post-header">
                 {profileHref ? (
                   <Link href={profileHref} className="avatar" style={linkStyle} aria-label={`Open profile ${p.username || "unknown"}`}>
@@ -979,6 +988,16 @@ export default function HomePage() {
                   <span>コメント</span>
                   <span className="muted">{p.commentCount}</span>
                 </button>
+                <Link
+                  href={`/post/${encodeURIComponent(p.id)}`}
+                  style={{
+                    textDecoration: "underline",
+                    fontWeight: 500,
+                    fontSize: 13,
+                  }}
+                >
+                  View post →
+                </Link>
               </div>
 
               {openCommentsFor === p.id ? (
