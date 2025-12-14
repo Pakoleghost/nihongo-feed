@@ -30,7 +30,7 @@ type PostMini = { id: string | number; image_url: string | null };
 
 type GroupedNotification = {
   key: string;
-  type: "like" | "comment" | "other";
+  type: "like" | "comment" | "reply" | "other";
   post_id: string | number | null;
   comment_id: string | null;
   created_at: string;
@@ -249,6 +249,7 @@ export default function NotificationsPage() {
     const normType = (t: string | null) => {
       const v = (t ?? "").toLowerCase();
       if (v.includes("like")) return "like" as const;
+      if (v.includes("reply")) return "reply" as const;
       if (v.includes("comment")) return "comment" as const;
       return "other" as const;
     };
@@ -258,7 +259,7 @@ export default function NotificationsPage() {
     for (const n of items) {
       const t = normType(n.type);
       const postKey = n.post_id != null ? String(n.post_id) : null;
-      const key = (t === "like" || t === "comment") && postKey ? `${t}:${postKey}` : `single:${n.id}`;
+      const key = (t === "like" || t === "comment" || t === "reply") && postKey ? `${t}:${postKey}` : `single:${n.id}`;
 
       const actor = n.actor_id ? actors[n.actor_id] : null;
 
@@ -319,9 +320,9 @@ export default function NotificationsPage() {
 
       const postId = encodeURIComponent(rawPostId);
 
-      // If this is a comment notification and we have a comment id, deep-link to highlight it.
+      // If this is a comment or reply notification and we have a comment id, deep-link to highlight it.
       const rawCommentId = g.comment_id == null ? "" : String(g.comment_id).trim();
-      if (g.type === "comment" && rawCommentId) {
+      if ((g.type === "comment" || g.type === "reply") && rawCommentId) {
         const commentId = encodeURIComponent(rawCommentId);
         router.push(`/post/${postId}?c=${commentId}`);
         return;
@@ -358,11 +359,14 @@ export default function NotificationsPage() {
 
                   const isLike = g.type === "like";
                   const isComment = g.type === "comment";
+                  const isReply = g.type === "reply";
 
-                  const chip = isLike ? "いいね！" : isComment ? "コメント" : "通知";
+                  const chip = isLike ? "いいね！" : isReply ? "返信" : isComment ? "コメント" : "通知";
 
                   const body = isLike ? (
                     <>{actorText}があなたの投稿にいいね！しました。</>
+                  ) : isReply ? (
+                    <>{actorText}があなたのコメントに返信しました。</>
                   ) : isComment ? (
                     <>{actorText}があなたの投稿にコメントしました。</>
                   ) : (
