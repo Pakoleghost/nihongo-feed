@@ -3,7 +3,7 @@ import { Noto_Sans_JP, Poppins } from "next/font/google";
 import type { Viewport } from "next";
 
 const noto = Noto_Sans_JP({
-  subsets: ["latin", "japanese"],
+  subsets: ["latin"],
   weight: ["400", "500", "700"],
   display: "swap",
   variable: "--font-noto-sans-jp",
