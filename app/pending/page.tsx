@@ -1,12 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+
+type ApplicationStatus = "none" | "pending" | "approved" | "rejected";
 
 export default function PendingApprovalPage() {
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<ApplicationStatus>("none");
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("approved")
+        .eq("id", user.id)
+        .single();
+
+      if (profile?.approved) {
+        window.location.href = "/";
+        return;
+      }
+
+      const { data: app } = await supabase
+        .from("applications")
+        .select("status")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!app) {
+        setStatus("none");
+      } else {
+        setStatus(app.status as ApplicationStatus);
+      }
+    };
+
+    checkStatus();
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -41,18 +80,32 @@ export default function PendingApprovalPage() {
       return;
     }
 
-    setSubmitted(true);
+    setStatus("pending");
     setLoading(false);
   }
 
-  if (submitted) {
+  if (status === "pending") {
     return (
       <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
         <div style={{ maxWidth: 420, textAlign: "center" }}>
-          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Application submitted</h1>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>審査中</h1>
           <p style={{ opacity: 0.7 }}>
             Your application is under review.<br />
             You will be notified once an administrator approves your account.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  if (status === "rejected") {
+    return (
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ maxWidth: 420, textAlign: "center" }}>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Application rejected</h1>
+          <p style={{ opacity: 0.7 }}>
+            Your application was not approved.<br />
+            Please contact an administrator if you believe this is a mistake.
           </p>
         </div>
       </main>
