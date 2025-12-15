@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import * as htmlToImage from "html-to-image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/lib/supabase";
@@ -33,6 +34,7 @@ export default function PostPage() {
   const highlightCommentId = searchParams?.get("c") ?? null;
 
   const commentInputRef = useRef<HTMLInputElement | null>(null);
+  const shareCardRef = useRef<HTMLDivElement | null>(null);
   const [commentText, setCommentText] = useState("");
   const [commentBusy, setCommentBusy] = useState(false);
   const [replyTo, setReplyTo] = useState<{ commentId: string; username: string } | null>(null);
@@ -460,6 +462,25 @@ useEffect(() => {
     [router]
   );
 
+  const downloadShareCard = useCallback(async () => {
+    if (!shareCardRef.current) return;
+
+    try {
+      const dataUrl = await htmlToImage.toPng(shareCardRef.current, {
+        backgroundColor: "#ffffff",
+        pixelRatio: 2,
+      });
+
+      const link = document.createElement("a");
+      link.download = "nihongo-feed-post.png";
+      link.href = dataUrl;
+      link.click();
+    } catch (e) {
+      console.error(e);
+      alert("Failed to generate image.");
+    }
+  }, []);
+
   const renderComment = useCallback(
     (c: CommentRow, depth: number) => {
       const a = commentAuthors[String(c.user_id)];
@@ -636,6 +657,26 @@ useEffect(() => {
                   <span aria-hidden style={{ fontSize: 14, lineHeight: 1 }}>{likedByMe ? "♥" : "♡"}</span>
                   <span>{`いいね ${likeCount}`}</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={downloadShareCard}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 32,
+                    height: 32,
+                    borderRadius: 999,
+                    border: "1px solid rgba(17,17,20,.10)",
+                    background: "#fff",
+                    cursor: "pointer",
+                    opacity: 0.85,
+                  }}
+                  aria-label="Download post image"
+                  title="Download"
+                >
+                  ⤓
+                </button>
               </div>
               <div style={{ marginTop: 14, fontWeight: 900, opacity: 0.85 }}>コメント</div>
 
@@ -695,6 +736,75 @@ useEffect(() => {
               </div>
             </div>
           ) : null}
+        </div>
+        <div
+          ref={shareCardRef}
+          style={{
+            position: "absolute",
+            left: -9999,
+            top: 0,
+            width: 420,
+            padding: 20,
+            background: "#fff",
+            borderRadius: 24,
+            fontFamily: "inherit",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 999,
+                overflow: "hidden",
+                border: "1px solid rgba(17,17,20,.10)",
+                display: "grid",
+                placeItems: "center",
+                fontWeight: 900,
+              }}
+            >
+              {postAuthor?.avatar_url ? (
+                <img
+                  src={postAuthor.avatar_url}
+                  alt=""
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                <span>{((postAuthor?.username ?? "?")[0] ?? "?").toUpperCase()}</span>
+              )}
+            </div>
+            <div style={{ fontWeight: 900 }}>{`@${postAuthor?.username ?? "user"}`}</div>
+          </div>
+
+          {post?.content ? (
+            <div style={{ marginTop: 16, whiteSpace: "pre-wrap", fontSize: 15 }}>
+              {post.content}
+            </div>
+          ) : null}
+
+          {post?.image_url ? (
+            <div style={{ marginTop: 16, overflow: "hidden", borderRadius: 18 }}>
+              <img
+                src={post.image_url}
+                alt=""
+                style={{ width: "100%", height: "auto", display: "block" }}
+              />
+            </div>
+          ) : null}
+
+          <div
+            style={{
+              marginTop: 20,
+              fontSize: 12,
+              opacity: 0.6,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span>nihongo feed</span>
+            <img src="/branding/logo-small.png" alt="" style={{ height: 18 }} />
+          </div>
         </div>
       </main>
 

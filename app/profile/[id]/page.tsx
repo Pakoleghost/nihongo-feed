@@ -18,6 +18,7 @@ type ProfileRow = {
   id: string;
   username: string | null;
   avatar_url: string | null;
+  full_name?: string | null;
   bio?: string | null;
   level?: string | null;
   group?: string | null;
@@ -101,7 +102,7 @@ export default function ProfileByIdPage() {
       // profile
       const { data: prof, error: profErr } = await supabase
         .from("profiles")
-        .select("id, username, avatar_url, bio, level, group, jlpt_level, jlpt_verified")
+        .select("id, username, avatar_url, full_name, bio, level, group, jlpt_level, jlpt_verified")
         .eq("id", rawId)
         .maybeSingle<ProfileRow>();
 
@@ -255,6 +256,7 @@ export default function ProfileByIdPage() {
           hasPendingJlpt={hasPendingJlpt}
           profileId={profile.id}
           username={username}
+          fullName={viewerIsAdmin ? profile.full_name ?? null : null}
           avatarUrl={avatarUrl}
           bio={profile.bio ?? ""}
           level={profile.level ?? ""}
