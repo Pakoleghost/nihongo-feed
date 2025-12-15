@@ -280,7 +280,7 @@ export default function ProfileHeaderClient(props: {
           >
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                {isAdmin && fullName && !isOwn ? (
+                {isAdmin && fullName ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                     <span style={{ fontSize: 20, fontWeight: 900 }}>
                       {fullName}
