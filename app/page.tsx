@@ -115,7 +115,7 @@ export default function HomePage() {
   const [pendingEmailConfirmation, setPendingEmailConfirmation] = useState<string | null>(null);
   const [resendBusy, setResendBusy] = useState(false);
 
-  // APPLICATION DRAFT (captured during signup, submitted on /pending)
+  // APPLICATION (captured during signup; we try to submit immediately. If we can't, we keep a draft for /pending)
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [campus, setCampus] = useState("");
@@ -491,7 +491,7 @@ export default function HomePage() {
       return;
     }
 
-    // Save draft now (used to prefill /pending after the user confirms email + logs in)
+    // Always keep a local draft as a fallback.
     if (typeof window !== "undefined") saveApplicationDraftToLocalStorage(trimmedEmail);
 
     setAuthMessage("");
@@ -513,13 +513,56 @@ export default function HomePage() {
 
     setPassword("");
 
-    if (data.session || data.user?.email_confirmed_at) {
-      setAuthMode("login");
-      setAuthMessage("Account created. You can now log in with your password.");
-      setPendingEmailConfirmation(null);
+    // Best-effort: submit the application immediately if we have a session.
+    // If Supabase does not give us a session (common when email confirmation is required),
+    // the draft remains in localStorage and can be submitted from /pending after login.
+    let applicationInserted = false;
+    try {
+      const uid = data.user?.id ? String(data.user.id) : null;
+
+      if (data.session && uid) {
+        const { error: appErr } = await supabase.from("applications").upsert(
+          {
+            user_id: uid,
+            email: trimmedEmail,
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            campus: campus.trim(),
+            class_level: classLevel.trim(),
+            jlpt_level: (jlptLevel.trim() || null) as any,
+            dob: dob.trim(),
+            gender: gender || null,
+            status: "pending",
+          } as any,
+          { onConflict: "user_id" }
+        );
+
+        if (!appErr) applicationInserted = true;
+      }
+    } catch {
+      // ignore
+    }
+
+    // Keep the user inactive until approved: sign out immediately after signup.
+    // They will confirm email and then log in, but /pending will block until approved.
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // ignore
+    }
+
+    // Ask them to confirm email and wait for approval.
+    setAuthMode("login");
+    setPendingEmailConfirmation(trimmedEmail);
+
+    if (applicationInserted) {
+      setAuthMessage(
+        "Application submitted. Check your email to confirm your account. After an admin approves you, you can log in."
+      );
       return;
     }
 
+    // If we couldn't insert the application now, ensure a confirmation email is sent and rely on the draft.
     const { error: resendError } = await supabase.auth.resend({
       type: "signup",
       email: trimmedEmail,
@@ -528,15 +571,13 @@ export default function HomePage() {
 
     if (resendError) {
       setAuthMessage(
-        `Check your email to confirm your account, then log in. Resend failed: ${resendError.message}`
+        `Check your email to confirm your account. After approval, log in. Resend failed: ${resendError.message}`
       );
-      setPendingEmailConfirmation(trimmedEmail);
       return;
     }
 
-    setPendingEmailConfirmation(trimmedEmail);
     setAuthMessage(
-      "Check your email to confirm your account. We just sent another confirmation email."
+      "Check your email to confirm your account. Your application will be submitted when you log in and reach the pending approval screen."
     );
   }
 
@@ -1167,7 +1208,7 @@ export default function HomePage() {
               </div>
 
               <div style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.4 }}>
-                You will submit this after confirming your email, on the pending approval screen.
+                This is your application. You will be able to use the app after an admin approves you.
               </div>
             </div>
           ) : null}
