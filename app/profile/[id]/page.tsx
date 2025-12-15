@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
-import ProfileHeaderClient from "./profile-header-client";
+import ProfileHeaderClient, { type ProfileHeaderClientProps } from "./profile-header-client";
 import { supabase } from "@/lib/supabase";
 
 type Post = {
@@ -25,6 +25,9 @@ type ProfileRow = {
   jlpt_level?: string | null;
   jlpt_verified?: boolean | null;
 };
+
+// Compile-time safety: ensure the props we pass match the component's props type.
+const _profileHeaderPropsCheck = (p: ProfileHeaderClientProps) => p;
 
 export default function ProfileByIdPage() {
   const params = useParams<{ id?: string }>();
@@ -252,19 +255,21 @@ export default function ProfileByIdPage() {
 
       <div className="post" style={{ marginTop: 12 }}>
         <ProfileHeaderClient
-          isOwn={isOwn}
-          hasPendingJlpt={hasPendingJlpt}
-          profileId={profile.id}
-          username={username}
-          fullName={profile.full_name ?? null}
-          viewerIsAdmin={viewerIsAdmin}
-          avatarUrl={avatarUrl}
-          bio={profile.bio ?? ""}
-          level={profile.level ?? ""}
-          group={profile.group ?? ""}
-          jlptLevel={profile.jlpt_verified ? profile.jlpt_level : null}
-          postCount={posts.length}
-          commentCount={commentCount}
+          {..._profileHeaderPropsCheck({
+            isOwn,
+            hasPendingJlpt,
+            profileId: profile.id,
+            username,
+            fullName: profile.full_name ?? null,
+            viewerIsAdmin,
+            avatarUrl,
+            bio: profile.bio ?? "",
+            level: profile.level ?? "",
+            group: profile.group ?? "",
+            jlptLevel: profile.jlpt_verified ? profile.jlpt_level : null,
+            postCount: posts.length,
+            commentCount,
+          })}
         />
         {viewerIsAdmin && !isOwn ? (
           <div

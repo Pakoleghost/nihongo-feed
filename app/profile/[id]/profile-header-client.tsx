@@ -36,7 +36,7 @@ function levelChip(level: string) {
   );
 }
 
-export default function ProfileHeaderClient(props: {
+export type ProfileHeaderClientProps = {
   isOwn: boolean;
   profileId: string;
   username: string;
@@ -49,8 +49,12 @@ export default function ProfileHeaderClient(props: {
   commentCount: number;
   hasPendingJlpt?: boolean;
   fullName?: string | null;
+  // NOTE: page.tsx passes viewerIsAdmin. Keep isAdmin as a backward-compatible alias.
+  viewerIsAdmin?: boolean;
   isAdmin?: boolean;
-}) {
+};
+
+export default function ProfileHeaderClient(props: ProfileHeaderClientProps) {
   const {
     isOwn,
     profileId,
@@ -64,8 +68,11 @@ export default function ProfileHeaderClient(props: {
     commentCount,
     hasPendingJlpt = false,
     fullName,
-    isAdmin = false,
+    viewerIsAdmin,
+    isAdmin,
   } = props;
+
+  const adminFlag = viewerIsAdmin ?? isAdmin ?? false;
 
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -280,7 +287,7 @@ export default function ProfileHeaderClient(props: {
           >
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                {isAdmin && fullName ? (
+                {adminFlag && fullName ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                     <span style={{ fontSize: 20, fontWeight: 900 }}>
                       {fullName}
