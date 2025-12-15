@@ -21,6 +21,8 @@ type ProfileRow = {
   bio?: string | null;
   level?: string | null;
   group?: string | null;
+  jlpt_level?: string | null;
+  jlpt_verified?: boolean | null;
 };
 
 export default function ProfileByIdPage() {
@@ -94,7 +96,7 @@ export default function ProfileByIdPage() {
       // profile
       const { data: prof, error: profErr } = await supabase
         .from("profiles")
-        .select("id, username, avatar_url, bio, level, group")
+        .select("id, username, avatar_url, bio, level, group, jlpt_level, jlpt_verified")
         .eq("id", rawId)
         .maybeSingle<ProfileRow>();
 
@@ -220,6 +222,7 @@ export default function ProfileByIdPage() {
           bio={profile.bio ?? ""}
           level={profile.level ?? ""}
           group={profile.group ?? ""}
+          jlptLevel={profile.jlpt_verified ? profile.jlpt_level : null}
           postCount={posts.length}
           commentCount={commentCount}
         />
