@@ -6,6 +6,34 @@ import { supabase } from "@/lib/supabase";
 
 type ApplicationStatus = "none" | "pending" | "approved" | "rejected";
 
+const APPLICATION_SUBMITTED_KEY = "nhf_application_submitted_at";
+
+function markRecentlySubmitted() {
+  try {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(APPLICATION_SUBMITTED_KEY, String(Date.now()));
+  } catch {}
+}
+
+function wasRecentlySubmitted(ms: number): boolean {
+  try {
+    if (typeof window === "undefined") return false;
+    const raw = window.localStorage.getItem(APPLICATION_SUBMITTED_KEY);
+    const t = raw ? Number(raw) : NaN;
+    if (!Number.isFinite(t)) return false;
+    return Date.now() - t <= ms;
+  } catch {
+    return false;
+  }
+}
+
+function clearRecentlySubmitted() {
+  try {
+    if (typeof window === "undefined") return;
+    window.localStorage.removeItem(APPLICATION_SUBMITTED_KEY);
+  } catch {}
+}
+
 function normalizeDateInput(v: any): string | null {
   if (!v) return null;
   const s = String(v).trim();
@@ -24,6 +52,8 @@ export default function PendingApprovalPage() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<ApplicationStatus>("none");
   const [error, setError] = useState<string | null>(null);
+  const [checked, setChecked] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   const [userId, setUserId] = useState<string | null>(null);
   const [authReady, setAuthReady] = useState(false);
@@ -65,10 +95,16 @@ export default function PendingApprovalPage() {
         return;
       }
 
+      // No session on first load.
+      setSessionExpired(true);
+
       const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
         const nextUid = session?.user?.id ?? null;
         if (!alive) return;
-        if (nextUid) setUserId(nextUid);
+        if (nextUid) {
+          setUserId(nextUid);
+          setSessionExpired(false);
+        }
         setAuthReady(true);
       });
 
@@ -87,9 +123,14 @@ export default function PendingApprovalPage() {
   useEffect(() => {
     if (!draftLoaded) return;
     if (!authReady) return;
-    if (!userId) return;
+    if (!userId) {
+      setChecked(true);
+      return;
+    }
 
     const checkStatus = async () => {
+      setChecked(false);
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("approved,is_admin")
@@ -97,11 +138,13 @@ export default function PendingApprovalPage() {
         .single();
 
       if (profile?.is_admin) {
+        clearRecentlySubmitted();
         window.location.href = "/notifications";
         return;
       }
 
       if (profile?.approved) {
+        clearRecentlySubmitted();
         window.location.href = "/";
         return;
       }
@@ -115,15 +158,70 @@ export default function PendingApprovalPage() {
         .maybeSingle();
 
       if (!app) {
+        // If the user just submitted on the previous screen, the row can take a moment to appear.
+        // Avoid showing a second confusing form.
+        if (wasRecentlySubmitted(5 * 60 * 1000)) {
+          setStatus("pending");
+          setChecked(true);
+          return;
+        }
         setStatus("none");
+        setChecked(true);
         return;
       }
 
       setStatus(app.status as ApplicationStatus);
+      setChecked(true);
     };
 
     checkStatus();
   }, [draftLoaded, authReady, userId]);
+
+  // While pending, poll for approval and then send the user to the feed (no re-login).
+  useEffect(() => {
+    if (!authReady) return;
+    if (!userId) return;
+    if (status !== "pending") return;
+
+    let alive = true;
+    const tick = async () => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("approved,is_admin")
+        .eq("id", userId)
+        .single();
+
+      if (!alive) return;
+
+      if (profile?.is_admin) {
+        clearRecentlySubmitted();
+        window.location.href = "/notifications";
+        return;
+      }
+
+      if (profile?.approved) {
+        clearRecentlySubmitted();
+        // Keep the session. Just move them into the app.
+        window.location.href = "/";
+      }
+    };
+
+    // Run once quickly, then poll.
+    tick();
+    const id = window.setInterval(tick, 4000);
+
+    return () => {
+      alive = false;
+      window.clearInterval(id);
+    };
+  }, [authReady, userId, status]);
+
+  async function goToLogin() {
+    try {
+      await supabase.auth.signOut();
+    } catch {}
+    window.location.href = "/";
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -226,10 +324,40 @@ export default function PendingApprovalPage() {
       }
     }
 
+    markRecentlySubmitted();
+
     window.localStorage.removeItem("nhf_application_draft");
     setDraft(null);
     setStatus("pending");
     setLoading(false);
+  }
+
+  if (!draftLoaded || !authReady || (userId && !checked)) {
+    return (
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ maxWidth: 420, textAlign: "center" }}>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Loading…</h1>
+          <p style={{ opacity: 0.7 }}>Please wait.</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (sessionExpired) {
+    return (
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ maxWidth: 420, textAlign: "center" }}>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Session expired</h1>
+          <p style={{ opacity: 0.7 }}>
+            Please log in again to continue.<br />
+            If your application is already approved, you will go straight to the feed.
+          </p>
+          <button onClick={goToLogin} style={{ marginTop: 14 }}>
+            Go to login
+          </button>
+        </div>
+      </main>
+    );
   }
 
   if (status === "pending") {
@@ -239,7 +367,7 @@ export default function PendingApprovalPage() {
           <h1 style={{ fontSize: 22, marginBottom: 12 }}>Pending approval</h1>
           <p style={{ opacity: 0.7 }}>
             Your application is under review.<br />
-            You will be notified once an administrator approves your account.
+            Once an administrator approves your account, you will be sent to the feed automatically.
           </p>
         </div>
       </main>
