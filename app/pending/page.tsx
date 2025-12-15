@@ -10,7 +10,6 @@ export default function PendingApprovalPage() {
   const [status, setStatus] = useState<ApplicationStatus>("none");
   const [error, setError] = useState<string | null>(null);
 
-  const [draftLoaded, setDraftLoaded] = useState(false);
   const [draft, setDraft] = useState<any | null>(null);
 
   useEffect(() => {
@@ -19,7 +18,6 @@ export default function PendingApprovalPage() {
         const raw = window.localStorage.getItem("nhf_application_draft");
         if (raw) setDraft(JSON.parse(raw));
       } catch {}
-      setDraftLoaded(true);
     }
 
     const checkStatus = async () => {
@@ -42,13 +40,37 @@ export default function PendingApprovalPage() {
 
       const { data: app } = await supabase
         .from("applications")
-        .select("status")
+        .select("id,status")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
-      if (!app) {
+      if (!app && draft) {
+        // Auto-submit draft
+        const { data: insertData, error: insertError } = await supabase
+          .from("applications")
+          .insert({
+            user_id: user.id,
+            full_name: draft.full_name ?? null,
+            campus: draft.campus ?? null,
+            class_level: draft.class_level ?? null,
+            jlpt_level: draft.jlpt_level ?? null,
+            date_of_birth: draft.date_of_birth ?? null,
+            gender: draft.gender ?? null,
+          })
+          .select("status")
+          .single();
+
+        if (insertError) {
+          setError("Failed to auto-submit your saved application draft. Please try submitting the form manually.");
+          setStatus("none");
+          return;
+        }
+
+        window.localStorage.removeItem("nhf_application_draft");
+        setStatus("pending");
+      } else if (!app) {
         setStatus("none");
       } else {
         setStatus(app.status as ApplicationStatus);
@@ -56,7 +78,7 @@ export default function PendingApprovalPage() {
     };
 
     checkStatus();
-  }, []);
+  }, [draft]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -70,6 +92,12 @@ export default function PendingApprovalPage() {
 
     const form = new FormData(e.currentTarget);
 
+    const toStringOrNull = (value: FormDataEntryValue | null): string | null => {
+      if (value === null) return null;
+      if (typeof value === "string") return value;
+      return value.toString();
+    };
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -81,25 +109,50 @@ export default function PendingApprovalPage() {
     }
 
     const payload = draft ?? {
-      full_name: form.get("full_name"),
-      campus: form.get("campus"),
-      class_level: form.get("class_level"),
-      jlpt_level: form.get("jlpt_level"),
-      date_of_birth: form.get("date_of_birth"),
-      gender: form.get("gender"),
+      full_name: toStringOrNull(form.get("full_name")),
+      campus: toStringOrNull(form.get("campus")),
+      class_level: toStringOrNull(form.get("class_level")),
+      jlpt_level: toStringOrNull(form.get("jlpt_level")),
+      date_of_birth: toStringOrNull(form.get("date_of_birth")),
+      gender: toStringOrNull(form.get("gender")),
     };
 
-    const { error: insertError } = await supabase.from("applications").insert({
-      user_id: user.id,
-      ...payload,
-    });
+    // Check if application exists
+    const { data: existingApp } = await supabase
+      .from("applications")
+      .select("id,status")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (insertError) {
-      setError("Failed to submit application. Please try again.");
-      setLoading(false);
-      return;
+    if (existingApp) {
+      // Update existing application
+      const { error: updateError } = await supabase
+        .from("applications")
+        .update({ ...payload, status: "pending" })
+        .eq("id", existingApp.id);
+
+      if (updateError) {
+        setError("Failed to update your application. Please try again.");
+        setLoading(false);
+        return;
+      }
+    } else {
+      // Insert new application
+      const { error: insertError } = await supabase.from("applications").insert({
+        user_id: user.id,
+        ...payload,
+      });
+
+      if (insertError) {
+        setError("Failed to submit application. Please try again.");
+        setLoading(false);
+        return;
+      }
     }
 
+    window.localStorage.removeItem("nhf_application_draft");
     setStatus("pending");
     setLoading(false);
   }
@@ -108,7 +161,7 @@ export default function PendingApprovalPage() {
     return (
       <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
         <div style={{ maxWidth: 420, textAlign: "center" }}>
-          <h1 style={{ fontSize: 22, marginBottom: 12 }}>審査中</h1>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Pending approval</h1>
           <p style={{ opacity: 0.7 }}>
             Your application is under review.<br />
             You will be notified once an administrator approves your account.
@@ -136,7 +189,7 @@ export default function PendingApprovalPage() {
     return (
       <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
         <div style={{ maxWidth: 420, textAlign: "center" }}>
-          <h1 style={{ fontSize: 22, marginBottom: 12 }}>審査中</h1>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Pending approval</h1>
           <p style={{ opacity: 0.7 }}>
             Your application has been received.<br />
             Please wait for administrator approval.
