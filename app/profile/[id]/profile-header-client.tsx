@@ -48,6 +48,8 @@ export default function ProfileHeaderClient(props: {
   postCount: number;
   commentCount: number;
   hasPendingJlpt?: boolean;
+  fullName?: string | null;
+  isAdmin?: boolean;
 }) {
   const {
     isOwn,
@@ -61,6 +63,8 @@ export default function ProfileHeaderClient(props: {
     postCount,
     commentCount,
     hasPendingJlpt = false,
+    fullName,
+    isAdmin = false,
   } = props;
 
   const [open, setOpen] = useState(false);
@@ -276,9 +280,20 @@ export default function ProfileHeaderClient(props: {
           >
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span className="handle" style={{ color: "inherit", fontSize: 22, fontWeight: 800 }}>
-                  @{username}
-                </span>
+                {isAdmin && fullName && !isOwn ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    <span style={{ fontSize: 20, fontWeight: 900 }}>
+                      {fullName}
+                    </span>
+                    <span className="handle" style={{ color: "inherit", fontSize: 14, opacity: 0.7 }}>
+                      @{username}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="handle" style={{ color: "inherit", fontSize: 22, fontWeight: 800 }}>
+                    @{username}
+                  </span>
+                )}
 
                 {jlptLevel ? levelChip(jlptLevel) : levelChip(level)}
 

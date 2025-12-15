@@ -468,11 +468,11 @@ useEffect(() => {
     try {
       const dataUrl = await htmlToImage.toPng(shareCardRef.current, {
         backgroundColor: "#ffffff",
-        pixelRatio: 2,
+        pixelRatio: 3,
       });
 
       const link = document.createElement("a");
-      link.download = "nihongo-feed-post.png";
+      link.download = `nihongo-feed-${postId ?? "post"}.png`;
       link.href = dataUrl;
       link.click();
     } catch (e) {
@@ -768,6 +768,7 @@ useEffect(() => {
                   src={postAuthor.avatar_url}
                   alt=""
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  crossOrigin="anonymous"
                 />
               ) : (
                 <span>{((postAuthor?.username ?? "?")[0] ?? "?").toUpperCase()}</span>
@@ -788,6 +789,7 @@ useEffect(() => {
                 src={post.image_url}
                 alt=""
                 style={{ width: "100%", height: "auto", display: "block" }}
+                crossOrigin="anonymous"
               />
             </div>
           ) : null}
@@ -803,7 +805,7 @@ useEffect(() => {
             }}
           >
             <span>nihongo feed</span>
-            <img src="/branding/logo-small.png" alt="" style={{ height: 18 }} />
+            <img src="/logo.png" alt="" style={{ height: 18 }} crossOrigin="anonymous" />
           </div>
         </div>
       </main>

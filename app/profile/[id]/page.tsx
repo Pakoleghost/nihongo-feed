@@ -256,7 +256,6 @@ export default function ProfileByIdPage() {
           hasPendingJlpt={hasPendingJlpt}
           profileId={profile.id}
           username={username}
-          fullName={viewerIsAdmin ? profile.full_name ?? null : null}
           avatarUrl={avatarUrl}
           bio={profile.bio ?? ""}
           level={profile.level ?? ""}

@@ -378,6 +378,156 @@ export default function HomePage() {
   const [replyToByPost, setReplyToByPost] = useState<
     Record<string, { commentId: string; username: string } | null>
   >({});
+  // per-post menu
+  const [openMenuFor, setOpenMenuFor] = useState<string | null>(null);
+  // Download a post share card (square, IG story-friendly)
+  async function downloadPostCard(p: Post) {
+    try {
+      // Square card good for IG story reposts too
+      const W = 1080;
+      const H = 1080;
+      const canvas = document.createElement("canvas");
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      // background
+      ctx.fillStyle = "#0b0b0f";
+      ctx.fillRect(0, 0, W, H);
+
+      // header brand
+      ctx.fillStyle = "rgba(255,255,255,0.92)";
+      ctx.font = "900 54px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.fillText("フィード", 64, 96);
+
+      // username + time
+      const metaY = 152;
+      ctx.fillStyle = "rgba(255,255,255,0.72)";
+      ctx.font = "600 30px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      const handle = p.username ? `@${p.username}` : "@unknown";
+      ctx.fillText(handle, 64, metaY);
+
+      ctx.fillStyle = "rgba(255,255,255,0.45)";
+      ctx.font = "500 26px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      const t = timeAgoJa(p.created_at);
+      ctx.fillText(t, 64 + ctx.measureText(handle).width + 18, metaY);
+
+      // image (if any)
+      const cardPad = 64;
+      const imgTop = 210;
+      const imgH = 600;
+      const imgW = W - cardPad * 2;
+
+      if (p.image_url) {
+        try {
+          const resp = await fetch(p.image_url, { cache: "no-store" });
+          if (resp.ok) {
+            const blob = await resp.blob();
+            const objUrl = URL.createObjectURL(blob);
+            const img = new Image();
+            img.decoding = "async";
+            img.onload = () => {
+              // rounded rect clip
+              const r = 28;
+              ctx.save();
+              ctx.beginPath();
+              const x = cardPad;
+              const y = imgTop;
+              const w = imgW;
+              const h = imgH;
+              ctx.moveTo(x + r, y);
+              ctx.arcTo(x + w, y, x + w, y + h, r);
+              ctx.arcTo(x + w, y + h, x, y + h, r);
+              ctx.arcTo(x, y + h, x, y, r);
+              ctx.arcTo(x, y, x + w, y, r);
+              ctx.closePath();
+              ctx.clip();
+
+              // cover fit
+              const sx = 0;
+              const sy = 0;
+              const sw = img.width;
+              const sh = img.height;
+              const scale = Math.max(w / sw, h / sh);
+              const dw = sw * scale;
+              const dh = sh * scale;
+              const dx = x + (w - dw) / 2;
+              const dy = y + (h - dh) / 2;
+              ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+              ctx.restore();
+
+              URL.revokeObjectURL(objUrl);
+
+              // caption and export
+              drawCaptionAndSave();
+            };
+            img.onerror = () => {
+              try { URL.revokeObjectURL(objUrl); } catch {}
+              drawCaptionAndSave();
+            };
+            img.src = objUrl;
+            return; // export happens in onload
+          }
+        } catch {
+          // fall through to text-only
+        }
+      }
+
+      drawCaptionAndSave();
+
+      function drawCaptionAndSave() {
+        // caption
+        const cap = (p.content ?? "").toString().trim();
+        if (cap) {
+          const maxWidth = W - cardPad * 2;
+          ctx.fillStyle = "rgba(255,255,255,0.92)";
+          ctx.font = "600 34px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+          const lines: string[] = [];
+          const words = cap.split(/\s+/);
+          let line = "";
+          for (const w of words) {
+            const test = line ? `${line} ${w}` : w;
+            if (ctx.measureText(test).width <= maxWidth) {
+              line = test;
+            } else {
+              if (line) lines.push(line);
+              line = w;
+            }
+          }
+          if (line) lines.push(line);
+
+          const startY = 860;
+          const lineH = 44;
+          const maxLines = 4;
+          const clipped = lines.slice(0, maxLines);
+          clipped.forEach((ln, i) => ctx.fillText(ln, cardPad, startY + i * lineH));
+          if (lines.length > maxLines) {
+            ctx.fillText("…", cardPad, startY + (maxLines - 1) * lineH);
+          }
+        }
+
+        // small footer
+        ctx.fillStyle = "rgba(255,255,255,0.35)";
+        ctx.font = "600 22px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        ctx.fillText("nihongo-feed", 64, 1040);
+
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png");
+        a.download = `feed-${p.id}.png`;
+        a.click();
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Could not generate card.");
+    }
+  }
+  useEffect(() => {
+    const onDoc = () => setOpenMenuFor(null);
+    document.addEventListener("click", onDoc);
+    return () => document.removeEventListener("click", onDoc);
+  }, []);
   function startReply(postId: string, commentId: string, username: string) {
     // Ensure the comments panel is open for this post
     if (openCommentsFor !== postId) {
@@ -1729,7 +1879,7 @@ export default function HomePage() {
 
             return (
               <div className="post" key={p.id}>
-                <div className="post-header">
+                <div className="post-header" style={{ position: "relative" }}>
                   {profileHref ? (
                     <Link href={profileHref} className="avatar" style={linkStyle} aria-label={`Open profile ${p.username || "unknown"}`}>
                       {p.avatar_url ? <img src={p.avatar_url} alt={p.username} /> : <span>{initial}</span>}
@@ -1750,10 +1900,82 @@ export default function HomePage() {
                         <span className="handle muted">@unknown</span>
                       )}
 
-                      {canDelete ? (
-                        <button className="ghostBtn" onClick={() => deletePost(p.id)} title="Delete">
-                          削除
-                        </button>
+                      <button
+                        type="button"
+                        className="ghostBtn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuFor((cur) => (cur === p.id ? null : p.id));
+                        }}
+                        aria-label="Post menu"
+                        title="Menu"
+                        style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 18, lineHeight: 1 }}
+                      >
+                        ⋯
+                      </button>
+
+                      {openMenuFor === p.id ? (
+                        <div
+                          style={{
+                            position: "absolute",
+                            right: 12,
+                            top: 44,
+                            background: "rgba(20,20,24,0.98)",
+                            border: "1px solid rgba(255,255,255,0.08)",
+                            borderRadius: 12,
+                            padding: 6,
+                            minWidth: 160,
+                            zIndex: 50,
+                            boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOpenMenuFor(null);
+                              void downloadPostCard(p);
+                            }}
+                            style={{
+                              width: "100%",
+                              textAlign: "left",
+                              padding: "10px 10px",
+                              borderRadius: 10,
+                              border: 0,
+                              background: "transparent",
+                              color: "rgba(255,255,255,0.92)",
+                              cursor: "pointer",
+                              fontSize: 13,
+                              fontWeight: 700,
+                            }}
+                          >
+                            カードを保存
+                          </button>
+
+                          {canDelete ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenMenuFor(null);
+                                void deletePost(p.id);
+                              }}
+                              style={{
+                                width: "100%",
+                                textAlign: "left",
+                                padding: "10px 10px",
+                                borderRadius: 10,
+                                border: 0,
+                                background: "transparent",
+                                color: "rgba(255,120,120,0.95)",
+                                cursor: "pointer",
+                                fontSize: 13,
+                                fontWeight: 800,
+                              }}
+                            >
+                              削除
+                            </button>
+                          ) : null}
+                        </div>
                       ) : null}
                     </div>
 
