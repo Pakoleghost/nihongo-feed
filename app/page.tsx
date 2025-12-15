@@ -232,7 +232,19 @@ export default function HomePage() {
       setNeedsUsername(false);
       return;
     }
-    void checkMyProfile(userId);
+
+    (async () => {
+      try {
+        await requireApprovedSession();
+        await checkMyProfile(userId);
+      } catch (e: any) {
+        if (e.message === "NOT_APPROVED") {
+          window.location.href = "/pending";
+          return;
+        }
+        throw e;
+      }
+    })();
   }, [userId]);
 
   // open composer when coming from /new (/?compose=1)
@@ -696,7 +708,7 @@ export default function HomePage() {
     setLikeBusyByPost((prev) => ({ ...prev, [postId]: true }));
 
     try {
-      const activeUserId = userId ?? (await requireSession());
+      const activeUserId = userId ?? (await requireApprovedSession());
       if (!activeUserId) return;
 
       const p = posts.find((x) => x.id === postId);
