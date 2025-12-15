@@ -391,27 +391,28 @@ export default function HomePage() {
       canvas.height = H;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
+      const g: CanvasRenderingContext2D = ctx;
 
       // background
-      ctx.fillStyle = "#0b0b0f";
-      ctx.fillRect(0, 0, W, H);
+      g.fillStyle = "#0b0b0f";
+      g.fillRect(0, 0, W, H);
 
       // header brand
-      ctx.fillStyle = "rgba(255,255,255,0.92)";
-      ctx.font = "900 54px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-      ctx.fillText("フィード", 64, 96);
+      g.fillStyle = "rgba(255,255,255,0.92)";
+      g.font = "900 54px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      g.fillText("フィード", 64, 96);
 
       // username + time
       const metaY = 152;
-      ctx.fillStyle = "rgba(255,255,255,0.72)";
-      ctx.font = "600 30px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      g.fillStyle = "rgba(255,255,255,0.72)";
+      g.font = "600 30px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
       const handle = p.username ? `@${p.username}` : "@unknown";
-      ctx.fillText(handle, 64, metaY);
+      g.fillText(handle, 64, metaY);
 
-      ctx.fillStyle = "rgba(255,255,255,0.45)";
-      ctx.font = "500 26px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      g.fillStyle = "rgba(255,255,255,0.45)";
+      g.font = "500 26px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
       const t = timeAgoJa(p.created_at);
-      ctx.fillText(t, 64 + ctx.measureText(handle).width + 18, metaY);
+      g.fillText(t, 64 + g.measureText(handle).width + 18, metaY);
 
       // image (if any)
       const cardPad = 64;
@@ -430,19 +431,19 @@ export default function HomePage() {
             img.onload = () => {
               // rounded rect clip
               const r = 28;
-              ctx.save();
-              ctx.beginPath();
+              g.save();
+              g.beginPath();
               const x = cardPad;
               const y = imgTop;
               const w = imgW;
               const h = imgH;
-              ctx.moveTo(x + r, y);
-              ctx.arcTo(x + w, y, x + w, y + h, r);
-              ctx.arcTo(x + w, y + h, x, y + h, r);
-              ctx.arcTo(x, y + h, x, y, r);
-              ctx.arcTo(x, y, x + w, y, r);
-              ctx.closePath();
-              ctx.clip();
+              g.moveTo(x + r, y);
+              g.arcTo(x + w, y, x + w, y + h, r);
+              g.arcTo(x + w, y + h, x, y + h, r);
+              g.arcTo(x, y + h, x, y, r);
+              g.arcTo(x, y, x + w, y, r);
+              g.closePath();
+              g.clip();
 
               // cover fit
               const sx = 0;
@@ -454,8 +455,8 @@ export default function HomePage() {
               const dh = sh * scale;
               const dx = x + (w - dw) / 2;
               const dy = y + (h - dh) / 2;
-              ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
-              ctx.restore();
+              g.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+              g.restore();
 
               URL.revokeObjectURL(objUrl);
 
@@ -481,15 +482,15 @@ export default function HomePage() {
         const cap = (p.content ?? "").toString().trim();
         if (cap) {
           const maxWidth = W - cardPad * 2;
-          ctx.fillStyle = "rgba(255,255,255,0.92)";
-          ctx.font = "600 34px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+          g.fillStyle = "rgba(255,255,255,0.92)";
+          g.font = "600 34px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
           const lines: string[] = [];
           const words = cap.split(/\s+/);
           let line = "";
           for (const w of words) {
             const test = line ? `${line} ${w}` : w;
-            if (ctx.measureText(test).width <= maxWidth) {
+            if (g.measureText(test).width <= maxWidth) {
               line = test;
             } else {
               if (line) lines.push(line);
@@ -502,16 +503,16 @@ export default function HomePage() {
           const lineH = 44;
           const maxLines = 4;
           const clipped = lines.slice(0, maxLines);
-          clipped.forEach((ln, i) => ctx.fillText(ln, cardPad, startY + i * lineH));
+          clipped.forEach((ln, i) => g.fillText(ln, cardPad, startY + i * lineH));
           if (lines.length > maxLines) {
-            ctx.fillText("…", cardPad, startY + (maxLines - 1) * lineH);
+            g.fillText("…", cardPad, startY + (maxLines - 1) * lineH);
           }
         }
 
         // small footer
-        ctx.fillStyle = "rgba(255,255,255,0.35)";
-        ctx.font = "600 22px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-        ctx.fillText("nihongo-feed", 64, 1040);
+        g.fillStyle = "rgba(255,255,255,0.35)";
+        g.font = "600 22px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        g.fillText("nihongo-feed", 64, 1040);
 
         const a = document.createElement("a");
         a.href = canvas.toDataURL("image/png");
