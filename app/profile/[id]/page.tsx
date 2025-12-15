@@ -40,6 +40,7 @@ export default function ProfileByIdPage() {
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [viewerUsername, setViewerUsername] = useState<string>("");
   const [viewerAvatarUrl, setViewerAvatarUrl] = useState<string | null>(null);
+  const [viewerIsAdmin, setViewerIsAdmin] = useState(false);
 
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -77,19 +78,22 @@ export default function ProfileByIdPage() {
       if (uid) {
         const { data: vp } = await supabase
           .from("profiles")
-          .select("username, avatar_url")
+          .select("username, avatar_url, is_admin")
           .eq("id", uid)
-          .maybeSingle<{ username: string | null; avatar_url: string | null }>();
+          .maybeSingle<{ username: string | null; avatar_url: string | null; is_admin?: boolean }>();
 
         const uname = (vp?.username ?? "").toString().trim().toLowerCase();
+        const isAdmin = !!(vp as any)?.is_admin;
         if (mounted) {
           setViewerUsername(uname);
           setViewerAvatarUrl(vp?.avatar_url ?? null);
+          setViewerIsAdmin(isAdmin);
         }
       } else {
         if (mounted) {
           setViewerUsername("");
           setViewerAvatarUrl(null);
+          setViewerIsAdmin(false);
         }
       }
 
@@ -170,6 +174,24 @@ export default function ProfileByIdPage() {
     };
   }, [rawId]);
 
+  async function setJlptVerified(next: boolean) {
+    if (!viewerIsAdmin) return;
+    if (!profile?.id) return;
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ jlpt_verified: next })
+      .eq("id", profile.id);
+
+    if (error) {
+      setErrorMsg(error.message);
+      return;
+    }
+
+    // Refresh local profile state
+    setProfile((p) => (p ? { ...p, jlpt_verified: next } : p));
+  }
+
   const Shell = ({ title, subtitle }: { title: string; subtitle?: string }) => (
     <div className="feed" style={{ paddingBottom: 80, minHeight: "100vh" }}>
       <div className="header">
@@ -226,6 +248,55 @@ export default function ProfileByIdPage() {
           postCount={posts.length}
           commentCount={commentCount}
         />
+        {viewerIsAdmin && !isOwn ? (
+          <div
+            style={{
+              marginTop: 12,
+              padding: 12,
+              borderRadius: 14,
+              border: "1px solid rgba(0,0,0,.08)",
+              background: "rgba(255,255,255,.72)",
+            }}
+          >
+            <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 8, opacity: 0.85 }}>
+              Admin
+            </div>
+
+            <div style={{ fontSize: 12, lineHeight: 1.5, opacity: 0.85 }}>
+              <div>
+                <strong>JLPT claimed:</strong>{" "}
+                {profile.jlpt_level ? profile.jlpt_level : "—"}
+              </div>
+              <div>
+                <strong>Verified:</strong>{" "}
+                {profile.jlpt_verified ? "yes" : "no"}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+              <button
+                type="button"
+                onClick={() => void setJlptVerified(true)}
+                disabled={!profile.jlpt_level || !!profile.jlpt_verified}
+                style={{ padding: "10px 12px", borderRadius: 12 }}
+              >
+                Approve JLPT
+              </button>
+              <button
+                type="button"
+                onClick={() => void setJlptVerified(false)}
+                disabled={!profile.jlpt_verified}
+                style={{ padding: "10px 12px", borderRadius: 12 }}
+              >
+                Reject JLPT
+              </button>
+            </div>
+
+            <div style={{ marginTop: 8, fontSize: 12, opacity: 0.6 }}>
+              JLPT badge is public only when verified.
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {posts.length === 0 ? (
