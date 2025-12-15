@@ -380,155 +380,269 @@ export default function HomePage() {
   >({});
   // per-post menu
   const [openMenuFor, setOpenMenuFor] = useState<string | null>(null);
+  const menuBtnRef = useRef<Record<string, HTMLButtonElement | null>>({});
+  const menuRef = useRef<Record<string, HTMLDivElement | null>>({});
   // Download a post share card (square, IG story-friendly)
   async function downloadPostCard(p: Post) {
     try {
-      // Square card good for IG story reposts too
-      const W = 1080;
-      const H = 1080;
+      // Higher-res export for better quality (4:5-ish)
+      const W = 1440;
+      const H = 1800;
+      const SCALE = W / 1080;
+      const S = (n: number) => Math.round(n * SCALE);
       const canvas = document.createElement("canvas");
       canvas.width = W;
       canvas.height = H;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       const g: CanvasRenderingContext2D = ctx;
+      g.imageSmoothingEnabled = true;
+      // @ts-ignore
+      g.imageSmoothingQuality = "high";
+
+      async function loadBitmap(url: string): Promise<ImageBitmap | null> {
+        try {
+          const resp = await fetch(url, { cache: "no-store", mode: "cors" });
+          if (!resp.ok) return null;
+          const blob = await resp.blob();
+          return await createImageBitmap(blob);
+        } catch {
+          return null;
+        }
+      }
+
+      function roundedClip(x: number, y: number, w: number, h: number, r: number) {
+        g.beginPath();
+        g.moveTo(x + r, y);
+        g.arcTo(x + w, y, x + w, y + h, r);
+        g.arcTo(x + w, y + h, x, y + h, r);
+        g.arcTo(x, y + h, x, y, r);
+        g.arcTo(x, y, x + w, y, r);
+        g.closePath();
+        g.clip();
+      }
+
+      function drawCover(bmp: ImageBitmap, x: number, y: number, w: number, h: number) {
+        // Subtle surface in case the image has transparency
+        g.fillStyle = "rgba(255,255,255,0.04)";
+        g.fillRect(x, y, w, h);
+
+        // Cover-crop (preserve aspect ratio). No stretching.
+        const sw = bmp.width;
+        const sh = bmp.height;
+        if (!sw || !sh) return;
+
+        const scale = Math.max(w / sw, h / sh);
+        const dw = sw * scale;
+        const dh = sh * scale;
+        const dx = x + (w - dw) / 2;
+        const dy = y + (h - dh) / 2;
+
+        g.drawImage(bmp, dx, dy, dw, dh);
+      }
 
       // background
       g.fillStyle = "#0b0b0f";
       g.fillRect(0, 0, W, H);
 
-      // header brand
+      // header brand (bigger)
+      const brandPad = S(64);
       g.fillStyle = "rgba(255,255,255,0.92)";
-      g.font = "900 54px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-      g.fillText("フィード", 64, 96);
+      g.font = `900 ${S(62)}px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+      g.fillText("フィード", brandPad, S(104));
 
-      // username + time
-      const metaY = 152;
-      g.fillStyle = "rgba(255,255,255,0.72)";
-      g.font = "600 30px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      // avatar + username + time (no overlap)
+      const avatarSize = S(92); // bigger avatar
+      const metaTop = S(150); // more space below the top brand
+      const avatarX = brandPad;
+      const avatarY = metaTop;
+
+      // draw avatar circle
       const handle = p.username ? `@${p.username}` : "@unknown";
-      g.fillText(handle, 64, metaY);
+      const initial = (p.username?.[0] || "?").toUpperCase();
 
-      g.fillStyle = "rgba(255,255,255,0.45)";
-      g.font = "500 26px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-      const t = timeAgoJa(p.created_at);
-      g.fillText(t, 64 + g.measureText(handle).width + 18, metaY);
+      g.save();
+      g.beginPath();
+      g.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
+      g.closePath();
+      g.clip();
 
-      // image (if any)
-      const cardPad = 64;
-      const imgTop = 210;
-      const imgH = 600;
-      const imgW = W - cardPad * 2;
-
-      if (p.image_url) {
-        try {
-          const resp = await fetch(p.image_url, { cache: "no-store" });
-          if (resp.ok) {
-            const blob = await resp.blob();
-            const objUrl = URL.createObjectURL(blob);
-            const img = new Image();
-            img.decoding = "async";
-            img.onload = () => {
-              // rounded rect clip
-              const r = 28;
-              g.save();
-              g.beginPath();
-              const x = cardPad;
-              const y = imgTop;
-              const w = imgW;
-              const h = imgH;
-              g.moveTo(x + r, y);
-              g.arcTo(x + w, y, x + w, y + h, r);
-              g.arcTo(x + w, y + h, x, y + h, r);
-              g.arcTo(x, y + h, x, y, r);
-              g.arcTo(x, y, x + w, y, r);
-              g.closePath();
-              g.clip();
-
-              // cover fit
-              const sx = 0;
-              const sy = 0;
-              const sw = img.width;
-              const sh = img.height;
-              const scale = Math.max(w / sw, h / sh);
-              const dw = sw * scale;
-              const dh = sh * scale;
-              const dx = x + (w - dw) / 2;
-              const dy = y + (h - dh) / 2;
-              g.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
-              g.restore();
-
-              URL.revokeObjectURL(objUrl);
-
-              // caption and export
-              drawCaptionAndSave();
-            };
-            img.onerror = () => {
-              try { URL.revokeObjectURL(objUrl); } catch {}
-              drawCaptionAndSave();
-            };
-            img.src = objUrl;
-            return; // export happens in onload
-          }
-        } catch {
-          // fall through to text-only
+      if (p.avatar_url) {
+        const abmp = await loadBitmap(p.avatar_url);
+        if (abmp) {
+          // cover-crop into the circle
+          const sw = abmp.width;
+          const sh = abmp.height;
+          const scale = Math.max(avatarSize / sw, avatarSize / sh);
+          const dw = sw * scale;
+          const dh = sh * scale;
+          const dx = avatarX + (avatarSize - dw) / 2;
+          const dy = avatarY + (avatarSize - dh) / 2;
+          g.drawImage(abmp, dx, dy, dw, dh);
+          try { abmp.close(); } catch {}
+        } else {
+          g.fillStyle = "rgba(255,255,255,0.14)";
+          g.fillRect(avatarX, avatarY, avatarSize, avatarSize);
         }
+      } else {
+        g.fillStyle = "rgba(255,255,255,0.14)";
+        g.fillRect(avatarX, avatarY, avatarSize, avatarSize);
+      }
+      g.restore();
+
+      // avatar border
+      g.beginPath();
+      g.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
+      g.closePath();
+      g.strokeStyle = "rgba(255,255,255,0.18)";
+      g.lineWidth = S(2);
+      g.stroke();
+
+      // initial fallback if no avatar
+      if (!p.avatar_url) {
+        g.fillStyle = "rgba(255,255,255,0.9)";
+        g.font = `900 ${S(30)}px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+        const tw = g.measureText(initial).width;
+        g.fillText(initial, avatarX + (avatarSize - tw) / 2, avatarY + S(46));
       }
 
-      drawCaptionAndSave();
+      const textX = avatarX + avatarSize + S(18);
+      const userY = avatarY + S(40);
+      const timeY = avatarY + S(84); // more space between username and timestamp
 
-      function drawCaptionAndSave() {
-        // caption
-        const cap = (p.content ?? "").toString().trim();
-        if (cap) {
-          const maxWidth = W - cardPad * 2;
-          g.fillStyle = "rgba(255,255,255,0.92)";
-          g.font = "600 34px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      g.fillStyle = "rgba(255,255,255,0.82)";
+      g.font = `800 ${S(32)}px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+      g.fillText(handle, textX, userY);
 
-          const lines: string[] = [];
-          const words = cap.split(/\s+/);
+      g.fillStyle = "rgba(255,255,255,0.50)";
+      g.font = `700 ${S(26)}px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+      const t = timeAgoJa(p.created_at);
+      g.fillText(t, textX, timeY);
+
+      // layout
+      const cardPad = brandPad;
+      const imgW = W - cardPad * 2;
+
+      // Caption spacing: slightly tighter line spacing, with different top and bottom gaps
+      const capLineH = S(38); // slightly tighter line spacing
+      const capMaxLines = 4;
+      const capMaxWidth = W - cardPad * 2;
+      const capGapTop = S(38); // more breathing room above caption
+      const capGapBottom = 0; // less space below caption
+
+      // Reserve space at the bottom for the bottom-right logo so it never clips.
+      const bottomLogoReserve = S(110);
+
+      // Top of caption is based on avatar/meta block so it never looks cramped.
+      const metaBottom = avatarY + avatarSize;
+      const captionTop = metaBottom + capGapTop;
+
+      // Compute wrapped caption lines (preserve user-entered line breaks)
+      const capRaw = (p.content ?? "").toString().trimEnd();
+      const capLines: string[] = [];
+
+      if (capRaw) {
+        const paragraphs = capRaw.split(/\r?\n/);
+        for (const para of paragraphs) {
+          if (!para.trim()) {
+            capLines.push("");
+            continue;
+          }
+          const words = para.split(/\s+/);
           let line = "";
           for (const w of words) {
             const test = line ? `${line} ${w}` : w;
-            if (g.measureText(test).width <= maxWidth) {
+            if (g.measureText(test).width <= capMaxWidth) {
               line = test;
             } else {
-              if (line) lines.push(line);
+              if (line) capLines.push(line);
               line = w;
             }
           }
-          if (line) lines.push(line);
-
-          const startY = 860;
-          const lineH = 44;
-          const maxLines = 4;
-          const clipped = lines.slice(0, maxLines);
-          clipped.forEach((ln, i) => g.fillText(ln, cardPad, startY + i * lineH));
-          if (lines.length > maxLines) {
-            g.fillText("…", cardPad, startY + (maxLines - 1) * lineH);
-          }
+          if (line) capLines.push(line);
         }
-
-        // small footer
-        g.fillStyle = "rgba(255,255,255,0.35)";
-        g.font = "600 22px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-        g.fillText("nihongo-feed", 64, 1040);
-
-        const a = document.createElement("a");
-        a.href = canvas.toDataURL("image/png");
-        a.download = `feed-${p.id}.png`;
-        a.click();
       }
+
+      const clippedCapLines = capLines.slice(0, capMaxLines);
+
+      // Caption bottom is based on how many visible lines we will draw.
+      // Treat empty lines as vertical spacing.
+      const drawnLineCount = clippedCapLines.filter((ln) => ln.trim().length > 0).length;
+const captionBottom =
+  captionTop + Math.max(0, drawnLineCount - 1) * capLineH + S(20); // S(30) ~= your font size
+      // Image starts after the caption with a smaller gap below.
+      const imgTop = captionBottom + capGapBottom;
+
+      // Make the image area fit the remaining height so we don't overflow the canvas.
+      const maxImgBottom = H - brandPad - bottomLogoReserve;
+      const imgH = Math.max(S(760), maxImgBottom - imgTop);
+
+      // caption (above image)
+      if (capRaw) {
+        g.fillStyle = "rgba(255,255,255,0.94)";
+        g.font = `700 ${S(30)}px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+
+        clippedCapLines.forEach((ln, i) => {
+          if (!ln) return;
+          g.fillText(ln, cardPad, captionTop + i * capLineH);
+        });
+
+        if (capLines.length > capMaxLines) {
+          g.fillText("…", cardPad, captionTop + (capMaxLines - 1) * capLineH);
+        }
+      }
+
+      // image (if any)
+      if (p.image_url) {
+        const bmp = await loadBitmap(p.image_url);
+        if (bmp) {
+          const r = S(32);
+          g.save();
+          roundedClip(cardPad, imgTop, imgW, imgH, r);
+          drawCover(bmp, cardPad, imgTop, imgW, imgH);
+          g.restore();
+          try { bmp.close(); } catch {}
+        }
+      }
+
+      // bottom-right brand for symmetry (always visible)
+      g.save();
+      g.fillStyle = "rgba(255,255,255,0.92)";
+      g.font = `900 ${S(62)}px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+      g.textBaseline = "bottom";
+      const brand2 = "フィード";
+      const tw2 = g.measureText(brand2).width;
+      g.fillText(brand2, W - brandPad - tw2, H - brandPad);
+      g.restore();
+
+      const a = document.createElement("a");
+      a.href = canvas.toDataURL("image/png");
+      a.download = `feed-${p.id}.png`;
+      a.click();
     } catch (e) {
       console.error(e);
       alert("Could not generate card.");
     }
   }
   useEffect(() => {
-    const onDoc = () => setOpenMenuFor(null);
-    document.addEventListener("click", onDoc);
-    return () => document.removeEventListener("click", onDoc);
-  }, []);
+    const onDown = (e: PointerEvent) => {
+      const openId = openMenuFor;
+      if (!openId) return;
+      const target = e.target as Node | null;
+      if (!target) return;
+
+      const btn = menuBtnRef.current[openId];
+      const menu = menuRef.current[openId];
+
+      if (btn?.contains(target)) return;
+      if (menu?.contains(target)) return;
+
+      setOpenMenuFor(null);
+    };
+
+    document.addEventListener("pointerdown", onDown, { capture: true });
+    return () => document.removeEventListener("pointerdown", onDown, { capture: true } as any);
+  }, [openMenuFor]);
   function startReply(postId: string, commentId: string, username: string) {
     // Ensure the comments panel is open for this post
     if (openCommentsFor !== postId) {
@@ -1902,9 +2016,13 @@ export default function HomePage() {
                       )}
 
                       <button
+                        ref={(el) => {
+                          menuBtnRef.current[p.id] = el;
+                        }}
                         type="button"
                         className="ghostBtn"
                         onClick={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
                           setOpenMenuFor((cur) => (cur === p.id ? null : p.id));
                         }}
@@ -1917,6 +2035,9 @@ export default function HomePage() {
 
                       {openMenuFor === p.id ? (
                         <div
+                          ref={(el) => {
+                            menuRef.current[p.id] = el;
+                          }}
                           style={{
                             position: "absolute",
                             right: 12,
@@ -1929,11 +2050,16 @@ export default function HomePage() {
                             zIndex: 50,
                             boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
                           }}
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
                         >
                           <button
                             type="button"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
                               setOpenMenuFor(null);
                               void downloadPostCard(p);
                             }}
@@ -1956,7 +2082,9 @@ export default function HomePage() {
                           {canDelete ? (
                             <button
                               type="button"
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 setOpenMenuFor(null);
                                 void deletePost(p.id);
                               }}

@@ -469,6 +469,7 @@ useEffect(() => {
       const dataUrl = await htmlToImage.toPng(shareCardRef.current, {
         backgroundColor: "#ffffff",
         pixelRatio: 3,
+        cacheBust: true,
       });
 
       const link = document.createElement("a");
@@ -479,7 +480,7 @@ useEffect(() => {
       console.error(e);
       alert("Failed to generate image.");
     }
-  }, []);
+  }, [postId]);
 
   const renderComment = useCallback(
     (c: CommentRow, depth: number) => {
@@ -657,26 +658,6 @@ useEffect(() => {
                   <span aria-hidden style={{ fontSize: 14, lineHeight: 1 }}>{likedByMe ? "♥" : "♡"}</span>
                   <span>{`いいね ${likeCount}`}</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={downloadShareCard}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 32,
-                    height: 32,
-                    borderRadius: 999,
-                    border: "1px solid rgba(17,17,20,.10)",
-                    background: "#fff",
-                    cursor: "pointer",
-                    opacity: 0.85,
-                  }}
-                  aria-label="Download post image"
-                  title="Download"
-                >
-                  ⤓
-                </button>
               </div>
               <div style={{ marginTop: 14, fontWeight: 900, opacity: 0.85 }}>コメント</div>
 
@@ -740,14 +721,18 @@ useEffect(() => {
         <div
           ref={shareCardRef}
           style={{
-            position: "absolute",
-            left: -9999,
+            position: "fixed",
+            left: 0,
             top: 0,
             width: 420,
             padding: 20,
             background: "#fff",
             borderRadius: 24,
             fontFamily: "inherit",
+            color: "#111",
+            pointerEvents: "none",
+            opacity: 0,
+            transform: "translateX(-200%)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
