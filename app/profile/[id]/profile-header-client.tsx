@@ -47,6 +47,7 @@ export default function ProfileHeaderClient(props: {
   jlptLevel?: string | null;
   postCount: number;
   commentCount: number;
+  hasPendingJlpt?: boolean;
 }) {
   const {
     isOwn,
@@ -59,6 +60,7 @@ export default function ProfileHeaderClient(props: {
     jlptLevel,
     postCount,
     commentCount,
+    hasPendingJlpt = false,
   } = props;
 
   const [open, setOpen] = useState(false);
@@ -68,7 +70,9 @@ export default function ProfileHeaderClient(props: {
 
   const menuRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const jlptInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingJlpt, setUploadingJlpt] = useState(false);
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -106,6 +110,53 @@ export default function ProfileHeaderClient(props: {
   function changePhoto() {
     setOpen(false);
     fileInputRef.current?.click();
+  }
+
+  function submitJlptCertificate() {
+    if (hasPendingJlpt) return;
+    setOpen(false);
+    jlptInputRef.current?.click();
+  }
+
+  async function onPickJlptCertificate(file: File) {
+    try {
+      setUploadingJlpt(true);
+
+      if (!file.type.startsWith("image/")) {
+        alert("Please choose an image file.");
+        return;
+      }
+
+      const extRaw = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const ext = extRaw.replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `certificates/${profileId}/${Date.now()}.${ext}`;
+
+      const bucket = "jlpt-certificates";
+      const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
+        upsert: false,
+        contentType: file.type,
+      });
+
+      if (upErr) {
+        alert(upErr.message);
+        return;
+      }
+
+      const { error: insErr } = await supabase.from("jlpt_submissions").insert({
+        user_id: profileId,
+        image_path: path,
+        status: "pending",
+      });
+
+      if (insErr) {
+        alert(insErr.message);
+        return;
+      }
+
+      alert("JLPT certificate submitted. An admin will review it.");
+    } finally {
+      setUploadingJlpt(false);
+    }
   }
 
   async function onPickPhoto(file: File) {
@@ -178,18 +229,30 @@ export default function ProfileHeaderClient(props: {
           if (f) void onPickPhoto(f);
         }}
       />
+      <input
+        ref={jlptInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          // allow selecting the same file twice
+          e.currentTarget.value = "";
+          if (f) void onPickJlptCertificate(f);
+        }}
+      />
       <div className="post-header" style={{ alignItems: "flex-start" }}>
         {isOwn ? (
           <button
             type="button"
             onClick={changePhoto}
-            disabled={uploadingAvatar}
+            disabled={uploadingAvatar || uploadingJlpt}
             aria-label="Change profile photo"
             style={{
               padding: 0,
               border: 0,
               background: "transparent",
-              cursor: uploadingAvatar ? "not-allowed" : "pointer",
+              cursor: uploadingAvatar || uploadingJlpt ? "not-allowed" : "pointer",
             }}
           >
             <div className="avatar" aria-label="Profile avatar" style={{ width: 96, height: 96 }}>
@@ -237,7 +300,7 @@ export default function ProfileHeaderClient(props: {
                     type="button"
                     className="ghostBtn"
                     onClick={() => setEditBioOpen(true)}
-                    disabled={uploadingAvatar}
+                    disabled={uploadingAvatar || uploadingJlpt}
                   >
                     Edit bio
                   </button>
@@ -252,6 +315,7 @@ export default function ProfileHeaderClient(props: {
                   type="button"
                   onClick={() => setOpen((v) => !v)}
                   aria-label="Profile menu"
+                  disabled={uploadingAvatar || uploadingJlpt}
                   style={{
                     width: 40,
                     height: 40,
@@ -264,12 +328,12 @@ export default function ProfileHeaderClient(props: {
                     color: "#111",
                     fontSize: 22,
                     fontWeight: 900,
-                    cursor: "pointer",
+                    cursor: uploadingAvatar || uploadingJlpt ? "not-allowed" : "pointer",
                     position: "relative",
                     zIndex: 10,
                   }}
                 >
-                  ⋯
+                  {uploadingJlpt ? "…" : "⋯"}
                 </button>
 
                 {open ? (
@@ -290,14 +354,14 @@ export default function ProfileHeaderClient(props: {
                     <button
                       type="button"
                       onClick={changePhoto}
-                      disabled={uploadingAvatar}
+                      disabled={uploadingAvatar || uploadingJlpt}
                       style={{
                         width: "100%",
                         textAlign: "left",
                         padding: "10px 12px",
                         background: "transparent",
                         border: 0,
-                        cursor: uploadingAvatar ? "not-allowed" : "pointer",
+                        cursor: uploadingAvatar || uploadingJlpt ? "not-allowed" : "pointer",
                         borderTop: "1px solid rgba(0,0,0,0.08)",
                       }}
                     >
@@ -306,15 +370,36 @@ export default function ProfileHeaderClient(props: {
 
                     <button
                       type="button"
-                      onClick={logout}
-                      disabled={uploadingAvatar}
+                      onClick={submitJlptCertificate}
+                      disabled={uploadingAvatar || uploadingJlpt || hasPendingJlpt}
                       style={{
                         width: "100%",
                         textAlign: "left",
                         padding: "10px 12px",
                         background: "transparent",
                         border: 0,
-                        cursor: uploadingAvatar ? "not-allowed" : "pointer",
+                        cursor:
+                          uploadingAvatar || uploadingJlpt || hasPendingJlpt
+                            ? "not-allowed"
+                            : "pointer",
+                        opacity: hasPendingJlpt ? 0.6 : 1,
+                        borderTop: "1px solid rgba(0,0,0,0.08)",
+                      }}
+                    >
+                      {hasPendingJlpt ? "JLPT certificate pending review" : "Submit JLPT certificate"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={logout}
+                      disabled={uploadingAvatar || uploadingJlpt}
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "10px 12px",
+                        background: "transparent",
+                        border: 0,
+                        cursor: uploadingAvatar || uploadingJlpt ? "not-allowed" : "pointer",
                         borderTop: "1px solid rgba(0,0,0,0.08)",
                       }}
                     >

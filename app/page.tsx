@@ -59,8 +59,12 @@ function normalizeProfile(p: any): { username: string; avatar_url: string | null
 
   const raw = (obj?.username ?? "").toString().trim().toLowerCase();
 
-  // Si no hay username real, NO generes link
-  const username = raw && raw !== "unknown" ? raw : "";
+  // Treat auto-generated usernames as "not set" so we force the username picker.
+  // Examples we want to reject: user_ce5b7889, user_123abc, etc.
+  const isAuto = /^user_[a-z0-9]+$/.test(raw);
+
+  // If no real username, do not generate a link
+  const username = raw && raw !== "unknown" && !isAuto ? raw : "";
 
   return {
     username,
@@ -123,10 +127,17 @@ export default function HomePage() {
   const [jlptLevel, setJlptLevel] = useState(""); // optional
   const [dob, setDob] = useState(""); // YYYY-MM-DD
   const [gender, setGender] = useState<"male" | "female" | "non-binary" | "prefer_not_to_say" | "">("");
+  // Optional JLPT certificate image (for badge verification). This is NOT the same as jlptLevel (research only).
+  const [jlptCertFile, setJlptCertFile] = useState<File | null>(null);
+  const [jlptCertPreviewUrl, setJlptCertPreviewUrl] = useState<string | null>(null);
+  const fullName = useMemo(() => {
+    const f = firstName.trim();
+    const l = lastName.trim();
+    return `${f} ${l}`.trim();
+  }, [firstName, lastName]);
   function getApplicationDraftError(): string {
     if (authMode !== "signup") return "";
-    if (!firstName.trim()) return "First name is required.";
-    if (!lastName.trim()) return "Last name is required.";
+    if (!fullName) return "Full name is required.";
     if (!campus.trim()) return "Campus is required.";
     if (!classLevel.trim()) return "Class level is required.";
     if (!dob.trim()) return "Date of birth is required.";
@@ -136,17 +147,17 @@ export default function HomePage() {
     return "";
   }
 
-  function saveApplicationDraftToLocalStorage(emailForDraft: string) {
+  function saveApplicationDraftToLocalStorage(emailForDraft: string, hasJlptCert: boolean) {
     try {
       const payload = {
         email: emailForDraft.trim(),
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
+        full_name: fullName,
         campus: campus.trim(),
         class_level: classLevel.trim(),
         jlpt_level: jlptLevel.trim() || null,
-        dob: dob.trim(),
+        date_of_birth: dob.trim(),
         gender,
+        jlpt_certificate_intent: !!hasJlptCert,
         saved_at: new Date().toISOString(),
       };
       window.localStorage.setItem("nhf_application_draft", JSON.stringify(payload));
@@ -154,6 +165,189 @@ export default function HomePage() {
       // ignore
     }
   }
+
+  async function submitApplicationFromDraftIfPresent(uid: string): Promise<boolean> {
+    try {
+      if (typeof window === "undefined") return false;
+      if (!uid) return false;
+      const raw = window.localStorage.getItem("nhf_application_draft");
+      if (!raw) return false;
+      const draft = JSON.parse(raw);
+
+      const full_name = (draft?.full_name ?? "").toString().trim();
+      const campus = (draft?.campus ?? "").toString().trim();
+      const class_level = (draft?.class_level ?? "").toString().trim();
+      const jlpt_level = (draft?.jlpt_level ?? "").toString().trim();
+      const date_of_birth = (draft?.date_of_birth ?? "").toString().trim();
+      const gender = (draft?.gender ?? "").toString().trim();
+
+      if (!full_name || !campus || !class_level || !date_of_birth || !gender) return false;
+
+      // Use SECURITY DEFINER RPC so RLS cannot block due to user_id mismatch.
+      const { error } = await supabase.rpc(
+        "create_application",
+        {
+          full_name,
+          campus,
+          class_level,
+          jlpt_level: jlpt_level || null,
+          date_of_birth,
+          gender,
+        }
+      );
+
+      if (error) {
+        console.error("create_application rpc failed:", error);
+        return false;
+      }
+
+      // Do not auto-upload JLPT cert here.
+      // Upload happens in the signup flow (when session exists) or from profile (⋯) later.
+
+      // Clear draft only on success.
+      window.localStorage.removeItem("nhf_application_draft");
+      return true;
+    } catch (e) {
+      console.error("submitApplicationFromDraftIfPresent failed:", e);
+      return false;
+    }
+  }
+
+  async function uploadJlptCertificateAndCreateSubmission(uid: string, file: File): Promise<void> {
+    // Prevent repeated automatic JLPT uploads: check for pending submission
+    const { data: pendingSub, error: pendingError } = await supabase
+      .from("jlpt_submissions")
+      .select("id")
+      .eq("user_id", uid)
+      .eq("status", "pending")
+      .limit(1)
+      .maybeSingle();
+    if (pendingSub && pendingSub.id) {
+      // Already a pending submission, do nothing
+      return;
+    }
+
+    // Uses a private bucket: jlpt-certificates
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const safeExt = ext.replace(/[^a-z0-9]/g, "") || "jpg";
+    const path = `certificates/${uid}/${Date.now()}.${safeExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("jlpt-certificates")
+      .upload(path, file, { upsert: false, contentType: file.type || undefined });
+
+    if (uploadError) throw uploadError;
+
+    // Insert JLPT submission and get the inserted id
+    const { data: insertedRow, error: insertError } = await supabase.from("jlpt_submissions").insert({
+      user_id: uid,
+      image_path: path,
+      status: "pending",
+    }).select("id").single();
+
+    if (insertError) throw insertError;
+    const jlptSubmissionId = insertedRow?.id;
+
+    // Notify all admins of new JLPT submission
+    try {
+      // Get admin user ids
+      const { data: admins, error: adminErr } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("is_admin", true);
+      if (adminErr) throw adminErr;
+      if (Array.isArray(admins) && admins.length > 0 && jlptSubmissionId) {
+        const notifications = admins.map((admin: any) => ({
+          user_id: admin.id,
+          actor_id: uid,
+          type: "jlpt",
+          read: false,
+          jlpt_submission_id: jlptSubmissionId,
+        }));
+        await supabase.from("notifications").insert(notifications);
+      }
+    } catch {
+      // Ignore notification failures, JLPT submission still succeeds
+    }
+  }
+
+  // Persist JLPT certificate across email confirmation flows (no session on initial signup)
+  async function saveJlptCertToIndexedDB(file: File): Promise<void> {
+    if (typeof window === "undefined") return;
+    await new Promise<void>((resolve, reject) => {
+      const req = indexedDB.open("nhf", 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains("blobs")) db.createObjectStore("blobs");
+      };
+      req.onsuccess = () => {
+        const db = req.result;
+        const tx = db.transaction("blobs", "readwrite");
+        tx.objectStore("blobs").put(file, "jlpt_cert");
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      };
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function loadJlptCertFromIndexedDB(): Promise<File | null> {
+    if (typeof window === "undefined") return null;
+    return await new Promise<File | null>((resolve, reject) => {
+      const req = indexedDB.open("nhf", 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains("blobs")) db.createObjectStore("blobs");
+      };
+      req.onsuccess = () => {
+        const db = req.result;
+        const tx = db.transaction("blobs", "readonly");
+        const getReq = tx.objectStore("blobs").get("jlpt_cert");
+        getReq.onsuccess = () => resolve((getReq.result as File) || null);
+        getReq.onerror = () => reject(getReq.error);
+      };
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function clearJlptCertFromIndexedDB(): Promise<void> {
+    if (typeof window === "undefined") return;
+    await new Promise<void>((resolve, reject) => {
+      const req = indexedDB.open("nhf", 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains("blobs")) db.createObjectStore("blobs");
+      };
+      req.onsuccess = () => {
+        const db = req.result;
+        const tx = db.transaction("blobs", "readwrite");
+        tx.objectStore("blobs").delete("jlpt_cert");
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      };
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  // JLPT certificate preview URL lifecycle
+  useEffect(() => {
+    if (!jlptCertFile) {
+      if (jlptCertPreviewUrl) setJlptCertPreviewUrl(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(jlptCertFile);
+    setJlptCertPreviewUrl(url);
+
+    return () => {
+      try {
+        URL.revokeObjectURL(url);
+      } catch {
+        // ignore
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jlptCertFile]);
 
   // USERNAME GATE
   const [checkingProfile, setCheckingProfile] = useState(true);
@@ -395,7 +589,8 @@ export default function HomePage() {
     const uLower = uRaw.toLowerCase();
     const a = data?.avatar_url ?? null;
 
-    const hasRealUsername = !!uRaw && uLower !== "unknown";
+    const isAuto = /^user_[a-z0-9]+$/.test(uLower);
+    const hasRealUsername = !!uRaw && uLower !== "unknown" && !isAuto;
 
     setMyUsername(hasRealUsername ? uRaw : "unknown");
     setMyAvatarUrl(a);
@@ -477,6 +672,39 @@ export default function HomePage() {
     setPassword("");
     setPendingEmailConfirmation(null);
     setAuthMessage("");
+
+    // Best-effort: if the user previously saved an application draft (common when email confirmation was required),
+    // submit it now that we have a session.
+    try {
+      const { data } = await supabase.auth.getUser();
+      const uid = data.user?.id;
+      if (uid) await submitApplicationFromDraftIfPresent(uid);
+    } catch {
+      // ignore
+    }
+
+    // Best-effort: after login, try to upload JLPT cert from IndexedDB if present
+    try {
+      const { data } = await supabase.auth.getUser();
+      const uid = data.user?.id;
+      if (uid) {
+        const file = await loadJlptCertFromIndexedDB();
+        if (file) {
+          try {
+            await uploadJlptCertificateAndCreateSubmission(uid, file);
+          } catch {
+            // ignore upload errors
+          }
+          try {
+            await clearJlptCertFromIndexedDB();
+          } catch {
+            // ignore clear errors
+          }
+        }
+      }
+    } catch {
+      // ignore
+    }
   }
 
   async function signUpWithPassword() {
@@ -492,7 +720,7 @@ export default function HomePage() {
     }
 
     // Always keep a local draft as a fallback.
-    if (typeof window !== "undefined") saveApplicationDraftToLocalStorage(trimmedEmail);
+    if (typeof window !== "undefined") saveApplicationDraftToLocalStorage(trimmedEmail, !!jlptCertFile);
 
     setAuthMessage("");
     setAuthBusy(true);
@@ -515,29 +743,34 @@ export default function HomePage() {
 
     // Best-effort: submit the application immediately if we have a session.
     // If Supabase does not give us a session (common when email confirmation is required),
-    // the draft remains in localStorage and can be submitted from /pending after login.
+    // we keep the draft and (optionally) stash the JLPT image for later upload.
     let applicationInserted = false;
+    let jlptSubmitted = false;
+    let jlptCertSavedToIndexedDB = false;
+
     try {
-      const uid = data.user?.id ? String(data.user.id) : null;
+      if (data.session) {
+        const uid = data.session.user?.id;
+        if (uid) {
+          applicationInserted = await submitApplicationFromDraftIfPresent(uid);
 
-      if (data.session && uid) {
-        const { error: appErr } = await supabase.from("applications").upsert(
-          {
-            user_id: uid,
-            email: trimmedEmail,
-            first_name: firstName.trim(),
-            last_name: lastName.trim(),
-            campus: campus.trim(),
-            class_level: classLevel.trim(),
-            jlpt_level: (jlptLevel.trim() || null) as any,
-            dob: dob.trim(),
-            gender: gender || null,
-            status: "pending",
-          } as any,
-          { onConflict: "user_id" }
-        );
-
-        if (!appErr) applicationInserted = true;
+          // Optional JLPT certificate submission (only once)
+          if (jlptCertFile) {
+            await uploadJlptCertificateAndCreateSubmission(uid, jlptCertFile);
+            jlptSubmitted = true;
+          }
+        }
+      } else {
+        // No session yet (email confirmation flow). Save the certificate so we can upload
+        // it after the user confirms and logs in.
+        if (jlptCertFile) {
+          try {
+            await saveJlptCertToIndexedDB(jlptCertFile);
+            jlptCertSavedToIndexedDB = true;
+          } catch {
+            // ignore
+          }
+        }
       }
     } catch {
       // ignore
@@ -551,13 +784,20 @@ export default function HomePage() {
       // ignore
     }
 
+    // Clear local state for safety only after successful upload or save to IndexedDB
+    if (jlptSubmitted || jlptCertSavedToIndexedDB) {
+      setJlptCertFile(null);
+    }
+
     // Ask them to confirm email and wait for approval.
     setAuthMode("login");
     setPendingEmailConfirmation(trimmedEmail);
 
     if (applicationInserted) {
       setAuthMessage(
-        "Application submitted. Check your email to confirm your account. After an admin approves you, you can log in."
+        jlptSubmitted
+          ? "Application submitted and JLPT certificate uploaded. Check your email to confirm your account. After an admin approves you, you can log in."
+          : "Application submitted. Check your email to confirm your account. After an admin approves you, you can log in."
       );
       return;
     }
@@ -577,8 +817,14 @@ export default function HomePage() {
     }
 
     setAuthMessage(
-      "Check your email to confirm your account. Your application will be submitted when you log in and reach the pending approval screen."
+      jlptCertFile
+        ? "Check your email to confirm your account. After you confirm and log in, we will upload your JLPT certificate automatically."
+        : "Check your email to confirm your account. Your application will be submitted when you log in and reach the pending approval screen."
     );
+    // If we didn't clear JLPT cert file above and we did save it to IndexedDB, clear it now.
+    if (!jlptSubmitted && jlptCertSavedToIndexedDB) {
+      setJlptCertFile(null);
+    }
   }
 
   async function resendConfirmation(targetEmail?: string) {
@@ -1024,7 +1270,10 @@ export default function HomePage() {
 
     const { error: updateError } = await supabase.from("profiles").upsert({
       id: activeUserId,
-      username: myUsername === "unknown" ? normalizedNewUsername || null : myUsername,
+      username:
+        myUsername === "unknown" || /^user_[a-z0-9]+$/.test((myUsername ?? "").toString().toLowerCase())
+          ? null
+          : myUsername,
       avatar_url: pub.publicUrl,
     });
 
@@ -1091,13 +1340,13 @@ export default function HomePage() {
 
           {authMode === "signup" ? (
             <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
-              <div style={{ fontSize: 12, opacity: 0.75 }}>Application (required)</div>
+              <div style={{ fontSize: 12, opacity: 0.75 }}>Application (all required except JLPT)</div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 <input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="first name"
+                  placeholder="First name"
                   style={{
                     width: "100%",
                     padding: 12,
@@ -1111,7 +1360,7 @@ export default function HomePage() {
                 <input
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="last name"
+                  placeholder="Last name"
                   style={{
                     width: "100%",
                     padding: 12,
@@ -1127,7 +1376,7 @@ export default function HomePage() {
               <input
                 value={campus}
                 onChange={(e) => setCampus(e.target.value)}
-                placeholder="campus"
+                placeholder="Campus"
                 style={{
                   width: "100%",
                   padding: 12,
@@ -1169,11 +1418,54 @@ export default function HomePage() {
                 }}
               />
 
+              <div style={{ marginTop: 2 }}>
+                <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 6 }}>
+                  JLPT certificate (optional, for badge verification)
+                </div>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={!!jlptCertFile}
+                  onChange={(e) => setJlptCertFile(e.target.files?.[0] ?? null)}
+                  style={{
+                    width: "100%",
+                    padding: 10,
+                    borderRadius: 12,
+                    border: "1px solid rgba(255,255,255,.15)",
+                    background: "rgba(255,255,255,.06)",
+                    color: "#fff",
+                    outline: "none",
+                    opacity: jlptCertFile ? 0.6 : 1,
+                    cursor: jlptCertFile ? "not-allowed" : "pointer",
+                  }}
+                />
+
+                {jlptCertPreviewUrl ? (
+                  <div style={{ marginTop: 10, borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,.12)" }}>
+                    <img
+                      src={jlptCertPreviewUrl}
+                      alt="JLPT certificate preview"
+                      style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }}
+                    />
+                  </div>
+                ) : null}
+                {jlptCertFile ? (
+                  <div style={{ fontSize: 12, opacity: 0.6, marginTop: 6 }}>
+                    JLPT certificate selected. You can submit another one after this is reviewed.
+                  </div>
+                ) : null}
+
+                <div style={{ fontSize: 12, opacity: 0.65, marginTop: 8, lineHeight: 1.4 }}>
+                  Optional. If email confirmation is enabled, we will upload this after you confirm and log in.
+                </div>
+              </div>
+
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 <input
                   value={dob}
                   onChange={(e) => setDob(e.target.value)}
-                  placeholder="date of birth (YYYY-MM-DD)"
+                  placeholder="Date of birth (YYYY-MM-DD)"
                   style={{
                     width: "100%",
                     padding: 12,
@@ -1269,7 +1561,20 @@ export default function HomePage() {
           ) : null}
 
           <button
-            onClick={() => setAuthMode((prev) => (prev === "login" ? "signup" : "login"))}
+            onClick={() => {
+              setAuthMode((prev) => {
+                const next = prev === "login" ? "signup" : "login";
+                if (next !== "signup") {
+                  setJlptCertFile(null);
+                  try {
+                    void clearJlptCertFromIndexedDB();
+                  } catch {
+                    // ignore
+                  }
+                }
+                return next;
+              });
+            }}
             style={{
               width: "100%",
               padding: 10,

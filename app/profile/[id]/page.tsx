@@ -41,6 +41,7 @@ export default function ProfileByIdPage() {
   const [viewerUsername, setViewerUsername] = useState<string>("");
   const [viewerAvatarUrl, setViewerAvatarUrl] = useState<string | null>(null);
   const [viewerIsAdmin, setViewerIsAdmin] = useState(false);
+  const [hasPendingJlpt, setHasPendingJlpt] = useState(false);
 
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -123,6 +124,19 @@ export default function ProfileByIdPage() {
       }
 
       if (mounted) setProfile(prof);
+
+      if (uid && uid === prof.id) {
+        const { data: pending } = await supabase
+          .from("jlpt_submissions")
+          .select("id")
+          .eq("user_id", uid)
+          .eq("status", "pending")
+          .limit(1);
+
+        if (mounted) setHasPendingJlpt((pending?.length ?? 0) > 0);
+      } else {
+        if (mounted) setHasPendingJlpt(false);
+      }
 
       // posts
       const { data: postRows, error: postsErr } = await supabase
@@ -238,6 +252,7 @@ export default function ProfileByIdPage() {
       <div className="post" style={{ marginTop: 12 }}>
         <ProfileHeaderClient
           isOwn={isOwn}
+          hasPendingJlpt={hasPendingJlpt}
           profileId={profile.id}
           username={username}
           avatarUrl={avatarUrl}

@@ -14,6 +14,7 @@ type DbNotificationRow = {
   actor_id: string | null;
   post_id: string | number | null;
   comment_id?: string | null;
+  jlpt_submission_id?: string | null;
   message: string | null;
   read: boolean | null;
 };
@@ -30,7 +31,7 @@ type PostMini = { id: string | number; image_url: string | null };
 
 type GroupedNotification = {
   key: string;
-  type: "like" | "comment" | "reply" | "application" | "other";
+  type: "like" | "comment" | "reply" | "application" | "jlpt" | "other";
   post_id: string | number | null;
   comment_id: string | null;
   created_at: string;
@@ -52,6 +53,13 @@ export default function NotificationsPage() {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [openApplicationId, setOpenApplicationId] = useState<string | null>(null);
   const [appsById, setAppsById] = useState<Record<string, any>>({});
+  const [actionBusyId, setActionBusyId] = useState<string | null>(null);
+  const [actionMsg, setActionMsg] = useState<string | null>(null);
+
+  const [openJlptId, setOpenJlptId] = useState<string | null>(null);
+  const [jlptById, setJlptById] = useState<Record<string, any>>({});
+  const [jlptSignedUrlById, setJlptSignedUrlById] = useState<Record<string, string | null>>({});
+  const [jlptModalId, setJlptModalId] = useState<string | null>(null);
 
   const unreadIdsRef = useRef<string[]>([]);
 
@@ -75,7 +83,7 @@ export default function NotificationsPage() {
         // Expect a table named `notifications` with at least: id, created_at, type, actor_id, post_id, message, read
         const { data, error } = await supabase
           .from("notifications")
-          .select("id, created_at, user_id, type, actor_id, post_id, comment_id, message, read")
+          .select("id, created_at, user_id, type, actor_id, post_id, comment_id, jlpt_submission_id, message, read")
           .eq("user_id", uid)
           .order("created_at", { ascending: false })
           .limit(50);
@@ -172,8 +180,60 @@ export default function NotificationsPage() {
           } else {
             if (mounted) setAppsById({});
           }
+
+          // --- ADMIN: Load JLPT submissions (when notifications include jlpt_submission_id) ---
+          const jlptIds = Array.from(
+            new Set(
+              rows
+                .filter((r) => (r.type ?? "").toLowerCase().includes("jlpt"))
+                .map((r) => (r as any).jlpt_submission_id)
+                .filter((v): v is string => !!v)
+                .map((v) => String(v))
+            )
+          );
+
+          if (jlptIds.length > 0) {
+            const { data: subs } = await supabase
+              .from("jlpt_submissions")
+              .select("id, user_id, image_path, status, assigned_badge, submitted_at")
+              .in("id", jlptIds as any);
+
+            const map: Record<string, any> = {};
+            (subs as any[] | null)?.forEach((s) => {
+              const id = s?.id;
+              if (!id) return;
+              map[String(id)] = s;
+            });
+            if (mounted) setJlptById(map);
+
+            // Signed URLs for previews (private bucket)
+            const urlMap: Record<string, string | null> = {};
+            for (const sid of jlptIds) {
+              const row = map[sid];
+              const path = row?.image_path;
+              if (!path) {
+                urlMap[sid] = null;
+                continue;
+              }
+              const { data: signed } = await supabase.storage
+                .from("jlpt-certificates")
+                .createSignedUrl(String(path), 60 * 30);
+              urlMap[sid] = signed?.signedUrl ?? null;
+            }
+            if (mounted) setJlptSignedUrlById(urlMap);
+          } else {
+            if (mounted) {
+              setJlptById({});
+              setJlptSignedUrlById({});
+            }
+          }
+          // --- END ADMIN JLPT ---
         } else {
           if (mounted) setAppsById({});
+          if (mounted) {
+            setJlptById({});
+            setJlptSignedUrlById({});
+          }
         }
         // --- END ADMIN ---
       } finally {
@@ -291,6 +351,7 @@ export default function NotificationsPage() {
       if (v.includes("reply")) return "reply" as const;
       if (v.includes("comment")) return "comment" as const;
       if (v.includes("application")) return "application" as const;
+      if (v.includes("jlpt")) return "jlpt" as const;
       return "other" as const;
     };
 
@@ -299,7 +360,13 @@ export default function NotificationsPage() {
     for (const n of items) {
       const t = normType(n.type);
       const postKey = n.post_id != null ? String(n.post_id) : null;
-      const key = (t === "like" || t === "comment" || t === "reply") && postKey ? `${t}:${postKey}` : `single:${n.id}`;
+      const jlptId = (n as any).jlpt_submission_id ? String((n as any).jlpt_submission_id) : "";
+      const key =
+        t === "jlpt" && jlptId
+          ? `jlpt:${jlptId}`
+          : (t === "like" || t === "comment" || t === "reply") && postKey
+          ? `${t}:${postKey}`
+          : `single:${n.id}`;
 
       const actor = n.actor_id ? actors[n.actor_id] : null;
 
@@ -309,7 +376,7 @@ export default function NotificationsPage() {
           key,
           type: t,
           post_id: n.post_id ?? null,
-          comment_id: (n as any).comment_id ?? null,
+          comment_id: t === "jlpt" ? (((n as any).jlpt_submission_id ?? null) as any) : ((n as any).comment_id ?? null),
           created_at: n.created_at,
           read: !!n.read,
           ids: [n.id],
@@ -323,7 +390,10 @@ export default function NotificationsPage() {
         if (new Date(n.created_at).getTime() > new Date(existing.created_at).getTime()) {
           existing.created_at = n.created_at;
           existing.latestMessage = n.message ?? existing.latestMessage;
-          existing.comment_id = (n as any).comment_id ?? existing.comment_id;
+          existing.comment_id =
+            t === "jlpt"
+              ? (((n as any).jlpt_submission_id ?? null) as any)
+              : ((n as any).comment_id ?? existing.comment_id);
         }
         if (actor) {
           const uname = (actor.username ?? "").toString();
@@ -347,6 +417,15 @@ export default function NotificationsPage() {
       await supabase.from("notifications").update({ read: true }).in("id", g.ids as any);
     } catch {
       // ignore
+    }
+  }, []);
+
+  const removeGroupFromUI = useCallback((g: GroupedNotification) => {
+    setItems((prev) => prev.filter((it) => !g.ids.includes(it.id)));
+    // Also clear any open panel for this application
+    if (g.type === "application") {
+      const appId = (g.comment_id ?? "").toString();
+      if (appId) setOpenApplicationId((prev) => (prev === appId ? null : prev));
     }
   }, []);
 
@@ -401,6 +480,20 @@ export default function NotificationsPage() {
         </header>
 
         <div style={{ padding: 16 }}>
+          {actionMsg ? (
+            <div
+              style={{
+                marginBottom: 10,
+                padding: "10px 12px",
+                borderRadius: 12,
+                border: "1px solid rgba(17,17,20,.10)",
+                background: "rgba(17,17,20,.03)",
+                fontSize: 13,
+              }}
+            >
+              {actionMsg}
+            </div>
+          ) : null}
           <div style={{ marginTop: 8 }}>
             {grouped.length === 0 ? (
               <p style={{ margin: 0, opacity: 0.7 }}>{emptyHint}</p>
@@ -414,9 +507,12 @@ export default function NotificationsPage() {
                   const isLike = g.type === "like";
                   const isComment = g.type === "comment";
                   const isReply = g.type === "reply";
+                  const isJlpt = g.type === "jlpt";
 
                   const chip = isApplication
                     ? "APPLICATION"
+                    : isJlpt
+                    ? "JLPT"
                     : isLike
                     ? "いいね！"
                     : isReply
@@ -427,6 +523,8 @@ export default function NotificationsPage() {
 
                   const body = isApplication ? (
                     <>New user application pending approval.</>
+                  ) : isJlpt ? (
+                    <>{actorText} submitted a JLPT certificate.</>
                   ) : isLike ? (
                     <>{actorText}があなたの投稿にいいね！しました。</>
                   ) : isReply ? (
@@ -438,6 +536,11 @@ export default function NotificationsPage() {
                   );
 
                   const thumbUrl = g.post_id != null ? (postThumbs[String(g.post_id)] ?? null) : null;
+                  const jlptId = isJlpt ? (g.comment_id ?? "").toString() : "";
+                  const jlptPreview = jlptId ? (jlptSignedUrlById[jlptId] ?? null) : null;
+                  const appIdStr = (g.comment_id ?? "").toString();
+                  const appRow = appIdStr ? (appsById as any)[appIdStr] : null;
+                  const alreadyReviewed = !!appRow && (appRow.status === "approved" || appRow.status === "rejected");
 
                   return (
                     <li
@@ -448,6 +551,12 @@ export default function NotificationsPage() {
                           if (appId) {
                             setOpenApplicationId((prev) => (prev === appId ? null : appId));
                           }
+                          void markGroupRead(g);
+                          return;
+                        }
+                        if (g.type === "jlpt") {
+                          const sid = (g.comment_id ?? "").toString();
+                          if (sid) setOpenJlptId((prev) => (prev === sid ? null : sid));
                           void markGroupRead(g);
                           return;
                         }
@@ -555,9 +664,15 @@ export default function NotificationsPage() {
                           </div>
                         </div>
 
-                        {/* Post thumbnail (if post has image) */}
-                        {thumbUrl ? (
+                        {/* Post thumbnail (if post has image) OR JLPT preview */}
+                        {thumbUrl || jlptPreview ? (
                           <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (isJlpt && jlptId) {
+                                setJlptModalId(jlptId);
+                              }
+                            }}
                             style={{
                               width: 44,
                               height: 44,
@@ -567,11 +682,11 @@ export default function NotificationsPage() {
                               flexShrink: 0,
                               background: "#fff",
                             }}
-                            aria-label="post thumbnail"
+                            aria-label="thumbnail"
                           >
                             <img
-                              src={thumbUrl}
-                              alt="post"
+                              src={(isJlpt ? (jlptPreview as any) : (thumbUrl as any)) as string}
+                              alt={isJlpt ? "jlpt certificate" : "post"}
                               style={{ width: "100%", height: "100%", objectFit: "cover" }}
                               loading="lazy"
                             />
@@ -581,19 +696,45 @@ export default function NotificationsPage() {
                       {isApplication && isAdmin ? (
                         <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                           <button
+                            disabled={alreadyReviewed || actionBusyId === (g.comment_id ?? "").toString()}
                             onClick={async (e) => {
                               e.stopPropagation();
+                              setActionMsg(null);
+
                               const appId = (g.comment_id ?? "").toString();
                               const app = appId ? (appsById as any)[appId] : null;
-                              const targetUserId = app?.user_id ? String(app.user_id) : null;
-                              if (!targetUserId) return;
-                              await supabase.rpc("review_application", {
-                                target_user_id: targetUserId,
-                                new_status: "approved",
-                                note: null,
-                              } as any);
-                              await markGroupRead(g);
-                              router.refresh();
+                              if (!appId || !app) {
+                                setActionMsg("Missing application details for this notification.");
+                                return;
+                              }
+
+                              setActionBusyId(appId);
+                              try {
+                                const r = await supabase.rpc("review_application", {
+                                  application_id: appId,
+                                  new_status: "approved",
+                                  note: null,
+                                } as any);
+
+                                if (r.error) {
+                                  console.error("review_application failed:", r.error);
+                                  setActionMsg(`Approve failed: ${r.error.message ?? "Unknown error"}`);
+                                  return;
+                                }
+
+                                // Optimistic local update
+                                setAppsById((prev) => {
+                                  const next = { ...prev } as any;
+                                  if (next[appId]) next[appId] = { ...next[appId], status: "approved" };
+                                  return next;
+                                });
+
+                                await markGroupRead(g);
+                                removeGroupFromUI(g);
+                                setActionMsg("Approved.");
+                              } finally {
+                                setActionBusyId(null);
+                              }
                             }}
                             style={{
                               flex: 1,
@@ -606,24 +747,52 @@ export default function NotificationsPage() {
                               fontWeight: 600,
                             }}
                           >
-                            Approve
+                            {alreadyReviewed
+                              ? (appRow?.status === "approved" ? "Approved" : "Already reviewed")
+                              : actionBusyId === (g.comment_id ?? "").toString()
+                              ? "Approving…"
+                              : "Approve"}
                           </button>
 
                           <button
+                            disabled={alreadyReviewed || actionBusyId === (g.comment_id ?? "").toString()}
                             onClick={async (e) => {
                               e.stopPropagation();
+                              setActionMsg(null);
+
                               const appId = (g.comment_id ?? "").toString();
                               const app = appId ? (appsById as any)[appId] : null;
-                              const targetUserId = app?.user_id ? String(app.user_id) : null;
-                              if (!targetUserId) return;
-                              await supabase.rpc("review_application", {
-                                target_user_id: targetUserId,
-                                new_status: "rejected",
-                                note: null,
-                              } as any);
+                              if (!appId || !app) {
+                                setActionMsg("Missing application details for this notification.");
+                                return;
+                              }
 
-                              await markGroupRead(g);
-                              router.refresh();
+                              setActionBusyId(appId);
+                              try {
+                                const r = await supabase.rpc("review_application", {
+                                  application_id: appId,
+                                  new_status: "rejected",
+                                  note: null,
+                                } as any);
+
+                                if (r.error) {
+                                  console.error("review_application failed:", r.error);
+                                  setActionMsg(`Reject failed: ${r.error.message ?? "Unknown error"}`);
+                                  return;
+                                }
+
+                                setAppsById((prev) => {
+                                  const next = { ...prev } as any;
+                                  if (next[appId]) next[appId] = { ...next[appId], status: "rejected" };
+                                  return next;
+                                });
+
+                                await markGroupRead(g);
+                                removeGroupFromUI(g);
+                                setActionMsg("Rejected.");
+                              } finally {
+                                setActionBusyId(null);
+                              }
                             }}
                             style={{
                               flex: 1,
@@ -636,10 +805,134 @@ export default function NotificationsPage() {
                               fontWeight: 600,
                             }}
                           >
-                            Reject
+                            {alreadyReviewed
+                              ? (appRow?.status === "rejected" ? "Rejected" : "Already reviewed")
+                              : actionBusyId === (g.comment_id ?? "").toString()
+                              ? "Rejecting…"
+                              : "Reject"}
                           </button>
                         </div>
                       ) : null}
+                      {/* Application detail panel for admins */}
+                      {isJlpt && isAdmin ? (
+                        <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+                          <button
+                            disabled={actionBusyId === jlptId}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              setActionMsg(null);
+                              if (!jlptId) return;
+                              setActionBusyId(jlptId);
+                              try {
+                                const r = await supabase.rpc(
+                                  "review_jlpt_submission",
+                                  { submission_id: jlptId, new_status: "rejected", badge: null } as any
+                                );
+                                if (r.error) {
+                                  console.error("review_jlpt_submission failed:", r.error);
+                                  setActionMsg(`Reject failed: ${r.error.message ?? "Unknown error"}`);
+                                  return;
+                                }
+                                setJlptById((prev) => {
+                                  const next = { ...prev } as any;
+                                  if (next[jlptId]) next[jlptId] = { ...next[jlptId], status: "rejected" };
+                                  return next;
+                                });
+                                await markGroupRead(g);
+                                removeGroupFromUI(g);
+                                setActionMsg("Rejected.");
+                              } finally {
+                                setActionBusyId(null);
+                              }
+                            }}
+                            style={{
+                              padding: "6px 10px",
+                              borderRadius: 10,
+                              border: "1px solid rgba(17,17,20,.12)",
+                              background: "#fff",
+                              color: "#111",
+                              fontSize: 12,
+                              fontWeight: 600,
+                              minWidth: 92,
+                            }}
+                          >
+                            {actionBusyId === jlptId ? "Rejecting…" : "Reject"}
+                          </button>
+
+                          {(["N5", "N4", "N3", "N2", "N1"] as const).map((badge) => (
+                            <button
+                              key={badge}
+                              disabled={actionBusyId === jlptId}
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                setActionMsg(null);
+                                if (!jlptId) return;
+                                setActionBusyId(jlptId);
+                                try {
+                                  const r = await supabase.rpc(
+                                    "review_jlpt_submission",
+                                    { submission_id: jlptId, new_status: "approved", badge } as any
+                                  );
+                                  if (r.error) {
+                                    console.error("review_jlpt_submission failed:", r.error);
+                                    setActionMsg(`Approve failed: ${r.error.message ?? "Unknown error"}`);
+                                    return;
+                                  }
+                                  setJlptById((prev) => {
+                                    const next = { ...prev } as any;
+                                    if (next[jlptId]) next[jlptId] = { ...next[jlptId], status: "approved", assigned_badge: badge };
+                                    return next;
+                                  });
+                                  await markGroupRead(g);
+                                  removeGroupFromUI(g);
+                                  setActionMsg(`Approved. Badge: ${badge}`);
+                                } finally {
+                                  setActionBusyId(null);
+                                }
+                              }}
+                              style={{
+                                padding: "6px 10px",
+                                borderRadius: 10,
+                                border: "1px solid rgba(17,17,20,.12)",
+                                background: "#111",
+                                color: "#fff",
+                                fontSize: 12,
+                                fontWeight: 700,
+                                minWidth: 52,
+                              }}
+                            >
+                              {actionBusyId === jlptId ? "…" : badge}
+                            </button>
+                          ))}
+                        </div>
+                      ) : null}
+
+                      {isJlpt && isAdmin && openJlptId && openJlptId === jlptId ? (
+                        <div
+                          style={{
+                            marginTop: 10,
+                            padding: 10,
+                            borderRadius: 10,
+                            background: "rgba(17,17,20,.04)",
+                            fontSize: 12,
+                            lineHeight: 1.4,
+                          }}
+                        >
+                          {(() => {
+                            if (!jlptId) return null;
+                            const row = (jlptById as any)[jlptId];
+                            if (!row) return null;
+                            return (
+                              <>
+                                <div><strong>Submission:</strong> {jlptId}</div>
+                                <div><strong>Status:</strong> {row.status ?? "pending"}</div>
+                                <div><strong>Assigned badge:</strong> {row.assigned_badge ?? "—"}</div>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      ) : null}
+
                       {/* Application detail panel for admins */}
                       {isApplication && isAdmin && openApplicationId && openApplicationId === (g.comment_id ?? "").toString() ? (
                         <div
@@ -655,6 +948,7 @@ export default function NotificationsPage() {
                           {(() => {
                             const appId = (g.comment_id ?? "").toString();
                             const app = appId ? (appsById as any)[appId] : null;
+                            const appRow = appId ? (appsById as any)[appId] : null;
                             if (!app) return null;
 
                             const age =
@@ -673,7 +967,7 @@ export default function NotificationsPage() {
                                 <div><strong>JLPT:</strong> {app.jlpt_level ?? "—"}</div>
                                 <div><strong>Gender:</strong> {app.gender}</div>
                                 {age !== null && <div><strong>Age:</strong> {age}</div>}
-                                <div><strong>Status:</strong> {app.status}</div>
+                                <div><strong>Status:</strong> {(appRow?.status ?? app.status) ?? "—"}</div>
                               </>
                             );
                           })()}
@@ -687,6 +981,61 @@ export default function NotificationsPage() {
           </div>
         </div>
       </main>
+
+      {jlptModalId ? (
+        <div
+          onClick={() => setJlptModalId(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,.35)",
+            zIndex: 1000,
+            display: "grid",
+            placeItems: "center",
+            padding: 16,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(520px, 92vw)",
+              borderRadius: 14,
+              background: "#fff",
+              border: "1px solid rgba(17,17,20,.12)",
+              overflow: "hidden",
+            }}
+          >
+            <div style={{ padding: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.8 }}>JLPT Certificate</div>
+              <button
+                onClick={() => setJlptModalId(null)}
+                style={{
+                  border: "1px solid rgba(17,17,20,.12)",
+                  background: "#fff",
+                  borderRadius: 10,
+                  padding: "6px 10px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                }}
+              >
+                Close
+              </button>
+            </div>
+            <div style={{ borderTop: "1px solid rgba(17,17,20,.08)" }} />
+            <div style={{ padding: 10 }}>
+              {jlptSignedUrlById[jlptModalId] ? (
+                <img
+                  src={jlptSignedUrlById[jlptModalId] as string}
+                  alt="jlpt certificate"
+                  style={{ width: "100%", height: "auto", display: "block", borderRadius: 10 }}
+                />
+              ) : (
+                <div style={{ fontSize: 13, opacity: 0.7 }}>No preview available.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <BottomNav
         profileHref={myProfileHref}
