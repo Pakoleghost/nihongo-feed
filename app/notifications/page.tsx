@@ -51,6 +51,7 @@ export default function NotificationsPage() {
   const [postThumbs, setPostThumbs] = useState<Record<string, string | null>>({});
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [openApplicationId, setOpenApplicationId] = useState<string | null>(null);
+  const [appsById, setAppsById] = useState<Record<string, any>>({});
 
   const unreadIdsRef = useRef<string[]>([]);
 
@@ -141,23 +142,38 @@ export default function NotificationsPage() {
           if (mounted) setPostThumbs({});
         }
 
-        // --- ADMIN: Load application details ---
+        // --- ADMIN: Load application details (when notifications include application_id in comment_id) ---
         if ((prof as any)?.is_admin) {
-          const appIds = rows
-            .filter((r) => (r.type ?? "").toLowerCase().includes("application"))
-            .map((r) => r.id);
+          const applicationIds = Array.from(
+            new Set(
+              rows
+                .filter((r) => (r.type ?? "").toLowerCase().includes("application"))
+                .map((r) => (r as any).comment_id)
+                .filter((v): v is string => !!v)
+                .map((v) => String(v))
+            )
+          );
 
-          if (appIds.length > 0) {
+          if (applicationIds.length > 0) {
             const { data: apps } = await supabase
-              .from("admin_applications")
-              .select("*")
-              .in("application_id", appIds);
+              .from("applications")
+              .select(
+                "id, user_id, created_at, status, full_name, campus, class_level, jlpt_level, gender, date_of_birth"
+              )
+              .in("id", applicationIds as any);
 
+            const map: Record<string, any> = {};
             (apps as any[] | null)?.forEach((a) => {
-              // attach to actors map via synthetic key
-              actors[`app:${a.application_id}`] = a as any;
+              const id = a?.id;
+              if (!id) return;
+              map[String(id)] = a;
             });
+            if (mounted) setAppsById(map);
+          } else {
+            if (mounted) setAppsById({});
           }
+        } else {
+          if (mounted) setAppsById({});
         }
         // --- END ADMIN ---
       } finally {
@@ -370,29 +386,17 @@ export default function NotificationsPage() {
   return (
     <>
       <main className="feed" style={{ minHeight: "100vh", paddingBottom: 80 }}>
-        <header className="header" style={{ position: "relative" }}>
-          <div className="headerInner">
-            <div className="headerTitle">フィード</div>
-          </div>
-
+        <header className="header">
           <div
+            className="headerInner"
             style={{
-              position: "absolute",
-              right: 16,
-              top: "50%",
-              transform: "translateY(-50%)",
-              fontSize: 11,
-              fontWeight: 900,
-              letterSpacing: 0.2,
-              opacity: 0.8,
-              padding: "3px 10px",
-              borderRadius: 999,
-              background: "rgba(17,17,20,.06)",
-              border: "1px solid rgba(17,17,20,.08)",
-              pointerEvents: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
             }}
           >
-            通知
+            <div className="headerTitle">通知</div>
           </div>
         </header>
 
@@ -440,7 +444,10 @@ export default function NotificationsPage() {
                       key={g.key}
                       onClick={() => {
                         if (g.type === "application") {
-                          setOpenApplicationId((prev) => (prev === g.ids[0] ? null : g.ids[0]));
+                          const appId = (g.comment_id ?? "").toString();
+                          if (appId) {
+                            setOpenApplicationId((prev) => (prev === appId ? null : appId));
+                          }
                           void markGroupRead(g);
                           return;
                         }
@@ -576,7 +583,15 @@ export default function NotificationsPage() {
                           <button
                             onClick={async (e) => {
                               e.stopPropagation();
-                              await supabase.rpc("approve_application", { app_id: g.ids[0] });
+                              const appId = (g.comment_id ?? "").toString();
+                              const app = appId ? (appsById as any)[appId] : null;
+                              const targetUserId = app?.user_id ? String(app.user_id) : null;
+                              if (!targetUserId) return;
+                              await supabase.rpc("review_application", {
+                                target_user_id: targetUserId,
+                                new_status: "approved",
+                                note: null,
+                              } as any);
                               await markGroupRead(g);
                               router.refresh();
                             }}
@@ -597,10 +612,15 @@ export default function NotificationsPage() {
                           <button
                             onClick={async (e) => {
                               e.stopPropagation();
-                              await supabase
-                                .from("applications")
-                                .update({ status: "rejected" })
-                                .eq("id", g.ids[0]);
+                              const appId = (g.comment_id ?? "").toString();
+                              const app = appId ? (appsById as any)[appId] : null;
+                              const targetUserId = app?.user_id ? String(app.user_id) : null;
+                              if (!targetUserId) return;
+                              await supabase.rpc("review_application", {
+                                target_user_id: targetUserId,
+                                new_status: "rejected",
+                                note: null,
+                              } as any);
 
                               await markGroupRead(g);
                               router.refresh();
@@ -621,7 +641,7 @@ export default function NotificationsPage() {
                         </div>
                       ) : null}
                       {/* Application detail panel for admins */}
-                      {isApplication && isAdmin && openApplicationId === g.ids[0] ? (
+                      {isApplication && isAdmin && openApplicationId && openApplicationId === (g.comment_id ?? "").toString() ? (
                         <div
                           style={{
                             marginTop: 10,
@@ -633,7 +653,8 @@ export default function NotificationsPage() {
                           }}
                         >
                           {(() => {
-                            const app = (actors as any)[`app:${g.ids[0]}`];
+                            const appId = (g.comment_id ?? "").toString();
+                            const app = appId ? (appsById as any)[appId] : null;
                             if (!app) return null;
 
                             const age =
