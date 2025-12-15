@@ -1,50 +1,106 @@
+"use client";
 
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function PendingApprovalPage() {
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const form = new FormData(e.currentTarget);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setError("You are not authenticated.");
+      setLoading(false);
+      return;
+    }
+
+    const { error: insertError } = await supabase.from("applications").insert({
+      user_id: user.id,
+      full_name: form.get("full_name"),
+      campus: form.get("campus"),
+      class_level: form.get("class_level"),
+      jlpt_level: form.get("jlpt_level"),
+      date_of_birth: form.get("date_of_birth"),
+      gender: form.get("gender"),
+    });
+
+    if (insertError) {
+      setError("Failed to submit application. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    setSubmitted(true);
+    setLoading(false);
+  }
+
+  if (submitted) {
+    return (
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ maxWidth: 420, textAlign: "center" }}>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Application submitted</h1>
+          <p style={{ opacity: 0.7 }}>
+            Your application is under review.<br />
+            You will be notified once an administrator approves your account.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "2rem",
-        textAlign: "center",
-      }}
-    >
-      <div style={{ maxWidth: 420 }}>
-        <h1
-          style={{
-            fontSize: "1.25rem",
-            fontWeight: 600,
-            marginBottom: "0.75rem",
-          }}
-        >
-          Application under review
-        </h1>
+    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{ width: "100%", maxWidth: 420, display: "grid", gap: 12 }}
+      >
+        <h1 style={{ fontSize: 20, fontWeight: 600 }}>Student application</h1>
 
-        <p
-          style={{
-            fontSize: "0.95rem",
-            color: "#555",
-            lineHeight: 1.6,
-          }}
-        >
-          Your account has been created successfully, but it is not active yet.
-          An administrator must approve your application before you can start
-          using the app.
-        </p>
+        <input name="full_name" required placeholder="Full name" />
+        <input name="campus" required placeholder="Campus" />
+        <input name="class_level" required placeholder="Class / level" />
 
-        <p
-          style={{
-            fontSize: "0.85rem",
-            color: "#777",
-            marginTop: "1.25rem",
-          }}
-        >
-          You will be notified once your account is approved.
+        <select name="jlpt_level" required>
+          <option value="">JLPT level</option>
+          <option value="none">None</option>
+          <option value="N5">N5</option>
+          <option value="N4">N4</option>
+          <option value="N3">N3</option>
+          <option value="N2">N2</option>
+          <option value="N1">N1</option>
+        </select>
+
+        <input type="date" name="date_of_birth" required />
+
+        <select name="gender" required>
+          <option value="">Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="non-binary">Non-binary</option>
+          <option value="prefer-not">Prefer not to say</option>
+        </select>
+
+        {error && <p style={{ color: "crimson", fontSize: 12 }}>{error}</p>}
+
+        <button disabled={loading} style={{ marginTop: 8 }}>
+          {loading ? "Submitting…" : "Submit application"}
+        </button>
+
+        <p style={{ fontSize: 12, opacity: 0.6 }}>
+          Your account will remain inactive until an administrator approves your application.
         </p>
-      </div>
+      </form>
     </main>
   );
 }
