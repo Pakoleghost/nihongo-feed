@@ -115,6 +115,46 @@ export default function HomePage() {
   const [pendingEmailConfirmation, setPendingEmailConfirmation] = useState<string | null>(null);
   const [resendBusy, setResendBusy] = useState(false);
 
+  // APPLICATION DRAFT (captured during signup, submitted on /pending)
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [campus, setCampus] = useState("");
+  const [classLevel, setClassLevel] = useState("");
+  const [jlptLevel, setJlptLevel] = useState(""); // optional
+  const [dob, setDob] = useState(""); // YYYY-MM-DD
+  const [gender, setGender] = useState<"male" | "female" | "non-binary" | "prefer_not_to_say" | "">("");
+  function getApplicationDraftError(): string {
+    if (authMode !== "signup") return "";
+    if (!firstName.trim()) return "First name is required.";
+    if (!lastName.trim()) return "Last name is required.";
+    if (!campus.trim()) return "Campus is required.";
+    if (!classLevel.trim()) return "Class level is required.";
+    if (!dob.trim()) return "Date of birth is required.";
+    if (!gender) return "Gender is required.";
+    // basic YYYY-MM-DD check
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dob.trim())) return "Date of birth must be YYYY-MM-DD.";
+    return "";
+  }
+
+  function saveApplicationDraftToLocalStorage(emailForDraft: string) {
+    try {
+      const payload = {
+        email: emailForDraft.trim(),
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        campus: campus.trim(),
+        class_level: classLevel.trim(),
+        jlpt_level: jlptLevel.trim() || null,
+        dob: dob.trim(),
+        gender,
+        saved_at: new Date().toISOString(),
+      };
+      window.localStorage.setItem("nhf_application_draft", JSON.stringify(payload));
+    } catch {
+      // ignore
+    }
+  }
+
   // USERNAME GATE
   const [checkingProfile, setCheckingProfile] = useState(true);
   const [needsUsername, setNeedsUsername] = useState(false);
@@ -441,13 +481,24 @@ export default function HomePage() {
 
   async function signUpWithPassword() {
     if (authBusy) return;
-    if (!email.trim() || !password) return;
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) return;
+
+    const draftErr = getApplicationDraftError();
+    if (draftErr) {
+      setAuthMessage(draftErr);
+      return;
+    }
+
+    // Save draft now (used to prefill /pending after the user confirms email + logs in)
+    if (typeof window !== "undefined") saveApplicationDraftToLocalStorage(trimmedEmail);
 
     setAuthMessage("");
     setAuthBusy(true);
 
     const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
+      email: trimmedEmail,
       password,
       options: { emailRedirectTo: EMAIL_REDIRECT_TO },
     });
@@ -460,7 +511,6 @@ export default function HomePage() {
       return;
     }
 
-    const trimmedEmail = email.trim();
     setPassword("");
 
     if (data.session || data.user?.email_confirmed_at) {
@@ -998,6 +1048,130 @@ export default function HomePage() {
             }}
           />
 
+          {authMode === "signup" ? (
+            <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
+              <div style={{ fontSize: 12, opacity: 0.75 }}>Application (required)</div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                <input
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="first name"
+                  style={{
+                    width: "100%",
+                    padding: 12,
+                    borderRadius: 12,
+                    border: "1px solid rgba(255,255,255,.15)",
+                    background: "rgba(255,255,255,.06)",
+                    color: "#fff",
+                    outline: "none",
+                  }}
+                />
+                <input
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="last name"
+                  style={{
+                    width: "100%",
+                    padding: 12,
+                    borderRadius: 12,
+                    border: "1px solid rgba(255,255,255,.15)",
+                    background: "rgba(255,255,255,.06)",
+                    color: "#fff",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <input
+                value={campus}
+                onChange={(e) => setCampus(e.target.value)}
+                placeholder="campus"
+                style={{
+                  width: "100%",
+                  padding: 12,
+                  borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,.15)",
+                  background: "rgba(255,255,255,.06)",
+                  color: "#fff",
+                  outline: "none",
+                }}
+              />
+
+              <input
+                value={classLevel}
+                onChange={(e) => setClassLevel(e.target.value)}
+                placeholder="class level (e.g., A2 / Japanese 2 / Group 3)"
+                style={{
+                  width: "100%",
+                  padding: 12,
+                  borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,.15)",
+                  background: "rgba(255,255,255,.06)",
+                  color: "#fff",
+                  outline: "none",
+                }}
+              />
+
+              <input
+                value={jlptLevel}
+                onChange={(e) => setJlptLevel(e.target.value)}
+                placeholder="JLPT passed (optional, e.g., N4)"
+                style={{
+                  width: "100%",
+                  padding: 12,
+                  borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,.15)",
+                  background: "rgba(255,255,255,.06)",
+                  color: "#fff",
+                  outline: "none",
+                }}
+              />
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                <input
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  placeholder="date of birth (YYYY-MM-DD)"
+                  style={{
+                    width: "100%",
+                    padding: 12,
+                    borderRadius: 12,
+                    border: "1px solid rgba(255,255,255,.15)",
+                    background: "rgba(255,255,255,.06)",
+                    color: "#fff",
+                    outline: "none",
+                  }}
+                />
+
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value as any)}
+                  style={{
+                    width: "100%",
+                    padding: 12,
+                    borderRadius: 12,
+                    border: "1px solid rgba(255,255,255,.15)",
+                    background: "rgba(255,255,255,.06)",
+                    color: "#fff",
+                    outline: "none",
+                    appearance: "none",
+                  }}
+                >
+                  <option value="" style={{ color: "#111" }}>gender</option>
+                  <option value="male" style={{ color: "#111" }}>male</option>
+                  <option value="female" style={{ color: "#111" }}>female</option>
+                  <option value="non-binary" style={{ color: "#111" }}>non-binary</option>
+                  <option value="prefer_not_to_say" style={{ color: "#111" }}>prefer not to say</option>
+                </select>
+              </div>
+
+              <div style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.4 }}>
+                You will submit this after confirming your email, on the pending approval screen.
+              </div>
+            </div>
+          ) : null}
+
           {pendingEmailConfirmation ? (
             <div style={{ marginBottom: 10, fontSize: 12, lineHeight: 1.5, color: "#d1d5ff" }}>
               We’ve sent a confirmation link to {pendingEmailConfirmation}. Confirm your email, then log in.
@@ -1006,7 +1180,12 @@ export default function HomePage() {
 
           <button
             onClick={authMode === "login" ? loginWithPassword : signUpWithPassword}
-            disabled={authBusy || !email.trim() || !password}
+            disabled={
+              authBusy ||
+              !email.trim() ||
+              !password ||
+              (authMode === "signup" && !!getApplicationDraftError())
+            }
             style={{
               width: "100%",
               padding: 12,
@@ -1016,7 +1195,13 @@ export default function HomePage() {
               color: "#111",
               fontWeight: 800,
               cursor: "pointer",
-              opacity: authBusy || !email.trim() || !password ? 0.6 : 1,
+              opacity:
+                authBusy ||
+                !email.trim() ||
+                !password ||
+                (authMode === "signup" && !!getApplicationDraftError())
+                  ? 0.6
+                  : 1,
               marginTop: 4,
             }}
           >
