@@ -17,7 +17,7 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  title: "Nihongo Feed",
+  title: "フィード",
 };
 
 export const viewport: Viewport = {
