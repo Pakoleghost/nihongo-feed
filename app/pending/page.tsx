@@ -10,7 +10,18 @@ export default function PendingApprovalPage() {
   const [status, setStatus] = useState<ApplicationStatus>("none");
   const [error, setError] = useState<string | null>(null);
 
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const [draft, setDraft] = useState<any | null>(null);
+
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const raw = window.localStorage.getItem("nhf_application_draft");
+        if (raw) setDraft(JSON.parse(raw));
+      } catch {}
+      setDraftLoaded(true);
+    }
+
     const checkStatus = async () => {
       const {
         data: { user },
@@ -52,6 +63,11 @@ export default function PendingApprovalPage() {
     setLoading(true);
     setError(null);
 
+    if (status === "pending" || status === "approved") {
+      setLoading(false);
+      return;
+    }
+
     const form = new FormData(e.currentTarget);
 
     const {
@@ -64,14 +80,18 @@ export default function PendingApprovalPage() {
       return;
     }
 
-    const { error: insertError } = await supabase.from("applications").insert({
-      user_id: user.id,
+    const payload = draft ?? {
       full_name: form.get("full_name"),
       campus: form.get("campus"),
       class_level: form.get("class_level"),
       jlpt_level: form.get("jlpt_level"),
       date_of_birth: form.get("date_of_birth"),
       gender: form.get("gender"),
+    };
+
+    const { error: insertError } = await supabase.from("applications").insert({
+      user_id: user.id,
+      ...payload,
     });
 
     if (insertError) {
@@ -106,6 +126,20 @@ export default function PendingApprovalPage() {
           <p style={{ opacity: 0.7 }}>
             Your application was not approved.<br />
             Please contact an administrator if you believe this is a mistake.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  if (draft && status === "none") {
+    return (
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ maxWidth: 420, textAlign: "center" }}>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>審査中</h1>
+          <p style={{ opacity: 0.7 }}>
+            Your application has been received.<br />
+            Please wait for administrator approval.
           </p>
         </div>
       </main>
