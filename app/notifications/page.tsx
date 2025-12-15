@@ -50,6 +50,7 @@ export default function NotificationsPage() {
   const [actors, setActors] = useState<ActorMap>({});
   const [postThumbs, setPostThumbs] = useState<Record<string, string | null>>({});
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [openApplicationId, setOpenApplicationId] = useState<string | null>(null);
 
   const unreadIdsRef = useRef<string[]>([]);
 
@@ -139,6 +140,26 @@ export default function NotificationsPage() {
         } else {
           if (mounted) setPostThumbs({});
         }
+
+        // --- ADMIN: Load application details ---
+        if ((prof as any)?.is_admin) {
+          const appIds = rows
+            .filter((r) => (r.type ?? "").toLowerCase().includes("application"))
+            .map((r) => r.id);
+
+          if (appIds.length > 0) {
+            const { data: apps } = await supabase
+              .from("admin_applications")
+              .select("*")
+              .in("application_id", appIds);
+
+            (apps as any[] | null)?.forEach((a) => {
+              // attach to actors map via synthetic key
+              actors[`app:${a.application_id}`] = a as any;
+            });
+          }
+        }
+        // --- END ADMIN ---
       } finally {
         if (mounted) setLoading(false);
       }
@@ -418,6 +439,11 @@ export default function NotificationsPage() {
                     <li
                       key={g.key}
                       onClick={() => {
+                        if (g.type === "application") {
+                          setOpenApplicationId((prev) => (prev === g.ids[0] ? null : g.ids[0]));
+                          void markGroupRead(g);
+                          return;
+                        }
                         if (g.post_id != null) void openPostFromNotification(g);
                       }}
                       style={{
@@ -592,6 +618,44 @@ export default function NotificationsPage() {
                           >
                             Reject
                           </button>
+                        </div>
+                      ) : null}
+                      {/* Application detail panel for admins */}
+                      {isApplication && isAdmin && openApplicationId === g.ids[0] ? (
+                        <div
+                          style={{
+                            marginTop: 10,
+                            padding: 10,
+                            borderRadius: 10,
+                            background: "rgba(17,17,20,.04)",
+                            fontSize: 12,
+                            lineHeight: 1.4,
+                          }}
+                        >
+                          {(() => {
+                            const app = (actors as any)[`app:${g.ids[0]}`];
+                            if (!app) return null;
+
+                            const age =
+                              app.date_of_birth
+                                ? Math.floor(
+                                    (Date.now() - new Date(app.date_of_birth).getTime()) /
+                                      (1000 * 60 * 60 * 24 * 365)
+                                  )
+                                : null;
+
+                            return (
+                              <>
+                                <div><strong>Name:</strong> {app.full_name}</div>
+                                <div><strong>Campus:</strong> {app.campus}</div>
+                                <div><strong>Class:</strong> {app.class_level}</div>
+                                <div><strong>JLPT:</strong> {app.jlpt_level ?? "—"}</div>
+                                <div><strong>Gender:</strong> {app.gender}</div>
+                                {age !== null && <div><strong>Age:</strong> {age}</div>}
+                                <div><strong>Status:</strong> {app.status}</div>
+                              </>
+                            );
+                          })()}
                         </div>
                       ) : null}
                     </li>
