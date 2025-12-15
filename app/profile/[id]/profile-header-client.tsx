@@ -44,10 +44,22 @@ export default function ProfileHeaderClient(props: {
   bio: string;
   level: string;
   group: string;
+  jlptLevel?: string | null;
   postCount: number;
   commentCount: number;
 }) {
-  const { isOwn, profileId, username, avatarUrl, bio, level, group, postCount, commentCount } = props;
+  const {
+    isOwn,
+    profileId,
+    username,
+    avatarUrl,
+    bio,
+    level,
+    group,
+    jlptLevel,
+    postCount,
+    commentCount,
+  } = props;
 
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -205,7 +217,7 @@ export default function ProfileHeaderClient(props: {
                   @{username}
                 </span>
 
-                {levelChip(level)}
+                {jlptLevel ? levelChip(jlptLevel) : levelChip(level)}
 
                 {group ? (
                   <span className="muted" style={{ fontSize: 12 }}>
