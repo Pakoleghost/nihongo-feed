@@ -4,35 +4,32 @@ import { supabase } from "./supabase";
  * Ensures a Supabase session exists and that the user
  * has been approved by an admin before accessing the app.
  *
- * Returns the user id when approved, otherwise redirects
- * to a pending approval screen.
+ * Returns the user id when approved.
+ * Throws NOT_APPROVED when the user is pending.
  */
-export async function requireApprovedSession(): Promise<string | null> {
-  const { data, error } = await supabase.auth.getSession();
+export async function requireApprovedSession(): Promise<string> {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (error || !data.session?.user) {
-    alert("Session expired. Please log in again.");
-    return null;
+  if (error || !user) {
+    throw new Error("NOT_AUTHENTICATED");
   }
-
-  const uid = data.session.user.id;
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("status")
-    .eq("id", uid)
+    .select("approved")
+    .eq("id", user.id)
     .single();
 
   if (profileError || !profile) {
-    console.error("Failed to load profile", profileError);
-    alert("Unable to verify account status.");
-    return null;
+    throw new Error("PROFILE_NOT_FOUND");
   }
 
-  if (profile.status !== "approved") {
-    window.location.href = "/pending";
-    return null;
+  if (!profile.approved) {
+    throw new Error("NOT_APPROVED");
   }
 
-  return uid;
+  return user.id;
 }
