@@ -30,7 +30,7 @@ type PostMini = { id: string | number; image_url: string | null };
 
 type GroupedNotification = {
   key: string;
-  type: "like" | "comment" | "reply" | "other";
+  type: "like" | "comment" | "reply" | "application" | "other";
   post_id: string | number | null;
   comment_id: string | null;
   created_at: string;
@@ -49,6 +49,7 @@ export default function NotificationsPage() {
   const [myProfile, setMyProfile] = useState<MiniProfile | null>(null);
   const [actors, setActors] = useState<ActorMap>({});
   const [postThumbs, setPostThumbs] = useState<Record<string, string | null>>({});
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   const unreadIdsRef = useRef<string[]>([]);
 
@@ -59,13 +60,14 @@ export default function NotificationsPage() {
       setLoading(true);
       setErrorMsg(null);
 
-      // Load current user's profile for BottomNav avatar/initial
+      // Load current user's profile for BottomNav avatar/initial, and admin flag
       const { data: prof } = await supabase
         .from("profiles")
-        .select("username, avatar_url")
+        .select("username, avatar_url, is_admin")
         .eq("id", uid)
         .maybeSingle();
       setMyProfile((prof as MiniProfile) ?? null);
+      setIsAdmin(!!(prof as any)?.is_admin);
 
       try {
         // Expect a table named `notifications` with at least: id, created_at, type, actor_id, post_id, message, read
@@ -251,6 +253,7 @@ export default function NotificationsPage() {
       if (v.includes("like")) return "like" as const;
       if (v.includes("reply")) return "reply" as const;
       if (v.includes("comment")) return "comment" as const;
+      if (v.includes("application")) return "application" as const;
       return "other" as const;
     };
 
@@ -345,34 +348,35 @@ export default function NotificationsPage() {
 
   return (
     <>
-      <main className="feed" style={{ minHeight: "100vh", padding: 16, paddingBottom: 80 }}>
-        <div>
-          <header className="header" style={{ padding: "10px 0 12px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div className="headerTitle">フィード</div>
-              </div>
+      <main className="feed" style={{ minHeight: "100vh", paddingBottom: 80 }}>
+        <header className="header" style={{ position: "relative" }}>
+          <div className="headerInner">
+            <div className="headerTitle">フィード</div>
+          </div>
 
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 900,
-                    letterSpacing: 0.2,
-                    opacity: 0.8,
-                    padding: "3px 10px",
-                    borderRadius: 999,
-                    background: "rgba(17,17,20,.06)",
-                    border: "1px solid rgba(17,17,20,.08)",
-                  }}
-                >
-                  通知
-                </div>
-              </div>
-            </div>
-          </header>
+          <div
+            style={{
+              position: "absolute",
+              right: 16,
+              top: "50%",
+              transform: "translateY(-50%)",
+              fontSize: 11,
+              fontWeight: 900,
+              letterSpacing: 0.2,
+              opacity: 0.8,
+              padding: "3px 10px",
+              borderRadius: 999,
+              background: "rgba(17,17,20,.06)",
+              border: "1px solid rgba(17,17,20,.08)",
+              pointerEvents: "none",
+            }}
+          >
+            通知
+          </div>
+        </header>
 
-          <div style={{ marginTop: 10 }}>
+        <div style={{ padding: 16 }}>
+          <div style={{ marginTop: 8 }}>
             {grouped.length === 0 ? (
               <p style={{ margin: 0, opacity: 0.7 }}>{emptyHint}</p>
             ) : (
@@ -381,13 +385,24 @@ export default function NotificationsPage() {
                   const when = timeAgoJP(g.created_at);
                   const actorText = renderActorsJP(g.actors);
 
+                  const isApplication = g.type === "application";
                   const isLike = g.type === "like";
                   const isComment = g.type === "comment";
                   const isReply = g.type === "reply";
 
-                  const chip = isLike ? "いいね！" : isReply ? "返信" : isComment ? "コメント" : "通知";
+                  const chip = isApplication
+                    ? "APPLICATION"
+                    : isLike
+                    ? "いいね！"
+                    : isReply
+                    ? "返信"
+                    : isComment
+                    ? "コメント"
+                    : "通知";
 
-                  const body = isLike ? (
+                  const body = isApplication ? (
+                    <>New user application pending approval.</>
+                  ) : isLike ? (
                     <>{actorText}があなたの投稿にいいね！しました。</>
                   ) : isReply ? (
                     <>{actorText}があなたのコメントに返信しました。</>
@@ -530,6 +545,51 @@ export default function NotificationsPage() {
                           </div>
                         ) : null}
                       </div>
+                      {isApplication && isAdmin ? (
+                        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              await supabase.rpc("approve_user_application", { notification_id: g.ids[0] });
+                              await markGroupRead(g);
+                              router.refresh();
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: "6px 10px",
+                              borderRadius: 10,
+                              border: "1px solid rgba(17,17,20,.12)",
+                              background: "#111",
+                              color: "#fff",
+                              fontSize: 12,
+                              fontWeight: 600,
+                            }}
+                          >
+                            Approve
+                          </button>
+
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              await supabase.rpc("reject_user_application", { notification_id: g.ids[0] });
+                              await markGroupRead(g);
+                              router.refresh();
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: "6px 10px",
+                              borderRadius: 10,
+                              border: "1px solid rgba(17,17,20,.12)",
+                              background: "#fff",
+                              color: "#111",
+                              fontSize: 12,
+                              fontWeight: 600,
+                            }}
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : null}
                     </li>
                   );
                 })}
