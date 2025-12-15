@@ -27,34 +27,15 @@ export default function AuthCallback() {
         const { data } = await supabase.auth.getSession();
         const session = data.session;
         if (!session) {
-          setMsg("No session found. Try logging in again.");
+          setMsg("No session found. Redirecting to login…");
+          router.replace("/login");
           return;
         }
 
-        // If user is not approved yet, send them to the pending page.
-        // This keeps the UX consistent after email confirmation.
-        const uid = session.user?.id;
-        if (uid) {
-          const { data: prof, error: profErr } = await supabase
-            .from("profiles")
-            .select("approved")
-            .eq("id", uid)
-            .maybeSingle();
-
-          if (profErr) {
-            // Don't block login for profile fetch issues
-            console.warn("Profile lookup failed in callback:", profErr);
-          } else {
-            const approved = Boolean((prof as any)?.approved);
-            if (!approved) {
-              router.replace("/pending");
-              return;
-            }
-          }
-        }
-
-        // Approved users continue into the app
-        router.replace("/");
+        // Always send users to /pending after auth.
+        // /pending is responsible for deciding whether to show the pending screen,
+        // the application form, or redirect approved users into the app.
+        router.replace("/pending");
       } catch (e: any) {
         setMsg(`Callback failed: ${e?.message ?? "unknown error"}`);
       }

@@ -3,7 +3,7 @@ import { Noto_Sans_JP, Poppins } from "next/font/google";
 import type { Viewport } from "next";
 
 const noto = Noto_Sans_JP({
-  subsets: ["latin"],
+  subsets: ["japanese"],
   weight: ["400", "500", "700"],
   display: "swap",
   variable: "--font-noto-sans-jp",
@@ -18,6 +18,10 @@ const poppins = Poppins({
 
 export const metadata = {
   title: "フィード",
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -30,7 +34,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" className={poppins.variable}>
+    <html lang="ja" className={`${poppins.variable} ${noto.variable}`}>
       <body className={noto.className}>{children}</body>
     </html>
   );

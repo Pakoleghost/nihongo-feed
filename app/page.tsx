@@ -729,19 +729,40 @@ const captionBottom =
     if (!userId) {
       setCheckingProfile(false);
       setNeedsUsername(false);
+      setLoading(false);
       return;
     }
 
     (async () => {
       try {
-        await requireApprovedSession();
-        await checkMyProfile(userId);
+        // This will throw when the session is missing/expired or the user is not approved.
+        const approvedUid = await requireApprovedSession();
+        if (!approvedUid) throw new Error("NO_SESSION");
+        await checkMyProfile(approvedUid);
       } catch (e: any) {
-        if (e.message === "NOT_APPROVED") {
+        const msg = (e?.message ?? "").toString();
+
+        // Not approved: always send to pending.
+        if (msg === "NOT_APPROVED" || msg.toLowerCase().includes("not_approved") || msg.toLowerCase().includes("not approved")) {
           window.location.href = "/pending";
           return;
         }
-        throw e;
+
+        // Any other auth issue (expired token, missing session, etc): sign out and show login.
+        try {
+          await supabase.auth.signOut();
+        } catch {
+          // ignore
+        }
+
+        setUserId(null);
+        setCheckingProfile(false);
+        setNeedsUsername(false);
+        setNewUsername("");
+        setPosts([]);
+        setLoading(false);
+        setAuthMode("login");
+        setAuthMessage("");
       }
     })();
   }, [userId]);
@@ -1177,6 +1198,17 @@ const captionBottom =
       .order("created_at", { ascending: false });
 
     if (error) {
+      const msg = (error.message || "").toLowerCase();
+      // If the session is invalid/expired, force logout so the login screen is reachable.
+      if (msg.includes("jwt") || msg.includes("token") || msg.includes("auth") || msg.includes("session")) {
+        try {
+          await supabase.auth.signOut();
+        } catch {
+          // ignore
+        }
+        setUserId(null);
+        setPosts([]);
+      }
       alert(error.message);
       setLoading(false);
       return;
