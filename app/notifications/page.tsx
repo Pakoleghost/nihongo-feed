@@ -550,7 +550,7 @@ export default function NotificationsPage() {
                           <button
                             onClick={async (e) => {
                               e.stopPropagation();
-                              await supabase.rpc("approve_user_application", { notification_id: g.ids[0] });
+                              await supabase.rpc("approve_application", { app_id: g.ids[0] });
                               await markGroupRead(g);
                               router.refresh();
                             }}
@@ -571,7 +571,11 @@ export default function NotificationsPage() {
                           <button
                             onClick={async (e) => {
                               e.stopPropagation();
-                              await supabase.rpc("reject_user_application", { notification_id: g.ids[0] });
+                              await supabase
+                                .from("applications")
+                                .update({ status: "rejected" })
+                                .eq("id", g.ids[0]);
+
                               await markGroupRead(g);
                               router.refresh();
                             }}
