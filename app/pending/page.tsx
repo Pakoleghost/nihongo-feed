@@ -47,23 +47,20 @@ export default function PendingApprovalPage() {
         .maybeSingle();
 
       if (!app && draft) {
-        // Auto-submit draft
-        const { data: insertData, error: insertError } = await supabase
-          .from("applications")
-          .insert({
-            user_id: user.id,
-            full_name: draft.full_name ?? null,
-            campus: draft.campus ?? null,
-            class_level: draft.class_level ?? null,
-            jlpt_level: draft.jlpt_level ?? null,
-            date_of_birth: draft.date_of_birth ?? null,
-            gender: draft.gender ?? null,
-          })
-          .select("status")
-          .single();
+        // Auto-submit draft via RPC (server-side, avoids RLS insert failures)
+        const { error: rpcError } = await supabase.rpc("create_application", {
+          full_name: (draft.full_name ?? "").toString(),
+          campus: (draft.campus ?? "").toString(),
+          class_level: (draft.class_level ?? "").toString(),
+          jlpt_level: (draft.jlpt_level ?? null) as any,
+          date_of_birth: (draft.date_of_birth ?? "").toString(),
+          gender: (draft.gender ?? null) as any,
+        } as any);
 
-        if (insertError) {
-          setError("Failed to auto-submit your saved application draft. Please try submitting the form manually.");
+        if (rpcError) {
+          setError(
+            "Failed to auto-submit your saved application draft. Please try submitting the form manually."
+          );
           setStatus("none");
           return;
         }
@@ -139,13 +136,17 @@ export default function PendingApprovalPage() {
         return;
       }
     } else {
-      // Insert new application
-      const { error: insertError } = await supabase.from("applications").insert({
-        user_id: user.id,
-        ...payload,
-      });
+      // Insert new application via RPC (server-side)
+      const { error: rpcError } = await supabase.rpc("create_application", {
+        full_name: (payload.full_name ?? "").toString(),
+        campus: (payload.campus ?? "").toString(),
+        class_level: (payload.class_level ?? "").toString(),
+        jlpt_level: (payload.jlpt_level ?? null) as any,
+        date_of_birth: (payload.date_of_birth ?? "").toString(),
+        gender: (payload.gender ?? null) as any,
+      } as any);
 
-      if (insertError) {
+      if (rpcError) {
         setError("Failed to submit application. Please try again.");
         setLoading(false);
         return;
