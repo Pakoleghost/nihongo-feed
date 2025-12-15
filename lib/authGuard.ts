@@ -1,23 +1,36 @@
 import { supabase } from "./supabase";
 
 /**
- * Ensures a Supabase session exists before performing a write.
- * Returns the user id when available, otherwise shows a unified
- * "Session expired" message and resolves to null.
+ * Ensures a Supabase session exists and that the user
+ * has been approved by an admin before accessing the app.
+ *
+ * Returns the user id when approved, otherwise redirects
+ * to a pending approval screen.
  */
-export async function requireSession(): Promise<string | null> {
+export async function requireApprovedSession(): Promise<string | null> {
   const { data, error } = await supabase.auth.getSession();
 
-  if (error) {
-    console.error("Failed to check session", error);
+  if (error || !data.session?.user) {
     alert("Session expired. Please log in again.");
     return null;
   }
 
-  const uid = data.session?.user?.id ?? null;
+  const uid = data.session.user.id;
 
-  if (!uid) {
-    alert("Session expired. Please log in again.");
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("status")
+    .eq("id", uid)
+    .single();
+
+  if (profileError || !profile) {
+    console.error("Failed to load profile", profileError);
+    alert("Unable to verify account status.");
+    return null;
+  }
+
+  if (profile.status !== "approved") {
+    window.location.href = "/pending";
     return null;
   }
 

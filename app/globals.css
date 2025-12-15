@@ -18,7 +18,8 @@ body{
   margin: 0;
   background: radial-gradient(1200px 700px at 50% -200px, #ffffff 0%, var(--bg) 55%, var(--bg) 100%);
   color: var(--ink);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+  font-family: var(--font-latin), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
   letter-spacing: .2px;
 }
@@ -64,6 +65,22 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  flex-wrap: nowrap;
+  min-height: 40px;
+}
+
+/* Prevent default heading margins from changing header height on some pages */
+.header h1,
+.header h2,
+.header h3{
+  margin: 0;
+}
+
+/* Keep the title on one line and consistent height across pages */
+.brand,
+.headerTitle,
+.headerTitleBtn{
+  white-space: nowrap;
 }
 
 .header--hidden{
@@ -73,20 +90,24 @@ a:hover {
 .brand {
   /* Keep header title consistent across iOS/desktop */
   font-size: 34px;
+  line-height: 1;
   font-weight: 900;
   letter-spacing: 0.10em;
   color: #2b2b2b;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+  font-family: var(--font-latin), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
 }
 
 /* Reuse the same header title sizing on any page */
 .headerTitle{
   font-size: 34px;
+  line-height: 1;
   font-weight: 900;
   letter-spacing: 0.10em;
   color: #2b2b2b;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+  font-family: var(--font-latin), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
 }
 
@@ -96,10 +117,12 @@ a:hover {
   cursor: pointer;
   display: inline-block;
   font-size: 34px;
+  line-height: 1;
   font-weight: 900;
   letter-spacing: 0.10em;
   color: #2b2b2b;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+  font-family: var(--font-latin), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
 }
 
