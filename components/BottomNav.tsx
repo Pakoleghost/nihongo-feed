@@ -16,10 +16,12 @@ export default function BottomNav({
   profileHref,
   profileAvatarUrl,
   profileInitial,
+  viewerId,
 }: {
   profileHref: string;
   profileAvatarUrl?: string | null;
   profileInitial?: string;
+  viewerId?: string;
 }) {
   const pathname = usePathname();
 
@@ -36,8 +38,7 @@ export default function BottomNav({
           return;
         }
 
-        const { data: userRes } = await supabase.auth.getUser();
-        const uid = userRes?.user?.id;
+        const uid = viewerId || (await supabase.auth.getUser()).data?.user?.id;
         if (!uid) {
           if (!cancelled) setHasUnseen(false);
           return;
@@ -75,7 +76,7 @@ export default function BottomNav({
     return () => {
       cancelled = true;
     };
-  }, [pathname]);
+  }, [pathname, viewerId]);
 
   const items: Item[] = [
     { key: "home", href: "/", label: "Home", icon: "🏠" },
