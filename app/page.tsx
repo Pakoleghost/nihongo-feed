@@ -101,6 +101,103 @@ function timeAgoJa(iso: string): string {
     return "";
   }
 }
+type ImageKind = "post" | "avatar";
+
+function isHeicLike(file: File): boolean {
+  const name = (file.name || "").toLowerCase();
+  const type = (file.type || "").toLowerCase();
+  return name.endsWith(".heic") || name.endsWith(".heif") || type.includes("heic") || type.includes("heif");
+}
+
+async function blobToFile(blob: Blob, filename: string): Promise<File> {
+  return new File([blob], filename, { type: blob.type || "application/octet-stream" });
+}
+
+async function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob> {
+  return await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Failed to encode image"))), type, quality);
+  });
+}
+
+async function supportsWebP(): Promise<boolean> {
+  if (typeof document === "undefined") return false;
+  try {
+    const c = document.createElement("canvas");
+    c.width = 1;
+    c.height = 1;
+    const b = await new Promise<Blob | null>((resolve) => c.toBlob(resolve, "image/webp", 0.8));
+    return !!b && b.type === "image/webp";
+  } catch {
+    return false;
+  }
+}
+
+function computeResize(w: number, h: number, maxDim: number): { w: number; h: number } {
+  if (!w || !h) return { w: maxDim, h: maxDim };
+  if (Math.max(w, h) <= maxDim) return { w, h };
+  const scale = maxDim / Math.max(w, h);
+  return { w: Math.round(w * scale), h: Math.round(h * scale) };
+}
+
+async function normalizeImageForUpload(file: File, kind: ImageKind): Promise<{ file: File; previewUrl: string | null }> {
+  // conservative quality, big storage win mostly from resizing
+  const maxDim = kind === "avatar" ? 512 : 1600;
+  const quality = kind === "avatar" ? 0.85 : 0.82;
+
+  const mime = (file.type || "").toLowerCase();
+  const name = (file.name || "").toLowerCase();
+  const looksImage = mime.startsWith("image/") || name.endsWith(".heic") || name.endsWith(".heif");
+  if (!looksImage) throw new Error("Please upload an image file.");
+
+  // Convert HEIC/HEIF first
+  let working: File = file;
+  if (isHeicLike(file)) {
+    const mod: any = await import("heic2any");
+    const heic2any = mod?.default ?? mod;
+    const outBlob = (await heic2any({ blob: file, toType: "image/jpeg", quality: 0.92 })) as Blob;
+    working = await blobToFile(outBlob, (file.name || "upload").replace(/\.(heic|heif)$/i, ".jpg"));
+  }
+
+  const objectUrl = URL.createObjectURL(working);
+  try {
+    const img = new Image();
+    img.decoding = "async";
+
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("Could not read image"));
+      img.src = objectUrl;
+    });
+
+    const srcW = img.naturalWidth || img.width;
+    const srcH = img.naturalHeight || img.height;
+    const { w: outW, h: outH } = computeResize(srcW, srcH, maxDim);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = outW;
+    canvas.height = outH;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not process image");
+
+    ctx.imageSmoothingEnabled = true;
+    // @ts-ignore
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, outW, outH);
+
+    const useWebp = kind !== "avatar" && (await supportsWebP());
+    const outType = useWebp ? "image/webp" : "image/jpeg";
+    const outBlob = await canvasToBlob(canvas, outType, quality);
+
+    const ext = outType === "image/webp" ? "webp" : "jpg";
+    const base = (working.name || "image").replace(/\.[a-z0-9]+$/i, "");
+    const outFile = await blobToFile(outBlob, `${base}.${ext}`);
+
+    const previewUrl = URL.createObjectURL(outFile);
+    return { file: outFile, previewUrl };
+  } finally {
+    try { URL.revokeObjectURL(objectUrl); } catch {}
+  }
+}
 
 export default function HomePage() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -1306,19 +1403,43 @@ const captionBottom =
       return;
     }
 
-    if (imageFile) {
-      const ext = (imageFile.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `posts/${post.id}.${ext}`;
+ if (imageFile) {
+  try {
+    const normalized = await normalizeImageForUpload(imageFile, "post");
+    const uploadFile = normalized.file;
 
-      const { error: uploadError } = await supabase.storage
-        .from("post-images")
-        .upload(path, imageFile, { upsert: true });
+    const ext = (uploadFile.name.split(".").pop() || "jpg").toLowerCase();
+    const safeExt = ext.replace(/[^a-z0-9]/g, "") || "jpg";
+    const path = `posts/${post.id}.${safeExt}`;
 
-      if (uploadError) {
-        setBusy(false);
-        alert(uploadError.message);
-        return;
-      }
+    const { error: uploadError } = await supabase.storage
+      .from("post-images")
+      .upload(path, uploadFile, { upsert: true, contentType: uploadFile.type || undefined });
+
+    if (uploadError) {
+      setBusy(false);
+      alert(uploadError.message);
+      return;
+    }
+
+    const { data: pub } = supabase.storage.from("post-images").getPublicUrl(path);
+
+    const { error: updateError } = await supabase
+      .from("posts")
+      .update({ image_url: pub.publicUrl })
+      .eq("id", post.id);
+
+    if (updateError) {
+      setBusy(false);
+      alert(updateError.message);
+      return;
+    }
+  } catch (e: any) {
+    setBusy(false);
+    alert(e?.message ?? "Could not process image.");
+    return;
+  }
+}
 
       const { data: pub } = supabase.storage.from("post-images").getPublicUrl(path);
 
@@ -1550,13 +1671,26 @@ const captionBottom =
     if (avatarBusy) return;
 
     setAvatarBusy(true);
+let uploadFile: File = file;
+try {
+  const normalized = await normalizeImageForUpload(file, "avatar");
+  uploadFile = normalized.file;
 
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const path = `avatars/${activeUserId}.${ext}`;
+  // show processed avatar immediately
+  if (normalized.previewUrl) setMyAvatarUrl(normalized.previewUrl);
+} catch (e: any) {
+  setAvatarBusy(false);
+  return alert(e?.message ?? "Could not process image.");
+}
 
-    const { error: uploadError } = await supabase.storage
-      .from("post-images")
-      .upload(path, file, { upsert: true });
+const ext = (uploadFile.name.split(".").pop() || "jpg").toLowerCase();
+const safeExt = ext.replace(/[^a-z0-9]/g, "") || "jpg";
+const path = `avatars/${activeUserId}.${safeExt}`;
+
+const { error: uploadError } = await supabase.storage
+  .from("post-images")
+  .upload(path, uploadFile, { upsert: true, contentType: uploadFile.type || undefined });
+
 
     if (uploadError) {
       setAvatarBusy(false);
@@ -2002,7 +2136,14 @@ const captionBottom =
         </div>
 
         <div className="fileRow">
-          <input id="image" className="fileInput" type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
+ 
+<input
+  id="image"
+  className="fileInput"
+  type="file"
+  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+  onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+/>
 
           <label className="fileBtn" htmlFor="image">
             画像
