@@ -460,6 +460,7 @@ export default function HomePage() {
   // feed
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // my profile
   const [myUsername, setMyUsername] = useState<string>("");
@@ -1383,6 +1384,62 @@ const captionBottom =
     setLoading(false);
   }
 
+  const refreshFeed = useCallback(async () => {
+    if (isRefreshing) return;
+
+    const activeUserId = userId ?? (await requireApprovedSession());
+    if (!activeUserId) return;
+
+    setIsRefreshing(true);
+    try {
+      await loadAll(activeUserId);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [isRefreshing, userId]);
+
+  useEffect(() => {
+    const el = feedRef.current;
+    if (!el) return;
+
+    let startY = 0;
+    let armed = false;
+    let triggered = false;
+
+    const onTouchStart = (e: TouchEvent) => {
+      // Only arm when the feed is at the very top
+      if (el.scrollTop <= 0) {
+        startY = e.touches[0]?.clientY ?? 0;
+        armed = true;
+        triggered = false;
+      } else {
+        armed = false;
+      }
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!armed || triggered) return;
+      if (el.scrollTop > 0) return;
+
+      const y = e.touches[0]?.clientY ?? 0;
+      const delta = y - startY;
+
+      // Threshold similar to Instagram
+      if (delta > 80) {
+        triggered = true;
+        void refreshFeed();
+      }
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: true });
+
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart as any);
+      el.removeEventListener("touchmove", onTouchMove as any);
+    };
+  }, [refreshFeed]);
+
   async function createPost() {
     if (busy) return;
     if (!text.trim() && !imageFile) return;
@@ -2244,7 +2301,7 @@ const { error: uploadError } = await supabase.storage
   const myProfileHref = userId ? `/profile/${encodeURIComponent(userId)}` : "/";
   return (
     <>
-      <div ref={feedRef} className="feed" style={{ paddingBottom: 80, minHeight: "100vh" }}>
+      <div ref={feedRef} className="feed" style={{ paddingBottom: 80, minHeight: "100vh", overscrollBehaviorY: "contain" }}>
       <div className={`header ${headerHidden ? "header--hidden" : ""}`}>
         <div className="headerInner">
           <button
@@ -2258,6 +2315,14 @@ const { error: uploadError } = await supabase.storage
         </div>
       </div>
 
+
+      {isRefreshing ? (
+        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0", fontSize: 12, opacity: 0.75 }}>
+          Refreshing…
+        </div>
+      ) : null
+
+      }
 
       <div className="composer">
         <div className="composer-row">
