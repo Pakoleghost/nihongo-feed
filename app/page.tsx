@@ -1441,16 +1441,6 @@ const captionBottom =
   }
 }
 
-      const { data: pub } = supabase.storage.from("post-images").getPublicUrl(path);
-
-      const { error: updateError } = await supabase.from("posts").update({ image_url: pub.publicUrl }).eq("id", post.id);
-
-      if (updateError) {
-        setBusy(false);
-        alert(updateError.message);
-        return;
-      }
-    }
 
     setText("");
     setImageFile(null);

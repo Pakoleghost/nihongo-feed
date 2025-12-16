@@ -3,6 +3,100 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+type ImageKind = "avatar" | "certificate";
+
+function isHeicLike(file: File): boolean {
+  const name = (file.name || "").toLowerCase();
+  const type = (file.type || "").toLowerCase();
+  return name.endsWith(".heic") || name.endsWith(".heif") || type.includes("heic") || type.includes("heif");
+}
+
+async function blobToFile(blob: Blob, filename: string): Promise<File> {
+  return new File([blob], filename, { type: blob.type || "application/octet-stream" });
+}
+
+async function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob> {
+  return await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Failed to encode image"))), type, quality);
+  });
+}
+
+function computeResize(w: number, h: number, maxDim: number): { w: number; h: number } {
+  if (Math.max(w, h) <= maxDim) return { w, h };
+  const scale = maxDim / Math.max(w, h);
+  return { w: Math.round(w * scale), h: Math.round(h * scale) };
+}
+
+async function supportsWebP(): Promise<boolean> {
+  try {
+    const c = document.createElement("canvas");
+    c.width = 1;
+    c.height = 1;
+    const b = await new Promise<Blob | null>((resolve) => c.toBlob(resolve, "image/webp", 0.8));
+    return !!b && b.type === "image/webp";
+  } catch {
+    return false;
+  }
+}
+
+async function normalizeImageForUpload(file: File, kind: ImageKind): Promise<File> {
+  const maxDim = kind === "avatar" ? 512 : 1600;
+  const quality = kind === "avatar" ? 0.85 : 0.84;
+
+  const mime = (file.type || "").toLowerCase();
+  const name = (file.name || "").toLowerCase();
+  const looksImage = mime.startsWith("image/") || name.endsWith(".heic") || name.endsWith(".heif");
+  if (!looksImage) throw new Error("Please choose an image file.");
+
+  let working: File = file;
+
+  if (isHeicLike(file)) {
+    const mod: any = await import("heic2any");
+    const heic2any = mod?.default ?? mod;
+    const outBlob = (await heic2any({ blob: file, toType: "image/jpeg", quality: 0.92 })) as Blob;
+    working = await blobToFile(outBlob, (file.name || "upload").replace(/\.(heic|heif)$/i, ".jpg"));
+  }
+
+  const objectUrl = URL.createObjectURL(working);
+  try {
+    const img = new Image();
+    img.decoding = "async";
+
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("Could not read image"));
+      img.src = objectUrl;
+    });
+
+    const srcW = img.naturalWidth || img.width;
+    const srcH = img.naturalHeight || img.height;
+    const { w: outW, h: outH } = computeResize(srcW, srcH, maxDim);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = outW;
+    canvas.height = outH;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not process image");
+
+    ctx.imageSmoothingEnabled = true;
+    // @ts-ignore
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, outW, outH);
+
+    const useWebp = kind !== "avatar" && (await supportsWebP());
+    const outType = useWebp ? "image/webp" : "image/jpeg";
+
+    const outBlob = await canvasToBlob(canvas, outType, quality);
+
+    const ext = outType === "image/webp" ? "webp" : "jpg";
+    const base = (working.name || "image").replace(/\.[a-z0-9]+$/i, "");
+    return await blobToFile(outBlob, `${base}.${ext}`);
+  } finally {
+    try { URL.revokeObjectURL(objectUrl); } catch {}
+  }
+}
+
 function levelChip(level: string) {
   const v = (level || "").toLowerCase().trim();
   if (!v) return null;
@@ -138,14 +232,16 @@ export default function ProfileHeaderClient(props: ProfileHeaderClientProps) {
         return;
       }
 
-      const extRaw = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const ext = extRaw.replace(/[^a-z0-9]/g, "") || "jpg";
-      const path = `certificates/${profileId}/${Date.now()}.${ext}`;
+      const uploadFile = await normalizeImageForUpload(file, "certificate");
+
+const extRaw = (uploadFile.name.split(".").pop() || "jpg").toLowerCase();
+const ext = extRaw.replace(/[^a-z0-9]/g, "") || "jpg";
+const path = `certificates/${profileId}/${Date.now()}.${ext}`;
 
       const bucket = "jlpt-certificates";
-      const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
+      const { error: upErr } = await supabase.storage.from(bucket).upload(path, uploadFile, {
         upsert: false,
-        contentType: file.type,
+        contentType: uploadFile.type,
       });
 
       if (upErr) {
@@ -174,21 +270,17 @@ export default function ProfileHeaderClient(props: ProfileHeaderClientProps) {
     try {
       setUploadingAvatar(true);
 
-      // Basic validation
-      if (!file.type.startsWith("image/")) {
-        alert("Please choose an image file.");
-        return;
-      }
+      const uploadFile = await normalizeImageForUpload(file, "avatar");
 
-      // Use a stable path per profile id
-      const ext = (file.name.split(".").pop() || "png").toLowerCase();
-      const path = `${profileId}/${Date.now()}.${ext}`;
+const extRaw = (uploadFile.name.split(".").pop() || "jpg").toLowerCase();
+const ext = extRaw.replace(/[^a-z0-9]/g, "") || "jpg";
+const path = `avatars/${profileId}.${ext}`;
 
       // Upload to Supabase Storage (bucket name used by the app)
       const bucket = "post-images";
-      const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
+      const { error: upErr } = await supabase.storage.from(bucket).upload(path, uploadFile, {
         upsert: true,
-        contentType: file.type,
+        contentType: uploadFile.type,
       });
 
       if (upErr) {
@@ -231,8 +323,7 @@ export default function ProfileHeaderClient(props: ProfileHeaderClientProps) {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
-        style={{ display: "none" }}
+accept="image/jpeg,image/png,image/webp,image/heic,image/heif"        style={{ display: "none" }}
         onChange={(e) => {
           const f = e.target.files?.[0];
           // allow selecting the same file twice
@@ -243,8 +334,7 @@ export default function ProfileHeaderClient(props: ProfileHeaderClientProps) {
       <input
         ref={jlptInputRef}
         type="file"
-        accept="image/*"
-        style={{ display: "none" }}
+accept="image/jpeg,image/png,image/webp,image/heic,image/heif"        style={{ display: "none" }}
         onChange={(e) => {
           const f = e.target.files?.[0];
           // allow selecting the same file twice
