@@ -32,6 +32,7 @@ type PostMini = { id: string | number; image_url: string | null };
 type GroupedNotification = {
   key: string;
   type: "like" | "comment" | "reply" | "application" | "jlpt" | "other";
+  raw_type: string | null;
   post_id: string | number | null;
   comment_id: string | null;
   created_at: string;
@@ -384,11 +385,15 @@ export default function NotificationsPage() {
         continue;
       }
 
+      const isCommentLike = t === "like" && ((n.type ?? "").toLowerCase().includes("comment_like") || (n as any).comment_id);
+
       const key =
         t === "jlpt" && jlptId
           ? `jlpt:${jlptId}`
           : t === "application" && appId
           ? `application:${appId}`
+          : isCommentLike && (n as any).comment_id
+          ? `comment_like:${String((n as any).comment_id)}`
           : (t === "like" || t === "comment" || t === "reply") && postKey
           ? `${t}:${postKey}`
           : `single:${n.id}`;
@@ -400,6 +405,7 @@ export default function NotificationsPage() {
         byKey.set(key, {
           key,
           type: t,
+          raw_type: n.type ?? null,
           post_id: n.post_id ?? null,
           comment_id:
             t === "jlpt"
@@ -420,6 +426,7 @@ export default function NotificationsPage() {
         if (new Date(n.created_at).getTime() > new Date(existing.created_at).getTime()) {
           existing.created_at = n.created_at;
           existing.latestMessage = n.message ?? existing.latestMessage;
+          existing.raw_type = n.type ?? existing.raw_type;
           existing.comment_id =
             t === "jlpt"
               ? (((n as any).jlpt_submission_id ?? null) as any)
@@ -540,11 +547,14 @@ export default function NotificationsPage() {
                   const isComment = g.type === "comment";
                   const isReply = g.type === "reply";
                   const isJlpt = g.type === "jlpt";
+                  const isCommentLike = isLike && ((g.raw_type ?? "").toLowerCase().includes("comment_like") || !!g.comment_id);
 
                   const chip = isApplication
                     ? "APPLICATION"
                     : isJlpt
                     ? "JLPT"
+                    : isCommentLike
+                    ? "コメントいいね"
                     : isLike
                     ? "いいね！"
                     : isReply
@@ -558,7 +568,11 @@ export default function NotificationsPage() {
                   ) : isJlpt ? (
                     <>{actorText} submitted a JLPT certificate.</>
                   ) : isLike ? (
-                    <>{actorText}があなたの投稿にいいね！しました。</>
+                    isCommentLike ? (
+                      <>{actorText}があなたのコメントにいいね！しました。</>
+                    ) : (
+                      <>{actorText}があなたの投稿にいいね！しました。</>
+                    )
                   ) : isReply ? (
                     <>{actorText}があなたのコメントに返信しました。</>
                   ) : isComment ? (
@@ -1073,6 +1087,7 @@ export default function NotificationsPage() {
         profileHref={myProfileHref}
         profileAvatarUrl={myProfile?.avatar_url ? myProfile.avatar_url : null}
         profileInitial={((myProfile?.username ?? "?").toString().trim()[0] ?? "?").toUpperCase()}
+        viewerId={userId ?? ""}
       />
     </>
   );

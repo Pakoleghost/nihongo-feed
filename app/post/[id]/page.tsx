@@ -23,6 +23,8 @@ type CommentRow = {
   post_id: string | number;
   content: string | null;
   parent_comment_id: string | null;
+  likeCount?: number;
+  likedByMe?: boolean;
 };
 
 export default function PostPage() {
@@ -47,6 +49,7 @@ export default function PostPage() {
   const [likeCount, setLikeCount] = useState(0);
   const [likedByMe, setLikedByMe] = useState(false);
   const [likeBusy, setLikeBusy] = useState(false);
+  const [commentLikeBusyById, setCommentLikeBusyById] = useState<Record<string, boolean>>({});
 
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [commentAuthors, setCommentAuthors] = useState<Record<string, MiniProfile>>({});
@@ -64,6 +67,42 @@ export default function PostPage() {
 
     if (cErr) throw cErr;
     setComments((cs as CommentRow[]) ?? []);
+
+    // Hydrate comment like counts + my-like state
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      const uid = u.user?.id ?? null;
+
+      const commentIds = Array.from(new Set(((cs as any[]) ?? []).map((x) => x?.id).filter(Boolean).map(String)));
+      if (commentIds.length) {
+        const { data: likeRows } = await supabase
+          .from("comment_likes")
+          .select("comment_id, user_id")
+          .in("comment_id", commentIds as any);
+
+        const map = new Map<string, { count: number; mine: boolean }>();
+        for (const id of commentIds) map.set(String(id), { count: 0, mine: false });
+
+        (likeRows ?? []).forEach((r: any) => {
+          const key = String(r.comment_id);
+          const cur = map.get(key);
+          if (!cur) return;
+          cur.count += 1;
+          if (uid && r.user_id === uid) cur.mine = true;
+          map.set(key, cur);
+        });
+
+        setComments((prev) =>
+          (prev ?? []).map((c) => {
+            const v = map.get(String(c.id));
+            if (!v) return c;
+            return { ...c, likeCount: v.count, likedByMe: v.mine };
+          })
+        );
+      }
+    } catch {
+      // ignore hydration failures
+    }
 
     const ids = Array.from(new Set(((cs as any[]) ?? []).map((x) => x?.user_id).filter(Boolean)));
     if (ids.length) {
@@ -262,6 +301,80 @@ export default function PostPage() {
       setLikeBusy(false);
     }
   }, [likedByMe, likeBusy, postId, reloadLikes, reloadMyLike]);
+
+  const toggleCommentLike = useCallback(
+    async (comment: CommentRow) => {
+      const cid = String(comment.id);
+      if (commentLikeBusyById[cid]) return;
+
+      const { data: u } = await supabase.auth.getUser();
+      const uid = u.user?.id;
+      if (!uid) return alert("Session expired. Please log in again.");
+
+      setCommentLikeBusyById((p) => ({ ...p, [cid]: true }));
+
+      const wasLiked = !!comment.likedByMe;
+
+      // optimistic UI
+      setComments((prev) =>
+        (prev ?? []).map((c) => {
+          if (String(c.id) !== cid) return c;
+          const liked = !wasLiked;
+          const nextCount = Math.max(0, (c.likeCount ?? 0) + (liked ? 1 : -1));
+          return { ...c, likedByMe: liked, likeCount: nextCount };
+        })
+      );
+
+      try {
+        if (wasLiked) {
+          const { error } = await supabase
+            .from("comment_likes")
+            .delete()
+            .eq("comment_id", cid)
+            .eq("user_id", uid);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from("comment_likes").insert({ comment_id: cid, user_id: uid });
+          if (error) {
+            const msg = (error.message || "").toLowerCase();
+            const code = (error as any).code;
+            if (!(code === "23505" || msg.includes("duplicate") || msg.includes("unique"))) {
+              throw error;
+            }
+          }
+
+          // notify comment owner (best-effort)
+          try {
+            const ownerId = comment.user_id ? String(comment.user_id) : null;
+            if (ownerId && ownerId !== uid) {
+              await supabase.from("notifications").insert({
+                user_id: ownerId,
+                actor_id: uid,
+                post_id: postId as any,
+                comment_id: cid,
+                type: "comment_like",
+                read: false,
+              });
+            }
+          } catch {
+            // ignore
+          }
+        }
+      } catch (e: any) {
+        console.error(e);
+        alert(e?.message ?? "Failed to update comment like.");
+        // re-sync
+        try {
+          await reloadComments();
+        } catch {
+          // ignore
+        }
+      } finally {
+        setCommentLikeBusyById((p) => ({ ...p, [cid]: false }));
+      }
+    },
+    [commentLikeBusyById, postId, reloadComments]
+  );
 
   const startReply = useCallback((commentId: string, username: string) => {
     const handle = `@${(username || "unknown").toString()} `;
@@ -521,7 +634,30 @@ useEffect(() => {
               {`@${uname}`}
             </button>
             <div style={{ marginTop: 4, whiteSpace: "pre-wrap" }}>{c.content ?? ""}</div>
-            <div style={{ marginTop: 6, display: "flex", gap: 10, alignItems: "center" }}>
+            <div style={{ marginTop: 6, display: "flex", gap: 12, alignItems: "center" }}>
+              <button
+                type="button"
+                onClick={() => void toggleCommentLike(c)}
+                disabled={!!commentLikeBusyById[String(c.id)]}
+                style={{
+                  padding: 0,
+                  border: 0,
+                  background: "transparent",
+                  cursor: "pointer",
+                  fontSize: 12,
+                  opacity: commentLikeBusyById[String(c.id)] ? 0.5 : 0.85,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+                aria-label="Like comment"
+                title="Like"
+              >
+                <span style={{ fontSize: 13 }}>{c.likedByMe ? "💙" : "🤍"}</span>
+                <span style={{ opacity: 0.8 }}>いいね！</span>
+                <span style={{ fontSize: 12, opacity: 0.7 }}>{c.likeCount ?? 0}</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => startReply(c.id, uname)}
@@ -550,7 +686,7 @@ useEffect(() => {
         </div>
       );
     },
-    [childrenByParent, commentAuthors, deleteComment, goToProfile, highlightCommentId, startReply, userId]
+    [childrenByParent, commentAuthors, deleteComment, goToProfile, highlightCommentId, startReply, userId, toggleCommentLike, commentLikeBusyById]
   );
 
   return (
@@ -656,7 +792,7 @@ useEffect(() => {
                   aria-label={likedByMe ? "Unlike" : "Like"}
                 >
                   <span aria-hidden style={{ fontSize: 14, lineHeight: 1 }}>{likedByMe ? "♥" : "♡"}</span>
-                  <span>{`いいね ${likeCount}`}</span>
+                  <span>{`いいね！ ${likeCount}`}</span>
                 </button>
               </div>
               <div style={{ marginTop: 14, fontWeight: 900, opacity: 0.85 }}>コメント</div>
@@ -799,6 +935,7 @@ useEffect(() => {
         profileHref={myProfileHref}
         profileAvatarUrl={myProfile?.avatar_url ? myProfile.avatar_url : null}
         profileInitial={((myProfile?.username ?? "?").toString().trim()[0] ?? "?").toUpperCase()}
+        viewerId={userId ?? ""}
       />
     </>
   );

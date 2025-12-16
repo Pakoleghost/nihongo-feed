@@ -790,6 +790,7 @@ const captionBottom =
   }
   // likes in-flight guard (prevents double-click duplicate inserts)
   const [likeBusyByPost, setLikeBusyByPost] = useState<Record<string, boolean>>({});
+  const [likeBusyByComment, setLikeBusyByComment] = useState<Record<string, boolean>>({});
 
   const BASE_URL = useMemo(() => {
     const env = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim();
@@ -1543,10 +1544,126 @@ const captionBottom =
           parent_comment_id: row.parent_comment_id ?? null,
           username: prof.username, // "" si no hay
           avatar_url: prof.avatar_url,
+          likeCount: 0,
+          likedByMe: false,
         };
       }) ?? [];
 
+    // Populate comment like counts + my like state
+    try {
+      const activeUserId = userId ?? null;
+      const commentIds = normalized.map((c) => c.id);
+
+      if (commentIds.length) {
+        const { data: likeRows } = await supabase
+          .from("comment_likes")
+          .select("comment_id, user_id")
+          .in("comment_id", commentIds as any);
+
+        const map = new Map<string, { count: number; mine: boolean }>();
+        for (const id of commentIds) map.set(String(id), { count: 0, mine: false });
+
+        (likeRows ?? []).forEach((r: any) => {
+          const key = String(r.comment_id);
+          const cur = map.get(key);
+          if (!cur) return;
+          cur.count += 1;
+          if (activeUserId && r.user_id === activeUserId) cur.mine = true;
+          map.set(key, cur);
+        });
+
+        normalized.forEach((c) => {
+          const v = map.get(String(c.id));
+          if (v) {
+            (c as any).likeCount = v.count;
+            (c as any).likedByMe = v.mine;
+          }
+        });
+      }
+    } catch {
+      // ignore like hydration failures
+    }
+
     setCommentsByPost((prev) => ({ ...prev, [postId]: normalized }));
+  }
+  async function toggleCommentLike(postId: string, commentId: string, commentOwnerId: string) {
+    if (likeBusyByComment[commentId]) return;
+    setLikeBusyByComment((prev) => ({ ...prev, [commentId]: true }));
+
+    try {
+      const activeUserId = userId ?? (await requireApprovedSession());
+      if (!activeUserId) return;
+
+      // Find current comment state
+      const list = commentsByPost[postId] ?? [];
+      const cur = list.find((c) => String(c.id) === String(commentId));
+      if (!cur) return;
+
+      const wasLiked = !!(cur as any).likedByMe;
+
+      // Optimistic UI
+      setCommentsByPost((prev) => {
+        const arr = prev[postId] ?? [];
+        return {
+          ...prev,
+          [postId]: arr.map((c) => {
+            if (String(c.id) !== String(commentId)) return c;
+            const liked = !wasLiked;
+            const count = Math.max(0, ((c as any).likeCount ?? 0) + (liked ? 1 : -1));
+            return { ...(c as any), likedByMe: liked, likeCount: count };
+          }),
+        };
+      });
+
+      if (wasLiked) {
+        // Unlike
+        const { error } = await supabase
+          .from("comment_likes")
+          .delete()
+          .eq("comment_id", commentId)
+          .eq("user_id", activeUserId);
+
+        if (error) {
+          alert(error.message);
+          await loadComments(postId);
+        }
+        return;
+      }
+
+      // Like
+      const { error } = await supabase
+        .from("comment_likes")
+        .insert({ comment_id: commentId, user_id: activeUserId });
+
+      if (error) {
+        const msg = (error.message || "").toLowerCase();
+        const code = (error as any).code;
+        // Ignore duplicate like
+        if (!(code === "23505" || msg.includes("duplicate") || msg.includes("unique"))) {
+          alert(error.message);
+        }
+        await loadComments(postId);
+        return;
+      }
+
+      // Notify comment owner (best-effort)
+      try {
+        if (commentOwnerId && commentOwnerId !== activeUserId) {
+          await supabase.from("notifications").insert({
+            user_id: commentOwnerId,
+            actor_id: activeUserId,
+            post_id: Number(postId),
+            comment_id: String(commentId),
+            type: "comment_like",
+            read: false,
+          });
+        }
+      } catch {
+        // ignore
+      }
+    } finally {
+      setLikeBusyByComment((prev) => ({ ...prev, [commentId]: false }));
+    }
   }
 
   async function addComment(postId: string) {
@@ -1884,9 +2001,13 @@ const { error: uploadError } = await supabase.storage
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 <input
+                  type="date"
                   value={dob}
                   onChange={(e) => setDob(e.target.value)}
-                  placeholder="Date of birth (YYYY-MM-DD)"
+                  placeholder="YYYY-MM-DD"
+                  min="1900-01-01"
+                  max={new Date().toISOString().slice(0, 10)}
+                  inputMode="numeric"
                   style={{
                     width: "100%",
                     padding: 12,
@@ -2292,7 +2413,7 @@ const { error: uploadError } = await supabase.storage
                 <div className="actionsRow">
                   <button className="likeBtn" onClick={() => toggleLike(p.id)}>
                     <span className="icon">{p.likedByMe ? "💙" : "🤍"}</span>
-                    <span>いいね</span>
+                    <span>いいね！</span>
                     <span className="muted">{p.likes}</span>
                   </button>
 
@@ -2374,7 +2495,31 @@ const { error: uploadError } = await supabase.storage
 
                                     <div className="cText">{c.content}</div>
 
-                                    <div style={{ marginTop: 6, display: "flex", gap: 10, alignItems: "center" }}>
+                                    <div style={{ marginTop: 6, display: "flex", gap: 12, alignItems: "center" }}>
+                                      <button
+                                        type="button"
+                                        className="ghostBtn"
+                                        onClick={() => void toggleCommentLike(p.id, c.id, c.user_id)}
+                                        disabled={!!likeBusyByComment[c.id]}
+                                        style={{
+                                          padding: 0,
+                                          border: 0,
+                                          background: "transparent",
+                                          cursor: "pointer",
+                                          fontSize: 12,
+                                          opacity: likeBusyByComment[c.id] ? 0.5 : 0.85,
+                                          display: "inline-flex",
+                                          alignItems: "center",
+                                          gap: 6,
+                                        }}
+                                        aria-label="Like comment"
+                                        title="Like"
+                                      >
+                                        <span style={{ fontSize: 13 }}>{(c as any).likedByMe ? "💙" : "🤍"}</span>
+                                        <span style={{ opacity: 0.8 }}>いいね！</span>
+                                        <span className="muted" style={{ fontSize: 12 }}>{(c as any).likeCount ?? 0}</span>
+                                      </button>
+
                                       <button
                                         type="button"
                                         className="ghostBtn"
