@@ -66,6 +66,17 @@ export default function NotificationsPage() {
   useEffect(() => {
     let mounted = true;
 
+    const markNotificationsSeen = async (uid: string) => {
+      try {
+        await supabase
+          .from("profiles")
+          .update({ notifications_last_seen_at: new Date().toISOString() })
+          .eq("id", uid);
+      } catch {
+        // ignore
+      }
+    };
+
     const load = async (uid: string) => {
       setLoading(true);
       setErrorMsg(null);
@@ -245,14 +256,19 @@ export default function NotificationsPage() {
       const uid = data.user?.id ?? null;
       if (!mounted) return;
       setUserId(uid);
-      if (uid) void load(uid);
+      if (uid) {
+        void markNotificationsSeen(uid);
+        void load(uid);
+      }
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       const uid = session?.user?.id ?? null;
       setUserId(uid);
-      if (uid) void load(uid);
-      else {
+      if (uid) {
+        void markNotificationsSeen(uid);
+        void load(uid);
+      } else {
         setItems([]);
         setErrorMsg(null);
         setMyProfile(null);

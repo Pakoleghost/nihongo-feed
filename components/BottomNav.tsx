@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 type Item = {
   key: string;
@@ -20,7 +22,60 @@ export default function BottomNav({
   profileInitial?: string;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
+
+  const [hasUnseen, setHasUnseen] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        // Do not show badge while on the notifications page.
+        if (pathname === "/notifications" || pathname.startsWith("/notifications/")) {
+          if (!cancelled) setHasUnseen(false);
+          return;
+        }
+
+        const { data: userRes } = await supabase.auth.getUser();
+        const uid = userRes?.user?.id;
+        if (!uid) {
+          if (!cancelled) setHasUnseen(false);
+          return;
+        }
+
+        const [{ data: prof }, { data: latestNoti }] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("notifications_last_seen_at")
+            .eq("id", uid)
+            .maybeSingle(),
+          supabase
+            .from("notifications")
+            .select("created_at")
+            .eq("user_id", uid)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+        ]);
+
+        const lastSeenMs = prof?.notifications_last_seen_at
+          ? new Date(prof.notifications_last_seen_at).getTime()
+          : 0;
+        const newestMs = latestNoti?.created_at ? new Date(latestNoti.created_at).getTime() : 0;
+
+        if (!cancelled) setHasUnseen(newestMs > lastSeenMs);
+      } catch (e) {
+        // If anything fails (RLS, missing columns, etc.), fail closed.
+        if (!cancelled) setHasUnseen(false);
+      }
+    };
+
+    void run();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
 
   const items: Item[] = [
     { key: "home", href: "/", label: "Home", icon: "🏠" },
@@ -146,7 +201,43 @@ export default function BottomNav({
                     </div>
                   )
                 ) : (
-                  <span style={{ fontSize: it.icon === "＋" ? 20 : 18 }}>{it.icon}</span>
+                  <div style={{ position: "relative", display: "grid", placeItems: "center" }}>
+                    <span style={{ fontSize: it.icon === "＋" ? 20 : 18 }}>{it.icon}</span>
+
+                    {it.key === "noti" && hasUnseen && (
+                      <span
+                        aria-label="New notifications"
+                        style={{
+                          position: "absolute",
+                          top: -2,
+                          right: -2,
+                          width: 8,
+                          height: 8,
+                          borderRadius: 999,
+                          background: "#ff3b30",
+                          boxShadow: "0 0 0 2px rgba(255,255,255,.92)",
+                          animation: "nhfPulse 1.35s ease-in-out infinite",
+                        }}
+                      />
+                    )}
+
+                    <style jsx>{`
+                      @keyframes nhfPulse {
+                        0% {
+                          transform: scale(1);
+                          opacity: 0.95;
+                        }
+                        50% {
+                          transform: scale(1.45);
+                          opacity: 0.55;
+                        }
+                        100% {
+                          transform: scale(1);
+                          opacity: 0.95;
+                        }
+                      }
+                    `}</style>
+                  </div>
                 )}
               </div>
             </Link>
