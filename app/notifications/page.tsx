@@ -361,9 +361,18 @@ export default function NotificationsPage() {
       const t = normType(n.type);
       const postKey = n.post_id != null ? String(n.post_id) : null;
       const jlptId = (n as any).jlpt_submission_id ? String((n as any).jlpt_submission_id) : "";
+      const appId = (n as any).comment_id ? String((n as any).comment_id) : "";
+
+      // Admin application notifications must include an application id. If not, skip the row to avoid useless duplicates.
+      if (t === "application" && !appId) {
+        continue;
+      }
+
       const key =
         t === "jlpt" && jlptId
           ? `jlpt:${jlptId}`
+          : t === "application" && appId
+          ? `application:${appId}`
           : (t === "like" || t === "comment" || t === "reply") && postKey
           ? `${t}:${postKey}`
           : `single:${n.id}`;
@@ -376,7 +385,12 @@ export default function NotificationsPage() {
           key,
           type: t,
           post_id: n.post_id ?? null,
-          comment_id: t === "jlpt" ? (((n as any).jlpt_submission_id ?? null) as any) : ((n as any).comment_id ?? null),
+          comment_id:
+            t === "jlpt"
+              ? (((n as any).jlpt_submission_id ?? null) as any)
+              : t === "application"
+              ? ((n as any).comment_id ?? null)
+              : ((n as any).comment_id ?? null),
           created_at: n.created_at,
           read: !!n.read,
           ids: [n.id],
@@ -393,6 +407,8 @@ export default function NotificationsPage() {
           existing.comment_id =
             t === "jlpt"
               ? (((n as any).jlpt_submission_id ?? null) as any)
+              : t === "application"
+              ? ((n as any).comment_id ?? existing.comment_id)
               : ((n as any).comment_id ?? existing.comment_id);
         }
         if (actor) {
