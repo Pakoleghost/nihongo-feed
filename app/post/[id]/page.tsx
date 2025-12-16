@@ -31,6 +31,7 @@ export default function PostPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const postId = params?.id;
+  const postIdNum = postId ? Number(postId) : null;
 
   const searchParams = useSearchParams();
   const highlightCommentId = searchParams?.get("c") ?? null;
@@ -58,11 +59,11 @@ export default function PostPage() {
   const [err, setErr] = useState<string | null>(null);
 
   const reloadComments = useCallback(async () => {
-    if (!postId) return;
+    if (!postIdNum || !Number.isFinite(postIdNum)) return;
     const { data: cs, error: cErr } = await supabase
       .from("comments")
       .select("id, created_at, user_id, post_id, content, parent_comment_id")
-      .eq("post_id", postId as any)
+      .eq("post_id", postIdNum)
       .order("created_at", { ascending: true });
 
     if (cErr) throw cErr;
@@ -116,21 +117,21 @@ export default function PostPage() {
     } else {
       setCommentAuthors({});
     }
-  }, [postId]);
+  }, [postIdNum]);
 
   const reloadLikes = useCallback(async () => {
-    if (!postId) return;
+    if (!postIdNum || !Number.isFinite(postIdNum)) return;
     const { count, error } = await supabase
       .from("likes")
       .select("id", { count: "exact", head: true })
-      .eq("post_id", postId as any);
+      .eq("post_id", postIdNum);
 
     if (error) throw error;
     setLikeCount(count ?? 0);
-  }, [postId]);
+  }, [postIdNum]);
 
   const reloadMyLike = useCallback(async () => {
-    if (!postId) return;
+    if (!postIdNum || !Number.isFinite(postIdNum)) return;
     const { data: u } = await supabase.auth.getUser();
     const uid = u.user?.id;
     if (!uid) {
@@ -141,16 +142,16 @@ export default function PostPage() {
     const { data, error } = await supabase
       .from("likes")
       .select("id")
-      .eq("post_id", postId as any)
+      .eq("post_id", postIdNum)
       .eq("user_id", uid)
       .maybeSingle();
 
     if (error) throw error;
     setLikedByMe(!!data);
-  }, [postId]);
+  }, [postIdNum]);
 
   const addComment = useCallback(async () => {
-    if (!postId) return;
+    if (!postIdNum || !Number.isFinite(postIdNum)) return;
     const t = commentText.trim();
     if (!t) return;
 
@@ -166,7 +167,7 @@ export default function PostPage() {
       const { data: inserted, error } = await supabase
         .from("comments")
         .insert({
-          post_id: postId as any,
+          post_id: postIdNum,
           user_id: uid,
           content: t,
           parent_comment_id: parentId,
@@ -200,7 +201,7 @@ export default function PostPage() {
           notifInserts.push({
             user_id: postOwnerId,
             actor_id: uid,
-            post_id: postId as any,
+            post_id: postIdNum,
             comment_id: newCommentId,
             type: "comment",
             read: false,
@@ -217,7 +218,7 @@ export default function PostPage() {
           notifInserts.push({
             user_id: parentOwnerId,
             actor_id: uid,
-            post_id: postId as any,
+            post_id: postIdNum,
             comment_id: newCommentId,
             type: "reply",
             read: false,
@@ -241,7 +242,7 @@ export default function PostPage() {
     } finally {
       setCommentBusy(false);
     }
-  }, [commentText, postId, post, reloadComments, reloadLikes, replyTo]);
+  }, [commentText, postIdNum, post, reloadComments, reloadLikes, replyTo]);
 
   const deleteComment = useCallback(
     async (commentId: string) => {
@@ -262,7 +263,7 @@ export default function PostPage() {
   );
 
   const toggleLike = useCallback(async () => {
-    if (!postId) return;
+    if (!postIdNum || !Number.isFinite(postIdNum)) return;
 
     const { data: u } = await supabase.auth.getUser();
     const uid = u.user?.id;
@@ -273,12 +274,12 @@ export default function PostPage() {
 
     try {
       if (likedByMe) {
-        const { error } = await supabase.from("likes").delete().eq("post_id", postId as any).eq("user_id", uid);
+        const { error } = await supabase.from("likes").delete().eq("post_id", postIdNum).eq("user_id", uid);
         if (error) throw error;
         setLikedByMe(false);
         setLikeCount((c) => Math.max(0, (c ?? 0) - 1));
       } else {
-        const { error } = await supabase.from("likes").insert({ post_id: postId as any, user_id: uid });
+        const { error } = await supabase.from("likes").insert({ post_id: postIdNum, user_id: uid });
         if (error) throw error;
         setLikedByMe(true);
         setLikeCount((c) => (c ?? 0) + 1);
@@ -300,7 +301,7 @@ export default function PostPage() {
     } finally {
       setLikeBusy(false);
     }
-  }, [likedByMe, likeBusy, postId, reloadLikes, reloadMyLike]);
+  }, [likedByMe, likeBusy, postIdNum, reloadLikes, reloadMyLike]);
 
   const toggleCommentLike = useCallback(
     async (comment: CommentRow) => {
@@ -350,7 +351,7 @@ export default function PostPage() {
               await supabase.from("notifications").insert({
                 user_id: ownerId,
                 actor_id: uid,
-                post_id: postId as any,
+                post_id: postIdNum,
                 comment_id: cid,
                 type: "comment_like",
                 read: false,
@@ -373,7 +374,7 @@ export default function PostPage() {
         setCommentLikeBusyById((p) => ({ ...p, [cid]: false }));
       }
     },
-    [commentLikeBusyById, postId, reloadComments]
+    [commentLikeBusyById, postIdNum, reloadComments]
   );
 
   const startReply = useCallback((commentId: string, username: string) => {
@@ -463,7 +464,7 @@ useEffect(() => {
     let mounted = true;
 
     const load = async () => {
-      if (!postId) return;
+      if (!postIdNum || !Number.isFinite(postIdNum)) return;
 
       setLoading(true);
       setErr(null);
@@ -473,7 +474,7 @@ useEffect(() => {
         const { data: p, error: pErr } = await supabase
           .from("posts")
           .select("id, content, created_at, user_id, image_url")
-          .eq("id", postId as any)
+          .eq("id", postIdNum)
           .maybeSingle();
 
         if (pErr) throw pErr;
@@ -512,7 +513,7 @@ useEffect(() => {
         const { data: cs, error: cErr } = await supabase
           .from("comments")
           .select("id, created_at, user_id, post_id, content, parent_comment_id")
-          .eq("post_id", postId as any)
+          .eq("post_id", postIdNum)
           .order("created_at", { ascending: true });
 
         if (cErr) throw cErr;
@@ -546,7 +547,7 @@ useEffect(() => {
     return () => {
       mounted = false;
     };
-  }, [postId, reloadLikes, reloadMyLike]);
+  }, [postIdNum, reloadLikes, reloadMyLike]);
 
   const myProfileHref = userId ? `/profile/${encodeURIComponent(userId)}` : "/";
 

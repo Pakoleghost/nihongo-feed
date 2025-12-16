@@ -1710,7 +1710,7 @@ const captionBottom =
       const { data: inserted, error } = await supabase
         .from("comments")
         .insert({
-          post_id: postId,
+          post_id: Number(postId),
           user_id: activeUserId,
           content: commentText.trim(),
           parent_comment_id: parentId,
