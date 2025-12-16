@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
 
@@ -123,7 +124,16 @@ export default function LeaderboardPage() {
     <div className="feed">
       <div className="header">
         <div className="headerInner">
-          <div className="headerTitle">フィード</div>
+          <div className="headerTitle">
+            <Image
+              src="/logo.png"
+              alt="フィード"
+              width={120}
+              height={28}
+              priority
+              style={{ height: 28, width: "auto", display: "block" }}
+            />
+          </div>
         </div>
       </div>
 

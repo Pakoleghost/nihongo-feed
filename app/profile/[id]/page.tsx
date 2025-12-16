@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
+import Image from "next/image";
 import ProfileHeaderClient, { type ProfileHeaderClientProps } from "./profile-header-client";
 import { supabase } from "@/lib/supabase";
 
@@ -214,7 +215,16 @@ export default function ProfileByIdPage() {
     <div className="feed" style={{ paddingBottom: 80, minHeight: "100vh" }}>
       <div className="header">
         <div className="headerInner">
-          <div className="headerTitle">フィード</div>
+          <div className="headerTitle">
+            <Image
+              src="/logo.png"
+              alt="フィード"
+              width={120}
+              height={28}
+              priority
+              style={{ height: 28, width: "auto", display: "block" }}
+            />
+          </div>
           <div className="me" />
         </div>
       </div>
@@ -248,7 +258,16 @@ export default function ProfileByIdPage() {
     <div className="feed" style={{ paddingBottom: 80, minHeight: "100vh" }}>
       <div className="header">
         <div className="headerInner">
-          <div className="headerTitle">フィード</div>
+          <div className="headerTitle">
+            <Image
+              src="/logo.png"
+              alt="フィード"
+              width={120}
+              height={28}
+              priority
+              style={{ height: 28, width: "auto", display: "block" }}
+            />
+          </div>
           <div className="me" />
         </div>
       </div>

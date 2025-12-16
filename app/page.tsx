@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { requireApprovedSession } from "@/lib/authGuard";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import Image from "next/image";
 import BottomNav from "@/components/BottomNav";
 
 type DbPostRow = {
@@ -2310,7 +2311,14 @@ const { error: uploadError } = await supabase.storage
             onClick={() => void onTapBrand()}
             aria-label="Scroll to top or refresh"
           >
-            フィード
+            <Image
+              src="/logo.png"
+              alt="フィード"
+              width={120}
+              height={28}
+              priority
+              style={{ height: 28, width: "auto", display: "block" }}
+            />
           </button>
         </div>
       </div>
