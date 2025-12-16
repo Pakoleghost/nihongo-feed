@@ -32,10 +32,37 @@ export default function AuthCallback() {
           return;
         }
 
-        // Always send users to /pending after auth.
-        // /pending is responsible for deciding whether to show the pending screen,
-        // the application form, or redirect approved users into the app.
-        router.replace("/pending");
+        // After auth, decide where to send the user based on their profile.
+        const userId = session.user.id;
+
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("approved, username")
+          .eq("id", userId)
+          .maybeSingle();
+
+        if (profileError) {
+          // If profile lookup fails, fall back to pending which can handle onboarding states.
+          router.replace("/pending");
+          return;
+        }
+
+        const approved = Boolean(profile?.approved);
+        const username = (profile?.username ?? "").toString().trim();
+
+        if (approved && !username) {
+          router.replace("/pick-username");
+          return;
+        }
+
+        // Not approved (or no profile yet) -> pending flow.
+        if (!approved) {
+          router.replace("/pending");
+          return;
+        }
+
+        // Approved + username set.
+        router.replace("/");
       } catch (e: any) {
         setMsg(`Callback failed: ${e?.message ?? "unknown error"}`);
       }

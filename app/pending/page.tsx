@@ -133,9 +133,11 @@ export default function PendingApprovalPage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("approved,is_admin")
+        .select("approved,is_admin,username")
         .eq("id", userId)
         .single();
+
+      const username = (profile?.username ?? "").toString().trim();
 
       if (profile?.is_admin) {
         clearRecentlySubmitted();
@@ -145,7 +147,7 @@ export default function PendingApprovalPage() {
 
       if (profile?.approved) {
         clearRecentlySubmitted();
-        window.location.href = "/";
+        window.location.href = username ? "/" : "/pick-username";
         return;
       }
 
@@ -187,9 +189,11 @@ export default function PendingApprovalPage() {
     const tick = async () => {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("approved,is_admin")
+        .select("approved,is_admin,username")
         .eq("id", userId)
         .single();
+
+      const username = (profile?.username ?? "").toString().trim();
 
       if (!alive) return;
 
@@ -202,7 +206,7 @@ export default function PendingApprovalPage() {
       if (profile?.approved) {
         clearRecentlySubmitted();
         // Keep the session. Just move them into the app.
-        window.location.href = "/";
+        window.location.href = username ? "/" : "/pick-username";
       }
     };
 
