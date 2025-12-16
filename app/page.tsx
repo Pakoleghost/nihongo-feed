@@ -1526,13 +1526,13 @@ const captionBottom =
   async function loadComments(postId: string) {
     // comments.post_id is usually bigint. Normalize to a number when possible.
     const pidNum = Number(postId);
-    const pidFilter: any = Number.isFinite(pidNum) ? pidNum : postId;
+    if (!Number.isFinite(pidNum)) return;
 
     // 1) Fetch comments WITHOUT embedding profiles (avoids ambiguous FK paths)
     const { data: rows, error } = await supabase
       .from("comments")
       .select("id, post_id, user_id, content, created_at, parent_comment_id")
-      .eq("post_id", pidFilter)
+      .eq("post_id", pidNum)
       .order("created_at", { ascending: true });
 
     if (error) return alert(error.message);
@@ -1727,7 +1727,7 @@ const captionBottom =
         const { data: postRow } = await supabase
           .from("posts")
           .select("user_id")
-          .eq("id", postId)
+          .eq("id", Number(postId))
           .maybeSingle();
         const postOwnerId = (postRow as any)?.user_id ? String((postRow as any).user_id) : null;
 
