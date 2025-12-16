@@ -64,11 +64,15 @@ export default function PendingApprovalPage() {
     const checkStatus = async () => {
       setChecked(false);
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("approved,is_admin,username")
         .eq("id", userId)
-        .single();
+        .maybeSingle();
+
+      if (profileError) {
+        console.error("profiles read failed", profileError);
+      }
 
       const username = (profile?.username ?? "").toString().trim();
 
@@ -96,6 +100,13 @@ export default function PendingApprovalPage() {
         return;
       }
 
+      if (app?.status === "approved") {
+        // Fallback: if applications is approved but profiles.approved hasn't propagated yet,
+        // still move the user forward.
+        window.location.href = username ? "/" : "/pick-username";
+        return;
+      }
+
       // Default: pending (covers none, pending, approved not yet propagated, or missing application row)
       setStatus("pending");
       setChecked(true);
@@ -112,11 +123,15 @@ export default function PendingApprovalPage() {
 
     let alive = true;
     const tick = async () => {
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("approved,is_admin,username")
         .eq("id", userId)
-        .single();
+        .maybeSingle();
+
+      if (profileError) {
+        console.error("profiles read failed", profileError);
+      }
 
       const username = (profile?.username ?? "").toString().trim();
 
@@ -129,6 +144,18 @@ export default function PendingApprovalPage() {
 
       if (profile?.approved) {
         // Keep the session. Just move them into the app.
+        window.location.href = username ? "/" : "/pick-username";
+      }
+
+      const { data: app } = await supabase
+        .from("applications")
+        .select("status")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (app?.status === "approved") {
         window.location.href = username ? "/" : "/pick-username";
       }
     };
@@ -187,6 +214,7 @@ export default function PendingApprovalPage() {
             Your application is under review.<br />
             Once an administrator approves your account, you will be sent to the feed automatically.
           </p>
+          <p style={{ marginTop: 14, fontSize: 12, opacity: 0.5 }}>User: {userId}</p>
         </div>
       </main>
     );
