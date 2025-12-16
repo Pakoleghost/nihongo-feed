@@ -1524,32 +1524,60 @@ const captionBottom =
   }
 
   async function loadComments(postId: string) {
-    const { data, error } = await supabase
+    // comments.post_id is usually bigint. Normalize to a number when possible.
+    const pidNum = Number(postId);
+    const pidFilter: any = Number.isFinite(pidNum) ? pidNum : postId;
+
+    // 1) Fetch comments WITHOUT embedding profiles (avoids ambiguous FK paths)
+    const { data: rows, error } = await supabase
       .from("comments")
-      .select("id, post_id, user_id, content, created_at, parent_comment_id, profiles(username, avatar_url)")
-      .eq("post_id", postId)
+      .select("id, post_id, user_id, content, created_at, parent_comment_id")
+      .eq("post_id", pidFilter)
       .order("created_at", { ascending: true });
 
     if (error) return alert(error.message);
 
-    const normalized: Comment[] =
-      (data as unknown as CommentRow[] | null)?.map((row) => {
-        const prof = normalizeProfile(row.profiles as any);
+    const normalized: any[] =
+      (rows as any[] | null)?.map((row) => {
         return {
-          id: row.id,
-          post_id: row.post_id,
-          user_id: row.user_id,
-          content: row.content,
+          id: String(row.id),
+          post_id: String(row.post_id),
+          user_id: String(row.user_id),
+          content: (row.content ?? "").toString(),
           created_at: row.created_at,
-          parent_comment_id: row.parent_comment_id ?? null,
-          username: prof.username, // "" si no hay
-          avatar_url: prof.avatar_url,
+          parent_comment_id: row.parent_comment_id ? String(row.parent_comment_id) : null,
+          username: "", // filled in below
+          avatar_url: null as string | null,
           likeCount: 0,
           likedByMe: false,
         };
       }) ?? [];
 
-    // Populate comment like counts + my like state
+    // 2) Fetch commenter profiles in one query and merge
+    try {
+      const userIds = Array.from(new Set(normalized.map((c) => c.user_id).filter(Boolean)));
+      if (userIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, username, avatar_url")
+          .in("id", userIds as any);
+
+        const map = new Map<string, any>();
+        (profs ?? []).forEach((p: any) => map.set(String(p.id), p));
+
+        normalized.forEach((c) => {
+          const p = map.get(String(c.user_id));
+          // Reuse normalizeProfile so we keep the same username rules.
+          const prof = normalizeProfile(p);
+          c.username = prof.username;
+          c.avatar_url = prof.avatar_url;
+        });
+      }
+    } catch {
+      // ignore profile hydration failures
+    }
+
+    // 3) Populate comment like counts + my like state
     try {
       const activeUserId = userId ?? null;
       const commentIds = normalized.map((c) => c.id);
@@ -1575,8 +1603,8 @@ const captionBottom =
         normalized.forEach((c) => {
           const v = map.get(String(c.id));
           if (v) {
-            (c as any).likeCount = v.count;
-            (c as any).likedByMe = v.mine;
+            c.likeCount = v.count;
+            c.likedByMe = v.mine;
           }
         });
       }
@@ -1584,7 +1612,7 @@ const captionBottom =
       // ignore like hydration failures
     }
 
-    setCommentsByPost((prev) => ({ ...prev, [postId]: normalized }));
+    setCommentsByPost((prev) => ({ ...prev, [postId]: normalized as any }));
   }
   async function toggleCommentLike(postId: string, commentId: string, commentOwnerId: string) {
     if (likeBusyByComment[commentId]) return;
