@@ -126,7 +126,7 @@ export default function LeaderboardPage() {
         <div className="headerInner">
           <div className="headerTitle">
             <Image
-              src="/logo.png"
+              src="/logo-header.png"
               alt="フィード"
               width={180}
               height={40}

@@ -1401,9 +1401,30 @@ export default function HomePage() {
     }
   }, [isRefreshing, userId]);
 
+  // Pull-to-refresh (mobile). Works when scrolling in window or in the feed container.
+  const pullReadyRef = useRef(false);
+  const isRefreshingRef = useRef(false);
   useEffect(() => {
+    pullReadyRef.current = pullReady;
+  }, [pullReady]);
+  useEffect(() => {
+    isRefreshingRef.current = isRefreshing;
+  }, [isRefreshing]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const el = feedRef.current;
-    if (!el) return;
+
+    const isElScrollable = () => {
+      if (!el) return false;
+      return el.scrollHeight > el.clientHeight + 2;
+    };
+
+    const getScrollTop = () => {
+      if (isElScrollable()) return el!.scrollTop;
+      return window.scrollY;
+    };
 
     let startY = 0;
     let armed = false;
@@ -1412,8 +1433,8 @@ export default function HomePage() {
     const MAX_PULL = 140;
 
     const onTouchStart = (e: TouchEvent) => {
-      // Only arm when the feed is at the very top
-      if (el.scrollTop <= 0) {
+      // Only arm when we're at the very top
+      if (getScrollTop() <= 0) {
         startY = e.touches[0]?.clientY ?? 0;
         armed = true;
         setPullY(0);
@@ -1425,18 +1446,21 @@ export default function HomePage() {
 
     const onTouchMove = (e: TouchEvent) => {
       if (!armed) return;
-      if (el.scrollTop > 0) return;
+      if (getScrollTop() > 0) return;
 
       const y = e.touches[0]?.clientY ?? 0;
       const delta = Math.max(0, y - startY);
+      if (delta <= 0) return;
 
       // A little resistance so it feels like IG
       const eased = Math.min(MAX_PULL, delta * 0.6);
       setPullY(eased);
-      setPullReady(eased >= THRESHOLD);
+      const ready = eased >= THRESHOLD;
+      setPullReady(ready);
+      pullReadyRef.current = ready;
 
-      // Prevent Safari rubber-band if we are pulling
-      if (delta > 0) {
+      // Prevent Safari rubber-band while we're pulling
+      if ((e as any).cancelable) {
         try {
           e.preventDefault();
         } catch {
@@ -1445,33 +1469,34 @@ export default function HomePage() {
       }
     };
 
-    const onTouchEnd = async () => {
+    const onTouchEnd = () => {
       if (!armed) return;
       armed = false;
 
-      // Trigger refresh only if we passed threshold and we are not already refreshing
-      if (pullReady && !isRefreshing) {
+      // Trigger refresh only if we passed threshold and we're not already refreshing
+      if (pullReadyRef.current && !isRefreshingRef.current) {
         void refreshFeed();
       }
 
       // Reset UI
       setPullY(0);
       setPullReady(false);
+      pullReadyRef.current = false;
     };
 
-    // passive:false so we can preventDefault during pull
-    el.addEventListener("touchstart", onTouchStart, { passive: true });
-    el.addEventListener("touchmove", onTouchMove, { passive: false } as any);
-    el.addEventListener("touchend", onTouchEnd, { passive: true });
-    el.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    // Attach to window so it still works even when the scroll container is the window
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false } as any);
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    window.addEventListener("touchcancel", onTouchEnd, { passive: true });
 
     return () => {
-      el.removeEventListener("touchstart", onTouchStart as any);
-      el.removeEventListener("touchmove", onTouchMove as any);
-      el.removeEventListener("touchend", onTouchEnd as any);
-      el.removeEventListener("touchcancel", onTouchEnd as any);
+      window.removeEventListener("touchstart", onTouchStart as any);
+      window.removeEventListener("touchmove", onTouchMove as any);
+      window.removeEventListener("touchend", onTouchEnd as any);
+      window.removeEventListener("touchcancel", onTouchEnd as any);
     };
-  }, [refreshFeed, isRefreshing, pullReady]);
+  }, [refreshFeed]);
 
   async function createPost() {
     if (busy) return;
@@ -2340,7 +2365,16 @@ const { error: uploadError } = await supabase.storage
           to { transform: rotate(360deg); }
         }
       `}</style>
-      <div ref={feedRef} className="feed" style={{ paddingBottom: 80, minHeight: "100vh", overscrollBehaviorY: "contain" }}>
+      <div
+        ref={feedRef}
+        className="feed"
+        style={{
+          paddingBottom: 80,
+          minHeight: "100vh",
+          overscrollBehaviorY: "contain",
+          touchAction: "pan-x pan-y",
+        }}
+      >
       <div className={`header ${headerHidden ? "header--hidden" : ""}`}>
         <div className="headerInner">
           <button
@@ -2350,7 +2384,7 @@ const { error: uploadError } = await supabase.storage
             aria-label="Scroll to top or refresh"
           >
             <NextImage
-              src="/logo.png"
+              src="/logo-header.png"
               alt="フィード"
               width={180}
               height={40}
