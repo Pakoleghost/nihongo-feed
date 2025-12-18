@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { requireApprovedSession } from "@/lib/authGuard";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import Image from "next/image";
+import NextImage from "next/image";
 import BottomNav from "@/components/BottomNav";
 
 type DbPostRow = {
@@ -161,7 +161,7 @@ async function normalizeImageForUpload(file: File, kind: ImageKind): Promise<{ f
 
   const objectUrl = URL.createObjectURL(working);
   try {
-    const img = new Image();
+    const img = new window.Image();
     img.decoding = "async";
 
     await new Promise<void>((resolve, reject) => {
@@ -462,6 +462,8 @@ export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullY, setPullY] = useState(0);
+  const [pullReady, setPullReady] = useState(false);
 
   // my profile
   const [myUsername, setMyUsername] = useState<string>("");
@@ -1405,41 +1407,71 @@ const captionBottom =
 
     let startY = 0;
     let armed = false;
-    let triggered = false;
+
+    const THRESHOLD = 80;
+    const MAX_PULL = 140;
 
     const onTouchStart = (e: TouchEvent) => {
       // Only arm when the feed is at the very top
       if (el.scrollTop <= 0) {
         startY = e.touches[0]?.clientY ?? 0;
         armed = true;
-        triggered = false;
+        setPullY(0);
+        setPullReady(false);
       } else {
         armed = false;
       }
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (!armed || triggered) return;
+      if (!armed) return;
       if (el.scrollTop > 0) return;
 
       const y = e.touches[0]?.clientY ?? 0;
-      const delta = y - startY;
+      const delta = Math.max(0, y - startY);
 
-      // Threshold similar to Instagram
-      if (delta > 80) {
-        triggered = true;
-        void refreshFeed();
+      // A little resistance so it feels like IG
+      const eased = Math.min(MAX_PULL, delta * 0.6);
+      setPullY(eased);
+      setPullReady(eased >= THRESHOLD);
+
+      // Prevent Safari rubber-band if we are pulling
+      if (delta > 0) {
+        try {
+          e.preventDefault();
+        } catch {
+          // ignore
+        }
       }
     };
 
+    const onTouchEnd = async () => {
+      if (!armed) return;
+      armed = false;
+
+      // Trigger refresh only if we passed threshold and we are not already refreshing
+      if (pullReady && !isRefreshing) {
+        void refreshFeed();
+      }
+
+      // Reset UI
+      setPullY(0);
+      setPullReady(false);
+    };
+
+    // passive:false so we can preventDefault during pull
     el.addEventListener("touchstart", onTouchStart, { passive: true });
-    el.addEventListener("touchmove", onTouchMove, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false } as any);
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    el.addEventListener("touchcancel", onTouchEnd, { passive: true });
 
     return () => {
       el.removeEventListener("touchstart", onTouchStart as any);
       el.removeEventListener("touchmove", onTouchMove as any);
+      el.removeEventListener("touchend", onTouchEnd as any);
+      el.removeEventListener("touchcancel", onTouchEnd as any);
     };
-  }, [refreshFeed]);
+  }, [refreshFeed, isRefreshing, pullReady]);
 
   async function createPost() {
     if (busy) return;
@@ -2302,6 +2334,12 @@ const { error: uploadError } = await supabase.storage
   const myProfileHref = userId ? `/profile/${encodeURIComponent(userId)}` : "/";
   return (
     <>
+      <style>{`
+        @keyframes nhfSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
       <div ref={feedRef} className="feed" style={{ paddingBottom: 80, minHeight: "100vh", overscrollBehaviorY: "contain" }}>
       <div className={`header ${headerHidden ? "header--hidden" : ""}`}>
         <div className="headerInner">
@@ -2311,7 +2349,7 @@ const { error: uploadError } = await supabase.storage
             onClick={() => void onTapBrand()}
             aria-label="Scroll to top or refresh"
           >
-            <Image
+            <NextImage
               src="/logo.png"
               alt="フィード"
               width={120}
@@ -2324,13 +2362,61 @@ const { error: uploadError } = await supabase.storage
       </div>
 
 
-      {isRefreshing ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0", fontSize: 12, opacity: 0.75 }}>
-          Refreshing…
+      {(pullY > 0 || isRefreshing) ? (
+        <div
+          style={{
+            height: 0,
+            overflow: "visible",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              transform: `translateY(${Math.min(60, pullY)}px)`,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 12px",
+              borderRadius: 999,
+              border: "1px solid rgba(0,0,0,0.08)",
+              background: "rgba(255,255,255,0.92)",
+              color: "rgba(0,0,0,0.7)",
+              fontSize: 12,
+              boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+              pointerEvents: "none",
+            }}
+            aria-hidden
+          >
+            {isRefreshing ? (
+              <span
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: 999,
+                  border: "2px solid rgba(0,0,0,0.25)",
+                  borderTopColor: "rgba(0,0,0,0.65)",
+                  display: "inline-block",
+                  animation: "nhfSpin 0.8s linear infinite",
+                }}
+              />
+            ) : (
+              <span
+                style={{
+                  display: "inline-block",
+                  transform: pullReady ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 120ms ease",
+                  fontSize: 14,
+                  lineHeight: 1,
+                }}
+              >
+                ↓
+              </span>
+            )}
+            <span>{isRefreshing ? "Refreshing…" : pullReady ? "Release to refresh" : "Pull to refresh"}</span>
+          </div>
         </div>
-      ) : null
-
-      }
+      ) : null}
 
       <div className="composer">
         <div className="composer-row">
