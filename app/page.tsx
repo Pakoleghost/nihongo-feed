@@ -1428,6 +1428,19 @@ export default function HomePage() {
 
     let startY = 0;
     let armed = false;
+    let idleTimer: any = null;
+    const resetPullUI = () => {
+      setPullY(0);
+      setPullReady(false);
+      pullReadyRef.current = false;
+    };
+    const scheduleIdleReset = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        // If we stopped getting touchmove events (common on iOS rubber-band), hide the pill.
+        if (!isRefreshingRef.current) resetPullUI();
+      }, 220);
+    };
 
     const THRESHOLD = 80;
     const MAX_PULL = 140;
@@ -1459,6 +1472,9 @@ export default function HomePage() {
       setPullReady(ready);
       pullReadyRef.current = ready;
 
+      // If the user pauses or the browser swallows touchend, hide the pill shortly after.
+      scheduleIdleReset();
+
       // Prevent Safari rubber-band while we're pulling
       if ((e as any).cancelable) {
         try {
@@ -1473,15 +1489,18 @@ export default function HomePage() {
       if (!armed) return;
       armed = false;
 
+      if (idleTimer) {
+        clearTimeout(idleTimer);
+        idleTimer = null;
+      }
+
       // Trigger refresh only if we passed threshold and we're not already refreshing
       if (pullReadyRef.current && !isRefreshingRef.current) {
         void refreshFeed();
       }
 
       // Reset UI
-      setPullY(0);
-      setPullReady(false);
-      pullReadyRef.current = false;
+      resetPullUI();
     };
 
     // Attach to window so it still works even when the scroll container is the window
@@ -1491,6 +1510,10 @@ export default function HomePage() {
     window.addEventListener("touchcancel", onTouchEnd, { passive: true });
 
     return () => {
+      if (idleTimer) {
+        clearTimeout(idleTimer);
+        idleTimer = null;
+      }
       window.removeEventListener("touchstart", onTouchStart as any);
       window.removeEventListener("touchmove", onTouchMove as any);
       window.removeEventListener("touchend", onTouchEnd as any);
