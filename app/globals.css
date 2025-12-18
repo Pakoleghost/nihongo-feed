@@ -71,14 +71,24 @@ a:hover {
 
 /* App logo used in headers */
 .appLogo{
-  height: 28px;        /* increase from tiny inline sizes */
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
+/* If a page renders the logo without the class, still size it correctly */
+.headerTitle img,
+.headerTitleBtn img{
+  height: 40px;
   width: auto;
   display: block;
 }
 
 @media (max-width: 480px){
-  .appLogo{
-    height: 26px;
+  .appLogo,
+  .headerTitle img,
+  .headerTitleBtn img{
+    height: 34px;
   }
 }
 
