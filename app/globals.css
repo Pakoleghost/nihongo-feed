@@ -69,6 +69,19 @@ a:hover {
   min-height: 40px;
 }
 
+/* App logo used in headers */
+.appLogo{
+  height: 28px;        /* increase from tiny inline sizes */
+  width: auto;
+  display: block;
+}
+
+@media (max-width: 480px){
+  .appLogo{
+    height: 26px;
+  }
+}
+
 /* Prevent default heading margins from changing header height on some pages */
 .header h1,
 .header h2,

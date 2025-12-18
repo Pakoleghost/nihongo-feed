@@ -666,11 +666,11 @@ export default function HomePage() {
 
       const clippedCapLines = capLines.slice(0, capMaxLines);
 
-      // Caption bottom is based on how many visible lines we will draw.
+      // Caption bottom is based on how many lines (including empty) we will draw.
       // Treat empty lines as vertical spacing.
-      const drawnLineCount = clippedCapLines.filter((ln) => ln.trim().length > 0).length;
-const captionBottom =
-  captionTop + Math.max(0, drawnLineCount - 1) * capLineH + S(20); // S(30) ~= your font size
+      const drawnLineCount = clippedCapLines.length;
+      const captionBottom =
+        captionTop + Math.max(0, drawnLineCount - 1) * capLineH + S(20);
       // Image starts after the caption with a smaller gap below.
       const imgTop = captionBottom + capGapBottom;
 
@@ -2352,10 +2352,10 @@ const { error: uploadError } = await supabase.storage
             <NextImage
               src="/logo.png"
               alt="フィード"
-              width={120}
-              height={28}
+              width={180}
+              height={40}
               priority
-              style={{ height: 28, width: "auto", display: "block" }}
+              style={{ height: 40, width: "auto", display: "block" }}
             />
           </button>
         </div>

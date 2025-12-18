@@ -128,10 +128,10 @@ export default function LeaderboardPage() {
             <Image
               src="/logo.png"
               alt="フィード"
-              width={120}
-              height={28}
+              width={180}
+              height={40}
               priority
-              style={{ height: 28, width: "auto", display: "block" }}
+              style={{ height: 40, width: "auto", display: "block" }}
             />
           </div>
         </div>
