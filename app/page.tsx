@@ -56,6 +56,13 @@ type Comment = {
   avatar_url: string | null;
 };
 
+type WeeklyTopic = {
+  week_start: string; // YYYY-MM-DD
+  prompt: string;
+  created_at?: string;
+  created_by?: string | null;
+};
+
 function normalizeProfile(p: any): { username: string; avatar_url: string | null } {
   const obj = Array.isArray(p) ? p?.[0] : p;
 
@@ -245,6 +252,16 @@ export default function HomePage() {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dob.trim())) return "Date of birth must be YYYY-MM-DD.";
     return "";
   }
+
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // weekly topic
+  const [weeklyTopic, setWeeklyTopic] = useState<WeeklyTopic | null>(null);
+  const [weeklyTopicLoading, setWeeklyTopicLoading] = useState(false);
+  const [weeklyTopicEditOpen, setWeeklyTopicEditOpen] = useState(false);
+  const [weeklyTopicDraft, setWeeklyTopicDraft] = useState("");
+  const [weeklyTopicSaveBusy, setWeeklyTopicSaveBusy] = useState(false);
+  const [weeklyTopicError, setWeeklyTopicError] = useState<string>("");
 
   function saveApplicationDraftToLocalStorage(emailForDraft: string, hasJlptCert: boolean) {
     try {
@@ -962,7 +979,7 @@ export default function HomePage() {
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("username, avatar_url")
+      .select("username, avatar_url, is_admin")
       .eq("id", uid)
       .single();
 
@@ -971,6 +988,7 @@ export default function HomePage() {
       setNeedsUsername(true);
       setMyUsername("unknown");
       setMyAvatarUrl(null);
+      setIsAdmin(false);
       setCheckingProfile(false);
       return;
     }
@@ -985,6 +1003,7 @@ export default function HomePage() {
     setMyUsername(hasRealUsername ? uRaw : "unknown");
     setMyAvatarUrl(a);
     setNeedsUsername(!hasRealUsername);
+    setIsAdmin(!!(data as any)?.is_admin);
     setCheckingProfile(false);
 
     // load feed once we pass gate
@@ -1293,8 +1312,121 @@ export default function HomePage() {
     };
   }, [onTapBrand]);
 
+  function mondayOfThisWeek(d = new Date()): string {
+    const x = new Date(d);
+    x.setHours(0, 0, 0, 0);
+    const day = x.getDay(); // 0=Sun
+    const diff = (day + 6) % 7; // days since Monday
+    x.setDate(x.getDate() - diff);
+    return x.toISOString().slice(0, 10);
+  }
+
+  async function loadWeeklyTopic(): Promise<void> {
+    try {
+      setWeeklyTopicError("");
+      setWeeklyTopicLoading(true);
+      const weekStart = mondayOfThisWeek();
+
+      const { data, error } = await supabase
+        .from("weekly_topics")
+        .select("week_start, prompt, created_at, created_by")
+        .eq("week_start", weekStart)
+        .maybeSingle();
+
+      if (error) {
+        console.error("loadWeeklyTopic error:", error);
+        setWeeklyTopic(null);
+        setWeeklyTopicError(error.message);
+        return;
+      }
+
+      if (!data) {
+        setWeeklyTopic(null);
+        setWeeklyTopicDraft("");
+        return;
+      }
+
+      const row = {
+        week_start: String((data as any).week_start),
+        prompt: String((data as any).prompt ?? ""),
+        created_at: (data as any).created_at ?? undefined,
+        created_by: (data as any).created_by ?? null,
+      } as WeeklyTopic;
+
+      setWeeklyTopic(row);
+      setWeeklyTopicDraft(row.prompt);
+    } catch (e: any) {
+      console.error("loadWeeklyTopic failed:", e);
+      setWeeklyTopic(null);
+      setWeeklyTopicError(e?.message ?? "Failed to load weekly topic");
+    } finally {
+      setWeeklyTopicLoading(false);
+    }
+  }
+
+  async function saveWeeklyTopic(): Promise<void> {
+    if (weeklyTopicSaveBusy) return;
+    setWeeklyTopicError("");
+
+    const prompt = (weeklyTopicDraft ?? "").toString().trim();
+    if (!prompt) {
+      setWeeklyTopicError("Type a weekly topic.");
+      return;
+    }
+
+    setWeeklyTopicSaveBusy(true);
+    try {
+      // Ensure we still have a valid approved session.
+      await requireApprovedSession();
+
+      const weekStart = mondayOfThisWeek();
+
+      const payload = {
+        week_start: weekStart,
+        prompt,
+        created_by: userId,
+      };
+
+      const { data, error } = await supabase
+        .from("weekly_topics")
+        .upsert(payload, { onConflict: "week_start" })
+        .select("week_start, prompt, created_at, created_by")
+        .single();
+
+      if (error) {
+        console.error("saveWeeklyTopic error:", error);
+        setWeeklyTopicError(error.message);
+        return;
+      }
+
+      const row = {
+        week_start: String((data as any).week_start),
+        prompt: String((data as any).prompt ?? ""),
+        created_at: (data as any).created_at ?? undefined,
+        created_by: (data as any).created_by ?? null,
+      } as WeeklyTopic;
+
+      setWeeklyTopic(row);
+      setWeeklyTopicDraft(row.prompt);
+      setWeeklyTopicEditOpen(false);
+    } catch (e: any) {
+      console.error("saveWeeklyTopic failed:", e);
+      setWeeklyTopicError(e?.message ?? "Failed to save weekly topic");
+    } finally {
+      setWeeklyTopicSaveBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!weeklyTopicEditOpen && weeklyTopic?.prompt) {
+      setWeeklyTopicDraft(weeklyTopic.prompt);
+    }
+  }, [weeklyTopicEditOpen, weeklyTopic?.prompt]);
+
   async function loadAll(uid: string) {
     setLoading(true);
+    // weekly topic (best-effort)
+    void loadWeeklyTopic();
 
     const { data, error } = await supabase
       .from("posts")
@@ -1460,6 +1592,8 @@ export default function HomePage() {
         setPullY(0);
         setPullReady(false);
         pullReadyRef.current = false;
+        // Ensure the pill auto-hides even if iOS never sends touchend
+        scheduleIdleReset();
       } else {
         armed = false;
         setPullActive(false);
@@ -1520,6 +1654,17 @@ export default function HomePage() {
     window.addEventListener("pointerup", onTouchEnd as any, { passive: true } as any);
     window.addEventListener("pointercancel", onTouchEnd as any, { passive: true } as any);
 
+    // iOS Safari sometimes fails to deliver touchend to window. Listen on document too.
+    document.addEventListener("touchend", onTouchEnd, { passive: true, capture: true } as any);
+    document.addEventListener("touchcancel", onTouchEnd, { passive: true, capture: true } as any);
+
+    // If the page loses focus mid-pull, reset the pill.
+    const onBlur = () => {
+      if (!isRefreshingRef.current) hardReset();
+    };
+    window.addEventListener("blur", onBlur);
+    document.addEventListener("visibilitychange", onBlur);
+
     return () => {
       if (idleTimer) {
         clearTimeout(idleTimer);
@@ -1531,6 +1676,10 @@ export default function HomePage() {
       window.removeEventListener("touchcancel", onTouchEnd as any);
       window.removeEventListener("pointerup", onTouchEnd as any);
       window.removeEventListener("pointercancel", onTouchEnd as any);
+      document.removeEventListener("touchend", onTouchEnd as any, { capture: true } as any);
+      document.removeEventListener("touchcancel", onTouchEnd as any, { capture: true } as any);
+      window.removeEventListener("blur", onBlur as any);
+      document.removeEventListener("visibilitychange", onBlur as any);
     };
   }, [refreshFeed]);
 
@@ -2428,6 +2577,97 @@ const { error: uploadError } = await supabase.storage
               style={{ height: 40, width: "auto", display: "block" }}
             />
           </button>
+        </div>
+      </div>
+
+      {/* Weekly topic */}
+      <div style={{ padding: "12px 14px 4px" }}>
+        <div
+          style={{
+            border: "1px solid rgba(0,0,0,0.08)",
+            background: "rgba(255,255,255,0.9)",
+            borderRadius: 16,
+            padding: 12,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+            <div style={{ fontWeight: 900, fontSize: 14 }}>今週のトピック</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {weeklyTopicLoading ? (
+                <div style={{ fontSize: 12, opacity: 0.55 }}>Loading…</div>
+              ) : null}
+              {isAdmin ? (
+                <button
+                  type="button"
+                  onClick={() => setWeeklyTopicEditOpen((v) => !v)}
+                  style={{
+                    border: "1px solid rgba(0,0,0,0.10)",
+                    background: "#fff",
+                    borderRadius: 999,
+                    padding: "6px 10px",
+                    fontWeight: 800,
+                    fontSize: 12,
+                    cursor: "pointer",
+                  }}
+                >
+                  {weeklyTopicEditOpen ? "Close" : weeklyTopic?.prompt ? "Edit" : "Set"}
+                </button>
+              ) : null}
+            </div>
+          </div>
+
+          {weeklyTopic?.prompt ? (
+            <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+              {weeklyTopic.prompt}
+            </div>
+          ) : (
+            <div style={{ marginTop: 8, fontSize: 13, opacity: 0.7 }}>
+              まだありません。今週の話題を出して日本語で投稿してね。
+            </div>
+          )}
+
+          {weeklyTopicError ? (
+            <div style={{ marginTop: 8, fontSize: 12, color: "#b91c1c" }}>{weeklyTopicError}</div>
+          ) : null}
+
+          {isAdmin && weeklyTopicEditOpen ? (
+            <div style={{ marginTop: 10 }}>
+              <textarea
+                value={weeklyTopicDraft}
+                onChange={(e) => setWeeklyTopicDraft(e.target.value)}
+                placeholder="例：最近ハマっていることは？理由も書いてね。"
+                rows={3}
+                style={{
+                  width: "100%",
+                  resize: "vertical",
+                  borderRadius: 12,
+                  padding: 10,
+                  border: "1px solid rgba(0,0,0,0.10)",
+                  outline: "none",
+                  fontSize: 14,
+                }}
+              />
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => void saveWeeklyTopic()}
+                  disabled={weeklyTopicSaveBusy}
+                  style={{
+                    border: 0,
+                    background: "#111",
+                    color: "#fff",
+                    borderRadius: 999,
+                    padding: "10px 14px",
+                    fontWeight: 900,
+                    cursor: "pointer",
+                    opacity: weeklyTopicSaveBusy ? 0.6 : 1,
+                  }}
+                >
+                  {weeklyTopicSaveBusy ? "Saving…" : "Save"}
+                </button>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
