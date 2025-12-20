@@ -1,4 +1,5 @@
 "use client";
+// oboe_test
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { requireApprovedSession } from "@/lib/authGuard";
 import { supabase } from "@/lib/supabase";
@@ -464,6 +465,7 @@ export default function HomePage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullY, setPullY] = useState(0);
   const [pullReady, setPullReady] = useState(false);
+  const [pullActive, setPullActive] = useState(false);
 
   // my profile
   const [myUsername, setMyUsername] = useState<string>("");
