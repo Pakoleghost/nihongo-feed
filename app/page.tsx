@@ -464,8 +464,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullY, setPullY] = useState(0);
-  const [pullReady, setPullReady] = useState(false);
-  const [pullActive, setPullActive] = useState(false);
+const [pullActive, setPullActive] = useState(false);  const [pullActive, setPullActive] = useState(false);
 
   // my profile
   const [myUsername, setMyUsername] = useState<string>("");
@@ -1431,17 +1430,21 @@ export default function HomePage() {
     let startY = 0;
     let armed = false;
     let idleTimer: any = null;
-    const resetPullUI = () => {
+
+    const hardReset = () => {
+      armed = false;
+      setPullActive(false);
       setPullY(0);
       setPullReady(false);
       pullReadyRef.current = false;
     };
+
     const scheduleIdleReset = () => {
       if (idleTimer) clearTimeout(idleTimer);
       idleTimer = setTimeout(() => {
-        // If we stopped getting touchmove events (common on iOS rubber-band), hide the pill.
-        if (!isRefreshingRef.current) resetPullUI();
-      }, 220);
+        // If iOS swallows touchend / touchcancel, still hide the pill.
+        if (!isRefreshingRef.current) hardReset();
+      }, 180);
     };
 
     const THRESHOLD = 80;
@@ -1452,10 +1455,13 @@ export default function HomePage() {
       if (getScrollTop() <= 0) {
         startY = e.touches[0]?.clientY ?? 0;
         armed = true;
+        setPullActive(true);
         setPullY(0);
         setPullReady(false);
+        pullReadyRef.current = false;
       } else {
         armed = false;
+        setPullActive(false);
       }
     };
 
@@ -1502,7 +1508,7 @@ export default function HomePage() {
       }
 
       // Reset UI
-      resetPullUI();
+      hardReset();
     };
 
     // Attach to window so it still works even when the scroll container is the window
@@ -1510,6 +1516,8 @@ export default function HomePage() {
     window.addEventListener("touchmove", onTouchMove, { passive: false } as any);
     window.addEventListener("touchend", onTouchEnd, { passive: true });
     window.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    window.addEventListener("pointerup", onTouchEnd as any, { passive: true } as any);
+    window.addEventListener("pointercancel", onTouchEnd as any, { passive: true } as any);
 
     return () => {
       if (idleTimer) {
@@ -1520,6 +1528,8 @@ export default function HomePage() {
       window.removeEventListener("touchmove", onTouchMove as any);
       window.removeEventListener("touchend", onTouchEnd as any);
       window.removeEventListener("touchcancel", onTouchEnd as any);
+      window.removeEventListener("pointerup", onTouchEnd as any);
+      window.removeEventListener("pointercancel", onTouchEnd as any);
     };
   }, [refreshFeed]);
 
@@ -2421,7 +2431,7 @@ const { error: uploadError } = await supabase.storage
       </div>
 
 
-      {(pullY > 0 || isRefreshing) ? (
+      {((pullActive && pullY > 0) || isRefreshing) ? (
         <div
           style={{
             height: 0,
