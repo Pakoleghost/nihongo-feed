@@ -464,7 +464,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullY, setPullY] = useState(0);
-const [pullActive, setPullActive] = useState(false);  const [pullActive, setPullActive] = useState(false);
+  const [pullActive, setPullActive] = useState(false);
 
   // my profile
   const [myUsername, setMyUsername] = useState<string>("");
