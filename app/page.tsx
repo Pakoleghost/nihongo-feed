@@ -30,6 +30,7 @@ type Post = {
   likes: number;
   likedByMe: boolean;
   commentCount: number;
+  weekly_topic_week: string | null;
 };
 
 type CommentRow = {
@@ -815,11 +816,13 @@ export default function HomePage() {
   const [likeBusyByPost, setLikeBusyByPost] = useState<Record<string, boolean>>({});
   const [likeBusyByComment, setLikeBusyByComment] = useState<Record<string, boolean>>({});
 
-  const BASE_URL = useMemo(() => {
+  const [BASE_URL, setBaseUrl] = useState("");
+
+  useEffect(() => {
     const env = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim();
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const raw = env || origin;
-    return raw.replace(/\/$/, "");
+    setBaseUrl(raw.replace(/\/$/, ""));
   }, []);
 
   const EMAIL_REDIRECT_TO = useMemo(() => `${BASE_URL}/auth/callback`, [BASE_URL]);
@@ -1321,6 +1324,21 @@ export default function HomePage() {
     return x.toISOString().slice(0, 10);
   }
 
+  function startWeeklyAnswer() {
+    if (!weeklyTopic?.week_start) return;
+
+    // scroll to composer
+    setTimeout(() => {
+      try {
+        composerRef.current?.focus();
+        composerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } catch {}
+    }, 0);
+
+    // optional prefix to signal weekly response
+    setText((prev) => (prev?.trim() ? prev : ""));
+  }
+
   async function loadWeeklyTopic(): Promise<void> {
     try {
       setWeeklyTopicError("");
@@ -1430,7 +1448,7 @@ export default function HomePage() {
 
     const { data, error } = await supabase
       .from("posts")
-      .select("id, content, created_at, user_id, image_url, profiles(username, avatar_url)")
+      .select("id, content, created_at, user_id, image_url, weekly_topic_week, profiles(username, avatar_url)")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -1461,6 +1479,7 @@ export default function HomePage() {
           username: prof.username, // "" si no hay
           avatar_url: prof.avatar_url,
           image_url: (row as any).image_url ?? null,
+          weekly_topic_week: (row as any).weekly_topic_week ?? null,
           likes: 0,
           likedByMe: false,
           commentCount: 0,
@@ -1694,7 +1713,11 @@ export default function HomePage() {
 
     const { data: post, error: postError } = await supabase
       .from("posts")
-      .insert({ content: text.trim(), user_id: activeUserId })
+      .insert({
+        content: text.trim(),
+        user_id: activeUserId,
+        weekly_topic_week: weeklyTopic?.week_start ?? null,
+      })
       .select("id")
       .single();
 
@@ -2154,6 +2177,13 @@ const { error: uploadError } = await supabase.storage
 
   const headerAvatarInitial = useMemo(() => (myUsername?.[0] || "?").toUpperCase(), [myUsername]);
 
+  const myWeeklyCount = useMemo(() => {
+    if (!userId) return 0;
+    return posts.filter(
+      (p) => p.user_id === userId && p.weekly_topic_week
+    ).length;
+  }, [posts, userId]);
+
 
   const linkStyle: React.CSSProperties = { color: "inherit", textDecoration: "none" };
 
@@ -2540,7 +2570,20 @@ const { error: uploadError } = await supabase.storage
     );
   }
 
-  // FEED
+// FEED
+type Post = {
+  id: string;
+  content: string;
+  created_at: string;
+  user_id: string;
+  username: string;
+  avatar_url: string | null;
+  image_url: string | null;
+  weekly_topic_week: string | null;
+  likes: number;
+  likedByMe: boolean;
+  commentCount: number;
+};
   const myProfileHref = userId ? `/profile/${encodeURIComponent(userId)}` : "/";
   return (
     <>
@@ -2613,6 +2656,24 @@ const { error: uploadError } = await supabase.storage
                   {weeklyTopicEditOpen ? "Close" : weeklyTopic?.prompt ? "Edit" : "Set"}
                 </button>
               ) : null}
+              {weeklyTopic?.prompt ? (
+                <button
+                  type="button"
+                  onClick={startWeeklyAnswer}
+                  style={{
+                    border: "1px solid rgba(0,0,0,0.12)",
+                    background: "#111",
+                    color: "#fff",
+                    borderRadius: 999,
+                    padding: "6px 12px",
+                    fontWeight: 800,
+                    fontSize: 12,
+                    cursor: "pointer",
+                  }}
+                >
+                  Answer
+                </button>
+              ) : null}
             </div>
           </div>
 
@@ -2625,6 +2686,12 @@ const { error: uploadError } = await supabase.storage
               まだありません。今週の話題を出して日本語で投稿してね。
             </div>
           )}
+
+          {weeklyTopic?.prompt ? (
+            <div style={{ marginTop: 6, fontSize: 12, opacity: 0.7 }}>
+              You have participated in <strong>{myWeeklyCount}</strong> weekly topics.
+            </div>
+          ) : null}
 
           {weeklyTopicError ? (
             <div style={{ marginTop: 8, fontSize: 12, color: "#b91c1c" }}>{weeklyTopicError}</div>
@@ -2772,9 +2839,22 @@ const { error: uploadError } = await supabase.storage
             const canDelete = !!userId && p.user_id === userId;
             // Link posts and avatars using the user_id rather than the username to ensure stable routing.
             const profileHref = p.user_id ? `/profile/${encodeURIComponent(p.user_id)}` : "";
+            const isWeeklyResponse =
+              !!weeklyTopic?.week_start && p.weekly_topic_week === weeklyTopic.week_start;
 
             return (
-              <div className="post" key={p.id}>
+              <div
+                className="post"
+                key={p.id}
+                style={
+                  isWeeklyResponse
+                    ? {
+                        border: "1px solid rgba(79,70,229,0.35)",
+                        background: "linear-gradient(0deg, rgba(99,102,241,0.04), rgba(99,102,241,0.04))",
+                      }
+                    : undefined
+                }
+              >
                 <div className="post-header" style={{ position: "relative" }}>
                   {profileHref ? (
                     <Link href={profileHref} className="avatar" style={linkStyle} aria-label={`Open profile ${p.username || "unknown"}`}>
@@ -2795,6 +2875,21 @@ const { error: uploadError } = await supabase.storage
                       ) : (
                         <span className="handle muted">@unknown</span>
                       )}
+                      {isWeeklyResponse ? (
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 800,
+                            color: "#4f46e5",
+                            background: "rgba(99,102,241,0.12)",
+                            padding: "2px 8px",
+                            borderRadius: 999,
+                            marginLeft: 6,
+                          }}
+                        >
+                          Weekly
+                        </span>
+                      ) : null}
 
                       <button
                         ref={(el) => {
