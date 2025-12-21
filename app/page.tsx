@@ -219,6 +219,7 @@ export default function HomePage() {
 
   // LOGIN UI
   const [email, setEmail] = useState("");
+const [answeringWeekly, setAnsweringWeekly] = useState(false);
   const [authBusy, setAuthBusy] = useState(false);
   const [password, setPassword] = useState("");
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
@@ -1326,6 +1327,7 @@ export default function HomePage() {
 
   function startWeeklyAnswer() {
     if (!weeklyTopic?.week_start) return;
+  setAnsweringWeekly(true);
 
     // scroll to composer
     setTimeout(() => {
@@ -1716,12 +1718,12 @@ export default function HomePage() {
       .insert({
         content: text.trim(),
         user_id: activeUserId,
-        weekly_topic_week: weeklyTopic?.week_start ?? null,
-      })
+weekly_topic_week: answeringWeekly ? (weeklyTopic?.week_start ?? null) : null,      })
       .select("id")
       .single();
 
     if (postError || !post) {
+setAnsweringWeekly(false);
       setBusy(false);
       alert(postError?.message ?? "Post error");
       return;
@@ -1768,6 +1770,7 @@ export default function HomePage() {
 
     setText("");
     setImageFile(null);
+setAnsweringWeekly(false);
     setBusy(false);
     void loadAll(activeUserId);
   }
