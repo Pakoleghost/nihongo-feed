@@ -1327,7 +1327,8 @@ const [answeringWeekly, setAnsweringWeekly] = useState(false);
 
   function startWeeklyAnswer() {
     if (!weeklyTopic?.week_start) return;
-  setAnsweringWeekly(true);
+    if (hasAnsweredWeeklyThisWeek) return;
+    setAnsweringWeekly(true);
 
     // scroll to composer
     setTimeout(() => {
@@ -1743,6 +1744,7 @@ setAnsweringWeekly(false);
       .upload(path, uploadFile, { upsert: true, contentType: uploadFile.type || undefined });
 
     if (uploadError) {
+      setAnsweringWeekly(false);
       setBusy(false);
       alert(uploadError.message);
       return;
@@ -1756,12 +1758,14 @@ setAnsweringWeekly(false);
       .eq("id", post.id);
 
     if (updateError) {
+      setAnsweringWeekly(false);
       setBusy(false);
       alert(updateError.message);
       return;
     }
   } catch (e: any) {
-    setBusy(false);
+    setAnsweringWeekly(false);
+      setBusy(false);
     alert(e?.message ?? "Could not process image.");
     return;
   }
@@ -2188,7 +2192,15 @@ const { error: uploadError } = await supabase.storage
   }, [posts, userId]);
 
 
-  const linkStyle: React.CSSProperties = { color: "inherit", textDecoration: "none" };
+  
+
+  const hasAnsweredWeeklyThisWeek = useMemo(() => {
+    if (!userId) return false;
+    const wk = weeklyTopic?.week_start;
+    if (!wk) return false;
+    return posts.some((p) => p.user_id === userId && p.weekly_topic_week === wk);
+  }, [posts, userId, weeklyTopic?.week_start]);
+const linkStyle: React.CSSProperties = { color: "inherit", textDecoration: "none" };
 
   // --------- SCREENS ---------
 
@@ -2663,6 +2675,7 @@ type Post = {
                 <button
                   type="button"
                   onClick={startWeeklyAnswer}
+                  disabled={hasAnsweredWeeklyThisWeek}
                   style={{
                     border: "1px solid rgba(0,0,0,0.12)",
                     background: "#111",
@@ -2671,10 +2684,11 @@ type Post = {
                     padding: "6px 12px",
                     fontWeight: 800,
                     fontSize: 12,
-                    cursor: "pointer",
+                    cursor: hasAnsweredWeeklyThisWeek ? "not-allowed" : "pointer",
+                    opacity: hasAnsweredWeeklyThisWeek ? 0.55 : 1,
                   }}
                 >
-                  Answer
+                  {hasAnsweredWeeklyThisWeek ? "Answered" : "Answer"}
                 </button>
               ) : null}
             </div>
