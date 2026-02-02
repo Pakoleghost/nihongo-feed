@@ -26,6 +26,7 @@ type Post = {
   user_id: string;
   username: string; // "" si no hay
   avatar_url: string | null;
+  avatar_version: number;
   image_url: string | null;
   likes: number;
   likedByMe: boolean;
@@ -64,7 +65,7 @@ type WeeklyTopic = {
   created_by?: string | null;
 };
 
-function normalizeProfile(p: any): { username: string; avatar_url: string | null } {
+function normalizeProfile(p: any): { username: string; avatar_url: string | null; avatar_version: number } {
   const obj = Array.isArray(p) ? p?.[0] : p;
 
   const raw = (obj?.username ?? "").toString().trim().toLowerCase();
@@ -79,6 +80,7 @@ function normalizeProfile(p: any): { username: string; avatar_url: string | null
   return {
     username,
     avatar_url: obj?.avatar_url ?? null,
+    avatar_version: Number(obj?.avatar_version ?? 0) || 0,
   };
 }
 
@@ -110,6 +112,15 @@ function timeAgoJa(iso: string): string {
   } catch {
     return "";
   }
+
+
+function avatarSrc(url: string | null, version?: number): string | null {
+  if (!url) return null;
+  const v = Number(version ?? 0) || 0;
+  if (!v) return url;
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}v=${encodeURIComponent(String(v))}`;
+}
 }
 type ImageKind = "post" | "avatar";
 
@@ -489,6 +500,7 @@ const [answeringWeekly, setAnsweringWeekly] = useState(false);
   // my profile
   const [myUsername, setMyUsername] = useState<string>("");
   const [myAvatarUrl, setMyAvatarUrl] = useState<string | null>(null);
+  const [myAvatarVersion, setMyAvatarVersion] = useState<number>(0);
   const [avatarBusy, setAvatarBusy] = useState(false);
 
   // comments
@@ -983,7 +995,7 @@ const [answeringWeekly, setAnsweringWeekly] = useState(false);
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("username, avatar_url, is_admin")
+      .select("username, avatar_url, avatar_version, is_admin")
       .eq("id", uid)
       .single();
 
@@ -1001,11 +1013,14 @@ const [answeringWeekly, setAnsweringWeekly] = useState(false);
     const uLower = uRaw.toLowerCase();
     const a = data?.avatar_url ?? null;
 
+    const av = Number((data as any)?.avatar_version ?? 0) || 0;
+
     const isAuto = /^user_[a-z0-9]+$/.test(uLower);
     const hasRealUsername = !!uRaw && uLower !== "unknown" && !isAuto;
 
     setMyUsername(hasRealUsername ? uRaw : "unknown");
     setMyAvatarUrl(a);
+    setMyAvatarVersion(av);
     setNeedsUsername(!hasRealUsername);
     setIsAdmin(!!(data as any)?.is_admin);
     setCheckingProfile(false);
@@ -1451,7 +1466,7 @@ const [answeringWeekly, setAnsweringWeekly] = useState(false);
 
     const { data, error } = await supabase
       .from("posts")
-      .select("id, content, created_at, user_id, image_url, weekly_topic_week, profiles(username, avatar_url)")
+      .select("id, content, created_at, user_id, image_url, weekly_topic_week, profiles(username, avatar_url, avatar_version)")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -1481,6 +1496,7 @@ const [answeringWeekly, setAnsweringWeekly] = useState(false);
           user_id: row.user_id,
           username: prof.username, // "" si no hay
           avatar_url: prof.avatar_url,
+          avatar_version: prof.avatar_version,
           image_url: (row as any).image_url ?? null,
           weekly_topic_week: (row as any).weekly_topic_week ?? null,
           likes: 0,
@@ -2164,20 +2180,19 @@ const { error: uploadError } = await supabase.storage
 
     const { data: pub } = supabase.storage.from("post-images").getPublicUrl(path);
 
-    const { error: updateError } = await supabase.from("profiles").upsert({
-      id: activeUserId,
-      username:
-        myUsername === "unknown" || /^user_[a-z0-9]+$/.test((myUsername ?? "").toString().toLowerCase())
-          ? null
-          : myUsername,
-      avatar_url: pub.publicUrl,
-    });
+    const version = Date.now();
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ avatar_url: pub.publicUrl, avatar_version: version })
+      .eq("id", activeUserId);
 
     setAvatarBusy(false);
 
     if (updateError) return alert(updateError.message);
 
     setMyAvatarUrl(pub.publicUrl);
+    setMyAvatarVersion(version);
     void loadAll(activeUserId);
   }
 
@@ -2875,11 +2890,11 @@ type Post = {
                 <div className="post-header" style={{ position: "relative" }}>
                   {profileHref ? (
                     <Link href={profileHref} className="avatar" style={linkStyle} aria-label={`Open profile ${p.username || "unknown"}`}>
-                      {p.avatar_url ? <img src={p.avatar_url} alt={p.username} /> : <span>{initial}</span>}
+                      {p.avatar_url ? <img src={avatarSrc(p.avatar_url, p.avatar_version) ?? undefined} alt={p.username} /> : <span>{initial}</span>}
                     </Link>
                   ) : (
                     <div className="avatar" aria-label="No profile">
-                      {p.avatar_url ? <img src={p.avatar_url} alt="unknown" /> : <span>{initial}</span>}
+                      {p.avatar_url ? <img src={avatarSrc(p.avatar_url, p.avatar_version) ?? undefined} alt="unknown" /> : <span>{initial}</span>}
                     </div>
                   )}
 
@@ -3232,7 +3247,7 @@ type Post = {
 
       <BottomNav
         profileHref={myProfileHref}
-        profileAvatarUrl={myAvatarUrl ?? null}
+        profileAvatarUrl={avatarSrc(myAvatarUrl ?? null, myAvatarVersion) ?? null}
         profileInitial={(myUsername?.[0] ?? "?").toUpperCase()}
       />
     </>
