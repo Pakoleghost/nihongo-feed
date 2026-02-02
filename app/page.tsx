@@ -112,6 +112,7 @@ function timeAgoJa(iso: string): string {
   } catch {
     return "";
   }
+}
 
 
 function avatarSrc(url: string | null, version?: number): string | null {
@@ -120,7 +121,6 @@ function avatarSrc(url: string | null, version?: number): string | null {
   if (!v) return url;
   const sep = url.includes("?") ? "&" : "?";
   return `${url}${sep}v=${encodeURIComponent(String(v))}`;
-}
 }
 type ImageKind = "post" | "avatar";
 
