@@ -112,7 +112,6 @@ function timeAgoJa(iso: string): string {
   } catch {
     return "";
   }
-}
 
 
 function avatarSrc(url: string | null, version?: number): string | null {
@@ -121,6 +120,7 @@ function avatarSrc(url: string | null, version?: number): string | null {
   if (!v) return url;
   const sep = url.includes("?") ? "&" : "?";
   return `${url}${sep}v=${encodeURIComponent(String(v))}`;
+}
 }
 type ImageKind = "post" | "avatar";
 
@@ -2890,11 +2890,11 @@ type Post = {
                 <div className="post-header" style={{ position: "relative" }}>
                   {profileHref ? (
                     <Link href={profileHref} className="avatar" style={linkStyle} aria-label={`Open profile ${p.username || "unknown"}`}>
-                      {p.avatar_url ? <img src={avatarSrc(p.avatar_url, p.avatar_version) ?? undefined} alt={p.username} /> : <span>{initial}</span>}
+                      {p.avatar_url ? <img src={avatarSrc(p.avatar_url, (p as any).avatar_version ?? null) ?? undefined} alt={p.username} /> : <span>{initial}</span>}
                     </Link>
                   ) : (
                     <div className="avatar" aria-label="No profile">
-                      {p.avatar_url ? <img src={avatarSrc(p.avatar_url, p.avatar_version) ?? undefined} alt="unknown" /> : <span>{initial}</span>}
+                      {p.avatar_url ? <img src={avatarSrc(p.avatar_url, (p as any).avatar_version ?? null) ?? undefined} alt="unknown" /> : <span>{initial}</span>}
                     </div>
                   )}
 
