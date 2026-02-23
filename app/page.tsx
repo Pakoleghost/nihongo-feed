@@ -919,6 +919,8 @@ const [answeringWeekly, setAnsweringWeekly] = useState(false);
         : null;
     if (compose !== "1") return;
 
+    setComposerOpen(true);
+
     // focus + scroll to composer
     setTimeout(() => {
       try {
@@ -3115,7 +3117,7 @@ function parseEntry(content: string): { title: string | null; body: string } {
                 ) : null}
                 {p.image_url ? (
                   <div style={{ marginTop: 8, borderRadius: 10, overflow: "hidden" }}>
-                    <NextImage src={p.image_url} alt="post image" width={600} height={400} style={{ width: "100%", height: "auto", display: "block" }} />
+                    <img src={p.image_url} alt="" width={600} height={400} style={{ width: "100%", height: "auto", display: "block" }} />
                   </div>
                 ) : null}
 
