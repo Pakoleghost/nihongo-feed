@@ -503,6 +503,9 @@ const [answeringWeekly, setAnsweringWeekly] = useState(false);
   const [myAvatarUrl, setMyAvatarUrl] = useState<string | null>(null);
   const [myAvatarVersion, setMyAvatarVersion] = useState<number>(0);
   const [avatarBusy, setAvatarBusy] = useState(false);
+  const [myClassLevel, setMyClassLevel] = useState<string>("");
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [entryTitle, setEntryTitle] = useState("");
 
   // comments
   const [openCommentsFor, setOpenCommentsFor] = useState<string | null>(null);
@@ -1025,6 +1028,22 @@ const [answeringWeekly, setAnsweringWeekly] = useState(false);
     setNeedsUsername(!hasRealUsername);
     setIsAdmin(!!(data as any)?.is_admin);
     setCheckingProfile(false);
+
+    // fetch class level from applications (best-effort)
+    try {
+      const { data: appData } = await supabase
+        .from("applications")
+        .select("class_level")
+        .eq("user_id", uid)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (appData && (appData as any).class_level) {
+        setMyClassLevel(String((appData as any).class_level));
+      }
+    } catch {
+      // ignore
+    }
 
     // load feed once we pass gate
     if (hasRealUsername) void loadAll(uid);
@@ -1731,12 +1750,19 @@ const [answeringWeekly, setAnsweringWeekly] = useState(false);
 
     setBusy(true);
 
+    const titleTrimmed = entryTitle.trim();
+    const bodyTrimmed = text.trim();
+    const fullContent = titleTrimmed
+      ? `[ENTRY_TITLE]${titleTrimmed}\n[ENTRY_BODY]\n${bodyTrimmed}`
+      : bodyTrimmed;
+
     const { data: post, error: postError } = await supabase
       .from("posts")
       .insert({
-        content: text.trim(),
+        content: fullContent,
         user_id: activeUserId,
-weekly_topic_week: answeringWeekly ? (weeklyTopic?.week_start ?? null) : null,      })
+        weekly_topic_week: answeringWeekly ? (weeklyTopic?.week_start ?? null) : null,
+      })
       .select("id")
       .single();
 
@@ -1790,8 +1816,10 @@ setAnsweringWeekly(false);
 
 
     setText("");
+    setEntryTitle("");
     setImageFile(null);
-setAnsweringWeekly(false);
+    setAnsweringWeekly(false);
+    setComposerOpen(false);
     setBusy(false);
     void loadAll(activeUserId);
   }
@@ -2601,27 +2629,210 @@ const linkStyle: React.CSSProperties = { color: "inherit", textDecoration: "none
     );
   }
 
-// FEED
-type Post = {
-  id: string;
-  content: string;
-  created_at: string;
-  user_id: string;
-  username: string;
-  avatar_url: string | null;
-  image_url: string | null;
-  weekly_topic_week: string | null;
-  likes: number;
-  likedByMe: boolean;
-  commentCount: number;
-};
+// ---- HELPERS & DERIVED STATE ----
+
+function parseEntry(content: string): { title: string | null; body: string } {
+  if (content.startsWith("[ENTRY_TITLE]")) {
+    const titleEnd = content.indexOf("\n[ENTRY_BODY]\n");
+    if (titleEnd !== -1) {
+      return {
+        title: content.slice("[ENTRY_TITLE]".length, titleEnd).trim(),
+        body: content.slice(titleEnd + "\n[ENTRY_BODY]\n".length).trim(),
+      };
+    }
+  }
+  return { title: null, body: content };
+}
+
   const myProfileHref = userId ? `/profile/${encodeURIComponent(userId)}` : "/";
+  const myPosts = useMemo(() => posts.filter((p) => p.user_id === userId), [posts, userId]);
+  const otherPosts = useMemo(() => posts.filter((p) => p.user_id !== userId).slice(0, 30), [posts, userId]);
+
+  const writingStreak = useMemo(() => {
+    if (!myPosts.length) return 0;
+    const dayMs = 86400000;
+    const postDays = new Set(
+      myPosts.map((p) => {
+        const d = new Date(p.created_at);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+      })
+    );
+    let streak = 0;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    let checkDay = now.getTime();
+    while (postDays.has(checkDay)) {
+      streak++;
+      checkDay -= dayMs;
+    }
+    return streak;
+  }, [myPosts]);
+
+  const levelPrompt = useMemo(() => {
+    const lvl = myClassLevel.toLowerCase();
+    const prompts: Record<string, string[]> = {
+      a1: [
+        "今日は何をしましたか？（例：今日はご飯を食べました。）",
+        "好きな食べ物は何ですか？なぜですか？",
+        "今日の天気はどうですか？",
+      ],
+      a2: [
+        "週末は何をする予定ですか？",
+        "最近、何か新しいことをしましたか？",
+        "あなたの町はどんな場所ですか？",
+      ],
+      b1: [
+        "日本語を勉強している理由を教えてください。",
+        "最近見た映画やドラマについて感想を書いてみよう。",
+        "将来の夢や目標は何ですか？",
+      ],
+      default: [
+        "今週あったことを自由に書いてみよう。",
+        "最近興味があることは何ですか？",
+        "日本語の勉強で難しいと思うことは何ですか？",
+      ],
+    };
+    let key = "default";
+    if (!lvl) key = "default";
+    else if (lvl.includes("a1") || (lvl.includes("1") && !lvl.includes("11"))) key = "a1";
+    else if (lvl.includes("a2") || lvl.includes("2")) key = "a2";
+    else if (lvl.includes("b1") || lvl.includes("b2") || lvl.includes("3") || lvl.includes("4")) key = "b1";
+    const arr = prompts[key];
+    const weekNum = Math.floor(Date.now() / (1000 * 60 * 60 * 24 * 7));
+    return arr[weekNum % arr.length];
+  }, [myClassLevel]);
   return (
     <>
       <style>{`
         @keyframes nhfSpin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        .entryCard {
+          border-radius: 14px;
+          border: 1px solid rgba(0,0,0,0.07);
+          background: #fff;
+          padding: 14px 16px;
+          cursor: pointer;
+          transition: box-shadow 0.15s ease;
+        }
+        .entryCard:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+        .entryTitle { font-size: 16px; font-weight: 800; line-height: 1.35; color: #111; }
+        .entryBody { font-size: 14px; line-height: 1.6; color: #333; margin-top: 4px; }
+        .entryMeta { font-size: 12px; color: #888; margin-top: 8px; display: flex; gap: 10px; align-items: center; }
+        .sectionLabel {
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #888;
+          padding: 0 16px;
+          margin: 20px 0 8px;
+        }
+        .journalComposer {
+          margin: 0 14px;
+          border-radius: 16px;
+          border: 1px solid rgba(0,0,0,0.10);
+          background: #fff;
+          overflow: hidden;
+        }
+        .journalTitleInput {
+          width: 100%;
+          font-size: 18px;
+          font-weight: 800;
+          border: none;
+          outline: none;
+          padding: 16px 16px 8px;
+          background: transparent;
+          color: #111;
+          box-sizing: border-box;
+        }
+        .journalTitleInput::placeholder { color: #bbb; font-weight: 700; }
+        .journalBodyInput {
+          width: 100%;
+          min-height: 140px;
+          font-size: 15px;
+          line-height: 1.6;
+          border: none;
+          outline: none;
+          padding: 8px 16px 12px;
+          background: transparent;
+          color: #222;
+          resize: none;
+          box-sizing: border-box;
+          font-family: inherit;
+        }
+        .journalBodyInput::placeholder { color: #ccc; }
+        .journalDivider { height: 1px; background: rgba(0,0,0,0.07); margin: 0 16px; }
+        .journalFooter {
+          padding: 10px 16px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          justify-content: space-between;
+        }
+        .journalPromptBanner {
+          margin: 0 14px 10px;
+          border-radius: 12px;
+          background: rgba(99,102,241,0.07);
+          border: 1px solid rgba(99,102,241,0.15);
+          padding: 10px 14px;
+          font-size: 13px;
+          color: #4338ca;
+          line-height: 1.5;
+          cursor: pointer;
+        }
+        .streakBadge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          background: rgba(251,146,60,0.12);
+          color: #ea580c;
+          border-radius: 999px;
+          padding: 3px 10px;
+          font-size: 12px;
+          font-weight: 800;
+        }
+        .mySection {
+          padding: 16px 14px 8px;
+        }
+        .myHeader {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 12px;
+        }
+        .myGreeting {
+          font-size: 20px;
+          font-weight: 900;
+          color: #111;
+        }
+        .newEntryBtn {
+          background: #111;
+          color: #fff;
+          border: none;
+          border-radius: 999px;
+          padding: 8px 16px;
+          font-size: 13px;
+          font-weight: 800;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .emptyState {
+          text-align: center;
+          padding: 24px;
+          color: #aaa;
+          font-size: 14px;
+          line-height: 1.6;
+        }
+        .communityPost {
+          border-radius: 14px;
+          border: 1px solid rgba(0,0,0,0.07);
+          background: #fff;
+          padding: 12px 14px;
         }
       `}</style>
       <div
@@ -2632,8 +2843,10 @@ type Post = {
           minHeight: "100vh",
           overscrollBehaviorY: "contain",
           touchAction: "pan-x pan-y",
+          background: "#f6f6f7",
         }}
       >
+      {/* HEADER */}
       <div className={`header ${headerHidden ? "header--hidden" : ""}`}>
         <div className="headerInner">
           <button
@@ -2654,578 +2867,343 @@ type Post = {
         </div>
       </div>
 
-      {/* Weekly topic */}
-      <div style={{ padding: "12px 14px 4px" }}>
-        <div
-          style={{
-            border: "1px solid rgba(0,0,0,0.08)",
-            background: "rgba(255,255,255,0.9)",
-            borderRadius: 16,
-            padding: 12,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-            <div style={{ fontWeight: 900, fontSize: 14 }}>今週のトピック</div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              {weeklyTopicLoading ? (
-                <div style={{ fontSize: 12, opacity: 0.55 }}>Loading…</div>
-              ) : null}
-              {isAdmin ? (
-                <button
-                  type="button"
-                  onClick={() => setWeeklyTopicEditOpen((v) => !v)}
-                  style={{
-                    border: "1px solid rgba(0,0,0,0.10)",
-                    background: "#fff",
-                    borderRadius: 999,
-                    padding: "6px 10px",
-                    fontWeight: 800,
-                    fontSize: 12,
-                    cursor: "pointer",
-                  }}
-                >
-                  {weeklyTopicEditOpen ? "Close" : weeklyTopic?.prompt ? "Edit" : "Set"}
-                </button>
-              ) : null}
-              {weeklyTopic?.prompt ? (
-                <button
-                  type="button"
-                  onClick={startWeeklyAnswer}
-                  disabled={hasAnsweredWeeklyThisWeek}
-                  style={{
-                    border: "1px solid rgba(0,0,0,0.12)",
-                    background: "#111",
-                    color: "#fff",
-                    borderRadius: 999,
-                    padding: "6px 12px",
-                    fontWeight: 800,
-                    fontSize: 12,
-                    cursor: hasAnsweredWeeklyThisWeek ? "not-allowed" : "pointer",
-                    opacity: hasAnsweredWeeklyThisWeek ? 0.55 : 1,
-                  }}
-                >
-                  {hasAnsweredWeeklyThisWeek ? "Answered" : "Answer"}
-                </button>
-              ) : null}
-            </div>
-          </div>
-
-          {weeklyTopic?.prompt ? (
-            <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
-              {weeklyTopic.prompt}
-            </div>
-          ) : (
-            <div style={{ marginTop: 8, fontSize: 13, opacity: 0.7 }}>
-              まだありません。今週の話題を出して日本語で投稿してね。
-            </div>
-          )}
-
-          {weeklyTopic?.prompt ? (
-            <div style={{ marginTop: 6, fontSize: 12, opacity: 0.7 }}>
-              You have participated in <strong>{myWeeklyCount}</strong> weekly topics.
-            </div>
-          ) : null}
-
-          {weeklyTopicError ? (
-            <div style={{ marginTop: 8, fontSize: 12, color: "#b91c1c" }}>{weeklyTopicError}</div>
-          ) : null}
-
-          {isAdmin && weeklyTopicEditOpen ? (
-            <div style={{ marginTop: 10 }}>
-              <textarea
-                value={weeklyTopicDraft}
-                onChange={(e) => setWeeklyTopicDraft(e.target.value)}
-                placeholder="例：最近ハマっていることは？理由も書いてね。"
-                rows={3}
-                style={{
-                  width: "100%",
-                  resize: "vertical",
-                  borderRadius: 12,
-                  padding: 10,
-                  border: "1px solid rgba(0,0,0,0.10)",
-                  outline: "none",
-                  fontSize: 14,
-                }}
-              />
-              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-                <button
-                  type="button"
-                  onClick={() => void saveWeeklyTopic()}
-                  disabled={weeklyTopicSaveBusy}
-                  style={{
-                    border: 0,
-                    background: "#111",
-                    color: "#fff",
-                    borderRadius: 999,
-                    padding: "10px 14px",
-                    fontWeight: 900,
-                    cursor: "pointer",
-                    opacity: weeklyTopicSaveBusy ? 0.6 : 1,
-                  }}
-                >
-                  {weeklyTopicSaveBusy ? "Saving…" : "Save"}
-                </button>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-
+      {/* Pull to refresh indicator */}
       {((pullActive && pullY > 0) || isRefreshing) ? (
-        <div
-          style={{
-            height: 0,
-            overflow: "visible",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ height: 0, overflow: "visible", display: "flex", justifyContent: "center" }}>
           <div
             style={{
               transform: `translateY(${Math.min(60, pullY)}px)`,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "8px 12px",
-              borderRadius: 999,
-              border: "1px solid rgba(0,0,0,0.08)",
-              background: "rgba(255,255,255,0.92)",
-              color: "rgba(0,0,0,0.7)",
-              fontSize: 12,
-              boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "8px 12px", borderRadius: 999,
+              border: "1px solid rgba(0,0,0,0.08)", background: "rgba(255,255,255,0.92)",
+              color: "rgba(0,0,0,0.7)", fontSize: 12, boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
               pointerEvents: "none",
             }}
             aria-hidden
           >
             {isRefreshing ? (
-              <span
-                style={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: 999,
-                  border: "2px solid rgba(0,0,0,0.25)",
-                  borderTopColor: "rgba(0,0,0,0.65)",
-                  display: "inline-block",
-                  animation: "nhfSpin 0.8s linear infinite",
-                }}
-              />
+              <span style={{ width: 14, height: 14, borderRadius: 999, border: "2px solid rgba(0,0,0,0.25)", borderTopColor: "rgba(0,0,0,0.65)", display: "inline-block", animation: "nhfSpin 0.8s linear infinite" }} />
             ) : (
-              <span
-                style={{
-                  display: "inline-block",
-                  transform: pullReady ? "rotate(180deg)" : "rotate(0deg)",
-                  transition: "transform 120ms ease",
-                  fontSize: 14,
-                  lineHeight: 1,
-                }}
-              >
-                ↓
-              </span>
+              <span style={{ display: "inline-block", transform: pullReady ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 120ms ease", fontSize: 14, lineHeight: "1" }}>↓</span>
             )}
-            <span>{isRefreshing ? "Refreshing…" : pullReady ? "Release to refresh" : "Pull to refresh"}</span>
+            <span>{isRefreshing ? "更新中…" : pullReady ? "離してね" : "引っ張って更新"}</span>
           </div>
         </div>
       ) : null}
 
-      <div className="composer">
-        <div className="composer-row">
-          <textarea
-            className="textarea"
-            ref={composerRef}
-            placeholder="日本語で書いてね…"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-
-          <button className="postBtn" onClick={createPost} disabled={busy || (!text.trim() && !imageFile)}>
-            {busy ? "投稿中…" : "投稿"}
+      {/* ---- MY SECTION ---- */}
+      <div className="mySection">
+        <div className="myHeader">
+          <div>
+            <div className="myGreeting">こんにちは、@{myUsername} 👋</div>
+            <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 8 }}>
+              {writingStreak > 0 ? (
+                <span className="streakBadge">🔥 {writingStreak}日連続</span>
+              ) : (
+                <span style={{ fontSize: 12, color: "#aaa" }}>今日は何か書いてみよう</span>
+              )}
+              {myClassLevel ? (
+                <span style={{ fontSize: 12, color: "#888", background: "rgba(0,0,0,0.06)", borderRadius: 999, padding: "2px 8px" }}>{myClassLevel}</span>
+              ) : null}
+            </div>
+          </div>
+          <button className="newEntryBtn" onClick={() => { setComposerOpen(true); setTimeout(() => { try { composerRef.current?.focus(); composerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); } catch {} }, 50); }}>
+            ＋ 書く
           </button>
         </div>
 
-        <div className="fileRow">
- 
-<input
-  id="image"
-  className="fileInput"
-  type="file"
-  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-  onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-/>
-
-          <label className="fileBtn" htmlFor="image">
-            画像
-          </label>
-
-          <div className="fileName">{imageFile ? imageFile.name : "画像なし"}</div>
-        </div>
+        {/* My recent entries */}
+        {myPosts.length > 0 ? (
+          <div style={{ display: "grid", gap: 8 }}>
+            {myPosts.slice(0, 3).map((p) => {
+              const { title, body } = parseEntry(p.content);
+              const profileHref = p.user_id ? `/profile/${encodeURIComponent(p.user_id)}` : "";
+              return (
+                <Link key={p.id} href={profileHref || "/"} style={{ textDecoration: "none" }}>
+                  <div className="entryCard">
+                    {title ? <div className="entryTitle">{title}</div> : null}
+                    <div className="entryBody" style={{ WebkitLineClamp: title ? 2 : 3, overflow: "hidden", display: "-webkit-box", WebkitBoxOrient: "vertical" }}>
+                      {body || "(画像のみ)"}
+                    </div>
+                    <div className="entryMeta">
+                      <span>{timeAgoJa(p.created_at)}</span>
+                      {p.likes > 0 ? <span>💙 {p.likes}</span> : null}
+                      {p.commentCount > 0 ? <span>💬 {p.commentCount}</span> : null}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+            {myPosts.length > 3 ? (
+              <Link href={myProfileHref} style={{ textAlign: "center", fontSize: 13, color: "#888", textDecoration: "none", padding: "6px 0", display: "block" }}>
+                全{myPosts.length}件を見る →
+              </Link>
+            ) : null}
+          </div>
+        ) : (
+          <div className="emptyState">
+            まだ投稿がありません。<br />最初の日記を書いてみよう！
+          </div>
+        )}
       </div>
 
-      {loading ? (
-        <div style={{ padding: 16 }} className="muted">
-          Loading…
+      {/* ---- COMPOSER ---- */}
+      {composerOpen ? (
+        <div style={{ margin: "0 0 4px" }}>
+          {/* Level prompt suggestion */}
+          {levelPrompt ? (
+            <div
+              className="journalPromptBanner"
+              onClick={() => { if (!text.trim()) setText(levelPrompt); }}
+              title="クリックで入力欄にコピー"
+            >
+              💡 今週のお題：{levelPrompt}
+            </div>
+          ) : null}
+          <div className="journalComposer">
+            <input
+              className="journalTitleInput"
+              placeholder="タイトル（省略可）"
+              value={entryTitle}
+              onChange={(e) => setEntryTitle(e.target.value)}
+            />
+            <div className="journalDivider" />
+            <textarea
+              className="journalBodyInput"
+              ref={composerRef}
+              placeholder="日本語で書いてね…"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+            <div className="journalDivider" />
+            <div className="journalFooter">
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <input
+                  id="journal-image"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                  onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+                  style={{ display: "none" }}
+                />
+                <label htmlFor="journal-image" style={{ fontSize: 13, color: "#888", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                  🖼 {imageFile ? imageFile.name.slice(0, 16) + "…" : "画像"}
+                </label>
+                {imageFile ? <button type="button" onClick={() => setImageFile(null)} style={{ background: "none", border: "none", fontSize: 12, color: "#aaa", cursor: "pointer" }}>✕</button> : null}
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => { setComposerOpen(false); setText(""); setEntryTitle(""); setImageFile(null); }}
+                  style={{ background: "none", border: "1px solid rgba(0,0,0,0.10)", borderRadius: 999, padding: "8px 14px", fontSize: 13, cursor: "pointer", color: "#666" }}
+                >
+                  キャンセル
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void createPost()}
+                  disabled={busy || (!text.trim() && !imageFile)}
+                  style={{ background: "#111", color: "#fff", border: "none", borderRadius: 999, padding: "8px 18px", fontSize: 13, fontWeight: 800, cursor: busy || (!text.trim() && !imageFile) ? "not-allowed" : "pointer", opacity: busy || (!text.trim() && !imageFile) ? 0.5 : 1 }}
+                >
+                  {busy ? "投稿中…" : "投稿する"}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+      ) : null}
+
+      {/* ---- ADMIN: Weekly topic (collapsed, subtle) ---- */}
+      {isAdmin ? (
+        <div style={{ padding: "4px 14px" }}>
+          <div style={{ border: "1px dashed rgba(0,0,0,0.12)", borderRadius: 12, padding: "8px 12px", background: "rgba(255,255,255,0.6)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#888" }}>🗓 今週のトピック (admin)</span>
+              <button type="button" onClick={() => setWeeklyTopicEditOpen((v) => !v)} style={{ background: "none", border: "none", fontSize: 12, color: "#888", cursor: "pointer" }}>
+                {weeklyTopicEditOpen ? "閉じる" : weeklyTopic?.prompt ? "編集" : "設定"}
+              </button>
+            </div>
+            {weeklyTopic?.prompt && !weeklyTopicEditOpen ? (
+              <div style={{ fontSize: 12, color: "#555", marginTop: 4, lineHeight: 1.4 }}>{weeklyTopic.prompt}</div>
+            ) : null}
+            {weeklyTopicEditOpen ? (
+              <div style={{ marginTop: 8 }}>
+                <textarea
+                  value={weeklyTopicDraft}
+                  onChange={(e) => setWeeklyTopicDraft(e.target.value)}
+                  placeholder="今週のトピックを入力…"
+                  rows={2}
+                  style={{ width: "100%", borderRadius: 8, padding: 8, border: "1px solid rgba(0,0,0,0.10)", fontSize: 13, resize: "vertical", outline: "none", boxSizing: "border-box" }}
+                />
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6 }}>
+                  <button type="button" onClick={() => void saveWeeklyTopic()} disabled={weeklyTopicSaveBusy} style={{ background: "#111", color: "#fff", border: "none", borderRadius: 999, padding: "6px 14px", fontSize: 12, fontWeight: 800, cursor: "pointer" }}>
+                    {weeklyTopicSaveBusy ? "保存中…" : "保存"}
+                  </button>
+                </div>
+                {weeklyTopicError ? <div style={{ fontSize: 12, color: "#b91c1c", marginTop: 4 }}>{weeklyTopicError}</div> : null}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {/* ---- COMMUNITY ---- */}
+      <div className="sectionLabel">みんなの日記</div>
+      {loading ? (
+        <div style={{ padding: "16px", textAlign: "center", color: "#aaa", fontSize: 14 }}>Loading…</div>
+      ) : otherPosts.length === 0 ? (
+        <div className="emptyState">まだ他の投稿はありません。</div>
       ) : (
-        <div style={{ display: "grid", gap: 12 }}>
-          {posts.map((p) => {
+        <div style={{ display: "grid", gap: 8, padding: "0 14px" }}>
+          {otherPosts.map((p) => {
+            const { title, body } = parseEntry(p.content);
             const initial = (p.username?.[0] || "?").toUpperCase();
-            const canDelete = !!userId && p.user_id === userId;
-            // Link posts and avatars using the user_id rather than the username to ensure stable routing.
             const profileHref = p.user_id ? `/profile/${encodeURIComponent(p.user_id)}` : "";
-            const isWeeklyResponse =
-              !!weeklyTopic?.week_start && p.weekly_topic_week === weeklyTopic.week_start;
+            const canDelete = !!userId && p.user_id === userId;
+            const isWeeklyResponse = !!weeklyTopic?.week_start && p.weekly_topic_week === weeklyTopic.week_start;
 
             return (
               <div
-                className="post"
                 key={p.id}
-                style={
-                  isWeeklyResponse
-                    ? {
-                        border: "1px solid rgba(79,70,229,0.35)",
-                        background: "linear-gradient(0deg, rgba(99,102,241,0.04), rgba(99,102,241,0.04))",
-                      }
-                    : undefined
-                }
+                className="communityPost"
+                style={isWeeklyResponse ? { border: "1px solid rgba(79,70,229,0.25)", background: "rgba(99,102,241,0.03)" } : undefined}
               >
-                <div className="post-header" style={{ position: "relative" }}>
+                {/* Author row */}
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                   {profileHref ? (
                     <Link href={profileHref} className="avatar" style={linkStyle} aria-label={`Open profile ${p.username || "unknown"}`}>
                       {p.avatar_url ? <img src={avatarSrc(p.avatar_url, (p as any).avatar_version ?? null) ?? undefined} alt={p.username} /> : <span>{initial}</span>}
                     </Link>
                   ) : (
-                    <div className="avatar" aria-label="No profile">
-                      {p.avatar_url ? <img src={avatarSrc(p.avatar_url, (p as any).avatar_version ?? null) ?? undefined} alt="unknown" /> : <span>{initial}</span>}
-                    </div>
+                    <div className="avatar">{p.avatar_url ? <img src={avatarSrc(p.avatar_url) ?? undefined} alt="?" /> : <span>{initial}</span>}</div>
                   )}
-
-                  <div className="postMeta">
-                    <div className="nameRow">
-                      {p.username ? (
-                        <Link href={profileHref} className="handle" style={linkStyle}>
-                          @{p.username}
-                        </Link>
-                      ) : (
-                        <span className="handle muted">@unknown</span>
-                      )}
-                      {isWeeklyResponse ? (
-                        <span
-                          style={{
-                            fontSize: 11,
-                            fontWeight: 800,
-                            color: "#4f46e5",
-                            background: "rgba(99,102,241,0.12)",
-                            padding: "2px 8px",
-                            borderRadius: 999,
-                            marginLeft: 6,
-                          }}
-                        >
-                          Weekly
-                        </span>
-                      ) : null}
-
+                  <div style={{ flex: 1 }}>
+                    {p.username ? (
+                      <Link href={profileHref} style={{ ...linkStyle, fontWeight: 700, fontSize: 13 }}>@{p.username}</Link>
+                    ) : (
+                      <span style={{ fontWeight: 700, fontSize: 13, color: "#aaa" }}>@unknown</span>
+                    )}
+                  </div>
+                  <span style={{ fontSize: 11, color: "#bbb" }}>{timeAgoJa(p.created_at)}</span>
+                  {/* Post menu */}
+                  {canDelete ? (
+                    <div style={{ position: "relative" }}>
                       <button
-                        ref={(el) => {
-                          menuBtnRef.current[p.id] = el;
-                        }}
                         type="button"
-                        className="ghostBtn"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setOpenMenuFor((cur) => (cur === p.id ? null : p.id));
-                        }}
-                        aria-label="Post menu"
-                        title="Menu"
-                        style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 18, lineHeight: 1 }}
-                      >
-                        ⋯
-                      </button>
-
+                        ref={(el) => { menuBtnRef.current[p.id] = el; }}
+                        onClick={() => setOpenMenuFor(openMenuFor === p.id ? null : p.id)}
+                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "#bbb", padding: "0 4px" }}
+                      >⋯</button>
                       {openMenuFor === p.id ? (
-                        <div
-                          ref={(el) => {
-                            menuRef.current[p.id] = el;
-                          }}
-                          style={{
-                            position: "absolute",
-                            right: 12,
-                            top: 44,
-                            background: "rgba(20,20,24,0.98)",
-                            border: "1px solid rgba(255,255,255,0.08)",
-                            borderRadius: 12,
-                            padding: 6,
-                            minWidth: 160,
-                            zIndex: 50,
-                            boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
-                          }}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setOpenMenuFor(null);
-                              void downloadPostCard(p);
-                            }}
-                            style={{
-                              width: "100%",
-                              textAlign: "left",
-                              padding: "10px 10px",
-                              borderRadius: 10,
-                              border: 0,
-                              background: "transparent",
-                              color: "rgba(255,255,255,0.92)",
-                              cursor: "pointer",
-                              fontSize: 13,
-                              fontWeight: 700,
-                            }}
-                          >
-                            カードを保存
+                        <div ref={(el) => { menuRef.current[p.id] = el; }} style={{ position: "absolute", right: 0, top: "100%", background: "#fff", border: "1px solid rgba(0,0,0,0.10)", borderRadius: 10, boxShadow: "0 4px 16px rgba(0,0,0,0.10)", zIndex: 100, minWidth: 140, overflow: "hidden" }}>
+                          <button type="button" onClick={() => { setOpenMenuFor(null); void deletePost(p.id); }} style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 14px", background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "#b91c1c" }}>
+                            削除
                           </button>
-
-                          {canDelete ? (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setOpenMenuFor(null);
-                                void deletePost(p.id);
-                              }}
-                              style={{
-                                width: "100%",
-                                textAlign: "left",
-                                padding: "10px 10px",
-                                borderRadius: 10,
-                                border: 0,
-                                background: "transparent",
-                                color: "rgba(255,120,120,0.95)",
-                                cursor: "pointer",
-                                fontSize: 13,
-                                fontWeight: 800,
-                              }}
-                            >
-                              削除
-                            </button>
-                          ) : null}
+                          <button type="button" onClick={() => { setOpenMenuFor(null); void downloadPostCard(p); }} style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 14px", background: "none", border: "none", cursor: "pointer", fontSize: 13 }}>
+                            カード保存
+                          </button>
                         </div>
                       ) : null}
                     </div>
-
-                    <div
-                      className="muted"
-                      style={{ fontSize: 12, lineHeight: 1.2 }}
-                      title={new Date(p.created_at).toLocaleString()}
-                    >
-                      {timeAgoJa(p.created_at)}
-                    </div>
-                  </div>
+                  ) : null}
                 </div>
 
-                {p.content ? <div className="post-content">{p.content}</div> : null}
-
+                {/* Entry content */}
+                {title ? <div className="entryTitle" style={{ marginBottom: 4 }}>{title}</div> : null}
+                {body ? (
+                  <div style={{ fontSize: 14, lineHeight: 1.6, color: "#333", whiteSpace: "pre-wrap" }}>{body}</div>
+                ) : null}
                 {p.image_url ? (
-                  <div style={{ padding: "0 12px 12px" }}>
-                    <img src={p.image_url} alt="post" className="postImage" />
+                  <div style={{ marginTop: 8, borderRadius: 10, overflow: "hidden" }}>
+                    <NextImage src={p.image_url} alt="post image" width={600} height={400} style={{ width: "100%", height: "auto", display: "block" }} />
                   </div>
                 ) : null}
 
-                <div className="actionsRow">
-                  <button className="likeBtn" onClick={() => toggleLike(p.id)}>
-                    <span className="icon">{p.likedByMe ? "💙" : "🤍"}</span>
-                    <span>いいね！</span>
-                    <span className="muted">{p.likes}</span>
+                {/* Like / comment row */}
+                <div style={{ display: "flex", gap: 12, marginTop: 10, alignItems: "center" }}>
+                  <button
+                    type="button"
+                    className="ghostBtn"
+                    onClick={() => void toggleLike(p.id)}
+                    disabled={!!likeBusyByPost[p.id]}
+                    style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 4, opacity: likeBusyByPost[p.id] ? 0.5 : 1 }}
+                  >
+                    <span>{p.likedByMe ? "💙" : "🤍"}</span>
+                    <span style={{ color: "#888" }}>{p.likes > 0 ? p.likes : ""}</span>
                   </button>
-
-                  <button className="commentBtn" onClick={() => void openComments(p.id)}>
-                    <span className="icon">💬</span>
-                    <span>コメント</span>
-                    <span className="muted">{p.commentCount}</span>
+                  <button
+                    type="button"
+                    className="ghostBtn"
+                    onClick={() => void openComments(p.id)}
+                    style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 4, color: "#888" }}
+                  >
+                    💬 {p.commentCount > 0 ? p.commentCount : "コメント"}
                   </button>
                 </div>
 
+                {/* Comments panel */}
                 {openCommentsFor === p.id ? (
-                  <div className="comments">
-                    <div className="commentsList">
+                  <div style={{ marginTop: 12, borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: 10 }}>
+                    {/* comments list */}
+                    <div style={{ display: "grid", gap: 8 }}>
                       {(commentsByPost[p.id] ?? []).length === 0 ? (
-                        <div className="muted" style={{ fontSize: 13, padding: 8 }}>
-                          まだコメントはありません。
-                        </div>
+                        <div style={{ fontSize: 13, color: "#bbb", textAlign: "center", padding: "8px 0" }}>まだコメントはありません。</div>
                       ) : (
                         (() => {
                           const list = commentsByPost[p.id] ?? [];
                           const byParent: Record<string, Comment[]> = {};
                           const roots: Comment[] = [];
-
                           list.forEach((c) => {
                             const pid = c.parent_comment_id ? String(c.parent_comment_id) : "";
                             if (!pid) roots.push(c);
                             else (byParent[pid] ||= []).push(c);
                           });
-
-                          const render = (c: Comment, depth: number) => {
+                          const render = (c: Comment, depth: number): React.ReactNode => {
                             const ci = (c.username?.[0] || "?").toUpperCase();
                             const cProfileHref = c.user_id ? `/profile/${encodeURIComponent(c.user_id)}` : "";
                             const kids = byParent[String(c.id)] ?? [];
-
                             return (
                               <div key={c.id}>
-                                <div
-                                  className="comment"
-                                  style={{
-                                    marginLeft: depth > 0 ? 14 : 0,
-                                    borderLeft: depth > 0 ? "3px solid rgba(17,17,20,.08)" : undefined,
-                                    paddingLeft: depth > 0 ? 10 : undefined,
-                                  }}
-                                >
+                                <div className="comment" style={{ marginLeft: depth > 0 ? 14 : 0, borderLeft: depth > 0 ? "3px solid rgba(17,17,20,.08)" : undefined, paddingLeft: depth > 0 ? 10 : undefined }}>
                                   {cProfileHref ? (
-                                    <Link
-                                      href={cProfileHref}
-                                      className="cAvatar"
-                                      style={linkStyle}
-                                      aria-label={`Open profile ${c.username || "unknown"}`}
-                                    >
+                                    <Link href={cProfileHref} className="cAvatar" style={linkStyle} aria-label={`Open profile ${c.username || "unknown"}`}>
                                       {c.avatar_url ? <img src={c.avatar_url} alt={c.username} /> : <span>{ci}</span>}
                                     </Link>
                                   ) : (
-                                    <div className="cAvatar">
-                                      {c.avatar_url ? <img src={c.avatar_url} alt="unknown" /> : <span>{ci}</span>}
-                                    </div>
+                                    <div className="cAvatar">{c.avatar_url ? <img src={c.avatar_url} alt="unknown" /> : <span>{ci}</span>}</div>
                                   )}
-
                                   <div className="cBody">
                                     <div className="cTop">
-                                      <div className="cUser">
-                                        {c.username ? (
-                                          <Link href={cProfileHref} style={linkStyle}>
-                                            @{c.username}
-                                          </Link>
-                                        ) : (
-                                          "@unknown"
-                                        )}
-                                      </div>
-                                      <div
-                                        className="muted"
-                                        style={{ fontSize: 11, lineHeight: 1.2 }}
-                                        title={new Date(c.created_at).toLocaleString()}
-                                      >
-                                        {timeAgoJa(c.created_at)}
-                                      </div>
+                                      <div className="cUser">{c.username ? <Link href={cProfileHref} style={linkStyle}>@{c.username}</Link> : "@unknown"}</div>
+                                      <div className="muted" style={{ fontSize: 11 }} title={new Date(c.created_at).toLocaleString()}>{timeAgoJa(c.created_at)}</div>
                                     </div>
-
                                     <div className="cText">{c.content}</div>
-
-                                    <div style={{ marginTop: 6, display: "flex", gap: 12, alignItems: "center" }}>
-                                      <button
-                                        type="button"
-                                        className="ghostBtn"
-                                        onClick={() => void toggleCommentLike(p.id, c.id, c.user_id)}
-                                        disabled={!!likeBusyByComment[c.id]}
-                                        style={{
-                                          padding: 0,
-                                          border: 0,
-                                          background: "transparent",
-                                          cursor: "pointer",
-                                          fontSize: 12,
-                                          opacity: likeBusyByComment[c.id] ? 0.5 : 0.85,
-                                          display: "inline-flex",
-                                          alignItems: "center",
-                                          gap: 6,
-                                        }}
-                                        aria-label="Like comment"
-                                        title="Like"
-                                      >
-                                        <span style={{ fontSize: 13 }}>{(c as any).likedByMe ? "💙" : "🤍"}</span>
-                                        <span style={{ opacity: 0.8 }}>いいね！</span>
-                                        <span className="muted" style={{ fontSize: 12 }}>{(c as any).likeCount ?? 0}</span>
+                                    <div style={{ marginTop: 6, display: "flex", gap: 12 }}>
+                                      <button type="button" className="ghostBtn" onClick={() => void toggleCommentLike(p.id, c.id, c.user_id)} disabled={!!likeBusyByComment[c.id]} style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12 }}>
+                                        {(c as any).likedByMe ? "💙" : "🤍"} {(c as any).likeCount ?? 0}
                                       </button>
-
-                                      <button
-                                        type="button"
-                                        className="ghostBtn"
-                                        onClick={() => startReply(p.id, c.id, c.username)}
-                                        style={{
-                                          padding: 0,
-                                          border: 0,
-                                          background: "transparent",
-                                          cursor: "pointer",
-                                          fontSize: 12,
-                                          opacity: 0.7,
-                                        }}
-                                      >
-                                        返信
-                                      </button>
-
+                                      <button type="button" className="ghostBtn" onClick={() => startReply(p.id, c.id, c.username)} style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12, opacity: 0.7 }}>返信</button>
                                       {userId && c.user_id === userId ? (
-                                        <button
-                                          type="button"
-                                          className="ghostBtn"
-                                          onClick={() => void deleteComment(p.id, c.id)}
-                                          style={{
-                                            padding: 0,
-                                            border: 0,
-                                            background: "transparent",
-                                            cursor: "pointer",
-                                            fontSize: 12,
-                                            opacity: 0.7,
-                                          }}
-                                        >
-                                          削除
-                                        </button>
+                                        <button type="button" className="ghostBtn" onClick={() => void deleteComment(p.id, c.id)} style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12, opacity: 0.7 }}>削除</button>
                                       ) : null}
                                     </div>
                                   </div>
                                 </div>
-
-                                {kids.length ? (
-                                  <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
-                                    {kids.map((k) => render(k, depth + 1))}
-                                  </div>
-                                ) : null}
+                                {kids.length ? <div style={{ marginTop: 8, display: "grid", gap: 8 }}>{kids.map((k) => render(k, depth + 1))}</div> : null}
                               </div>
                             );
                           };
-
                           return roots.map((c) => render(c, 0));
                         })()
                       )}
                     </div>
-
-                    <div className="commentComposer">
+                    {/* comment input */}
+                    <div className="commentComposer" style={{ marginTop: 8 }}>
                       {replyToByPost[p.id] ? (
-                        <div
-                          style={{
-                            fontSize: 12,
-                            opacity: 0.7,
-                            marginBottom: 6,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 8,
-                          }}
-                        >
+                        <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
                           <span>{`@${replyToByPost[p.id]!.username} に返信中`}</span>
-                          <button
-                            type="button"
-                            onClick={() => clearReply(p.id)}
-                            style={{
-                              padding: 0,
-                              border: 0,
-                              background: "transparent",
-                              cursor: "pointer",
-                              fontSize: 12,
-                              opacity: 0.7,
-                            }}
-                          >
-                            やめる
-                          </button>
+                          <button type="button" onClick={() => clearReply(p.id)} style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12, opacity: 0.7 }}>やめる</button>
                         </div>
                       ) : null}
-
                       <input
                         ref={commentInputRef}
                         className="commentInput"
@@ -3244,6 +3222,7 @@ type Post = {
           })}
         </div>
       )}
+
       </div>
 
       <BottomNav
