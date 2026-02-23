@@ -2244,7 +2244,7 @@ const { error: uploadError } = await supabase.storage
     if (!wk) return false;
     return posts.some((p) => p.user_id === userId && p.weekly_topic_week === wk);
   }, [posts, userId, weeklyTopic?.week_start]);
-const linkStyle: React.CSSProperties = { color: "inherit", textDecoration: "none" };
+const linkStyle = { color: "inherit", textDecoration: "none" } as const;
 
   // --------- SCREENS ---------
 
@@ -3157,7 +3157,7 @@ function parseEntry(content: string): { title: string | null; body: string } {
                             if (!pid) roots.push(c);
                             else (byParent[pid] ||= []).push(c);
                           });
-                          const render = (c: Comment, depth: number): React.ReactNode => {
+                          const render = (c: Comment, depth: number): JSX.Element => {
                             const ci = (c.username?.[0] || "?").toUpperCase();
                             const cProfileHref = c.user_id ? `/profile/${encodeURIComponent(c.user_id)}` : "";
                             const kids = byParent[String(c.id)] ?? [];
