@@ -3157,7 +3157,7 @@ function parseEntry(content: string): { title: string | null; body: string } {
                             if (!pid) roots.push(c);
                             else (byParent[pid] ||= []).push(c);
                           });
-                          const render = (c: Comment, depth: number): JSX.Element => {
+                          const render = (c: Comment, depth: number) => {
                             const ci = (c.username?.[0] || "?").toUpperCase();
                             const cProfileHref = c.user_id ? `/profile/${encodeURIComponent(c.user_id)}` : "";
                             const kids = byParent[String(c.id)] ?? [];
