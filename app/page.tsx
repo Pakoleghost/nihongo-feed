@@ -2246,6 +2246,65 @@ const { error: uploadError } = await supabase.storage
   }, [posts, userId, weeklyTopic?.week_start]);
 const linkStyle = { color: "inherit", textDecoration: "none" } as const;
 
+  const myProfileHref = userId ? `/profile/${encodeURIComponent(userId)}` : "/";
+  const myPosts = useMemo(() => posts.filter((p) => p.user_id === userId), [posts, userId]);
+  const otherPosts = useMemo(() => posts.filter((p) => p.user_id !== userId).slice(0, 30), [posts, userId]);
+
+  const writingStreak = useMemo(() => {
+    if (!myPosts.length) return 0;
+    const dayMs = 86400000;
+    const postDays = new Set(
+      myPosts.map((p) => {
+        const d = new Date(p.created_at);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+      })
+    );
+    let streak = 0;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    let checkDay = now.getTime();
+    while (postDays.has(checkDay)) {
+      streak++;
+      checkDay -= dayMs;
+    }
+    return streak;
+  }, [myPosts]);
+
+  const levelPrompt = useMemo(() => {
+    const lvl = myClassLevel.toLowerCase();
+    const prompts: Record<string, string[]> = {
+      a1: [
+        "今日は何をしましたか？（例：今日はご飯を食べました。）",
+        "好きな食べ物は何ですか？なぜですか？",
+        "今日の天気はどうですか？",
+      ],
+      a2: [
+        "週末は何をする予定ですか？",
+        "最近、何か新しいことをしましたか？",
+        "あなたの町はどんな場所ですか？",
+      ],
+      b1: [
+        "日本語を勉強している理由を教えてください。",
+        "最近見た映画やドラマについて感想を書いてみよう。",
+        "将来の夢や目標は何ですか？",
+      ],
+      default: [
+        "今週あったことを自由に書いてみよう。",
+        "最近興味があることは何ですか？",
+        "日本語の勉強で難しいと思うことは何ですか？",
+      ],
+    };
+    let key = "default";
+    if (!lvl) key = "default";
+    else if (lvl.includes("a1") || (lvl.includes("1") && !lvl.includes("11"))) key = "a1";
+    else if (lvl.includes("a2") || lvl.includes("2")) key = "a2";
+    else if (lvl.includes("b1") || lvl.includes("b2") || lvl.includes("3") || lvl.includes("4")) key = "b1";
+    const arr = prompts[key];
+    const weekNum = Math.floor(Date.now() / (1000 * 60 * 60 * 24 * 7));
+    return arr[weekNum % arr.length];
+  }, [myClassLevel]);
+
   // --------- SCREENS ---------
 
   if (!userId) {
@@ -2629,7 +2688,7 @@ const linkStyle = { color: "inherit", textDecoration: "none" } as const;
     );
   }
 
-// ---- HELPERS & DERIVED STATE ----
+// ---- HELPERS ----
 
 function parseEntry(content: string): { title: string | null; body: string } {
   if (content.startsWith("[ENTRY_TITLE]")) {
@@ -2644,64 +2703,6 @@ function parseEntry(content: string): { title: string | null; body: string } {
   return { title: null, body: content };
 }
 
-  const myProfileHref = userId ? `/profile/${encodeURIComponent(userId)}` : "/";
-  const myPosts = useMemo(() => posts.filter((p) => p.user_id === userId), [posts, userId]);
-  const otherPosts = useMemo(() => posts.filter((p) => p.user_id !== userId).slice(0, 30), [posts, userId]);
-
-  const writingStreak = useMemo(() => {
-    if (!myPosts.length) return 0;
-    const dayMs = 86400000;
-    const postDays = new Set(
-      myPosts.map((p) => {
-        const d = new Date(p.created_at);
-        d.setHours(0, 0, 0, 0);
-        return d.getTime();
-      })
-    );
-    let streak = 0;
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    let checkDay = now.getTime();
-    while (postDays.has(checkDay)) {
-      streak++;
-      checkDay -= dayMs;
-    }
-    return streak;
-  }, [myPosts]);
-
-  const levelPrompt = useMemo(() => {
-    const lvl = myClassLevel.toLowerCase();
-    const prompts: Record<string, string[]> = {
-      a1: [
-        "今日は何をしましたか？（例：今日はご飯を食べました。）",
-        "好きな食べ物は何ですか？なぜですか？",
-        "今日の天気はどうですか？",
-      ],
-      a2: [
-        "週末は何をする予定ですか？",
-        "最近、何か新しいことをしましたか？",
-        "あなたの町はどんな場所ですか？",
-      ],
-      b1: [
-        "日本語を勉強している理由を教えてください。",
-        "最近見た映画やドラマについて感想を書いてみよう。",
-        "将来の夢や目標は何ですか？",
-      ],
-      default: [
-        "今週あったことを自由に書いてみよう。",
-        "最近興味があることは何ですか？",
-        "日本語の勉強で難しいと思うことは何ですか？",
-      ],
-    };
-    let key = "default";
-    if (!lvl) key = "default";
-    else if (lvl.includes("a1") || (lvl.includes("1") && !lvl.includes("11"))) key = "a1";
-    else if (lvl.includes("a2") || lvl.includes("2")) key = "a2";
-    else if (lvl.includes("b1") || lvl.includes("b2") || lvl.includes("3") || lvl.includes("4")) key = "b1";
-    const arr = prompts[key];
-    const weekNum = Math.floor(Date.now() / (1000 * 60 * 60 * 24 * 7));
-    return arr[weekNum % arr.length];
-  }, [myClassLevel]);
   return (
     <>
       <style>{`
