@@ -3056,171 +3056,63 @@ function parseEntry(content: string): { title: string | null; body: string } {
       ) : otherPosts.length === 0 ? (
         <div className="emptyState">まだ他の投稿はありません。</div>
       ) : (
-        <div style={{ display: "grid", gap: 8, padding: "0 14px" }}>
+        <div style={{ display: "grid", gap: 10, padding: "0 14px" }}>
           {otherPosts.map((p) => {
             const { title, body } = parseEntry(p.content);
             const initial = (p.username?.[0] || "?").toUpperCase();
-            const profileHref = p.user_id ? `/profile/${encodeURIComponent(p.user_id)}` : "";
-            const canDelete = !!userId && p.user_id === userId;
             const isWeeklyResponse = !!weeklyTopic?.week_start && p.weekly_topic_week === weeklyTopic.week_start;
 
             return (
-              <div
+              <Link
                 key={p.id}
-                className="communityPost"
-                style={isWeeklyResponse ? { border: "1px solid rgba(79,70,229,0.25)", background: "rgba(99,102,241,0.03)" } : undefined}
+                href={`/post/${encodeURIComponent(p.id)}`}
+                style={{ textDecoration: "none", color: "inherit" }}
               >
-                {/* Author row */}
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                  {profileHref ? (
-                    <Link href={profileHref} className="avatar" style={linkStyle} aria-label={`Open profile ${p.username || "unknown"}`}>
-                      {p.avatar_url ? <img src={avatarSrc(p.avatar_url, (p as any).avatar_version ?? null) ?? undefined} alt={p.username} /> : <span>{initial}</span>}
-                    </Link>
-                  ) : (
-                    <div className="avatar">{p.avatar_url ? <img src={avatarSrc(p.avatar_url) ?? undefined} alt="?" /> : <span>{initial}</span>}</div>
-                  )}
-                  <div style={{ flex: 1 }}>
-                    {p.username ? (
-                      <Link href={profileHref} style={{ ...linkStyle, fontWeight: 700, fontSize: 13 }}>@{p.username}</Link>
-                    ) : (
-                      <span style={{ fontWeight: 700, fontSize: 13, color: "#aaa" }}>@unknown</span>
-                    )}
-                  </div>
-                  <span style={{ fontSize: 11, color: "#bbb" }}>{timeAgoJa(p.created_at)}</span>
-                  {/* Post menu */}
-                  {canDelete ? (
-                    <div style={{ position: "relative" }}>
-                      <button
-                        type="button"
-                        ref={(el) => { menuBtnRef.current[p.id] = el; }}
-                        onClick={() => setOpenMenuFor(openMenuFor === p.id ? null : p.id)}
-                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "#bbb", padding: "0 4px" }}
-                      >⋯</button>
-                      {openMenuFor === p.id ? (
-                        <div ref={(el) => { menuRef.current[p.id] = el; }} style={{ position: "absolute", right: 0, top: "100%", background: "#fff", border: "1px solid rgba(0,0,0,0.10)", borderRadius: 10, boxShadow: "0 4px 16px rgba(0,0,0,0.10)", zIndex: 100, minWidth: 140, overflow: "hidden" }}>
-                          <button type="button" onClick={() => { setOpenMenuFor(null); void deletePost(p.id); }} style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 14px", background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "#b91c1c" }}>
-                            削除
-                          </button>
-                          <button type="button" onClick={() => { setOpenMenuFor(null); void downloadPostCard(p); }} style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 14px", background: "none", border: "none", cursor: "pointer", fontSize: 13 }}>
-                            カード保存
-                          </button>
+                <div
+                  className="communityPost"
+                  style={isWeeklyResponse ? { border: "1px solid rgba(79,70,229,0.25)", background: "rgba(99,102,241,0.03)" } : undefined}
+                >
+                  {/* Thumbnail + text layout */}
+                  <div style={{ display: "flex", gap: 12 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {/* Author row */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                        <div className="avatar" style={{ width: 20, height: 20, fontSize: 9, flexShrink: 0 }}>
+                          {p.avatar_url ? <img src={avatarSrc(p.avatar_url, (p as any).avatar_version ?? null) ?? undefined} alt="" /> : <span>{initial}</span>}
+                        </div>
+                        <span style={{ fontWeight: 700, fontSize: 12, color: "#555", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          @{p.username || "unknown"}
+                        </span>
+                        <span style={{ fontSize: 11, color: "#bbb", flexShrink: 0 }}>{timeAgoJa(p.created_at)}</span>
+                      </div>
+                      {/* Title */}
+                      {title ? (
+                        <div style={{ fontSize: 15, fontWeight: 800, lineHeight: 1.35, color: "#111", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {title}
                         </div>
                       ) : null}
-                    </div>
-                  ) : null}
-                </div>
-
-                {/* Entry content */}
-                {title ? <div className="entryTitle" style={{ marginBottom: 4 }}>{title}</div> : null}
-                {body ? (
-                  <div style={{ fontSize: 14, lineHeight: 1.6, color: "#333", whiteSpace: "pre-wrap" }}>{body}</div>
-                ) : null}
-                {p.image_url ? (
-                  <div style={{ marginTop: 8, borderRadius: 10, overflow: "hidden" }}>
-                    <img src={p.image_url} alt="" width={600} height={400} style={{ width: "100%", height: "auto", display: "block" }} />
-                  </div>
-                ) : null}
-
-                {/* Like / comment row */}
-                <div style={{ display: "flex", gap: 12, marginTop: 10, alignItems: "center" }}>
-                  <button
-                    type="button"
-                    className="ghostBtn"
-                    onClick={() => void toggleLike(p.id)}
-                    disabled={!!likeBusyByPost[p.id]}
-                    style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 4, opacity: likeBusyByPost[p.id] ? 0.5 : 1 }}
-                  >
-                    <span>{p.likedByMe ? "💙" : "🤍"}</span>
-                    <span style={{ color: "#888" }}>{p.likes > 0 ? p.likes : ""}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="ghostBtn"
-                    onClick={() => void openComments(p.id)}
-                    style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 4, color: "#888" }}
-                  >
-                    💬 {p.commentCount > 0 ? p.commentCount : "コメント"}
-                  </button>
-                </div>
-
-                {/* Comments panel */}
-                {openCommentsFor === p.id ? (
-                  <div style={{ marginTop: 12, borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: 10 }}>
-                    {/* comments list */}
-                    <div style={{ display: "grid", gap: 8 }}>
-                      {(commentsByPost[p.id] ?? []).length === 0 ? (
-                        <div style={{ fontSize: 13, color: "#bbb", textAlign: "center", padding: "8px 0" }}>まだコメントはありません。</div>
-                      ) : (
-                        (() => {
-                          const list = commentsByPost[p.id] ?? [];
-                          const byParent: Record<string, Comment[]> = {};
-                          const roots: Comment[] = [];
-                          list.forEach((c) => {
-                            const pid = c.parent_comment_id ? String(c.parent_comment_id) : "";
-                            if (!pid) roots.push(c);
-                            else (byParent[pid] ||= []).push(c);
-                          });
-                          const render = (c: Comment, depth: number) => {
-                            const ci = (c.username?.[0] || "?").toUpperCase();
-                            const cProfileHref = c.user_id ? `/profile/${encodeURIComponent(c.user_id)}` : "";
-                            const kids = byParent[String(c.id)] ?? [];
-                            return (
-                              <div key={c.id}>
-                                <div className="comment" style={{ marginLeft: depth > 0 ? 14 : 0, borderLeft: depth > 0 ? "3px solid rgba(17,17,20,.08)" : undefined, paddingLeft: depth > 0 ? 10 : undefined }}>
-                                  {cProfileHref ? (
-                                    <Link href={cProfileHref} className="cAvatar" style={linkStyle} aria-label={`Open profile ${c.username || "unknown"}`}>
-                                      {c.avatar_url ? <img src={c.avatar_url} alt={c.username} /> : <span>{ci}</span>}
-                                    </Link>
-                                  ) : (
-                                    <div className="cAvatar">{c.avatar_url ? <img src={c.avatar_url} alt="unknown" /> : <span>{ci}</span>}</div>
-                                  )}
-                                  <div className="cBody">
-                                    <div className="cTop">
-                                      <div className="cUser">{c.username ? <Link href={cProfileHref} style={linkStyle}>@{c.username}</Link> : "@unknown"}</div>
-                                      <div className="muted" style={{ fontSize: 11 }} title={new Date(c.created_at).toLocaleString()}>{timeAgoJa(c.created_at)}</div>
-                                    </div>
-                                    <div className="cText">{c.content}</div>
-                                    <div style={{ marginTop: 6, display: "flex", gap: 12 }}>
-                                      <button type="button" className="ghostBtn" onClick={() => void toggleCommentLike(p.id, c.id, c.user_id)} disabled={!!likeBusyByComment[c.id]} style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12 }}>
-                                        {(c as any).likedByMe ? "💙" : "🤍"} {(c as any).likeCount ?? 0}
-                                      </button>
-                                      <button type="button" className="ghostBtn" onClick={() => startReply(p.id, c.id, c.username)} style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12, opacity: 0.7 }}>返信</button>
-                                      {userId && c.user_id === userId ? (
-                                        <button type="button" className="ghostBtn" onClick={() => void deleteComment(p.id, c.id)} style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12, opacity: 0.7 }}>削除</button>
-                                      ) : null}
-                                    </div>
-                                  </div>
-                                </div>
-                                {kids.length ? <div style={{ marginTop: 8, display: "grid", gap: 8 }}>{kids.map((k) => render(k, depth + 1))}</div> : null}
-                              </div>
-                            );
-                          };
-                          return roots.map((c) => render(c, 0));
-                        })()
-                      )}
-                    </div>
-                    {/* comment input */}
-                    <div className="commentComposer" style={{ marginTop: 8 }}>
-                      {replyToByPost[p.id] ? (
-                        <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
-                          <span>{`@${replyToByPost[p.id]!.username} に返信中`}</span>
-                          <button type="button" onClick={() => clearReply(p.id)} style={{ padding: 0, border: 0, background: "transparent", cursor: "pointer", fontSize: 12, opacity: 0.7 }}>やめる</button>
+                      {/* Body preview */}
+                      {body ? (
+                        <div style={{ fontSize: 13, lineHeight: 1.5, color: "#666", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: title ? 2 : 3, WebkitBoxOrient: "vertical" }}>
+                          {body}
                         </div>
                       ) : null}
-                      <input
-                        ref={commentInputRef}
-                        className="commentInput"
-                        placeholder="コメントを書く…"
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                      />
-                      <button className="miniPost" disabled={commentBusy || !commentText.trim()} onClick={() => void addComment(p.id)}>
-                        {commentBusy ? "…" : "送信"}
-                      </button>
+                      {/* Meta row */}
+                      <div style={{ display: "flex", gap: 10, marginTop: 6, alignItems: "center", fontSize: 12, color: "#aaa" }}>
+                        {p.likes > 0 ? <span>{p.likedByMe ? "💙" : "🤍"} {p.likes}</span> : null}
+                        {p.commentCount > 0 ? <span>💬 {p.commentCount}</span> : null}
+                      </div>
                     </div>
+                    {/* Thumbnail */}
+                    {p.image_url ? (
+                      <div style={{ width: 80, height: 80, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: "#f0f0f0" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={p.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                      </div>
+                    ) : null}
                   </div>
-                ) : null}
-              </div>
+                </div>
+              </Link>
             );
           })}
         </div>

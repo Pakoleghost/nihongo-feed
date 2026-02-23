@@ -1087,7 +1087,6 @@ export default function NotificationsPage() {
         profileHref={myProfileHref}
         profileAvatarUrl={myProfile?.avatar_url ? myProfile.avatar_url : null}
         profileInitial={((myProfile?.username ?? "?").toString().trim()[0] ?? "?").toUpperCase()}
-        viewerId={userId ?? ""}
       />
     </>
   );
