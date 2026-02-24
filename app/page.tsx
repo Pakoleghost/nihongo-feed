@@ -21,6 +21,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [myUsername, setMyUsername] = useState<string | null>(null);
   const [myAvatarUrl, setMyAvatarUrl] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false); // Nuevo estado de admin
 
   const fetchPosts = useCallback(async () => {
     const { data, error } = await supabase
@@ -49,23 +50,22 @@ export default function HomePage() {
   useEffect(() => {
     const checkUserAndData = async () => {
       setLoading(true);
-      // Verificamos si hay sesión
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        // Si no hay usuario, directo al login
         router.push("/login");
       } else {
-        // Si hay usuario, cargamos su perfil y los posts
+        // Buscamos perfil incluyendo el campo is_admin
         const { data: profile } = await supabase
           .from("profiles")
-          .select("username, avatar_url")
+          .select("username, avatar_url, is_admin")
           .eq("id", user.id)
           .single();
         
         if (profile) {
           setMyUsername(profile.username);
           setMyAvatarUrl(profile.avatar_url);
+          setIsAdmin(profile.is_admin); // Activamos el botón si es TRUE
         }
         await fetchPosts();
       }
@@ -81,12 +81,23 @@ export default function HomePage() {
       {/* HEADER */}
       <header style={{ 
         display: "flex", justifyContent: "space-between", alignItems: "center", 
-        padding: "15px 20px", borderBottom: "1px solid #eee", position: "sticky", top: 0, backgroundColor: "#fff" 
+        padding: "15px 20px", borderBottom: "1px solid #eee", position: "sticky", top: 0, backgroundColor: "#fff", zIndex: 10
       }}>
         <Link href="/" style={{ textDecoration: "none", color: "#333", fontWeight: "bold", fontSize: "20px" }}>Nihongo Note</Link>
-        <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
-          <Link href="/write" style={{ padding: "8px 15px", backgroundColor: "#2cb696", color: "#fff", borderRadius: "20px", textDecoration: "none", fontSize: "14px" }}>Escribir</Link>
-          <Link href="/profile" style={{ width: "35px", height: "35px", borderRadius: "50%", backgroundColor: "#eee", overflow: "hidden", display: "block" }}>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          
+          {/* BOTÓN SOLO PARA ADMINS */}
+          {isAdmin && (
+            <Link href="/admin/groups" style={{ 
+              padding: "8px 12px", border: "1px solid #2cb696", color: "#2cb696", borderRadius: "20px", textDecoration: "none", fontSize: "13px", fontWeight: "bold" 
+            }}>
+              ⚙️ Grupos
+            </Link>
+          )}
+
+          <Link href="/write" style={{ padding: "8px 15px", backgroundColor: "#2cb696", color: "#fff", borderRadius: "20px", textDecoration: "none", fontSize: "14px", fontWeight: "bold" }}>Escribir</Link>
+          
+          <Link href="/profile" style={{ width: "35px", height: "35px", borderRadius: "50%", backgroundColor: "#eee", overflow: "hidden", display: "block", border: "1px solid #ddd" }}>
             {myAvatarUrl ? (
               <img src={myAvatarUrl} alt="Perfil" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
