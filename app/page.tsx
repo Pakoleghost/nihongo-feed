@@ -34,7 +34,6 @@ export default function HomePage() {
       `)
       .order("created_at", { ascending: false });
 
-    // Si hay un filtro seleccionado, filtramos por la columna de la tabla profiles
     if (groupFilter !== "Todos") {
       query = query.eq("profiles.group_name", groupFilter);
     }
@@ -64,11 +63,9 @@ export default function HomePage() {
         return;
       }
 
-      // Cargar mi perfil
       const { data: prof } = await supabase.from("profiles").select("avatar_url, is_admin").eq("id", user.id).single();
       setMyProfile(prof);
 
-      // Cargar grupos para el filtro
       const { data: grps } = await supabase.from("groups").select("name").order("name");
       if (grps) setGroups(grps);
 
@@ -79,8 +76,18 @@ export default function HomePage() {
 
   return (
     <div style={{ maxWidth: "600px", margin: "0 auto", fontFamily: "sans-serif" }}>
-      {/* HEADER */}
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "15px 20px", borderBottom: "1px solid #eee", sticky: "top", backgroundColor: "#fff", zIndex: 10 }}>
+      {/* HEADER CORREGIDO */}
+      <header style={{ 
+        display: "flex", 
+        justifyContent: "space-between", 
+        alignItems: "center", 
+        padding: "15px 20px", 
+        borderBottom: "1px solid #eee", 
+        position: "sticky", // Ajustado: posición sticky
+        top: 0,             // Ajustado: pegado al tope
+        backgroundColor: "#fff", 
+        zIndex: 10 
+      }}>
         <h1 style={{ margin: 0, fontSize: "20px" }}>Nihongo Note</h1>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           {myProfile?.is_admin && <Link href="/admin/groups" style={{ fontSize: "12px", color: "#2cb696", textDecoration: "none" }}>⚙️ Grupos</Link>}
