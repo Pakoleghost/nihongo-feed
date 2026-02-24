@@ -15,6 +15,7 @@ type Post = {
 type Profile = {
   username: string;
   avatar_url: string | null;
+  group_name: string | null; // Añadido para el sistema de clases
 };
 
 export default function ProfilePage() {
@@ -35,10 +36,10 @@ export default function ProfilePage() {
         return;
       }
 
-      // 2. Cargar Datos del Perfil
+      // 2. Cargar Datos del Perfil (Incluyendo el nombre del grupo)
       const { data: profileData } = await supabase
         .from("profiles")
-        .select("username, avatar_url")
+        .select("username, avatar_url, group_name")
         .eq("id", user.id)
         .single();
 
@@ -95,7 +96,22 @@ export default function ProfilePage() {
         </div>
         
         {/* Nombre de usuario */}
-        <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: "0 0 16px 0" }}>{profile?.username || "Usuario"}</h1>
+        <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: "0 0 8px 0" }}>{profile?.username || "Usuario"}</h1>
+        
+        {/* Clase / Grupo (Lectura únicamente para el alumno) */}
+        <div style={{ marginBottom: "20px" }}>
+          <span style={{ 
+            display: "inline-block",
+            padding: "4px 12px", 
+            backgroundColor: "#f0f0f0", 
+            borderRadius: "15px", 
+            fontSize: "13px", 
+            color: "#666" 
+          }}>
+            🏫 Clase: <strong>{profile?.group_name || "Sin clase asignada"}</strong>
+          </span>
+          <p style={{ fontSize: "11px", color: "#aaa", marginTop: "5px" }}>* El cambio de grupo solo lo puede realizar el maestro.</p>
+        </div>
         
         {/* BOTONERA: Editar y Cerrar Sesión */}
         <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
@@ -150,7 +166,6 @@ export default function ProfilePage() {
                 transition: "box-shadow 0.2s",
                 backgroundColor: "#fff"
               }}>
-                {/* Texto */}
                 <div style={{ flex: 1 }}>
                   <h3 style={{ margin: "0 0 8px 0", fontSize: "16px", fontWeight: "bold", color: "#333", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                     {post.content.split('\n')[0] || "Sin título"}
@@ -160,7 +175,6 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Miniatura si tiene */}
                 {post.image_url && (
                   <div style={{ width: "60px", height: "60px", borderRadius: "4px", overflow: "hidden", flexShrink: 0, backgroundColor: "#f0f0f0" }}>
                     <img src={post.image_url} alt="Thumbnail" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
