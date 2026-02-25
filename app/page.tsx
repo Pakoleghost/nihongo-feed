@@ -48,20 +48,20 @@ export default function HomePage() {
       <header style={{ 
         display: "flex", justifyContent: "space-between", alignItems: "center", 
         padding: "10px 20px", borderBottom: "1px solid #eee", position: "sticky", 
-        top: 0, backgroundColor: "#fff", zIndex: 10, gap: "10px", flexWrap: "wrap" 
+        top: 0, backgroundColor: "#fff", zIndex: 10, gap: "10px"
       }}>
-        <Link href="/" style={{ textDecoration: "none", color: "#2cb696", fontWeight: "bold", fontSize: "18px" }}>Nihongo Note</Link>
-        <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+        <Link href="/" style={{ textDecoration: "none", color: "#2cb696", fontWeight: "bold", fontSize: "18px", flexShrink: 0 }}>Nihongo Note</Link>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center", overflowX: "auto" }}>
           {myProfile?.is_admin && <Link href="/admin/groups" title="Panel Maestro" style={{ textDecoration: "none", fontSize: "18px" }}>⚙️</Link>}
           <Link href="/resources" title="Recursos" style={{ textDecoration: "none", fontSize: "18px" }}>📚</Link>
           <Link href="/notifications" style={{ position: "relative", textDecoration: "none", fontSize: "18px" }}>
-            🔔 {unreadNotifications > 0 && <span style={{ position: "absolute", top: "-5px", right: "-5px", backgroundColor: "#d9534f", color: "#fff", fontSize: "9px", padding: "2px 5px", borderRadius: "10px" }}>{unreadNotifications}</span>}
+            🔔 {unreadNotifications > 0 && <span style={{ position: "absolute", top: "-5px", right: "-5px", backgroundColor: "#d9534f", color: "#fff", fontSize: "9px", padding: "2px 4px", borderRadius: "10px" }}>{unreadNotifications}</span>}
           </Link>
-          <button onClick={() => setShowArchived(!showArchived)} style={{ background: "#f5f5f5", border: "none", fontSize: "11px", color: showArchived ? "#2cb696" : "#666", cursor: "pointer", padding: "5px 10px", borderRadius: "8px" }}>
+          <button onClick={() => setShowArchived(!showArchived)} style={{ background: "#f5f5f5", border: "none", fontSize: "11px", color: showArchived ? "#2cb696" : "#666", cursor: "pointer", padding: "5px 10px", borderRadius: "8px", whiteSpace: "nowrap" }}>
             {showArchived ? "📖 Muro" : "📑 Tareas"}
           </button>
-          <Link href="/write" style={{ backgroundColor: "#2cb696", color: "#fff", padding: "6px 15px", borderRadius: "20px", textDecoration: "none", fontSize: "13px", fontWeight: "bold" }}>書く</Link>
-          <Link href={`/profile/${myProfile?.id}`} style={{ width: "32px", height: "32px", borderRadius: "50%", overflow: "hidden", border: "1px solid #ddd" }}>
+          <Link href="/write" style={{ backgroundColor: "#2cb696", color: "#fff", padding: "6px 16px", borderRadius: "20px", textDecoration: "none", fontSize: "13px", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>書く</Link>
+          <Link href={`/profile/${myProfile?.id}`} style={{ width: "32px", height: "32px", borderRadius: "50%", overflow: "hidden", border: "1px solid #ddd", flexShrink: 0 }}>
             {myProfile?.avatar_url ? <img src={myProfile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ lineHeight: "32px", textAlign: "center", background: "#eee" }}>👤</div>}
           </Link>
         </div>
@@ -81,7 +81,13 @@ export default function HomePage() {
           return (
             <article key={post.id} style={{ padding: "20px", borderBottom: "1px solid #eee", display: "flex", gap: "15px" }}>
               <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", gap: "8px", marginBottom: "5px", alignItems: "center" }}>
+                <div style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
+                  {/* Foto de perfil del autor en el feed */}
+                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", overflow: "hidden", background: "#eee", flexShrink: 0 }}>
+                    {post.profiles?.avatar_url ? (
+                      <img src={post.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : <div style={{ textAlign: "center", fontSize: "12px", lineHeight: "24px" }}>👤</div>}
+                  </div>
                   <Link href={`/profile/${post.user_id}`} style={{ textDecoration: "none", color: "#333", fontWeight: "700", fontSize: "12px" }}>
                     {post.profiles?.is_admin ? "👨‍🏫 Sensei" : post.profiles?.username}
                   </Link>
