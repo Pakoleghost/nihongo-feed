@@ -50,9 +50,18 @@ export default function HomePage() {
         padding: "12px 20px", borderBottom: "1px solid #f2f2f2", position: "sticky", 
         top: 0, backgroundColor: "#fff", zIndex: 10
       }}>
-        {/* LOGO: icon.png reemplaza al texto */}
+        {/* LOGO: Actualizado a logo.png y tamaño corregido */}
         <Link href="/" style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-          <img src="/icon.png" alt="Logo" style={{ height: "32px", width: "auto" }} />
+          <img 
+            src="/logo.png" 
+            alt="Logo" 
+            style={{ 
+              height: "40px", 
+              width: "auto", 
+              display: "block",
+              imageRendering: "auto" 
+            }} 
+          />
         </Link>
         
         <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
@@ -71,7 +80,6 @@ export default function HomePage() {
       </header>
 
       <main>
-        {/* Filtro rápido de Muro/Tareas */}
         <div style={{ padding: "15px 20px", display: "flex", justifyContent: "flex-end" }}>
           <button onClick={() => setShowArchived(!showArchived)} style={{ background: "#f8f8f8", border: "1px solid #eee", fontSize: "12px", color: "#666", cursor: "pointer", padding: "6px 12px", borderRadius: "15px", fontWeight: "500" }}>
             {showArchived ? "Ver Muro Completo" : "Ver solo Tareas"}
