@@ -1,213 +1,94 @@
 "use client";
-
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 
-type PostDetail = {
-  id: string;
-  content: string;
-  created_at: string;
-  image_url: string | null;
-  user_id: string;
-  username: string;
-  avatar_url: string | null;
-};
-
 export default function PostPage() {
-  const params = useParams();
-  // Validamos que postId sea string
-  const postId = typeof params?.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : null;
-
-  const [post, setPost] = useState<PostDetail | null>(null);
+  const { id } = useParams();
+  const [post, setPost] = useState<any>(null);
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [myProfile, setMyProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
-  // Estados para Likes
-  const [likesCount, setLikesCount] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  // 1. Obtener usuario actual
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) setCurrentUserId(session.user.id);
-    });
-  }, []);
-
-  // 2. Cargar Post y Likes
-  const fetchPostData = useCallback(async () => {
-    if (!postId) return;
-    setLoading(true);
-
-    // A) Cargar contenido del post
-    const { data, error } = await supabase
-      .from("posts")
-      .select(`
-        id, content, created_at, image_url, user_id,
-        profiles (username, avatar_url)
-      `)
-      .eq("id", postId)
-      .single();
-
-    if (error) {
-      console.error("Error cargando post:", error);
-      setLoading(false);
-      return;
+  const fetchPostAndComments = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: p } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+      setMyProfile(p);
     }
 
-    const profile = Array.isArray(data.profiles) ? data.profiles[0] : data.profiles;
-    setPost({
-      id: data.id,
-      content: data.content || "",
-      created_at: data.created_at,
-      image_url: data.image_url || null,
-      user_id: data.user_id,
-      username: profile?.username || "Usuario Anónimo",
-      avatar_url: profile?.avatar_url || null,
-    });
+    const { data: postData } = await supabase.from("posts").select("*, profiles:user_id(*)").eq("id", id).single();
+    const { data: comms } = await supabase.from("comments").select("*, profiles:user_id(*)").eq("post_id", id).order("created_at", { ascending: true });
 
-    // B) Cargar conteo de likes
-    const { count } = await supabase
-      .from("likes")
-      .select("*", { count: "exact", head: true }) // head: true significa "solo cuenta, no traigas datos"
-      .eq("post_id", postId);
-    
-    setLikesCount(count || 0);
-
-    // C) Verificar si YO le di like
-    if (currentUserId) {
-      const { data: likeData } = await supabase
-        .from("likes")
-        .select("user_id")
-        .eq("post_id", postId)
-        .eq("user_id", currentUserId)
-        .single();
-      
-      setIsLiked(!!likeData);
-    }
-
+    setPost(postData);
+    setComments(comms || []);
     setLoading(false);
-  }, [postId, currentUserId]);
+  }, [id]);
 
-  useEffect(() => {
-    fetchPostData();
-  }, [fetchPostData]);
+  useEffect(() => { fetchPostAndComments(); }, [fetchPostAndComments]);
 
-
-  // 3. Manejar el Click en Like
-  const handleToggleLike = async () => {
-    if (!currentUserId) {
-      alert("Debes iniciar sesión para dar like.");
-      return;
-    }
-    if (!postId) return;
-
-    // Optimism UI: Actualizamos visualmente antes de esperar a la base de datos
-    const previousIsLiked = isLiked;
-    const previousCount = likesCount;
-
-    setIsLiked(!isLiked);
-    setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
-
-    try {
-      if (previousIsLiked) {
-        // Quitar Like
-        const { error } = await supabase
-          .from("likes")
-          .delete()
-          .eq("post_id", postId)
-          .eq("user_id", currentUserId);
-        if (error) throw error;
-      } else {
-        // Dar Like
-        const { error } = await supabase
-          .from("likes")
-          .insert({ post_id: postId, user_id: currentUserId });
-        if (error) throw error;
-      }
-    } catch (error) {
-      console.error("Error al dar like:", error);
-      // Revertir cambios si falló
-      setIsLiked(previousIsLiked);
-      setLikesCount(previousCount);
+  const postComment = async () => {
+    if (!newComment.trim()) return;
+    const { error } = await supabase.from("comments").insert({
+      post_id: id,
+      user_id: myProfile.id,
+      content: newComment
+    });
+    if (!error) {
+      setNewComment("");
+      fetchPostAndComments();
     }
   };
 
-
-  if (loading) return <div style={{ padding: "40px", textAlign: "center", color: "#888" }}>Cargando...</div>;
-  if (!post) return <div style={{ padding: "40px", textAlign: "center" }}>Post no encontrado.</div>;
+  if (loading || !post) return <div style={{ padding: "50px", textAlign: "center" }}>Cargando...</div>;
 
   return (
-    <div style={{ backgroundColor: "#fff", minHeight: "100vh", paddingBottom: "80px" }}>
+    <div style={{ maxWidth: "700px", margin: "0 auto", padding: "20px", fontFamily: "sans-serif" }}>
+      <Link href="/" style={{ color: "#2cb696", textDecoration: "none", fontWeight: "bold" }}>← Volver</Link>
       
-      <header style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
-        <Link href="/" style={{ textDecoration: "none", color: "#888", fontSize: "14px" }}>
-          ← Volver al inicio
-        </Link>
-      </header>
-
-      <article style={{ maxWidth: "680px", margin: "0 auto", padding: "0 20px" }}>
+      <article style={{ marginTop: "30px" }}>
+        <h1 style={{ fontSize: "32px", marginBottom: "10px" }}>{post.content.split('\n')[0]}</h1>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center", color: "#888", fontSize: "14px", marginBottom: "20px" }}>
+          <span>Por {post.profiles.username}</span>
+          <span>• {post.is_forum ? "掲示板 Foro" : "Post"}</span>
+        </div>
         
-        {post.image_url && (
-          <div style={{ width: "100%", height: "300px", marginBottom: "32px", borderRadius: "8px", overflow: "hidden", backgroundColor: "#f5f5f5" }}>
-            <img src={post.image_url} alt="Cover" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </div>
-        )}
-
-        <h1 style={{ fontSize: "32px", fontWeight: "bold", marginBottom: "16px", color: "#222" }}>
-          {post.content.split('\n')[0]}
-        </h1>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "32px" }}>
-          <div style={{ width: "40px", height: "40px", borderRadius: "50%", overflow: "hidden", backgroundColor: "#eee" }}>
-            {post.avatar_url ? (
-              <img src={post.avatar_url} alt={post.username} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            ) : (
-              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", color: "#999" }}>
-                {post.username[0]?.toUpperCase()}
-              </div>
-            )}
-          </div>
-          <div>
-            <div style={{ fontWeight: "bold", fontSize: "14px" }}>{post.username}</div>
-            <div style={{ fontSize: "12px", color: "#888" }}>
-              {new Date(post.created_at).toLocaleDateString("ja-JP", { year: 'numeric', month: 'long', day: 'numeric' })}
-            </div>
-          </div>
+        {post.image_url && <img src={post.image_url} style={{ width: "100%", borderRadius: "15px", marginBottom: "20px" }} />}
+        
+        <div style={{ fontSize: "18px", lineHeight: "1.7", whiteSpace: "pre-wrap", marginBottom: "40px" }}>
+          {post.content.split('\n').slice(1).join('\n')}
         </div>
-
-        <div style={{ fontSize: "18px", lineHeight: "1.8", color: "#333", whiteSpace: "pre-wrap", fontFamily: "Georgia, serif" }}>
-          {post.content}
-        </div>
-
       </article>
-      
-      {/* SECCIÓN DE LIKES */}
-      <div style={{ maxWidth: "680px", margin: "40px auto 0", borderTop: "1px solid #eaeaea", paddingTop: "32px", textAlign: "center" }}>
-        <p style={{ color: "#888", marginBottom: "16px", fontSize: "14px" }}>¿Te gustó este artículo?</p>
-        
-        <button 
-          onClick={handleToggleLike}
-          style={{ 
-            padding: "10px 24px", 
-            borderRadius: "30px", 
-            border: isLiked ? "none" : "1px solid #2cb696", 
-            backgroundColor: isLiked ? "#ff4d4f" : "#fff", 
-            color: isLiked ? "#fff" : "#2cb696", 
-            fontWeight: "bold",
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            fontSize: "16px",
-            transition: "all 0.2s ease"
-          }}
-        >
-          {isLiked ? "♥" : "♡"} <span>{likesCount}</span>
-        </button>
-      </div>
 
+      <section style={{ borderTop: "2px solid #eee", paddingTop: "30px" }}>
+        <h3 style={{ marginBottom: "20px" }}>Comentarios ({comments.length})</h3>
+        
+        <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginBottom: "30px" }}>
+          {comments.map(c => (
+            <div key={c.id} style={{ display: "flex", gap: "12px" }}>
+              <div style={{ width: "35px", height: "35px", borderRadius: "50%", backgroundColor: "#eee", flexShrink: 0, overflow: "hidden" }}>
+                {c.profiles?.avatar_url && <img src={c.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+              </div>
+              <div style={{ backgroundColor: "#f5f5f5", padding: "12px", borderRadius: "12px", flex: 1 }}>
+                <div style={{ fontWeight: "bold", fontSize: "13px", marginBottom: "4px" }}>{c.profiles?.username}</div>
+                <div style={{ fontSize: "14px", color: "#444" }}>{c.content}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CUADRO PARA COMENTAR */}
+        <div style={{ display: "flex", gap: "10px" }}>
+          <textarea 
+            value={newComment} onChange={e => setNewComment(e.target.value)}
+            placeholder={post.is_forum ? "Participa en el foro..." : "Escribe un comentario..."}
+            style={{ flex: 1, padding: "12px", borderRadius: "10px", border: "1px solid #ddd", resize: "none" }}
+          />
+          <button onClick={postComment} style={{ backgroundColor: "#2cb696", color: "#fff", border: "none", padding: "0 20px", borderRadius: "10px", fontWeight: "bold", cursor: "pointer" }}>Enviar</button>
+        </div>
+      </section>
     </div>
   );
 }
