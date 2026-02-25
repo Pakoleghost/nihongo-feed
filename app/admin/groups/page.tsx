@@ -5,134 +5,98 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function AdminGroupsPage() {
+  const [activeTab, setActiveTab] = useState<'groups' | 'approvals'>('groups');
   const [groups, setGroups] = useState<{ name: string }[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [students, setStudents] = useState<any[]>([]);
+  const [pendingUsers, setPendingUsers] = useState<any[]>([]);
   const [newGroupName, setNewGroupName] = useState("");
-  const [editingGroup, setEditingGroup] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
-  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const SIN_GRUPO_LABEL = "⚠️ Sin asignar";
 
-  const fetchGroups = useCallback(async () => {
-    const { data } = await supabase.from("groups").select("name").order("name");
-    const allGroups = data ? [...data, { name: SIN_GRUPO_LABEL }] : [{ name: SIN_GRUPO_LABEL }];
-    setGroups(allGroups);
+  const fetchInitialData = useCallback(async () => {
+    const { data: grps } = await supabase.from("groups").select("name").order("name");
+    setGroups(grps ? [...grps, { name: SIN_GRUPO_LABEL }] : [{ name: SIN_GRUPO_LABEL }]);
+    
+    // Cargar solicitudes pendientes
+    const { data: pending } = await supabase.from("profiles").select("*").eq("is_approved", false).order("created_at");
+    setPendingUsers(pending || []);
   }, []);
+
+  useEffect(() => { fetchInitialData(); }, [fetchInitialData]);
+
+  const approveUser = async (userId: string) => {
+    const { error } = await supabase.from("profiles").update({ is_approved: true }).eq("id", userId);
+    if (!error) fetchInitialData();
+  };
 
   const fetchStudents = async (groupName: string) => {
     setSelectedGroup(groupName);
-    setLoadingStudents(true);
-    let query = supabase.from("profiles").select("id, username, group_name");
+    setLoading(true);
+    let query = supabase.from("profiles").select("*").eq("is_approved", true);
     if (groupName === SIN_GRUPO_LABEL) {
       query = query.or('group_name.is.null,group_name.eq."",group_name.eq."Sin Grupo"');
     } else {
       query = query.eq("group_name", groupName);
     }
-    const { data } = await query.order("username", { ascending: true });
+    const { data } = await query.order("username");
     setStudents(data || []);
-    setLoadingStudents(false);
-  };
-
-  useEffect(() => {
-    fetchGroups();
-  }, [fetchGroups]);
-
-  const changeStudentGroup = async (studentId: string, newGroup: string) => {
-    const groupToSave = newGroup === SIN_GRUPO_LABEL ? null : newGroup;
-    const { error } = await supabase.from("profiles").update({ group_name: groupToSave }).eq("id", studentId);
-    if (!error && selectedGroup) fetchStudents(selectedGroup);
+    setLoading(false);
   };
 
   return (
-    <div style={{ maxWidth: "1000px", margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif", color: "#333" }}>
-      
-      {/* NAVEGACIÓN DEL PANEL */}
-      <nav style={{ marginBottom: "30px", borderBottom: "1px solid #eee", paddingBottom: "15px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", gap: "20px" }}>
-          <Link href="/admin/groups" style={{ textDecoration: "none", color: "#2cb696", fontWeight: "bold", borderBottom: "2px solid #2cb696", paddingBottom: "15px", marginBottom: "-17px" }}>
-            Alumnos y Grupos
-          </Link>
-          <Link href="/admin/assignments" style={{ textDecoration: "none", color: "#888", fontWeight: "500" }}>
-            Matriz de Tareas (Shukudai)
-          </Link>
-        </div>
-        <Link href="/" style={{ textDecoration: "none", color: "#888", fontSize: "14px" }}>← Volver al Home</Link>
+    <div style={{ maxWidth: "1000px", margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif" }}>
+      {/* NAVEGACIÓN PRINCIPAL */}
+      <nav style={{ marginBottom: "30px", borderBottom: "1px solid #eee", display: "flex", gap: "20px" }}>
+        <Link href="/admin/groups" style={{ color: "#2cb696", fontWeight: "bold", borderBottom: "2px solid #2cb696", paddingBottom: "15px", textDecoration: "none" }}>Gestión</Link>
+        <Link href="/admin/assignments" style={{ color: "#888", textDecoration: "none" }}>Matriz Tareas</Link>
+        <Link href="/admin/resources" style={{ color: "#888", textDecoration: "none" }}>Recursos</Link>
+        <Link href="/" style={{ color: "#888", textDecoration: "none", marginLeft: "auto" }}>← Home</Link>
       </nav>
 
-      <header style={{ marginBottom: "30px" }}>
-        <h1 style={{ fontSize: "24px", margin: "0 0 10px 0" }}>Gestión de Clases</h1>
-        <p style={{ color: "#888", fontSize: "14px" }}>Crea grupos y organiza a tus alumnos antiguos o nuevos.</p>
-      </header>
-      
-      {/* SECCIÓN CREAR GRUPO */}
-      <div style={{ marginBottom: "30px", display: "flex", gap: "10px", backgroundColor: "#f9f9f9", padding: "20px", borderRadius: "12px" }}>
-        <input 
-          type="text" placeholder="Nombre de la nueva clase..." 
-          value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)}
-          style={{ flex: 1, padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}
-        />
-        <button onClick={async () => {
-          if (!newGroupName) return;
-          await supabase.from("groups").insert([{ name: newGroupName }]);
-          setNewGroupName("");
-          fetchGroups();
-        }} style={{ padding: "12px 24px", backgroundColor: "#2cb696", color: "#fff", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>
-          + Crear Grupo
+      <div style={{ display: "flex", gap: "10px", marginBottom: "30px" }}>
+        <button onClick={() => setActiveTab('groups')} style={{ padding: "10px 20px", borderRadius: "8px", border: "none", backgroundColor: activeTab === 'groups' ? "#333" : "#eee", color: activeTab === 'groups' ? "#fff" : "#333", cursor: "pointer" }}>Grupos y Alumnos</button>
+        <button onClick={() => setActiveTab('approvals')} style={{ padding: "10px 20px", borderRadius: "8px", border: "none", backgroundColor: activeTab === 'approvals' ? "#d9534f" : "#eee", color: activeTab === 'approvals' ? "#fff" : "#333", cursor: "pointer" }}>
+          Solicitudes {pendingUsers.length > 0 && `(${pendingUsers.length})`}
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: "30px" }}>
-        
-        {/* COLUMNA GRUPOS */}
-        <div style={{ backgroundColor: "#fff", borderRadius: "12px", border: "1px solid #eee", overflow: "hidden" }}>
-          <div style={{ padding: "12px 15px", backgroundColor: "#fcfcfc", borderBottom: "1px solid #eee", fontSize: "11px", fontWeight: "bold", color: "#999" }}>GRUPOS ACTIVOS</div>
-          {groups.map((g) => (
-            <div key={g.name} 
-              onClick={() => fetchStudents(g.name)}
-              style={{ 
-                display: "flex", justifyContent: "space-between", padding: "14px 15px", cursor: "pointer",
-                borderBottom: "1px solid #f9f9f9", backgroundColor: selectedGroup === g.name ? "#eefaf5" : "transparent"
-              }}>
-              <span style={{ fontWeight: selectedGroup === g.name ? "700" : "400", color: g.name === SIN_GRUPO_LABEL ? "#d9534f" : "#333" }}>
-                {g.name}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* COLUMNA ALUMNOS */}
-        <div style={{ backgroundColor: "#fff", borderRadius: "12px", border: "1px solid #eee", minHeight: "400px" }}>
-          <div style={{ padding: "12px 15px", backgroundColor: "#fcfcfc", borderBottom: "1px solid #eee", fontSize: "11px", fontWeight: "bold", color: "#999" }}>
-            LISTA DE ALUMNOS: {selectedGroup || "---"}
-          </div>
-          
-          {loadingStudents ? (
-            <p style={{ padding: "30px", textAlign: "center", color: "#999" }}>Cargando datos...</p>
-          ) : students.length > 0 ? (
-            students.map((s) => (
-              <div key={s.id} style={{ padding: "15px", borderBottom: "1px solid #f9f9f9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontWeight: "500" }}>{s.username}</span>
-                <select 
-                  value={s.group_name || SIN_GRUPO_LABEL} 
-                  onChange={(e) => changeStudentGroup(s.id, e.target.value)}
-                  style={{ padding: "6px 10px", borderRadius: "6px", border: "1px solid #ddd", fontSize: "13px" }}
-                >
-                  {groups.map(g => (
-                    <option key={g.name} value={g.name}>{g.name}</option>
-                  ))}
-                </select>
+      {activeTab === 'approvals' ? (
+        <section style={{ backgroundColor: "#fff", padding: "20px", borderRadius: "12px", border: "1px solid #eee" }}>
+          <h3>Solicitudes de Registro</h3>
+          {pendingUsers.length === 0 ? <p style={{ color: "#999" }}>No hay solicitudes pendientes.</p> : 
+            pendingUsers.map(u => (
+              <div key={u.id} style={{ display: "flex", justifyContent: "space-between", padding: "15px", borderBottom: "1px solid #f5f5f5" }}>
+                <div>
+                  <div style={{ fontWeight: "bold" }}>{u.username}</div>
+                  <div style={{ fontSize: "12px", color: "#888" }}>Registrado: {new Date(u.created_at).toLocaleDateString()}</div>
+                </div>
+                <button onClick={() => approveUser(u.id)} style={{ backgroundColor: "#2cb696", color: "#fff", border: "none", padding: "8px 15px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>Aprobar Alumno</button>
               </div>
             ))
-          ) : (
-            <div style={{ textAlign: "center", padding: "80px 20px", color: "#ccc" }}>
-              <p>Selecciona un grupo a la izquierda para gestionar alumnos.</p>
-            </div>
-          )}
+          }
+        </section>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: "20px" }}>
+          {/* Grupos a la izquierda */}
+          <div style={{ border: "1px solid #eee", borderRadius: "12px", overflow: "hidden" }}>
+            {groups.map(g => (
+              <div key={g.name} onClick={() => fetchStudents(g.name)} style={{ padding: "15px", cursor: "pointer", backgroundColor: selectedGroup === g.name ? "#eefaf5" : "#fff", borderBottom: "1px solid #f5f5f5" }}>{g.name}</div>
+            ))}
+          </div>
+          {/* Alumnos a la derecha */}
+          <div style={{ border: "1px solid #eee", borderRadius: "12px", padding: "20px" }}>
+            {loading ? "Cargando..." : students.map(s => (
+              <div key={s.id} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid #f9f9f9" }}>
+                <span>{s.username}</span>
+                <Link href={`/profile/${s.id}`} style={{ fontSize: "12px", color: "#2cb696", textDecoration: "none" }}>Ver Expediente →</Link>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
