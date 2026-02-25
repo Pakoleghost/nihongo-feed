@@ -1,213 +1,166 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
-type PostDetail = {
-  id: string;
-  content: string;
-  created_at: string;
-  image_url: string | null;
-  user_id: string;
-  username: string;
-  avatar_url: string | null;
-};
-
-export default function PostPage() {
-  const params = useParams();
-  // Validamos que postId sea string
-  const postId = typeof params?.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : null;
-
-  const [post, setPost] = useState<PostDetail | null>(null);
+export default function PostDetailPage() {
+  const { id } = useParams();
+  const router = useRouter();
+  const [post, setPost] = useState<any>(null);
+  const [myProfile, setMyProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
-  // Estados para Likes
-  const [likesCount, setLikesCount] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  // 1. Obtener usuario actual
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) setCurrentUserId(session.user.id);
-    });
-  }, []);
-
-  // 2. Cargar Post y Likes
-  const fetchPostData = useCallback(async () => {
-    if (!postId) return;
-    setLoading(true);
-
-    // A) Cargar contenido del post
-    const { data, error } = await supabase
-      .from("posts")
-      .select(`
-        id, content, created_at, image_url, user_id,
-        profiles (username, avatar_url)
-      `)
-      .eq("id", postId)
-      .single();
-
-    if (error) {
-      console.error("Error cargando post:", error);
-      setLoading(false);
-      return;
-    }
-
-    const profile = Array.isArray(data.profiles) ? data.profiles[0] : data.profiles;
-    setPost({
-      id: data.id,
-      content: data.content || "",
-      created_at: data.created_at,
-      image_url: data.image_url || null,
-      user_id: data.user_id,
-      username: profile?.username || "Usuario Anónimo",
-      avatar_url: profile?.avatar_url || null,
-    });
-
-    // B) Cargar conteo de likes
-    const { count } = await supabase
-      .from("likes")
-      .select("*", { count: "exact", head: true }) // head: true significa "solo cuenta, no traigas datos"
-      .eq("post_id", postId);
-    
-    setLikesCount(count || 0);
-
-    // C) Verificar si YO le di like
-    if (currentUserId) {
-      const { data: likeData } = await supabase
-        .from("likes")
-        .select("user_id")
-        .eq("post_id", postId)
-        .eq("user_id", currentUserId)
-        .single();
+    const fetchPostAndUser = async () => {
+      setLoading(true);
       
-      setIsLiked(!!likeData);
-    }
-
-    setLoading(false);
-  }, [postId, currentUserId]);
-
-  useEffect(() => {
-    fetchPostData();
-  }, [fetchPostData]);
-
-
-  // 3. Manejar el Click en Like
-  const handleToggleLike = async () => {
-    if (!currentUserId) {
-      alert("Debes iniciar sesión para dar like.");
-      return;
-    }
-    if (!postId) return;
-
-    // Optimism UI: Actualizamos visualmente antes de esperar a la base de datos
-    const previousIsLiked = isLiked;
-    const previousCount = likesCount;
-
-    setIsLiked(!isLiked);
-    setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
-
-    try {
-      if (previousIsLiked) {
-        // Quitar Like
-        const { error } = await supabase
-          .from("likes")
-          .delete()
-          .eq("post_id", postId)
-          .eq("user_id", currentUserId);
-        if (error) throw error;
-      } else {
-        // Dar Like
-        const { error } = await supabase
-          .from("likes")
-          .insert({ post_id: postId, user_id: currentUserId });
-        if (error) throw error;
+      // 1. Obtener perfil del usuario actual
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+        setMyProfile(prof);
       }
-    } catch (error) {
-      console.error("Error al dar like:", error);
-      // Revertir cambios si falló
-      setIsLiked(previousIsLiked);
-      setLikesCount(previousCount);
-    }
+
+      // 2. Obtener detalle del post con info del autor
+      const { data: postData } = await supabase
+        .from("posts")
+        .select(`*, profiles:user_id (username, avatar_url, group_name, is_admin)`)
+        .eq("id", id)
+        .single();
+
+      if (postData) setPost(postData);
+      setLoading(false);
+    };
+
+    fetchPostAndUser();
+  }, [id]);
+
+  const toggleReview = async () => {
+    const { error } = await supabase
+      .from("posts")
+      .update({ is_reviewed: !post.is_reviewed })
+      .eq("id", id);
+    
+    if (!error) setPost({ ...post, is_reviewed: !post.is_reviewed });
   };
 
-
-  if (loading) return <div style={{ padding: "40px", textAlign: "center", color: "#888" }}>Cargando...</div>;
+  if (loading) return <div style={{ padding: "40px", textAlign: "center", color: "#888" }}>読み込み中... (Cargando)</div>;
   if (!post) return <div style={{ padding: "40px", textAlign: "center" }}>Post no encontrado.</div>;
 
+  const isSenseiPost = post.profiles?.is_admin;
+  const [titulo, ...cuerpo] = post.content.split('\n');
+
   return (
-    <div style={{ backgroundColor: "#fff", minHeight: "100vh", paddingBottom: "80px" }}>
+    <div style={{ maxWidth: "700px", margin: "0 auto", padding: "20px", fontFamily: "sans-serif", color: "#333" }}>
       
-      <header style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
-        <Link href="/" style={{ textDecoration: "none", color: "#888", fontSize: "14px" }}>
+      {/* HEADER: Volver */}
+      <nav style={{ marginBottom: "30px" }}>
+        <Link href="/" style={{ textDecoration: "none", color: "#2cb696", fontWeight: "bold", fontSize: "14px" }}>
           ← Volver al inicio
         </Link>
-      </header>
+      </nav>
 
-      <article style={{ maxWidth: "680px", margin: "0 auto", padding: "0 20px" }}>
-        
-        {post.image_url && (
-          <div style={{ width: "100%", height: "300px", marginBottom: "32px", borderRadius: "8px", overflow: "hidden", backgroundColor: "#f5f5f5" }}>
-            <img src={post.image_url} alt="Cover" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      <article>
+        {/* INFO DEL AUTOR */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ width: "45px", height: "45px", borderRadius: "50%", overflow: "hidden", border: "1px solid #eee" }}>
+              {post.profiles?.avatar_url ? (
+                <img src={post.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <div style={{ width: "100%", height: "100%", backgroundColor: "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center" }}>👤</div>
+              )}
+            </div>
+            <div>
+              <div style={{ fontWeight: "bold", fontSize: "16px" }}>
+                {isSenseiPost ? "👨‍🏫 " : ""}{post.profiles?.username}
+                {isSenseiPost && <span style={{ color: "#2cb696", fontSize: "12px", marginLeft: "5px" }}>先生</span>}
+              </div>
+              <div style={{ fontSize: "12px", color: "#999" }}>
+                {post.profiles?.group_name || "Sensei"} • {new Date(post.created_at).toLocaleDateString()}
+              </div>
+            </div>
           </div>
-        )}
 
-        <h1 style={{ fontSize: "32px", fontWeight: "bold", marginBottom: "16px", color: "#222" }}>
-          {post.content.split('\n')[0]}
-        </h1>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "32px" }}>
-          <div style={{ width: "40px", height: "40px", borderRadius: "50%", overflow: "hidden", backgroundColor: "#eee" }}>
-            {post.avatar_url ? (
-              <img src={post.avatar_url} alt={post.username} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            ) : (
-              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", color: "#999" }}>
-                {post.username[0]?.toUpperCase()}
+          {/* TAGS Y SELLO SUMI */}
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <span style={{ 
+              fontSize: "11px", padding: "4px 10px", borderRadius: "20px", 
+              backgroundColor: post.type === 'assignment' ? "#eefaf5" : "#f5f5f5",
+              color: post.type === 'assignment' ? "#2cb696" : "#888",
+              border: `1px solid ${post.type === 'assignment' ? "#2cb696" : "#ddd"}`
+            }}>
+              {post.type === 'assignment' ? "# Tarea" : post.type === 'announcement' ? "# Aviso" : "# Práctica"}
+            </span>
+            {post.is_reviewed && (
+              <div style={{ 
+                border: "3px solid #d9534f", color: "#d9534f", padding: "5px 10px", 
+                borderRadius: "5px", fontWeight: "900", transform: "rotate(-10px)",
+                fontSize: "18px", letterSpacing: "2px"
+              }}>
+                済 SUMI
               </div>
             )}
           </div>
-          <div>
-            <div style={{ fontWeight: "bold", fontSize: "14px" }}>{post.username}</div>
-            <div style={{ fontSize: "12px", color: "#888" }}>
-              {new Date(post.created_at).toLocaleDateString("ja-JP", { year: 'numeric', month: 'long', day: 'numeric' })}
-            </div>
+        </div>
+
+        {/* IMAGEN DE PORTADA */}
+        {post.image_url && (
+          <div style={{ width: "100%", borderRadius: "15px", overflow: "hidden", marginBottom: "30px", border: "1px solid #eee" }}>
+            <img src={post.image_url} alt="Portada" style={{ width: "100%", display: "block" }} />
           </div>
+        )}
+
+        {/* CONTENIDO TEXTO */}
+        <h1 style={{ fontSize: "32px", fontWeight: "800", marginBottom: "20px", lineHeight: "1.2" }}>{titulo}</h1>
+        <div style={{ fontSize: "18px", lineHeight: "1.8", color: "#444", whiteSpace: "pre-wrap", marginBottom: "40px" }}>
+          {cuerpo.join('\n')}
         </div>
 
-        <div style={{ fontSize: "18px", lineHeight: "1.8", color: "#333", whiteSpace: "pre-wrap", fontFamily: "Georgia, serif" }}>
-          {post.content}
-        </div>
+        {/* PANEL DE ACCIONES (FOOTER DEL POST) */}
+        <footer style={{ padding: "30px", backgroundColor: "#f9f9f9", borderRadius: "15px", border: "1px solid #eee" }}>
+          
+          {/* Caso 1: Es una tarea del Sensei y el alumno quiere entregar */}
+          {post.type === 'assignment' && isSenseiPost && !myProfile?.is_admin && (
+            <div style={{ textAlign: "center" }}>
+              <p style={{ margin: "0 0 15px 0", fontSize: "14px", color: "#666" }}>¿Listo para tu entrega de blog?</p>
+              <Link href={`/write?assignment_id=${post.id}&title=${encodeURIComponent(titulo)}`} style={{ 
+                backgroundColor: "#2cb696", color: "#fff", padding: "12px 30px", 
+                borderRadius: "25px", textDecoration: "none", fontWeight: "bold", display: "inline-block"
+              }}>
+                ✍️ Escribir mi tarea ahora
+              </Link>
+            </div>
+          )}
 
+          {/* Caso 2: El Sensei está revisando la tarea de un alumno */}
+          {myProfile?.is_admin && post.user_id !== myProfile.id && (
+            <div style={{ textAlign: "center" }}>
+              <p style={{ margin: "0 0 15px 0", fontSize: "14px", color: "#666" }}>Acciones de Sensei:</p>
+              <button 
+                onClick={toggleReview}
+                style={{ 
+                  backgroundColor: post.is_reviewed ? "#fff" : "#2cb696", 
+                  color: post.is_reviewed ? "#2cb696" : "#fff", 
+                  border: `2px solid #2cb696`,
+                  padding: "10px 25px", borderRadius: "25px", fontWeight: "bold", cursor: "pointer"
+                }}
+              >
+                {post.is_reviewed ? "◯ Quitar sello revisado" : "✅ Marcar como Revisado (済)"}
+              </button>
+            </div>
+          )}
+
+          {/* Información de Deadline */}
+          {post.deadline && (
+            <p style={{ textAlign: "center", fontSize: "12px", color: "#d9534f", marginTop: "15px", fontWeight: "bold" }}>
+              ⏰ Fecha límite: {new Date(post.deadline).toLocaleDateString()}
+            </p>
+          )}
+        </footer>
       </article>
-      
-      {/* SECCIÓN DE LIKES */}
-      <div style={{ maxWidth: "680px", margin: "40px auto 0", borderTop: "1px solid #eaeaea", paddingTop: "32px", textAlign: "center" }}>
-        <p style={{ color: "#888", marginBottom: "16px", fontSize: "14px" }}>¿Te gustó este artículo?</p>
-        
-        <button 
-          onClick={handleToggleLike}
-          style={{ 
-            padding: "10px 24px", 
-            borderRadius: "30px", 
-            border: isLiked ? "none" : "1px solid #2cb696", 
-            backgroundColor: isLiked ? "#ff4d4f" : "#fff", 
-            color: isLiked ? "#fff" : "#2cb696", 
-            fontWeight: "bold",
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            fontSize: "16px",
-            transition: "all 0.2s ease"
-          }}
-        >
-          {isLiked ? "♥" : "♡"} <span>{likesCount}</span>
-        </button>
-      </div>
-
     </div>
   );
 }
