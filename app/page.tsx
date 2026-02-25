@@ -47,7 +47,7 @@ export default function HomePage() {
     <div style={{ maxWidth: "650px", margin: "0 auto", fontFamily: "sans-serif", backgroundColor: "#fff", minHeight: "100vh" }}>
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 20px", borderBottom: "1px solid #eee", position: "sticky", top: 0, backgroundColor: "#fff", zIndex: 10 }}>
         <Link href="/" style={{ textDecoration: "none", color: "#2cb696", fontWeight: "bold", fontSize: "20px" }}>Nihongo Note</Link>
-        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           {myProfile?.is_admin && <Link href="/admin/groups" style={{ fontSize: "18px", textDecoration: "none" }}>⚙️</Link>}
           <Link href="/notifications" style={{ position: "relative", textDecoration: "none", fontSize: "18px" }}>
             🔔 {unreadNotifications > 0 && <span style={{ position: "absolute", top: "-5px", right: "-5px", backgroundColor: "#d9534f", color: "#fff", fontSize: "9px", padding: "2px 4px", borderRadius: "10px" }}>{unreadNotifications}</span>}
@@ -55,7 +55,7 @@ export default function HomePage() {
           <button onClick={() => setShowArchived(!showArchived)} style={{ background: "none", border: "none", fontSize: "12px", color: showArchived ? "#2cb696" : "#888", cursor: "pointer" }}>
             {showArchived ? "📖 Muro" : "📑 Tareas"}
           </button>
-          <Link href="/write" style={{ backgroundColor: "#2cb696", color: "#fff", padding: "6px 16px", borderRadius: "20px", textDecoration: "none", fontSize: "13px", fontWeight: "bold", whiteSpace: "nowrap" }}>書く</Link>
+          <Link href="/write" style={{ backgroundColor: "#2cb696", color: "#fff", padding: "8px 16px", borderRadius: "20px", textDecoration: "none", fontSize: "13px", fontWeight: "bold" }}>書く</Link>
           <Link href={`/profile/${myProfile?.id}`} style={{ width: "30px", height: "30px", borderRadius: "50%", overflow: "hidden", border: "1px solid #ddd" }}>
             {myProfile?.avatar_url ? <img src={myProfile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "👤"}
           </Link>

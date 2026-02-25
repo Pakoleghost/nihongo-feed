@@ -17,33 +17,25 @@ export default function NotificationsPage() {
 
   useEffect(() => { fetchNotifications(); }, []);
 
-  const handleUserAction = async (notifId: number, userId: string, approve: boolean) => {
-    if (approve) {
-      await supabase.from("profiles").update({ is_approved: true }).eq("id", userId);
-      alert("Alumno aprobado ✅");
-    } else {
-      // Opcional: eliminar notificación o manejar rechazo
-      alert("Solicitud ignorada");
-    }
+  const approveUser = async (notifId: number, userId: string) => {
+    await supabase.from("profiles").update({ is_approved: true }).eq("id", userId);
     await supabase.from("notifications").delete().eq("id", notifId);
+    alert("¡Alumno aprobado! ✅");
     fetchNotifications();
   };
 
   return (
     <div style={{ maxWidth: "600px", margin: "40px auto", padding: "20px", fontFamily: "sans-serif" }}>
-      <Link href="/" style={{ color: "#2cb696", textDecoration: "none", fontWeight: "bold" }}>← Volver</Link>
-      <h1 style={{ fontSize: "24px", margin: "20px 0" }}>Notificaciones</h1>
+      <header style={{ marginBottom: "20px" }}>
+        <Link href="/" style={{ color: "#2cb696", textDecoration: "none", fontWeight: "bold" }}>← Volver</Link>
+        <h1 style={{ fontSize: "24px", marginTop: "10px" }}>Notificaciones</h1>
+      </header>
       
       {notifications.map(n => (
         <div key={n.id} style={{ padding: "15px", border: "1px solid #eee", borderRadius: "10px", marginBottom: "10px", backgroundColor: "#fff" }}>
           <p style={{ margin: "0 0 10px 0" }}>{n.message}</p>
-          
-          {/* Si el mensaje contiene "signup" o "registro", mostramos botones de acción */}
           {n.message.toLowerCase().includes("registro") && (
-            <div style={{ display: "flex", gap: "10px" }}>
-              <button onClick={() => handleUserAction(n.id, n.link.split('/').pop(), true)} style={{ backgroundColor: "#2cb696", color: "#fff", border: "none", padding: "5px 12px", borderRadius: "5px", cursor: "pointer" }}>Aprobar</button>
-              <button onClick={() => handleUserAction(n.id, n.link.split('/').pop(), false)} style={{ backgroundColor: "#eee", color: "#666", border: "none", padding: "5px 12px", borderRadius: "5px", cursor: "pointer" }}>Ignorar</button>
-            </div>
+            <button onClick={() => approveUser(n.id, n.link.split('/').pop()!)} style={{ backgroundColor: "#2cb696", color: "#fff", border: "none", padding: "8px 16px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>Aprobar Alumno</button>
           )}
           {!n.message.toLowerCase().includes("registro") && n.link && <Link href={n.link} style={{ fontSize: "12px", color: "#2cb696" }}>Ver detalle →</Link>}
         </div>
