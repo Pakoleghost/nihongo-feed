@@ -2,8 +2,25 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
+
+// Componente de Icono de Corazón Minimalista
+const HeartIcon = ({ filled }: { filled: boolean }) => (
+  <svg 
+    width="20" 
+    height="20" 
+    viewBox="0 0 24 24" 
+    fill={filled ? "#ff2d55" : "none"} 
+    stroke={filled ? "#ff2d55" : "#666"} 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    style={{ transition: "all 0.2s ease" }}
+  >
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+  </svg>
+);
 
 export default function PostDetailPage() {
   const { id } = useParams();
@@ -14,20 +31,16 @@ export default function PostDetailPage() {
   const [loading, setLoading] = useState(true);
 
   const fetchPostAndLikes = useCallback(async () => {
-    // 1. Obtener el post con el perfil del autor
     const { data } = await supabase.from("posts").select("*, profiles:user_id(*)").eq("id", id).single();
     setPost(data);
 
-    // 2. Obtener mi sesión
     const { data: { user } } = await supabase.auth.getUser();
     setMyId(user?.id || null);
 
     if (data) {
-      // 3. Contar likes
       const { count } = await supabase.from("likes").select("*", { count: 'exact', head: true }).eq("post_id", id);
       setLikesCount(count || 0);
 
-      // 4. Ver si yo le di like
       if (user) {
         const { data: like } = await supabase.from("likes").select("*").eq("post_id", id).eq("user_id", user.id).single();
         setIsLiked(!!like);
@@ -50,55 +63,74 @@ export default function PostDetailPage() {
     setIsLiked(!isLiked);
   };
 
-  if (loading || !post) return <div style={{ padding: "40px", textAlign: "center", fontFamily: "sans-serif" }}>Cargando post...</div>;
+  if (loading || !post) return <div style={{ padding: "100px 20px", textAlign: "center", color: "#ccc" }}>...</div>;
 
   const [titulo, ...cuerpo] = post.content.split('\n');
+  const formattedDate = new Date(post.created_at).toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 
   return (
-    <div style={{ maxWidth: "700px", margin: "0 auto", padding: "20px", fontFamily: "sans-serif", color: "#333" }}>
-      <Link href="/" style={{ color: "#2cb696", textDecoration: "none", fontWeight: "bold" }}>← Volver al muro</Link>
+    <div style={{ maxWidth: "620px", margin: "0 auto", padding: "60px 20px", fontFamily: '-apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif' }}>
       
-      <article style={{ marginTop: "30px" }}>
-        {/* Cabecera: Foto y Nombre clicable */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-          <Link href={`/profile/${post.user_id}`} style={{ width: "45px", height: "45px", borderRadius: "50%", overflow: "hidden", border: "1px solid #eee", display: "block" }}>
+      {/* Imagen de Portada */}
+      {post.image_url && (
+        <div style={{ margin: "0 -20px 40px -20px" }}>
+          <img src={post.image_url} style={{ width: "100%", height: "auto", display: "block", borderRadius: "4px" }} alt="Portada" />
+        </div>
+      )}
+
+      <article>
+        <h1 style={{ fontSize: "32px", fontWeight: "700", lineHeight: "1.4", color: "#222", marginBottom: "32px", letterSpacing: "-0.02em" }}>
+          {titulo}
+        </h1>
+
+        {/* Info del Autor */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "40px" }}>
+          <Link href={`/profile/${post.user_id}`} style={{ width: "42px", height: "42px", borderRadius: "50%", overflow: "hidden", display: "block", flexShrink: 0, border: "1px solid #f0f0f0" }}>
             {post.profiles?.avatar_url ? (
               <img src={post.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            ) : <div style={{ background: "#eee", width: "100%", height: "100%", textAlign: "center", lineHeight: "45px" }}>👤</div>}
+            ) : <div style={{ background: "#eee", width: "100%", height: "100%", textAlign: "center", lineHeight: "42px", color: "#999" }}>👤</div>}
           </Link>
           <div>
-            <Link href={`/profile/${post.user_id}`} style={{ textDecoration: "none", color: "#333", fontWeight: "bold", fontSize: "16px" }}>
+            <Link href={`/profile/${post.user_id}`} style={{ textDecoration: "none", color: "#222", fontWeight: "500", fontSize: "15px" }}>
               {post.profiles?.username}
             </Link>
-            <div style={{ fontSize: "12px", color: "#999" }}>{new Date(post.created_at).toLocaleDateString()}</div>
+            <div style={{ fontSize: "13px", color: "#888", marginTop: "2px" }}>{formattedDate}</div>
           </div>
         </div>
 
-        <h1 style={{ fontSize: "28px", margin: "0 0 20px 0" }}>{titulo}</h1>
-
-        {/* Imagen del post (si existe) */}
-        {post.image_url && (
-          <img src={post.image_url} style={{ width: "100%", borderRadius: "15px", marginBottom: "20px", border: "1px solid #eee" }} />
-        )}
-
-        <div style={{ fontSize: "18px", lineHeight: "1.7", whiteSpace: "pre-wrap", marginBottom: "30px" }}>
+        {/* Cuerpo del Post */}
+        <div style={{ fontSize: "18px", lineHeight: "1.9", color: "#333", whiteSpace: "pre-wrap", letterSpacing: "0.01em" }}>
           {cuerpo.join('\n')}
         </div>
 
-        {/* Botón de Like */}
-        <div style={{ borderTop: "1px solid #eee", paddingTop: "20px", display: "flex", alignItems: "center", gap: "10px" }}>
-          <button 
-            onClick={handleLike} 
-            style={{ 
-              background: isLiked ? "#fee2e2" : "#f3f4f6", 
-              border: "none", padding: "10px 20px", borderRadius: "20px", 
-              cursor: "pointer", display: "flex", alignItems: "center", gap: "5px",
-              color: isLiked ? "#ef4444" : "#666", fontWeight: "bold", transition: "0.2s"
-            }}
-          >
-            {isLiked ? "❤️" : "🤍"} {likesCount}
-          </button>
-        </div>
+        {/* Footer con Interacciones Minimalistas */}
+        <footer style={{ marginTop: "80px", paddingTop: "40px", borderTop: "1px solid #eee" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <button 
+              onClick={handleLike} 
+              style={{ 
+                background: isLiked ? "#fff0f0" : "none", 
+                border: isLiked ? "1px solid #ffccd5" : "1px solid #ddd", 
+                padding: "10px 24px", 
+                borderRadius: "30px", 
+                cursor: "pointer", 
+                display: "flex", 
+                alignItems: "center", 
+                gap: "8px",
+                transition: "all 0.2s ease"
+              }}
+            >
+              <HeartIcon filled={isLiked} />
+              <span style={{ fontWeight: "600", color: isLiked ? "#ff2d55" : "#666", fontSize: "15px" }}>
+                {likesCount > 0 ? likesCount : "Suki"}
+              </span>
+            </button>
+          </div>
+        </footer>
       </article>
     </div>
   );
