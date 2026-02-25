@@ -7,48 +7,47 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+  const fetchNotifications = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data } = await supabase.from("notifications").select("*").eq("user_id", user?.id).order("created_at", { ascending: false });
+    setNotifications(data || []);
+    setLoading(false);
+    await supabase.from("notifications").update({ is_read: true }).eq("user_id", user?.id);
+  };
 
-      const { data } = await supabase.from("notifications")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+  useEffect(() => { fetchNotifications(); }, []);
 
-      setNotifications(data || []);
-      
-      // Marcar todas como leídas al entrar
-      await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id);
-      setLoading(false);
-    };
+  const handleUserAction = async (notifId: number, userId: string, approve: boolean) => {
+    if (approve) {
+      await supabase.from("profiles").update({ is_approved: true }).eq("id", userId);
+      alert("Alumno aprobado ✅");
+    } else {
+      // Opcional: eliminar notificación o manejar rechazo
+      alert("Solicitud ignorada");
+    }
+    await supabase.from("notifications").delete().eq("id", notifId);
     fetchNotifications();
-  }, []);
+  };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif" }}>
-      <header style={{ marginBottom: "30px" }}>
-        <Link href="/" style={{ color: "#2cb696", textDecoration: "none", fontWeight: "bold" }}>← Volver</Link>
-        <h1 style={{ fontSize: "24px", marginTop: "10px" }}>Notificaciones 🔔</h1>
-      </header>
-
-      {loading ? "Cargando..." : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {notifications.length === 0 ? <p style={{ color: "#999", textAlign: "center" }}>No tienes notificaciones aún.</p> : 
-            notifications.map(n => (
-              <Link key={n.id} href={n.link || "#"} style={{ 
-                display: "block", padding: "15px", borderRadius: "10px", 
-                backgroundColor: n.is_read ? "#fff" : "#f0fdf4",
-                border: "1px solid #eee", textDecoration: "none", color: "#333"
-              }}>
-                <div style={{ fontSize: "14px" }}>{n.message}</div>
-                <div style={{ fontSize: "11px", color: "#aaa", marginTop: "5px" }}>{new Date(n.created_at).toLocaleDateString()}</div>
-              </Link>
-            ))
-          }
+    <div style={{ maxWidth: "600px", margin: "40px auto", padding: "20px", fontFamily: "sans-serif" }}>
+      <Link href="/" style={{ color: "#2cb696", textDecoration: "none", fontWeight: "bold" }}>← Volver</Link>
+      <h1 style={{ fontSize: "24px", margin: "20px 0" }}>Notificaciones</h1>
+      
+      {notifications.map(n => (
+        <div key={n.id} style={{ padding: "15px", border: "1px solid #eee", borderRadius: "10px", marginBottom: "10px", backgroundColor: "#fff" }}>
+          <p style={{ margin: "0 0 10px 0" }}>{n.message}</p>
+          
+          {/* Si el mensaje contiene "signup" o "registro", mostramos botones de acción */}
+          {n.message.toLowerCase().includes("registro") && (
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button onClick={() => handleUserAction(n.id, n.link.split('/').pop(), true)} style={{ backgroundColor: "#2cb696", color: "#fff", border: "none", padding: "5px 12px", borderRadius: "5px", cursor: "pointer" }}>Aprobar</button>
+              <button onClick={() => handleUserAction(n.id, n.link.split('/').pop(), false)} style={{ backgroundColor: "#eee", color: "#666", border: "none", padding: "5px 12px", borderRadius: "5px", cursor: "pointer" }}>Ignorar</button>
+            </div>
+          )}
+          {!n.message.toLowerCase().includes("registro") && n.link && <Link href={n.link} style={{ fontSize: "12px", color: "#2cb696" }}>Ver detalle →</Link>}
         </div>
-      )}
+      ))}
     </div>
   );
 }
