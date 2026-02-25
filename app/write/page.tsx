@@ -34,26 +34,37 @@ function WriteContent() {
         const { data: groups } = await supabase.from("groups").select("name").order("name");
         if (groups) setAvailableGroups(groups);
       }
+      if (assignmentId) setPostType('assignment');
     };
     checkUser();
-  }, [router]);
+  }, [router, assignmentId]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
 
   const handlePublish = async () => {
-    if (!title.trim() || !body.trim()) return alert("Completa los campos.");
+    if (!title.trim() || !body.trim()) return alert("Escribe título y contenido.");
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No auth");
       let imageUrl = null;
       if (imageFile) {
-        const filePath = `post-images/${user?.id}-${Math.random()}`;
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+        const filePath = `post-images/${fileName}`;
         await supabase.storage.from('uploads').upload(filePath, imageFile);
         const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(filePath);
         imageUrl = urlData.publicUrl;
       }
-
       await supabase.from("posts").insert({
         content: `${title}\n${body}`,
-        user_id: user?.id,
+        user_id: user.id,
         image_url: imageUrl,
         type: postType === 'forum' ? 'assignment' : postType,
         is_forum: postType === 'forum',
@@ -63,28 +74,48 @@ function WriteContent() {
         assignment_subtype: postType === 'assignment' ? assignmentSubtype : (postType === 'forum' ? 'internal' : null)
       });
       router.push("/");
-    } catch (e) { alert("Error"); }
+    } catch (err) { alert("Error al publicar"); }
     finally { setLoading(false); }
   };
 
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px", fontFamily: "sans-serif" }}>
-      <header style={{ display: "flex", justifyContent: "space-between", marginBottom: "30px" }}>
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
         <Link href="/" style={{ color: "#888", textDecoration: "none" }}>Cancelar</Link>
-        <button onClick={handlePublish} disabled={loading} style={{ backgroundColor: "#2cb696", color: "white", padding: "10px 24px", borderRadius: "20px", fontWeight: "bold" }}>Publicar</button>
+        <button onClick={handlePublish} disabled={loading} style={{ backgroundColor: "#2cb696", color: "white", border: "none", padding: "10px 24px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer" }}>
+          {assignmentId ? "📤 Entregar Tarea" : loading ? "Publicando..." : "Publicar"}
+        </button>
       </header>
-      {isAdmin && (
-        <div style={{ backgroundColor: "#f0fdf4", padding: "20px", borderRadius: "12px", marginBottom: "30px" }}>
-          <select value={postType} onChange={(e) => setPostType(e.target.value as any)} style={{ padding: "8px", borderRadius: "6px" }}>
-            <option value="post">Post Normal</option>
-            <option value="assignment">宿題 (Tarea)</option>
-            <option value="forum">掲示板 (Foro)</option>
-            <option value="announcement">お知らせ (Anuncio)</option>
-          </select>
+      {isAdmin && !assignmentId && (
+        <div style={{ backgroundColor: "#f0fdf4", padding: "20px", borderRadius: "12px", marginBottom: "30px", border: "1px solid #dcfce7" }}>
+          <h3 style={{ margin: "0 0 15px 0", fontSize: "14px", color: "#166534", textTransform: "uppercase" }}>Configuración de Sensei</h3>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontSize: "12px", color: "#666" }}>Tipo</label>
+              <select value={postType} onChange={(e) => setPostType(e.target.value as any)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
+                <option value="post">Post Normal</option>
+                <option value="assignment">宿題 (Tarea)</option>
+                <option value="forum">掲示板 (Foro)</option>
+                <option value="announcement">お知らせ (Anuncio)</option>
+              </select>
+            </div>
+            {postType !== 'post' && (
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: "12px", color: "#666" }}>Grupo</label>
+                <select value={targetGroup} onChange={(e) => setTargetGroup(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
+                  <option value="">Seleccionar...</option>
+                  <option value="Todos">Todos</option>
+                  {availableGroups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
+                </select>
+              </div>
+            )}
+          </div>
         </div>
       )}
-      <input type="text" placeholder="Título..." value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%", fontSize: "32px", fontWeight: "bold", border: "none", outline: "none" }} />
-      <textarea placeholder="Contenido..." value={body} onChange={(e) => setBody(e.target.value)} style={{ width: "100%", minHeight: "300px", fontSize: "18px", border: "none", outline: "none", resize: "none" }} />
+      <main>
+        <input type="text" placeholder="Título..." value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%", fontSize: "32px", fontWeight: "bold", border: "none", outline: "none", marginBottom: "20px" }} />
+        <textarea placeholder="Escribe aquí..." value={body} onChange={(e) => setBody(e.target.value)} style={{ width: "100%", minHeight: "300px", fontSize: "18px", border: "none", outline: "none", resize: "none" }} />
+      </main>
     </div>
   );
 }
