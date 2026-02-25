@@ -29,7 +29,6 @@ export default function PostDetailPage() {
   const [likesCount, setLikesCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(true);
-  // Nuevo estado para controlar si la imagen está expandida
   const [isExpanded, setIsExpanded] = useState(false);
 
   const fetchPostAndLikes = useCallback(async () => {
@@ -77,24 +76,23 @@ export default function PostDetailPage() {
   return (
     <div style={{ maxWidth: "620px", margin: "0 auto", padding: "60px 0", fontFamily: '-apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif' }}>
       
-      {/* Portada Expandible */}
+      {/* Portada Horizontal Estilo Note.com */}
       {post.image_url && (
         <div 
-          onClick={() => setIsExpanded(!isExpanded)} // Al hacer clic, alterna el estado
+          onClick={() => setIsExpanded(!isExpanded)} 
           style={{ 
             width: "100%", 
-            // Si no está expandida, altura fija de 400px. Si está expandida, altura automática.
-            height: isExpanded ? "auto" : "400px", 
-            maxHeight: isExpanded ? "none" : "50vh", 
+            // Altura reducida a 260px para un look más horizontal y estético
+            height: isExpanded ? "auto" : "260px", 
+            maxHeight: isExpanded ? "85vh" : "260px", 
             overflow: "hidden", 
             marginBottom: "40px",
             backgroundColor: "#f9f9f9",
-            // Cambia el cursor para indicar que es interactivo
             cursor: isExpanded ? "zoom-out" : "zoom-in",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            transition: "height 0.3s ease" // Transición suave al cambiar la altura
+            transition: "all 0.3s ease-in-out" 
           }}
         >
           <img 
@@ -102,12 +100,10 @@ export default function PostDetailPage() {
             style={{ 
               width: "100%", 
               height: isExpanded ? "auto" : "100%", 
-              // 'cover' recorta para llenar el espacio, 'contain' muestra la imagen completa
               objectFit: isExpanded ? "contain" : "cover", 
               objectPosition: "center",
               display: "block",
-              // Limita la altura máxima al expandir para que no sea más alta que la pantalla
-              maxHeight: isExpanded ? "85vh" : "none" 
+              maxHeight: isExpanded ? "85vh" : "260px"
             }} 
             alt="Portada" 
           />
@@ -119,7 +115,6 @@ export default function PostDetailPage() {
           {titulo}
         </h1>
 
-        {/* Info del Autor */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "40px" }}>
           <Link href={`/profile/${post.user_id}`} style={{ width: "42px", height: "42px", borderRadius: "50%", overflow: "hidden", display: "block", flexShrink: 0, border: "1px solid #f0f0f0" }}>
             {post.profiles?.avatar_url ? (
@@ -134,12 +129,10 @@ export default function PostDetailPage() {
           </div>
         </div>
 
-        {/* Cuerpo del Post */}
         <div style={{ fontSize: "18px", lineHeight: "1.9", color: "#333", whiteSpace: "pre-wrap", letterSpacing: "0.01em" }}>
           {cuerpo.join('\n')}
         </div>
 
-        {/* Footer Minimalista */}
         <footer style={{ marginTop: "80px", paddingTop: "40px", borderTop: "1px solid #eee" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <button 
