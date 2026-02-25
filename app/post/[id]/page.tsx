@@ -29,6 +29,8 @@ export default function PostDetailPage() {
   const [likesCount, setLikesCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(true);
+  // Nuevo estado para controlar si la imagen está expandida
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const fetchPostAndLikes = useCallback(async () => {
     const { data } = await supabase.from("posts").select("*, profiles:user_id(*)").eq("id", id).single();
@@ -75,23 +77,37 @@ export default function PostDetailPage() {
   return (
     <div style={{ maxWidth: "620px", margin: "0 auto", padding: "60px 0", fontFamily: '-apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif' }}>
       
-      {/* Portada Estilo Note.com */}
+      {/* Portada Expandible */}
       {post.image_url && (
-        <div style={{ 
-          width: "100%", 
-          height: "400px", // Altura fija para controlar imágenes verticales
-          maxHeight: "50vh", 
-          overflow: "hidden", 
-          marginBottom: "40px",
-          backgroundColor: "#f9f9f9"
-        }}>
+        <div 
+          onClick={() => setIsExpanded(!isExpanded)} // Al hacer clic, alterna el estado
+          style={{ 
+            width: "100%", 
+            // Si no está expandida, altura fija de 400px. Si está expandida, altura automática.
+            height: isExpanded ? "auto" : "400px", 
+            maxHeight: isExpanded ? "none" : "50vh", 
+            overflow: "hidden", 
+            marginBottom: "40px",
+            backgroundColor: "#f9f9f9",
+            // Cambia el cursor para indicar que es interactivo
+            cursor: isExpanded ? "zoom-out" : "zoom-in",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "height 0.3s ease" // Transición suave al cambiar la altura
+          }}
+        >
           <img 
             src={post.image_url} 
             style={{ 
               width: "100%", 
-              height: "100%", 
-              objectFit: "cover", // Esto es lo que evita que se estire
-              objectPosition: "center" 
+              height: isExpanded ? "auto" : "100%", 
+              // 'cover' recorta para llenar el espacio, 'contain' muestra la imagen completa
+              objectFit: isExpanded ? "contain" : "cover", 
+              objectPosition: "center",
+              display: "block",
+              // Limita la altura máxima al expandir para que no sea más alta que la pantalla
+              maxHeight: isExpanded ? "85vh" : "none" 
             }} 
             alt="Portada" 
           />
