@@ -2,81 +2,92 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 
-export default function ProfilePage() {
+export default function StudentProfilePage() {
   const { id } = useParams();
-  const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
-  const [myId, setMyId] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [myProfile, setMyProfile] = useState<any>(null);
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    setMyId(user?.id || null);
-    
-    const { data: me } = await supabase.from("profiles").select("is_admin").eq("id", user?.id).single();
-    setIsAdmin(me?.is_admin || false);
-
+    const { data: me } = await supabase.from("profiles").select("*").eq("id", user?.id).single();
     const { data: target } = await supabase.from("profiles").select("*").eq("id", id).single();
+    
+    setMyProfile(me);
     setProfile(target);
+
+    if (target) {
+      // Tareas y Foros del grupo
+      const { data: asgn } = await supabase.from("posts").select("*").eq("target_group", target.group_name).eq("type", "assignment");
+      // Entregas (posts hijos)
+      const { data: subs } = await supabase.from("posts").select("*").eq("user_id", id).not("parent_assignment_id", "is", null);
+      // Participaciones en Foros (comentarios)
+      const { data: comms } = await supabase.from("comments").select("post_id").eq("user_id", id);
+      
+      setAssignments(asgn || []);
+      setSubmissions([...(subs || []), ...(comms || [])]); // Combinamos entregas y comentarios
+    }
     setLoading(false);
   }, [id]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleSave = async () => {
-    const { error } = await supabase.from("profiles").update({
-      full_name: profile.full_name,
-      bio: profile.bio,
-      cefr_level: profile.cefr_level,
-      jlpt_level: profile.jlpt_level
-    }).eq("id", id);
-    if (!error) setIsEditing(false);
+  const updateLevel = async (field: string, val: string) => {
+    await supabase.from("profiles").update({ [field]: val }).eq("id", id);
+    fetchData();
   };
 
   if (loading || !profile) return <div style={{ padding: "50px", textAlign: "center" }}>Cargando...</div>;
 
-  const canEdit = isAdmin || myId === id;
-
   return (
-    <div style={{ maxWidth: "600px", margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif" }}>
-      <header style={{ textAlign: "center", marginBottom: "30px" }}>
-        <div style={{ width: "120px", height: "120px", borderRadius: "50%", overflow: "hidden", margin: "0 auto 20px", border: "4px solid #2cb696" }}>
-          {profile.avatar_url ? <img src={profile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ fontSize: "50px", lineHeight: "120px", backgroundColor: "#f0f0f0" }}>👤</div>}
+    <div style={{ maxWidth: "650px", margin: "40px auto", padding: "20px", fontFamily: "sans-serif" }}>
+      <header style={{ textAlign: "center", marginBottom: "40px" }}>
+        <div style={{ width: "100px", height: "100px", borderRadius: "50%", backgroundColor: "#eee", margin: "0 auto 15px", overflow: "hidden" }}>
+          {profile.avatar_url && <img src={profile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
         </div>
-        
-        {isEditing ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <input type="text" value={profile.full_name || ""} onChange={e => setProfile({...profile, full_name: e.target.value})} placeholder="Nombre Real" style={{ padding: "10px", textAlign: "center", fontSize: "20px", fontWeight: "bold" }} />
-            <textarea value={profile.bio || ""} onChange={e => setProfile({...profile, bio: e.target.value})} placeholder="Cuéntanos sobre ti en japonés..." style={{ padding: "10px", minHeight: "80px", borderRadius: "8px" }} />
-            <button onClick={handleSave} style={{ backgroundColor: "#2cb696", color: "#fff", border: "none", padding: "10px", borderRadius: "20px", fontWeight: "bold" }}>Guardar Cambios</button>
-          </div>
-        ) : (
-          <>
-            <h1 style={{ margin: "0 0 5px 0" }}>{profile.full_name || profile.username}</h1>
-            <p style={{ color: "#888", margin: "0 0 20px 0" }}>@{profile.username} • {profile.group_name || "Sin grupo"}</p>
-            <p style={{ fontStyle: "italic", color: "#555", backgroundColor: "#f9f9f9", padding: "15px", borderRadius: "10px" }}>
-              {profile.bio || "Este alumno aún no ha escrito su biografía."}
-            </p>
-            {canEdit && <button onClick={() => setIsEditing(true)} style={{ marginTop: "15px", background: "none", border: "1px solid #ddd", padding: "5px 15px", borderRadius: "15px", cursor: "pointer" }}>Editar Perfil</button>}
-          </>
-        )}
+        <h1>{profile.full_name || profile.username}</h1>
+        <p style={{ color: "#888" }}>{profile.group_name} • {profile.bio || "Sin biografía"}</p>
       </header>
-      
-      {/* Badges de Nivel (JLPT / CEFR) */}
-      <div style={{ display: "flex", gap: "15px", justifyContent: "center" }}>
-        <div style={{ padding: "10px 20px", backgroundColor: "#eefaf5", borderRadius: "10px", border: "1px solid #2cb696", textAlign: "center" }}>
-          <div style={{ fontSize: "10px", color: "#2cb696" }}>CURSO</div>
-          <div style={{ fontWeight: "bold", fontSize: "18px" }}>{profile.cefr_level || "A1.1"}</div>
+
+      {/* GESTIÓN DE NIVELES (Solo para ti) */}
+      {myProfile?.is_admin && (
+        <div style={{ backgroundColor: "#f9f9f9", padding: "20px", borderRadius: "15px", marginBottom: "30px", border: "1px solid #eee" }}>
+          <h3 style={{ fontSize: "14px", color: "#999", marginBottom: "15px" }}>PANEL DE SENSEI</h3>
+          <div style={{ display: "flex", gap: "20px" }}>
+            <div>
+              <label style={{ fontSize: "11px", display: "block" }}>NIVEL CURSO</label>
+              <select value={profile.cefr_level || ""} onChange={e => updateLevel("cefr_level", e.target.value)} style={{ padding: "5px", borderRadius: "5px" }}>
+                {["A1.1", "A1.2", "A2.1", "A2.2", "A2+", "B1.1", "B1.2"].map(l => <option key={l} value={l}>{l}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize: "11px", display: "block" }}>JLPT</label>
+              <select value={profile.jlpt_level || ""} onChange={e => updateLevel("jlpt_level", e.target.value)} style={{ padding: "5px", borderRadius: "5px" }}>
+                {["Ninguno", "N5", "N4", "N3", "N2", "N1"].map(l => <option key={l} value={l}>{l}</option>)}
+              </select>
+            </div>
+          </div>
         </div>
-        <div style={{ padding: "10px 20px", backgroundColor: "#fff5f5", borderRadius: "10px", border: "1px solid #f87171", textAlign: "center" }}>
-          <div style={{ fontSize: "10px", color: "#f87171" }}>JLPT</div>
-          <div style={{ fontWeight: "bold", fontSize: "18px" }}>{profile.jlpt_level || "---"}</div>
-        </div>
-      </div>
+      )}
+
+      {/* LISTA DE PROGRESO */}
+      <section>
+        <h3>Progreso de Tareas y Foros</h3>
+        {assignments.map(a => {
+          const isDone = submissions.some(s => s.parent_assignment_id === a.id || s.post_id === a.id);
+          return (
+            <div key={a.id} style={{ display: "flex", justifyContent: "space-between", padding: "15px", borderBottom: "1px solid #eee" }}>
+              <span>{a.content.split('\n')[0]} {a.is_forum && "(Foro)"}</span>
+              <span style={{ fontWeight: "bold", color: isDone ? "#2cb696" : "#f87171" }}>
+                {isDone ? "✅ Completado" : "❌ Pendiente"}
+              </span>
+            </div>
+          );
+        })}
+      </section>
     </div>
   );
 }

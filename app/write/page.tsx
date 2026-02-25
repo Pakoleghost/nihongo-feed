@@ -8,8 +8,6 @@ import Link from "next/link";
 function WriteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
-  // Capturamos si viene una orden de entrega desde el feed
   const assignmentId = searchParams.get("assignment_id");
   const assignmentTitle = searchParams.get("title");
 
@@ -21,19 +19,18 @@ function WriteContent() {
 
   // Estados de Maestro
   const [isAdmin, setIsAdmin] = useState(false);
-  const [postType, setPostType] = useState<'post' | 'assignment' | 'announcement'>(assignmentId ? 'assignment' : 'post');
+  const [postType, setPostType] = useState<'post' | 'assignment' | 'announcement' | 'forum'>('post');
   const [targetGroup, setTargetGroup] = useState("");
   const [deadline, setDeadline] = useState("");
   const [assignmentSubtype, setAssignmentSubtype] = useState<'internal' | 'external'>('external');
+  const [isForumAssignment, setIsForumAssignment] = useState(false);
   const [availableGroups, setAvailableGroups] = useState<{name: string}[]>([]);
 
   useEffect(() => {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return router.push("/login");
-
       const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
-      
       if (profile?.is_admin) {
         setIsAdmin(true);
         const { data: groups } = await supabase.from("groups").select("name").order("name");
@@ -52,7 +49,7 @@ function WriteContent() {
   };
 
   const handlePublish = async () => {
-    if (!title.trim() || !body.trim()) return alert("Por favor escribe un título y contenido.");
+    if (!title.trim() || !body.trim()) return alert("Escribe título y contenido.");
     setLoading(true);
 
     try {
@@ -73,19 +70,18 @@ function WriteContent() {
         content: `${title}\n${body}`,
         user_id: user.id,
         image_url: imageUrl,
-        type: postType,
+        type: postType === 'forum' ? 'assignment' : postType, // Los foros-tarea se guardan como assignment
+        is_forum: postType === 'forum',
         parent_assignment_id: assignmentId ? parseInt(assignmentId) : null,
-        target_group: postType !== 'post' ? targetGroup : (assignmentId ? 'assignment' : null),
-        deadline: postType === 'assignment' ? (deadline || null) : null,
-        assignment_subtype: postType === 'assignment' ? assignmentSubtype : null
+        target_group: postType !== 'post' ? targetGroup : null,
+        deadline: (postType === 'assignment' || postType === 'forum') ? (deadline || null) : null,
+        assignment_subtype: postType === 'assignment' ? assignmentSubtype : (postType === 'forum' ? 'internal' : null)
       });
 
       if (error) throw error;
       router.push("/");
-      router.refresh();
     } catch (err) {
-      console.error(err);
-      alert("Hubo un error al publicar.");
+      alert("Error al publicar");
     } finally {
       setLoading(false);
     }
@@ -93,72 +89,37 @@ function WriteContent() {
 
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px", fontFamily: "sans-serif" }}>
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+      <header style={{ display: "flex", justifyContent: "space-between", marginBottom: "30px" }}>
         <Link href="/" style={{ color: "#888", textDecoration: "none" }}>Cancelar</Link>
-        <button 
-          onClick={handlePublish} 
-          disabled={loading} 
-          style={{ 
-            backgroundColor: "#2cb696", 
-            color: "white", 
-            border: "none", 
-            padding: "10px 24px", 
-            borderRadius: "20px", 
-            fontWeight: "bold", 
-            cursor: loading ? "not-allowed" : "pointer" 
-          }}
-        >
-          {assignmentId ? "📤 Entregar Tarea" : loading ? "Publicando..." : "Publicar"}
+        <button onClick={handlePublish} disabled={loading} style={{ backgroundColor: "#2cb696", color: "white", border: "none", padding: "10px 24px", borderRadius: "20px", fontWeight: "bold", cursor: "pointer" }}>
+          {loading ? "Publicando..." : "Publicar"}
         </button>
       </header>
 
-      {/* Info de Tarea vinculada para el alumno */}
-      {assignmentId && (
-        <div style={{ backgroundColor: "#eefaf5", padding: "15px", borderRadius: "10px", marginBottom: "25px", border: "1px solid #2cb696", color: "#166534" }}>
-          <strong>📝 Respondiendo a:</strong> {assignmentTitle}
-        </div>
-      )}
-
-      {/* Panel de Maestro (Solo Administrador) */}
-      {isAdmin && !assignmentId && (
+      {isAdmin && (
         <div style={{ backgroundColor: "#f0fdf4", padding: "20px", borderRadius: "12px", marginBottom: "30px", border: "1px solid #dcfce7" }}>
-          <h3 style={{ margin: "0 0 15px 0", fontSize: "14px", color: "#166534", textTransform: "uppercase", fontWeight: "bold" }}>⚙️ Configuración de Sensei</h3>
+          <h3 style={{ margin: "0 0 15px 0", fontSize: "14px", color: "#166534" }}>TIPO DE PUBLICACIÓN</h3>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "15px" }}>
-            <div style={{ flex: 1, minWidth: "150px" }}>
-              <label style={{ display: "block", fontSize: "11px", color: "#666", marginBottom: "5px" }}>Tipo de Post</label>
-              <select value={postType} onChange={(e) => setPostType(e.target.value as any)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
-                <option value="post">Post Normal</option>
-                <option value="assignment">宿題 (Tarea)</option>
-                <option value="announcement">お知らせ (Anuncio)</option>
-              </select>
-            </div>
-
-            {postType === 'assignment' && (
-              <div style={{ flex: 1, minWidth: "150px" }}>
-                <label style={{ display: "block", fontSize: "11px", color: "#666", marginBottom: "5px" }}>Lugar de Entrega</label>
-                <select value={assignmentSubtype} onChange={(e) => setAssignmentSubtype(e.target.value as any)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
-                  <option value="external">Fuera de app (Libro/PDF)</option>
-                  <option value="internal">Dentro de app (Blog Post)</option>
-                </select>
-              </div>
-            )}
+            <select value={postType} onChange={(e) => setPostType(e.target.value as any)} style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
+              <option value="post">Post Normal</option>
+              <option value="assignment">宿題 (Tarea Blog/Libro)</option>
+              <option value="forum">掲示板 (Foro / Tarea Grupal)</option>
+              <option value="announcement">お知らせ (Anuncio)</option>
+            </select>
 
             {postType !== 'post' && (
-              <div style={{ flex: 1, minWidth: "150px" }}>
-                <label style={{ display: "block", fontSize: "11px", color: "#666", marginBottom: "5px" }}>Grupo</label>
-                <select value={targetGroup} onChange={(e) => setTargetGroup(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
-                  <option value="">Seleccionar grupo...</option>
-                  <option value="Todos">Todos</option>
-                  {availableGroups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
-                </select>
-              </div>
+              <select value={targetGroup} onChange={(e) => setTargetGroup(e.target.value)} style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
+                <option value="">¿Para qué grupo?</option>
+                <option value="Todos">Todos</option>
+                {availableGroups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
+              </select>
             )}
 
             {postType === 'assignment' && (
-              <div style={{ flex: 1, minWidth: "150px" }}>
-                <label style={{ display: "block", fontSize: "11px", color: "#666", marginBottom: "5px" }}>Fecha Límite</label>
-                <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} style={{ width: "100%", padding: "7px", borderRadius: "6px", border: "1px solid #ccc" }} />
-              </div>
+              <select value={assignmentSubtype} onChange={(e) => setAssignmentSubtype(e.target.value as any)} style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
+                <option value="internal">Entrega en App (Blog)</option>
+                <option value="external">Tarea Externa (Libro/PDF)</option>
+              </select>
             )}
           </div>
         </div>
@@ -167,27 +128,18 @@ function WriteContent() {
       <main>
         <div style={{ marginBottom: "20px" }}>
           <label style={{ cursor: "pointer", color: "#2cb696", fontSize: "14px", fontWeight: "bold" }}>
-            📷 {previewUrl ? "Cambiar imagen" : "Agregar imagen de portada"}
+            📷 {previewUrl ? "Cambiar imagen" : "Agregar portada"}
             <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} />
           </label>
-          {previewUrl && (
-            <div style={{ marginTop: "10px", width: "100%", height: "200px", borderRadius: "10px", overflow: "hidden" }}>
-              <img src={previewUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            </div>
-          )}
+          {previewUrl && <img src={previewUrl} style={{ width: "100%", height: "200px", objectFit: "cover", borderRadius: "10px", marginTop: "10px" }} />}
         </div>
-
         <input type="text" placeholder="Título..." value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%", fontSize: "32px", fontWeight: "bold", border: "none", outline: "none", marginBottom: "20px" }} />
-        <textarea placeholder="Escribe aquí..." value={body} onChange={(e) => setBody(e.target.value)} style={{ width: "100%", minHeight: "300px", fontSize: "18px", lineHeight: "1.6", border: "none", outline: "none", resize: "none" }} />
+        <textarea placeholder="Escribe aquí las instrucciones o tu post..." value={body} onChange={(e) => setBody(e.target.value)} style={{ width: "100%", minHeight: "300px", fontSize: "18px", border: "none", outline: "none", resize: "none" }} />
       </main>
     </div>
   );
 }
 
 export default function WritePage() {
-  return (
-    <Suspense fallback={<div style={{ padding: "40px", textAlign: "center" }}>Cargando editor...</div>}>
-      <WriteContent />
-    </Suspense>
-  );
+  return <Suspense fallback={<div>Cargando...</div>}><WriteContent /></Suspense>;
 }
