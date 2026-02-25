@@ -44,61 +44,74 @@ export default function HomePage() {
   const regularFeed = posts.filter(p => !p.profiles?.is_admin || (p.type !== 'assignment' && p.type !== 'announcement') || dismissedAnnouncements.includes(p.id));
 
   return (
-    <div style={{ maxWidth: "650px", margin: "0 auto", fontFamily: "sans-serif", backgroundColor: "#fff", minHeight: "100vh" }}>
+    <div style={{ maxWidth: "650px", margin: "0 auto", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: "#fff", minHeight: "100vh" }}>
       <header style={{ 
         display: "flex", justifyContent: "space-between", alignItems: "center", 
-        padding: "10px 20px", borderBottom: "1px solid #eee", position: "sticky", 
-        top: 0, backgroundColor: "#fff", zIndex: 10, gap: "10px"
+        padding: "12px 20px", borderBottom: "1px solid #f2f2f2", position: "sticky", 
+        top: 0, backgroundColor: "#fff", zIndex: 10
       }}>
-        <Link href="/" style={{ textDecoration: "none", color: "#2cb696", fontWeight: "bold", fontSize: "18px", flexShrink: 0 }}>Nihongo Note</Link>
-        <div style={{ display: "flex", gap: "12px", alignItems: "center", overflowX: "auto" }}>
-          {myProfile?.is_admin && <Link href="/admin/groups" title="Panel Maestro" style={{ textDecoration: "none", fontSize: "18px" }}>⚙️</Link>}
-          <Link href="/resources" title="Recursos" style={{ textDecoration: "none", fontSize: "18px" }}>📚</Link>
-          <Link href="/notifications" style={{ position: "relative", textDecoration: "none", fontSize: "18px" }}>
-            🔔 {unreadNotifications > 0 && <span style={{ position: "absolute", top: "-5px", right: "-5px", backgroundColor: "#d9534f", color: "#fff", fontSize: "9px", padding: "2px 4px", borderRadius: "10px" }}>{unreadNotifications}</span>}
+        {/* LOGO: icon.png reemplaza al texto */}
+        <Link href="/" style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+          <img src="/icon.png" alt="Logo" style={{ height: "32px", width: "auto" }} />
+        </Link>
+        
+        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+          <Link href="/resources" title="Recursos" style={{ textDecoration: "none", fontSize: "20px" }}>📚</Link>
+          <Link href="/notifications" style={{ position: "relative", textDecoration: "none", fontSize: "20px" }}>
+            🔔 {unreadNotifications > 0 && <span style={{ position: "absolute", top: "-5px", right: "-5px", backgroundColor: "#ff2d55", color: "#fff", fontSize: "10px", padding: "2px 5px", borderRadius: "10px", fontWeight: "bold" }}>{unreadNotifications}</span>}
           </Link>
-          <button onClick={() => setShowArchived(!showArchived)} style={{ background: "#f5f5f5", border: "none", fontSize: "11px", color: showArchived ? "#2cb696" : "#666", cursor: "pointer", padding: "5px 10px", borderRadius: "8px", whiteSpace: "nowrap" }}>
-            {showArchived ? "📖 Muro" : "📑 Tareas"}
-          </button>
-          <Link href="/write" style={{ backgroundColor: "#2cb696", color: "#fff", padding: "6px 16px", borderRadius: "20px", textDecoration: "none", fontSize: "13px", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>書く</Link>
-          <Link href={`/profile/${myProfile?.id}`} style={{ width: "32px", height: "32px", borderRadius: "50%", overflow: "hidden", border: "1px solid #ddd", flexShrink: 0 }}>
-            {myProfile?.avatar_url ? <img src={myProfile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ lineHeight: "32px", textAlign: "center", background: "#eee" }}>👤</div>}
+          {myProfile?.is_admin && <Link href="/admin/groups" title="Panel Maestro" style={{ textDecoration: "none", fontSize: "20px" }}>⚙️</Link>}
+          
+          <Link href="/write" style={{ backgroundColor: "#2cb696", color: "#fff", padding: "8px 18px", borderRadius: "24px", textDecoration: "none", fontSize: "14px", fontWeight: "bold", marginLeft: "4px" }}>書く</Link>
+          
+          <Link href={`/profile/${myProfile?.id}`} style={{ width: "34px", height: "34px", borderRadius: "50%", overflow: "hidden", border: "1px solid #eee", flexShrink: 0 }}>
+            {myProfile?.avatar_url ? <img src={myProfile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ lineHeight: "34px", textAlign: "center", background: "#f5f5f5", color: "#ccc" }}>👤</div>}
           </Link>
         </div>
       </header>
 
       <main>
+        {/* Filtro rápido de Muro/Tareas */}
+        <div style={{ padding: "15px 20px", display: "flex", justifyContent: "flex-end" }}>
+          <button onClick={() => setShowArchived(!showArchived)} style={{ background: "#f8f8f8", border: "1px solid #eee", fontSize: "12px", color: "#666", cursor: "pointer", padding: "6px 12px", borderRadius: "15px", fontWeight: "500" }}>
+            {showArchived ? "Ver Muro Completo" : "Ver solo Tareas"}
+          </button>
+        </div>
+
         {!showArchived && teacherDirectives.filter(p => !dismissedAnnouncements.includes(p.id)).map(post => (
-          <div key={post.id} style={{ margin: "10px 20px", padding: "15px", borderRadius: "12px", backgroundColor: post.type === 'assignment' ? "#f0fdf4" : "#eff6ff", border: `1px solid ${post.type === 'assignment' ? "#2cb696" : "#3b82f6"}`, position: "relative" }}>
-            <button onClick={() => { const newD = [...dismissedAnnouncements, post.id]; setDismissedAnnouncements(newD); localStorage.setItem("dismissed_posts", JSON.stringify(newD)); }} style={{ position: "absolute", top: "10px", right: "10px", background: "none", border: "none", color: "#888", cursor: "pointer" }}>✕</button>
-            <h3 style={{ margin: "0 0 10px 0", fontSize: "15px", fontWeight: "bold" }}>{post.content.split('\n')[0]}</h3>
-            <Link href={`/write?assignment_id=${post.id}&title=${encodeURIComponent(post.content.split('\n')[0])}`} style={{ fontSize: "12px", color: "#2cb696", fontWeight: "bold", textDecoration: "none" }}>✍️ Entregar tarea</Link>
+          <div key={post.id} style={{ margin: "0 20px 20px", padding: "18px", borderRadius: "12px", backgroundColor: post.type === 'assignment' ? "#f0fdf4" : "#f0f9ff", border: "1px solid rgba(0,0,0,0.05)", position: "relative" }}>
+            <button onClick={() => { const newD = [...dismissedAnnouncements, post.id]; setDismissedAnnouncements(newD); localStorage.setItem("dismissed_posts", JSON.stringify(newD)); }} style={{ position: "absolute", top: "12px", right: "12px", background: "none", border: "none", color: "#aaa", cursor: "pointer", fontSize: "16px" }}>✕</button>
+            <h3 style={{ margin: "0 0 12px 0", fontSize: "16px", fontWeight: "700", color: "#333" }}>{post.content.split('\n')[0]}</h3>
+            <Link href={`/write?assignment_id=${post.id}&title=${encodeURIComponent(post.content.split('\n')[0])}`} style={{ fontSize: "13px", color: "#2cb696", fontWeight: "bold", textDecoration: "none" }}>✍️ Entregar tarea</Link>
           </div>
         ))}
 
         {(showArchived ? teacherDirectives : regularFeed).map(post => {
           const [titulo, ...cuerpo] = post.content.split('\n');
           return (
-            <article key={post.id} style={{ padding: "20px", borderBottom: "1px solid #eee", display: "flex", gap: "15px" }}>
+            <article key={post.id} style={{ padding: "24px 20px", borderBottom: "1px solid #f2f2f2", display: "flex", gap: "20px" }}>
               <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
-                  {/* Foto de perfil del autor en el feed */}
-                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", overflow: "hidden", background: "#eee", flexShrink: 0 }}>
+                <div style={{ display: "flex", gap: "10px", marginBottom: "10px", alignItems: "center" }}>
+                  <div style={{ width: "26px", height: "26px", borderRadius: "50%", overflow: "hidden", background: "#f5f5f5", flexShrink: 0 }}>
                     {post.profiles?.avatar_url ? (
                       <img src={post.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    ) : <div style={{ textAlign: "center", fontSize: "12px", lineHeight: "24px" }}>👤</div>}
+                    ) : <div style={{ textAlign: "center", fontSize: "12px", lineHeight: "26px", color: "#ccc" }}>👤</div>}
                   </div>
-                  <Link href={`/profile/${post.user_id}`} style={{ textDecoration: "none", color: "#333", fontWeight: "700", fontSize: "12px" }}>
-                    {post.profiles?.is_admin ? "👨‍🏫 Sensei" : post.profiles?.username}
+                  <Link href={`/profile/${post.user_id}`} style={{ textDecoration: "none", color: "#222", fontWeight: "500", fontSize: "13px" }}>
+                    {post.profiles?.is_admin ? "Sensei" : post.profiles?.username}
                   </Link>
-                  {post.is_reviewed && <span style={{ fontSize: "10px", color: "#2cb696", fontWeight: "bold", border: "1px solid #2cb696", padding: "1px 4px", borderRadius: "4px" }}>済 Sumi</span>}
+                  {post.is_reviewed && <span style={{ fontSize: "10px", color: "#2cb696", fontWeight: "700", border: "1px solid #2cb696", padding: "1px 6px", borderRadius: "4px" }}>済 Sumi</span>}
                 </div>
                 <Link href={`/post/${post.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                  <h2 style={{ margin: "0 0 5px 0", fontSize: "17px", fontWeight: "bold" }}>{titulo}</h2>
-                  <p style={{ fontSize: "14px", color: "#666", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{cuerpo.join(' ')}</p>
+                  <h2 style={{ margin: "0 0 8px 0", fontSize: "18px", fontWeight: "700", lineHeight: "1.4", color: "#222" }}>{titulo}</h2>
+                  <p style={{ fontSize: "14px", color: "#666", lineHeight: "1.6", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{cuerpo.join(' ')}</p>
                 </Link>
               </div>
-              {post.image_url && <img src={post.image_url} style={{ width: "80px", height: "80px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />}
+              {post.image_url && (
+                <Link href={`/post/${post.id}`} style={{ flexShrink: 0 }}>
+                  <img src={post.image_url} style={{ width: "100px", height: "100px", borderRadius: "6px", objectFit: "cover" }} />
+                </Link>
+              )}
             </article>
           );
         })}
