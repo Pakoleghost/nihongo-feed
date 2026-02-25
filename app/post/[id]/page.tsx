@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
-// Componente de Icono de Corazón Minimalista
+// Icono de Corazón Minimalista SVG
 const HeartIcon = ({ filled }: { filled: boolean }) => (
   <svg 
     width="20" 
@@ -73,16 +73,32 @@ export default function PostDetailPage() {
   });
 
   return (
-    <div style={{ maxWidth: "620px", margin: "0 auto", padding: "60px 20px", fontFamily: '-apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif' }}>
+    <div style={{ maxWidth: "620px", margin: "0 auto", padding: "60px 0", fontFamily: '-apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif' }}>
       
-      {/* Imagen de Portada */}
+      {/* Portada Estilo Note.com */}
       {post.image_url && (
-        <div style={{ margin: "0 -20px 40px -20px" }}>
-          <img src={post.image_url} style={{ width: "100%", height: "auto", display: "block", borderRadius: "4px" }} alt="Portada" />
+        <div style={{ 
+          width: "100%", 
+          height: "400px", // Altura fija para controlar imágenes verticales
+          maxHeight: "50vh", 
+          overflow: "hidden", 
+          marginBottom: "40px",
+          backgroundColor: "#f9f9f9"
+        }}>
+          <img 
+            src={post.image_url} 
+            style={{ 
+              width: "100%", 
+              height: "100%", 
+              objectFit: "cover", // Esto es lo que evita que se estire
+              objectPosition: "center" 
+            }} 
+            alt="Portada" 
+          />
         </div>
       )}
 
-      <article>
+      <article style={{ padding: "0 20px" }}>
         <h1 style={{ fontSize: "32px", fontWeight: "700", lineHeight: "1.4", color: "#222", marginBottom: "32px", letterSpacing: "-0.02em" }}>
           {titulo}
         </h1>
@@ -107,7 +123,7 @@ export default function PostDetailPage() {
           {cuerpo.join('\n')}
         </div>
 
-        {/* Footer con Interacciones Minimalistas */}
+        {/* Footer Minimalista */}
         <footer style={{ marginTop: "80px", paddingTop: "40px", borderTop: "1px solid #eee" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <button 
