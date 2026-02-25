@@ -1,176 +1,75 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
-type Post = {
-  id: string;
-  content: string;
-  created_at: string;
-  image_url: string | null;
-};
-
-type Profile = {
-  username: string;
-  avatar_url: string | null;
-};
-
-export default function ProfilePage() {
-  const router = useRouter();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [myPosts, setMyPosts] = useState<Post[]>([]);
+export default function MyProfilePage() {
+  const [profile, setProfile] = useState<any>(null);
+  const [bio, setBio] = useState("");
+  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchProfileAndPosts = async () => {
-      setLoading(true);
-      
-      // 1. Verificar Usuario
+    const fetchProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        router.push("/login");
-        return;
-      }
-
-      // 2. Cargar Datos del Perfil
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("username, avatar_url")
-        .eq("id", user.id)
-        .single();
-
-      if (profileData) {
-        setProfile(profileData);
-      }
-
-      // 3. Cargar MIS posts (Filtrados por user_id)
-      const { data: postsData } = await supabase
-        .from("posts")
-        .select("id, content, created_at, image_url")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-
-      if (postsData) {
-        setMyPosts(postsData);
-      }
-
+      if (!user) return router.push("/login");
+      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+      setProfile(data);
+      setBio(data.bio || "");
+      setFullName(data.full_name || "");
       setLoading(false);
     };
-
-    fetchProfileAndPosts();
+    fetchProfile();
   }, [router]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
+  const handleAvatarUpload = async (e: any) => {
+    try {
+      setUploading(true);
+      const file = e.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${profile.id}-${Math.random()}.${fileExt}`;
+      
+      await supabase.storage.from('uploads').upload(filePath, file);
+      const { data: { publicUrl } } = supabase.storage.from('uploads').getPublicUrl(filePath);
+      
+      await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("id", profile.id);
+      setProfile({ ...profile, avatar_url: publicUrl });
+    } finally {
+      setUploading(false);
+    }
   };
 
-  if (loading) {
-    return <div style={{ textAlign: "center", padding: "40px", color: "#888" }}>Cargando perfil...</div>;
-  }
+  const handleSave = async () => {
+    await supabase.from("profiles").update({ bio, full_name: fullName }).eq("id", profile.id);
+    alert("¡Perfil actualizado!");
+    router.push("/");
+  };
+
+  if (loading) return <p style={{ textAlign: "center", padding: "50px" }}>Cargando...</p>;
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px", fontFamily: "sans-serif" }}>
+    <div style={{ maxWidth: "500px", margin: "50px auto", padding: "20px", fontFamily: "sans-serif", textAlign: "center" }}>
+      <div style={{ width: "120px", height: "120px", borderRadius: "50%", overflow: "hidden", margin: "0 auto 20px", border: "3px solid #2cb696", position: "relative" }}>
+        {profile.avatar_url ? <img src={profile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "👤"}
+        {uploading && <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px" }}>Subiendo...</div>}
+      </div>
       
-      {/* HEADER: Botón volver */}
-      <div style={{ marginBottom: "20px" }}>
-        <Link href="/" style={{ textDecoration: "none", color: "#888" }}>← Volver al inicio</Link>
-      </div>
+      <label style={{ cursor: "pointer", color: "#2cb696", fontSize: "13px", fontWeight: "bold" }}>
+        Cambiar foto
+        <input type="file" onChange={handleAvatarUpload} style={{ display: "none" }} />
+      </label>
 
-      {/* TARJETA DE PERFIL */}
-      <div style={{ textAlign: "center", marginBottom: "40px", paddingBottom: "20px", borderBottom: "1px solid #eee" }}>
-        {/* Avatar Grande */}
-        <div style={{ width: "100px", height: "100px", borderRadius: "50%", backgroundColor: "#eee", margin: "0 auto 16px", overflow: "hidden" }}>
-          {profile?.avatar_url ? (
-            <img src={profile.avatar_url} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          ) : (
-            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px", color: "#999" }}>
-              {profile?.username?.[0]?.toUpperCase()}
-            </div>
-          )}
-        </div>
+      <div style={{ marginTop: "30px", textAlign: "left" }}>
+        <label style={{ fontSize: "12px", color: "#888" }}>Nombre Real</label>
+        <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} style={{ width: "100%", padding: "10px", margin: "5px 0 20px", borderRadius: "8px", border: "1px solid #ddd" }} />
         
-        {/* Nombre de usuario */}
-        <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: "0 0 16px 0" }}>{profile?.username || "Usuario"}</h1>
+        <label style={{ fontSize: "12px", color: "#888" }}>Biografía (Jidoushoukai)</label>
+        <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="¡Preséntate en japonés!" style={{ width: "100%", padding: "10px", height: "100px", borderRadius: "8px", border: "1px solid #ddd" }} />
         
-        {/* BOTONERA: Editar y Cerrar Sesión */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
-          <Link href="/profile/edit" style={{ 
-            textDecoration: "none",
-            padding: "8px 20px", 
-            border: "1px solid #2cb696", 
-            backgroundColor: "#fff", 
-            color: "#2cb696",
-            borderRadius: "20px", 
-            fontSize: "14px",
-            fontWeight: "bold"
-          }}>
-            Editar Perfil
-          </Link>
-
-          <button 
-            onClick={handleLogout}
-            style={{ 
-              padding: "8px 20px", 
-              border: "1px solid #ddd", 
-              backgroundColor: "transparent", 
-              borderRadius: "20px", 
-              cursor: "pointer",
-              fontSize: "14px",
-              color: "#666"
-            }}
-          >
-            Cerrar Sesión
-          </button>
-        </div>
+        <button onClick={handleSave} style={{ width: "100%", backgroundColor: "#2cb696", color: "#fff", border: "none", padding: "12px", borderRadius: "25px", fontWeight: "bold", marginTop: "20px", cursor: "pointer" }}>Guardar cambios</button>
       </div>
-
-      {/* LISTA DE MIS POSTS */}
-      <h2 style={{ fontSize: "18px", marginBottom: "20px", fontWeight: "bold" }}>Mis Publicaciones ({myPosts.length})</h2>
-
-      {myPosts.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "40px", backgroundColor: "#f9f9f9", borderRadius: "8px", color: "#666" }}>
-          <p>Aún no has escrito nada.</p>
-          <Link href="/write" style={{ color: "#2cb696", fontWeight: "bold", textDecoration: "none" }}>¡Escribe tu primer post!</Link>
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-          {myPosts.map((post) => (
-            <Link href={`/post/${post.id}`} key={post.id} style={{ textDecoration: "none", color: "inherit" }}>
-              <div style={{ 
-                display: "flex", 
-                gap: "16px", 
-                padding: "16px", 
-                border: "1px solid #eaeaea", 
-                borderRadius: "8px",
-                transition: "box-shadow 0.2s",
-                backgroundColor: "#fff"
-              }}>
-                {/* Texto */}
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ margin: "0 0 8px 0", fontSize: "16px", fontWeight: "bold", color: "#333", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                    {post.content.split('\n')[0] || "Sin título"}
-                  </h3>
-                  <div style={{ fontSize: "12px", color: "#999" }}>
-                    {new Date(post.created_at).toLocaleDateString()}
-                  </div>
-                </div>
-
-                {/* Miniatura si tiene */}
-                {post.image_url && (
-                  <div style={{ width: "60px", height: "60px", borderRadius: "4px", overflow: "hidden", flexShrink: 0, backgroundColor: "#f0f0f0" }}>
-                    <img src={post.image_url} alt="Thumbnail" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  </div>
-                )}
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

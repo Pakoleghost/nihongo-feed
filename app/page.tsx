@@ -1,194 +1,112 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { requireApprovedSession } from "@/lib/authGuard";
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import NextImage from "next/image";
-
-// Tipos simplificados para el Feed
-type DbPostRow = {
-  id: string;
-  content: string | null;
-  created_at: string;
-  user_id: string;
-  image_url?: string | null;
-  profiles:
-    | { username: string | null; avatar_url: string | null }
-    | { username: string | null; avatar_url: string | null }[]
-    | null;
-};
-
-type Post = {
-  id: string;
-  content: string;
-  created_at: string;
-  user_id: string;
-  username: string;
-  avatar_url: string | null;
-  image_url: string | null;
-  likes: number;
-  likedByMe: boolean;
-};
 
 export default function HomePage() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const router = useRouter();
+  const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // Estados para tu usuario actual (para el avatar del header)
-  const [myUsername, setMyUsername] = useState<string | null>(null);
-  const [myAvatarUrl, setMyAvatarUrl] = useState<string | null>(null);
+  const [myProfile, setMyProfile] = useState<any>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([]);
+  const [showArchived, setShowArchived] = useState(false);
 
-  const fetchPosts = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
-    // 1. Aquí debes poner tu lógica de supabase para traer los posts recientes.
-    // Este es un ejemplo básico basado en tu código anterior:
-    const { data, error } = await supabase
-      .from("posts")
-      .select(`
-        id, content, created_at, user_id, image_url,
-        profiles (username, avatar_url)
-      `)
-      .order("created_at", { ascending: false })
-      .limit(20);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return router.push("/login");
 
-    if (error) {
-      console.error("Error fetching posts:", error);
-      setLoading(false);
-      return;
+    const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+    setMyProfile(prof);
+
+    if (prof?.is_approved || prof?.is_admin) {
+      // Cargar Posts
+      const { data: postsData } = await supabase.from("posts").select(`
+        *,
+        profiles:user_id (username, avatar_url, group_name, is_admin)
+      `).order("created_at", { ascending: false });
+      setPosts(postsData || []);
+
+      // Cargar conteo de notificaciones no leídas
+      const { count } = await supabase.from("notifications")
+        .select("*", { count: 'exact', head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false);
+      setUnreadCount(count || 0);
+
+      const saved = localStorage.getItem("dismissed_posts");
+      if (saved) setDismissedAnnouncements(JSON.parse(saved));
     }
-
-    // Transformar los datos de la DB al formato Post
-    const formattedPosts: Post[] = (data as unknown as DbPostRow[]).map((row) => {
-      const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
-      return {
-        id: row.id,
-        content: row.content || "",
-        created_at: row.created_at,
-        user_id: row.user_id,
-        username: profile?.username || "Usuario Anónimo",
-        avatar_url: profile?.avatar_url || null,
-        image_url: row.image_url || null,
-        likes: 0, // Aquí puedes mantener tu lógica de likes
-        likedByMe: false,
-      };
-    });
-
-    setPosts(formattedPosts);
     setLoading(false);
-  }, []);
+  }, [router]);
 
-  useEffect(() => {
-    // Reemplaza esto con la forma en que obtienes tu usuario
-    // requireApprovedSession().then(...)
-    fetchPosts();
-  }, [fetchPosts]);
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  if (!loading && myProfile && !myProfile.is_approved && !myProfile.is_admin) {
+    return (
+      <div style={{ textAlign: "center", padding: "100px 20px", fontFamily: "sans-serif" }}>
+        <h1 style={{ fontSize: "50px" }}>⏳</h1>
+        <h2>¡Hola, {myProfile.username}!</h2>
+        <p style={{ color: "#666" }}>Tu cuenta espera aprobación de Pako-sensei.</p>
+        <button onClick={() => supabase.auth.signOut().then(() => router.push("/login"))} style={{ marginTop: "20px", padding: "10px 20px", borderRadius: "20px", cursor: "pointer" }}>Cerrar sesión</button>
+      </div>
+    );
+  }
+
+  const teacherDirectives = posts.filter(p => p.profiles?.is_admin && (p.type === 'assignment' || p.type === 'announcement') && (p.target_group === myProfile?.group_name || p.target_group === "Todos"));
+  const regularFeed = posts.filter(p => !p.profiles?.is_admin || (p.type !== 'assignment' && p.type !== 'announcement') || dismissedAnnouncements.includes(p.id));
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", fontFamily: "sans-serif", backgroundColor: "#fff", minHeight: "100vh" }}>
-      
-      {/* HEADER TIPO NOTE.COM */}
-      <header style={{ 
-        display: "flex", 
-        justifyContent: "space-between", 
-        alignItems: "center", 
-        padding: "16px 20px", 
-        borderBottom: "1px solid #eaeaea",
-        position: "sticky",
-        top: 0,
-        backgroundColor: "rgba(255, 255, 255, 0.95)",
-        zIndex: 10
-      }}>
-        {/* Logo o Nombre de la App */}
-        <Link href="/" style={{ textDecoration: "none", color: "#333" }}>
-          <h1 style={{ margin: 0, fontSize: "22px", fontWeight: "bold" }}>Nihongo Note</h1>
-        </Link>
-
-        {/* Botones de Acción */}
-        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-          <Link 
-            href="/write" 
-            style={{ 
-              padding: "8px 16px", 
-              backgroundColor: "#2cb696", // Color verde característico de Note
-              color: "#fff", 
-              borderRadius: "20px", 
-              textDecoration: "none", 
-              fontSize: "14px", 
-              fontWeight: "bold" 
-            }}
-          >
-            書く (Escribir)
+    <div style={{ maxWidth: "650px", margin: "0 auto", fontFamily: "sans-serif", backgroundColor: "#fff", minHeight: "100vh" }}>
+      <header style={{ display: "flex", justifyContent: "space-between", padding: "15px 20px", borderBottom: "1px solid #eee", position: "sticky", top: 0, backgroundColor: "#fff", zIndex: 10 }}>
+        <h1 style={{ margin: 0, fontSize: "18px", color: "#2cb696", fontWeight: "bold" }}>Nihongo Note</h1>
+        <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+          <Link href="/notifications" style={{ textDecoration: "none", position: "relative", fontSize: "20px" }}>
+            🔔 {unreadCount > 0 && <span style={{ position: "absolute", top: "-5px", right: "-5px", backgroundColor: "#d9534f", color: "#fff", fontSize: "10px", padding: "2px 5px", borderRadius: "10px" }}>{unreadCount}</span>}
           </Link>
-          <Link 
-            href="/profile" // Link a tu página de perfil
-            style={{ 
-              display: "block", 
-              width: "36px", 
-              height: "36px", 
-              borderRadius: "50%", 
-              backgroundColor: "#f0f0f0", 
-              overflow: "hidden" 
-            }}
-          >
-            {myAvatarUrl ? (
-              <img src={myAvatarUrl} alt="Mi Perfil" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            ) : (
-              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#999" }}>
-                {myUsername ? myUsername[0].toUpperCase() : "?"}
-              </div>
-            )}
+          <Link href="/resources" style={{ fontSize: "12px", color: "#888", textDecoration: "none" }}>📚 Recursos</Link>
+          <Link href="/write" style={{ padding: "6px 15px", backgroundColor: "#2cb696", color: "#fff", borderRadius: "20px", textDecoration: "none", fontSize: "14px", fontWeight: "bold" }}>書く</Link>
+          <Link href={`/profile/${myProfile?.id}`} style={{ width: "32px", height: "32px", borderRadius: "50%", overflow: "hidden", border: "1px solid #ddd" }}>
+            {myProfile?.avatar_url ? <img src={myProfile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "👤"}
           </Link>
         </div>
       </header>
 
-      {/* FEED DE PREVIEWS */}
-      <main style={{ padding: "0 20px" }}>
-        {loading ? (
-          <p style={{ textAlign: "center", marginTop: "40px", color: "#888" }}>Cargando...</p>
-        ) : posts.length === 0 ? (
-          <p style={{ textAlign: "center", marginTop: "40px", color: "#888" }}>No hay posts aún. ¡Anímate a escribir el primero!</p>
-        ) : (
-          posts.map((post) => (
-            <article key={post.id} style={{ borderBottom: "1px solid #eaeaea", padding: "24px 0" }}>
-              
-              {/* Información del Autor */}
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                <div style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "#eee", overflow: "hidden" }}>
-                  {post.avatar_url && <img src={post.avatar_url} alt={post.username} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+      <main>
+        {!showArchived && teacherDirectives.filter(p => !dismissedAnnouncements.includes(p.id)).map(post => (
+          <div key={post.id} style={{ margin: "10px 20px", padding: "15px", borderRadius: "12px", backgroundColor: post.type === 'assignment' ? "#f0fdf4" : "#eff6ff", border: `1px solid ${post.type === 'assignment' ? "#2cb696" : "#3b82f6"}`, position: "relative" }}>
+            <button onClick={() => { const newD = [...dismissedAnnouncements, post.id]; setDismissedAnnouncements(newD); localStorage.setItem("dismissed_posts", JSON.stringify(newD)); }} style={{ position: "absolute", top: "10px", right: "10px", background: "none", border: "none", cursor: "pointer" }}>✕</button>
+            <div style={{ fontSize: "10px", fontWeight: "bold", color: post.type === 'assignment' ? "#2cb696" : "#3b82f6", marginBottom: "5px" }}>{post.type === 'assignment' ? "📝 TAREA" : "📢 AVISO"}</div>
+            <h3 style={{ margin: "0 0 10px 0", fontSize: "16px" }}>{post.content.split('\n')[0]}</h3>
+            <div style={{ display: "flex", gap: "10px" }}>
+              {post.assignment_subtype === 'internal' && <Link href={`/write?assignment_id=${post.id}&title=${encodeURIComponent(post.content.split('\n')[0])}`} style={{ backgroundColor: "#2cb696", color: "#fff", padding: "6px 12px", borderRadius: "15px", textDecoration: "none", fontSize: "12px", fontWeight: "bold" }}>✍️ Responder</Link>}
+              <Link href={`/post/${post.id}`} style={{ fontSize: "12px", color: "#666" }}>Detalles</Link>
+            </div>
+          </div>
+        ))}
+
+        {regularFeed.map(post => {
+          const [titulo, ...cuerpo] = post.content.split('\n');
+          return (
+            <article key={post.id} style={{ padding: "20px", borderBottom: "1px solid #eee", display: "flex", gap: "15px" }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", gap: "8px", marginBottom: "5px", alignItems: "center" }}>
+                  <span style={{ fontSize: "12px", fontWeight: "bold" }}>{post.profiles?.is_admin ? "👨‍🏫 Sensei" : post.profiles?.username}</span>
+                  {post.is_reviewed && <span style={{ fontSize: "10px", color: "#2cb696", fontWeight: "bold" }}>済 Sumi</span>}
                 </div>
-                <span style={{ fontSize: "14px", color: "#333", fontWeight: "500" }}>{post.username}</span>
-                <span style={{ fontSize: "12px", color: "#888" }}>
-                  {new Date(post.created_at).toLocaleDateString("ja-JP", { month: 'short', day: 'numeric' })}
-                </span>
+                <Link href={`/post/${post.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                  <h2 style={{ margin: "0 0 5px 0", fontSize: "17px", fontWeight: "bold" }}>{titulo}</h2>
+                  <p style={{ fontSize: "14px", color: "#666", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{cuerpo.join(' ')}</p>
+                </Link>
               </div>
-
-              {/* Contenido (Preview) clickeable hacia el artículo completo */}
-              <Link href={`/post/${post.id}`} style={{ textDecoration: "none", color: "inherit", display: "flex", gap: "16px", justifyContent: "space-between" }}>
-                <div style={{ flex: 1 }}>
-                  {/* Título o primera línea del post */}
-                  <h2 style={{ margin: "0 0 8px 0", fontSize: "18px", fontWeight: "bold", color: "#222", lineHeight: "1.4", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                    {post.content.split('\n')[0] || "Sin título"}
-                  </h2>
-                  
-                  {/* Fragmento de texto / Preview */}
-                  <p style={{ margin: 0, fontSize: "15px", color: "#555", lineHeight: "1.6", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                    {post.content}
-                  </p>
-                </div>
-
-                {/* Imagen miniatura (si existe) */}
-                {post.image_url && (
-                  <div style={{ width: "120px", height: "120px", borderRadius: "8px", overflow: "hidden", flexShrink: 0, backgroundColor: "#fafafa" }}>
-                    <img src={post.image_url} alt="Thumbnail" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  </div>
-                )}
-              </Link>
+              {post.image_url && <img src={post.image_url} style={{ width: "80px", height: "80px", borderRadius: "8px", objectFit: "cover" }} />}
             </article>
-          ))
-        )}
+          );
+        })}
       </main>
-
     </div>
   );
 }
