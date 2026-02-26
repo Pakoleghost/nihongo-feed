@@ -10,6 +10,7 @@ type NotificationRow = {
   user_id: string;
   message?: string | null;
   link?: string | null;
+  post_id?: string | number | null;
   is_read?: boolean | null;
   created_at?: string | null;
   actor_user_id?: string | null;
@@ -46,6 +47,11 @@ const getPostIdFromLink = (link?: string | null) => {
   return link.split("/").filter(Boolean).pop() || null;
 };
 
+const getPostIdFromNotification = (n: NotificationRow) => {
+  if (n.post_id != null && String(n.post_id).trim()) return String(n.post_id);
+  return getPostIdFromLink(n.link);
+};
+
 const getActorIdFromNotification = (n: NotificationRow) =>
   n.actor_user_id || n.from_user_id || n.source_user_id || n.target_user_id || null;
 
@@ -77,14 +83,6 @@ const formatFullDate = (value?: string | null) => {
   }).format(d);
 };
 
-const getNotificationKind = (n: NotificationRow) => {
-  if (isSignupNotification(n)) return "registro";
-  if (isLikeNotification(n)) return "like";
-  if (n.link?.startsWith("/post/")) return "post";
-  if (n.link?.startsWith("/profile/")) return "perfil";
-  return "sistema";
-};
-
 function BellIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -108,7 +106,6 @@ function DotIcon({ color }: { color: string }) {
         height: 8,
         borderRadius: 999,
         background: color,
-        boxShadow: `0 0 0 4px ${color}22`,
         display: "inline-block",
       }}
     />
@@ -125,7 +122,7 @@ function AvatarFallback() {
         placeItems: "center",
         color: "#9097a1",
         fontSize: 13,
-        background: "linear-gradient(180deg, #f7f7f8 0%, #f1f2f4 100%)",
+        background: "#f5f5f5",
       }}
     >
       👤
@@ -172,13 +169,11 @@ export default function NotificationsPage() {
     const visibleNotifications = rawNotifications.filter((n) => amAdmin || !isSignupNotification(n));
     setNotifications(visibleNotifications);
 
-    const actorIds = Array.from(
-      new Set(
-        visibleNotifications
-          .map(getActorIdFromNotification)
-          .filter((id): id is string => Boolean(id))
-      )
-    );
+    const actorIds = Array.from(new Set(
+      visibleNotifications
+        .map((n) => getActorIdFromNotification(n) || (isLikeNotification(n) ? getUserIdFromLink(n.link) : null))
+        .filter((id): id is string => Boolean(id))
+    ));
 
     const actorsMapById: Record<string, ActorPreview> = {};
     if (actorIds.length > 0) {
@@ -198,7 +193,8 @@ export default function NotificationsPage() {
 
     const nextActorsByNotifId: Record<number, ActorPreview> = {};
     visibleNotifications.forEach((n) => {
-      const actorId = getActorIdFromNotification(n);
+      const actorId =
+        getActorIdFromNotification(n) || (isLikeNotification(n) ? getUserIdFromLink(n.link) : null);
       if (actorId && actorsMapById[actorId]) nextActorsByNotifId[n.id] = actorsMapById[actorId];
     });
 
@@ -208,7 +204,7 @@ export default function NotificationsPage() {
     );
     await Promise.all(
       missingLikeNotifs.map(async (n) => {
-        const postId = getPostIdFromLink(n.link);
+        const postId = getPostIdFromNotification(n);
         if (!postId) return;
 
         const { data: likes } = await supabase
@@ -260,8 +256,6 @@ export default function NotificationsPage() {
     }
   };
 
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
-
   if (loading) {
     return (
       <div
@@ -270,19 +264,15 @@ export default function NotificationsPage() {
           display: "grid",
           placeItems: "center",
           padding: 24,
-          background:
-            "radial-gradient(circle at 20% 0%, rgba(44,182,150,0.14), transparent 45%), #fafafa",
-          color: "#6b7280",
+          background: "#fff",
+          color: "#777",
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         }}
       >
         <div
           style={{
-            padding: "14px 18px",
-            borderRadius: 16,
-            border: "1px solid #ececec",
-            background: "rgba(255,255,255,0.85)",
-            backdropFilter: "blur(8px)",
+            padding: "8px 0",
+            fontSize: 14,
           }}
         >
           読み込み中... Cargando notificaciones
@@ -295,24 +285,21 @@ export default function NotificationsPage() {
     <div
       style={{
         minHeight: "100vh",
-        background:
-          "radial-gradient(circle at 12% -8%, rgba(44,182,150,0.15), transparent 38%), radial-gradient(circle at 100% 0%, rgba(14,165,233,0.09), transparent 32%), #fafafa",
+        background: "#fff",
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}
     >
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "18px 14px 36px" }}>
+      <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 16px 40px" }}>
         <header
           style={{
             position: "sticky",
-            top: 10,
+            top: 0,
             zIndex: 5,
-            marginBottom: 18,
-            borderRadius: 20,
-            border: "1px solid rgba(255,255,255,0.75)",
-            background: "rgba(255,255,255,0.78)",
-            backdropFilter: "blur(14px)",
-            boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
-            padding: "12px 14px",
+            marginBottom: 8,
+            background: "rgba(255,255,255,0.95)",
+            backdropFilter: "blur(8px)",
+            borderBottom: "1px solid #f0f0f0",
+            padding: "14px 0 12px",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
@@ -321,15 +308,13 @@ export default function NotificationsPage() {
                 href="/"
                 style={{
                   textDecoration: "none",
-                  color: "#0f172a",
-                  border: "1px solid #e8eaed",
-                  background: "#fff",
-                  width: 36,
-                  height: 36,
-                  borderRadius: 12,
+                  color: "#222",
+                  width: 32,
+                  height: 32,
+                  borderRadius: 999,
                   display: "grid",
                   placeItems: "center",
-                  fontSize: 18,
+                  fontSize: 17,
                   lineHeight: 1,
                   flexShrink: 0,
                 }}
@@ -341,14 +326,14 @@ export default function NotificationsPage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span
                     style={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: 10,
+                      width: 28,
+                      height: 28,
+                      borderRadius: 999,
                       display: "grid",
                       placeItems: "center",
-                      color: "#116e5a",
-                      background: "linear-gradient(180deg, #ddfbf2 0%, #c8f6ea 100%)",
-                      border: "1px solid #b6ecdd",
+                      color: "#2cb696",
+                      background: "#f5fbf8",
+                      border: "1px solid #e8f5f0",
                       flexShrink: 0,
                     }}
                   >
@@ -358,33 +343,19 @@ export default function NotificationsPage() {
                     Notificaciones
                   </h1>
                 </div>
-                <p
-                  style={{
-                    margin: "4px 0 0",
-                    fontSize: 12,
-                    color: "#6b7280",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {notifications.length === 0
-                    ? "Tu bandeja está vacía"
-                    : `${notifications.length} aviso${notifications.length === 1 ? "" : "s"}${unreadCount ? ` · ${unreadCount} nuevo${unreadCount === 1 ? "" : "s"}` : ""}`}
-                </p>
               </div>
             </div>
 
             <button
               onClick={() => void fetchNotifications()}
               style={{
-                border: "1px solid #dfe3e8",
+                border: "1px solid #ececec",
                 background: "#fff",
-                color: "#334155",
-                borderRadius: 12,
-                padding: "8px 12px",
+                color: "#555",
+                borderRadius: 999,
+                padding: "7px 11px",
                 fontSize: 12,
-                fontWeight: 700,
+                fontWeight: 600,
                 cursor: "pointer",
                 flexShrink: 0,
               }}
@@ -398,31 +369,31 @@ export default function NotificationsPage() {
         {notifications.length === 0 ? (
           <section
             style={{
-              borderRadius: 22,
-              border: "1px solid #eceff3",
-              background: "rgba(255,255,255,0.9)",
-              boxShadow: "0 8px 24px rgba(15,23,42,0.04)",
-              padding: "34px 20px",
+              borderRadius: 12,
+              border: "1px solid #f0f0f0",
+              background: "#fff",
+              padding: "28px 20px",
               textAlign: "center",
+              marginTop: 16,
             }}
           >
             <div
               style={{
-                width: 52,
-                height: 52,
-                borderRadius: 16,
+                width: 44,
+                height: 44,
+                borderRadius: 999,
                 margin: "0 auto 12px",
                 display: "grid",
                 placeItems: "center",
-                color: "#0f766e",
-                background: "linear-gradient(180deg, #e6fffb 0%, #cffafe 100%)",
-                border: "1px solid #c7eef5",
+                color: "#2cb696",
+                background: "#f5fbf8",
+                border: "1px solid #e8f5f0",
               }}
             >
               <BellIcon />
             </div>
-            <p style={{ margin: "0 0 6px", fontWeight: 700, color: "#111827" }}>Sin novedades</p>
-            <p style={{ margin: 0, color: "#6b7280", fontSize: 14 }}>
+            <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#222" }}>Sin novedades</p>
+            <p style={{ margin: 0, color: "#777", fontSize: 14 }}>
               Cuando alguien interactúe contigo o haya avisos del sistema, aparecerán aquí.
             </p>
           </section>
@@ -433,32 +404,13 @@ export default function NotificationsPage() {
               const isLike = isLikeNotification(n);
               const targetUserId = getUserIdFromLink(n.link);
               const actor = actorsByNotifId[n.id];
-              const clickableHref = !isSignup && n.link ? n.link : null;
+              const clickableHref = isSignup
+                ? null
+                : n.post_id != null
+                  ? `/post/${n.post_id}`
+                  : n.link || null;
               const clickable = Boolean(clickableHref);
               const actorProfileHref = actor?.id ? `/profile/${actor.id}` : null;
-              const kind = getNotificationKind(n);
-
-              const accent =
-                kind === "registro"
-                  ? "#f59e0b"
-                  : kind === "like"
-                    ? "#ef4444"
-                    : kind === "post"
-                      ? "#3b82f6"
-                      : kind === "perfil"
-                        ? "#8b5cf6"
-                        : "#2cb696";
-
-              const badgeLabel =
-                kind === "registro"
-                  ? "Registro"
-                  : kind === "like"
-                    ? "Like"
-                    : kind === "post"
-                      ? "Post"
-                      : kind === "perfil"
-                        ? "Perfil"
-                        : "Sistema";
 
               return (
                 <div
@@ -475,13 +427,10 @@ export default function NotificationsPage() {
                   tabIndex={clickable ? 0 : undefined}
                   aria-label={clickable ? `Abrir notificación ${n.id}` : undefined}
                   style={{
-                    borderRadius: 18,
-                    border: n.is_read ? "1px solid #edf0f2" : `1px solid ${accent}33`,
-                    background: n.is_read
-                      ? "rgba(255,255,255,0.9)"
-                      : `linear-gradient(180deg, ${accent}0f 0%, rgba(255,255,255,0.95) 48%)`,
-                    boxShadow: "0 6px 18px rgba(15,23,42,0.04)",
-                    padding: 14,
+                    borderRadius: 0,
+                    borderBottom: "1px solid #f3f3f3",
+                    background: "#fff",
+                    padding: "14px 0",
                     cursor: clickable ? "pointer" : "default",
                     outline: "none",
                   }}
@@ -489,12 +438,12 @@ export default function NotificationsPage() {
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
                     <div
                       style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 14,
+                        width: 36,
+                        height: 36,
+                        borderRadius: 999,
                         overflow: "hidden",
-                        border: "1px solid #eceef2",
-                        background: "#f8fafc",
+                        border: "1px solid #efefef",
+                        background: "#f5f5f5",
                         flexShrink: 0,
                       }}
                     >
@@ -517,46 +466,31 @@ export default function NotificationsPage() {
                           gap: 8,
                           justifyContent: "space-between",
                           flexWrap: "wrap",
-                          marginBottom: 8,
+                          marginBottom: 6,
                         }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                          {!n.is_read && <DotIcon color={accent} />}
-                          <span
-                            style={{
-                              fontSize: 11,
-                              fontWeight: 800,
-                              letterSpacing: 0.3,
-                              color: accent,
-                              background: `${accent}14`,
-                              border: `1px solid ${accent}25`,
-                              borderRadius: 999,
-                              padding: "3px 8px",
-                            }}
-                          >
-                            {badgeLabel}
-                          </span>
+                          {!n.is_read && <DotIcon color="#2cb696" />}
                         </div>
                         <time
                           dateTime={n.created_at || undefined}
                           title={formatFullDate(n.created_at)}
-                          style={{ fontSize: 12, color: "#64748b", flexShrink: 0 }}
+                          style={{ fontSize: 12, color: "#888", flexShrink: 0 }}
                         >
                           {formatTimeAgo(n.created_at)}
                         </time>
                       </div>
 
                       {isLike && actor ? (
-                        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: "#0f172a" }}>
+                        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "#222" }}>
                           {actorProfileHref ? (
                             <Link
                               href={actorProfileHref}
                               onClick={(e) => e.stopPropagation()}
                               style={{
-                                color: "#0f172a",
-                                fontWeight: 800,
+                                color: "#222",
+                                fontWeight: 600,
                                 textDecoration: "none",
-                                borderBottom: "1px dashed #cbd5e1",
                               }}
                             >
                               @{actor.username || "usuario"}
@@ -567,7 +501,7 @@ export default function NotificationsPage() {
                           le gustó tu publicación
                         </p>
                       ) : (
-                        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: "#0f172a" }}>
+                        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "#222" }}>
                           {n.message || "Aviso del sistema"}
                         </p>
                       )}
@@ -589,21 +523,20 @@ export default function NotificationsPage() {
                               void approveUser(n.id, targetUserId);
                             }}
                             style={{
-                              background: "linear-gradient(180deg, #2cb696 0%, #22a487 100%)",
+                              background: "#2cb696",
                               color: "#fff",
                               border: "none",
-                              padding: "9px 14px",
-                              borderRadius: 10,
+                              padding: "8px 13px",
+                              borderRadius: 8,
                               cursor: "pointer",
-                              fontWeight: 800,
+                              fontWeight: 600,
                               fontSize: 12,
-                              boxShadow: "0 6px 14px rgba(44,182,150,0.25)",
                             }}
                           >
                             Aprobar alumno
                           </button>
                         ) : (
-                          <span style={{ fontSize: 12, color: "#94a3b8" }}>
+                          <span style={{ fontSize: 12, color: "#999" }}>
                             {clickable ? "Toca para abrir" : "Notificación informativa"}
                           </span>
                         )}
@@ -612,8 +545,8 @@ export default function NotificationsPage() {
                           <span
                             style={{
                               fontSize: 12,
-                              color: accent,
-                              fontWeight: 800,
+                              color: "#2cb696",
+                              fontWeight: 600,
                               display: "inline-flex",
                               alignItems: "center",
                               gap: 6,
