@@ -189,7 +189,6 @@ function WriteContent() {
           ? `${title}\n${linkUrl.trim()}\n${body}`.trim()
           : `${title}\n${body}`;
 
-      await supabase.from("posts").insert({
       const { data: insertedPost, error: insertError } = await supabase.from("posts").insert({
         content: finalContent,
         user_id: user.id,
