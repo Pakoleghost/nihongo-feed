@@ -77,6 +77,9 @@ export default function PostDetailPage() {
         user_id: post.user_id,
         message: `${actorName} indicó que le gustó: ${postTitle}`,
         link: `/post/${id}`,
+        post_id: id,
+        actor_user_id: myId,
+        type: "like",
         is_read: false,
       });
     }
