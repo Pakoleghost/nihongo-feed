@@ -89,18 +89,58 @@ export default function StudentProfilePage() {
             <section className="profileCard">
               <div className="profileHeader">
                 {isMe ? (
-                  <Link href="/profile/edit" className="avatarWrap avatarClickable" aria-label="Cambiar foto de perfil">
+                  <Link
+                    href="/profile/edit"
+                    className="avatarWrap avatarClickable"
+                    aria-label="Cambiar foto de perfil"
+                    style={{
+                      width: 110,
+                      height: 110,
+                      minWidth: 110,
+                      minHeight: 110,
+                      maxWidth: 110,
+                      maxHeight: 110,
+                      borderRadius: 999,
+                      overflow: "hidden",
+                      display: "grid",
+                      placeItems: "center",
+                    }}
+                  >
                     {profile.avatar_url ? (
-                      <img src={profile.avatar_url} alt="" className="avatarImg" />
+                      <img
+                        src={profile.avatar_url}
+                        alt=""
+                        className="avatarImg"
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      />
                     ) : (
                       <AvatarPlaceholder size={98} />
                     )}
                     <span className="avatarEditBadge">Cambiar</span>
                   </Link>
                 ) : (
-                  <div className="avatarWrap">
+                  <div
+                    className="avatarWrap"
+                    style={{
+                      width: 110,
+                      height: 110,
+                      minWidth: 110,
+                      minHeight: 110,
+                      maxWidth: 110,
+                      maxHeight: 110,
+                      borderRadius: 999,
+                      overflow: "hidden",
+                      display: "grid",
+                      placeItems: "center",
+                    }}
+                  >
                     {profile.avatar_url ? (
-                      <img src={profile.avatar_url} alt="" className="avatarImg" />
+                      <img
+                        src={profile.avatar_url}
+                        alt=""
+                        className="avatarImg"
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      />
                     ) : (
                       <AvatarPlaceholder size={98} />
                     )}
