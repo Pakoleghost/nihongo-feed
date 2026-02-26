@@ -66,6 +66,15 @@ function fileLabelFromUrl(url?: string | null): string {
   }
 }
 
+function normalizeGroupValue(value?: string | null) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function isPublicTargetGroup(value?: string | null) {
+  const normalized = normalizeGroupValue(value);
+  return !normalized || normalized === "todos" || normalized === "general";
+}
+
 function IconFolder() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -155,8 +164,8 @@ export default function ResourcesPage() {
 
       const visibleTasks = (taskRows || []).filter((task: any) => {
         if (prof?.is_admin) return true;
-        if (!task.target_group || task.target_group === "Todos") return true;
-        return task.target_group === prof?.group_name;
+        if (isPublicTargetGroup(task.target_group)) return true;
+        return normalizeGroupValue(task.target_group) === normalizeGroupValue(prof?.group_name);
       });
       setTasks(visibleTasks);
     } else {

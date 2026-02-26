@@ -60,6 +60,15 @@ function formatFeedDate(value?: string) {
   return date.toLocaleDateString("es-ES", { month: "short", day: "numeric" });
 }
 
+function normalizeGroupValue(value?: string | null) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function isPublicTargetGroup(value?: string | null) {
+  const normalized = normalizeGroupValue(value);
+  return !normalized || normalized === "todos" || normalized === "general";
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [posts, setPosts] = useState<any[]>([]);
@@ -98,8 +107,8 @@ export default function HomePage() {
   const canSeePost = (p: any) => {
     if (myProfile?.is_admin) return true;
     const target = p?.target_group;
-    if (!target || target === "Todos") return true;
-    return target === myProfile?.group_name;
+    if (isPublicTargetGroup(target)) return true;
+    return normalizeGroupValue(target) === normalizeGroupValue(myProfile?.group_name);
   };
 
   const visibleRootPosts = posts.filter((p) => canSeePost(p) && !p.parent_assignment_id);
