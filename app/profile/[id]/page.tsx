@@ -279,8 +279,9 @@ export default function StudentProfilePage() {
         }
         .profileHeader {
           display: grid;
-          grid-template-columns: 1fr;
+          grid-template-columns: 110px minmax(0, 1fr);
           gap: 16px;
+          align-items: start;
         }
         .avatarWrap {
           width: 110px;
@@ -326,6 +327,9 @@ export default function StudentProfilePage() {
           color: #7a7a84;
           font-weight: 800;
           margin-bottom: 6px;
+        }
+        .profileMainInfo {
+          min-width: 0;
         }
         .profileName {
           margin: 0;
