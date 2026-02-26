@@ -65,7 +65,6 @@ export default function StudentProfilePage() {
   const stats = useMemo(
     () => ({
       postCount: posts.length,
-      withImages: posts.filter((post) => Boolean(post.image_url)).length,
     }),
     [posts],
   );
@@ -89,13 +88,24 @@ export default function StudentProfilePage() {
           <main className="profileGrid">
             <section className="profileCard">
               <div className="profileHeader">
-                <div className="avatarWrap">
-                  {profile.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" className="avatarImg" />
-                  ) : (
-                    <AvatarPlaceholder size={98} />
-                  )}
-                </div>
+                {isMe ? (
+                  <Link href="/profile/edit" className="avatarWrap avatarClickable" aria-label="Cambiar foto de perfil">
+                    {profile.avatar_url ? (
+                      <img src={profile.avatar_url} alt="" className="avatarImg" />
+                    ) : (
+                      <AvatarPlaceholder size={98} />
+                    )}
+                    <span className="avatarEditBadge">Cambiar</span>
+                  </Link>
+                ) : (
+                  <div className="avatarWrap">
+                    {profile.avatar_url ? (
+                      <img src={profile.avatar_url} alt="" className="avatarImg" />
+                    ) : (
+                      <AvatarPlaceholder size={98} />
+                    )}
+                  </div>
+                )}
 
                 <div className="profileMainInfo">
                   <div className="profileEyebrow">Perfil</div>
@@ -112,10 +122,6 @@ export default function StudentProfilePage() {
                     <div className="statCard">
                       <span className="statLabel">Publicaciones</span>
                       <strong className="statValue">{stats.postCount}</strong>
-                    </div>
-                    <div className="statCard">
-                      <span className="statLabel">Con imagen</span>
-                      <strong className="statValue">{stats.withImages}</strong>
                     </div>
                   </div>
                 </div>
@@ -139,11 +145,7 @@ export default function StudentProfilePage() {
                     const [title, ...rest] = String(post.content || "").split("\n");
                     const preview = rest.join(" ").trim();
                     return (
-                      <article
-                        key={post.id}
-                        className="postRow"
-                        style={{ borderBottom: idx === posts.length - 1 ? "none" : "1px solid rgba(17,17,20,.06)" }}
-                      >
+                    <article key={post.id} className="postRow" style={{ borderBottom: idx === posts.length - 1 ? "none" : "1px solid rgba(17,17,20,.06)" }}>
                         <div className="postRowContent">
                           <div className="postRowMeta">
                             <span>{formatDate(post.created_at)}</span>
@@ -250,12 +252,32 @@ export default function StudentProfilePage() {
           border: 2px solid #fff;
           box-shadow: 0 0 0 1px rgba(17, 17, 20, 0.08);
           background: #f8f8f8;
+          position: relative;
+          text-decoration: none;
         }
+        .avatarClickable { cursor: pointer; }
+        .avatarClickable:hover .avatarEditBadge { opacity: 1; transform: translateY(0); }
         .avatarImg {
           width: 100%;
           height: 100%;
           object-fit: cover;
           display: block;
+        }
+        .avatarEditBadge {
+          position: absolute;
+          left: 50%;
+          bottom: 6px;
+          transform: translate(-50%, 4px);
+          opacity: 0.95;
+          background: rgba(17, 17, 20, 0.75);
+          color: #fff;
+          border-radius: 999px;
+          padding: 4px 8px;
+          font-size: 10px;
+          font-weight: 700;
+          line-height: 1;
+          transition: 120ms ease;
+          white-space: nowrap;
         }
         .profileEyebrow {
           font-size: 11px;
@@ -286,7 +308,7 @@ export default function StudentProfilePage() {
         }
         .statsRow {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns: minmax(0, 220px);
           gap: 10px;
           margin-top: 16px;
         }
@@ -359,9 +381,9 @@ export default function StudentProfilePage() {
           background: #fff;
         }
         .postRow {
-          display: flex;
-          gap: 14px;
-          align-items: flex-start;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          gap: 10px;
           padding: 14px;
           background: #fff;
         }
@@ -406,9 +428,8 @@ export default function StudentProfilePage() {
           overflow: hidden;
         }
         .thumbLink {
-          width: 110px;
-          height: 82px;
-          flex-shrink: 0;
+          width: 100%;
+          height: 180px;
           border-radius: 12px;
           overflow: hidden;
           border: 1px solid rgba(17,17,20,.06);
@@ -444,9 +465,14 @@ export default function StudentProfilePage() {
           .postsSection {
             padding: 16px;
           }
+          .postRow {
+            grid-template-columns: minmax(0, 1fr) 148px;
+            gap: 14px;
+            align-items: start;
+          }
           .thumbLink {
-            width: 132px;
-            height: 92px;
+            width: 148px;
+            height: 104px;
           }
         }
       `}</style>

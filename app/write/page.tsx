@@ -2,10 +2,54 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 type GroupRow = { name: string };
+
+async function compressImageFile(file: File, options?: { maxWidth?: number; maxHeight?: number; quality?: number }) {
+  if (!file.type.startsWith("image/")) return file;
+
+  const maxWidth = options?.maxWidth ?? 1800;
+  const maxHeight = options?.maxHeight ?? 1800;
+  const quality = options?.quality ?? 0.82;
+
+  const imageUrl = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error("No se pudo leer imagen"));
+      el.src = imageUrl;
+    });
+
+    let { width, height } = img;
+    const scale = Math.min(1, maxWidth / width, maxHeight / height);
+    width = Math.max(1, Math.round(width * scale));
+    height = Math.max(1, Math.round(height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(img, 0, 0, width, height);
+
+    const outType = file.type === "image/png" ? "image/png" : "image/jpeg";
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, outType, outType === "image/png" ? undefined : quality),
+    );
+    if (!blob) return file;
+
+    const outName =
+      outType === "image/png"
+        ? file.name.replace(/\.[^.]+$/, ".png")
+        : file.name.replace(/\.[^.]+$/, ".jpg");
+    return new File([blob], outName, { type: outType });
+  } finally {
+    URL.revokeObjectURL(imageUrl);
+  }
+}
 
 function WriteContent() {
   const router = useRouter();
@@ -18,13 +62,17 @@ function WriteContent() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [inlineUploading, setInlineUploading] = useState(false);
 
   const [isAdmin, setIsAdmin] = useState(false);
-  const [postType, setPostType] = useState<"post" | "assignment" | "announcement" | "forum">("post");
-  const [targetGroup, setTargetGroup] = useState("");
+  const [postType, setPostType] = useState<"post" | "assignment" | "announcement" | "linkpost">("post");
+  const [targetGroup, setTargetGroup] = useState("Todos");
   const [deadline, setDeadline] = useState("");
   const [assignmentSubtype, setAssignmentSubtype] = useState<"internal" | "external">("external");
+  const [linkUrl, setLinkUrl] = useState("");
   const [availableGroups, setAvailableGroups] = useState<GroupRow[]>([]);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const inlineImageInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -58,8 +106,70 @@ function WriteContent() {
     setPreviewUrl(file ? URL.createObjectURL(file) : null);
   };
 
+  const uploadToStorage = async (userId: string, file: File, folder: "post-images" | "inline-images") => {
+    const compressed = await compressImageFile(file, {
+      maxWidth: folder === "inline-images" ? 1600 : 2000,
+      maxHeight: folder === "inline-images" ? 1600 : 2000,
+      quality: 0.82,
+    });
+    const fileExt = compressed.name.split(".").pop() || "jpg";
+    const fileName = `${userId}-${Math.random().toString(36).slice(2, 8)}.${fileExt}`;
+    const filePath = `${folder}/${fileName}`;
+    const { error } = await supabase.storage.from("uploads").upload(filePath, compressed);
+    if (error) throw error;
+    const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(filePath);
+    return urlData.publicUrl;
+  };
+
+  const insertAtCursor = (snippet: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      setBody((prev) => `${prev}${prev.endsWith("\n") || !prev ? "" : "\n"}${snippet}`);
+      return;
+    }
+
+    const start = textarea.selectionStart ?? body.length;
+    const end = textarea.selectionEnd ?? body.length;
+    const next = `${body.slice(0, start)}${snippet}${body.slice(end)}`;
+    setBody(next);
+
+    requestAnimationFrame(() => {
+      textarea.focus();
+      const caret = start + snippet.length;
+      textarea.setSelectionRange(caret, caret);
+    });
+  };
+
+  const handleInlineImagePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setInlineUploading(true);
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        alert("Inicia sesión de nuevo.");
+        return;
+      }
+
+      const publicUrl = await uploadToStorage(user.id, file, "inline-images");
+      const safeAlt = (file.name || "imagen").replace(/\.[^.]+$/, "");
+      const prefix = body && !body.endsWith("\n") ? "\n" : "";
+      insertAtCursor(`${prefix}![${safeAlt}](${publicUrl})\n`);
+    } catch {
+      alert("No se pudo subir la imagen inline.");
+    } finally {
+      setInlineUploading(false);
+      if (inlineImageInputRef.current) inlineImageInputRef.current.value = "";
+    }
+  };
+
   const handlePublish = async () => {
-    if (!title.trim() || !body.trim()) return alert("Escribe título y contenido.");
+    if (!title.trim()) return alert("Escribe un título.");
+    if (postType !== "linkpost" && !body.trim()) return alert("Escribe contenido.");
+    if (postType === "linkpost" && !linkUrl.trim()) return alert("Pega el link que quieres publicar.");
     setLoading(true);
     try {
       const {
@@ -69,26 +179,78 @@ function WriteContent() {
 
       let imageUrl = null;
       if (imageFile) {
-        const fileExt = imageFile.name.split(".").pop();
-        const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-        const filePath = `post-images/${fileName}`;
-        await supabase.storage.from("uploads").upload(filePath, imageFile);
-        const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(filePath);
-        imageUrl = urlData.publicUrl;
+        imageUrl = await uploadToStorage(user.id, imageFile, "post-images");
       }
 
+      const normalizedTargetGroup = isAdmin && !assignmentId ? (targetGroup || "Todos") : null;
+      const finalType = postType === "linkpost" ? "post" : postType;
+      const finalContent =
+        postType === "linkpost"
+          ? `${title}\n${linkUrl.trim()}\n${body}`.trim()
+          : `${title}\n${body}`;
+
       await supabase.from("posts").insert({
-        content: `${title}\n${body}`,
+      const { data: insertedPost, error: insertError } = await supabase.from("posts").insert({
+        content: finalContent,
         user_id: user.id,
         image_url: imageUrl,
-        type: postType === "forum" ? "assignment" : postType,
-        is_forum: postType === "forum",
+        type: finalType,
+        is_forum: !assignmentId && postType === "assignment" && assignmentSubtype === "internal",
         parent_assignment_id: assignmentId ? parseInt(assignmentId, 10) : null,
-        target_group: postType !== "post" ? targetGroup : null,
-        deadline: postType === "assignment" || postType === "forum" ? deadline || null : null,
+        target_group: assignmentId ? null : normalizedTargetGroup,
+        deadline: postType === "assignment" ? deadline || null : null,
         assignment_subtype:
-          postType === "assignment" ? assignmentSubtype : postType === "forum" ? "internal" : null,
-      });
+          postType === "assignment" ? assignmentSubtype : null,
+      }).select("id, type, target_group").single();
+      if (insertError) throw insertError;
+
+      // Notify students when the teacher posts announcements or new assignments.
+      if (
+        isAdmin &&
+        !assignmentId &&
+        insertedPost &&
+        (postType === "announcement" || postType === "assignment")
+      ) {
+        let recipientsQuery = supabase
+          .from("profiles")
+          .select("id, group_name")
+          .eq("is_admin", false)
+          .eq("is_approved", true);
+
+        if (normalizedTargetGroup && normalizedTargetGroup !== "Todos") {
+          recipientsQuery = recipientsQuery.eq("group_name", normalizedTargetGroup);
+        }
+
+        const { data: recipients } = await recipientsQuery;
+        const notifications = (recipients || [])
+          .filter((r: any) => r?.id && r.id !== user.id)
+          .map((r: any) => ({
+            user_id: r.id,
+            message:
+              postType === "announcement"
+                ? `Nuevo anuncio: ${title}`
+                : `Nueva tarea: ${title}`,
+            link: `/post/${insertedPost.id}`,
+            post_id: insertedPost.id,
+            actor_user_id: user.id,
+            type: postType === "announcement" ? "announcement" : "assignment",
+            is_read: false,
+          }));
+
+        if (notifications.length > 0) {
+          const { error: notifError } = await supabase.from("notifications").insert(notifications);
+          if (notifError) {
+            await supabase.from("notifications").insert(
+              notifications.map((n) => ({
+                user_id: n.user_id,
+                message: n.message,
+                link: n.link,
+                is_read: n.is_read,
+              })),
+            );
+          }
+        }
+      }
 
       router.push("/");
     } catch {
@@ -124,7 +286,7 @@ function WriteContent() {
           <div className="editorGrid">
             <section className="editorCard">
               <div className="fieldBlock">
-                <label className="label">Título</label>
+                <label className="label">{postType === "announcement" ? "Título del anuncio" : postType === "assignment" ? "Título de la tarea" : postType === "linkpost" ? "Título del link" : "Título"}</label>
                 <input
                   type="text"
                   placeholder="Título de tu publicación..."
@@ -135,13 +297,36 @@ function WriteContent() {
               </div>
 
               <div className="fieldBlock">
-                <label className="label">Contenido</label>
+                <div className="contentLabelRow">
+                  <label className="label" style={{ marginBottom: 0 }}>Contenido</label>
+                  <div className="contentTools">
+                    <button
+                      type="button"
+                      className="miniToolBtn"
+                      onClick={() => inlineImageInputRef.current?.click()}
+                      disabled={inlineUploading || loading}
+                    >
+                      {inlineUploading ? "Subiendo imagen…" : "+ Imagen en texto"}
+                    </button>
+                    <input
+                      ref={inlineImageInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleInlineImagePick}
+                      style={{ display: "none" }}
+                    />
+                  </div>
+                </div>
                 <textarea
+                  ref={textareaRef}
                   placeholder="Escribe aquí..."
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   className="bodyTextarea"
                 />
+                <div className="bodyHelp">
+                  Puedes insertar imágenes dentro del texto con el botón de arriba. Se guardan como bloques entre párrafos.
+                </div>
               </div>
             </section>
 
@@ -154,7 +339,7 @@ function WriteContent() {
 
                 <div className="previewCard">
                   <h3>{title.trim() || "Sin título aún"}</h3>
-                  <p>{body.trim() || "Tu contenido aparecerá aquí en una vista resumida."}</p>
+                    <p>{(postType === "linkpost" && linkUrl ? `${linkUrl}\n${body}` : body).trim() || "Tu contenido aparecerá aquí en una vista resumida."}</p>
                 </div>
               </section>
 
@@ -185,44 +370,53 @@ function WriteContent() {
                       <span>Tipo</span>
                       <select value={postType} onChange={(e) => setPostType(e.target.value as any)}>
                         <option value="post">Post normal</option>
-                        <option value="assignment">宿題 (Tarea)</option>
-                        <option value="forum">掲示板 (Foro)</option>
                         <option value="announcement">お知らせ (Anuncio)</option>
+                        <option value="linkpost">Link en el feed</option>
+                        <option value="assignment">宿題 (Tarea)</option>
                       </select>
                     </label>
 
-                    {postType !== "post" && (
-                      <label className="miniField">
-                        <span>Grupo</span>
-                        <select value={targetGroup} onChange={(e) => setTargetGroup(e.target.value)}>
-                          <option value="">Seleccionar…</option>
-                          <option value="Todos">Todos</option>
-                          {availableGroups.map((g) => (
-                            <option key={g.name} value={g.name}>
-                              {g.name}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    )}
+                    <label className="miniField">
+                      <span>Visible para</span>
+                      <select value={targetGroup} onChange={(e) => setTargetGroup(e.target.value)}>
+                        <option value="Todos">Todos</option>
+                        {availableGroups.map((g) => (
+                          <option key={g.name} value={g.name}>
+                            {g.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
 
-                    {(postType === "assignment" || postType === "forum") && (
+                    {postType === "linkpost" && (
                       <label className="miniField">
-                        <span>Fecha límite</span>
-                        <input type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+                        <span>URL del link</span>
+                        <input
+                          type="url"
+                          value={linkUrl}
+                          onChange={(e) => setLinkUrl(e.target.value)}
+                          placeholder="https://..."
+                        />
                       </label>
                     )}
 
                     {postType === "assignment" && (
                       <label className="miniField">
-                        <span>Tipo de tarea</span>
+                        <span>Modalidad de tarea</span>
                         <select
                           value={assignmentSubtype}
                           onChange={(e) => setAssignmentSubtype(e.target.value as "internal" | "external")}
                         >
-                          <option value="external">Externa</option>
-                          <option value="internal">Interna</option>
+                          <option value="external">Tarea tipo post (entrega en editor)</option>
+                          <option value="internal">Tarea tipo foro (responden en el post)</option>
                         </select>
+                      </label>
+                    )}
+
+                    {postType === "assignment" && (
+                      <label className="miniField">
+                        <span>Fecha límite</span>
+                        <input type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
                       </label>
                     )}
                   </div>
@@ -321,14 +515,40 @@ function WriteContent() {
         .fieldBlock + .fieldBlock {
           margin-top: 14px;
         }
+        .contentLabelRow {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          margin-bottom: 8px;
+          flex-wrap: wrap;
+        }
+        .contentTools {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+        }
         .label {
           display: block;
-          margin-bottom: 8px;
           font-size: 12px;
           color: #666a73;
           font-weight: 700;
           letter-spacing: 0.04em;
           text-transform: uppercase;
+        }
+        .miniToolBtn {
+          border: 1px solid rgba(17,17,20,.1);
+          background: #fff;
+          border-radius: 999px;
+          padding: 7px 10px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #333;
+          cursor: pointer;
+        }
+        .miniToolBtn:disabled {
+          opacity: .6;
+          cursor: not-allowed;
         }
         .titleInput {
           width: 100%;
@@ -356,6 +576,12 @@ function WriteContent() {
           outline: none;
           color: #222;
           font-family: inherit;
+        }
+        .bodyHelp {
+          margin-top: 8px;
+          color: #7c7c85;
+          font-size: 12px;
+          line-height: 1.4;
         }
         .titleInput:focus,
         .bodyTextarea:focus,

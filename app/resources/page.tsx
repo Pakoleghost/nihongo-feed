@@ -104,7 +104,9 @@ function IconNote() {
 
 export default function ResourcesPage() {
   const [resources, setResources] = useState<ResourceRow[]>([]);
+  const [tasks, setTasks] = useState<any[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [myProfile, setMyProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -117,6 +119,7 @@ export default function ResourcesPage() {
   const [extraFolders, setExtraFolders] = useState<string[]>([]);
   const [newFolderName, setNewFolderName] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [contentMode, setContentMode] = useState<"resources" | "tasks">("resources");
 
   useEffect(() => {
     try {
@@ -139,10 +142,27 @@ export default function ResourcesPage() {
     } = await supabase.auth.getUser();
 
     if (user) {
-      const { data: prof } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
+      const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+      setMyProfile(prof || null);
       setIsAdmin(Boolean(prof?.is_admin));
+
+      const { data: taskRows } = await supabase
+        .from("posts")
+        .select("id, content, created_at, target_group, deadline, is_forum, assignment_subtype")
+        .eq("type", "assignment")
+        .is("parent_assignment_id", null)
+        .order("created_at", { ascending: false });
+
+      const visibleTasks = (taskRows || []).filter((task: any) => {
+        if (prof?.is_admin) return true;
+        if (!task.target_group || task.target_group === "Todos") return true;
+        return task.target_group === prof?.group_name;
+      });
+      setTasks(visibleTasks);
     } else {
       setIsAdmin(false);
+      setMyProfile(null);
+      setTasks([]);
     }
 
     const { data, error } = await supabase.from("resources").select("*").order("category").order("title");
@@ -323,6 +343,14 @@ export default function ResourcesPage() {
               </div>
             </div>
             <div className="topActions">
+              <div className="toggleTabs" role="tablist" aria-label="Cambiar vista">
+                <button type="button" className={`toggleTab ${contentMode === "resources" ? "active" : ""}`} onClick={() => setContentMode("resources")}>
+                  Recursos
+                </button>
+                <button type="button" className={`toggleTab ${contentMode === "tasks" ? "active" : ""}`} onClick={() => setContentMode("tasks")}>
+                  Tareas
+                </button>
+              </div>
               {isAdmin && (
                 <button type="button" onClick={() => startCreateInFolder(selectedFolder)} className="primaryBtn">
                   + Nuevo recurso
@@ -334,6 +362,7 @@ export default function ResourcesPage() {
           {errorMsg && <div className="errorBox">{errorMsg}</div>}
 
           <div className="layoutGrid">
+            {contentMode === "resources" ? (
             <aside className="foldersPanel">
               <div className="panelHead">
                 <div>
@@ -379,17 +408,31 @@ export default function ResourcesPage() {
                 Las carpetas vacías se guardan localmente hasta que agregues contenido.
               </p>
             </aside>
+            ) : (
+              <aside className="foldersPanel">
+                <div className="panelHead">
+                  <div>
+                    <div className="eyebrow">Tareas</div>
+                    <h2>Asignadas</h2>
+                  </div>
+                  <span className="countPill">{tasks.length}</span>
+                </div>
+                <p className="panelHint">
+                  {isAdmin ? "Vista de todas las tareas publicadas." : `Solo ves tareas para ${myProfile?.group_name || "tu grupo"} o para Todos.`}
+                </p>
+              </aside>
+            )}
 
             <section className="contentPanel">
               <div className="panelHead">
                 <div>
-                  <div className="eyebrow">Contenido</div>
-                  <h2>{selectedFolder}</h2>
+                  <div className="eyebrow">{contentMode === "resources" ? "Contenido" : "Tareas"}</div>
+                  <h2>{contentMode === "resources" ? selectedFolder : "Pendientes y activas"}</h2>
                 </div>
-                <span className="countPill">{resourcesInFolder.length} items</span>
+                <span className="countPill">{contentMode === "resources" ? `${resourcesInFolder.length} items` : `${tasks.length} tareas`}</span>
               </div>
 
-              {showComposer && isAdmin && (
+              {contentMode === "resources" && showComposer && isAdmin && (
                 <div className="composerCard">
                   <div className="composerHeader">
                     <strong>{editingId ? "Editar recurso" : "Nuevo recurso"}</strong>
@@ -482,6 +525,47 @@ export default function ResourcesPage() {
 
               {loading ? (
                 <div className="emptyBox">Cargando recursos…</div>
+              ) : contentMode === "tasks" ? (
+                tasks.length === 0 ? (
+                  <div className="emptyBox">
+                    <p>No hay tareas visibles para ti.</p>
+                  </div>
+                ) : (
+                  <div className="resourceList">
+                    {tasks.map((task) => {
+                      const [taskTitle, ...taskBody] = String(task.content || "").split("\n");
+                      const deadline = task.deadline ? new Date(task.deadline) : null;
+                      const isExpired = Boolean(deadline && deadline.getTime() < Date.now());
+                      return (
+                        <Link key={task.id} href={`/post/${task.id}`} className="resourceRow" style={{ textDecoration: "none" }}>
+                          <div className="resourceMain">
+                            <div className="resourceIcon" style={{ color: task.is_forum ? "#3d81ce" : "#159578", background: task.is_forum ? "#eff6ff" : "#ecfdf5" }}>
+                              {task.is_forum ? "💬" : "📝"}
+                            </div>
+                            <div className="resourceText">
+                              <div className="resourceTitleRow">
+                                <strong>{taskTitle || "Tarea"}</strong>
+                                <span className={`typeTag ${task.is_forum ? "note" : "link"}`}>{task.is_forum ? "foro" : "tarea"}</span>
+                              </div>
+                              <p>{taskBody.join(" ").trim() || "Abrir para ver instrucciones."}</p>
+                              <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                <span className="typeTag" style={{ textTransform: "none", letterSpacing: 0, fontWeight: 700 }}>{task.target_group || "Todos"}</span>
+                                {deadline && (
+                                  <span className="typeTag" style={{ textTransform: "none", letterSpacing: 0, fontWeight: 700, color: isExpired ? "#b45309" : "#475569", background: isExpired ? "#fffbeb" : "#f8fafc", borderColor: isExpired ? "#fde68a" : "#e2e8f0" }}>
+                                    {isExpired ? "Vencida" : "Deadline"} · {deadline.toLocaleString("es-MX")}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="resourceActions">
+                            <span className="miniGhost">Abrir</span>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )
               ) : resourcesInFolder.length === 0 ? (
                 <div className="emptyBox">
                   <p>No hay recursos en esta carpeta.</p>
@@ -622,6 +706,30 @@ export default function ResourcesPage() {
           display: flex;
           gap: 8px;
           align-items: center;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+        }
+        .toggleTabs {
+          display: inline-flex;
+          gap: 4px;
+          border: 1px solid rgba(17,17,20,.08);
+          background: #fff;
+          border-radius: 999px;
+          padding: 3px;
+        }
+        .toggleTab {
+          border: 0;
+          background: transparent;
+          border-radius: 999px;
+          padding: 7px 10px;
+          font-size: 12px;
+          font-weight: 700;
+          color: #666a73;
+          cursor: pointer;
+        }
+        .toggleTab.active {
+          background: #111114;
+          color: #fff;
         }
         .primaryBtn, .secondaryBtn {
           border: 0;
