@@ -1,12 +1,11 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 
 export default function StudentProfilePage() {
   const { id } = useParams();
-  const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [myId, setMyId] = useState<string | null>(null);
   const [posts, setPosts] = useState<any[]>([]);
