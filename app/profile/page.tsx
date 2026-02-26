@@ -41,6 +41,12 @@ export default function MyProfilePage() {
     }
   };
 
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
   const handleSave = async () => {
     await supabase.from("profiles").update({ bio, full_name: fullName }).eq("id", profile.id);
     alert("¡Perfil actualizado!");
@@ -69,6 +75,9 @@ export default function MyProfilePage() {
         <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="¡Preséntate en japonés!" style={{ width: "100%", padding: "10px", height: "100px", borderRadius: "8px", border: "1px solid #ddd" }} />
         
         <button onClick={handleSave} style={{ width: "100%", backgroundColor: "#2cb696", color: "#fff", border: "none", padding: "12px", borderRadius: "25px", fontWeight: "bold", marginTop: "20px", cursor: "pointer" }}>Guardar cambios</button>
+        <button onClick={handleSignOut} title="Cerrar sesión" style={{ width: "100%", background: "none", border: "1px solid #ddd", color: "#666", padding: "12px", borderRadius: "25px", fontWeight: "bold", marginTop: "12px", cursor: "pointer" }}>
+          Cerrar sesión
+        </button>
       </div>
     </div>
   );

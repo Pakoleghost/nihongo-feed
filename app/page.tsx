@@ -35,11 +35,6 @@ export default function HomePage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
-
   if (!loading && myProfile && !myProfile.is_approved && !myProfile.is_admin) {
     return <div style={{ textAlign: "center", padding: "100px 20px", fontFamily: "sans-serif" }}>⏳ Tu cuenta espera aprobación de Pako-sensei...</div>;
   }
@@ -70,9 +65,7 @@ export default function HomePage() {
           {myProfile?.is_admin && <Link href="/admin/groups" title="Panel Maestro" style={{ textDecoration: "none", fontSize: "20px" }}>⚙️</Link>}
           <Link href="/write" style={{ backgroundColor: "#2cb696", color: "#fff", padding: "8px 18px", borderRadius: "24px", textDecoration: "none", fontSize: "14px", fontWeight: "bold" }}>書く</Link>
           
-          <button onClick={handleSignOut} title="Cerrar sesión" style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", padding: 0 }}>🚪</button>
-
-          <Link href={`/profile/${myProfile?.id}`} style={{ width: "34px", height: "34px", borderRadius: "50%", overflow: "hidden", border: "1px solid #eee", flexShrink: 0 }}>
+          <Link href="/profile" style={{ width: "34px", height: "34px", borderRadius: "50%", overflow: "hidden", border: "1px solid #eee", flexShrink: 0 }}>
             {myProfile?.avatar_url ? <img src={myProfile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ lineHeight: "34px", textAlign: "center", background: "#f5f5f5", color: "#ccc" }}>👤</div>}
           </Link>
         </div>
