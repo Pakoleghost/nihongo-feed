@@ -357,9 +357,29 @@ export default function PostDetailPage() {
                 <h1 className="postTitle">{parsed.title}</h1>
 
                 <div className="authorRow">
-                  <Link href={`/profile/${post.user_id}`} className="authorAvatar">
+                  <Link
+                    href={`/profile/${post.user_id}`}
+                    className="authorAvatar"
+                    style={{
+                      width: 42,
+                      height: 42,
+                      minWidth: 42,
+                      minHeight: 42,
+                      maxWidth: 42,
+                      maxHeight: 42,
+                      borderRadius: 999,
+                      overflow: "hidden",
+                      display: "block",
+                      flexShrink: 0,
+                    }}
+                  >
                     {post.profiles?.avatar_url ? (
-                      <img src={post.profiles.avatar_url} alt="" className="authorAvatarImg" />
+                      <img
+                        src={post.profiles.avatar_url}
+                        alt=""
+                        className="authorAvatarImg"
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      />
                     ) : (
                       <AvatarFallback size={42} />
                     )}
