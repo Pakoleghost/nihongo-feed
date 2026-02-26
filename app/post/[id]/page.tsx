@@ -57,6 +57,30 @@ export default function PostDetailPage() {
     if (isLiked) {
       await supabase.from("likes").delete().eq("post_id", id).eq("user_id", myId);
       setLikesCount(prev => prev - 1);
+      setIsLiked(false);
+      return;
+    }
+
+    const { error: likeError } = await supabase.from("likes").insert({ post_id: id, user_id: myId });
+    if (likeError) return;
+
+    setLikesCount(prev => prev + 1);
+    setIsLiked(true);
+
+    if (post?.user_id && post.user_id !== myId) {
+      const { data: actor } = await supabase.from("profiles").select("full_name,username").eq("id", myId).maybeSingle();
+      const actorName = actor?.full_name || actor?.username || "Un estudiante";
+      const postTitle = (post.content || "").split("\n")[0] || "tu publicación";
+
+      await supabase.from("notifications").insert({
+        user_id: post.user_id,
+        message: `${actorName} indicó que le gustó: ${postTitle}`,
+        link: `/post/${id}`,
+        post_id: id,
+        actor_user_id: myId,
+        type: "like",
+        is_read: false,
+      });
     } else {
       await supabase.from("likes").insert({ post_id: id, user_id: myId });
       setLikesCount(prev => prev + 1);
