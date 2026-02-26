@@ -47,6 +47,11 @@ export default function MyProfilePage() {
     router.push("/");
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
   if (loading) return <p style={{ textAlign: "center", padding: "50px" }}>Cargando...</p>;
 
   return (
@@ -69,6 +74,9 @@ export default function MyProfilePage() {
         <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="¡Preséntate en japonés!" style={{ width: "100%", padding: "10px", height: "100px", borderRadius: "8px", border: "1px solid #ddd" }} />
         
         <button onClick={handleSave} style={{ width: "100%", backgroundColor: "#2cb696", color: "#fff", border: "none", padding: "12px", borderRadius: "25px", fontWeight: "bold", marginTop: "20px", cursor: "pointer" }}>Guardar cambios</button>
+        <button onClick={handleSignOut} style={{ width: "100%", backgroundColor: "#fff", color: "#444", border: "1px solid #ddd", padding: "12px", borderRadius: "25px", fontWeight: "600", marginTop: "10px", cursor: "pointer" }}>
+          Cerrar sesión
+        </button>
       </div>
     </div>
   );

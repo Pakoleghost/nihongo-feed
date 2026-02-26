@@ -4,6 +4,43 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+function IconBook() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4.5 5.5A2.5 2.5 0 0 1 7 3h11.5v15.5H7A2.5 2.5 0 0 0 4.5 21V5.5Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+      <path d="M7 3v15.5A2.5 2.5 0 0 0 4.5 21H17" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconBell() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M7.5 9a4.5 4.5 0 1 1 9 0v2.4c0 .8.24 1.58.7 2.24l.55.8c.42.6 0 1.42-.73 1.42H6.98c-.73 0-1.15-.82-.73-1.42l.55-.8c.46-.66.7-1.44.7-2.24V9Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+      <path d="M10 18a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconSettings() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 8.75a3.25 3.25 0 1 0 0 6.5a3.25 3.25 0 0 0 0-6.5Z" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M19 12a7.5 7.5 0 0 0-.08-1.08l1.45-1.13-1.35-2.34-1.78.56a7.9 7.9 0 0 0-1.87-1.08L15.1 5h-2.7l-.27 1.93a7.9 7.9 0 0 0-1.87 1.08l-1.78-.56-1.35 2.34 1.45 1.13A7.5 7.5 0 0 0 5 12c0 .37.03.73.08 1.08l-1.45 1.13 1.35 2.34 1.78-.56c.56.46 1.2.83 1.87 1.08L12.4 19h2.7l.27-1.93c.67-.25 1.31-.62 1.87-1.08l1.78.56 1.35-2.34-1.45-1.13c.05-.35.08-.71.08-1.08Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function AvatarPlaceholder({ size = 34 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="11.5" fill="#f7f7f7" stroke="#e8e8e8" />
+      <circle cx="12" cy="9.2" r="3.2" fill="#cfcfd4" />
+      <path d="M6.7 18.1c1.1-2.3 3.05-3.4 5.3-3.4c2.25 0 4.2 1.1 5.3 3.4" stroke="#cfcfd4" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [posts, setPosts] = useState<any[]>([]);
@@ -35,11 +72,6 @@ export default function HomePage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
-
   if (!loading && myProfile && !myProfile.is_approved && !myProfile.is_admin) {
     return <div style={{ textAlign: "center", padding: "100px 20px", fontFamily: "sans-serif" }}>⏳ Tu cuenta espera aprobación de Pako-sensei...</div>;
   }
@@ -51,29 +83,34 @@ export default function HomePage() {
     <div style={{ maxWidth: "650px", margin: "0 auto", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: "#fff", minHeight: "100vh" }}>
       <header style={{ 
         display: "flex", justifyContent: "space-between", alignItems: "center", 
-        padding: "8px 20px", borderBottom: "1px solid #f2f2f2", position: "sticky", 
+        padding: "2px 16px", borderBottom: "1px solid #f2f2f2", position: "sticky", 
         top: 0, backgroundColor: "#fff", zIndex: 10
       }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
           <img 
             src="/logo.png" 
             alt="Logo" 
-            style={{ height: "60px", width: "auto", display: "block", imageRendering: "auto" }} 
+            style={{ height: "72px", width: "auto", display: "block", imageRendering: "auto" }} 
           />
         </Link>
         
-        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-          <Link href="/resources" title="Recursos" style={{ textDecoration: "none", fontSize: "20px" }}>📚</Link>
-          <Link href="/notifications" style={{ position: "relative", textDecoration: "none", fontSize: "20px" }}>
-            🔔 {unreadNotifications > 0 && <span style={{ position: "absolute", top: "-5px", right: "-5px", backgroundColor: "#ff2d55", color: "#fff", fontSize: "10px", padding: "2px 5px", borderRadius: "10px", fontWeight: "bold" }}>{unreadNotifications}</span>}
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <Link href="/resources" title="Recursos" aria-label="Recursos" style={{ color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+            <IconBook />
           </Link>
-          {myProfile?.is_admin && <Link href="/admin/groups" title="Panel Maestro" style={{ textDecoration: "none", fontSize: "20px" }}>⚙️</Link>}
+          <Link href="/notifications" title="Notificaciones" aria-label="Notificaciones" style={{ position: "relative", color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+            <IconBell />
+            {unreadNotifications > 0 && <span style={{ position: "absolute", top: "-6px", right: "-8px", backgroundColor: "#ff2d55", color: "#fff", fontSize: "10px", padding: "2px 5px", borderRadius: "10px", fontWeight: "bold", lineHeight: 1.2 }}>{unreadNotifications}</span>}
+          </Link>
+          {myProfile?.is_admin && (
+            <Link href="/admin/groups" title="Panel Maestro" aria-label="Panel Maestro" style={{ color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+              <IconSettings />
+            </Link>
+          )}
           <Link href="/write" style={{ backgroundColor: "#2cb696", color: "#fff", padding: "8px 18px", borderRadius: "24px", textDecoration: "none", fontSize: "14px", fontWeight: "bold" }}>書く</Link>
-          
-          <button onClick={handleSignOut} title="Cerrar sesión" style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", padding: 0 }}>🚪</button>
 
           <Link href={`/profile/${myProfile?.id}`} style={{ width: "34px", height: "34px", borderRadius: "50%", overflow: "hidden", border: "1px solid #eee", flexShrink: 0 }}>
-            {myProfile?.avatar_url ? <img src={myProfile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ lineHeight: "34px", textAlign: "center", background: "#f5f5f5", color: "#ccc" }}>👤</div>}
+            {myProfile?.avatar_url ? <img src={myProfile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", background: "#f5f5f5" }}><AvatarPlaceholder size={28} /></div>}
           </Link>
         </div>
       </header>
