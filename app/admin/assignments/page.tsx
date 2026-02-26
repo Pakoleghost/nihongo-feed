@@ -36,18 +36,18 @@ export default function AssignmentTracker() {
     setSelectedGroup(groupName);
 
     // Alumnos del grupo
-    const { data: stud } = await supabase.from("profiles").select("id, username").eq("group_name", groupName).order("username");
+    const { data: stud } = await supabase.from("profiles").select("id, username, full_name").eq("group_name", groupName).order("username");
     
     // Tareas que TÚ publicaste para este grupo
     const { data: asgn } = await supabase.from("posts")
-      .select("id, content")
+      .select("id, content, deadline, is_forum")
       .eq("type", "assignment")
       .eq("target_group", groupName)
       .order("created_at", { ascending: true });
 
     // Entregas que los alumnos han hecho vinculadas a esas tareas
     const { data: subs } = await supabase.from("posts")
-      .select("id, user_id, parent_assignment_id, is_reviewed")
+      .select("id, user_id, parent_assignment_id, is_reviewed, created_at")
       .eq("type", "assignment")
       .not("parent_assignment_id", "is", null);
 
@@ -60,7 +60,10 @@ export default function AssignmentTracker() {
   const getStatus = (studentId: string, assignmentId: number) => {
     const sub = submissions.find(s => s.user_id === studentId && s.parent_assignment_id === assignmentId);
     if (!sub) return { icon: "❌", color: "#fff5f5", text: "Pendiente" };
-    if (sub.is_reviewed) return { icon: "済", color: "#f0fdf4", text: "Revisado", id: sub.id };
+    const assignment = assignments.find(a => a.id === assignmentId);
+    const isLate = assignment?.deadline ? new Date(sub.created_at).getTime() > new Date(assignment.deadline).getTime() : false;
+    if (sub.is_reviewed) return { icon: isLate ? "⏰" : "済", color: isLate ? "#fff7ed" : "#f0fdf4", text: isLate ? "Revisado (tardía)" : "Revisado", id: sub.id };
+    if (isLate) return { icon: "⏰", color: "#fff7ed", text: "Entregado tarde", id: sub.id };
     return { icon: "📥", color: "#fffbeb", text: "Entregado", id: sub.id };
   };
 
@@ -105,7 +108,10 @@ export default function AssignmentTracker() {
                 <th style={{ padding: "20px", textAlign: "left", borderRight: "1px solid #eee", width: "200px", color: "#999", fontWeight: "bold", fontSize: "11px", textTransform: "uppercase" }}>Alumno</th>
                 {assignments.map(a => (
                   <th key={a.id} style={{ padding: "15px", minWidth: "100px", textAlign: "center", color: "#666" }}>
-                    {a.content.split('\n')[0].substring(0, 12)}...
+                    <div title={a.content.split('\n')[0]}>
+                      {a.content.split('\n')[0].substring(0, 12)}...
+                      {a.deadline && <div style={{ fontSize: "10px", color: "#999", marginTop: "4px" }}>⏱</div>}
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -113,7 +119,10 @@ export default function AssignmentTracker() {
             <tbody>
               {students.map(s => (
                 <tr key={s.id} style={{ borderBottom: "1px solid #f5f5f5" }}>
-                  <td style={{ padding: "15px 20px", fontWeight: "600", borderRight: "1px solid #eee", color: "#444" }}>{s.username}</td>
+                  <td style={{ padding: "15px 20px", fontWeight: "600", borderRight: "1px solid #eee", color: "#444" }}>
+                    <div>{s.full_name || s.username}</div>
+                    {s.username && s.full_name && <div style={{ fontSize: "11px", color: "#999", fontWeight: 500 }}>@{s.username}</div>}
+                  </td>
                   {assignments.map(a => {
                     const status = getStatus(s.id, a.id);
                     return (

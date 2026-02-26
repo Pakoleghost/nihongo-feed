@@ -46,7 +46,8 @@ export default function AdminGroupsPage() {
       const { data: subs } = await supabase.from("posts")
         .select("user_id")
         .in("user_id", studentIds)
-        .not("parent_assignment_id", "is", null);
+        .not("parent_assignment_id", "is", null)
+        .eq("type", "assignment");
       
       const sCount: Record<string, number> = {};
       subs?.forEach(s => {
@@ -90,7 +91,10 @@ export default function AdminGroupsPage() {
           {pendingUsers.length === 0 ? <p style={{color: "#999", textAlign: "center"}}>No hay solicitudes pendientes.</p> : 
             pendingUsers.map(u => (
               <div key={u.id} style={{ display: "flex", justifyContent: "space-between", padding: "15px", border: "1px solid #eee", borderRadius: "10px", marginBottom: "10px", alignItems: "center" }}>
-                <span>{u.username}</span>
+                <div>
+                  <div style={{ fontWeight: 700, color: "#333" }}>{u.full_name || u.username || "Sin nombre"}</div>
+                  {u.username && <div style={{ fontSize: "12px", color: "#888" }}>@{u.username}</div>}
+                </div>
                 <button onClick={() => handleApprove(u.id)} style={{ backgroundColor: "#2cb696", color: "#fff", border: "none", padding: "8px 15px", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>Aprobar</button>
               </div>
             ))
@@ -122,7 +126,10 @@ export default function AdminGroupsPage() {
             return (
               <div key={s.id} style={{ display: "flex", justifyContent: "space-between", padding: "15px", borderBottom: "1px solid #eee", alignItems: "center" }}>
                 <div style={{ flex: 1 }}>
-                  <Link href={`/profile/${s.id}`} style={{ fontWeight: "bold", textDecoration: "none", color: "#333", display: "block" }}>{s.username}</Link>
+                  <Link href={`/profile/${s.id}`} style={{ fontWeight: "bold", textDecoration: "none", color: "#333", display: "block" }}>
+                    {s.full_name || s.username || "Sin nombre"}
+                  </Link>
+                  {s.username && <div style={{ fontSize: "12px", color: "#888" }}>@{s.username}</div>}
                   {/* RESUMEN DE TAREAS (Aditivo) */}
                   <div style={{ fontSize: "11px", color: done >= total && total > 0 ? "#2cb696" : "#888", fontWeight: "bold" }}>
                     Tareas: {done} / {total} {done >= total && total > 0 ? "✅" : ""}

@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 
-function AvatarPlaceholder({ size = 100 }: { size?: number }) {
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+function AvatarPlaceholder({ size = 96 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="12" r="11.5" fill="#f7f7f7" stroke="#e8e8e8" />
@@ -14,9 +15,23 @@ function AvatarPlaceholder({ size = 100 }: { size?: number }) {
   );
 }
 
+function formatDate(value?: string) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const now = Date.now();
+  const diffH = Math.floor((now - date.getTime()) / (1000 * 60 * 60));
+  const diffD = Math.floor(diffH / 24);
+  if (diffH < 1) return "ahora";
+  if (diffH < 24) return `${diffH}h`;
+  if (diffD < 7) return `${diffD}d`;
+  return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+}
+
 export default function StudentProfilePage() {
   const { id } = useParams();
-  const router = useRouter();
+  const profileId = String(id ?? "");
+
   const [profile, setProfile] = useState<any>(null);
   const [myId, setMyId] = useState<string | null>(null);
   const [posts, setPosts] = useState<any[]>([]);
@@ -24,83 +39,443 @@ export default function StudentProfilePage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     setMyId(user?.id || null);
 
-    const { data: target } = await supabase.from("profiles").select("*").eq("id", id).single();
+    const { data: target } = await supabase.from("profiles").select("*").eq("id", profileId).single();
     setProfile(target);
 
-    const { data: userPosts } = await supabase.from("posts").select("*").eq("user_id", id).order("created_at", { ascending: false });
+    const { data: userPosts } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("user_id", profileId)
+      .order("created_at", { ascending: false });
     setPosts(userPosts || []);
     setLoading(false);
-  }, [id]);
+  }, [profileId]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
 
-  if (loading || !profile) return <div style={{ padding: "100px 20px", textAlign: "center", color: "#ccc" }}>...</div>;
+  const isMe = myId === profileId;
 
-  const isMe = myId === id;
+  const stats = useMemo(
+    () => ({
+      postCount: posts.length,
+    }),
+    [posts],
+  );
+
+  if (loading || !profile) {
+    return <div style={{ padding: "110px 16px", textAlign: "center", color: "#9ca3af" }}>Cargando perfil…</div>;
+  }
 
   return (
-    <div style={{ maxWidth: "650px", margin: "0 auto", padding: "24px 16px 40px", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', background: "#fff", minHeight: "100vh" }}>
-      <div style={{ textAlign: "center", marginBottom: "28px", padding: "12px 8px 24px", borderBottom: "1px solid #f1f1f1" }}>
-        <div style={{ width: "108px", height: "108px", borderRadius: "50%", overflow: "hidden", margin: "0 auto 15px", border: "2px solid #eee", background: "#f8f8f8", display: "grid", placeItems: "center" }}>
-          {profile.avatar_url ? <img src={profile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <AvatarPlaceholder size={92} />}
-        </div>
-        <h1 style={{ fontSize: "24px", margin: "0 0 5px 0", color: "#222", letterSpacing: "-0.01em" }}>{profile.full_name || profile.username}</h1>
-        <p style={{ color: "#888", fontSize: "14px", margin: "0 0 18px 0" }}>@{profile.username} • {profile.group_name || "Sin grupo"}</p>
-        
-        {profile.bio && (
-          <p style={{ fontSize: "15px", color: "#444", lineHeight: "1.65", maxWidth: "460px", margin: "0 auto", whiteSpace: "pre-wrap" }}>
-            {profile.bio}
-          </p>
-        )}
+    <>
+      <div className="profilePage">
+        <div className="profileShell">
+          <header className="profileTop">
+            <Link href="/" className="topGhost">← Volver</Link>
+            <div className="topActions">
+              {isMe && <Link href="/profile/edit" className="topPill">Editar perfil</Link>}
+              <Link href="/write" className="topPrimary">Escribir</Link>
+            </div>
+          </header>
 
-        {isMe && (
-          <Link href="/profile/edit" style={{ display: "inline-block", marginTop: "20px", fontSize: "13px", color: "#2cb696", textDecoration: "none", border: "1px solid #2cb696", padding: "6px 20px", borderRadius: "20px", fontWeight: "bold" }}>
-            Editar perfil
-          </Link>
-        )}
-      </div>
-
-      <div style={{ paddingTop: "4px" }}>
-        <h2 style={{ fontSize: "12px", color: "#999", textTransform: "uppercase", letterSpacing: "1.2px", margin: "0 4px 14px" }}>Publicaciones</h2>
-        {posts.length === 0 && (
-          <div style={{ padding: "20px 8px", color: "#999", fontSize: "14px" }}>Todavía no hay publicaciones.</div>
-        )}
-        {posts.map(post => {
-          const [titulo, ...cuerpo] = (post.content || "").split('\n');
-          const preview = cuerpo.join(" ").trim();
-          return (
-            <article key={post.id} style={{ padding: "18px 4px", borderBottom: "1px solid #f2f2f2", display: "flex", gap: "16px" }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <Link href={`/post/${post.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                  <h3 style={{ fontSize: "18px", fontWeight: 700, lineHeight: 1.4, margin: "0 0 8px 0", color: "#222" }}>
-                    {titulo || "Sin título"}
-                  </h3>
-                  {preview && (
-                    <p style={{ fontSize: "14px", color: "#666", lineHeight: 1.6, margin: "0 0 10px 0", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                      {preview}
-                    </p>
-                  )}
-                  <div style={{ fontSize: "12px", color: "#aaa" }}>
-                    {new Date(post.created_at).toLocaleDateString()}
+          <main className="profileGrid">
+            <section className="profileCard">
+              <div className="profileHeader">
+                {isMe ? (
+                  <Link href="/profile/edit" className="avatarWrap avatarClickable" aria-label="Cambiar foto de perfil">
+                    {profile.avatar_url ? (
+                      <img src={profile.avatar_url} alt="" className="avatarImg" />
+                    ) : (
+                      <AvatarPlaceholder size={98} />
+                    )}
+                    <span className="avatarEditBadge">Cambiar</span>
+                  </Link>
+                ) : (
+                  <div className="avatarWrap">
+                    {profile.avatar_url ? (
+                      <img src={profile.avatar_url} alt="" className="avatarImg" />
+                    ) : (
+                      <AvatarPlaceholder size={98} />
+                    )}
                   </div>
-                </Link>
+                )}
+
+                <div className="profileMainInfo">
+                  <div className="profileEyebrow">Perfil</div>
+                  <h1 className="profileName">{profile.full_name || profile.username || "Usuario"}</h1>
+                  <p className="profileHandle">
+                    @{profile.username || "sin-username"}
+                    {profile.group_name ? ` · ${profile.group_name}` : ""}
+                    {profile.is_admin ? " · Sensei" : ""}
+                  </p>
+
+                  {profile.bio && <p className="profileBio">{profile.bio}</p>}
+
+                  <div className="statsRow">
+                    <div className="statCard">
+                      <span className="statLabel">Publicaciones</span>
+                      <strong className="statValue">{stats.postCount}</strong>
+                    </div>
+                  </div>
+                </div>
               </div>
-              {post.image_url && (
-                <Link href={`/post/${post.id}`} style={{ flexShrink: 0, display: "block" }}>
-                  <img
-                    src={post.image_url}
-                    alt=""
-                    style={{ width: "96px", height: "96px", borderRadius: "8px", objectFit: "cover", display: "block", background: "#f3f3f3" }}
-                  />
-                </Link>
+            </section>
+
+            <section className="postsSection">
+              <div className="sectionHeader">
+                <div>
+                  <div className="sectionEyebrow">Archivo</div>
+                  <h2 className="sectionTitle">Publicaciones</h2>
+                </div>
+                <div className="sectionBadge">{stats.postCount} posts</div>
+              </div>
+
+              {posts.length === 0 ? (
+                <div className="emptyState">Todavía no hay publicaciones.</div>
+              ) : (
+                <div className="postListCard">
+                  {posts.map((post, idx) => {
+                    const [title, ...rest] = String(post.content || "").split("\n");
+                    const preview = rest.join(" ").trim();
+                    return (
+                    <article key={post.id} className="postRow" style={{ borderBottom: idx === posts.length - 1 ? "none" : "1px solid rgba(17,17,20,.06)" }}>
+                        <div className="postRowContent">
+                          <div className="postRowMeta">
+                            <span>{formatDate(post.created_at)}</span>
+                            {post.is_reviewed && <span className="sumiTag">済 Sumi</span>}
+                          </div>
+                          <Link href={`/post/${post.id}`} className="postRowTitle">
+                            {title || "Sin título"}
+                          </Link>
+                          {preview && <p className="postRowPreview">{preview}</p>}
+                        </div>
+
+                        {post.image_url && (
+                          <Link href={`/post/${post.id}`} className="thumbLink" aria-label="Abrir publicación">
+                            <img src={post.image_url} alt="" className="thumbImg" />
+                          </Link>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
               )}
-            </article>
-          );
-        })}
+            </section>
+          </main>
+        </div>
       </div>
-    </div>
+
+      <style jsx>{`
+        .profilePage {
+          min-height: 100vh;
+          background: radial-gradient(900px 420px at 50% -10%, rgba(88, 168, 255, 0.07), transparent 65%), #f6f7f8;
+          padding: 14px;
+        }
+        .profileShell {
+          max-width: 1180px;
+          margin: 0 auto;
+        }
+        .profileTop {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 12px;
+          position: sticky;
+          top: 0;
+          z-index: 10;
+          background: rgba(246, 247, 248, 0.82);
+          backdrop-filter: blur(10px);
+          padding: 10px 0;
+        }
+        .topActions {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+        }
+        .topGhost,
+        .topPill {
+          border: 1px solid rgba(17, 17, 20, 0.1);
+          background: #fff;
+          color: #222;
+          border-radius: 999px;
+          padding: 8px 12px;
+          font-size: 13px;
+          text-decoration: none;
+        }
+        .topPrimary {
+          text-decoration: none;
+          color: #fff;
+          background: linear-gradient(135deg, #34c5a6, #25a98f);
+          border-radius: 999px;
+          padding: 9px 14px;
+          font-size: 13px;
+          font-weight: 700;
+          box-shadow: 0 8px 18px rgba(44, 182, 150, 0.18);
+        }
+        .profileGrid {
+          display: grid;
+          gap: 14px;
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .profileCard,
+        .postsSection {
+          background: #fff;
+          border: 1px solid rgba(17, 17, 20, 0.07);
+          border-radius: 20px;
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.035);
+        }
+        .profileCard {
+          padding: 18px;
+        }
+        .profileHeader {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .avatarWrap {
+          width: 110px;
+          height: 110px;
+          border-radius: 999px;
+          overflow: hidden;
+          display: grid;
+          place-items: center;
+          border: 2px solid #fff;
+          box-shadow: 0 0 0 1px rgba(17, 17, 20, 0.08);
+          background: #f8f8f8;
+          position: relative;
+          text-decoration: none;
+        }
+        .avatarClickable { cursor: pointer; }
+        .avatarClickable:hover .avatarEditBadge { opacity: 1; transform: translateY(0); }
+        .avatarImg {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+        .avatarEditBadge {
+          position: absolute;
+          left: 50%;
+          bottom: 6px;
+          transform: translate(-50%, 4px);
+          opacity: 0.95;
+          background: rgba(17, 17, 20, 0.75);
+          color: #fff;
+          border-radius: 999px;
+          padding: 4px 8px;
+          font-size: 10px;
+          font-weight: 700;
+          line-height: 1;
+          transition: 120ms ease;
+          white-space: nowrap;
+        }
+        .profileEyebrow {
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #7a7a84;
+          font-weight: 800;
+          margin-bottom: 6px;
+        }
+        .profileName {
+          margin: 0;
+          font-size: 28px;
+          line-height: 1.1;
+          letter-spacing: -0.02em;
+          color: #111114;
+        }
+        .profileHandle {
+          margin: 8px 0 0;
+          font-size: 13px;
+          color: #767680;
+        }
+        .profileBio {
+          margin: 14px 0 0;
+          font-size: 14px;
+          line-height: 1.65;
+          color: #33343a;
+          white-space: pre-wrap;
+        }
+        .statsRow {
+          display: grid;
+          grid-template-columns: minmax(0, 220px);
+          gap: 10px;
+          margin-top: 16px;
+        }
+        .statCard {
+          border: 1px solid rgba(17, 17, 20, 0.07);
+          background: #fbfbfc;
+          border-radius: 14px;
+          padding: 12px;
+        }
+        .statLabel {
+          display: block;
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          color: #7a7a84;
+          font-weight: 700;
+          margin-bottom: 6px;
+        }
+        .statValue {
+          font-size: 22px;
+          line-height: 1;
+          color: #17171b;
+        }
+        .postsSection {
+          padding: 14px;
+        }
+        .sectionHeader {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 4px 2px 12px;
+        }
+        .sectionEyebrow {
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #7a7a84;
+          font-weight: 800;
+        }
+        .sectionTitle {
+          margin: 4px 0 0;
+          font-size: 24px;
+          line-height: 1;
+          color: #111114;
+          letter-spacing: -0.02em;
+        }
+        .sectionBadge {
+          border: 1px solid rgba(17,17,20,.07);
+          border-radius: 999px;
+          padding: 6px 10px;
+          font-size: 12px;
+          color: #666a73;
+          background: #f6f7f8;
+          font-weight: 600;
+        }
+        .emptyState {
+          border: 1px dashed rgba(17,17,20,.12);
+          border-radius: 14px;
+          padding: 20px;
+          text-align: center;
+          color: #8a8a94;
+          background: #fcfcfd;
+          font-size: 14px;
+        }
+        .postListCard {
+          border: 1px solid rgba(17,17,20,.06);
+          border-radius: 16px;
+          overflow: hidden;
+          background: #fff;
+        }
+        .postRow {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          gap: 10px;
+          padding: 14px;
+          background: #fff;
+        }
+        .postRowContent {
+          flex: 1;
+          min-width: 0;
+        }
+        .postRowMeta {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #7c7c85;
+          font-size: 12px;
+          margin-bottom: 8px;
+        }
+        .sumiTag {
+          border: 1px solid #2cb696;
+          color: #2cb696;
+          border-radius: 6px;
+          font-weight: 700;
+          font-size: 10px;
+          padding: 1px 6px;
+        }
+        .postRowTitle {
+          display: block;
+          color: #17171b;
+          text-decoration: none;
+          font-size: 17px;
+          font-weight: 800;
+          line-height: 1.3;
+          letter-spacing: -0.01em;
+          margin-bottom: 8px;
+        }
+        .postRowPreview {
+          margin: 0;
+          color: #666a73;
+          font-size: 13.5px;
+          line-height: 1.55;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .thumbLink {
+          width: 100%;
+          height: 180px;
+          border-radius: 12px;
+          overflow: hidden;
+          border: 1px solid rgba(17,17,20,.06);
+          background: #f5f5f5;
+          display: block;
+        }
+        .thumbImg {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        @media (min-width: 900px) {
+          .profilePage {
+            padding: 18px 22px 28px;
+          }
+          .profileCard {
+            padding: 22px;
+          }
+          .profileHeader {
+            grid-template-columns: 130px minmax(0, 1fr);
+            gap: 20px;
+            align-items: start;
+          }
+          .avatarWrap {
+            width: 124px;
+            height: 124px;
+          }
+          .profileName {
+            font-size: 34px;
+          }
+          .postsSection {
+            padding: 16px;
+          }
+          .postRow {
+            grid-template-columns: minmax(0, 1fr) 148px;
+            gap: 14px;
+            align-items: start;
+          }
+          .thumbLink {
+            width: 148px;
+            height: 104px;
+          }
+        }
+      `}</style>
+    </>
   );
 }

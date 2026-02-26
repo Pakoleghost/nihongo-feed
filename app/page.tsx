@@ -95,8 +95,20 @@ export default function HomePage() {
     return <div style={{ textAlign: "center", padding: "100px 20px", fontFamily: "sans-serif" }}>⏳ Tu cuenta espera aprobación de Pako-sensei...</div>;
   }
 
-  const teacherDirectives = posts.filter(p => p.profiles?.is_admin && (p.type === 'assignment' || p.type === 'announcement') && (p.target_group === myProfile?.group_name || p.target_group === "Todos"));
-  const regularFeed = posts.filter(p => !p.profiles?.is_admin || (p.type !== 'assignment' && p.type !== 'announcement') || dismissedAnnouncements.includes(p.id));
+  const canSeePost = (p: any) => {
+    if (myProfile?.is_admin) return true;
+    const target = p?.target_group;
+    if (!target || target === "Todos") return true;
+    return target === myProfile?.group_name;
+  };
+
+  const visibleRootPosts = posts.filter((p) => canSeePost(p) && !p.parent_assignment_id);
+  const pinnedAnnouncements = visibleRootPosts.filter(
+    (p) => p.profiles?.is_admin && p.type === "announcement" && !dismissedAnnouncements.includes(p.id),
+  );
+  const regularFeed = visibleRootPosts.filter(
+    (p) => p.type !== "announcement" || dismissedAnnouncements.includes(p.id),
+  );
 
   return (
     <div style={{ maxWidth: "760px", margin: "0 auto", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', minHeight: "100vh", paddingBottom: "28px" }}>
@@ -145,24 +157,26 @@ export default function HomePage() {
           </div>
         </section>
 
-        {teacherDirectives.filter(p => !dismissedAnnouncements.includes(p.id)).map(post => (
+        {pinnedAnnouncements.map(post => (
           <div key={post.id} style={{ margin: "0 14px 12px", padding: "16px 16px 14px 18px", borderRadius: "16px", backgroundColor: post.type === 'assignment' ? "#f2fffa" : "#f4fbff", border: "1px solid rgba(17,17,20,0.06)", position: "relative", boxShadow: "0 8px 24px rgba(0,0,0,.025)" }}>
             <div style={{ position: "absolute", left: "0", top: "12px", bottom: "12px", width: "4px", borderRadius: "0 6px 6px 0", background: post.type === "assignment" ? "#2cb696" : "#58a8ff" }} />
             <button onClick={() => { const newD = [...dismissedAnnouncements, post.id]; setDismissedAnnouncements(newD); localStorage.setItem("dismissed_posts", JSON.stringify(newD)); }} style={{ position: "absolute", top: "10px", right: "10px", background: "#fff", border: "1px solid rgba(17,17,20,.08)", color: "#8b8b93", cursor: "pointer", fontSize: "13px", width: "24px", height: "24px", borderRadius: "999px", lineHeight: 1 }}>✕</button>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "10px", fontSize: "11px", fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase", color: post.type === "assignment" ? "#159578" : "#3d81ce" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "10px", fontSize: "11px", fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase", color: "#3d81ce" }}>
               <span style={{ width: "6px", height: "6px", borderRadius: "999px", background: "currentColor" }} />
-              {post.type === "assignment" ? "Tarea del sensei" : "Anuncio"}
+              Anuncio
             </div>
             <h3 style={{ margin: "0 0 12px 0", fontSize: "16px", lineHeight: 1.35, fontWeight: "800", color: "#222" }}>{post.content.split('\n')[0]}</h3>
-            <Link href={`/write?assignment_id=${post.id}&title=${encodeURIComponent(post.content.split('\n')[0])}`} style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#147f68", fontWeight: 700, textDecoration: "none", background: "#fff", border: "1px solid rgba(44,182,150,.2)", padding: "8px 10px", borderRadius: "999px" }}>✍️ Entregar tarea</Link>
+            <Link href={`/post/${post.id}`} style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#3d81ce", fontWeight: 700, textDecoration: "none", background: "#fff", border: "1px solid rgba(88,168,255,.2)", padding: "8px 10px", borderRadius: "999px" }}>Abrir anuncio</Link>
           </div>
         ))}
 
         <section style={{ margin: "0 14px", background: "#fff", borderRadius: "20px", border: "1px solid rgba(17,17,20,.06)", overflow: "hidden", boxShadow: "0 12px 34px rgba(0,0,0,.035)" }}>
         {regularFeed.map((post, idx) => {
           const [titulo, ...cuerpo] = post.content.split('\n');
+          const isAssignmentPost = post.type === "assignment" && !post.parent_assignment_id;
+          const rowBg = isAssignmentPost ? "#f6fffb" : idx % 2 === 0 ? "rgba(255,255,255,1)" : "rgba(251,251,252,1)";
           return (
-            <article key={post.id} style={{ padding: "18px 16px", borderBottom: idx === regularFeed.length - 1 ? "none" : "1px solid rgba(17,17,20,.06)", display: "flex", gap: "14px", alignItems: "flex-start", background: idx % 2 === 0 ? "rgba(255,255,255,1)" : "rgba(251,251,252,1)" }}>
+            <article key={post.id} style={{ padding: "18px 16px", borderBottom: idx === regularFeed.length - 1 ? "none" : "1px solid rgba(17,17,20,.06)", display: "flex", gap: "14px", alignItems: "flex-start", background: rowBg }}>
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center", minWidth: 0 }}>
                   <div style={{ width: "28px", height: "28px", borderRadius: "50%", overflow: "hidden", background: "#f5f5f5", flexShrink: 0, border: "1px solid rgba(17,17,20,.06)" }}>
@@ -178,6 +192,12 @@ export default function HomePage() {
                   {post.is_reviewed && <span style={{ fontSize: "10px", color: "#2cb696", fontWeight: "700", border: "1px solid #2cb696", padding: "1px 6px", borderRadius: "4px" }}>済 Sumi</span>}
                 </div>
                 <Link href={`/post/${post.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                  {isAssignmentPost && (
+                    <div style={{ marginBottom: "8px", display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "10px", letterSpacing: ".06em", textTransform: "uppercase", fontWeight: 800, color: "#159578", background: "#ecfdf5", border: "1px solid #bbf7d0", borderRadius: "999px", padding: "4px 8px" }}>
+                      <span style={{ width: 5, height: 5, borderRadius: "999px", background: "currentColor" }} />
+                      {post.is_forum ? "Tarea Foro" : "Tarea"}
+                    </div>
+                  )}
                   <h2 style={{ margin: "0 0 8px 0", fontSize: "17px", fontWeight: 800, lineHeight: "1.35", color: "#17171b", letterSpacing: "-0.01em" }}>{titulo}</h2>
                   {cuerpo.length > 0 && (
                     <p style={{ margin: 0, fontSize: "13.5px", color: "#666a73", lineHeight: "1.55", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{cuerpo.join(' ')}</p>
@@ -189,8 +209,15 @@ export default function HomePage() {
                     投稿
                   </span>
                   <span>·</span>
-                  <span>{post.profiles?.group_name || "General"}</span>
+                  <span>{post.target_group || post.profiles?.group_name || "General"}</span>
                 </div>
+                {isAssignmentPost && (
+                  <div style={{ marginTop: "10px" }}>
+                    <Link href={post.is_forum ? `/post/${post.id}` : `/write?assignment_id=${post.id}&title=${encodeURIComponent(titulo || "Tarea")}`} style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#147f68", fontWeight: 700, textDecoration: "none", background: "#fff", border: "1px solid rgba(44,182,150,.2)", padding: "7px 10px", borderRadius: "999px" }}>
+                      {post.is_forum ? "Entrar al foro" : "Entregar tarea"}
+                    </Link>
+                  </div>
+                )}
               </div>
               {post.image_url && (
                 <Link href={`/post/${post.id}`} style={{ flexShrink: 0, alignSelf: "center" }}>
