@@ -209,22 +209,37 @@ export default function NotificationsPage() {
 
         const { data: likes } = await supabase
           .from("likes")
-          .select("user_id, created_at, profiles:user_id(id, username, avatar_url)")
+          .select("user_id, created_at")
           .eq("post_id", postId)
           .order("created_at", { ascending: false })
-          .limit(5);
+          .limit(8);
 
-        const best =
-          (likes || []).find((like: any) => {
-            const profile = Array.isArray(like?.profiles) ? like.profiles[0] : like?.profiles;
-            return Boolean(profile?.id);
-          }) || null;
+        const candidateUserIds = Array.from(
+          new Set(
+            (likes || [])
+              .map((row: any) => row?.user_id)
+              .filter((id: any): id is string => Boolean(id))
+          )
+        );
+        if (candidateUserIds.length === 0) return;
 
-        const bestProfile = best
-          ? Array.isArray((best as any).profiles)
-            ? (best as any).profiles[0]
-            : (best as any).profiles
-          : null;
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, username, avatar_url")
+          .in("id", candidateUserIds);
+
+        const profileById: Record<string, ActorPreview> = {};
+        (profiles || []).forEach((p: any) => {
+          if (!p?.id) return;
+          profileById[p.id] = {
+            id: p.id,
+            username: p.username || null,
+            avatar_url: p.avatar_url || null,
+          };
+        });
+
+        const bestLike = (likes || []).find((row: any) => row?.user_id && profileById[row.user_id]) as any;
+        const bestProfile = bestLike?.user_id ? profileById[bestLike.user_id] : null;
 
         if (bestProfile?.id) {
           nextActorsByNotifId[n.id] = {
