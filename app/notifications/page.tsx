@@ -114,12 +114,17 @@ export default function NotificationsPage() {
           .order("created_at", { ascending: false })
           .limit(5);
 
-        const best = (likes || []).find((like: any) => like?.profiles?.id) || null;
-        if (best?.profiles?.id) {
+        const best = (likes || []).find((like: any) => {
+          const profile = Array.isArray(like?.profiles) ? like.profiles[0] : like?.profiles;
+          return Boolean(profile?.id);
+        }) || null;
+
+        const bestProfile = best ? (Array.isArray((best as any).profiles) ? (best as any).profiles[0] : (best as any).profiles) : null;
+        if (bestProfile?.id) {
           nextActorsByNotifId[n.id] = {
-            id: best.profiles.id,
-            username: best.profiles.username || null,
-            avatar_url: best.profiles.avatar_url || null,
+            id: bestProfile.id,
+            username: bestProfile.username || null,
+            avatar_url: bestProfile.avatar_url || null,
           };
         }
       })
