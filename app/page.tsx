@@ -25,8 +25,11 @@ function IconBell() {
 function IconSettings() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 8.75a3.25 3.25 0 1 0 0 6.5a3.25 3.25 0 0 0 0-6.5Z" stroke="currentColor" strokeWidth="1.7" />
-      <path d="M19 12a7.5 7.5 0 0 0-.08-1.08l1.45-1.13-1.35-2.34-1.78.56a7.9 7.9 0 0 0-1.87-1.08L15.1 5h-2.7l-.27 1.93a7.9 7.9 0 0 0-1.87 1.08l-1.78-.56-1.35 2.34 1.45 1.13A7.5 7.5 0 0 0 5 12c0 .37.03.73.08 1.08l-1.45 1.13 1.35 2.34 1.78-.56c.56.46 1.2.83 1.87 1.08L12.4 19h2.7l.27-1.93c.67-.25 1.31-.62 1.87-1.08l1.78.56 1.35-2.34-1.45-1.13c.05-.35.08-.71.08-1.08Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M12 2.75l1.15 2.65 2.88.23-2.2 1.88.67 2.82L12 8.9l-2.5 1.43.67-2.82-2.2-1.88 2.88-.23L12 2.75Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round" />
+      <path d="M21.25 12l-2.65 1.15-.23 2.88-1.88-2.2-2.82.67L15.1 12l-1.43-2.5 2.82.67 1.88-2.2.23 2.88L21.25 12Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round" />
+      <path d="M12 21.25l-1.15-2.65-2.88-.23 2.2-1.88-.67-2.82L12 15.1l2.5-1.43-.67 2.82 2.2 1.88-2.88.23L12 21.25Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round" />
+      <path d="M2.75 12l2.65-1.15.23-2.88 1.88 2.2 2.82-.67L8.9 12l1.43 2.5-2.82-.67-1.88 2.2-.23-2.88L2.75 12Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="3.25" stroke="currentColor" strokeWidth="1.6" />
     </svg>
   );
 }
@@ -83,14 +86,14 @@ export default function HomePage() {
     <div style={{ maxWidth: "650px", margin: "0 auto", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: "#fff", minHeight: "100vh" }}>
       <header style={{ 
         display: "flex", justifyContent: "space-between", alignItems: "center", 
-        padding: "2px 16px", borderBottom: "1px solid #f2f2f2", position: "sticky", 
+        padding: "0 16px", borderBottom: "1px solid #f2f2f2", position: "sticky", 
         top: 0, backgroundColor: "#fff", zIndex: 10
       }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
           <img 
             src="/logo.png" 
             alt="Logo" 
-            style={{ height: "72px", width: "auto", display: "block", imageRendering: "auto" }} 
+            style={{ height: "82px", width: "auto", display: "block", imageRendering: "auto" }} 
           />
         </Link>
         
