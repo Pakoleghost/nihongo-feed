@@ -54,7 +54,6 @@ export default function PostDetailPage() {
 
   const handleLike = async () => {
     if (!myId) return;
-
     if (isLiked) {
       await supabase.from("likes").delete().eq("post_id", id).eq("user_id", myId);
       setLikesCount(prev => prev - 1);
@@ -82,7 +81,11 @@ export default function PostDetailPage() {
         type: "like",
         is_read: false,
       });
+    } else {
+      await supabase.from("likes").insert({ post_id: id, user_id: myId });
+      setLikesCount(prev => prev + 1);
     }
+    setIsLiked(!isLiked);
   };
 
   if (loading || !post) return <div style={{ padding: "100px 20px", textAlign: "center", color: "#ccc" }}>...</div>;

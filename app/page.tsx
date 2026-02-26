@@ -25,8 +25,11 @@ function IconBell() {
 function IconSettings() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 8.75a3.25 3.25 0 1 0 0 6.5a3.25 3.25 0 0 0 0-6.5Z" stroke="currentColor" strokeWidth="1.7" />
-      <path d="M19 12a7.5 7.5 0 0 0-.08-1.08l1.45-1.13-1.35-2.34-1.78.56a7.9 7.9 0 0 0-1.87-1.08L15.1 5h-2.7l-.27 1.93a7.9 7.9 0 0 0-1.87 1.08l-1.78-.56-1.35 2.34 1.45 1.13A7.5 7.5 0 0 0 5 12c0 .37.03.73.08 1.08l-1.45 1.13 1.35 2.34 1.78-.56c.56.46 1.2.83 1.87 1.08L12.4 19h2.7l.27-1.93c.67-.25 1.31-.62 1.87-1.08l1.78.56 1.35-2.34-1.45-1.13c.05-.35.08-.71.08-1.08Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M12 2.75l1.15 2.65 2.88.23-2.2 1.88.67 2.82L12 8.9l-2.5 1.43.67-2.82-2.2-1.88 2.88-.23L12 2.75Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round" />
+      <path d="M21.25 12l-2.65 1.15-.23 2.88-1.88-2.2-2.82.67L15.1 12l-1.43-2.5 2.82.67 1.88-2.2.23 2.88L21.25 12Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round" />
+      <path d="M12 21.25l-1.15-2.65-2.88-.23 2.2-1.88-.67-2.82L12 15.1l2.5-1.43-.67 2.82 2.2 1.88-2.88.23L12 21.25Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round" />
+      <path d="M2.75 12l2.65-1.15.23-2.88 1.88 2.2 2.82-.67L8.9 12l1.43 2.5-2.82-.67-1.88 2.2-.23-2.88L2.75 12Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="3.25" stroke="currentColor" strokeWidth="1.6" />
     </svg>
   );
 }
@@ -39,6 +42,22 @@ function AvatarPlaceholder({ size = 34 }: { size?: number }) {
       <path d="M6.7 18.1c1.1-2.3 3.05-3.4 5.3-3.4c2.25 0 4.2 1.1 5.3 3.4" stroke="#cfcfd4" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
+}
+
+function formatFeedDate(value?: string) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (hours < 1) return "ahora";
+  if (hours < 24) return `${hours}h`;
+  if (days < 7) return `${days}d`;
+  return date.toLocaleDateString("es-ES", { month: "short", day: "numeric" });
 }
 
 export default function HomePage() {
@@ -80,79 +99,108 @@ export default function HomePage() {
   const regularFeed = posts.filter(p => !p.profiles?.is_admin || (p.type !== 'assignment' && p.type !== 'announcement') || dismissedAnnouncements.includes(p.id));
 
   return (
-    <div style={{ maxWidth: "650px", margin: "0 auto", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: "#fff", minHeight: "100vh" }}>
+    <div style={{ maxWidth: "760px", margin: "0 auto", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', minHeight: "100vh", paddingBottom: "28px" }}>
       <header style={{ 
         display: "flex", justifyContent: "space-between", alignItems: "center", 
-        padding: "2px 16px", borderBottom: "1px solid #f2f2f2", position: "sticky", 
-        top: 0, backgroundColor: "#fff", zIndex: 10
+        padding: "14px 16px", borderBottom: "1px solid rgba(17,17,20,.08)", position: "sticky", 
+        top: 0, background: "rgba(255,255,255,.88)", backdropFilter: "blur(12px)", zIndex: 20,
+        boxShadow: "0 8px 30px rgba(0,0,0,.03)"
       }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-          <img 
-            src="/logo.png" 
-            alt="Logo" 
-            style={{ height: "72px", width: "auto", display: "block", imageRendering: "auto" }} 
-          />
+        <Link href="/" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", flexShrink: 1, minWidth: 0, textDecoration: "none" }}>
+          <span style={{ fontSize: "10px", color: "#7f7f88", letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 700 }}>Nihongo Feed</span>
+          <span style={{ fontSize: "28px", lineHeight: 1, fontWeight: 900, color: "#111114", letterSpacing: "-0.02em" }}>フィード</span>
         </Link>
         
-        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-          <Link href="/resources" title="Recursos" aria-label="Recursos" style={{ color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <Link href="/resources" title="Recursos" aria-label="Recursos" style={{ color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "999px", border: "1px solid rgba(17,17,20,.08)", background: "#fff" }}>
             <IconBook />
           </Link>
-          <Link href="/notifications" title="Notificaciones" aria-label="Notificaciones" style={{ position: "relative", color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+          <Link href="/notifications" title="Notificaciones" aria-label="Notificaciones" style={{ position: "relative", color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "999px", border: "1px solid rgba(17,17,20,.08)", background: "#fff" }}>
             <IconBell />
             {unreadNotifications > 0 && <span style={{ position: "absolute", top: "-6px", right: "-8px", backgroundColor: "#ff2d55", color: "#fff", fontSize: "10px", padding: "2px 5px", borderRadius: "10px", fontWeight: "bold", lineHeight: 1.2 }}>{unreadNotifications}</span>}
           </Link>
           {myProfile?.is_admin && (
-            <Link href="/admin/groups" title="Panel Maestro" aria-label="Panel Maestro" style={{ color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+            <Link href="/admin/groups" title="Panel Maestro" aria-label="Panel Maestro" style={{ color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "999px", border: "1px solid rgba(17,17,20,.08)", background: "#fff" }}>
               <IconSettings />
             </Link>
           )}
-          <Link href="/write" style={{ backgroundColor: "#2cb696", color: "#fff", padding: "8px 18px", borderRadius: "24px", textDecoration: "none", fontSize: "14px", fontWeight: "bold" }}>書く</Link>
+          <Link href="/write" style={{ background: "linear-gradient(135deg, #34c5a6, #25a98f)", color: "#fff", padding: "10px 20px", borderRadius: "999px", textDecoration: "none", fontSize: "14px", fontWeight: "700", boxShadow: "0 8px 18px rgba(44,182,150,.22)" }}>書く</Link>
 
-          <Link href={`/profile/${myProfile?.id}`} style={{ width: "34px", height: "34px", borderRadius: "50%", overflow: "hidden", border: "1px solid #eee", flexShrink: 0 }}>
+          <Link href={`/profile/${myProfile?.id}`} style={{ width: "38px", height: "38px", borderRadius: "50%", overflow: "hidden", border: "2px solid #fff", boxShadow: "0 0 0 1px rgba(17,17,20,.08)", flexShrink: 0 }}>
             {myProfile?.avatar_url ? <img src={myProfile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", background: "#f5f5f5" }}><AvatarPlaceholder size={28} /></div>}
           </Link>
         </div>
       </header>
 
-      <main style={{ paddingTop: "20px" }}>
+      <main style={{ paddingTop: "14px", background: "linear-gradient(to bottom, rgba(255,255,255,.8), rgba(255,255,255,.7))" }}>
+        <section style={{ margin: "0 14px 14px", padding: "14px 16px 12px", borderRadius: "16px", background: "#fff", border: "1px solid rgba(17,17,20,.07)", boxShadow: "0 10px 28px rgba(0,0,0,.03)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
+            <div>
+              <div style={{ fontSize: "12px", letterSpacing: ".08em", textTransform: "uppercase", color: "#7a7a84", fontWeight: 700 }}>Home Feed</div>
+              <h1 style={{ margin: "4px 0 0", fontSize: "28px", lineHeight: 1.05, color: "#111114", fontWeight: 800 }}>フィード</h1>
+            </div>
+            <div style={{ fontSize: "12px", color: "#777", background: "#f6f7f8", border: "1px solid rgba(17,17,20,.06)", borderRadius: "999px", padding: "6px 10px", fontWeight: 600 }}>
+              {regularFeed.length} posts
+            </div>
+          </div>
+        </section>
+
         {teacherDirectives.filter(p => !dismissedAnnouncements.includes(p.id)).map(post => (
-          <div key={post.id} style={{ margin: "0 20px 20px", padding: "18px", borderRadius: "12px", backgroundColor: post.type === 'assignment' ? "#f0fdf4" : "#f0f9ff", border: "1px solid rgba(0,0,0,0.05)", position: "relative" }}>
-            <button onClick={() => { const newD = [...dismissedAnnouncements, post.id]; setDismissedAnnouncements(newD); localStorage.setItem("dismissed_posts", JSON.stringify(newD)); }} style={{ position: "absolute", top: "12px", right: "12px", background: "none", border: "none", color: "#aaa", cursor: "pointer", fontSize: "16px" }}>✕</button>
-            <h3 style={{ margin: "0 0 12px 0", fontSize: "16px", fontWeight: "700", color: "#333" }}>{post.content.split('\n')[0]}</h3>
-            <Link href={`/write?assignment_id=${post.id}&title=${encodeURIComponent(post.content.split('\n')[0])}`} style={{ fontSize: "13px", color: "#2cb696", fontWeight: "bold", textDecoration: "none" }}>✍️ Entregar tarea</Link>
+          <div key={post.id} style={{ margin: "0 14px 12px", padding: "16px 16px 14px 18px", borderRadius: "16px", backgroundColor: post.type === 'assignment' ? "#f2fffa" : "#f4fbff", border: "1px solid rgba(17,17,20,0.06)", position: "relative", boxShadow: "0 8px 24px rgba(0,0,0,.025)" }}>
+            <div style={{ position: "absolute", left: "0", top: "12px", bottom: "12px", width: "4px", borderRadius: "0 6px 6px 0", background: post.type === "assignment" ? "#2cb696" : "#58a8ff" }} />
+            <button onClick={() => { const newD = [...dismissedAnnouncements, post.id]; setDismissedAnnouncements(newD); localStorage.setItem("dismissed_posts", JSON.stringify(newD)); }} style={{ position: "absolute", top: "10px", right: "10px", background: "#fff", border: "1px solid rgba(17,17,20,.08)", color: "#8b8b93", cursor: "pointer", fontSize: "13px", width: "24px", height: "24px", borderRadius: "999px", lineHeight: 1 }}>✕</button>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "10px", fontSize: "11px", fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase", color: post.type === "assignment" ? "#159578" : "#3d81ce" }}>
+              <span style={{ width: "6px", height: "6px", borderRadius: "999px", background: "currentColor" }} />
+              {post.type === "assignment" ? "Tarea del sensei" : "Anuncio"}
+            </div>
+            <h3 style={{ margin: "0 0 12px 0", fontSize: "16px", lineHeight: 1.35, fontWeight: "800", color: "#222" }}>{post.content.split('\n')[0]}</h3>
+            <Link href={`/write?assignment_id=${post.id}&title=${encodeURIComponent(post.content.split('\n')[0])}`} style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#147f68", fontWeight: 700, textDecoration: "none", background: "#fff", border: "1px solid rgba(44,182,150,.2)", padding: "8px 10px", borderRadius: "999px" }}>✍️ Entregar tarea</Link>
           </div>
         ))}
 
-        {regularFeed.map(post => {
+        <section style={{ margin: "0 14px", background: "#fff", borderRadius: "20px", border: "1px solid rgba(17,17,20,.06)", overflow: "hidden", boxShadow: "0 12px 34px rgba(0,0,0,.035)" }}>
+        {regularFeed.map((post, idx) => {
           const [titulo, ...cuerpo] = post.content.split('\n');
           return (
-            <article key={post.id} style={{ padding: "24px 20px", borderBottom: "1px solid #f2f2f2", display: "flex", gap: "20px" }}>
+            <article key={post.id} style={{ padding: "18px 16px", borderBottom: idx === regularFeed.length - 1 ? "none" : "1px solid rgba(17,17,20,.06)", display: "flex", gap: "14px", alignItems: "flex-start", background: idx % 2 === 0 ? "rgba(255,255,255,1)" : "rgba(251,251,252,1)" }}>
               <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", gap: "10px", marginBottom: "10px", alignItems: "center" }}>
-                  <div style={{ width: "26px", height: "26px", borderRadius: "50%", overflow: "hidden", background: "#f5f5f5", flexShrink: 0 }}>
+                <div style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center", minWidth: 0 }}>
+                  <div style={{ width: "28px", height: "28px", borderRadius: "50%", overflow: "hidden", background: "#f5f5f5", flexShrink: 0, border: "1px solid rgba(17,17,20,.06)" }}>
                     {post.profiles?.avatar_url ? (
                       <img src={post.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     ) : <div style={{ textAlign: "center", fontSize: "12px", lineHeight: "26px", color: "#ccc" }}>👤</div>}
                   </div>
-                  <Link href={`/profile/${post.user_id}`} style={{ textDecoration: "none", color: "#222", fontWeight: "500", fontSize: "13px" }}>
+                  <Link href={`/profile/${post.user_id}`} style={{ textDecoration: "none", color: "#2b2b30", fontWeight: 700, fontSize: "13px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "44%" }}>
                     {post.profiles?.is_admin ? "Sensei" : post.profiles?.username}
                   </Link>
+                  <span style={{ width: "3px", height: "3px", borderRadius: "50%", background: "#b7b7bf", flexShrink: 0 }} />
+                  <span style={{ color: "#7c7c85", fontSize: "12px", fontWeight: 500, whiteSpace: "nowrap" }}>{formatFeedDate(post.created_at)}</span>
                   {post.is_reviewed && <span style={{ fontSize: "10px", color: "#2cb696", fontWeight: "700", border: "1px solid #2cb696", padding: "1px 6px", borderRadius: "4px" }}>済 Sumi</span>}
                 </div>
                 <Link href={`/post/${post.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                  <h2 style={{ margin: "0 0 8px 0", fontSize: "18px", fontWeight: "700", lineHeight: "1.4", color: "#222" }}>{titulo}</h2>
-                  <p style={{ fontSize: "14px", color: "#666", lineHeight: "1.6", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{cuerpo.join(' ')}</p>
+                  <h2 style={{ margin: "0 0 8px 0", fontSize: "17px", fontWeight: 800, lineHeight: "1.35", color: "#17171b", letterSpacing: "-0.01em" }}>{titulo}</h2>
+                  {cuerpo.length > 0 && (
+                    <p style={{ margin: 0, fontSize: "13.5px", color: "#666a73", lineHeight: "1.55", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{cuerpo.join(' ')}</p>
+                  )}
                 </Link>
+                <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "8px", color: "#8a8a94", fontSize: "12px", fontWeight: 500 }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                    <span style={{ width: "14px", height: "14px", borderRadius: "999px", border: "1.4px solid currentColor", display: "inline-block" }} />
+                    投稿
+                  </span>
+                  <span>·</span>
+                  <span>{post.profiles?.group_name || "General"}</span>
+                </div>
               </div>
               {post.image_url && (
-                <Link href={`/post/${post.id}`} style={{ flexShrink: 0 }}>
-                  <img src={post.image_url} style={{ width: "100px", height: "100px", borderRadius: "6px", objectFit: "cover" }} />
+                <Link href={`/post/${post.id}`} style={{ flexShrink: 0, alignSelf: "center" }}>
+                  <img src={post.image_url} style={{ width: "120px", height: "88px", borderRadius: "12px", objectFit: "cover", border: "1px solid rgba(17,17,20,.06)", boxShadow: "0 8px 20px rgba(0,0,0,.08)" }} />
                 </Link>
               )}
             </article>
           );
         })}
+        </section>
       </main>
     </div>
   );
