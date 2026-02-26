@@ -11,7 +11,6 @@ export default function HomePage() {
   const [myProfile, setMyProfile] = useState<any>(null);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([]);
-  const [showArchived, setShowArchived] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -36,6 +35,11 @@ export default function HomePage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
   if (!loading && myProfile && !myProfile.is_approved && !myProfile.is_admin) {
     return <div style={{ textAlign: "center", padding: "100px 20px", fontFamily: "sans-serif" }}>⏳ Tu cuenta espera aprobación de Pako-sensei...</div>;
   }
@@ -47,20 +51,14 @@ export default function HomePage() {
     <div style={{ maxWidth: "650px", margin: "0 auto", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: "#fff", minHeight: "100vh" }}>
       <header style={{ 
         display: "flex", justifyContent: "space-between", alignItems: "center", 
-        padding: "12px 20px", borderBottom: "1px solid #f2f2f2", position: "sticky", 
+        padding: "8px 20px", borderBottom: "1px solid #f2f2f2", position: "sticky", 
         top: 0, backgroundColor: "#fff", zIndex: 10
       }}>
-        {/* LOGO: Actualizado a logo.png y tamaño corregido */}
         <Link href="/" style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
           <img 
             src="/logo.png" 
             alt="Logo" 
-            style={{ 
-              height: "40px", 
-              width: "auto", 
-              display: "block",
-              imageRendering: "auto" 
-            }} 
+            style={{ height: "60px", width: "auto", display: "block", imageRendering: "auto" }} 
           />
         </Link>
         
@@ -70,23 +68,18 @@ export default function HomePage() {
             🔔 {unreadNotifications > 0 && <span style={{ position: "absolute", top: "-5px", right: "-5px", backgroundColor: "#ff2d55", color: "#fff", fontSize: "10px", padding: "2px 5px", borderRadius: "10px", fontWeight: "bold" }}>{unreadNotifications}</span>}
           </Link>
           {myProfile?.is_admin && <Link href="/admin/groups" title="Panel Maestro" style={{ textDecoration: "none", fontSize: "20px" }}>⚙️</Link>}
+          <Link href="/write" style={{ backgroundColor: "#2cb696", color: "#fff", padding: "8px 18px", borderRadius: "24px", textDecoration: "none", fontSize: "14px", fontWeight: "bold" }}>書く</Link>
           
-          <Link href="/write" style={{ backgroundColor: "#2cb696", color: "#fff", padding: "8px 18px", borderRadius: "24px", textDecoration: "none", fontSize: "14px", fontWeight: "bold", marginLeft: "4px" }}>書く</Link>
-          
+          <button onClick={handleSignOut} title="Cerrar sesión" style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", padding: 0 }}>🚪</button>
+
           <Link href={`/profile/${myProfile?.id}`} style={{ width: "34px", height: "34px", borderRadius: "50%", overflow: "hidden", border: "1px solid #eee", flexShrink: 0 }}>
             {myProfile?.avatar_url ? <img src={myProfile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ lineHeight: "34px", textAlign: "center", background: "#f5f5f5", color: "#ccc" }}>👤</div>}
           </Link>
         </div>
       </header>
 
-      <main>
-        <div style={{ padding: "15px 20px", display: "flex", justifyContent: "flex-end" }}>
-          <button onClick={() => setShowArchived(!showArchived)} style={{ background: "#f8f8f8", border: "1px solid #eee", fontSize: "12px", color: "#666", cursor: "pointer", padding: "6px 12px", borderRadius: "15px", fontWeight: "500" }}>
-            {showArchived ? "Ver Muro Completo" : "Ver solo Tareas"}
-          </button>
-        </div>
-
-        {!showArchived && teacherDirectives.filter(p => !dismissedAnnouncements.includes(p.id)).map(post => (
+      <main style={{ paddingTop: "20px" }}>
+        {teacherDirectives.filter(p => !dismissedAnnouncements.includes(p.id)).map(post => (
           <div key={post.id} style={{ margin: "0 20px 20px", padding: "18px", borderRadius: "12px", backgroundColor: post.type === 'assignment' ? "#f0fdf4" : "#f0f9ff", border: "1px solid rgba(0,0,0,0.05)", position: "relative" }}>
             <button onClick={() => { const newD = [...dismissedAnnouncements, post.id]; setDismissedAnnouncements(newD); localStorage.setItem("dismissed_posts", JSON.stringify(newD)); }} style={{ position: "absolute", top: "12px", right: "12px", background: "none", border: "none", color: "#aaa", cursor: "pointer", fontSize: "16px" }}>✕</button>
             <h3 style={{ margin: "0 0 12px 0", fontSize: "16px", fontWeight: "700", color: "#333" }}>{post.content.split('\n')[0]}</h3>
@@ -94,7 +87,7 @@ export default function HomePage() {
           </div>
         ))}
 
-        {(showArchived ? teacherDirectives : regularFeed).map(post => {
+        {regularFeed.map(post => {
           const [titulo, ...cuerpo] = post.content.split('\n');
           return (
             <article key={post.id} style={{ padding: "24px 20px", borderBottom: "1px solid #f2f2f2", display: "flex", gap: "20px" }}>

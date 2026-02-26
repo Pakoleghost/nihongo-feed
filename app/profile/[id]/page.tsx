@@ -8,69 +8,64 @@ export default function StudentProfilePage() {
   const { id } = useParams();
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
-  const [myProfile, setMyProfile] = useState<any>(null);
-  const [userPosts, setUserPosts] = useState<any[]>([]);
-  const [groups, setGroups] = useState<any[]>([]);
+  const [myId, setMyId] = useState<string | null>(null);
+  const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
+    setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
-    const { data: me } = await supabase.from("profiles").select("*").eq("id", user?.id).single();
-    const { data: target } = await supabase.from("profiles").select("*").eq("id", id).single();
-    const { data: posts } = await supabase.from("posts").select("*").eq("user_id", id).order("created_at", { ascending: false });
-    const { data: grps } = await supabase.from("groups").select("name");
+    setMyId(user?.id || null);
 
-    setMyProfile(me);
+    const { data: target } = await supabase.from("profiles").select("*").eq("id", id).single();
     setProfile(target);
-    setUserPosts(posts || []);
-    setGroups(grps || []);
+
+    const { data: userPosts } = await supabase.from("posts").select("*").eq("user_id", id).order("created_at", { ascending: false });
+    setPosts(userPosts || []);
     setLoading(false);
   }, [id]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const updateProfile = async (field: string, val: string) => {
-    await supabase.from("profiles").update({ [field]: val }).eq("id", id);
-    fetchData();
-  };
+  if (loading || !profile) return <div style={{ padding: "100px 20px", textAlign: "center", color: "#ccc" }}>...</div>;
 
-  if (loading || !profile) return <div style={{ textAlign: "center", padding: "50px" }}>Cargando...</div>;
+  const isMe = myId === id;
 
   return (
-    <div style={{ maxWidth: "700px", margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif" }}>
-      <Link href="/" style={{ color: "#2cb696", textDecoration: "none", fontWeight: "bold" }}>← Volver</Link>
-      
-      <section style={{ textAlign: "center", padding: "30px", borderBottom: "1px solid #eee" }}>
-        <div style={{ width: "100px", height: "100px", borderRadius: "50%", margin: "0 auto 15px", overflow: "hidden", border: "3px solid #2cb696" }}>
-          <img src={profile.avatar_url || "https://via.placeholder.com/100"} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    <div style={{ maxWidth: "650px", margin: "0 auto", padding: "40px 20px", fontFamily: "sans-serif" }}>
+      <div style={{ textAlign: "center", marginBottom: "40px" }}>
+        <div style={{ width: "100px", height: "100px", borderRadius: "50%", overflow: "hidden", margin: "0 auto 15px", border: "2px solid #eee" }}>
+          {profile.avatar_url ? <img src={profile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ fontSize: "50px", lineHeight: "100px", background: "#f5f5f5", color: "#ccc" }}>👤</div>}
         </div>
-        <h1 style={{ margin: 0 }}>{profile.username}</h1>
-        <p style={{ color: "#888" }}>{profile.group_name || "Sin grupo"}</p>
-
-        {myProfile?.is_admin && (
-          <div style={{ marginTop: "20px", padding: "15px", backgroundColor: "#f9f9f9", borderRadius: "12px", display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
-            <select value={profile.group_name || ""} onChange={e => updateProfile("group_name", e.target.value)}>
-              <option value="">Cambiar Grupo</option>
-              {groups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
-            </select>
-            <select value={profile.cefr_level || ""} onChange={e => updateProfile("cefr_level", e.target.value)}>
-              {["A1.1", "A1.2", "A2.1", "A2.2", "A2+", "B1.1"].map(l => <option key={l} value={l}>{l}</option>)}
-            </select>
-          </div>
+        <h1 style={{ fontSize: "24px", margin: "0 0 5px 0", color: "#222" }}>{profile.full_name || profile.username}</h1>
+        <p style={{ color: "#888", fontSize: "14px", margin: "0 0 20px 0" }}>@{profile.username} • {profile.group_name || "Sin grupo"}</p>
+        
+        {/* Biografía restaurada */}
+        {profile.bio && (
+          <p style={{ fontSize: "15px", color: "#444", lineHeight: "1.6", maxWidth: "450px", margin: "0 auto", whiteSpace: "pre-wrap" }}>
+            {profile.bio}
+          </p>
         )}
-      </section>
 
-      <section style={{ marginTop: "30px" }}>
-        <h3>Publicaciones de {profile.username}</h3>
-        {userPosts.map(p => (
-          <Link key={p.id} href={`/post/${p.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-            <div style={{ padding: "15px", borderBottom: "1px solid #f5f5f5" }}>
-              <strong>{p.content.split('\n')[0]}</strong>
-              <div style={{ fontSize: "12px", color: "#999" }}>{new Date(p.created_at).toLocaleDateString()}</div>
-            </div>
+        {isMe && (
+          <Link href="/profile/edit" style={{ display: "inline-block", marginTop: "20px", fontSize: "13px", color: "#2cb696", textDecoration: "none", border: "1px solid #2cb696", padding: "6px 20px", borderRadius: "20px", fontWeight: "bold" }}>
+            Editar perfil
           </Link>
-        ))}
-      </section>
+        )}
+      </div>
+
+      <div style={{ borderTop: "1px solid #eee", paddingTop: "30px" }}>
+        <h2 style={{ fontSize: "14px", color: "#999", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "20px" }}>Publicaciones</h2>
+        {posts.map(post => {
+          const [titulo] = post.content.split('\n');
+          return (
+            <Link href={`/post/${post.id}`} key={post.id} style={{ display: "block", padding: "15px 0", borderBottom: "1px solid #f9f9f9", textDecoration: "none", color: "#222" }}>
+              <h3 style={{ fontSize: "17px", margin: "0 0 5px 0" }}>{titulo}</h3>
+              <div style={{ fontSize: "12px", color: "#aaa" }}>{new Date(post.created_at).toLocaleDateString()}</div>
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }
