@@ -100,6 +100,14 @@ export default function HomePage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  useEffect(() => {
+    if (!myProfile || myProfile.is_approved || myProfile.is_admin) return;
+    const timer = setInterval(() => {
+      void fetchData();
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [myProfile, fetchData]);
+
   if (!loading && myProfile && !myProfile.is_approved && !myProfile.is_admin) {
     return <div style={{ textAlign: "center", padding: "100px 20px", fontFamily: "sans-serif" }}>⏳ Tu cuenta espera aprobación de Pako-sensei...</div>;
   }

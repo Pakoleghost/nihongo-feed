@@ -44,7 +44,22 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
       if (!fullName.trim()) return alert("Escribe tu nombre completo.");
       if (!gender) return alert("Selecciona tu género.");
       if (!birthDate) return alert("Selecciona tu fecha de nacimiento.");
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName.trim(),
+            group_name: groupName || null,
+            gender,
+            birth_date: birthDate,
+          },
+        },
+      });
+      if (error) {
+        alert(error.message);
+        return;
+      }
       if (data.user) {
         const generatedUsername = `${toUsernameBase(fullName.trim())}-${Math.random().toString(36).slice(2, 6)}`;
         const profilePayload = {
@@ -55,20 +70,27 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
           gender,
           birth_date: birthDate,
         };
-        const { error: profileError } = await supabase.from("profiles").insert([profilePayload]);
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .upsert(profilePayload, { onConflict: "id" });
         if (profileError) {
           // Fallback if newer research fields are not in the schema yet.
-          const { error: fallbackError } = await supabase.from("profiles").insert([{
-            id: data.user.id,
-            username: generatedUsername,
-            full_name: fullName.trim(),
-            group_name: groupName,
-          }]);
+          const { error: fallbackError } = await supabase
+            .from("profiles")
+            .upsert(
+              {
+                id: data.user.id,
+                username: generatedUsername,
+                full_name: fullName.trim(),
+                group_name: groupName,
+              },
+              { onConflict: "id" },
+            );
           if (fallbackError) {
-            alert(`Cuenta creada pero no se pudo guardar el perfil: ${fallbackError.message}`);
+            alert(`Cuenta creada pero no se pudo completar el perfil: ${fallbackError.message}`);
             return;
           }
-          alert(`Cuenta creada. Nota: género/fecha de nacimiento no se guardaron aún (falta actualizar la base de datos).`);
+          alert("¡Cuenta creada! Tu perfil quedó listo (sin género/fecha por esquema actual).");
         } else {
           alert("¡Cuenta creada!");
         }
@@ -77,7 +99,6 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
         setGender("");
         setBirthDate("");
       }
-      if (error) alert(error.message);
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) alert(error.message);
@@ -90,7 +111,10 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
 
   return (
     <div style={{ maxWidth: "400px", margin: "60px auto", padding: "20px", fontFamily: "sans-serif", border: "1px solid #eee", borderRadius: "10px" }}>
-      <h1 style={{ textAlign: "center" }}>{isSignUp ? "Registro de Alumno" : "Nihongo Note"}</h1>
+      <h1 style={{ textAlign: "center" }}>Nihongo Note</h1>
+      <p style={{ textAlign: "center", margin: "6px 0 18px", color: "#6b7280", fontSize: "13px" }}>
+        {isSignUp ? "Crear cuenta nueva" : "Iniciar sesión"}
+      </p>
       <form onSubmit={handleAuth} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
         {isSignUp && (
           <>
