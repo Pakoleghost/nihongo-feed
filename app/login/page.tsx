@@ -1,56 +1,55 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
-function toUsernameBase(name: string): string {
-  const normalized = name
+function normalizeUsername(value: string): string {
+  return value
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s_-]/g, "")
+    .replace(/[^a-z0-9._-]/g, "")
     .trim()
-    .replace(/\s+/g, "-")
-    .slice(0, 20);
-
-  return normalized || `student-${Math.random().toString(36).slice(2, 8)}`;
+    .slice(0, 24);
 }
 
 export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [gender, setGender] = useState("");
   const [birthDate, setBirthDate] = useState("");
-  const [groupName, setGroupName] = useState("");
-  const [availableGroups, setAvailableGroups] = useState<{name: string}[]>([]);
   const [isSignUp, setIsSignUp] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    const loadGroups = async () => {
-      const { data } = await supabase.from("groups").select("name").order("name");
-      if (data && data.length > 0) {
-        setAvailableGroups(data);
-        setGroupName(data[0].name);
-      }
-    };
-    loadGroups();
-  }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSignUp) {
       if (!fullName.trim()) return alert("Escribe tu nombre completo.");
+      const normalizedUsername = normalizeUsername(username);
+      if (!normalizedUsername || !/^[a-z0-9._-]{3,24}$/.test(normalizedUsername)) {
+        return alert("Username inválido. Usa 3-24 caracteres: letras, números, punto, guion o guion_bajo.");
+      }
       if (!gender) return alert("Selecciona tu género.");
       if (!birthDate) return alert("Selecciona tu fecha de nacimiento.");
+
+      const { data: usernameTaken } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", normalizedUsername)
+        .limit(1);
+      if ((usernameTaken || []).length > 0) {
+        return alert("Ese username ya está en uso.");
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: fullName.trim(),
-            group_name: groupName || null,
+            username: normalizedUsername,
             gender,
             birth_date: birthDate,
           },
@@ -61,12 +60,12 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
         return;
       }
       if (data.user) {
-        const generatedUsername = `${toUsernameBase(fullName.trim())}-${Math.random().toString(36).slice(2, 6)}`;
         const profilePayload = {
           id: data.user.id,
-          username: generatedUsername,
+          username: normalizedUsername,
           full_name: fullName.trim(),
-          group_name: groupName,
+          email: email.trim().toLowerCase(),
+          group_name: null,
           gender,
           birth_date: birthDate,
         };
@@ -80,9 +79,9 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
             .upsert(
               {
                 id: data.user.id,
-                username: generatedUsername,
+                username: normalizedUsername,
                 full_name: fullName.trim(),
-                group_name: groupName,
+                group_name: null,
               },
               { onConflict: "id" },
             );
@@ -96,6 +95,7 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
         }
         setIsSignUp(false);
         setFullName("");
+        setUsername("");
         setGender("");
         setBirthDate("");
       }
@@ -111,7 +111,7 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
 
   return (
     <div style={{ maxWidth: "400px", margin: "60px auto", padding: "20px", fontFamily: "sans-serif", border: "1px solid #eee", borderRadius: "10px" }}>
-      <h1 style={{ textAlign: "center" }}>Nihongo Note</h1>
+      <h1 style={{ textAlign: "center" }}>Nihongo Feed</h1>
       <p style={{ textAlign: "center", margin: "6px 0 18px", color: "#6b7280", fontSize: "13px" }}>
         {isSignUp ? "Crear cuenta nueva" : "Iniciar sesión"}
       </p>
@@ -119,9 +119,14 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
         {isSignUp && (
           <>
             <input type="text" placeholder="Nombre completo" value={fullName} onChange={(e) => setFullName(e.target.value)} required style={{ padding: "12px", borderRadius: "5px", border: "1px solid #ddd" }} />
-            <select value={groupName} onChange={(e) => setGroupName(e.target.value)} style={{ padding: "12px", borderRadius: "5px", border: "1px solid #ddd" }}>
-              {availableGroups.map((g, i) => <option key={i} value={g.name}>{g.name}</option>)}
-            </select>
+            <input
+              type="text"
+              placeholder="Username (ej. sakura_01)"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              style={{ padding: "12px", borderRadius: "5px", border: "1px solid #ddd" }}
+            />
             <select value={gender} onChange={(e) => setGender(e.target.value)} required style={{ padding: "12px", borderRadius: "5px", border: "1px solid #ddd" }}>
               <option value="">Género</option>
               <option value="mujer">Mujer</option>

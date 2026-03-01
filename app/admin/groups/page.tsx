@@ -9,6 +9,8 @@ export default function AdminGroupsPage() {
   const [selectedGroup, setSelectedGroup] = useState("Todos");
   const [students, setStudents] = useState<any[]>([]);
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
+  const [pastRequests, setPastRequests] = useState<any[]>([]);
+  const [pendingGroupByUser, setPendingGroupByUser] = useState<Record<string, string>>({});
   
   // Estados nuevos (Aditivos)
   const [newGroupName, setNewGroupName] = useState("");
@@ -20,9 +22,37 @@ export default function AdminGroupsPage() {
     const { data: grps } = await supabase.from("groups").select("name").order("name");
     setGroups(grps || []);
     
-    // 2. Cargar Solicitudes Pendientes
-    const { data: pending } = await supabase.from("profiles").select("*").eq("is_approved", false);
-    setPendingUsers(pending || []);
+    // 2. Cargar Solicitudes Pendientes/Pasadas con email via API admin
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      const response = await fetch("/api/admin/requests", {
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      });
+      if (response.ok) {
+        const payload = await response.json();
+        const pending = payload?.pending || [];
+        const past = payload?.past || [];
+        setPendingUsers(pending);
+        setPastRequests(past);
+        setPendingGroupByUser((prev) => {
+          const next = { ...prev };
+          const fallbackGroup = grps?.[0]?.name || "";
+          pending.forEach((u: any) => {
+            if (!next[u.id]) next[u.id] = fallbackGroup;
+          });
+          return next;
+        });
+      } else {
+        const { data: pending } = await supabase.from("profiles").select("*").eq("is_approved", false);
+        setPendingUsers(pending || []);
+        setPastRequests([]);
+      }
+    } catch {
+      const { data: pending } = await supabase.from("profiles").select("*").eq("is_approved", false);
+      setPendingUsers(pending || []);
+      setPastRequests([]);
+    }
     
     // 3. Cargar Alumnos
     let query = supabase.from("profiles").select("*").eq("is_approved", true);
@@ -74,8 +104,33 @@ export default function AdminGroupsPage() {
   };
 
   const handleApprove = async (userId: string) => {
-    await supabase.from("profiles").update({ is_approved: true }).eq("id", userId);
+    const selected = pendingGroupByUser[userId] || "";
+    if (!selected) {
+      alert("Selecciona un grupo para aprobar.");
+      return;
+    }
+    await supabase.from("profiles").update({ is_approved: true, group_name: selected }).eq("id", userId);
     fetchData();
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm("¿Borrar este usuario y sus datos para que pueda registrarse de nuevo?")) return;
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        alert(payload?.error || "No se pudo borrar el usuario.");
+        return;
+      }
+      fetchData();
+    } catch {
+      alert("No se pudo borrar el usuario.");
+    }
   };
 
   return (
@@ -90,15 +145,47 @@ export default function AdminGroupsPage() {
         <div>
           {pendingUsers.length === 0 ? <p style={{color: "#999", textAlign: "center"}}>No hay solicitudes pendientes.</p> : 
             pendingUsers.map(u => (
-              <div key={u.id} style={{ display: "flex", justifyContent: "space-between", padding: "15px", border: "1px solid #eee", borderRadius: "10px", marginBottom: "10px", alignItems: "center" }}>
+              <div key={u.id} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "15px", border: "1px solid #eee", borderRadius: "10px", marginBottom: "10px", alignItems: "center" }}>
                 <div>
                   <div style={{ fontWeight: 700, color: "#333" }}>{u.full_name || u.username || "Sin nombre"}</div>
                   {u.username && <div style={{ fontSize: "12px", color: "#888" }}>@{u.username}</div>}
+                  {u.email && <div style={{ fontSize: "12px", color: "#888" }}>{u.email}</div>}
                 </div>
-                <button onClick={() => handleApprove(u.id)} style={{ backgroundColor: "#2cb696", color: "#fff", border: "none", padding: "8px 15px", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>Aprobar</button>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  <select
+                    value={pendingGroupByUser[u.id] || ""}
+                    onChange={(e) => setPendingGroupByUser((prev) => ({ ...prev, [u.id]: e.target.value }))}
+                    style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ddd" }}
+                  >
+                    <option value="">Elegir grupo…</option>
+                    {groups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
+                  </select>
+                  <button onClick={() => handleApprove(u.id)} style={{ backgroundColor: "#2cb696", color: "#fff", border: "none", padding: "8px 15px", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>Aprobar</button>
+                  <button onClick={() => handleDeleteUser(u.id)} style={{ backgroundColor: "#fff", color: "#b42318", border: "1px solid #f3c7c1", padding: "8px 12px", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>Borrar</button>
+                </div>
               </div>
             ))
           }
+
+          <div style={{ marginTop: 24 }}>
+            <h3 style={{ fontSize: 16, marginBottom: 10, color: "#555" }}>Solicitudes pasadas</h3>
+            {pastRequests.length === 0 ? (
+              <p style={{ color: "#999" }}>Aún no hay solicitudes aprobadas registradas.</p>
+            ) : (
+              <div style={{ display: "grid", gap: 8 }}>
+                {pastRequests.map((u) => (
+                  <div key={u.id} style={{ display: "flex", justifyContent: "space-between", gap: 10, padding: "12px 14px", border: "1px solid #f0f0f0", borderRadius: 10, background: "#fafafa" }}>
+                    <div>
+                      <div style={{ fontWeight: 700, color: "#333" }}>{u.full_name || u.username || "Sin nombre"}</div>
+                      {u.username && <div style={{ fontSize: "12px", color: "#888" }}>@{u.username}</div>}
+                      {u.email && <div style={{ fontSize: "12px", color: "#888" }}>{u.email}</div>}
+                    </div>
+                    <button onClick={() => handleDeleteUser(u.id)} style={{ backgroundColor: "#fff", color: "#b42318", border: "1px solid #f3c7c1", padding: "8px 12px", borderRadius: "5px", cursor: "pointer", fontWeight: "bold", height: "fit-content" }}>Borrar</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <div>
@@ -135,10 +222,15 @@ export default function AdminGroupsPage() {
                     Tareas: {done} / {total} {done >= total && total > 0 ? "✅" : ""}
                   </div>
                 </div>
-                <select value={s.group_name || ""} onChange={e => handleUpdateGroup(s.id, e.target.value)} style={{ padding: "5px", borderRadius: "5px", border: "1px solid #ddd" }}>
-                  <option value="">Sin grupo</option>
-                  {groups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
-                </select>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  <select value={s.group_name || ""} onChange={e => handleUpdateGroup(s.id, e.target.value)} style={{ padding: "5px", borderRadius: "5px", border: "1px solid #ddd" }}>
+                    <option value="">Sin grupo</option>
+                    {groups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
+                  </select>
+                  <button onClick={() => handleDeleteUser(s.id)} style={{ backgroundColor: "#fff", color: "#b42318", border: "1px solid #f3c7c1", padding: "8px 10px", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>
+                    Borrar
+                  </button>
+                </div>
               </div>
             );
           })}

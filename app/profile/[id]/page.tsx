@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -30,6 +30,7 @@ function formatDate(value?: string) {
 
 export default function StudentProfilePage() {
   const { id } = useParams();
+  const router = useRouter();
   const profileId = String(id ?? "");
 
   const [profile, setProfile] = useState<any>(null);
@@ -61,6 +62,10 @@ export default function StudentProfilePage() {
   }, [fetchData]);
 
   const isMe = myId === profileId;
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
 
   const stats = useMemo(
     () => ({
@@ -81,6 +86,7 @@ export default function StudentProfilePage() {
             <Link href="/" className="topGhost">← Volver</Link>
             <div className="topActions">
               {isMe && <Link href="/profile/edit" className="topPill">Editar perfil</Link>}
+              {isMe && <button type="button" onClick={handleSignOut} className="topPill">Cerrar sesión</button>}
               <Link href="/write" className="topPrimary">Escribir</Link>
             </div>
           </header>

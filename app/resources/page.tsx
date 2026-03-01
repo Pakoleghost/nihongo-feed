@@ -164,6 +164,7 @@ export default function ResourcesPage() {
 
       const visibleTasks = (taskRows || []).filter((task: any) => {
         if (prof?.is_admin) return true;
+        if (task?.assignment_subtype === "forum" || task?.assignment_subtype === "internal" || task?.is_forum) return true;
         if (isPublicTargetGroup(task.target_group)) return true;
         return normalizeGroupValue(task.target_group) === normalizeGroupValue(prof?.group_name);
       });
@@ -545,20 +546,33 @@ export default function ResourcesPage() {
                       const [taskTitle, ...taskBody] = String(task.content || "").split("\n");
                       const deadline = task.deadline ? new Date(task.deadline) : null;
                       const isExpired = Boolean(deadline && deadline.getTime() < Date.now());
+                      const isForum = Boolean(task.is_forum || task.assignment_subtype === "forum" || task.assignment_subtype === "internal");
+                      const isAnnouncementTask = task.assignment_subtype === "announcement";
+                      const isAssignedToMe =
+                        isAdmin ||
+                        isPublicTargetGroup(task.target_group) ||
+                        normalizeGroupValue(task.target_group) === normalizeGroupValue(myProfile?.group_name);
                       return (
                         <Link key={task.id} href={`/post/${task.id}`} className="resourceRow" style={{ textDecoration: "none" }}>
                           <div className="resourceMain">
-                            <div className="resourceIcon" style={{ color: task.is_forum ? "#3d81ce" : "#159578", background: task.is_forum ? "#eff6ff" : "#ecfdf5" }}>
-                              {task.is_forum ? "💬" : "📝"}
+                            <div className="resourceIcon" style={{ color: isForum ? "#3d81ce" : isAnnouncementTask ? "#3d81ce" : "#159578", background: isForum ? "#eff6ff" : isAnnouncementTask ? "#f4fbff" : "#ecfdf5" }}>
+                              {isForum ? "💬" : isAnnouncementTask ? "📌" : "📝"}
                             </div>
                             <div className="resourceText">
                               <div className="resourceTitleRow">
                                 <strong>{taskTitle || "Tarea"}</strong>
-                                <span className={`typeTag ${task.is_forum ? "note" : "link"}`}>{task.is_forum ? "foro" : "tarea"}</span>
+                                <span className={`typeTag ${isForum ? "note" : "link"}`}>
+                                  {isForum ? "foro" : isAnnouncementTask ? "anuncio" : "tarea"}
+                                </span>
                               </div>
                               <p>{taskBody.join(" ").trim() || "Abrir para ver instrucciones."}</p>
                               <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
                                 <span className="typeTag" style={{ textTransform: "none", letterSpacing: 0, fontWeight: 700 }}>{task.target_group || "Todos"}</span>
+                                {isForum && !isAssignedToMe && (
+                                  <span className="typeTag" style={{ textTransform: "none", letterSpacing: 0, fontWeight: 700, color: "#64748b", background: "#f8fafc", borderColor: "#e2e8f0" }}>
+                                    Foro abierto
+                                  </span>
+                                )}
                                 {deadline && (
                                   <span className="typeTag" style={{ textTransform: "none", letterSpacing: 0, fontWeight: 700, color: isExpired ? "#b45309" : "#475569", background: isExpired ? "#fffbeb" : "#f8fafc", borderColor: isExpired ? "#fde68a" : "#e2e8f0" }}>
                                     {isExpired ? "Vencida" : "Deadline"} · {deadline.toLocaleString("es-MX")}

@@ -68,7 +68,7 @@ function WriteContent() {
   const [postType, setPostType] = useState<"post" | "assignment" | "announcement" | "linkpost">("post");
   const [targetGroup, setTargetGroup] = useState("Todos");
   const [deadline, setDeadline] = useState("");
-  const [assignmentSubtype, setAssignmentSubtype] = useState<"internal" | "external">("external");
+  const [assignmentSubtype, setAssignmentSubtype] = useState<"announcement" | "post" | "forum">("post");
   const [linkUrl, setLinkUrl] = useState("");
   const [availableGroups, setAvailableGroups] = useState<GroupRow[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -194,7 +194,7 @@ function WriteContent() {
         user_id: user.id,
         image_url: imageUrl,
         type: finalType,
-        is_forum: !assignmentId && postType === "assignment" && assignmentSubtype === "internal",
+        is_forum: !assignmentId && postType === "assignment" && assignmentSubtype === "forum",
         parent_assignment_id: assignmentId ? parseInt(assignmentId, 10) : null,
         target_group: assignmentId ? null : normalizedTargetGroup,
         deadline: postType === "assignment" ? deadline || null : null,
@@ -404,10 +404,11 @@ function WriteContent() {
                         <span>Modalidad de tarea</span>
                         <select
                           value={assignmentSubtype}
-                          onChange={(e) => setAssignmentSubtype(e.target.value as "internal" | "external")}
+                          onChange={(e) => setAssignmentSubtype(e.target.value as "announcement" | "post" | "forum")}
                         >
-                          <option value="external">Tarea tipo post (entrega en editor)</option>
-                          <option value="internal">Tarea tipo foro (responden en el post)</option>
+                          <option value="announcement">Anuncio de tarea (pinned)</option>
+                          <option value="post">Tarea tipo post (entrega en editor)</option>
+                          <option value="forum">Tarea tipo foro (responden en el post)</option>
                         </select>
                       </label>
                     )}

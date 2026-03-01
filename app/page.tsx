@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -69,6 +69,44 @@ function isPublicTargetGroup(value?: string | null) {
   return !normalized || normalized === "todos" || normalized === "general";
 }
 
+function isForumTaskSubtype(value?: string | null) {
+  const normalized = normalizeGroupValue(value);
+  return normalized === "forum" || normalized === "internal";
+}
+
+function isTaskAnnouncementSubtype(value?: string | null) {
+  return normalizeGroupValue(value) === "announcement";
+}
+
+function isTaskPostSubtype(value?: string | null) {
+  const normalized = normalizeGroupValue(value);
+  return !normalized || normalized === "post" || normalized === "external";
+}
+
+function cleanFeedText(value: string) {
+  return value
+    .replace(/!\[[^\]]*]\((https?:\/\/[^\s)]+)\)/gi, "")
+    .replace(/https?:\/\/\S+\.(?:png|jpe?g|gif|webp|svg)(?:\?\S+)?/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getPostParts(content: string) {
+  const lines = String(content || "").split("\n");
+  const title = cleanFeedText(lines[0] || "");
+  const bodyLines = lines.slice(1).filter((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return false;
+    if (/^!\[[^\]]*]\((https?:\/\/[^\s)]+)\)\s*$/i.test(trimmed)) return false;
+    if (/^https?:\/\/\S+\.(?:png|jpe?g|gif|webp|svg)(?:\?\S+)?$/i.test(trimmed)) return false;
+    return true;
+  });
+  return {
+    title: title || "Sin título",
+    preview: cleanFeedText(bodyLines.join(" ")),
+  };
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [posts, setPosts] = useState<any[]>([]);
@@ -76,17 +114,31 @@ export default function HomePage() {
   const [myProfile, setMyProfile] = useState<any>(null);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const inFlightRef = useRef(false);
+  const pullStartY = useRef<number | null>(null);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (opts?: { silent?: boolean }) => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
+    if (!opts?.silent) setLoading(true);
+    else setRefreshing(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return router.push("/login");
+    if (!user) {
+      inFlightRef.current = false;
+      if (!opts?.silent) setLoading(false);
+      setRefreshing(false);
+      return router.push("/login");
+    }
 
     const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
     setMyProfile(prof);
 
     if (prof?.is_approved || prof?.is_admin) {
-      const { data: postsData } = await supabase.from("posts").select(`*, profiles:user_id (username, avatar_url, group_name, is_admin)` ).order("created_at", { ascending: false });
+      const { data: postsData } = await supabase
+        .from("posts")
+        .select(`*, profiles:user_id (username, avatar_url, group_name, is_admin), parent:parent_assignment_id (id, assignment_subtype, is_forum, target_group)`)
+        .order("created_at", { ascending: false });
       setPosts(postsData || []);
 
       const { count } = await supabase.from("notifications").select("*", { count: 'exact', head: true }).eq("user_id", user.id).eq("is_read", false);
@@ -95,7 +147,9 @@ export default function HomePage() {
       const saved = localStorage.getItem("dismissed_posts");
       if (saved) setDismissedAnnouncements(JSON.parse(saved));
     }
+    inFlightRef.current = false;
     setLoading(false);
+    setRefreshing(false);
   }, [router]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -103,10 +157,39 @@ export default function HomePage() {
   useEffect(() => {
     if (!myProfile || myProfile.is_approved || myProfile.is_admin) return;
     const timer = setInterval(() => {
-      void fetchData();
+      void fetchData({ silent: true });
     }, 6000);
     return () => clearInterval(timer);
   }, [myProfile, fetchData]);
+
+  useEffect(() => {
+    if (!myProfile || (!myProfile.is_approved && !myProfile.is_admin)) return;
+    const timer = setInterval(() => {
+      void fetchData({ silent: true });
+    }, 12000);
+    return () => clearInterval(timer);
+  }, [myProfile, fetchData]);
+
+  useEffect(() => {
+    const onTouchStart = (e: TouchEvent) => {
+      if (window.scrollY <= 2) pullStartY.current = e.touches[0]?.clientY ?? null;
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      if (pullStartY.current == null) return;
+      const endY = e.changedTouches[0]?.clientY ?? pullStartY.current;
+      const delta = endY - pullStartY.current;
+      pullStartY.current = null;
+      if (window.scrollY <= 2 && delta > 85) {
+        void fetchData({ silent: true });
+      }
+    };
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [fetchData]);
 
   if (!loading && myProfile && !myProfile.is_approved && !myProfile.is_admin) {
     return <div style={{ textAlign: "center", padding: "100px 20px", fontFamily: "sans-serif" }}>⏳ Tu cuenta espera aprobación de Pako-sensei...</div>;
@@ -114,17 +197,31 @@ export default function HomePage() {
 
   const canSeePost = (p: any) => {
     if (myProfile?.is_admin) return true;
+    if (p?.parent_assignment_id) {
+      return isTaskPostSubtype(p?.parent?.assignment_subtype);
+    }
+    if (p?.type === "assignment" && (p?.is_forum || isForumTaskSubtype(p?.assignment_subtype))) return true;
     const target = p?.target_group;
     if (isPublicTargetGroup(target)) return true;
     return normalizeGroupValue(target) === normalizeGroupValue(myProfile?.group_name);
   };
 
-  const visibleRootPosts = posts.filter((p) => canSeePost(p) && !p.parent_assignment_id);
-  const pinnedAnnouncements = visibleRootPosts.filter(
-    (p) => p.profiles?.is_admin && p.type === "announcement" && !dismissedAnnouncements.includes(p.id),
+  const visiblePosts = posts.filter((p) => canSeePost(p));
+  const pinnedAnnouncements = visiblePosts.filter(
+    (p) =>
+      p.profiles?.is_admin &&
+      !p.parent_assignment_id &&
+      (p.type === "announcement" || (p.type === "assignment" && isTaskAnnouncementSubtype(p.assignment_subtype))) &&
+      !dismissedAnnouncements.includes(p.id),
   );
-  const regularFeed = visibleRootPosts.filter(
-    (p) => p.type !== "announcement" || dismissedAnnouncements.includes(p.id),
+  const regularFeed = visiblePosts.filter(
+    (p) =>
+      !(
+        p.profiles?.is_admin &&
+        !p.parent_assignment_id &&
+        (p.type === "announcement" || (p.type === "assignment" && isTaskAnnouncementSubtype(p.assignment_subtype))) &&
+        !dismissedAnnouncements.includes(p.id)
+      ),
   );
 
   return (
@@ -135,7 +232,14 @@ export default function HomePage() {
         top: 0, background: "rgba(255,255,255,.88)", backdropFilter: "blur(12px)", zIndex: 20,
         boxShadow: "0 8px 30px rgba(0,0,0,.03)"
       }}>
-        <Link href="/" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", flexShrink: 1, minWidth: 0, textDecoration: "none" }}>
+        <Link
+          href="/"
+          onClick={(e) => {
+            e.preventDefault();
+            void fetchData({ silent: true });
+          }}
+          style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", flexShrink: 1, minWidth: 0, textDecoration: "none" }}
+        >
           <span style={{ fontSize: "10px", color: "#7f7f88", letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 700 }}>Nihongo Feed</span>
           <span style={{ fontSize: "28px", lineHeight: 1, fontWeight: 900, color: "#111114", letterSpacing: "-0.02em" }}>フィード</span>
         </Link>
@@ -169,7 +273,7 @@ export default function HomePage() {
               <h1 style={{ margin: "4px 0 0", fontSize: "28px", lineHeight: 1.05, color: "#111114", fontWeight: 800 }}>フィード</h1>
             </div>
             <div style={{ fontSize: "12px", color: "#777", background: "#f6f7f8", border: "1px solid rgba(17,17,20,.06)", borderRadius: "999px", padding: "6px 10px", fontWeight: 600 }}>
-              {regularFeed.length} posts
+              {refreshing ? "actualizando..." : `${regularFeed.length} posts`}
             </div>
           </div>
         </section>
@@ -180,18 +284,22 @@ export default function HomePage() {
             <button onClick={() => { const newD = [...dismissedAnnouncements, post.id]; setDismissedAnnouncements(newD); localStorage.setItem("dismissed_posts", JSON.stringify(newD)); }} style={{ position: "absolute", top: "10px", right: "10px", background: "#fff", border: "1px solid rgba(17,17,20,.08)", color: "#8b8b93", cursor: "pointer", fontSize: "13px", width: "24px", height: "24px", borderRadius: "999px", lineHeight: 1 }}>✕</button>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "10px", fontSize: "11px", fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase", color: "#3d81ce" }}>
               <span style={{ width: "6px", height: "6px", borderRadius: "999px", background: "currentColor" }} />
-              Anuncio
+              {post.type === "assignment" ? "Anuncio de tarea" : "Anuncio"}
             </div>
-            <h3 style={{ margin: "0 0 12px 0", fontSize: "16px", lineHeight: 1.35, fontWeight: "800", color: "#222" }}>{post.content.split('\n')[0]}</h3>
+            <h3 style={{ margin: "0 0 12px 0", fontSize: "16px", lineHeight: 1.35, fontWeight: "800", color: "#222" }}>{getPostParts(post.content || "").title}</h3>
             <Link href={`/post/${post.id}`} style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#3d81ce", fontWeight: 700, textDecoration: "none", background: "#fff", border: "1px solid rgba(88,168,255,.2)", padding: "8px 10px", borderRadius: "999px" }}>Abrir anuncio</Link>
           </div>
         ))}
 
         <section style={{ margin: "0 14px", background: "#fff", borderRadius: "20px", border: "1px solid rgba(17,17,20,.06)", overflow: "hidden", boxShadow: "0 12px 34px rgba(0,0,0,.035)" }}>
         {regularFeed.map((post, idx) => {
-          const [titulo, ...cuerpo] = post.content.split('\n');
+          const { title: titulo, preview } = getPostParts(post.content || "");
           const isAssignmentPost = post.type === "assignment" && !post.parent_assignment_id;
-          const rowBg = isAssignmentPost ? "#f6fffb" : idx % 2 === 0 ? "rgba(255,255,255,1)" : "rgba(251,251,252,1)";
+          const isForumAssignment = isAssignmentPost && (post.is_forum || isForumTaskSubtype(post.assignment_subtype));
+          const isAssignedToMe = isPublicTargetGroup(post.target_group) || normalizeGroupValue(post.target_group) === normalizeGroupValue(myProfile?.group_name);
+          const isForumAccent = isForumAssignment && isAssignedToMe;
+          const isHighlightedTask = isAssignmentPost && (!isForumAssignment || isAssignedToMe);
+          const rowBg = isHighlightedTask ? "#f6fffb" : idx % 2 === 0 ? "rgba(255,255,255,1)" : "rgba(251,251,252,1)";
           return (
             <article key={post.id} style={{ padding: "18px 16px", borderBottom: idx === regularFeed.length - 1 ? "none" : "1px solid rgba(17,17,20,.06)", display: "flex", gap: "14px", alignItems: "flex-start", background: rowBg }}>
               <div style={{ flex: 1 }}>
@@ -210,14 +318,14 @@ export default function HomePage() {
                 </div>
                 <Link href={`/post/${post.id}`} style={{ textDecoration: "none", color: "inherit" }}>
                   {isAssignmentPost && (
-                    <div style={{ marginBottom: "8px", display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "10px", letterSpacing: ".06em", textTransform: "uppercase", fontWeight: 800, color: "#159578", background: "#ecfdf5", border: "1px solid #bbf7d0", borderRadius: "999px", padding: "4px 8px" }}>
+                    <div style={{ marginBottom: "8px", display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "10px", letterSpacing: ".06em", textTransform: "uppercase", fontWeight: 800, color: isForumAccent ? "#3d81ce" : isForumAssignment ? "#667085" : "#159578", background: isForumAccent ? "#eff6ff" : isForumAssignment ? "#f8fafc" : "#ecfdf5", border: `1px solid ${isForumAccent ? "#bfdbfe" : isForumAssignment ? "#e4e7ec" : "#bbf7d0"}`, borderRadius: "999px", padding: "4px 8px" }}>
                       <span style={{ width: 5, height: 5, borderRadius: "999px", background: "currentColor" }} />
-                      {post.is_forum ? "Tarea Foro" : "Tarea"}
+                      {isForumAssignment ? (isAssignedToMe ? "Tarea Foro" : "Foro Abierto") : "Tarea"}
                     </div>
                   )}
                   <h2 style={{ margin: "0 0 8px 0", fontSize: "17px", fontWeight: 800, lineHeight: "1.35", color: "#17171b", letterSpacing: "-0.01em" }}>{titulo}</h2>
-                  {cuerpo.length > 0 && (
-                    <p style={{ margin: 0, fontSize: "13.5px", color: "#666a73", lineHeight: "1.55", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{cuerpo.join(' ')}</p>
+                  {preview && (
+                    <p style={{ margin: 0, fontSize: "13.5px", color: "#666a73", lineHeight: "1.55", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{preview}</p>
                   )}
                 </Link>
                 <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "8px", color: "#8a8a94", fontSize: "12px", fontWeight: 500 }}>
@@ -230,8 +338,8 @@ export default function HomePage() {
                 </div>
                 {isAssignmentPost && (
                   <div style={{ marginTop: "10px" }}>
-                    <Link href={post.is_forum ? `/post/${post.id}` : `/write?assignment_id=${post.id}&title=${encodeURIComponent(titulo || "Tarea")}`} style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#147f68", fontWeight: 700, textDecoration: "none", background: "#fff", border: "1px solid rgba(44,182,150,.2)", padding: "7px 10px", borderRadius: "999px" }}>
-                      {post.is_forum ? "Entrar al foro" : "Entregar tarea"}
+                    <Link href={isForumAssignment ? `/post/${post.id}` : `/write?assignment_id=${post.id}&title=${encodeURIComponent(titulo || "Tarea")}`} style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "12px", color: isForumAccent ? "#3d81ce" : isForumAssignment ? "#667085" : "#147f68", fontWeight: 700, textDecoration: "none", background: "#fff", border: `1px solid ${isForumAccent ? "rgba(61,129,206,.24)" : isForumAssignment ? "#e4e7ec" : "rgba(44,182,150,.2)"}`, padding: "7px 10px", borderRadius: "999px" }}>
+                      {isForumAssignment ? "Entrar al foro" : "Entregar tarea"}
                     </Link>
                   </div>
                 )}

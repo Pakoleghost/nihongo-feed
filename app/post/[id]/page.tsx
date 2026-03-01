@@ -254,7 +254,10 @@ export default function PostDetailPage() {
   }, [post]);
   const bodyBlocks = useMemo(() => parseBodyBlocks(parsed.body || ""), [parsed.body]);
   const isRootAssignment = post?.type === "assignment" && !post?.parent_assignment_id;
-  const isForumAssignment = Boolean(isRootAssignment && (post?.is_forum || post?.assignment_subtype === "internal"));
+  const isForumAssignment = Boolean(
+    isRootAssignment &&
+      (post?.is_forum || post?.assignment_subtype === "internal" || post?.assignment_subtype === "forum"),
+  );
   const isPostAssignment = Boolean(isRootAssignment && !isForumAssignment);
   const postDeadline = post?.deadline ? new Date(post.deadline) : null;
   const deadlinePassed = Boolean(postDeadline && postDeadline.getTime() < Date.now());
@@ -728,8 +731,8 @@ export default function PostDetailPage() {
           color: #7c7c85;
         }
         .postContent {
-          font-size: 19px;
-          line-height: 1.95;
+          font-size: 17px;
+          line-height: 1.82;
           color: #2a2a31;
           letter-spacing: 0.01em;
         }
@@ -1061,8 +1064,8 @@ export default function PostDetailPage() {
             font-size: 38px;
           }
           .postContent {
-            font-size: 20px;
-            line-height: 2;
+            font-size: 18px;
+            line-height: 1.9;
           }
         }
       `}</style>
