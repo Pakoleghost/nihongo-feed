@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { assertAdmin } from "../../_lib";
 
-export async function DELETE(req: NextRequest, ctx: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
     const authHeader = req.headers.get("authorization");
     const { service, adminUserId } = await assertAdmin(authHeader);
-    const { id } = ctx.params;
+    const { id } = await ctx.params;
 
     const targetId = String(id || "").trim();
     if (!targetId) {
