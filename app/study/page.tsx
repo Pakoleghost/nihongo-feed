@@ -450,6 +450,7 @@ export default function StudyPage() {
   const [kanaRunning, setKanaRunning] = useState(false);
   const [kanaTime, setKanaTime] = useState(60);
   const [kanaScore, setKanaScore] = useState(0);
+  const [kanaBest, setKanaBest] = useState(0);
   const [kanaQuestion, setKanaQuestion] = useState<{ char: string; correct: string; options: string[] }>({
     char: "あ",
     correct: "a",
@@ -480,6 +481,13 @@ export default function StudyPage() {
         const raw = localStorage.getItem(`study-srs-${key}`);
         if (raw) setSrsMap(JSON.parse(raw));
       } catch {}
+      try {
+        const rawBest = localStorage.getItem(`study-kana-best-${key}`);
+        if (rawBest) {
+          const value = Number(rawBest);
+          if (!Number.isNaN(value) && value > 0) setKanaBest(value);
+        }
+      } catch {}
     };
     void boot();
   }, []);
@@ -493,6 +501,14 @@ export default function StudyPage() {
   useEffect(() => {
     if (kanaTime <= 0) setKanaRunning(false);
   }, [kanaTime]);
+
+  useEffect(() => {
+    if (kanaScore <= kanaBest) return;
+    setKanaBest(kanaScore);
+    try {
+      localStorage.setItem(`study-kana-best-${userKey}`, String(kanaScore));
+    } catch {}
+  }, [kanaScore, kanaBest, userKey]);
 
   const kanaPool = kanaSet === "hiragana" ? HIRAGANA : KATAKANA;
 
@@ -522,6 +538,11 @@ export default function StudyPage() {
   }, [flashDeck, srsMap]);
 
   const flashCard = dueDeck[flashIndex % Math.max(1, dueDeck.length)];
+  const flashDueCount = useMemo(() => {
+    const now = Date.now();
+    return flashDeck.filter((c) => !srsMap[c.id] || srsMap[c.id] <= now).length;
+  }, [flashDeck, srsMap]);
+  const flashCurrentNumber = dueDeck.length > 0 ? (flashIndex % dueDeck.length) + 1 : 0;
 
   const setSrs = (cardId: string, quality: "again" | "hard" | "good") => {
     const days = quality === "again" ? 1 : quality === "hard" ? 3 : 7;
@@ -531,6 +552,11 @@ export default function StudyPage() {
     try {
       localStorage.setItem(`study-srs-${userKey}`, JSON.stringify(nextMap));
     } catch {}
+    setFlashBack(false);
+    setFlashIndex((v) => v + 1);
+  };
+
+  const skipFlash = () => {
     setFlashBack(false);
     setFlashIndex((v) => v + 1);
   };
@@ -555,7 +581,7 @@ export default function StudyPage() {
     if (quizMode === "vocab") generated = buildVocabQuestions(lessons, quizCount);
     if (quizMode === "kanji") generated = buildKanjiQuestions(lessons, quizCount);
     if (quizMode === "conjugation") {
-      const types = conjTypes.length > 0 ? conjTypes : ["te"];
+      const types: ConjType[] = conjTypes.length > 0 ? [...conjTypes] : ["te"];
       generated = buildConjugationQuestions(lessons, types, quizCount);
     }
 
@@ -572,6 +598,10 @@ export default function StudyPage() {
   };
 
   const currentQ = quizQuestions[quizIndex] || null;
+  const kanaTimePct = Math.max(0, Math.min(100, (kanaTime / 60) * 100));
+  const quizProgressPct = quizQuestions.length
+    ? Math.round(((quizFinished ? quizQuestions.length : quizIndex + 1) / quizQuestions.length) * 100)
+    : 0;
 
   const answerQuiz = (option: string) => {
     if (!currentQ || quizChoice) return;
@@ -597,7 +627,14 @@ export default function StudyPage() {
           <div style={{ fontSize: 12, color: "#7c7c85", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>Nihongo Study</div>
         </header>
 
-        <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 18, padding: 10, display: "inline-flex", gap: 6 }}>
+        <section style={{ background: "linear-gradient(145deg, #ffffff, #f7fffc)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 18, padding: 14 }}>
+          <h1 style={{ margin: 0, fontSize: 28, lineHeight: 1.1, letterSpacing: "-.02em" }}>Study Lab</h1>
+          <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 14, lineHeight: 1.5 }}>
+            Herramientas cortas y enfocadas para practicar Genki I: kana, flashcards SRS y quizzes configurables.
+          </p>
+        </section>
+
+        <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 18, padding: 10, display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
           <button type="button" onClick={() => setActiveTab("kana")} style={{ border: 0, borderRadius: 999, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: activeTab === "kana" ? "#fff" : "#61616e", background: activeTab === "kana" ? "#111114" : "#f3f4f6" }}>Kana Sprint</button>
           <button type="button" onClick={() => setActiveTab("flashcards")} style={{ border: 0, borderRadius: 999, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: activeTab === "flashcards" ? "#fff" : "#61616e", background: activeTab === "flashcards" ? "#111114" : "#f3f4f6" }}>Flashcards</button>
           <button type="button" onClick={() => setActiveTab("quiz")} style={{ border: 0, borderRadius: 999, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: activeTab === "quiz" ? "#fff" : "#61616e", background: activeTab === "quiz" ? "#111114" : "#f3f4f6" }}>QUIZ</button>
@@ -613,6 +650,9 @@ export default function StudyPage() {
               </div>
             </div>
             <p style={{ color: "#6b7280", fontSize: 14 }}>60 segundos. Elige la romanización correcta (4 opciones).</p>
+            <div style={{ marginTop: 8, height: 7, borderRadius: 999, background: "#ecedf1", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${kanaTimePct}%`, background: "linear-gradient(90deg, #34c5a6, #25a98f)" }} />
+            </div>
             <div style={{ display: "grid", placeItems: "center", margin: "20px 0" }}>
               <div style={{ fontSize: 80, fontWeight: 800, lineHeight: 1 }}>{kanaQuestion.char}</div>
             </div>
@@ -622,7 +662,7 @@ export default function StudyPage() {
               ))}
             </div>
             <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <div style={{ color: "#374151", fontWeight: 700 }}>Tiempo: {kanaTime}s · Score: {kanaScore}</div>
+              <div style={{ color: "#374151", fontWeight: 700 }}>Tiempo: {kanaTime}s · Score: {kanaScore} · Mejor: {kanaBest}</div>
               <button type="button" onClick={startKana} style={{ border: 0, borderRadius: 999, background: "#111114", color: "#fff", padding: "8px 12px", fontWeight: 700 }}>{kanaRunning ? "Reiniciar" : "Iniciar"}</button>
             </div>
           </section>
@@ -637,6 +677,10 @@ export default function StudyPage() {
               </select>
             </div>
             <p style={{ color: "#6b7280", fontSize: 14, margin: "8px 0 12px" }}>Deck por lección, tarjeta volteable y SRS.</p>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#0f766e", background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: 999, padding: "4px 8px" }}>Pendientes hoy: {flashDueCount}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#475467", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 999, padding: "4px 8px" }}>Deck: {flashDeck.length} tarjetas</span>
+            </div>
 
             {flashCard ? (
               <>
@@ -657,11 +701,12 @@ export default function StudyPage() {
                 </button>
 
                 <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ color: "#6b7280", fontSize: 13 }}>Tarjeta {flashIndex + 1} de {Math.max(1, dueDeck.length)}</div>
+                  <div style={{ color: "#6b7280", fontSize: 13 }}>Tarjeta {flashCurrentNumber} de {Math.max(1, dueDeck.length)}</div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button type="button" onClick={() => setSrs(flashCard.id, "again")} style={{ border: "1px solid #fecaca", color: "#b91c1c", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700 }}>No lo sé</button>
                     <button type="button" onClick={() => setSrs(flashCard.id, "hard")} style={{ border: "1px solid #fde68a", color: "#b45309", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700 }}>Difícil</button>
                     <button type="button" onClick={() => setSrs(flashCard.id, "good")} style={{ border: "1px solid #86efac", color: "#15803d", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700 }}>Bien</button>
+                    <button type="button" onClick={skipFlash} style={{ border: "1px solid rgba(17,17,20,.1)", color: "#344054", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700 }}>Saltar</button>
                   </div>
                 </div>
               </>
@@ -730,7 +775,13 @@ export default function StudyPage() {
 
             {currentQ && !quizFinished && (
               <div style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 12, background: "#fbfbfc" }}>
-                <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Pregunta {quizIndex + 1} / {quizQuestions.length}</div>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Pregunta {quizIndex + 1} / {quizQuestions.length}</div>
+                  <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Score actual: {quizScore}</div>
+                </div>
+                <div style={{ marginTop: 8, height: 7, borderRadius: 999, background: "#ecedf1", overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${quizProgressPct}%`, background: "linear-gradient(90deg, #34c5a6, #25a98f)" }} />
+                </div>
                 <div style={{ marginTop: 8, fontSize: 20, fontWeight: 800, color: "#111114" }}>{currentQ.prompt}</div>
                 {currentQ.hint && <div style={{ marginTop: 4, color: "#6b7280", fontSize: 13 }}>{currentQ.hint}</div>}
                 <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
@@ -779,6 +830,9 @@ export default function StudyPage() {
                 <div style={{ marginTop: 6, color: "#6b7280" }}>
                   {Math.round((quizScore / Math.max(1, quizQuestions.length)) * 100)}% de aciertos
                 </div>
+                <button type="button" onClick={startQuiz} style={{ marginTop: 10, border: "1px solid rgba(17,17,20,.12)", background: "#fff", color: "#111114", borderRadius: 999, padding: "7px 10px", fontWeight: 700 }}>
+                  Repetir quiz
+                </button>
               </div>
             )}
           </section>
