@@ -55,9 +55,8 @@ function WriteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const assignmentId = searchParams.get("assignment_id");
-  const assignmentTitle = searchParams.get("title");
 
-  const [title, setTitle] = useState(assignmentTitle ? `Entrega: ${assignmentTitle}` : "");
+  const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -288,7 +287,7 @@ function WriteContent() {
                 <label className="label">{postType === "announcement" ? "Título del anuncio" : postType === "assignment" ? "Título de la tarea" : postType === "linkpost" ? "Título del link" : "Título"}</label>
                 <input
                   type="text"
-                  placeholder="Título de tu publicación..."
+                  placeholder={assignmentId ? "Título de tu entrega..." : "Título de tu publicación..."}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="titleInput"

@@ -80,7 +80,7 @@ function isTaskAnnouncementSubtype(value?: string | null) {
 
 function isTaskPostSubtype(value?: string | null) {
   const normalized = normalizeGroupValue(value);
-  return !normalized || normalized === "post" || normalized === "external";
+  return normalized === "post" || normalized === "external";
 }
 
 function cleanFeedText(value: string) {
@@ -115,6 +115,7 @@ export default function HomePage() {
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [feedMode, setFeedMode] = useState<"all" | "tasks">("all");
   const inFlightRef = useRef(false);
   const pullStartY = useRef<number | null>(null);
 
@@ -198,7 +199,12 @@ export default function HomePage() {
   const canSeePost = (p: any) => {
     if (myProfile?.is_admin) return true;
     if (p?.parent_assignment_id) {
-      return isTaskPostSubtype(p?.parent?.assignment_subtype);
+      const parentSubtype = normalizeGroupValue(p?.parent?.assignment_subtype);
+      if (parentSubtype === "forum" || parentSubtype === "internal") return false;
+      if (isTaskPostSubtype(parentSubtype)) return true;
+      if (p?.parent?.is_forum === true) return false;
+      if (p?.type === "assignment" && String(p?.content || "").startsWith("Respuesta ·")) return false;
+      return p?.parent?.id ? true : false;
     }
     if (p?.type === "assignment" && (p?.is_forum || isForumTaskSubtype(p?.assignment_subtype))) return true;
     const target = p?.target_group;
@@ -207,14 +213,14 @@ export default function HomePage() {
   };
 
   const visiblePosts = posts.filter((p) => canSeePost(p));
-  const pinnedAnnouncements = visiblePosts.filter(
+  const pinnedAnnouncementsBase = visiblePosts.filter(
     (p) =>
       p.profiles?.is_admin &&
       !p.parent_assignment_id &&
       (p.type === "announcement" || (p.type === "assignment" && isTaskAnnouncementSubtype(p.assignment_subtype))) &&
       !dismissedAnnouncements.includes(p.id),
   );
-  const regularFeed = visiblePosts.filter(
+  const regularFeedBase = visiblePosts.filter(
     (p) =>
       !(
         p.profiles?.is_admin &&
@@ -223,6 +229,17 @@ export default function HomePage() {
         !dismissedAnnouncements.includes(p.id)
       ),
   );
+
+  const isTaskPost = (p: any) =>
+    p?.type === "assignment" || Boolean(p?.parent_assignment_id);
+
+  const pinnedAnnouncements = feedMode === "tasks"
+    ? pinnedAnnouncementsBase.filter((p) => p.type === "assignment")
+    : pinnedAnnouncementsBase;
+
+  const regularFeed = feedMode === "tasks"
+    ? regularFeedBase.filter((p) => isTaskPost(p))
+    : regularFeedBase;
 
   return (
     <div style={{ maxWidth: "760px", margin: "0 auto", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', minHeight: "100vh", paddingBottom: "28px" }}>
@@ -266,14 +283,44 @@ export default function HomePage() {
       </header>
 
       <main style={{ paddingTop: "14px", background: "linear-gradient(to bottom, rgba(255,255,255,.8), rgba(255,255,255,.7))" }}>
-        <section style={{ margin: "0 14px 14px", padding: "14px 16px 12px", borderRadius: "16px", background: "#fff", border: "1px solid rgba(17,17,20,.07)", boxShadow: "0 10px 28px rgba(0,0,0,.03)" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
-            <div>
-              <div style={{ fontSize: "12px", letterSpacing: ".08em", textTransform: "uppercase", color: "#7a7a84", fontWeight: 700 }}>Home Feed</div>
-              <h1 style={{ margin: "4px 0 0", fontSize: "28px", lineHeight: 1.05, color: "#111114", fontWeight: 800 }}>フィード</h1>
-            </div>
+        <section style={{ margin: "0 14px 14px", padding: "12px 14px", borderRadius: "16px", background: "#fff", border: "1px solid rgba(17,17,20,.07)", boxShadow: "0 10px 28px rgba(0,0,0,.03)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", flexWrap: "wrap" }}>
             <div style={{ fontSize: "12px", color: "#777", background: "#f6f7f8", border: "1px solid rgba(17,17,20,.06)", borderRadius: "999px", padding: "6px 10px", fontWeight: 600 }}>
               {refreshing ? "actualizando..." : `${regularFeed.length} posts`}
+            </div>
+            <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3, background: "#fff" }}>
+              <button
+                type="button"
+                onClick={() => setFeedMode("all")}
+                style={{
+                  border: 0,
+                  borderRadius: 999,
+                  padding: "7px 10px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  color: feedMode === "all" ? "#fff" : "#666a73",
+                  background: feedMode === "all" ? "#111114" : "transparent",
+                }}
+              >
+                Todos
+              </button>
+              <button
+                type="button"
+                onClick={() => setFeedMode("tasks")}
+                style={{
+                  border: 0,
+                  borderRadius: 999,
+                  padding: "7px 10px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  color: feedMode === "tasks" ? "#fff" : "#666a73",
+                  background: feedMode === "tasks" ? "#111114" : "transparent",
+                }}
+              >
+                Tareas
+              </button>
             </div>
           </div>
         </section>
