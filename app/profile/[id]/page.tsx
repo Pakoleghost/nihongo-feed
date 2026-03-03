@@ -37,6 +37,7 @@ export default function StudentProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [myId, setMyId] = useState<string | null>(null);
   const [posts, setPosts] = useState<any[]>([]);
+  const [viewMode, setViewMode] = useState<"portfolio" | "tasks">("portfolio");
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -71,8 +72,19 @@ export default function StudentProfilePage() {
   const stats = useMemo(
     () => ({
       postCount: posts.length,
+      portfolioCount: posts.filter((p) => p.type === "post" && !p.parent_assignment_id).length,
+      taskCount: posts.filter((p) => p.type === "assignment" || p.parent_assignment_id).length,
     }),
     [posts],
+  );
+  const shownPosts = useMemo(
+    () =>
+      posts.filter((p) =>
+        viewMode === "portfolio"
+          ? p.type === "post" && !p.parent_assignment_id
+          : p.type === "assignment" || Boolean(p.parent_assignment_id),
+      ),
+    [posts, viewMode],
   );
 
   if (loading || !profile) {
@@ -170,6 +182,14 @@ export default function StudentProfilePage() {
                       <span className="statLabel">Publicaciones</span>
                       <strong className="statValue">{stats.postCount}</strong>
                     </div>
+                    <div className="statCard">
+                      <span className="statLabel">Portafolio</span>
+                      <strong className="statValue">{stats.portfolioCount}</strong>
+                    </div>
+                    <div className="statCard">
+                      <span className="statLabel">Tareas</span>
+                      <strong className="statValue">{stats.taskCount}</strong>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -179,16 +199,22 @@ export default function StudentProfilePage() {
               <div className="sectionHeader">
                 <div>
                   <div className="sectionEyebrow">Archivo</div>
-                  <h2 className="sectionTitle">Publicaciones</h2>
+                  <h2 className="sectionTitle">{viewMode === "portfolio" ? "Portafolio" : "Tareas y entregas"}</h2>
                 </div>
-                <div className="sectionBadge">{stats.postCount} posts</div>
+                <div style={{ display: "grid", gap: 8, justifyItems: "end" }}>
+                  <div className="sectionBadge">{shownPosts.length} items</div>
+                  <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3, background: "#fff" }}>
+                    <button type="button" onClick={() => setViewMode("portfolio")} style={{ border: 0, borderRadius: 999, padding: "6px 9px", fontSize: 11, fontWeight: 700, cursor: "pointer", color: viewMode === "portfolio" ? "#fff" : "#666a73", background: viewMode === "portfolio" ? "#111114" : "transparent" }}>Portafolio</button>
+                    <button type="button" onClick={() => setViewMode("tasks")} style={{ border: 0, borderRadius: 999, padding: "6px 9px", fontSize: 11, fontWeight: 700, cursor: "pointer", color: viewMode === "tasks" ? "#fff" : "#666a73", background: viewMode === "tasks" ? "#111114" : "transparent" }}>Tareas</button>
+                  </div>
+                </div>
               </div>
 
-              {posts.length === 0 ? (
+              {shownPosts.length === 0 ? (
                 <div className="emptyState">Todavía no hay publicaciones.</div>
               ) : (
                 <div className="postListCard">
-                  {posts.map((post, idx) => {
+                  {shownPosts.map((post, idx) => {
                     const { title, preview } = getPostParts(post.content || "");
                     return (
                     <article key={post.id} className="postRow" style={{ borderBottom: idx === posts.length - 1 ? "none" : "1px solid rgba(17,17,20,.06)" }}>
@@ -358,7 +384,7 @@ export default function StudentProfilePage() {
         }
         .statsRow {
           display: grid;
-          grid-template-columns: minmax(0, 220px);
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 10px;
           margin-top: 16px;
         }
@@ -514,6 +540,9 @@ export default function StudentProfilePage() {
           }
           .postsSection {
             padding: 16px;
+          }
+          .statsRow {
+            grid-template-columns: repeat(3, minmax(0, 170px));
           }
           .postRow {
             grid-template-columns: minmax(0, 1fr) 148px;

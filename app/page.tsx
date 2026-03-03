@@ -80,20 +80,53 @@ export default function HomePage() {
   const router = useRouter();
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [lastCursor, setLastCursor] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [myProfile, setMyProfile] = useState<any>(null);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [feedMode, setFeedMode] = useState<"all" | "tasks">("all");
   const [searchText, setSearchText] = useState("");
-  const [kindFilter, setKindFilter] = useState<"all" | "post" | "announcement" | "task" | "forum">("all");
   const [menuOpen, setMenuOpen] = useState(false);
   const [fontScale, setFontScale] = useState<"normal" | "large">("normal");
   const [submissionByAssignment, setSubmissionByAssignment] = useState<Record<string, { submitted: boolean; late: boolean }>>({});
-  const [visibleCount, setVisibleCount] = useState(20);
   const inFlightRef = useRef(false);
   const pullStartY = useRef<number | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  const fetchPostsBatch = useCallback(async (opts?: { reset?: boolean; userId?: string }) => {
+    const uid = opts?.userId || currentUserId;
+    if (!uid) return;
+    const PAGE_SIZE = 24;
+    if (!opts?.reset && (!hasMore || loadingMore)) return;
+    if (opts?.reset) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
+
+    let query = supabase
+      .from("posts")
+      .select(`*, profiles:user_id (username, avatar_url, group_name, is_admin), parent:parent_assignment_id (id, assignment_subtype, is_forum, target_group)`)
+      .order("created_at", { ascending: false })
+      .limit(PAGE_SIZE);
+
+    if (!opts?.reset && lastCursor) {
+      query = query.lt("created_at", lastCursor);
+    }
+
+    const { data: batch } = await query;
+    const rows = batch || [];
+    setPosts((prev) => (opts?.reset ? rows : [...prev, ...rows]));
+    const nextCursor = rows.length > 0 ? rows[rows.length - 1].created_at || null : null;
+    if (nextCursor) setLastCursor(nextCursor);
+    setHasMore(rows.length === PAGE_SIZE);
+    setLoading(false);
+    setLoadingMore(false);
+  }, [currentUserId, hasMore, lastCursor, loadingMore]);
 
   const fetchData = useCallback(async (opts?: { silent?: boolean }) => {
     if (inFlightRef.current) return;
@@ -107,6 +140,7 @@ export default function HomePage() {
       setRefreshing(false);
       return router.push("/login");
     }
+    setCurrentUserId(user.id);
 
     let { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
     if (!prof) {
@@ -132,11 +166,10 @@ export default function HomePage() {
     setMyProfile(prof || null);
 
     if (prof?.is_approved || prof?.is_admin) {
-      const { data: postsData } = await supabase
-        .from("posts")
-        .select(`*, profiles:user_id (username, avatar_url, group_name, is_admin), parent:parent_assignment_id (id, assignment_subtype, is_forum, target_group)`)
-        .order("created_at", { ascending: false });
-      setPosts(postsData || []);
+      setPosts([]);
+      setLastCursor(null);
+      setHasMore(true);
+      await fetchPostsBatch({ reset: true, userId: user.id });
 
       const { count } = await supabase
         .from("notifications")
@@ -151,8 +184,13 @@ export default function HomePage() {
         .eq("user_id", user.id)
         .not("parent_assignment_id", "is", null)
         .eq("type", "assignment");
+      const { data: assignments } = await supabase
+        .from("posts")
+        .select("id, deadline")
+        .eq("type", "assignment")
+        .is("parent_assignment_id", null);
       const deadlineById: Record<string, number> = {};
-      (postsData || []).forEach((p: any) => {
+      (assignments || []).forEach((p: any) => {
         if (!p?.id || !p?.deadline) return;
         const ts = new Date(p.deadline).getTime();
         if (!Number.isNaN(ts)) deadlineById[String(p.id)] = ts;
@@ -174,7 +212,7 @@ export default function HomePage() {
     inFlightRef.current = false;
     setLoading(false);
     setRefreshing(false);
-  }, [router]);
+  }, [router, fetchPostsBatch, currentUserId]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -216,20 +254,38 @@ export default function HomePage() {
   }, [fetchData]);
 
   useEffect(() => {
-    setVisibleCount(20);
-  }, [feedMode, kindFilter, searchText, posts.length]);
-
-  useEffect(() => {
     const el = loadMoreRef.current;
     if (!el) return;
     const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        setVisibleCount((prev) => prev + 20);
+      if (entries.some((entry) => entry.isIntersecting) && hasMore && !loadingMore) {
+        void fetchPostsBatch();
       }
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [hasMore, loadingMore, fetchPostsBatch]);
+
+  useEffect(() => {
+    if (!currentUserId) return;
+    const channel = supabase
+      .channel(`notif-count-${currentUserId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${currentUserId}` },
+        async () => {
+          const { count } = await supabase
+            .from("notifications")
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", currentUserId)
+            .or("is_read.eq.false,is_read.is.null");
+          setUnreadNotifications(count || 0);
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUserId]);
 
   if (!loading && myProfile && !myProfile.is_approved && !myProfile.is_admin) {
     return <div style={{ textAlign: "center", padding: "100px 20px", fontFamily: "sans-serif" }}>⏳ Tu cuenta espera aprobación de Pako-sensei...</div>;
@@ -272,19 +328,6 @@ export default function HomePage() {
   const isTaskPost = (p: any) =>
     p?.type === "assignment" || Boolean(p?.parent_assignment_id);
 
-  const matchesKind = (p: any) => {
-    const isAssignmentRoot = p?.type === "assignment" && !p?.parent_assignment_id;
-    const isForum = isAssignmentRoot && (p?.is_forum || isForumTaskSubtype(p?.assignment_subtype));
-    if (kindFilter === "all") return true;
-    if (kindFilter === "announcement") {
-      return p?.type === "announcement" || (isAssignmentRoot && isTaskAnnouncementSubtype(p?.assignment_subtype));
-    }
-    if (kindFilter === "task") return isTaskPost(p) && !isForum;
-    if (kindFilter === "forum") return isForum;
-    if (kindFilter === "post") return p?.type === "post" && !p?.parent_assignment_id;
-    return true;
-  };
-
   const matchesSearch = (p: any) => {
     const q = searchText.trim().toLowerCase();
     if (!q) return true;
@@ -304,8 +347,7 @@ export default function HomePage() {
   const regularFeedRaw = feedMode === "tasks"
     ? regularFeedBase.filter((p) => isTaskPost(p))
     : regularFeedBase;
-  const regularFeed = regularFeedRaw.filter((p) => matchesKind(p) && matchesSearch(p));
-  const pagedFeed = regularFeed.slice(0, visibleCount);
+  const regularFeed = regularFeedRaw.filter((p) => matchesSearch(p));
 
   return (
     <div style={{ maxWidth: "760px", margin: "0 auto", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', minHeight: "100vh", paddingBottom: "28px" }}>
@@ -328,18 +370,6 @@ export default function HomePage() {
         </Link>
         
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-          <Link href="/resources" title="Recursos" aria-label="Recursos" style={{ color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "999px", border: "1px solid rgba(17,17,20,.08)", background: "#fff" }}>
-            <IconBook />
-          </Link>
-          <Link href="/notifications" title="Notificaciones" aria-label="Notificaciones" style={{ position: "relative", color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "999px", border: "1px solid rgba(17,17,20,.08)", background: "#fff" }}>
-            <IconBell />
-            {unreadNotifications > 0 && <span style={{ position: "absolute", top: "-6px", right: "-8px", backgroundColor: "#ff2d55", color: "#fff", fontSize: "10px", padding: "2px 5px", borderRadius: "10px", fontWeight: "bold", lineHeight: 1.2 }}>{unreadNotifications}</span>}
-          </Link>
-          {myProfile?.is_admin && (
-            <Link href="/admin/groups" title="Panel Maestro" aria-label="Panel Maestro" style={{ color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "999px", border: "1px solid rgba(17,17,20,.08)", background: "#fff" }}>
-              <IconSettings />
-            </Link>
-          )}
           <Link href="/write" style={{ background: "linear-gradient(135deg, #34c5a6, #25a98f)", color: "#fff", padding: "10px 20px", borderRadius: "999px", textDecoration: "none", fontSize: "14px", fontWeight: "700", boxShadow: "0 8px 18px rgba(44,182,150,.22)" }}>書く</Link>
 
           <button
@@ -347,9 +377,14 @@ export default function HomePage() {
             onClick={() => setMenuOpen(true)}
             title="Menú"
             aria-label="Abrir menú"
-            style={{ color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "999px", border: "1px solid rgba(17,17,20,.08)", background: "#fff" }}
+            style={{ color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "999px", border: "1px solid rgba(17,17,20,.08)", background: "#fff", position: "relative" }}
           >
             <IconMenu />
+            {unreadNotifications > 0 && (
+              <span style={{ position: "absolute", top: "-6px", right: "-8px", backgroundColor: "#ff2d55", color: "#fff", fontSize: "10px", padding: "2px 5px", borderRadius: "10px", fontWeight: "bold", lineHeight: 1.2 }}>
+                {unreadNotifications}
+              </span>
+            )}
           </button>
         </div>
       </header>
@@ -400,28 +435,6 @@ export default function HomePage() {
                 Tareas
               </button>
             </div>
-            <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3, background: "#fff" }}>
-              {(["all", "post", "announcement", "task", "forum"] as const).map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => setKindFilter(k)}
-                  style={{
-                    border: 0,
-                    borderRadius: 999,
-                    padding: "7px 9px",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    color: kindFilter === k ? "#fff" : "#666a73",
-                    background: kindFilter === k ? "#111114" : "transparent",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {k === "all" ? "todo" : k === "announcement" ? "anuncio" : k === "task" ? "tarea" : k === "forum" ? "foro" : "post"}
-                </button>
-              ))}
-            </div>
           </div>
         </section>
 
@@ -439,8 +452,13 @@ export default function HomePage() {
         ))}
 
         <section style={{ margin: "0 14px", background: "#fff", borderRadius: "20px", border: "1px solid rgba(17,17,20,.06)", overflow: "hidden", boxShadow: "0 12px 34px rgba(0,0,0,.035)" }}>
-        {pagedFeed.map((post, idx) => {
+        {regularFeed.map((post, idx) => {
           const { title: titulo, preview } = getPostParts(post.content || "");
+          const edited = Boolean(
+            post?.updated_at &&
+              post?.created_at &&
+              new Date(post.updated_at).getTime() - new Date(post.created_at).getTime() > 60_000,
+          );
           const isAssignmentPost = post.type === "assignment" && !post.parent_assignment_id;
           const isForumAssignment = isAssignmentPost && (post.is_forum || isForumTaskSubtype(post.assignment_subtype));
           const isAssignedToMe = isPublicTargetGroup(post.target_group) || normalizeGroupValue(post.target_group) === normalizeGroupValue(myProfile?.group_name);
@@ -461,6 +479,7 @@ export default function HomePage() {
                   </Link>
                   <span style={{ width: "3px", height: "3px", borderRadius: "50%", background: "#b7b7bf", flexShrink: 0 }} />
                   <span style={{ color: "#7c7c85", fontSize: "12px", fontWeight: 500, whiteSpace: "nowrap" }}>{formatFeedDate(post.created_at)}</span>
+                  {edited && <span style={{ fontSize: "10px", color: "#64748b", fontWeight: 700, border: "1px solid #cbd5e1", padding: "1px 6px", borderRadius: "4px" }}>editado</span>}
                   {post.is_reviewed && <span style={{ fontSize: "10px", color: "#2cb696", fontWeight: "700", border: "1px solid #2cb696", padding: "1px 6px", borderRadius: "4px" }}>済 Sumi</span>}
                 </div>
                 <Link href={`/post/${post.id}`} style={{ textDecoration: "none", color: "inherit" }}>
@@ -504,7 +523,8 @@ export default function HomePage() {
             </article>
           );
         })}
-        {pagedFeed.length < regularFeed.length && <div ref={loadMoreRef} style={{ height: 24 }} />}
+        {hasMore && <div ref={loadMoreRef} style={{ height: 24 }} />}
+        {loadingMore && <div style={{ padding: "8px 12px", color: "#7c7c85", fontSize: 12 }}>Cargando más...</div>}
         </section>
       </main>
 
@@ -521,10 +541,10 @@ export default function HomePage() {
               <strong style={{ fontSize: 16 }}>Menú</strong>
               <button onClick={() => setMenuOpen(false)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "6px 10px", cursor: "pointer" }}>Cerrar</button>
             </div>
-            <Link href={`/profile/${myProfile?.id}`} onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px" }}>Perfil</Link>
-            <Link href="/resources" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px" }}>Recursos</Link>
-            <Link href="/notifications" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px" }}>Notificaciones</Link>
-            {myProfile?.is_admin && <Link href="/admin/groups" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px" }}>Panel maestro</Link>}
+            <Link href={`/profile/${myProfile?.id}`} onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><AvatarPlaceholder size={18} /> Perfil</Link>
+            <Link href="/resources" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Recursos</Link>
+            <Link href="/notifications" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><IconBell /> Notificaciones</span>{unreadNotifications > 0 && <span style={{ background: "#ff2d55", color: "#fff", borderRadius: 999, fontSize: 11, fontWeight: 700, padding: "2px 6px" }}>{unreadNotifications}</span>}</Link>
+            {myProfile?.is_admin && <Link href="/admin/groups" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconSettings /> Panel maestro</Link>}
             <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: 10 }}>
               <div style={{ fontSize: 12, color: "#666a73", marginBottom: 6, fontWeight: 700 }}>Tamaño de texto</div>
               <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3 }}>

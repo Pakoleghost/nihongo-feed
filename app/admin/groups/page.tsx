@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 export default function AdminGroupsPage() {
   const [activeTab, setActiveTab] = useState<'groups' | 'approvals'>('groups');
@@ -16,6 +17,7 @@ export default function AdminGroupsPage() {
   const [newGroupName, setNewGroupName] = useState("");
   const [assignmentsCount, setAssignmentsCount] = useState<Record<string, number>>({});
   const [submissionsCount, setSubmissionsCount] = useState<Record<string, number>>({});
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
 
   const fetchData = useCallback(async () => {
     // 1. Cargar Grupos
@@ -114,11 +116,17 @@ export default function AdminGroupsPage() {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm("¿Borrar este usuario y sus datos para que pueda registrarse de nuevo?")) return;
+    const target = [...pendingUsers, ...students, ...pastRequests].find((u: any) => u.id === userId);
+    if (!target) return;
+    setDeleteTarget({ id: userId, label: target.full_name || target.username || userId });
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!deleteTarget) return;
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/admin/users/${deleteTarget.id}`, {
         method: "DELETE",
         headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
       });
@@ -130,10 +138,13 @@ export default function AdminGroupsPage() {
       fetchData();
     } catch {
       alert("No se pudo borrar el usuario.");
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
   return (
+    <>
     <div style={{ maxWidth: "800px", margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif" }}>
       <nav style={{ marginBottom: "20px", display: "flex", gap: "20px", borderBottom: "1px solid #eee", paddingBottom: "10px" }}>
         <Link href="/" style={{ color: "#2cb696", textDecoration: "none", fontWeight: "bold" }}>← Volver</Link>
@@ -237,5 +248,15 @@ export default function AdminGroupsPage() {
         </div>
       )}
     </div>
+    <ConfirmDialog
+      open={Boolean(deleteTarget)}
+      title="¿Borrar usuario?"
+      description={deleteTarget ? `Se borrará ${deleteTarget.label} para permitir re-registro limpio.` : ""}
+      confirmLabel="Sí, borrar"
+      destructive
+      onCancel={() => setDeleteTarget(null)}
+      onConfirm={() => void confirmDeleteUser()}
+    />
+    </>
   );
 }

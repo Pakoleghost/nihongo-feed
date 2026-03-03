@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { isForumTaskSubtype } from "@/lib/feed-utils";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 const HeartIcon = ({ filled }: { filled: boolean }) => (
   <svg
@@ -134,6 +135,7 @@ export default function PostDetailPage() {
   const [replyImageFile, setReplyImageFile] = useState<File | null>(null);
   const [replyImagePreview, setReplyImagePreview] = useState<string | null>(null);
   const [postingReply, setPostingReply] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const fetchPostAndLikes = useCallback(async () => {
     setLoading(true);
@@ -253,6 +255,10 @@ export default function PostDetailPage() {
       body: rest.join("\n").trim(),
     };
   }, [post]);
+  const isEdited = useMemo(() => {
+    if (!post?.updated_at || !post?.created_at) return false;
+    return new Date(post.updated_at).getTime() - new Date(post.created_at).getTime() > 60_000;
+  }, [post]);
   const bodyBlocks = useMemo(() => parseBodyBlocks(parsed.body || ""), [parsed.body]);
   const isRootAssignment = post?.type === "assignment" && !post?.parent_assignment_id;
   const isForumAssignment = Boolean(
@@ -318,8 +324,6 @@ export default function PostDetailPage() {
 
   const handleDeletePost = async () => {
     if (!canEditPost) return;
-    const confirmText = prompt("Para borrar este post escribe BORRAR");
-    if ((confirmText || "").trim().toUpperCase() !== "BORRAR") return;
     try {
       if (isRootAssignment) {
         await supabase.from("posts").delete().eq("parent_assignment_id", Number(postId));
@@ -329,6 +333,8 @@ export default function PostDetailPage() {
       router.push("/");
     } catch {
       alert("No se pudo borrar el post.");
+    } finally {
+      setConfirmDeleteOpen(false);
     }
   };
 
@@ -373,6 +379,7 @@ export default function PostDetailPage() {
                   <span className="eyebrow">POST</span>
                   <span className="eyebrowDot" />
                   <span className="eyebrowMeta">{formatPostDate(post.created_at)}</span>
+                  {isEdited && <span className="editedTag">editado</span>}
                 </div>
 
                 <h1 className="postTitle">{parsed.title}</h1>
@@ -566,7 +573,7 @@ export default function PostDetailPage() {
                   <Link href="/write" className="pillLink">Escribir nuevo post</Link>
                   {canEditPost && <Link href={`/write?edit_id=${post.id}`} className="pillLink">Editar post</Link>}
                   {canEditPost && (
-                    <button type="button" onClick={handleDeletePost} className="pillDangerBtn">
+                    <button type="button" onClick={() => setConfirmDeleteOpen(true)} className="pillDangerBtn">
                       Borrar post
                     </button>
                   )}
@@ -701,6 +708,16 @@ export default function PostDetailPage() {
         }
         .eyebrowMeta {
           font-size: 12px;
+        }
+        .editedTag {
+          font-size: 10px;
+          color: #64748b;
+          font-weight: 700;
+          border: 1px solid #cbd5e1;
+          border-radius: 4px;
+          padding: 1px 6px;
+          text-transform: uppercase;
+          letter-spacing: .04em;
         }
         .postTitle {
           margin: 0 0 18px;
@@ -1107,6 +1124,15 @@ export default function PostDetailPage() {
           }
         }
       `}</style>
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        title="¿Borrar publicación?"
+        description="Esta acción eliminará el post. Si es una tarea raíz también se eliminarán sus respuestas."
+        confirmLabel="Sí, borrar"
+        destructive
+        onCancel={() => setConfirmDeleteOpen(false)}
+        onConfirm={() => void handleDeletePost()}
+      />
     </>
   );
 }
