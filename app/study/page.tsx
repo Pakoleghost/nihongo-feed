@@ -129,7 +129,7 @@ export default function StudyPage() {
   const [kanaRunning, setKanaRunning] = useState(false);
   const [kanaScore, setKanaScore] = useState(0);
   const [kanaInput, setKanaInput] = useState("");
-  const [kanaPrompt, setKanaPrompt] = useState<[string, string]>(HIRAGANA[0]);
+  const [kanaPrompt, setKanaPrompt] = useState<readonly [string, string]>(HIRAGANA[0]);
 
   const [srsIndex, setSrsIndex] = useState(0);
   const [srsDueMap, setSrsDueMap] = useState<Record<string, number>>({});
