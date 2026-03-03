@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { getPostParts } from "@/lib/feed-utils";
 
-function AvatarPlaceholder({ size = 96 }: { size?: number }) {
+function AvatarPlaceholder({ size = 44 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="12" r="11.5" fill="#f7f7f7" stroke="#e8e8e8" />
@@ -31,7 +31,6 @@ function formatDate(value?: string) {
 
 export default function StudentProfilePage() {
   const { id } = useParams();
-  const router = useRouter();
   const profileId = String(id ?? "");
 
   const [profile, setProfile] = useState<any>(null);
@@ -47,14 +46,12 @@ export default function StudentProfilePage() {
     } = await supabase.auth.getUser();
     setMyId(user?.id || null);
 
-    const { data: target } = await supabase.from("profiles").select("*").eq("id", profileId).single();
-    setProfile(target);
+    const [{ data: target }, { data: userPosts }] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", profileId).single(),
+      supabase.from("posts").select("*").eq("user_id", profileId).order("created_at", { ascending: false }),
+    ]);
 
-    const { data: userPosts } = await supabase
-      .from("posts")
-      .select("*")
-      .eq("user_id", profileId)
-      .order("created_at", { ascending: false });
+    setProfile(target || null);
     setPosts(userPosts || []);
     setLoading(false);
   }, [profileId]);
@@ -64,219 +61,144 @@ export default function StudentProfilePage() {
   }, [fetchData]);
 
   const isMe = myId === profileId;
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
 
-  const stats = useMemo(
-    () => ({
-      postCount: posts.length,
-      portfolioCount: posts.filter((p) => p.type === "post" && !p.parent_assignment_id).length,
-      taskCount: posts.filter((p) => p.type === "assignment" || p.parent_assignment_id).length,
-    }),
+  const portfolioPosts = useMemo(
+    () => posts.filter((p) => p.type === "post" && !p.parent_assignment_id),
     [posts],
   );
-  const shownPosts = useMemo(
-    () =>
-      posts.filter((p) =>
-        viewMode === "portfolio"
-          ? p.type === "post" && !p.parent_assignment_id
-          : p.type === "assignment" || Boolean(p.parent_assignment_id),
-      ),
-    [posts, viewMode],
+  const taskPosts = useMemo(
+    () => posts.filter((p) => p.type === "assignment" || Boolean(p.parent_assignment_id)),
+    [posts],
   );
+
+  const shownPosts = viewMode === "portfolio" ? portfolioPosts : taskPosts;
 
   if (loading || !profile) {
     return <div style={{ padding: "110px 16px", textAlign: "center", color: "#9ca3af" }}>Cargando perfil…</div>;
   }
 
   return (
-    <>
-      <div className="profilePage">
-        <div className="profileShell">
-          <header className="profileTop">
-            <Link href="/" className="topGhost">← Volver</Link>
-            <div className="topActions">
-              {isMe && <Link href="/profile/edit" className="topPill">Editar perfil</Link>}
-              {isMe && <button type="button" onClick={handleSignOut} className="topPill">Cerrar sesión</button>}
-              <Link href="/write" className="topPrimary">Escribir</Link>
+    <div className="profilePageV2">
+      <div className="profileShellV2">
+        <header className="profileTopV2">
+          <Link href="/" className="ghostPillV2">← Volver</Link>
+          <div className="topActionsV2">
+            {isMe && <Link href="/profile/edit" className="ghostPillV2">Editar perfil</Link>}
+            <Link href="/write" className="primaryPillV2">Escribir</Link>
+          </div>
+        </header>
+
+        <section className="heroCardV2">
+          <div className="heroRowV2">
+            {isMe ? (
+              <Link href="/profile/edit" className="avatarWrapV2" aria-label="Cambiar foto">
+                {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="avatarImgV2" /> : <AvatarPlaceholder size={52} />}
+              </Link>
+            ) : (
+              <div className="avatarWrapV2">
+                {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="avatarImgV2" /> : <AvatarPlaceholder size={52} />}
+              </div>
+            )}
+
+            <div className="heroInfoV2">
+              <div className="eyebrowV2">Perfil</div>
+              <h1>{profile.full_name || profile.username || "Usuario"}</h1>
+              <p>
+                @{profile.username || "sin-username"}
+                {profile.group_name ? ` · ${profile.group_name}` : ""}
+                {profile.is_admin ? " · Sensei" : ""}
+              </p>
             </div>
-          </header>
+          </div>
 
-          <main className="profileGrid">
-            <section className="profileCard">
-              <div className="profileHeader">
-                {isMe ? (
-                  <Link
-                    href="/profile/edit"
-                    className="avatarWrap avatarClickable"
-                    aria-label="Cambiar foto de perfil"
-                    style={{
-                      width: 110,
-                      height: 110,
-                      minWidth: 110,
-                      minHeight: 110,
-                      maxWidth: 110,
-                      maxHeight: 110,
-                      borderRadius: 999,
-                      overflow: "hidden",
-                      display: "grid",
-                      placeItems: "center",
-                    }}
-                  >
-                    {profile.avatar_url ? (
-                      <img
-                        src={profile.avatar_url}
-                        alt=""
-                        className="avatarImg"
-                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                      />
-                    ) : (
-                      <AvatarPlaceholder size={98} />
+          {profile.bio && <p className="bioV2">{profile.bio}</p>}
+
+          <div className="statsRowV2">
+            <div className="statV2">
+              <span>Total</span>
+              <strong>{posts.length}</strong>
+            </div>
+            <div className="statV2">
+              <span>Portafolio</span>
+              <strong>{portfolioPosts.length}</strong>
+            </div>
+            <div className="statV2">
+              <span>Tareas</span>
+              <strong>{taskPosts.length}</strong>
+            </div>
+          </div>
+        </section>
+
+        <section className="feedCardV2">
+          <div className="feedHeadV2">
+            <div>
+              <div className="eyebrowV2">Archivo</div>
+              <h2>{viewMode === "portfolio" ? "Portafolio" : "Tareas"}</h2>
+            </div>
+            <div className="segmentedV2">
+              <button type="button" className={viewMode === "portfolio" ? "active" : ""} onClick={() => setViewMode("portfolio")}>Portafolio</button>
+              <button type="button" className={viewMode === "tasks" ? "active" : ""} onClick={() => setViewMode("tasks")}>Tareas</button>
+            </div>
+          </div>
+
+          {shownPosts.length === 0 ? (
+            <div className="emptyV2">Todavía no hay publicaciones aquí.</div>
+          ) : (
+            <div className="rowsV2">
+              {shownPosts.map((post, idx) => {
+                const { title, preview } = getPostParts(post.content || "");
+                return (
+                  <article key={post.id} className="rowV2" style={{ borderBottom: idx === shownPosts.length - 1 ? "none" : "1px solid rgba(17,17,20,.06)" }}>
+                    <div className="rowMetaV2">
+                      <span>{formatDate(post.created_at)}</span>
+                      {post.is_reviewed && <span className="sumiV2">済 Sumi</span>}
+                    </div>
+                    <Link href={`/post/${post.id}`} className="rowTitleV2">{title || "Sin título"}</Link>
+                    {preview && <p className="rowPreviewV2">{preview}</p>}
+                    {post.image_url && (
+                      <Link href={`/post/${post.id}`} className="thumbV2" aria-label="Abrir post">
+                        <img src={post.image_url} alt="" />
+                      </Link>
                     )}
-                    <span className="avatarEditBadge">Cambiar</span>
-                  </Link>
-                ) : (
-                  <div
-                    className="avatarWrap"
-                    style={{
-                      width: 110,
-                      height: 110,
-                      minWidth: 110,
-                      minHeight: 110,
-                      maxWidth: 110,
-                      maxHeight: 110,
-                      borderRadius: 999,
-                      overflow: "hidden",
-                      display: "grid",
-                      placeItems: "center",
-                    }}
-                  >
-                    {profile.avatar_url ? (
-                      <img
-                        src={profile.avatar_url}
-                        alt=""
-                        className="avatarImg"
-                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                      />
-                    ) : (
-                      <AvatarPlaceholder size={98} />
-                    )}
-                  </div>
-                )}
-
-                <div className="profileMainInfo">
-                  <div className="profileEyebrow">Perfil</div>
-                  <h1 className="profileName">{profile.full_name || profile.username || "Usuario"}</h1>
-                  <p className="profileHandle">
-                    @{profile.username || "sin-username"}
-                    {profile.group_name ? ` · ${profile.group_name}` : ""}
-                    {profile.is_admin ? " · Sensei" : ""}
-                  </p>
-
-                  {profile.bio && <p className="profileBio">{profile.bio}</p>}
-
-                  <div className="statsRow">
-                    <div className="statCard">
-                      <span className="statLabel">Publicaciones</span>
-                      <strong className="statValue">{stats.postCount}</strong>
-                    </div>
-                    <div className="statCard">
-                      <span className="statLabel">Portafolio</span>
-                      <strong className="statValue">{stats.portfolioCount}</strong>
-                    </div>
-                    <div className="statCard">
-                      <span className="statLabel">Tareas</span>
-                      <strong className="statValue">{stats.taskCount}</strong>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className="postsSection">
-              <div className="sectionHeader">
-                <div>
-                  <div className="sectionEyebrow">Archivo</div>
-                  <h2 className="sectionTitle">{viewMode === "portfolio" ? "Portafolio" : "Tareas y entregas"}</h2>
-                </div>
-                <div style={{ display: "grid", gap: 8, justifyItems: "end" }}>
-                  <div className="sectionBadge">{shownPosts.length} items</div>
-                  <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3, background: "#fff" }}>
-                    <button type="button" onClick={() => setViewMode("portfolio")} style={{ border: 0, borderRadius: 999, padding: "6px 9px", fontSize: 11, fontWeight: 700, cursor: "pointer", color: viewMode === "portfolio" ? "#fff" : "#666a73", background: viewMode === "portfolio" ? "#111114" : "transparent" }}>Portafolio</button>
-                    <button type="button" onClick={() => setViewMode("tasks")} style={{ border: 0, borderRadius: 999, padding: "6px 9px", fontSize: 11, fontWeight: 700, cursor: "pointer", color: viewMode === "tasks" ? "#fff" : "#666a73", background: viewMode === "tasks" ? "#111114" : "transparent" }}>Tareas</button>
-                  </div>
-                </div>
-              </div>
-
-              {shownPosts.length === 0 ? (
-                <div className="emptyState">Todavía no hay publicaciones.</div>
-              ) : (
-                <div className="postListCard">
-                  {shownPosts.map((post, idx) => {
-                    const { title, preview } = getPostParts(post.content || "");
-                    return (
-                    <article key={post.id} className="postRow" style={{ borderBottom: idx === posts.length - 1 ? "none" : "1px solid rgba(17,17,20,.06)" }}>
-                        <div className="postRowContent">
-                          <div className="postRowMeta">
-                            <span>{formatDate(post.created_at)}</span>
-                            {post.is_reviewed && <span className="sumiTag">済 Sumi</span>}
-                          </div>
-                          <Link href={`/post/${post.id}`} className="postRowTitle">
-                            {title || "Sin título"}
-                          </Link>
-                          {preview && <p className="postRowPreview">{preview}</p>}
-                        </div>
-
-                        {post.image_url && (
-                          <Link href={`/post/${post.id}`} className="thumbLink" aria-label="Abrir publicación">
-                            <img src={post.image_url} alt="" className="thumbImg" />
-                          </Link>
-                        )}
-                      </article>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-          </main>
-        </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </div>
 
       <style jsx>{`
-        .profilePage {
+        .profilePageV2 {
           min-height: 100vh;
-          background: radial-gradient(900px 420px at 50% -10%, rgba(88, 168, 255, 0.07), transparent 65%), #f6f7f8;
+          background: radial-gradient(1000px 500px at 50% -10%, rgba(52, 197, 166, .08), transparent 65%), #f6f7f8;
           padding: 14px;
         }
-        .profileShell {
-          max-width: 1180px;
+        .profileShellV2 {
+          max-width: 980px;
           margin: 0 auto;
+          display: grid;
+          gap: 12px;
         }
-        .profileTop {
+        .profileTopV2 {
+          position: sticky;
+          top: 0;
+          z-index: 20;
+          background: rgba(246,247,248,.84);
+          backdrop-filter: blur(10px);
+          padding: 8px 0;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 10px;
-          margin-bottom: 12px;
-          position: sticky;
-          top: 0;
-          z-index: 10;
-          background: rgba(246, 247, 248, 0.82);
-          backdrop-filter: blur(10px);
-          padding: 10px 0;
+          gap: 8px;
         }
-        .topActions {
+        .topActionsV2 {
           display: flex;
           gap: 8px;
           align-items: center;
-          flex-wrap: wrap;
-          justify-content: flex-end;
         }
-        .topGhost,
-        .topPill {
-          border: 1px solid rgba(17, 17, 20, 0.1);
+        .ghostPillV2 {
+          border: 1px solid rgba(17,17,20,.1);
           background: #fff;
           color: #222;
           border-radius: 999px;
@@ -284,277 +206,226 @@ export default function StudentProfilePage() {
           font-size: 13px;
           text-decoration: none;
         }
-        .topPrimary {
+        .primaryPillV2 {
           text-decoration: none;
           color: #fff;
-          background: linear-gradient(135deg, #34c5a6, #25a98f);
           border-radius: 999px;
           padding: 9px 14px;
           font-size: 13px;
           font-weight: 700;
-          box-shadow: 0 8px 18px rgba(44, 182, 150, 0.18);
+          background: linear-gradient(135deg,#34c5a6,#25a98f);
+          box-shadow: 0 8px 18px rgba(44,182,150,.2);
         }
-        .profileGrid {
-          display: grid;
-          gap: 14px;
-          grid-template-columns: minmax(0, 1fr);
-        }
-        .profileCard,
-        .postsSection {
-          background: #fff;
-          border: 1px solid rgba(17, 17, 20, 0.07);
+        .heroCardV2,
+        .feedCardV2 {
+          border: 1px solid rgba(17,17,20,.07);
           border-radius: 20px;
-          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.035);
+          background: #fff;
+          box-shadow: 0 12px 30px rgba(0,0,0,.035);
+          padding: 16px;
         }
-        .profileCard {
-          padding: 18px;
-        }
-        .profileHeader {
+        .heroRowV2 {
           display: grid;
-          grid-template-columns: 110px minmax(0, 1fr);
-          gap: 16px;
-          align-items: start;
+          grid-template-columns: auto 1fr;
+          gap: 12px;
+          align-items: center;
         }
-        .avatarWrap {
-          width: 110px;
-          height: 110px;
+        .avatarWrapV2 {
+          width: 68px;
+          height: 68px;
           border-radius: 999px;
           overflow: hidden;
+          border: 1px solid rgba(17,17,20,.09);
           display: grid;
           place-items: center;
-          border: 2px solid #fff;
-          box-shadow: 0 0 0 1px rgba(17, 17, 20, 0.08);
-          background: #f8f8f8;
-          position: relative;
+          background: #f5f5f5;
           text-decoration: none;
+          flex-shrink: 0;
         }
-        .avatarClickable { cursor: pointer; }
-        .avatarClickable:hover .avatarEditBadge { opacity: 1; transform: translateY(0); }
-        .avatarImg {
+        .avatarImgV2 {
           width: 100%;
           height: 100%;
           object-fit: cover;
           display: block;
         }
-        .avatarEditBadge {
-          position: absolute;
-          left: 50%;
-          bottom: 6px;
-          transform: translate(-50%, 4px);
-          opacity: 0.95;
-          background: rgba(17, 17, 20, 0.75);
-          color: #fff;
-          border-radius: 999px;
-          padding: 4px 8px;
-          font-size: 10px;
-          font-weight: 700;
-          line-height: 1;
-          transition: 120ms ease;
-          white-space: nowrap;
-        }
-        .profileEyebrow {
-          font-size: 11px;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          color: #7a7a84;
-          font-weight: 800;
-          margin-bottom: 6px;
-        }
-        .profileMainInfo {
+        .heroInfoV2 {
           min-width: 0;
         }
-        .profileName {
-          margin: 0;
-          font-size: 28px;
-          line-height: 1.1;
-          letter-spacing: -0.02em;
-          color: #111114;
-        }
-        .profileHandle {
-          margin: 8px 0 0;
-          font-size: 13px;
-          color: #767680;
-        }
-        .profileBio {
-          margin: 14px 0 0;
-          font-size: 14px;
-          line-height: 1.65;
-          color: #33343a;
-          white-space: pre-wrap;
-        }
-        .statsRow {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 10px;
-          margin-top: 16px;
-        }
-        .statCard {
-          border: 1px solid rgba(17, 17, 20, 0.07);
-          background: #fbfbfc;
-          border-radius: 14px;
-          padding: 12px;
-        }
-        .statLabel {
-          display: block;
+        .eyebrowV2 {
           font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
-          color: #7a7a84;
-          font-weight: 700;
-          margin-bottom: 6px;
-        }
-        .statValue {
-          font-size: 22px;
-          line-height: 1;
-          color: #17171b;
-        }
-        .postsSection {
-          padding: 14px;
-        }
-        .sectionHeader {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-          padding: 4px 2px 12px;
-        }
-        .sectionEyebrow {
-          font-size: 11px;
-          letter-spacing: 0.08em;
+          letter-spacing: .08em;
           text-transform: uppercase;
           color: #7a7a84;
           font-weight: 800;
         }
-        .sectionTitle {
-          margin: 4px 0 0;
-          font-size: 24px;
-          line-height: 1;
+        .heroInfoV2 h1 {
+          margin: 2px 0 0;
+          font-size: 34px;
+          line-height: 1.1;
+          letter-spacing: -.02em;
           color: #111114;
-          letter-spacing: -0.02em;
         }
-        .sectionBadge {
+        .heroInfoV2 p {
+          margin: 6px 0 0;
+          color: #72727c;
+          font-size: 14px;
+        }
+        .bioV2 {
+          margin: 14px 0 0;
+          color: #1f2937;
+          font-size: 15px;
+          line-height: 1.6;
+        }
+        .statsRowV2 {
+          margin-top: 12px;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+        }
+        .statV2 {
           border: 1px solid rgba(17,17,20,.07);
+          border-radius: 14px;
+          padding: 10px;
+          background: #fbfbfc;
+        }
+        .statV2 span {
+          display: block;
+          font-size: 11px;
+          letter-spacing: .06em;
+          text-transform: uppercase;
+          font-weight: 700;
+          color: #808089;
+        }
+        .statV2 strong {
+          margin-top: 2px;
+          display: block;
+          font-size: 24px;
+          color: #111114;
+          line-height: 1.1;
+        }
+        .feedHeadV2 {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          gap: 8px;
+          margin-bottom: 10px;
+        }
+        .feedHeadV2 h2 {
+          margin: 4px 0 0;
+          font-size: 22px;
+          line-height: 1.2;
+          color: #111114;
+        }
+        .segmentedV2 {
+          display: inline-flex;
+          gap: 4px;
+          border: 1px solid rgba(17,17,20,.08);
+          border-radius: 999px;
+          padding: 3px;
+          background: #fff;
+        }
+        .segmentedV2 button {
+          border: 0;
           border-radius: 999px;
           padding: 6px 10px;
           font-size: 12px;
+          font-weight: 700;
           color: #666a73;
-          background: #f6f7f8;
-          font-weight: 600;
+          background: transparent;
+          cursor: pointer;
         }
-        .emptyState {
-          border: 1px dashed rgba(17,17,20,.12);
+        .segmentedV2 button.active {
+          color: #fff;
+          background: #111114;
+        }
+        .emptyV2 {
+          padding: 24px;
+          border: 1px dashed rgba(17,17,20,.16);
           border-radius: 14px;
-          padding: 20px;
+          color: #7c7c85;
           text-align: center;
-          color: #8a8a94;
-          background: #fcfcfd;
           font-size: 14px;
         }
-        .postListCard {
-          border: 1px solid rgba(17,17,20,.06);
-          border-radius: 16px;
+        .rowsV2 {
+          border: 1px solid rgba(17,17,20,.07);
+          border-radius: 14px;
           overflow: hidden;
           background: #fff;
         }
-        .postRow {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr);
-          gap: 10px;
-          padding: 14px;
-          background: #fff;
+        .rowV2 {
+          padding: 12px;
+          position: relative;
         }
-        .postRowContent {
-          flex: 1;
-          min-width: 0;
-        }
-        .postRowMeta {
-          display: flex;
+        .rowMetaV2 {
+          display: inline-flex;
           align-items: center;
           gap: 8px;
-          color: #7c7c85;
           font-size: 12px;
-          margin-bottom: 8px;
+          color: #7c7c85;
+          margin-bottom: 6px;
         }
-        .sumiTag {
+        .sumiV2 {
+          font-size: 10px;
           border: 1px solid #2cb696;
           color: #2cb696;
-          border-radius: 6px;
-          font-weight: 700;
-          font-size: 10px;
+          border-radius: 999px;
           padding: 1px 6px;
+          font-weight: 700;
         }
-        .postRowTitle {
+        .rowTitleV2 {
           display: block;
-          color: #17171b;
-          text-decoration: none;
-          font-size: 17px;
-          font-weight: 800;
+          font-size: 18px;
           line-height: 1.3;
-          letter-spacing: -0.01em;
-          margin-bottom: 8px;
+          letter-spacing: -.01em;
+          font-weight: 800;
+          color: #15151a;
+          text-decoration: none;
+          padding-right: 108px;
         }
-        .postRowPreview {
-          margin: 0;
-          color: #666a73;
-          font-size: 13.5px;
-          line-height: 1.55;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
+        .rowPreviewV2 {
+          margin: 6px 0 0;
+          font-size: 14px;
+          line-height: 1.6;
+          color: #656574;
+          padding-right: 108px;
+        }
+        .thumbV2 {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          width: 92px;
+          height: 72px;
+          border-radius: 10px;
           overflow: hidden;
+          border: 1px solid rgba(17,17,20,.07);
+          background: #f2f3f5;
         }
-        .thumbLink {
-          width: 100%;
-          height: 180px;
-          border-radius: 12px;
-          overflow: hidden;
-          border: 1px solid rgba(17,17,20,.06);
-          background: #f5f5f5;
-          display: block;
-        }
-        .thumbImg {
+        .thumbV2 img {
           width: 100%;
           height: 100%;
           object-fit: cover;
           display: block;
         }
-
-        @media (min-width: 900px) {
-          .profilePage {
-            padding: 18px 22px 28px;
+        @media (max-width: 740px) {
+          .heroInfoV2 h1 {
+            font-size: 28px;
           }
-          .profileCard {
-            padding: 22px;
+          .statsRowV2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
           }
-          .profileHeader {
-            grid-template-columns: 130px minmax(0, 1fr);
-            gap: 20px;
-            align-items: start;
+          .rowTitleV2,
+          .rowPreviewV2 {
+            padding-right: 0;
           }
-          .avatarWrap {
-            width: 124px;
-            height: 124px;
-          }
-          .profileName {
-            font-size: 34px;
-          }
-          .postsSection {
-            padding: 16px;
-          }
-          .statsRow {
-            grid-template-columns: repeat(3, minmax(0, 170px));
-          }
-          .postRow {
-            grid-template-columns: minmax(0, 1fr) 148px;
-            gap: 14px;
-            align-items: start;
-          }
-          .thumbLink {
-            width: 148px;
-            height: 104px;
+          .thumbV2 {
+            position: static;
+            display: block;
+            margin-top: 10px;
+            width: 100%;
+            height: 170px;
           }
         }
       `}</style>
-    </>
+    </div>
   );
 }

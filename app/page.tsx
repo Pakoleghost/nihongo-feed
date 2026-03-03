@@ -88,6 +88,7 @@ export default function HomePage() {
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [hasFreshPosts, setHasFreshPosts] = useState(false);
   const [feedMode, setFeedMode] = useState<"all" | "tasks">("all");
   const [searchText, setSearchText] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -170,6 +171,7 @@ export default function HomePage() {
       setLastCursor(null);
       setHasMore(true);
       await fetchPostsBatch({ reset: true, userId: user.id });
+      setHasFreshPosts(false);
 
       const { count } = await supabase
         .from("notifications")
@@ -225,12 +227,23 @@ export default function HomePage() {
   }, [myProfile, fetchData]);
 
   useEffect(() => {
-    if (!myProfile || (!myProfile.is_approved && !myProfile.is_admin)) return;
-    const timer = setInterval(() => {
-      void fetchData({ silent: true });
-    }, 12000);
-    return () => clearInterval(timer);
-  }, [myProfile, fetchData]);
+    if (!currentUserId) return;
+    const channel = supabase
+      .channel(`feed-live-${currentUserId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "posts" },
+        () => setHasFreshPosts(true),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUserId]);
+
+  const softRefresh = useCallback(async () => {
+    await fetchData({ silent: true });
+  }, [fetchData]);
 
   useEffect(() => {
     const onTouchStart = (e: TouchEvent) => {
@@ -242,7 +255,7 @@ export default function HomePage() {
       const delta = endY - pullStartY.current;
       pullStartY.current = null;
       if (window.scrollY <= 2 && delta > 85) {
-        void fetchData({ silent: true });
+        void softRefresh();
       }
     };
     window.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -251,7 +264,7 @@ export default function HomePage() {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [fetchData]);
+  }, [softRefresh]);
 
   useEffect(() => {
     const el = loadMoreRef.current;
@@ -361,7 +374,7 @@ export default function HomePage() {
           href="/"
           onClick={(e) => {
             e.preventDefault();
-            void fetchData({ silent: true });
+            void softRefresh();
           }}
           style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", flexShrink: 1, minWidth: 0, textDecoration: "none" }}
         >
@@ -437,6 +450,19 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {hasFreshPosts && (
+          <section style={{ margin: "0 14px 12px", padding: "10px 12px", borderRadius: 12, border: "1px solid rgba(44,182,150,.24)", background: "#ecfdf5", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+            <span style={{ color: "#0f766e", fontSize: 13, fontWeight: 700 }}>Hay publicaciones nuevas</span>
+            <button
+              type="button"
+              onClick={() => void softRefresh()}
+              style={{ border: "1px solid rgba(44,182,150,.35)", background: "#fff", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: "#0f766e" }}
+            >
+              Actualizar
+            </button>
+          </section>
+        )}
 
         {pinnedAnnouncements.map(post => (
           <div key={post.id} style={{ margin: "0 14px 12px", padding: "16px 16px 14px 18px", borderRadius: "16px", backgroundColor: post.type === 'assignment' ? "#f2fffa" : "#f4fbff", border: "1px solid rgba(17,17,20,0.06)", position: "relative", boxShadow: "0 8px 24px rgba(0,0,0,.025)" }}>
@@ -543,6 +569,7 @@ export default function HomePage() {
             </div>
             <Link href={`/profile/${myProfile?.id}`} onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><AvatarPlaceholder size={18} /> Perfil</Link>
             <Link href="/resources" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Recursos</Link>
+            <Link href="/study" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Estudio</Link>
             <Link href="/notifications" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><IconBell /> Notificaciones</span>{unreadNotifications > 0 && <span style={{ background: "#ff2d55", color: "#fff", borderRadius: 999, fontSize: 11, fontWeight: 700, padding: "2px 6px" }}>{unreadNotifications}</span>}</Link>
             {myProfile?.is_admin && <Link href="/admin/groups" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconSettings /> Panel maestro</Link>}
             <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: 10 }}>
