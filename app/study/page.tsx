@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 type KanaPair = readonly [string, string];
@@ -167,6 +167,111 @@ const ADJECTIVES: AdjEntry[] = [
   { lesson: 11, jp: "有名", kana: "ゆうめい", es: "famoso", kind: "na" },
 ];
 
+const EXTRA_GENKI_VOCAB: VocabCard[] = [
+  { id: "l1-e1", lesson: 1, jp: "大学", kana: "だいがく", es: "universidad", kanji: "大学" },
+  { id: "l1-e2", lesson: 1, jp: "留学生", kana: "りゅうがくせい", es: "estudiante internacional", kanji: "留学生" },
+  { id: "l1-e3", lesson: 1, jp: "年生", kana: "ねんせい", es: "año escolar", kanji: "年生" },
+  { id: "l1-e4", lesson: 1, jp: "あの人", kana: "あのひと", es: "esa persona", kanji: "あの人" },
+  { id: "l1-e5", lesson: 1, jp: "歳", kana: "さい", es: "años de edad", kanji: "歳" },
+  { id: "l2-e1", lesson: 2, jp: "だれ", kana: "だれ", es: "quién" },
+  { id: "l2-e2", lesson: 2, jp: "どれ", kana: "どれ", es: "cuál" },
+  { id: "l2-e3", lesson: 2, jp: "ここ", kana: "ここ", es: "aquí" },
+  { id: "l2-e4", lesson: 2, jp: "そこ", kana: "そこ", es: "ahí" },
+  { id: "l2-e5", lesson: 2, jp: "あそこ", kana: "あそこ", es: "allá" },
+  { id: "l2-e6", lesson: 2, jp: "いくら", kana: "いくら", es: "cuánto" },
+  { id: "l3-e1", lesson: 3, jp: "月曜日", kana: "げつようび", es: "lunes", kanji: "月曜日" },
+  { id: "l3-e2", lesson: 3, jp: "火曜日", kana: "かようび", es: "martes", kanji: "火曜日" },
+  { id: "l3-e3", lesson: 3, jp: "午前", kana: "ごぜん", es: "a.m.", kanji: "午前" },
+  { id: "l3-e4", lesson: 3, jp: "午後", kana: "ごご", es: "p.m.", kanji: "午後" },
+  { id: "l3-e5", lesson: 3, jp: "週", kana: "しゅう", es: "semana", kanji: "週" },
+  { id: "l4-e1", lesson: 4, jp: "先週", kana: "せんしゅう", es: "la semana pasada", kanji: "先週" },
+  { id: "l4-e2", lesson: 4, jp: "今週", kana: "こんしゅう", es: "esta semana", kanji: "今週" },
+  { id: "l4-e3", lesson: 4, jp: "来週", kana: "らいしゅう", es: "la próxima semana", kanji: "来週" },
+  { id: "l4-e4", lesson: 4, jp: "いつ", kana: "いつ", es: "cuándo" },
+  { id: "l4-e5", lesson: 4, jp: "昨日", kana: "きのう", es: "ayer", kanji: "昨日" },
+  { id: "l4-e6", lesson: 4, jp: "明日", kana: "あした", es: "mañana", kanji: "明日" },
+  { id: "l5-e1", lesson: 5, jp: "町", kana: "まち", es: "ciudad", kanji: "町" },
+  { id: "l5-e2", lesson: 5, jp: "新しい", kana: "あたらしい", es: "nuevo", kanji: "新しい" },
+  { id: "l5-e3", lesson: 5, jp: "古い", kana: "ふるい", es: "viejo", kanji: "古い" },
+  { id: "l5-e4", lesson: 5, jp: "小さい", kana: "ちいさい", es: "pequeño", kanji: "小さい" },
+  { id: "l5-e5", lesson: 5, jp: "レストラン", kana: "レストラン", es: "restaurante" },
+  { id: "l6-e1", lesson: 6, jp: "魚", kana: "さかな", es: "pescado", kanji: "魚" },
+  { id: "l6-e2", lesson: 6, jp: "肉", kana: "にく", es: "carne", kanji: "肉" },
+  { id: "l6-e3", lesson: 6, jp: "野菜", kana: "やさい", es: "verduras", kanji: "野菜" },
+  { id: "l6-e4", lesson: 6, jp: "果物", kana: "くだもの", es: "fruta", kanji: "果物" },
+  { id: "l6-e5", lesson: 6, jp: "牛乳", kana: "ぎゅうにゅう", es: "leche", kanji: "牛乳" },
+  { id: "l7-e1", lesson: 7, jp: "兄弟", kana: "きょうだい", es: "hermanos", kanji: "兄弟" },
+  { id: "l7-e2", lesson: 7, jp: "両親", kana: "りょうしん", es: "padres", kanji: "両親" },
+  { id: "l7-e3", lesson: 7, jp: "会社員", kana: "かいしゃいん", es: "empleado de empresa", kanji: "会社員" },
+  { id: "l7-e4", lesson: 7, jp: "仕事", kana: "しごと", es: "trabajo", kanji: "仕事" },
+  { id: "l7-e5", lesson: 7, jp: "家", kana: "いえ", es: "casa", kanji: "家" },
+  { id: "l8-e1", lesson: 8, jp: "春", kana: "はる", es: "primavera", kanji: "春" },
+  { id: "l8-e2", lesson: 8, jp: "秋", kana: "あき", es: "otoño", kanji: "秋" },
+  { id: "l8-e3", lesson: 8, jp: "冬", kana: "ふゆ", es: "invierno", kanji: "冬" },
+  { id: "l8-e4", lesson: 8, jp: "暖かい", kana: "あたたかい", es: "templado", kanji: "暖かい" },
+  { id: "l8-e5", lesson: 8, jp: "涼しい", kana: "すずしい", es: "fresco", kanji: "涼しい" },
+  { id: "l9-e1", lesson: 9, jp: "風邪", kana: "かぜ", es: "resfriado", kanji: "風邪" },
+  { id: "l9-e2", lesson: 9, jp: "頭", kana: "あたま", es: "cabeza", kanji: "頭" },
+  { id: "l9-e3", lesson: 9, jp: "お腹", kana: "おなか", es: "estómago", kanji: "お腹" },
+  { id: "l9-e4", lesson: 9, jp: "痛い", kana: "いたい", es: "doloroso", kanji: "痛い" },
+  { id: "l9-e5", lesson: 9, jp: "薬局", kana: "やっきょく", es: "farmacia", kanji: "薬局" },
+  { id: "l10-e1", lesson: 10, jp: "角", kana: "かど", es: "esquina", kanji: "角" },
+  { id: "l10-e2", lesson: 10, jp: "信号", kana: "しんごう", es: "semáforo", kanji: "信号" },
+  { id: "l10-e3", lesson: 10, jp: "郵便局", kana: "ゆうびんきょく", es: "oficina postal", kanji: "郵便局" },
+  { id: "l10-e4", lesson: 10, jp: "銀行", kana: "ぎんこう", es: "banco", kanji: "銀行" },
+  { id: "l10-e5", lesson: 10, jp: "道", kana: "みち", es: "camino", kanji: "道" },
+  { id: "l11-e1", lesson: 11, jp: "予約", kana: "よやく", es: "reserva", kanji: "予約" },
+  { id: "l11-e2", lesson: 11, jp: "案内所", kana: "あんないじょ", es: "información", kanji: "案内所" },
+  { id: "l11-e3", lesson: 11, jp: "荷物", kana: "にもつ", es: "equipaje", kanji: "荷物" },
+  { id: "l11-e4", lesson: 11, jp: "観光", kana: "かんこう", es: "turismo", kanji: "観光" },
+  { id: "l11-e5", lesson: 11, jp: "神社", kana: "じんじゃ", es: "santuario", kanji: "神社" },
+  { id: "l12-e1", lesson: 12, jp: "練習", kana: "れんしゅう", es: "práctica", kanji: "練習" },
+  { id: "l12-e2", lesson: 12, jp: "発表", kana: "はっぴょう", es: "presentación", kanji: "発表" },
+  { id: "l12-e3", lesson: 12, jp: "意見", kana: "いけん", es: "opinión", kanji: "意見" },
+  { id: "l12-e4", lesson: 12, jp: "目標", kana: "もくひょう", es: "meta", kanji: "目標" },
+  { id: "l12-e5", lesson: 12, jp: "計画", kana: "けいかく", es: "plan", kanji: "計画" },
+];
+
+const EXTRA_VERBS: VerbEntry[] = [
+  { lesson: 3, jp: "話す", kana: "はなす", es: "hablar", kind: "u" },
+  { lesson: 4, jp: "浴びる", kana: "あびる", es: "ducharse", kind: "ru" },
+  { lesson: 5, jp: "遊ぶ", kana: "あそぶ", es: "jugar", kind: "u" },
+  { lesson: 6, jp: "作る", kana: "つくる", es: "hacer/crear", kind: "u" },
+  { lesson: 7, jp: "あげる", kana: "あげる", es: "dar", kind: "ru" },
+  { lesson: 7, jp: "もらう", kana: "もらう", es: "recibir", kind: "u" },
+  { lesson: 8, jp: "なる", kana: "なる", es: "volverse", kind: "u" },
+  { lesson: 9, jp: "使う", kana: "つかう", es: "usar", kind: "u" },
+  { lesson: 9, jp: "休む", kana: "やすむ", es: "descansar", kind: "u" },
+  { lesson: 10, jp: "教える", kana: "おしえる", es: "enseñar", kind: "ru" },
+  { lesson: 10, jp: "取る", kana: "とる", es: "tomar", kind: "u" },
+  { lesson: 11, jp: "連れて行く", kana: "つれていく", es: "llevar a alguien", kind: "u" },
+  { lesson: 12, jp: "始める", kana: "はじめる", es: "empezar", kind: "ru" },
+  { lesson: 12, jp: "見せる", kana: "みせる", es: "mostrar", kind: "ru" },
+  { lesson: 12, jp: "続ける", kana: "つづける", es: "continuar", kind: "ru" },
+];
+
+const EXTRA_ADJECTIVES: AdjEntry[] = [
+  { lesson: 5, jp: "大きい", kana: "おおきい", es: "grande", kind: "i" },
+  { lesson: 5, jp: "きれい", kana: "きれい", es: "bonito/limpio", kind: "na" },
+  { lesson: 5, jp: "好き", kana: "すき", es: "gustar", kind: "na" },
+  { lesson: 5, jp: "きらい", kana: "きらい", es: "no gustar", kind: "na" },
+  { lesson: 5, jp: "にぎやか", kana: "にぎやか", es: "animado", kind: "na" },
+  { lesson: 6, jp: "まずい", kana: "まずい", es: "malo (sabor)", kind: "i" },
+  { lesson: 6, jp: "いそがしい", kana: "いそがしい", es: "ocupado", kind: "i" },
+  { lesson: 9, jp: "たいへん", kana: "たいへん", es: "difícil/duro", kind: "na" },
+  { lesson: 9, jp: "だいじょうぶ", kana: "だいじょうぶ", es: "estar bien", kind: "na" },
+  { lesson: 10, jp: "広い", kana: "ひろい", es: "amplio", kind: "i" },
+  { lesson: 10, jp: "狭い", kana: "せまい", es: "estrecho", kind: "i" },
+  { lesson: 11, jp: "おもしろい", kana: "おもしろい", es: "interesante", kind: "i" },
+  { lesson: 11, jp: "親切", kana: "しんせつ", es: "amable", kind: "na" },
+  { lesson: 12, jp: "うれしい", kana: "うれしい", es: "feliz", kind: "i" },
+  { lesson: 12, jp: "重要", kana: "じゅうよう", es: "importante", kind: "na" },
+];
+
+const ALL_GENKI_VOCAB: VocabCard[] = [...GENKI_VOCAB, ...EXTRA_GENKI_VOCAB];
+const ALL_VERBS: VerbEntry[] = [...VERBS, ...EXTRA_VERBS];
+const ALL_ADJECTIVES: AdjEntry[] = [...ADJECTIVES, ...EXTRA_ADJECTIVES];
+
 const U_ENDINGS: Record<string, { masu: string; te: string; past: string }> = {
   "う": { masu: "います", te: "って", past: "った" },
   "く": { masu: "きます", te: "いて", past: "いた" },
@@ -191,6 +296,18 @@ function shuffle<T>(arr: T[]) {
 function pickN<T>(arr: T[], n: number) {
   if (arr.length <= n) return shuffle(arr);
   return shuffle(arr).slice(0, n);
+}
+
+function buildOptionSet(correct: string, wrongCandidates: string[], fallbackPool: string[]) {
+  const wrong = Array.from(new Set(wrongCandidates.filter((item) => item && item !== correct)));
+  if (wrong.length < 3) {
+    for (const item of fallbackPool) {
+      if (!item || item === correct || wrong.includes(item)) continue;
+      wrong.push(item);
+      if (wrong.length >= 3) break;
+    }
+  }
+  return shuffle([correct, ...wrong.slice(0, 3)]);
 }
 
 function romajiOptions(pool: KanaPair[], correct: string) {
@@ -298,8 +415,8 @@ function buildParticleQuestions(count: number): QuizQuestion[] {
 }
 
 function buildVocabQuestions(lessons: number[], count: number): QuizQuestion[] {
-  const pool = GENKI_VOCAB.filter((v) => lessons.includes(v.lesson));
-  const source = pool.length >= 4 ? pool : GENKI_VOCAB;
+  const pool = ALL_GENKI_VOCAB.filter((v) => lessons.includes(v.lesson));
+  const source = pool.length >= 4 ? pool : ALL_GENKI_VOCAB;
   const selected = pickN(source, count);
 
   return selected.map((card, idx) => {
@@ -318,8 +435,8 @@ function buildVocabQuestions(lessons: number[], count: number): QuizQuestion[] {
 }
 
 function buildKanjiQuestions(lessons: number[], count: number): QuizQuestion[] {
-  const pool = GENKI_VOCAB.filter((v) => lessons.includes(v.lesson) && v.kanji);
-  const source = pool.length >= 4 ? pool : GENKI_VOCAB.filter((v) => v.kanji);
+  const pool = ALL_GENKI_VOCAB.filter((v) => lessons.includes(v.lesson) && v.kanji);
+  const source = pool.length >= 4 ? pool : ALL_GENKI_VOCAB.filter((v) => v.kanji);
   const selected = pickN(source, count);
 
   return selected.map((card, idx) => {
@@ -339,20 +456,29 @@ function buildKanjiQuestions(lessons: number[], count: number): QuizQuestion[] {
 
 function buildConjugationQuestions(lessons: number[], types: ConjType[], count: number): QuizQuestion[] {
   const qs: QuizQuestion[] = [];
-  const verbs = VERBS.filter((v) => lessons.includes(v.lesson));
-  const adjs = ADJECTIVES.filter((a) => lessons.includes(a.lesson));
+  const verbs = ALL_VERBS.filter((v) => lessons.includes(v.lesson));
+  const adjs = ALL_ADJECTIVES.filter((a) => lessons.includes(a.lesson));
+  const allTe = ALL_VERBS.map((v) => toTeForm(v));
+  const allPast = ALL_VERBS.map((v) => toPastShort(v));
+  const allMasu = ALL_VERBS.map((v) => toMasu(v));
+  const allDict = ALL_VERBS.map((v) => v.kana);
+  const allAdjNeg = ALL_ADJECTIVES.map((a) => toAdjNegative(a));
+  const allAdjPast = ALL_ADJECTIVES.map((a) => toAdjPast(a));
 
   if (types.includes("te")) {
     verbs.forEach((v) => {
       const correct = toTeForm(v);
-      const distractors = pickN(
-        VERBS.filter((x) => x.kana !== v.kana).map((x) => toTeForm(x)),
-        3,
-      );
+      const stem = v.kana.slice(0, -1);
+      const distractors = [
+        toPastShort(v),
+        toMasu(v),
+        v.kana,
+        `${stem}た`,
+      ];
       qs.push({
         id: `c-te-${v.kana}`,
         prompt: `${v.kana} (${v.es}) → て形`,
-        options: shuffle([correct, ...distractors]),
+        options: buildOptionSet(correct, distractors, allTe),
         correct,
       });
     });
@@ -361,14 +487,17 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
   if (types.includes("past")) {
     verbs.forEach((v) => {
       const correct = toPastShort(v);
-      const distractors = pickN(
-        VERBS.filter((x) => x.kana !== v.kana).map((x) => toPastShort(x)),
-        3,
-      );
+      const stem = v.kana.slice(0, -1);
+      const distractors = [
+        toTeForm(v),
+        toMasu(v),
+        v.kana,
+        `${stem}て`,
+      ];
       qs.push({
         id: `c-past-${v.kana}`,
         prompt: `${v.kana} (${v.es}) → pasado corto`,
-        options: shuffle([correct, ...distractors]),
+        options: buildOptionSet(correct, distractors, allPast),
         correct,
       });
     });
@@ -377,14 +506,16 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
   if (types.includes("masu")) {
     verbs.forEach((v) => {
       const correct = toMasu(v);
-      const distractors = pickN(
-        VERBS.filter((x) => x.kana !== v.kana).map((x) => toMasu(x)),
-        3,
-      );
+      const distractors = [
+        toTeForm(v),
+        toPastShort(v),
+        v.kana,
+        `${v.kana}ます`,
+      ];
       qs.push({
         id: `c-masu-${v.kana}`,
         prompt: `${v.kana} (${v.es}) → ます形`,
-        options: shuffle([correct, ...distractors]),
+        options: buildOptionSet(correct, distractors, allMasu),
         correct,
       });
     });
@@ -393,14 +524,16 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
   if (types.includes("dictionary")) {
     verbs.forEach((v) => {
       const correct = v.kana;
-      const distractors = pickN(
-        VERBS.filter((x) => x.kana !== v.kana).map((x) => x.kana),
-        3,
-      );
+      const distractors = [
+        toMasu(v),
+        toTeForm(v),
+        toPastShort(v),
+        toMasu(v).replace(/ます$/, "る"),
+      ];
       qs.push({
         id: `c-dict-${v.kana}`,
         prompt: `${toMasu(v)} → forma diccionario`,
-        options: shuffle([correct, ...distractors]),
+        options: buildOptionSet(correct, distractors, allDict),
         correct,
       });
     });
@@ -409,14 +542,16 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
   if (types.includes("adj-negative")) {
     adjs.forEach((a) => {
       const correct = toAdjNegative(a);
-      const distractors = pickN(
-        ADJECTIVES.filter((x) => x.kana !== a.kana).map((x) => toAdjNegative(x)),
-        3,
-      );
+      const distractors = [
+        toAdjPast(a),
+        a.kana,
+        a.kind === "i" ? `${a.kana}じゃない` : `${a.kana}くない`,
+        `${a.kana}ではない`,
+      ];
       qs.push({
         id: `c-adjn-${a.kana}`,
         prompt: `${a.kana} (${a.es}) → negativo`,
-        options: shuffle([correct, ...distractors]),
+        options: buildOptionSet(correct, distractors, allAdjNeg),
         correct,
       });
     });
@@ -425,14 +560,16 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
   if (types.includes("adj-past")) {
     adjs.forEach((a) => {
       const correct = toAdjPast(a);
-      const distractors = pickN(
-        ADJECTIVES.filter((x) => x.kana !== a.kana).map((x) => toAdjPast(x)),
-        3,
-      );
+      const distractors = [
+        toAdjNegative(a),
+        a.kana,
+        a.kind === "i" ? `${a.kana}だった` : `${a.kana}かった`,
+        `${a.kana}でした`,
+      ];
       qs.push({
         id: `c-adjp-${a.kana}`,
         prompt: `${a.kana} (${a.es}) → pasado`,
-        options: shuffle([correct, ...distractors]),
+        options: buildOptionSet(correct, distractors, allAdjPast),
         correct,
       });
     });
@@ -471,6 +608,7 @@ export default function StudyPage() {
   const [quizScore, setQuizScore] = useState(0);
   const [quizChoice, setQuizChoice] = useState<string | null>(null);
   const [quizFinished, setQuizFinished] = useState(false);
+  const quizCardRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const boot = async () => {
@@ -530,7 +668,7 @@ export default function StudyPage() {
     createKanaQuestion();
   };
 
-  const flashDeck = useMemo(() => GENKI_VOCAB.filter((v) => v.lesson === flashLesson), [flashLesson]);
+  const flashDeck = useMemo(() => ALL_GENKI_VOCAB.filter((v) => v.lesson === flashLesson), [flashLesson]);
   const dueDeck = useMemo(() => {
     const now = Date.now();
     const due = flashDeck.filter((c) => !srsMap[c.id] || srsMap[c.id] <= now);
@@ -574,7 +712,10 @@ export default function StudyPage() {
   };
 
   const startQuiz = () => {
-    const lessons = quizLessons.length > 0 ? quizLessons : [1];
+    const lessons =
+      quizMode === "conjugation"
+        ? (quizLessons.filter((l) => l >= 3).length > 0 ? quizLessons.filter((l) => l >= 3) : [3])
+        : (quizLessons.length > 0 ? quizLessons : [1]);
     let generated: QuizQuestion[] = [];
 
     if (quizMode === "particles") generated = buildParticleQuestions(quizCount);
@@ -602,6 +743,43 @@ export default function StudyPage() {
   const quizProgressPct = quizQuestions.length
     ? Math.round(((quizFinished ? quizQuestions.length : quizIndex + 1) / quizQuestions.length) * 100)
     : 0;
+  const availableQuizLessons = quizMode === "conjugation" ? LESSONS.filter((l) => l >= 3) : LESSONS;
+  const hasVerbInSelectedLessons = ALL_VERBS.some((v) => quizLessons.includes(v.lesson));
+  const hasAdjInSelectedLessons = ALL_ADJECTIVES.some((a) => quizLessons.includes(a.lesson));
+  const activeConjTypes: ConjType[] = conjTypes.length > 0 ? [...conjTypes] : ["te"];
+
+  useEffect(() => {
+    if (quizMode !== "conjugation") return;
+    setQuizLessons((prev) => {
+      const filtered = prev.filter((l) => l >= 3);
+      return filtered.length > 0 ? filtered : [3];
+    });
+  }, [quizMode]);
+
+  useEffect(() => {
+    if (quizMode !== "conjugation") return;
+    setConjTypes((prev) => {
+      let next = prev.filter((type) => {
+        const isAdjType = type === "adj-negative" || type === "adj-past";
+        if (isAdjType && !hasAdjInSelectedLessons) return false;
+        const isVerbType = type === "te" || type === "past" || type === "masu" || type === "dictionary";
+        if (isVerbType && !hasVerbInSelectedLessons) return false;
+        return true;
+      });
+      if (next.length === 0) {
+        if (hasVerbInSelectedLessons) next = ["te"];
+        else if (hasAdjInSelectedLessons) next = ["adj-negative"];
+      }
+      return next;
+    });
+  }, [quizMode, hasAdjInSelectedLessons, hasVerbInSelectedLessons]);
+
+  useEffect(() => {
+    if (activeTab !== "quiz") return;
+    if (!currentQ && !quizFinished) return;
+    if (!quizCardRef.current) return;
+    quizCardRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [activeTab, currentQ, quizFinished, quizIndex]);
 
   const answerQuiz = (option: string) => {
     if (!currentQ || quizChoice) return;
@@ -618,6 +796,80 @@ export default function StudyPage() {
     setQuizIndex((v) => v + 1);
     setQuizChoice(null);
   };
+
+  const renderQuizConfigurator = (compact = false) => (
+    <div style={{ marginTop: compact ? 0 : 10, display: "grid", gap: 10 }}>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {([
+          ["particles", "Partículas"],
+          ["conjugation", "Conjugación"],
+          ["vocab", "Vocab"],
+          ["kanji", "Kanji"],
+        ] as [QuizMode, string][]).map(([mode, label]) => (
+          <button key={mode} type="button" onClick={() => setQuizMode(mode)} style={{ border: 0, borderRadius: 999, padding: "7px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: quizMode === mode ? "#fff" : "#61616e", background: quizMode === mode ? "#111114" : "#f3f4f6" }}>{label}</button>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {[10, 20, 30].map((n) => (
+          <button key={n} type="button" onClick={() => setQuizCount(n as QuizCount)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, background: quizCount === n ? "#111114" : "#fff", color: quizCount === n ? "#fff" : "#333" }}>{n} preguntas</button>
+        ))}
+      </div>
+
+      {quizMode !== "particles" && (
+        <div>
+          <div style={{ fontSize: 12, color: "#7c7c85", marginBottom: 6, fontWeight: 700 }}>
+            Lecciones (acumulable){quizMode === "conjugation" ? " · desde L3" : ""}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {availableQuizLessons.map((lesson) => (
+              <button key={lesson} type="button" onClick={() => toggleLesson(lesson)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 9px", fontSize: 12, fontWeight: 700, background: quizLessons.includes(lesson) ? "#111114" : "#fff", color: quizLessons.includes(lesson) ? "#fff" : "#333" }}>L{lesson}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {quizMode === "conjugation" && (
+        <div>
+          <div style={{ fontSize: 12, color: "#7c7c85", marginBottom: 6, fontWeight: 700 }}>Tipos de conjugación</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {([
+              ["te", "Forma て", hasVerbInSelectedLessons],
+              ["past", "Pasado corto", hasVerbInSelectedLessons],
+              ["masu", "Forma ます", hasVerbInSelectedLessons],
+              ["dictionary", "Diccionario", hasVerbInSelectedLessons],
+              ["adj-negative", "Adjetivo negativo", hasAdjInSelectedLessons],
+              ["adj-past", "Adjetivo pasado", hasAdjInSelectedLessons],
+            ] as [ConjType, string, boolean][])
+              .filter(([, , enabled]) => enabled)
+              .map(([kind, label]) => (
+              <button
+                key={kind}
+                type="button"
+                onClick={() => toggleConjType(kind)}
+                style={{
+                  border: "1px solid rgba(17,17,20,.1)",
+                  borderRadius: 999,
+                  padding: "6px 9px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  background: activeConjTypes.includes(kind) ? "#111114" : "#fff",
+                  color: activeConjTypes.includes(kind) ? "#fff" : "#333",
+                  cursor: "pointer",
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <button type="button" onClick={startQuiz} style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", padding: "9px 14px", fontWeight: 700 }}>Iniciar quiz</button>
+      </div>
+    </div>
+  );
 
   return (
     <div style={{ minHeight: "100vh", background: "radial-gradient(900px 420px at 50% -10%, rgba(52,197,166,.08), transparent 65%), #f6f7f8", padding: 14 }}>
@@ -721,60 +973,10 @@ export default function StudyPage() {
             <h2 style={{ margin: 0, fontSize: 24 }}>QUIZ</h2>
             <p style={{ color: "#6b7280", fontSize: 14 }}>Customiza tipo, lecciones y cantidad de preguntas.</p>
 
-            <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {([
-                  ["particles", "Partículas"],
-                  ["conjugation", "Conjugación"],
-                  ["vocab", "Vocab"],
-                  ["kanji", "Kanji"],
-                ] as [QuizMode, string][]).map(([mode, label]) => (
-                  <button key={mode} type="button" onClick={() => setQuizMode(mode)} style={{ border: 0, borderRadius: 999, padding: "7px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: quizMode === mode ? "#fff" : "#61616e", background: quizMode === mode ? "#111114" : "#f3f4f6" }}>{label}</button>
-                ))}
-              </div>
-
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {[10, 20, 30].map((n) => (
-                  <button key={n} type="button" onClick={() => setQuizCount(n as QuizCount)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, background: quizCount === n ? "#111114" : "#fff", color: quizCount === n ? "#fff" : "#333" }}>{n} preguntas</button>
-                ))}
-              </div>
-
-              {quizMode !== "particles" && (
-                <div>
-                  <div style={{ fontSize: 12, color: "#7c7c85", marginBottom: 6, fontWeight: 700 }}>Lecciones (acumulable)</div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                    {LESSONS.map((lesson) => (
-                      <button key={lesson} type="button" onClick={() => toggleLesson(lesson)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 9px", fontSize: 12, fontWeight: 700, background: quizLessons.includes(lesson) ? "#111114" : "#fff", color: quizLessons.includes(lesson) ? "#fff" : "#333" }}>L{lesson}</button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {quizMode === "conjugation" && (
-                <div>
-                  <div style={{ fontSize: 12, color: "#7c7c85", marginBottom: 6, fontWeight: 700 }}>Tipos de conjugación</div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                    {([
-                      ["te", "Forma て"],
-                      ["past", "Pasado corto"],
-                      ["masu", "Forma ます"],
-                      ["dictionary", "Diccionario"],
-                      ["adj-negative", "Adjetivo negativo"],
-                      ["adj-past", "Adjetivo pasado"],
-                    ] as [ConjType, string][]).map(([kind, label]) => (
-                      <button key={kind} type="button" onClick={() => toggleConjType(kind)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 9px", fontSize: 12, fontWeight: 700, background: conjTypes.includes(kind) ? "#111114" : "#fff", color: conjTypes.includes(kind) ? "#fff" : "#333" }}>{label}</button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <button type="button" onClick={startQuiz} style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", padding: "9px 14px", fontWeight: 700 }}>Iniciar quiz</button>
-              </div>
-            </div>
+            {!currentQ && !quizFinished && renderQuizConfigurator(false)}
 
             {currentQ && !quizFinished && (
-              <div style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 12, background: "#fbfbfc" }}>
+              <div ref={quizCardRef} style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 12, background: "#fbfbfc" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                   <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Pregunta {quizIndex + 1} / {quizQuestions.length}</div>
                   <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Score actual: {quizScore}</div>
@@ -824,7 +1026,7 @@ export default function StudyPage() {
             )}
 
             {quizFinished && (
-              <div style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 14, background: "#f8fafc" }}>
+              <div ref={quizCardRef} style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 14, background: "#f8fafc" }}>
                 <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>Resultado</div>
                 <div style={{ marginTop: 6, fontSize: 30, fontWeight: 800 }}>{quizScore} / {quizQuestions.length}</div>
                 <div style={{ marginTop: 6, color: "#6b7280" }}>
@@ -833,6 +1035,15 @@ export default function StudyPage() {
                 <button type="button" onClick={startQuiz} style={{ marginTop: 10, border: "1px solid rgba(17,17,20,.12)", background: "#fff", color: "#111114", borderRadius: 999, padding: "7px 10px", fontWeight: 700 }}>
                   Repetir quiz
                 </button>
+              </div>
+            )}
+
+            {(currentQ || quizFinished) && (
+              <div style={{ marginTop: 14, borderTop: "1px dashed rgba(17,17,20,.1)", paddingTop: 12 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#7c7c85", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 8 }}>
+                  Configuración
+                </div>
+                {renderQuizConfigurator(true)}
               </div>
             )}
           </section>

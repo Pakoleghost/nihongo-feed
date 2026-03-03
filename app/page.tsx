@@ -83,6 +83,7 @@ export default function HomePage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [lastCursor, setLastCursor] = useState<string | null>(null);
+  const [allFeedRows, setAllFeedRows] = useState<any[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [myProfile, setMyProfile] = useState<any>(null);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
@@ -97,6 +98,22 @@ export default function HomePage() {
   const inFlightRef = useRef(false);
   const pullStartY = useRef<number | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  const canSeePostForProfile = useCallback((p: any, profile: any) => {
+    if (profile?.is_admin) return true;
+    if (p?.parent_assignment_id) {
+      const parentSubtype = normalizeGroupValue(p?.parent?.assignment_subtype);
+      if (parentSubtype === "forum" || parentSubtype === "internal") return false;
+      if (isTaskPostSubtype(parentSubtype)) return true;
+      if (p?.parent?.is_forum === true) return false;
+      if (p?.type === "assignment" && String(p?.content || "").startsWith("Respuesta ·")) return false;
+      return p?.parent?.id ? true : false;
+    }
+    if (p?.type === "assignment" && (p?.is_forum || isForumTaskSubtype(p?.assignment_subtype))) return true;
+    const target = p?.target_group;
+    if (isPublicTargetGroup(target)) return true;
+    return normalizeGroupValue(target) === normalizeGroupValue(profile?.group_name);
+  }, []);
 
   const fetchPostsBatch = useCallback(async (opts?: { reset?: boolean; userId?: string }) => {
     const uid = opts?.userId || currentUserId;
@@ -168,10 +185,16 @@ export default function HomePage() {
 
     if (prof?.is_approved || prof?.is_admin) {
       setPosts([]);
+      setAllFeedRows([]);
       setLastCursor(null);
       setHasMore(true);
       await fetchPostsBatch({ reset: true, userId: user.id });
       setHasFreshPosts(false);
+
+      const { data: feedRows } = await supabase
+        .from("posts")
+        .select("id, type, target_group, parent_assignment_id, assignment_subtype, is_forum, content, profiles:user_id (is_admin), parent:parent_assignment_id (id, assignment_subtype, is_forum, target_group)");
+      setAllFeedRows(feedRows || []);
 
       const { count } = await supabase
         .from("notifications")
@@ -304,23 +327,10 @@ export default function HomePage() {
     return <div style={{ textAlign: "center", padding: "100px 20px", fontFamily: "sans-serif" }}>⏳ Tu cuenta espera aprobación de Pako-sensei...</div>;
   }
 
-  const canSeePost = (p: any) => {
-    if (myProfile?.is_admin) return true;
-    if (p?.parent_assignment_id) {
-      const parentSubtype = normalizeGroupValue(p?.parent?.assignment_subtype);
-      if (parentSubtype === "forum" || parentSubtype === "internal") return false;
-      if (isTaskPostSubtype(parentSubtype)) return true;
-      if (p?.parent?.is_forum === true) return false;
-      if (p?.type === "assignment" && String(p?.content || "").startsWith("Respuesta ·")) return false;
-      return p?.parent?.id ? true : false;
-    }
-    if (p?.type === "assignment" && (p?.is_forum || isForumTaskSubtype(p?.assignment_subtype))) return true;
-    const target = p?.target_group;
-    if (isPublicTargetGroup(target)) return true;
-    return normalizeGroupValue(target) === normalizeGroupValue(myProfile?.group_name);
-  };
+  const canSeePost = (p: any) => canSeePostForProfile(p, myProfile);
 
   const visiblePosts = posts.filter((p) => canSeePost(p));
+  const totalVisiblePosts = allFeedRows.filter((p) => canSeePostForProfile(p, myProfile));
   const pinnedAnnouncementsBase = visiblePosts.filter(
     (p) =>
       p.profiles?.is_admin &&
@@ -329,6 +339,15 @@ export default function HomePage() {
       !dismissedAnnouncements.includes(p.id),
   );
   const regularFeedBase = visiblePosts.filter(
+    (p) =>
+      !(
+        p.profiles?.is_admin &&
+        !p.parent_assignment_id &&
+        (p.type === "announcement" || (p.type === "assignment" && isTaskAnnouncementSubtype(p.assignment_subtype))) &&
+        !dismissedAnnouncements.includes(p.id)
+      ),
+  );
+  const totalRegularFeedBase = totalVisiblePosts.filter(
     (p) =>
       !(
         p.profiles?.is_admin &&
@@ -361,6 +380,9 @@ export default function HomePage() {
     ? regularFeedBase.filter((p) => isTaskPost(p))
     : regularFeedBase;
   const regularFeed = regularFeedRaw.filter((p) => matchesSearch(p));
+  const totalFeedCount = feedMode === "tasks"
+    ? totalRegularFeedBase.filter((p) => isTaskPost(p)).length
+    : totalRegularFeedBase.length;
 
   return (
     <div style={{ maxWidth: "760px", margin: "0 auto", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', minHeight: "100vh", paddingBottom: "28px" }}>
@@ -406,7 +428,7 @@ export default function HomePage() {
         <section style={{ margin: "0 14px 14px", padding: "12px 14px", borderRadius: "16px", background: "#fff", border: "1px solid rgba(17,17,20,.07)", boxShadow: "0 10px 28px rgba(0,0,0,.03)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", flexWrap: "wrap" }}>
             <div style={{ fontSize: "12px", color: "#777", background: "#f6f7f8", border: "1px solid rgba(17,17,20,.06)", borderRadius: "999px", padding: "6px 10px", fontWeight: 600 }}>
-              {refreshing ? "actualizando..." : `${regularFeed.length} posts`}
+              {refreshing ? "actualizando..." : `${totalFeedCount} posts`}
             </div>
             <input
               value={searchText}
