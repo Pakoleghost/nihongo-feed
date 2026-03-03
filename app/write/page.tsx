@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { normalizeAssignmentSubtype, normalizeGroupValue } from "@/lib/feed-utils";
 
 type GroupRow = { name: string };
 
@@ -181,7 +182,8 @@ function WriteContent() {
         imageUrl = await uploadToStorage(user.id, imageFile, "post-images");
       }
 
-      const normalizedTargetGroup = isAdmin && !assignmentId ? (targetGroup || "Todos") : null;
+      const normalizedTargetGroup = isAdmin && !assignmentId ? (targetGroup || "Todos").trim() : null;
+      const normalizedSubtype = normalizeAssignmentSubtype(assignmentSubtype);
       const finalType = postType === "linkpost" ? "post" : postType;
       const finalContent =
         postType === "linkpost"
@@ -193,12 +195,12 @@ function WriteContent() {
         user_id: user.id,
         image_url: imageUrl,
         type: finalType,
-        is_forum: !assignmentId && postType === "assignment" && assignmentSubtype === "forum",
+        is_forum: !assignmentId && postType === "assignment" && normalizedSubtype === "forum",
         parent_assignment_id: assignmentId ? parseInt(assignmentId, 10) : null,
         target_group: assignmentId ? null : normalizedTargetGroup,
         deadline: postType === "assignment" ? deadline || null : null,
         assignment_subtype:
-          postType === "assignment" ? assignmentSubtype : null,
+          postType === "assignment" ? normalizedSubtype : null,
       }).select("id, type, target_group").single();
       if (insertError) throw insertError;
 
@@ -215,7 +217,7 @@ function WriteContent() {
           .eq("is_admin", false)
           .eq("is_approved", true);
 
-        if (normalizedTargetGroup && normalizedTargetGroup !== "Todos") {
+        if (normalizedTargetGroup && normalizeGroupValue(normalizedTargetGroup) !== "todos") {
           recipientsQuery = recipientsQuery.eq("group_name", normalizedTargetGroup);
         }
 

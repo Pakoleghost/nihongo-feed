@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { getPostParts } from "@/lib/feed-utils";
 
 function AvatarPlaceholder({ size = 96 }: { size?: number }) {
   return (
@@ -188,8 +189,7 @@ export default function StudentProfilePage() {
               ) : (
                 <div className="postListCard">
                   {posts.map((post, idx) => {
-                    const [title, ...rest] = String(post.content || "").split("\n");
-                    const preview = rest.join(" ").trim();
+                    const { title, preview } = getPostParts(post.content || "");
                     return (
                     <article key={post.id} className="postRow" style={{ borderBottom: idx === posts.length - 1 ? "none" : "1px solid rgba(17,17,20,.06)" }}>
                         <div className="postRowContent">

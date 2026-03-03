@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { isPublicTargetGroup, normalizeGroupValue, isForumTaskSubtype, isTaskAnnouncementSubtype } from "@/lib/feed-utils";
 
 type ResourceRow = {
   id: number | string;
@@ -64,15 +65,6 @@ function fileLabelFromUrl(url?: string | null): string {
   } catch {
     return url.split("/").pop() || "Archivo";
   }
-}
-
-function normalizeGroupValue(value?: string | null) {
-  return String(value || "").trim().toLowerCase();
-}
-
-function isPublicTargetGroup(value?: string | null) {
-  const normalized = normalizeGroupValue(value);
-  return !normalized || normalized === "todos" || normalized === "general";
 }
 
 function IconFolder() {
@@ -546,8 +538,8 @@ export default function ResourcesPage() {
                       const [taskTitle, ...taskBody] = String(task.content || "").split("\n");
                       const deadline = task.deadline ? new Date(task.deadline) : null;
                       const isExpired = Boolean(deadline && deadline.getTime() < Date.now());
-                      const isForum = Boolean(task.is_forum || task.assignment_subtype === "forum" || task.assignment_subtype === "internal");
-                      const isAnnouncementTask = task.assignment_subtype === "announcement";
+                      const isForum = Boolean(task.is_forum || isForumTaskSubtype(task.assignment_subtype));
+                      const isAnnouncementTask = isTaskAnnouncementSubtype(task.assignment_subtype);
                       const isAssignedToMe =
                         isAdmin ||
                         isPublicTargetGroup(task.target_group) ||

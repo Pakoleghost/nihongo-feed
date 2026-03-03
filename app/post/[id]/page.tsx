@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { isForumTaskSubtype } from "@/lib/feed-utils";
 
 const HeartIcon = ({ filled }: { filled: boolean }) => (
   <svg
@@ -256,7 +257,7 @@ export default function PostDetailPage() {
   const isRootAssignment = post?.type === "assignment" && !post?.parent_assignment_id;
   const isForumAssignment = Boolean(
     isRootAssignment &&
-      (post?.is_forum || post?.assignment_subtype === "internal" || post?.assignment_subtype === "forum"),
+      (post?.is_forum || isForumTaskSubtype(post?.assignment_subtype)),
   );
   const isPostAssignment = Boolean(isRootAssignment && !isForumAssignment);
   const postDeadline = post?.deadline ? new Date(post.deadline) : null;

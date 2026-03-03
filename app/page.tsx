@@ -3,6 +3,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  getPostParts,
+  isForumTaskSubtype,
+  isPublicTargetGroup,
+  isTaskAnnouncementSubtype,
+  isTaskPostSubtype,
+  normalizeGroupValue,
+} from "@/lib/feed-utils";
 
 function IconBook() {
   return (
@@ -58,53 +66,6 @@ function formatFeedDate(value?: string) {
   if (hours < 24) return `${hours}h`;
   if (days < 7) return `${days}d`;
   return date.toLocaleDateString("es-ES", { month: "short", day: "numeric" });
-}
-
-function normalizeGroupValue(value?: string | null) {
-  return String(value || "").trim().toLowerCase();
-}
-
-function isPublicTargetGroup(value?: string | null) {
-  const normalized = normalizeGroupValue(value);
-  return !normalized || normalized === "todos" || normalized === "general";
-}
-
-function isForumTaskSubtype(value?: string | null) {
-  const normalized = normalizeGroupValue(value);
-  return normalized === "forum" || normalized === "internal";
-}
-
-function isTaskAnnouncementSubtype(value?: string | null) {
-  return normalizeGroupValue(value) === "announcement";
-}
-
-function isTaskPostSubtype(value?: string | null) {
-  const normalized = normalizeGroupValue(value);
-  return normalized === "post" || normalized === "external";
-}
-
-function cleanFeedText(value: string) {
-  return value
-    .replace(/!\[[^\]]*]\((https?:\/\/[^\s)]+)\)/gi, "")
-    .replace(/https?:\/\/\S+\.(?:png|jpe?g|gif|webp|svg)(?:\?\S+)?/gi, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function getPostParts(content: string) {
-  const lines = String(content || "").split("\n");
-  const title = cleanFeedText(lines[0] || "");
-  const bodyLines = lines.slice(1).filter((line) => {
-    const trimmed = line.trim();
-    if (!trimmed) return false;
-    if (/^!\[[^\]]*]\((https?:\/\/[^\s)]+)\)\s*$/i.test(trimmed)) return false;
-    if (/^https?:\/\/\S+\.(?:png|jpe?g|gif|webp|svg)(?:\?\S+)?$/i.test(trimmed)) return false;
-    return true;
-  });
-  return {
-    title: title || "Sin título",
-    preview: cleanFeedText(bodyLines.join(" ")),
-  };
 }
 
 export default function HomePage() {
