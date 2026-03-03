@@ -42,6 +42,14 @@ function IconSettings() {
   );
 }
 
+function IconMenu() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function AvatarPlaceholder({ size = 34 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -77,8 +85,15 @@ export default function HomePage() {
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [feedMode, setFeedMode] = useState<"all" | "tasks">("all");
+  const [searchText, setSearchText] = useState("");
+  const [kindFilter, setKindFilter] = useState<"all" | "post" | "announcement" | "task" | "forum">("all");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [fontScale, setFontScale] = useState<"normal" | "large">("normal");
+  const [submissionByAssignment, setSubmissionByAssignment] = useState<Record<string, { submitted: boolean; late: boolean }>>({});
+  const [visibleCount, setVisibleCount] = useState(20);
   const inFlightRef = useRef(false);
   const pullStartY = useRef<number | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const fetchData = useCallback(async (opts?: { silent?: boolean }) => {
     if (inFlightRef.current) return;
@@ -93,8 +108,28 @@ export default function HomePage() {
       return router.push("/login");
     }
 
-    const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-    setMyProfile(prof);
+    let { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+    if (!prof) {
+      const meta: any = user.user_metadata || {};
+      const baseUsername = String(meta?.username || user.email?.split("@")[0] || `user_${user.id.slice(0, 8)}`)
+        .toLowerCase()
+        .replace(/[^a-z0-9._-]/g, "")
+        .slice(0, 24);
+      const fallbackUsername = baseUsername || `user_${user.id.slice(0, 8)}`;
+      await supabase.from("profiles").upsert(
+        {
+          id: user.id,
+          username: fallbackUsername,
+          full_name: meta?.full_name || null,
+          group_name: meta?.group_name || null,
+          is_approved: false,
+        },
+        { onConflict: "id" },
+      );
+      const retry = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+      prof = retry.data || null;
+    }
+    setMyProfile(prof || null);
 
     if (prof?.is_approved || prof?.is_admin) {
       const { data: postsData } = await supabase
@@ -103,8 +138,35 @@ export default function HomePage() {
         .order("created_at", { ascending: false });
       setPosts(postsData || []);
 
-      const { count } = await supabase.from("notifications").select("*", { count: 'exact', head: true }).eq("user_id", user.id).eq("is_read", false);
+      const { count } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .or("is_read.eq.false,is_read.is.null");
       setUnreadNotifications(count || 0);
+
+      const { data: mySubs } = await supabase
+        .from("posts")
+        .select("parent_assignment_id, created_at")
+        .eq("user_id", user.id)
+        .not("parent_assignment_id", "is", null)
+        .eq("type", "assignment");
+      const deadlineById: Record<string, number> = {};
+      (postsData || []).forEach((p: any) => {
+        if (!p?.id || !p?.deadline) return;
+        const ts = new Date(p.deadline).getTime();
+        if (!Number.isNaN(ts)) deadlineById[String(p.id)] = ts;
+      });
+      const next: Record<string, { submitted: boolean; late: boolean }> = {};
+      (mySubs || []).forEach((s: any) => {
+        if (!s?.parent_assignment_id) return;
+        const pid = String(s.parent_assignment_id);
+        const submittedAt = new Date(s.created_at || "").getTime();
+        const deadline = deadlineById[pid];
+        const late = Boolean(deadline && !Number.isNaN(submittedAt) && submittedAt > deadline);
+        next[pid] = { submitted: true, late };
+      });
+      setSubmissionByAssignment(next);
 
       const saved = localStorage.getItem("dismissed_posts");
       if (saved) setDismissedAnnouncements(JSON.parse(saved));
@@ -153,6 +215,22 @@ export default function HomePage() {
     };
   }, [fetchData]);
 
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [feedMode, kindFilter, searchText, posts.length]);
+
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        setVisibleCount((prev) => prev + 20);
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   if (!loading && myProfile && !myProfile.is_approved && !myProfile.is_admin) {
     return <div style={{ textAlign: "center", padding: "100px 20px", fontFamily: "sans-serif" }}>⏳ Tu cuenta espera aprobación de Pako-sensei...</div>;
   }
@@ -194,13 +272,40 @@ export default function HomePage() {
   const isTaskPost = (p: any) =>
     p?.type === "assignment" || Boolean(p?.parent_assignment_id);
 
+  const matchesKind = (p: any) => {
+    const isAssignmentRoot = p?.type === "assignment" && !p?.parent_assignment_id;
+    const isForum = isAssignmentRoot && (p?.is_forum || isForumTaskSubtype(p?.assignment_subtype));
+    if (kindFilter === "all") return true;
+    if (kindFilter === "announcement") {
+      return p?.type === "announcement" || (isAssignmentRoot && isTaskAnnouncementSubtype(p?.assignment_subtype));
+    }
+    if (kindFilter === "task") return isTaskPost(p) && !isForum;
+    if (kindFilter === "forum") return isForum;
+    if (kindFilter === "post") return p?.type === "post" && !p?.parent_assignment_id;
+    return true;
+  };
+
+  const matchesSearch = (p: any) => {
+    const q = searchText.trim().toLowerCase();
+    if (!q) return true;
+    const parts = getPostParts(p?.content || "");
+    const author = String(p?.profiles?.username || "").toLowerCase();
+    return (
+      parts.title.toLowerCase().includes(q) ||
+      parts.preview.toLowerCase().includes(q) ||
+      author.includes(q)
+    );
+  };
+
   const pinnedAnnouncements = feedMode === "tasks"
     ? pinnedAnnouncementsBase.filter((p) => p.type === "assignment")
     : pinnedAnnouncementsBase;
 
-  const regularFeed = feedMode === "tasks"
+  const regularFeedRaw = feedMode === "tasks"
     ? regularFeedBase.filter((p) => isTaskPost(p))
     : regularFeedBase;
+  const regularFeed = regularFeedRaw.filter((p) => matchesKind(p) && matchesSearch(p));
+  const pagedFeed = regularFeed.slice(0, visibleCount);
 
   return (
     <div style={{ maxWidth: "760px", margin: "0 auto", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', minHeight: "100vh", paddingBottom: "28px" }}>
@@ -237,9 +342,15 @@ export default function HomePage() {
           )}
           <Link href="/write" style={{ background: "linear-gradient(135deg, #34c5a6, #25a98f)", color: "#fff", padding: "10px 20px", borderRadius: "999px", textDecoration: "none", fontSize: "14px", fontWeight: "700", boxShadow: "0 8px 18px rgba(44,182,150,.22)" }}>書く</Link>
 
-          <Link href={`/profile/${myProfile?.id}`} style={{ width: "38px", height: "38px", borderRadius: "50%", overflow: "hidden", border: "2px solid #fff", boxShadow: "0 0 0 1px rgba(17,17,20,.08)", flexShrink: 0 }}>
-            {myProfile?.avatar_url ? <img src={myProfile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", background: "#f5f5f5" }}><AvatarPlaceholder size={28} /></div>}
-          </Link>
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            title="Menú"
+            aria-label="Abrir menú"
+            style={{ color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "999px", border: "1px solid rgba(17,17,20,.08)", background: "#fff" }}
+          >
+            <IconMenu />
+          </button>
         </div>
       </header>
 
@@ -249,6 +360,12 @@ export default function HomePage() {
             <div style={{ fontSize: "12px", color: "#777", background: "#f6f7f8", border: "1px solid rgba(17,17,20,.06)", borderRadius: "999px", padding: "6px 10px", fontWeight: 600 }}>
               {refreshing ? "actualizando..." : `${regularFeed.length} posts`}
             </div>
+            <input
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              placeholder="Buscar en feed..."
+              style={{ flex: "1 1 220px", minWidth: 180, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: "8px 12px", fontSize: 13, outline: "none", background: "#fff" }}
+            />
             <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3, background: "#fff" }}>
               <button
                 type="button"
@@ -283,6 +400,28 @@ export default function HomePage() {
                 Tareas
               </button>
             </div>
+            <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3, background: "#fff" }}>
+              {(["all", "post", "announcement", "task", "forum"] as const).map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setKindFilter(k)}
+                  style={{
+                    border: 0,
+                    borderRadius: 999,
+                    padding: "7px 9px",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    color: kindFilter === k ? "#fff" : "#666a73",
+                    background: kindFilter === k ? "#111114" : "transparent",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {k === "all" ? "todo" : k === "announcement" ? "anuncio" : k === "task" ? "tarea" : k === "forum" ? "foro" : "post"}
+                </button>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -300,7 +439,7 @@ export default function HomePage() {
         ))}
 
         <section style={{ margin: "0 14px", background: "#fff", borderRadius: "20px", border: "1px solid rgba(17,17,20,.06)", overflow: "hidden", boxShadow: "0 12px 34px rgba(0,0,0,.035)" }}>
-        {regularFeed.map((post, idx) => {
+        {pagedFeed.map((post, idx) => {
           const { title: titulo, preview } = getPostParts(post.content || "");
           const isAssignmentPost = post.type === "assignment" && !post.parent_assignment_id;
           const isForumAssignment = isAssignmentPost && (post.is_forum || isForumTaskSubtype(post.assignment_subtype));
@@ -331,9 +470,9 @@ export default function HomePage() {
                       {isForumAssignment ? (isAssignedToMe ? "Tarea Foro" : "Foro Abierto") : "Tarea"}
                     </div>
                   )}
-                  <h2 style={{ margin: "0 0 8px 0", fontSize: "17px", fontWeight: 800, lineHeight: "1.35", color: "#17171b", letterSpacing: "-0.01em" }}>{titulo}</h2>
+                  <h2 style={{ margin: "0 0 8px 0", fontSize: fontScale === "large" ? "18px" : "17px", fontWeight: 800, lineHeight: "1.35", color: "#17171b", letterSpacing: "-0.01em" }}>{titulo}</h2>
                   {preview && (
-                    <p style={{ margin: 0, fontSize: "13.5px", color: "#666a73", lineHeight: "1.55", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{preview}</p>
+                    <p style={{ margin: 0, fontSize: fontScale === "large" ? "14.5px" : "13.5px", color: "#666a73", lineHeight: "1.55", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{preview}</p>
                   )}
                 </Link>
                 <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "8px", color: "#8a8a94", fontSize: "12px", fontWeight: 500 }}>
@@ -349,6 +488,11 @@ export default function HomePage() {
                     <Link href={isForumAssignment ? `/post/${post.id}` : `/write?assignment_id=${post.id}&title=${encodeURIComponent(titulo || "Tarea")}`} style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "12px", color: isForumAccent ? "#3d81ce" : isForumAssignment ? "#667085" : "#147f68", fontWeight: 700, textDecoration: "none", background: "#fff", border: `1px solid ${isForumAccent ? "rgba(61,129,206,.24)" : isForumAssignment ? "#e4e7ec" : "rgba(44,182,150,.2)"}`, padding: "7px 10px", borderRadius: "999px" }}>
                       {isForumAssignment ? "Entrar al foro" : "Entregar tarea"}
                     </Link>
+                    {!post.parent_assignment_id && (
+                      <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, color: submissionByAssignment[String(post.id)]?.submitted ? (submissionByAssignment[String(post.id)]?.late ? "#b45309" : "#147f68") : "#7c7c85", background: submissionByAssignment[String(post.id)]?.submitted ? (submissionByAssignment[String(post.id)]?.late ? "#fffbeb" : "#ecfdf5") : "#f8fafc", border: `1px solid ${submissionByAssignment[String(post.id)]?.submitted ? (submissionByAssignment[String(post.id)]?.late ? "#fde68a" : "#bbf7d0") : "#e2e8f0"}`, borderRadius: 999, padding: "4px 8px" }}>
+                        {submissionByAssignment[String(post.id)]?.submitted ? (submissionByAssignment[String(post.id)]?.late ? "Entregada tardía" : "Entregada") : "Pendiente"}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
@@ -360,8 +504,46 @@ export default function HomePage() {
             </article>
           );
         })}
+        {pagedFeed.length < regularFeed.length && <div ref={loadMoreRef} style={{ height: 24 }} />}
         </section>
       </main>
+
+      {menuOpen && (
+        <>
+          <button
+            type="button"
+            onClick={() => setMenuOpen(false)}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.28)", border: 0, zIndex: 50 }}
+            aria-label="Cerrar menú"
+          />
+          <aside style={{ position: "fixed", top: 0, right: 0, height: "100vh", width: "min(360px, 86vw)", background: "#fff", borderLeft: "1px solid rgba(17,17,20,.08)", zIndex: 60, padding: 16, display: "grid", gap: 12, alignContent: "start" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <strong style={{ fontSize: 16 }}>Menú</strong>
+              <button onClick={() => setMenuOpen(false)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "6px 10px", cursor: "pointer" }}>Cerrar</button>
+            </div>
+            <Link href={`/profile/${myProfile?.id}`} onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px" }}>Perfil</Link>
+            <Link href="/resources" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px" }}>Recursos</Link>
+            <Link href="/notifications" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px" }}>Notificaciones</Link>
+            {myProfile?.is_admin && <Link href="/admin/groups" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px" }}>Panel maestro</Link>}
+            <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: 10 }}>
+              <div style={{ fontSize: 12, color: "#666a73", marginBottom: 6, fontWeight: 700 }}>Tamaño de texto</div>
+              <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3 }}>
+                <button onClick={() => setFontScale("normal")} style={{ border: 0, borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: fontScale === "normal" ? "#fff" : "#666a73", background: fontScale === "normal" ? "#111114" : "transparent" }}>Normal</button>
+                <button onClick={() => setFontScale("large")} style={{ border: 0, borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: fontScale === "large" ? "#fff" : "#666a73", background: fontScale === "large" ? "#111114" : "transparent" }}>Grande</button>
+              </div>
+            </div>
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                router.push("/login");
+              }}
+              style={{ border: "1px solid #fecaca", color: "#b91c1c", borderRadius: 12, padding: "10px 12px", background: "#fff", textAlign: "left", cursor: "pointer" }}
+            >
+              Cerrar sesión
+            </button>
+          </aside>
+        </>
+      )}
     </div>
   );
 }

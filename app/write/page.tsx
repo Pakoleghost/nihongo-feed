@@ -56,6 +56,7 @@ function WriteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const assignmentId = searchParams.get("assignment_id");
+  const editId = searchParams.get("edit_id");
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -63,6 +64,8 @@ function WriteContent() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [inlineUploading, setInlineUploading] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
+  const [editingPostUserId, setEditingPostUserId] = useState<string | null>(null);
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [postType, setPostType] = useState<"post" | "assignment" | "announcement" | "linkpost">("post");
@@ -88,10 +91,82 @@ function WriteContent() {
         if (groups) setAvailableGroups(groups as GroupRow[]);
       }
       if (assignmentId) setPostType("assignment");
+
+      if (editId) {
+        setLoadingDraft(true);
+        const { data: existing } = await supabase
+          .from("posts")
+          .select("*")
+          .eq("id", editId)
+          .maybeSingle();
+        if (!existing) {
+          alert("No se encontró el post a editar.");
+          setLoadingDraft(false);
+          return router.push("/");
+        }
+        const canEdit = existing.user_id === user.id || Boolean(profile?.is_admin);
+        if (!canEdit) {
+          alert("No tienes permisos para editar este post.");
+          setLoadingDraft(false);
+          return router.push(`/post/${editId}`);
+        }
+        setEditingPostUserId(existing.user_id || user.id);
+        const [rawTitle, ...rest] = String(existing.content || "").split("\n");
+        setTitle(rawTitle || "");
+        setBody(rest.join("\n").trim());
+        if (existing.image_url) setPreviewUrl(existing.image_url);
+        if (existing.type === "announcement") setPostType("announcement");
+        else if (existing.type === "assignment") setPostType("assignment");
+        else setPostType("post");
+        if (existing.assignment_subtype) {
+          setAssignmentSubtype(normalizeAssignmentSubtype(existing.assignment_subtype) as "announcement" | "post" | "forum");
+        }
+        if (existing.target_group) setTargetGroup(existing.target_group);
+        if (existing.deadline) {
+          const d = new Date(existing.deadline);
+          if (!Number.isNaN(d.getTime())) setDeadline(d.toISOString().slice(0, 16));
+        }
+        setLoadingDraft(false);
+      } else {
+        const draftKey = assignmentId ? `write-draft-assignment-${assignmentId}` : "write-draft-main";
+        try {
+          const raw = localStorage.getItem(draftKey);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            setTitle(parsed?.title || "");
+            setBody(parsed?.body || "");
+            if (!assignmentId) {
+              if (parsed?.postType) setPostType(parsed.postType);
+              if (parsed?.targetGroup) setTargetGroup(parsed.targetGroup);
+              if (parsed?.deadline) setDeadline(parsed.deadline);
+              if (parsed?.assignmentSubtype) setAssignmentSubtype(parsed.assignmentSubtype);
+              if (parsed?.linkUrl) setLinkUrl(parsed.linkUrl);
+            }
+          }
+        } catch {}
+      }
     };
 
     void checkUser();
-  }, [router, assignmentId]);
+  }, [router, assignmentId, editId]);
+
+  useEffect(() => {
+    if (editId) return;
+    const draftKey = assignmentId ? `write-draft-assignment-${assignmentId}` : "write-draft-main";
+    const payload = {
+      title,
+      body,
+      postType,
+      targetGroup,
+      deadline,
+      assignmentSubtype,
+      linkUrl,
+      savedAt: Date.now(),
+    };
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(payload));
+    } catch {}
+  }, [title, body, postType, targetGroup, deadline, assignmentSubtype, linkUrl, assignmentId, editId]);
 
   useEffect(() => {
     return () => {
@@ -190,23 +265,34 @@ function WriteContent() {
           ? `${title}\n${linkUrl.trim()}\n${body}`.trim()
           : `${title}\n${body}`;
 
-      const { data: insertedPost, error: insertError } = await supabase.from("posts").insert({
+      const payload = {
         content: finalContent,
-        user_id: user.id,
-        image_url: imageUrl,
+        user_id: editingPostUserId || user.id,
+        image_url: imageUrl || (editId ? previewUrl : null),
         type: finalType,
         is_forum: !assignmentId && postType === "assignment" && normalizedSubtype === "forum",
         parent_assignment_id: assignmentId ? parseInt(assignmentId, 10) : null,
         target_group: assignmentId ? null : normalizedTargetGroup,
         deadline: postType === "assignment" ? deadline || null : null,
-        assignment_subtype:
-          postType === "assignment" ? normalizedSubtype : null,
-      }).select("id, type, target_group").single();
-      if (insertError) throw insertError;
+        assignment_subtype: postType === "assignment" ? normalizedSubtype : null,
+      } as any;
+
+      let insertedPost: { id: number; type: string; target_group: string | null } | null = editId
+        ? { id: Number(editId), type: finalType, target_group: normalizedTargetGroup }
+        : null;
+      if (editId) {
+        const { error: updateError } = await supabase.from("posts").update(payload).eq("id", editId);
+        if (updateError) throw updateError;
+      } else {
+        const { data: created, error: insertError } = await supabase.from("posts").insert(payload).select("id, type, target_group").single();
+        if (insertError) throw insertError;
+        if (created) insertedPost = created as any;
+      }
 
       // Notify students when the teacher posts announcements or new assignments.
       if (
         isAdmin &&
+        !editId &&
         !assignmentId &&
         insertedPost &&
         (postType === "announcement" || postType === "assignment")
@@ -252,6 +338,10 @@ function WriteContent() {
         }
       }
 
+      const draftKey = assignmentId ? `write-draft-assignment-${assignmentId}` : "write-draft-main";
+      try {
+        localStorage.removeItem(draftKey);
+      } catch {}
       router.push("/");
     } catch {
       alert("Error al publicar");
@@ -278,8 +368,8 @@ function WriteContent() {
               </div>
             </div>
 
-            <button onClick={handlePublish} disabled={loading} className="publishBtn">
-              {assignmentId ? "📤 Entregar" : loading ? "Publicando..." : "Publicar"}
+            <button onClick={handlePublish} disabled={loading || loadingDraft} className="publishBtn">
+              {editId ? "Guardar cambios" : assignmentId ? "📤 Entregar" : loading ? "Publicando..." : "Publicar"}
             </button>
           </header>
 

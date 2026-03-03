@@ -273,6 +273,7 @@ export default function PostDetailPage() {
     : canSeeAllTaskReplies
       ? taskReplies
       : taskReplies.filter((reply) => reply.user_id === myId);
+  const canEditPost = Boolean(myId && (myId === post?.user_id || post?.profiles?.is_admin));
 
   const submitForumReply = async () => {
     if (!myId || !isForumAssignment || postingReply) return;
@@ -312,6 +313,22 @@ export default function PostDetailPage() {
       alert("No se pudo publicar la respuesta del foro.");
     } finally {
       setPostingReply(false);
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (!canEditPost) return;
+    const confirmText = prompt("Para borrar este post escribe BORRAR");
+    if ((confirmText || "").trim().toUpperCase() !== "BORRAR") return;
+    try {
+      if (isRootAssignment) {
+        await supabase.from("posts").delete().eq("parent_assignment_id", Number(postId));
+      }
+      const { error } = await supabase.from("posts").delete().eq("id", Number(postId));
+      if (error) throw error;
+      router.push("/");
+    } catch {
+      alert("No se pudo borrar el post.");
     }
   };
 
@@ -547,6 +564,12 @@ export default function PostDetailPage() {
                 <div className="sideActions">
                   <Link href={`/profile/${post.user_id}`} className="pillLink">Ver perfil</Link>
                   <Link href="/write" className="pillLink">Escribir nuevo post</Link>
+                  {canEditPost && <Link href={`/write?edit_id=${post.id}`} className="pillLink">Editar post</Link>}
+                  {canEditPost && (
+                    <button type="button" onClick={handleDeletePost} className="pillDangerBtn">
+                      Borrar post
+                    </button>
+                  )}
                 </div>
               </section>
             </aside>
@@ -1041,6 +1064,20 @@ export default function PostDetailPage() {
         }
         .pillLink:hover {
           background: #fafafa;
+        }
+        .pillDangerBtn {
+          border: 1px solid #fecaca;
+          border-radius: 12px;
+          padding: 10px 12px;
+          background: #fff;
+          color: #b91c1c;
+          text-align: left;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .pillDangerBtn:hover {
+          background: #fff5f5;
         }
 
         @media (min-width: 980px) {

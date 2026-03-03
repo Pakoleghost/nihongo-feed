@@ -25,6 +25,18 @@ type ActorPreview = {
   avatar_url: string | null;
 };
 
+type DisplayNotifItem = {
+  key: string;
+  notif: NotificationRow;
+  isSignup: boolean;
+  isLike: boolean;
+  targetUserId: string | null;
+  actor: ActorPreview | null;
+  clickableHref: string | null;
+  likeMessage?: string;
+  sourceNotifId: number;
+};
+
 const isSignupNotification = (n: NotificationRow) =>
   (n.message || "").toLowerCase().includes("registro");
 
@@ -296,6 +308,68 @@ export default function NotificationsPage() {
     );
   }
 
+  const buildLikeSummary = (names: string[]) => {
+    if (names.length === 0) return "A varios usuarios les gustó tu publicación";
+    if (names.length === 1) return `@${names[0]} le gustó tu publicación`;
+    if (names.length === 2) return `@${names[0]} y @${names[1]} les gustó tu publicación`;
+    return `@${names[0]} y ${names.length - 1} más les gustó tu publicación`;
+  };
+
+  const displayItems: DisplayNotifItem[] = [];
+  const groupedLikes = new Map<string, NotificationRow[]>();
+  notifications.forEach((n) => {
+    if (isLikeNotification(n)) {
+      const pid = getPostIdFromNotification(n);
+      if (pid) {
+        const list = groupedLikes.get(pid) || [];
+        list.push(n);
+        groupedLikes.set(pid, list);
+        return;
+      }
+    }
+    const isSignup = isSignupNotification(n);
+    displayItems.push({
+      key: `notif-${n.id}`,
+      notif: n,
+      isSignup,
+      isLike: isLikeNotification(n),
+      targetUserId: getUserIdFromLink(n.link),
+      actor: actorsByNotifId[n.id] || null,
+      clickableHref: isSignup ? null : n.post_id != null ? `/post/${n.post_id}` : n.link || null,
+      sourceNotifId: n.id,
+    });
+  });
+
+  groupedLikes.forEach((rows, postId) => {
+    const sorted = [...rows].sort(
+      (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime(),
+    );
+    const names = Array.from(
+      new Set(
+        sorted
+          .map((r) => actorsByNotifId[r.id]?.username || null)
+          .filter((v): v is string => Boolean(v)),
+      ),
+    );
+    const first = sorted[0];
+    const actor = (sorted.map((r) => actorsByNotifId[r.id]).find(Boolean) as ActorPreview | undefined) || null;
+    displayItems.push({
+      key: `like-group-${postId}`,
+      notif: { ...first, is_read: sorted.every((r) => Boolean(r.is_read)) },
+      isSignup: false,
+      isLike: true,
+      targetUserId: null,
+      actor,
+      clickableHref: `/post/${postId}`,
+      likeMessage: buildLikeSummary(names),
+      sourceNotifId: first.id,
+    });
+  });
+
+  displayItems.sort(
+    (a, b) => new Date(b.notif.created_at || 0).getTime() - new Date(a.notif.created_at || 0).getTime(),
+  );
+
   return (
     <div
       style={{
@@ -381,7 +455,7 @@ export default function NotificationsPage() {
           </div>
         </header>
 
-        {notifications.length === 0 ? (
+        {displayItems.length === 0 ? (
           <section
             style={{
               borderRadius: 12,
@@ -414,22 +488,19 @@ export default function NotificationsPage() {
           </section>
         ) : (
           <div style={{ display: "grid", gap: 12 }}>
-            {notifications.map((n) => {
-              const isSignup = isSignupNotification(n);
-              const isLike = isLikeNotification(n);
-              const targetUserId = getUserIdFromLink(n.link);
-              const actor = actorsByNotifId[n.id];
-              const clickableHref = isSignup
-                ? null
-                : n.post_id != null
-                  ? `/post/${n.post_id}`
-                  : n.link || null;
+            {displayItems.map((item) => {
+              const { notif: n } = item;
+              const isSignup = item.isSignup;
+              const isLike = item.isLike;
+              const targetUserId = item.targetUserId;
+              const actor = item.actor;
+              const clickableHref = item.clickableHref;
               const clickable = Boolean(clickableHref);
               const actorProfileHref = actor?.id ? `/profile/${actor.id}` : null;
 
               return (
                 <div
-                  key={n.id}
+                  key={item.key}
                   onClick={() => clickable && router.push(clickableHref!)}
                   onKeyDown={(e) => {
                     if (!clickable) return;
@@ -498,7 +569,7 @@ export default function NotificationsPage() {
 
                       {isLike && actor ? (
                         <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "#222" }}>
-                          {actorProfileHref ? (
+                          {item.likeMessage && actorProfileHref ? (
                             <Link
                               href={actorProfileHref}
                               onClick={(e) => e.stopPropagation()}
@@ -510,10 +581,14 @@ export default function NotificationsPage() {
                             >
                               @{actor.username || "usuario"}
                             </Link>
+                          ) : item.likeMessage ? (
+                            <strong>@{actor.username || "usuario"}</strong>
                           ) : (
                             <strong>@{actor.username || "usuario"}</strong>
                           )}{" "}
-                          le gustó tu publicación
+                          {item.likeMessage
+                            ? item.likeMessage.replace(/^@\S+\s*/, "").trim()
+                            : "le gustó tu publicación"}
                         </p>
                       ) : (
                         <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: "#222" }}>
@@ -535,7 +610,7 @@ export default function NotificationsPage() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              void approveUser(n.id, targetUserId);
+                              void approveUser(item.sourceNotifId, targetUserId);
                             }}
                             style={{
                               background: "#2cb696",
