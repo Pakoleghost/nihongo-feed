@@ -191,6 +191,7 @@ export default function StudentProfilePage() {
           justify-content: space-between;
           align-items: center;
           gap: 8px;
+          flex-wrap: wrap;
         }
         .topActionsV2 {
           display: flex;
@@ -202,16 +203,16 @@ export default function StudentProfilePage() {
           background: #fff;
           color: #222;
           border-radius: 999px;
-          padding: 8px 12px;
-          font-size: 13px;
+          padding: 7px 11px;
+          font-size: 12px;
           text-decoration: none;
         }
         .primaryPillV2 {
           text-decoration: none;
           color: #fff;
           border-radius: 999px;
-          padding: 9px 14px;
-          font-size: 13px;
+          padding: 8px 12px;
+          font-size: 12px;
           font-weight: 700;
           background: linear-gradient(135deg,#34c5a6,#25a98f);
           box-shadow: 0 8px 18px rgba(44,182,150,.2);
@@ -260,21 +261,23 @@ export default function StudentProfilePage() {
         }
         .heroInfoV2 h1 {
           margin: 2px 0 0;
-          font-size: 34px;
+          font-size: clamp(24px, 4vw, 34px);
           line-height: 1.1;
           letter-spacing: -.02em;
           color: #111114;
+          overflow-wrap: anywhere;
         }
         .heroInfoV2 p {
           margin: 6px 0 0;
           color: #72727c;
-          font-size: 14px;
+          font-size: 13px;
+          overflow-wrap: anywhere;
         }
         .bioV2 {
           margin: 14px 0 0;
           color: #1f2937;
-          font-size: 15px;
-          line-height: 1.6;
+          font-size: 14px;
+          line-height: 1.5;
         }
         .statsRowV2 {
           margin-top: 12px;
@@ -299,7 +302,7 @@ export default function StudentProfilePage() {
         .statV2 strong {
           margin-top: 2px;
           display: block;
-          font-size: 24px;
+          font-size: 20px;
           color: #111114;
           line-height: 1.1;
         }
@@ -312,7 +315,7 @@ export default function StudentProfilePage() {
         }
         .feedHeadV2 h2 {
           margin: 4px 0 0;
-          font-size: 22px;
+          font-size: 19px;
           line-height: 1.2;
           color: #111114;
         }
@@ -374,7 +377,7 @@ export default function StudentProfilePage() {
         }
         .rowTitleV2 {
           display: block;
-          font-size: 18px;
+          font-size: 16px;
           line-height: 1.3;
           letter-spacing: -.01em;
           font-weight: 800;
@@ -384,8 +387,8 @@ export default function StudentProfilePage() {
         }
         .rowPreviewV2 {
           margin: 6px 0 0;
-          font-size: 14px;
-          line-height: 1.6;
+          font-size: 13px;
+          line-height: 1.5;
           color: #656574;
           padding-right: 108px;
         }
@@ -408,10 +411,22 @@ export default function StudentProfilePage() {
         }
         @media (max-width: 740px) {
           .heroInfoV2 h1 {
-            font-size: 28px;
+            font-size: 22px;
           }
           .statsRowV2 {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          .profileTopV2 {
+            justify-content: flex-start;
+          }
+          .topActionsV2 {
+            width: 100%;
+            justify-content: flex-start;
+          }
+          .heroCardV2,
+          .feedCardV2 {
+            padding: 12px;
+            border-radius: 16px;
           }
           .rowTitleV2,
           .rowPreviewV2 {

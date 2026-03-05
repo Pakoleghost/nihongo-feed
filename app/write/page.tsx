@@ -396,7 +396,7 @@ function WriteContent() {
                       onClick={() => inlineImageInputRef.current?.click()}
                       disabled={inlineUploading || loading}
                     >
-                      {inlineUploading ? "Subiendo imagen…" : "+ Imagen en texto"}
+                      {inlineUploading ? "Subiendo…" : "Insertar Imagen en Texto"}
                     </button>
                     <input
                       ref={inlineImageInputRef}
@@ -415,7 +415,7 @@ function WriteContent() {
                   className="bodyTextarea"
                 />
                 <div className="bodyHelp">
-                  Puedes insertar imágenes dentro del texto con el botón de arriba. Se guardan como bloques entre párrafos.
+                  Este botón agrega una imagen dentro del texto, en la posición del cursor (entre párrafos).
                 </div>
               </div>
             </section>
@@ -435,13 +435,16 @@ function WriteContent() {
 
               <section className="sideCard">
                 <div className="sideHeader">
-                  <span className="eyebrow">Imagen</span>
+                  <span className="eyebrow">Imagen de Portada (Header)</span>
                   <span className="muted">{imageFile ? imageFile.name : "Opcional"}</span>
                 </div>
                 <label className="uploadBox">
                   <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} />
-                  <span>{imageFile ? "Cambiar imagen" : "Seleccionar imagen"}</span>
+                  <span>{imageFile ? "Cambiar portada" : "Seleccionar portada"}</span>
                 </label>
+                <p className="coverHelp">
+                  Esta imagen va arriba del post como portada. No se inserta en el cuerpo del texto.
+                </p>
                 {previewUrl && (
                   <div className="imagePreviewWrap">
                     <img src={previewUrl} alt="Preview" className="imagePreview" />
@@ -757,6 +760,12 @@ function WriteContent() {
           height: 180px;
           object-fit: cover;
           display: block;
+        }
+        .coverHelp {
+          margin: 8px 0 0;
+          color: #667085;
+          font-size: 12px;
+          line-height: 1.45;
         }
         .formGrid {
           display: grid;

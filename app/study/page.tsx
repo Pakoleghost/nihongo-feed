@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 type KanaPair = readonly [string, string];
@@ -10,6 +11,7 @@ type QuizMode = "particles" | "conjugation" | "vocab" | "kanji";
 type ConjType = "te" | "past" | "masu" | "dictionary" | "adj-negative" | "adj-past";
 type VerbKind = "ru" | "u" | "irregular";
 type AdjKind = "i" | "na";
+type KanaMode = "hiragana" | "katakana";
 
 type VocabCard = {
   id: string;
@@ -42,6 +44,17 @@ type QuizQuestion = {
   options: string[];
   correct: string;
   hint?: string;
+};
+
+type KanaScoreRow = {
+  user_id: string;
+  mode: KanaMode;
+  best_score: number;
+  updated_at?: string | null;
+  profiles?: {
+    username?: string | null;
+    full_name?: string | null;
+  } | null;
 };
 
 const LESSONS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -580,19 +593,26 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
 }
 
 export default function StudyPage() {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"kana" | "flashcards" | "quiz">("kana");
   const [userKey, setUserKey] = useState("anon");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  const [kanaSet, setKanaSet] = useState<"hiragana" | "katakana">("hiragana");
+  const [kanaSet, setKanaSet] = useState<KanaMode>("hiragana");
   const [kanaRunning, setKanaRunning] = useState(false);
   const [kanaTime, setKanaTime] = useState(60);
   const [kanaScore, setKanaScore] = useState(0);
-  const [kanaBest, setKanaBest] = useState(0);
+  const [kanaBestByMode, setKanaBestByMode] = useState<Record<KanaMode, number>>({ hiragana: 0, katakana: 0 });
+  const [kanaCountdown, setKanaCountdown] = useState<number | null>(null);
+  const [kanaPenalty, setKanaPenalty] = useState(0);
+  const [kanaLeaderboard, setKanaLeaderboard] = useState<Record<KanaMode, KanaScoreRow[]>>({ hiragana: [], katakana: [] });
+  const [leaderboardUnavailable, setLeaderboardUnavailable] = useState(false);
   const [kanaQuestion, setKanaQuestion] = useState<{ char: string; correct: string; options: string[] }>({
     char: "あ",
     correct: "a",
     options: ["a", "i", "u", "e"],
   });
+  const kanaRoundSubmittedRef = useRef(false);
 
   const [flashLesson, setFlashLesson] = useState<number>(1);
   const [flashIndex, setFlashIndex] = useState(0);
@@ -614,16 +634,22 @@ export default function StudyPage() {
     const boot = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       const key = user?.id || "anon";
+      setCurrentUserId(user?.id || null);
       setUserKey(key);
       try {
         const raw = localStorage.getItem(`study-srs-${key}`);
         if (raw) setSrsMap(JSON.parse(raw));
       } catch {}
       try {
-        const rawBest = localStorage.getItem(`study-kana-best-${key}`);
+        const rawBest = localStorage.getItem(`study-kana-best-map-${key}`);
         if (rawBest) {
-          const value = Number(rawBest);
-          if (!Number.isNaN(value) && value > 0) setKanaBest(value);
+          const parsed = JSON.parse(rawBest);
+          const hira = Number(parsed?.hiragana || 0);
+          const kata = Number(parsed?.katakana || 0);
+          setKanaBestByMode({
+            hiragana: Number.isNaN(hira) ? 0 : hira,
+            katakana: Number.isNaN(kata) ? 0 : kata,
+          });
         }
       } catch {}
     };
@@ -631,22 +657,37 @@ export default function StudyPage() {
   }, []);
 
   useEffect(() => {
-    if (!kanaRunning || kanaTime <= 0) return;
+    if (searchParams.get("kana") === "1") setActiveTab("kana");
+    if (searchParams.get("flashcards") === "1") setActiveTab("flashcards");
+    if (searchParams.get("quiz") === "1") setActiveTab("quiz");
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!kanaRunning || kanaTime <= 0 || kanaPenalty > 0 || kanaCountdown !== null) return;
     const timer = window.setTimeout(() => setKanaTime((v) => v - 1), 1000);
     return () => window.clearTimeout(timer);
-  }, [kanaRunning, kanaTime]);
+  }, [kanaRunning, kanaTime, kanaPenalty, kanaCountdown]);
 
   useEffect(() => {
     if (kanaTime <= 0) setKanaRunning(false);
   }, [kanaTime]);
 
   useEffect(() => {
-    if (kanaScore <= kanaBest) return;
-    setKanaBest(kanaScore);
-    try {
-      localStorage.setItem(`study-kana-best-${userKey}`, String(kanaScore));
-    } catch {}
-  }, [kanaScore, kanaBest, userKey]);
+    if (kanaCountdown === null) return;
+    if (kanaCountdown <= 0) {
+      setKanaCountdown(null);
+      setKanaRunning(true);
+      return;
+    }
+    const timer = window.setTimeout(() => setKanaCountdown((v) => (v == null ? null : v - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [kanaCountdown]);
+
+  useEffect(() => {
+    if (kanaPenalty <= 0) return;
+    const timer = window.setTimeout(() => setKanaPenalty((v) => Math.max(0, v - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [kanaPenalty]);
 
   const kanaPool = kanaSet === "hiragana" ? HIRAGANA : KATAKANA;
 
@@ -655,16 +696,63 @@ export default function StudyPage() {
     setKanaQuestion({ char, correct: romaji, options: romajiOptions(kanaPool, romaji) });
   };
 
+  const loadKanaLeaderboard = async () => {
+    const { data, error } = await supabase
+      .from("study_kana_scores")
+      .select("user_id, mode, best_score, updated_at, profiles:user_id (username, full_name)")
+      .order("best_score", { ascending: false })
+      .order("updated_at", { ascending: true })
+      .limit(200);
+
+    if (error) {
+      setLeaderboardUnavailable(true);
+      return;
+    }
+    const rows = (data || []) as KanaScoreRow[];
+    const hira = rows.filter((r) => r.mode === "hiragana").slice(0, 10);
+    const kata = rows.filter((r) => r.mode === "katakana").slice(0, 10);
+    setKanaLeaderboard({ hiragana: hira, katakana: kata });
+    setLeaderboardUnavailable(false);
+  };
+
+  const submitKanaScore = async (mode: KanaMode, score: number) => {
+    setKanaBestByMode((prev) => {
+      const next: Record<KanaMode, number> = { ...prev, [mode]: Math.max(prev[mode] || 0, score) };
+      try {
+        localStorage.setItem(`study-kana-best-map-${userKey}`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    if (!currentUserId) return;
+    const { error } = await supabase.from("study_kana_scores").upsert(
+      { user_id: currentUserId, mode, best_score: score },
+      { onConflict: "user_id,mode" },
+    );
+    if (error) {
+      setLeaderboardUnavailable(true);
+      return;
+    }
+    await loadKanaLeaderboard();
+  };
+
   const startKana = () => {
-    setKanaRunning(true);
+    setKanaRunning(false);
     setKanaTime(60);
     setKanaScore(0);
+    setKanaPenalty(0);
+    setKanaCountdown(3);
+    kanaRoundSubmittedRef.current = false;
     createKanaQuestion();
   };
 
   const answerKana = (choice: string) => {
-    if (!kanaRunning) return;
-    if (choice === kanaQuestion.correct) setKanaScore((v) => v + 1);
+    if (!kanaRunning || kanaPenalty > 0 || kanaCountdown !== null || kanaTime <= 0) return;
+    if (choice === kanaQuestion.correct) {
+      setKanaScore((v) => v + 1);
+    } else {
+      setKanaPenalty(2);
+    }
     createKanaQuestion();
   };
 
@@ -747,6 +835,17 @@ export default function StudyPage() {
   const hasVerbInSelectedLessons = ALL_VERBS.some((v) => quizLessons.includes(v.lesson));
   const hasAdjInSelectedLessons = ALL_ADJECTIVES.some((a) => quizLessons.includes(a.lesson));
   const activeConjTypes: ConjType[] = conjTypes.length > 0 ? [...conjTypes] : ["te"];
+
+  useEffect(() => {
+    void loadKanaLeaderboard();
+  }, []);
+
+  useEffect(() => {
+    if (kanaTime > 0) return;
+    if (kanaRoundSubmittedRef.current) return;
+    kanaRoundSubmittedRef.current = true;
+    void submitKanaScore(kanaSet, kanaScore);
+  }, [kanaTime, kanaSet, kanaScore, currentUserId]);
 
   useEffect(() => {
     if (quizMode !== "conjugation") return;
@@ -901,21 +1000,93 @@ export default function StudyPage() {
                 <button type="button" onClick={() => setKanaSet("katakana")} style={{ border: 0, borderRadius: 999, padding: "6px 10px", background: kanaSet === "katakana" ? "#111114" : "transparent", color: kanaSet === "katakana" ? "#fff" : "#666" }}>Katakana</button>
               </div>
             </div>
-            <p style={{ color: "#6b7280", fontSize: 14 }}>60 segundos. Elige la romanización correcta (4 opciones).</p>
+            <p style={{ color: "#6b7280", fontSize: 14 }}>60 segundos. Elige la romanización correcta. Error = penalización de 2 segundos.</p>
             <div style={{ marginTop: 8, height: 7, borderRadius: 999, background: "#ecedf1", overflow: "hidden" }}>
               <div style={{ height: "100%", width: `${kanaTimePct}%`, background: "linear-gradient(90deg, #34c5a6, #25a98f)" }} />
             </div>
-            <div style={{ display: "grid", placeItems: "center", margin: "20px 0" }}>
-              <div style={{ fontSize: 80, fontWeight: 800, lineHeight: 1 }}>{kanaQuestion.char}</div>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 8 }}>
-              {kanaQuestion.options.map((op) => (
-                <button key={op} type="button" onClick={() => answerKana(op)} disabled={!kanaRunning} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 12, background: "#fff", padding: "10px 12px", fontSize: 16, fontWeight: 700, cursor: kanaRunning ? "pointer" : "not-allowed", opacity: kanaRunning ? 1 : .6 }}>{op}</button>
-              ))}
-            </div>
-            <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <div style={{ color: "#374151", fontWeight: 700 }}>Tiempo: {kanaTime}s · Score: {kanaScore} · Mejor: {kanaBest}</div>
-              <button type="button" onClick={startKana} style={{ border: 0, borderRadius: 999, background: "#111114", color: "#fff", padding: "8px 12px", fontWeight: 700 }}>{kanaRunning ? "Reiniciar" : "Iniciar"}</button>
+            <div style={{ marginTop: 12, display: "grid", gap: 12, gridTemplateColumns: "minmax(0,1fr)", alignItems: "start" }}>
+              <div style={{ border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, padding: 14, background: "linear-gradient(145deg,#ffffff,#f8fafc)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  <div style={{ color: "#374151", fontWeight: 700 }}>Tiempo: {kanaTime}s · Score: {kanaScore} · Mejor: {kanaBestByMode[kanaSet] || 0}</div>
+                  <button
+                    type="button"
+                    onClick={startKana}
+                    style={{
+                      border: 0,
+                      borderRadius: 999,
+                      background: "linear-gradient(135deg,#34c5a6,#25a98f)",
+                      color: "#fff",
+                      padding: "10px 18px",
+                      fontWeight: 800,
+                      fontSize: 14,
+                      boxShadow: "0 10px 18px rgba(44,182,150,.22)",
+                    }}
+                  >
+                    Iniciar Sprint
+                  </button>
+                </div>
+                <div style={{ display: "grid", placeItems: "center", margin: "22px 0 18px", minHeight: 118 }}>
+                  {kanaCountdown !== null ? (
+                    <div style={{ fontSize: 70, fontWeight: 900, lineHeight: 1, color: "#111114" }}>{kanaCountdown > 0 ? kanaCountdown : "GO!"}</div>
+                  ) : (
+                    <div style={{ fontSize: 88, fontWeight: 900, lineHeight: 1, color: "#111114" }}>{kanaQuestion.char}</div>
+                  )}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 10 }}>
+                  {kanaQuestion.options.map((op) => (
+                    <button
+                      key={op}
+                      type="button"
+                      onClick={() => answerKana(op)}
+                      disabled={!kanaRunning || kanaCountdown !== null || kanaPenalty > 0 || kanaTime <= 0}
+                      style={{
+                        border: "1px solid rgba(17,17,20,.1)",
+                        borderRadius: 14,
+                        background: "#fff",
+                        padding: "14px 14px",
+                        fontSize: 24,
+                        fontWeight: 800,
+                        cursor: kanaRunning && kanaCountdown === null && kanaPenalty === 0 && kanaTime > 0 ? "pointer" : "not-allowed",
+                        opacity: kanaRunning && kanaCountdown === null && kanaPenalty === 0 && kanaTime > 0 ? 1 : .55,
+                      }}
+                    >
+                      {op}
+                    </button>
+                  ))}
+                </div>
+                {kanaPenalty > 0 && (
+                  <div style={{ marginTop: 12, color: "#b42318", fontWeight: 800, fontSize: 13 }}>
+                    Penalización: espera {kanaPenalty}s antes de responder.
+                  </div>
+                )}
+              </div>
+
+              <div style={{ border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, padding: 12, background: "#fff" }}>
+                <div style={{ fontSize: 12, letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 800, color: "#7c7c85" }}>Leaderboard Kana</div>
+                {leaderboardUnavailable && (
+                  <p style={{ margin: "8px 0 0", fontSize: 12, color: "#b42318" }}>Leaderboard temporalmente no disponible.</p>
+                )}
+                <div style={{ marginTop: 10, display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))" }}>
+                  {(["hiragana", "katakana"] as KanaMode[]).map((mode) => (
+                    <div key={mode} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: 10, background: "#fbfbfc" }}>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: "#111114", marginBottom: 8, textTransform: "capitalize" }}>{mode}</div>
+                      <div style={{ display: "grid", gap: 6 }}>
+                        {(kanaLeaderboard[mode] || []).map((row, index) => (
+                          <div key={`${mode}-${row.user_id}-${index}`} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 13 }}>
+                            <span style={{ color: "#344054", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              #{index + 1} {row.profiles?.username || row.profiles?.full_name || "usuario"}
+                            </span>
+                            <strong style={{ color: "#111114" }}>{row.best_score}</strong>
+                          </div>
+                        ))}
+                        {(kanaLeaderboard[mode] || []).length === 0 && (
+                          <div style={{ color: "#98a2b3", fontSize: 12 }}>Sin puntajes todavía.</div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </section>
         )}

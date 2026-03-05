@@ -91,7 +91,6 @@ export default function HomePage() {
   const [refreshing, setRefreshing] = useState(false);
   const [hasFreshPosts, setHasFreshPosts] = useState(false);
   const [feedMode, setFeedMode] = useState<"all" | "tasks">("all");
-  const [searchText, setSearchText] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [fontScale, setFontScale] = useState<"normal" | "large">("normal");
   const [submissionByAssignment, setSubmissionByAssignment] = useState<Record<string, { submitted: boolean; late: boolean }>>({});
@@ -184,11 +183,21 @@ export default function HomePage() {
     setMyProfile(prof || null);
 
     if (prof?.is_approved || prof?.is_admin) {
+      const PAGE_SIZE = 24;
       setPosts([]);
       setAllFeedRows([]);
       setLastCursor(null);
       setHasMore(true);
-      await fetchPostsBatch({ reset: true, userId: user.id });
+      const { data: firstPage } = await supabase
+        .from("posts")
+        .select(`*, profiles:user_id (username, avatar_url, group_name, is_admin), parent:parent_assignment_id (id, assignment_subtype, is_forum, target_group)`)
+        .order("created_at", { ascending: false })
+        .limit(PAGE_SIZE);
+      const initialRows = firstPage || [];
+      setPosts(initialRows);
+      const initialCursor = initialRows.length > 0 ? initialRows[initialRows.length - 1].created_at || null : null;
+      setLastCursor(initialCursor);
+      setHasMore(initialRows.length === PAGE_SIZE);
       setHasFreshPosts(false);
 
       const { data: feedRows } = await supabase
@@ -237,9 +246,11 @@ export default function HomePage() {
     inFlightRef.current = false;
     setLoading(false);
     setRefreshing(false);
-  }, [router, fetchPostsBatch, currentUserId]);
+  }, [router]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
 
   useEffect(() => {
     if (!myProfile || myProfile.is_approved || myProfile.is_admin) return;
@@ -360,18 +371,6 @@ export default function HomePage() {
   const isTaskPost = (p: any) =>
     p?.type === "assignment" || Boolean(p?.parent_assignment_id);
 
-  const matchesSearch = (p: any) => {
-    const q = searchText.trim().toLowerCase();
-    if (!q) return true;
-    const parts = getPostParts(p?.content || "");
-    const author = String(p?.profiles?.username || "").toLowerCase();
-    return (
-      parts.title.toLowerCase().includes(q) ||
-      parts.preview.toLowerCase().includes(q) ||
-      author.includes(q)
-    );
-  };
-
   const pinnedAnnouncements = feedMode === "tasks"
     ? pinnedAnnouncementsBase.filter((p) => p.type === "assignment")
     : pinnedAnnouncementsBase;
@@ -379,7 +378,7 @@ export default function HomePage() {
   const regularFeedRaw = feedMode === "tasks"
     ? regularFeedBase.filter((p) => isTaskPost(p))
     : regularFeedBase;
-  const regularFeed = regularFeedRaw.filter((p) => matchesSearch(p));
+  const regularFeed = regularFeedRaw;
   const totalFeedCount = feedMode === "tasks"
     ? totalRegularFeedBase.filter((p) => isTaskPost(p)).length
     : totalRegularFeedBase.length;
@@ -430,12 +429,6 @@ export default function HomePage() {
             <div style={{ fontSize: "12px", color: "#777", background: "#f6f7f8", border: "1px solid rgba(17,17,20,.06)", borderRadius: "999px", padding: "6px 10px", fontWeight: 600 }}>
               {refreshing ? "actualizando..." : `${totalFeedCount} posts`}
             </div>
-            <input
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              placeholder="Buscar en feed..."
-              style={{ flex: "1 1 220px", minWidth: 180, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: "8px 12px", fontSize: 13, outline: "none", background: "#fff" }}
-            />
             <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3, background: "#fff" }}>
               <button
                 type="button"
@@ -470,6 +463,22 @@ export default function HomePage() {
                 Tareas
               </button>
             </div>
+            <Link href="/study" style={{ textDecoration: "none", color: "#0f766e", background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: 999, padding: "7px 10px", fontSize: 12, fontWeight: 800 }}>
+              Estudio
+            </Link>
+          </div>
+        </section>
+
+        <section style={{ margin: "0 14px 12px", padding: "14px 16px", borderRadius: 16, border: "1px solid rgba(17,17,20,.07)", background: "linear-gradient(140deg,#f7fffc,#ffffff)", boxShadow: "0 10px 24px rgba(0,0,0,.03)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 11, letterSpacing: ".08em", textTransform: "uppercase", color: "#0f766e", fontWeight: 800 }}>Estudio activo</div>
+              <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "#111114", letterSpacing: "-.01em" }}>Kana Sprint, Flashcards y Quiz</div>
+              <p style={{ margin: "6px 0 0", color: "#667085", fontSize: 13 }}>Practica diario con seguimiento y leaderboard.</p>
+            </div>
+            <Link href="/study?kana=1" style={{ textDecoration: "none", background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", borderRadius: 999, padding: "9px 14px", fontSize: 13, fontWeight: 800, whiteSpace: "nowrap", boxShadow: "0 8px 18px rgba(44,182,150,.2)" }}>
+              Entrar a Estudio
+            </Link>
           </div>
         </section>
 
