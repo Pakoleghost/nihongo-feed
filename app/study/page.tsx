@@ -614,6 +614,7 @@ function StudyContent() {
     options: ["a", "i", "u", "e"],
   });
   const kanaRoundSubmittedRef = useRef(false);
+  const pendingKanaSubmitRef = useRef<{ mode: KanaMode; score: number } | null>(null);
 
   const [flashLesson, setFlashLesson] = useState<number>(1);
   const [flashIndex, setFlashIndex] = useState(0);
@@ -725,9 +726,13 @@ function StudyContent() {
       return next;
     });
 
-    if (!currentUserId) return;
+    if (!currentUserId) {
+      pendingKanaSubmitRef.current = { mode, score };
+      return;
+    }
+    const safeBestScore = Math.max(score, kanaBestByMode[mode] || 0);
     const { error } = await supabase.from("study_kana_scores").upsert(
-      { user_id: currentUserId, mode, best_score: score },
+      { user_id: currentUserId, mode, best_score: safeBestScore, updated_at: new Date().toISOString() },
       { onConflict: "user_id,mode" },
     );
     if (error) {
@@ -738,6 +743,10 @@ function StudyContent() {
   };
 
   const startKana = () => {
+    if ((kanaRunning || kanaTime < 60) && kanaScore > 0 && !kanaRoundSubmittedRef.current) {
+      kanaRoundSubmittedRef.current = true;
+      void submitKanaScore(kanaSet, kanaScore);
+    }
     setKanaRunning(false);
     setKanaTime(60);
     setKanaScore(0);
@@ -842,11 +851,19 @@ function StudyContent() {
   }, []);
 
   useEffect(() => {
+    if (!currentUserId) return;
+    const pending = pendingKanaSubmitRef.current;
+    if (!pending) return;
+    pendingKanaSubmitRef.current = null;
+    void submitKanaScore(pending.mode, pending.score);
+  }, [currentUserId]);
+
+  useEffect(() => {
     if (kanaTime > 0) return;
     if (kanaRoundSubmittedRef.current) return;
     kanaRoundSubmittedRef.current = true;
     void submitKanaScore(kanaSet, kanaScore);
-  }, [kanaTime, kanaSet, kanaScore, currentUserId]);
+  }, [kanaTime, kanaSet, kanaScore, currentUserId, kanaBestByMode]);
 
   useEffect(() => {
     if (quizMode !== "conjugation") return;
