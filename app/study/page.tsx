@@ -58,6 +58,16 @@ type KanaScoreRow = {
   } | null;
 };
 
+type StudyView = "kana" | "flashcards" | "quiz";
+
+type SrsCardState = {
+  dueAt: number;
+  intervalDays: number;
+  ease: number;
+  reps: number;
+  lapses: number;
+};
+
 const LESSONS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 const HIRAGANA: KanaPair[] = [
@@ -282,9 +292,188 @@ const EXTRA_ADJECTIVES: AdjEntry[] = [
   { lesson: 12, jp: "重要", kana: "じゅうよう", es: "importante", kind: "na" },
 ];
 
-const ALL_GENKI_VOCAB: VocabCard[] = [...GENKI_VOCAB, ...EXTRA_GENKI_VOCAB];
+const GENKI_SUPPLEMENTAL_VOCAB: Array<Omit<VocabCard, "id">> = [
+  { lesson: 1, jp: "高校", kana: "こうこう", es: "preparatoria", kanji: "高校" },
+  { lesson: 1, jp: "大学院生", kana: "だいがくいんせい", es: "estudiante de posgrado", kanji: "大学院生" },
+  { lesson: 1, jp: "一年生", kana: "いちねんせい", es: "estudiante de primer año", kanji: "一年生" },
+  { lesson: 1, jp: "二年生", kana: "にねんせい", es: "estudiante de segundo año", kanji: "二年生" },
+  { lesson: 1, jp: "三年生", kana: "さんねんせい", es: "estudiante de tercer año", kanji: "三年生" },
+  { lesson: 1, jp: "四年生", kana: "よねんせい", es: "estudiante de cuarto año", kanji: "四年生" },
+  { lesson: 1, jp: "国際関係", kana: "こくさいかんけい", es: "relaciones internacionales", kanji: "国際関係" },
+  { lesson: 1, jp: "文学", kana: "ぶんがく", es: "literatura", kanji: "文学" },
+  { lesson: 1, jp: "歴史", kana: "れきし", es: "historia", kanji: "歴史" },
+  { lesson: 1, jp: "科学", kana: "かがく", es: "ciencia", kanji: "科学" },
+  { lesson: 2, jp: "えんぴつ", kana: "えんぴつ", es: "lápiz" },
+  { lesson: 2, jp: "かさ", kana: "かさ", es: "paraguas" },
+  { lesson: 2, jp: "財布", kana: "さいふ", es: "cartera", kanji: "財布" },
+  { lesson: 2, jp: "鍵", kana: "かぎ", es: "llave", kanji: "鍵" },
+  { lesson: 2, jp: "辞書", kana: "じしょ", es: "diccionario", kanji: "辞書" },
+  { lesson: 2, jp: "新聞", kana: "しんぶん", es: "periódico", kanji: "新聞" },
+  { lesson: 2, jp: "ノート", kana: "ノート", es: "cuaderno" },
+  { lesson: 2, jp: "ボールペン", kana: "ボールペン", es: "bolígrafo" },
+  { lesson: 2, jp: "シャツ", kana: "シャツ", es: "camisa" },
+  { lesson: 2, jp: "靴", kana: "くつ", es: "zapatos", kanji: "靴" },
+  { lesson: 2, jp: "テレビ", kana: "テレビ", es: "televisión" },
+  { lesson: 2, jp: "いくら", kana: "いくら", es: "cuánto" },
+  { lesson: 3, jp: "朝ごはん", kana: "あさごはん", es: "desayuno", kanji: "朝ご飯" },
+  { lesson: 3, jp: "昼ごはん", kana: "ひるごはん", es: "comida", kanji: "昼ご飯" },
+  { lesson: 3, jp: "晩ごはん", kana: "ばんごはん", es: "cena", kanji: "晩ご飯" },
+  { lesson: 3, jp: "今", kana: "いま", es: "ahora", kanji: "今" },
+  { lesson: 3, jp: "半", kana: "はん", es: "media (hora)" },
+  { lesson: 3, jp: "毎朝", kana: "まいあさ", es: "cada mañana", kanji: "毎朝" },
+  { lesson: 3, jp: "毎晩", kana: "まいばん", es: "cada noche", kanji: "毎晩" },
+  { lesson: 3, jp: "毎週", kana: "まいしゅう", es: "cada semana", kanji: "毎週" },
+  { lesson: 3, jp: "土曜日", kana: "どようび", es: "sábado", kanji: "土曜日" },
+  { lesson: 3, jp: "日曜日", kana: "にちようび", es: "domingo", kanji: "日曜日" },
+  { lesson: 3, jp: "友だち", kana: "ともだち", es: "amigo", kanji: "友達" },
+  { lesson: 3, jp: "家に帰る", kana: "うちにかえる", es: "regresar a casa", kanji: "家に帰る" },
+  { lesson: 4, jp: "朝", kana: "あさ", es: "mañana", kanji: "朝" },
+  { lesson: 4, jp: "昼", kana: "ひる", es: "mediodía", kanji: "昼" },
+  { lesson: 4, jp: "夜", kana: "よる", es: "noche", kanji: "夜" },
+  { lesson: 4, jp: "昨日", kana: "きのう", es: "ayer", kanji: "昨日" },
+  { lesson: 4, jp: "今日", kana: "きょう", es: "hoy", kanji: "今日" },
+  { lesson: 4, jp: "明日", kana: "あした", es: "mañana", kanji: "明日" },
+  { lesson: 4, jp: "先月", kana: "せんげつ", es: "mes pasado", kanji: "先月" },
+  { lesson: 4, jp: "今月", kana: "こんげつ", es: "este mes", kanji: "今月" },
+  { lesson: 4, jp: "来月", kana: "らいげつ", es: "mes siguiente", kanji: "来月" },
+  { lesson: 4, jp: "電車", kana: "でんしゃ", es: "tren", kanji: "電車" },
+  { lesson: 4, jp: "バイト", kana: "バイト", es: "trabajo de medio tiempo" },
+  { lesson: 4, jp: "図書館", kana: "としょかん", es: "biblioteca", kanji: "図書館" },
+  { lesson: 5, jp: "町", kana: "まち", es: "pueblo/ciudad", kanji: "町" },
+  { lesson: 5, jp: "神社", kana: "じんじゃ", es: "santuario", kanji: "神社" },
+  { lesson: 5, jp: "喫茶店", kana: "きっさてん", es: "cafetería", kanji: "喫茶店" },
+  { lesson: 5, jp: "病院", kana: "びょういん", es: "hospital", kanji: "病院" },
+  { lesson: 5, jp: "ホテル", kana: "ホテル", es: "hotel" },
+  { lesson: 5, jp: "デパート", kana: "デパート", es: "tienda departamental" },
+  { lesson: 5, jp: "新しい", kana: "あたらしい", es: "nuevo", kanji: "新しい" },
+  { lesson: 5, jp: "古い", kana: "ふるい", es: "viejo", kanji: "古い" },
+  { lesson: 5, jp: "おもしろい", kana: "おもしろい", es: "interesante" },
+  { lesson: 5, jp: "にぎやか", kana: "にぎやか", es: "animado" },
+  { lesson: 5, jp: "親切", kana: "しんせつ", es: "amable", kanji: "親切" },
+  { lesson: 5, jp: "便利", kana: "べんり", es: "conveniente", kanji: "便利" },
+  { lesson: 6, jp: "ハンバーガー", kana: "ハンバーガー", es: "hamburguesa" },
+  { lesson: 6, jp: "パスタ", kana: "パスタ", es: "pasta" },
+  { lesson: 6, jp: "りんご", kana: "りんご", es: "manzana" },
+  { lesson: 6, jp: "卵", kana: "たまご", es: "huevo", kanji: "卵" },
+  { lesson: 6, jp: "牛肉", kana: "ぎゅうにく", es: "carne de res", kanji: "牛肉" },
+  { lesson: 6, jp: "豚肉", kana: "ぶたにく", es: "carne de cerdo", kanji: "豚肉" },
+  { lesson: 6, jp: "果物", kana: "くだもの", es: "fruta", kanji: "果物" },
+  { lesson: 6, jp: "野菜", kana: "やさい", es: "verduras", kanji: "野菜" },
+  { lesson: 6, jp: "お茶", kana: "おちゃ", es: "té", kanji: "お茶" },
+  { lesson: 6, jp: "紅茶", kana: "こうちゃ", es: "té negro", kanji: "紅茶" },
+  { lesson: 6, jp: "毎日", kana: "まいにち", es: "todos los días", kanji: "毎日" },
+  { lesson: 6, jp: "時々", kana: "ときどき", es: "a veces", kanji: "時々" },
+  { lesson: 7, jp: "家族", kana: "かぞく", es: "familia", kanji: "家族" },
+  { lesson: 7, jp: "兄弟", kana: "きょうだい", es: "hermanos", kanji: "兄弟" },
+  { lesson: 7, jp: "両親", kana: "りょうしん", es: "padres", kanji: "両親" },
+  { lesson: 7, jp: "母", kana: "はは", es: "madre", kanji: "母" },
+  { lesson: 7, jp: "父", kana: "ちち", es: "padre", kanji: "父" },
+  { lesson: 7, jp: "お兄さん", kana: "おにいさん", es: "hermano mayor (de otro)" },
+  { lesson: 7, jp: "お姉さん", kana: "おねえさん", es: "hermana mayor (de otro)" },
+  { lesson: 7, jp: "結婚", kana: "けっこん", es: "matrimonio", kanji: "結婚" },
+  { lesson: 7, jp: "会社員", kana: "かいしゃいん", es: "empleado de empresa", kanji: "会社員" },
+  { lesson: 7, jp: "高校生", kana: "こうこうせい", es: "estudiante de prepa", kanji: "高校生" },
+  { lesson: 7, jp: "お金", kana: "おかね", es: "dinero", kanji: "お金" },
+  { lesson: 7, jp: "プレゼント", kana: "プレゼント", es: "regalo" },
+  { lesson: 8, jp: "春", kana: "はる", es: "primavera", kanji: "春" },
+  { lesson: 8, jp: "夏", kana: "なつ", es: "verano", kanji: "夏" },
+  { lesson: 8, jp: "秋", kana: "あき", es: "otoño", kanji: "秋" },
+  { lesson: 8, jp: "冬", kana: "ふゆ", es: "invierno", kanji: "冬" },
+  { lesson: 8, jp: "天気", kana: "てんき", es: "clima", kanji: "天気" },
+  { lesson: 8, jp: "暑い", kana: "あつい", es: "caluroso", kanji: "暑い" },
+  { lesson: 8, jp: "寒い", kana: "さむい", es: "frío", kanji: "寒い" },
+  { lesson: 8, jp: "暖かい", kana: "あたたかい", es: "templado", kanji: "暖かい" },
+  { lesson: 8, jp: "涼しい", kana: "すずしい", es: "fresco", kanji: "涼しい" },
+  { lesson: 8, jp: "晴れ", kana: "はれ", es: "soleado", kanji: "晴れ" },
+  { lesson: 8, jp: "曇り", kana: "くもり", es: "nublado", kanji: "曇り" },
+  { lesson: 8, jp: "雪", kana: "ゆき", es: "nieve", kanji: "雪" },
+  { lesson: 9, jp: "病気", kana: "びょうき", es: "enfermedad", kanji: "病気" },
+  { lesson: 9, jp: "風邪", kana: "かぜ", es: "resfriado", kanji: "風邪" },
+  { lesson: 9, jp: "薬", kana: "くすり", es: "medicina", kanji: "薬" },
+  { lesson: 9, jp: "熱", kana: "ねつ", es: "fiebre", kanji: "熱" },
+  { lesson: 9, jp: "頭", kana: "あたま", es: "cabeza", kanji: "頭" },
+  { lesson: 9, jp: "喉", kana: "のど", es: "garganta", kanji: "喉" },
+  { lesson: 9, jp: "お腹", kana: "おなか", es: "estómago", kanji: "お腹" },
+  { lesson: 9, jp: "痛い", kana: "いたい", es: "doler", kanji: "痛い" },
+  { lesson: 9, jp: "大丈夫", kana: "だいじょうぶ", es: "estar bien", kanji: "大丈夫" },
+  { lesson: 9, jp: "心配", kana: "しんぱい", es: "preocupación", kanji: "心配" },
+  { lesson: 9, jp: "忙しい", kana: "いそがしい", es: "ocupado", kanji: "忙しい" },
+  { lesson: 9, jp: "休み", kana: "やすみ", es: "descanso", kanji: "休み" },
+  { lesson: 10, jp: "駅", kana: "えき", es: "estación", kanji: "駅" },
+  { lesson: 10, jp: "道", kana: "みち", es: "camino", kanji: "道" },
+  { lesson: 10, jp: "地図", kana: "ちず", es: "mapa", kanji: "地図" },
+  { lesson: 10, jp: "右", kana: "みぎ", es: "derecha", kanji: "右" },
+  { lesson: 10, jp: "左", kana: "ひだり", es: "izquierda", kanji: "左" },
+  { lesson: 10, jp: "まっすぐ", kana: "まっすぐ", es: "derecho" },
+  { lesson: 10, jp: "角", kana: "かど", es: "esquina", kanji: "角" },
+  { lesson: 10, jp: "信号", kana: "しんごう", es: "semáforo", kanji: "信号" },
+  { lesson: 10, jp: "近い", kana: "ちかい", es: "cerca", kanji: "近い" },
+  { lesson: 10, jp: "遠い", kana: "とおい", es: "lejos", kanji: "遠い" },
+  { lesson: 10, jp: "郵便局", kana: "ゆうびんきょく", es: "oficina postal", kanji: "郵便局" },
+  { lesson: 10, jp: "銀行", kana: "ぎんこう", es: "banco", kanji: "銀行" },
+  { lesson: 11, jp: "旅行", kana: "りょこう", es: "viaje", kanji: "旅行" },
+  { lesson: 11, jp: "観光", kana: "かんこう", es: "turismo", kanji: "観光" },
+  { lesson: 11, jp: "神社", kana: "じんじゃ", es: "santuario", kanji: "神社" },
+  { lesson: 11, jp: "寺", kana: "てら", es: "templo", kanji: "寺" },
+  { lesson: 11, jp: "公園", kana: "こうえん", es: "parque", kanji: "公園" },
+  { lesson: 11, jp: "予約", kana: "よやく", es: "reserva", kanji: "予約" },
+  { lesson: 11, jp: "案内所", kana: "あんないじょ", es: "centro de información", kanji: "案内所" },
+  { lesson: 11, jp: "荷物", kana: "にもつ", es: "equipaje", kanji: "荷物" },
+  { lesson: 11, jp: "景色", kana: "けしき", es: "paisaje", kanji: "景色" },
+  { lesson: 11, jp: "有名", kana: "ゆうめい", es: "famoso", kanji: "有名" },
+  { lesson: 11, jp: "写真", kana: "しゃしん", es: "foto", kanji: "写真" },
+  { lesson: 11, jp: "思い出", kana: "おもいで", es: "recuerdo", kanji: "思い出" },
+  { lesson: 12, jp: "文化", kana: "ぶんか", es: "cultura", kanji: "文化" },
+  { lesson: 12, jp: "経験", kana: "けいけん", es: "experiencia", kanji: "経験" },
+  { lesson: 12, jp: "将来", kana: "しょうらい", es: "futuro", kanji: "将来" },
+  { lesson: 12, jp: "希望", kana: "きぼう", es: "esperanza", kanji: "希望" },
+  { lesson: 12, jp: "準備", kana: "じゅんび", es: "preparación", kanji: "準備" },
+  { lesson: 12, jp: "計画", kana: "けいかく", es: "plan", kanji: "計画" },
+  { lesson: 12, jp: "目標", kana: "もくひょう", es: "meta", kanji: "目標" },
+  { lesson: 12, jp: "意見", kana: "いけん", es: "opinión", kanji: "意見" },
+  { lesson: 12, jp: "発表", kana: "はっぴょう", es: "presentación", kanji: "発表" },
+  { lesson: 12, jp: "練習", kana: "れんしゅう", es: "práctica", kanji: "練習" },
+  { lesson: 12, jp: "約束", kana: "やくそく", es: "promesa", kanji: "約束" },
+  { lesson: 12, jp: "必要", kana: "ひつよう", es: "necesario", kanji: "必要" },
+];
+
+function dedupeVocab(cards: VocabCard[]) {
+  const byKey = new Map<string, VocabCard>();
+  cards.forEach((card) => {
+    const key = `${card.lesson}:${card.jp}:${card.kana}`;
+    if (!byKey.has(key)) byKey.set(key, card);
+  });
+  return Array.from(byKey.values());
+}
+
+const SUPPLEMENTAL_GENKI_VOCAB: VocabCard[] = GENKI_SUPPLEMENTAL_VOCAB.map((card, index) => ({
+  id: `supp-${card.lesson}-${index + 1}`,
+  ...card,
+}));
+
 const ALL_VERBS: VerbEntry[] = [...VERBS, ...EXTRA_VERBS];
 const ALL_ADJECTIVES: AdjEntry[] = [...ADJECTIVES, ...EXTRA_ADJECTIVES];
+const VERB_VOCAB: VocabCard[] = ALL_VERBS.map((card, index) => ({
+  id: `verb-${card.lesson}-${index + 1}`,
+  lesson: card.lesson,
+  jp: card.jp,
+  kana: card.kana,
+  es: card.es,
+}));
+const ADJ_VOCAB: VocabCard[] = ALL_ADJECTIVES.map((card, index) => ({
+  id: `adj-${card.lesson}-${index + 1}`,
+  lesson: card.lesson,
+  jp: card.jp,
+  kana: card.kana,
+  es: card.es,
+}));
+const ALL_GENKI_VOCAB: VocabCard[] = dedupeVocab([
+  ...GENKI_VOCAB,
+  ...EXTRA_GENKI_VOCAB,
+  ...SUPPLEMENTAL_GENKI_VOCAB,
+  ...VERB_VOCAB,
+  ...ADJ_VOCAB,
+]);
 
 const U_ENDINGS: Record<string, { masu: string; te: string; past: string }> = {
   "う": { masu: "います", te: "って", past: "った" },
@@ -593,9 +782,102 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
   return pickN(qs, count);
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function resolveStudyView(searchParams: Pick<URLSearchParams, "get">): StudyView | null {
+  const view = searchParams.get("view");
+  if (view === "kana" || view === "flashcards" || view === "quiz") return view;
+  if (searchParams.get("kana") === "1") return "kana";
+  if (searchParams.get("flashcards") === "1") return "flashcards";
+  if (searchParams.get("quiz") === "1") return "quiz";
+  return null;
+}
+
+function isSrsCardState(value: unknown): value is SrsCardState {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<SrsCardState>;
+  return (
+    typeof item.dueAt === "number" &&
+    typeof item.intervalDays === "number" &&
+    typeof item.ease === "number" &&
+    typeof item.reps === "number" &&
+    typeof item.lapses === "number"
+  );
+}
+
+function migrateSrsMap(raw: unknown): Record<string, SrsCardState> {
+  if (!raw || typeof raw !== "object") return {};
+  const now = Date.now();
+  const source = raw as Record<string, unknown>;
+  const next: Record<string, SrsCardState> = {};
+  Object.entries(source).forEach(([key, value]) => {
+    if (isSrsCardState(value)) {
+      next[key] = value;
+      return;
+    }
+    if (typeof value === "number") {
+      next[key] = {
+        dueAt: value,
+        intervalDays: 1,
+        ease: 2.3,
+        reps: value > now ? 1 : 0,
+        lapses: 0,
+      };
+    }
+  });
+  return next;
+}
+
+function getDefaultSrsState(): SrsCardState {
+  return { dueAt: 0, intervalDays: 0, ease: 2.3, reps: 0, lapses: 0 };
+}
+
+function gradeSrsCard(prevState: SrsCardState, quality: "again" | "hard" | "good"): SrsCardState {
+  const now = Date.now();
+  if (quality === "again") {
+    return {
+      dueAt: now + 15 * 60 * 1000,
+      intervalDays: 0.01,
+      ease: Math.max(1.3, prevState.ease - 0.2),
+      reps: 0,
+      lapses: prevState.lapses + 1,
+    };
+  }
+
+  if (quality === "hard") {
+    const reps = prevState.reps + 1;
+    const intervalDays = Math.max(1, Math.round(Math.max(1, prevState.intervalDays || 1) * 1.35));
+    return {
+      dueAt: now + intervalDays * DAY_MS,
+      intervalDays,
+      ease: Math.max(1.3, prevState.ease - 0.12),
+      reps,
+      lapses: prevState.lapses,
+    };
+  }
+
+  const reps = prevState.reps + 1;
+  const ease = Math.min(2.8, prevState.ease + 0.05);
+  const intervalDays =
+    reps <= 1
+      ? 1
+      : reps === 2
+        ? 3
+        : Math.max(4, Math.round(Math.max(1, prevState.intervalDays || 3) * ease));
+
+  return {
+    dueAt: now + intervalDays * DAY_MS,
+    intervalDays,
+    ease,
+    reps,
+    lapses: prevState.lapses,
+  };
+}
+
 function StudyContent() {
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<"kana" | "flashcards" | "quiz">("kana");
+  const selectedView = useMemo(() => resolveStudyView(searchParams), [searchParams]);
+  const [activeTab, setActiveTab] = useState<StudyView>("kana");
   const [userKey, setUserKey] = useState("anon");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -616,10 +898,11 @@ function StudyContent() {
   const kanaRoundSubmittedRef = useRef(false);
   const pendingKanaSubmitRef = useRef<{ mode: KanaMode; score: number } | null>(null);
 
-  const [flashLesson, setFlashLesson] = useState<number>(1);
+  const [flashLesson, setFlashLesson] = useState<number>(0);
   const [flashIndex, setFlashIndex] = useState(0);
   const [flashBack, setFlashBack] = useState(false);
-  const [srsMap, setSrsMap] = useState<Record<string, number>>({});
+  const [flashReviewMode, setFlashReviewMode] = useState(false);
+  const [srsMap, setSrsMap] = useState<Record<string, SrsCardState>>({});
 
   const [quizMode, setQuizMode] = useState<QuizMode>("particles");
   const [quizCount, setQuizCount] = useState<QuizCount>(10);
@@ -640,7 +923,7 @@ function StudyContent() {
       setUserKey(key);
       try {
         const raw = localStorage.getItem(`study-srs-${key}`);
-        if (raw) setSrsMap(JSON.parse(raw));
+        if (raw) setSrsMap(migrateSrsMap(JSON.parse(raw)));
       } catch {}
       try {
         const rawBest = localStorage.getItem(`study-kana-best-map-${key}`);
@@ -659,10 +942,12 @@ function StudyContent() {
   }, []);
 
   useEffect(() => {
-    if (searchParams.get("kana") === "1") setActiveTab("kana");
-    if (searchParams.get("flashcards") === "1") setActiveTab("flashcards");
-    if (searchParams.get("quiz") === "1") setActiveTab("quiz");
-  }, [searchParams]);
+    if (selectedView) {
+      setActiveTab(selectedView);
+      return;
+    }
+    setActiveTab("kana");
+  }, [selectedView]);
 
   useEffect(() => {
     if (!kanaRunning || kanaTime <= 0 || kanaPenalty > 0 || kanaCountdown !== null) return;
@@ -766,24 +1051,41 @@ function StudyContent() {
     createKanaQuestion();
   };
 
-  const flashDeck = useMemo(() => ALL_GENKI_VOCAB.filter((v) => v.lesson === flashLesson), [flashLesson]);
-  const dueDeck = useMemo(() => {
-    const now = Date.now();
-    const due = flashDeck.filter((c) => !srsMap[c.id] || srsMap[c.id] <= now);
-    return due.length > 0 ? due : flashDeck;
-  }, [flashDeck, srsMap]);
-
-  const flashCard = dueDeck[flashIndex % Math.max(1, dueDeck.length)];
-  const flashDueCount = useMemo(() => {
-    const now = Date.now();
-    return flashDeck.filter((c) => !srsMap[c.id] || srsMap[c.id] <= now).length;
-  }, [flashDeck, srsMap]);
-  const flashCurrentNumber = dueDeck.length > 0 ? (flashIndex % dueDeck.length) + 1 : 0;
+  const flashDeck = useMemo(() => {
+    const base = flashLesson === 0 ? ALL_GENKI_VOCAB : ALL_GENKI_VOCAB.filter((v) => v.lesson === flashLesson);
+    return [...base].sort((a, b) => (a.lesson === b.lesson ? a.kana.localeCompare(b.kana) : a.lesson - b.lesson));
+  }, [flashLesson]);
+  const flashNow = Date.now();
+  const flashNewDeck = useMemo(() => flashDeck.filter((card) => !srsMap[card.id]), [flashDeck, srsMap]);
+  const flashDueDeck = useMemo(
+    () => flashDeck.filter((card) => {
+      const state = srsMap[card.id];
+      return state ? state.dueAt <= flashNow : false;
+    }),
+    [flashDeck, srsMap, flashNow],
+  );
+  const flashLearningQueue = useMemo(() => [...flashDueDeck, ...flashNewDeck], [flashDueDeck, flashNewDeck]);
+  const flashQueue = flashReviewMode ? flashDeck : flashLearningQueue;
+  const flashCard = flashQueue[flashIndex % Math.max(1, flashQueue.length)];
+  const flashDueCount = flashDueDeck.length;
+  const flashNewCount = flashNewDeck.length;
+  const flashMasteredCount = useMemo(
+    () => flashDeck.filter((card) => (srsMap[card.id]?.intervalDays || 0) >= 21).length,
+    [flashDeck, srsMap],
+  );
+  const flashNextDueAt = useMemo(() => {
+    const dueValues = flashDeck
+      .map((card) => srsMap[card.id]?.dueAt || Number.POSITIVE_INFINITY)
+      .filter((dueAt) => dueAt > flashNow);
+    if (dueValues.length === 0) return null;
+    return Math.min(...dueValues);
+  }, [flashDeck, srsMap, flashNow]);
+  const flashCurrentNumber = flashQueue.length > 0 ? (flashIndex % flashQueue.length) + 1 : 0;
 
   const setSrs = (cardId: string, quality: "again" | "hard" | "good") => {
-    const days = quality === "again" ? 1 : quality === "hard" ? 3 : 7;
-    const next = Date.now() + days * 24 * 60 * 60 * 1000;
-    const nextMap = { ...srsMap, [cardId]: next };
+    const prevState = srsMap[cardId] || getDefaultSrsState();
+    const nextState = gradeSrsCard(prevState, quality);
+    const nextMap = { ...srsMap, [cardId]: nextState };
     setSrsMap(nextMap);
     try {
       localStorage.setItem(`study-srs-${userKey}`, JSON.stringify(nextMap));
@@ -796,6 +1098,11 @@ function StudyContent() {
     setFlashBack(false);
     setFlashIndex((v) => v + 1);
   };
+
+  useEffect(() => {
+    setFlashIndex(0);
+    setFlashBack(false);
+  }, [flashLesson, flashReviewMode]);
 
   const toggleLesson = (lesson: number) => {
     setQuizLessons((prev) => {
@@ -845,6 +1152,16 @@ function StudyContent() {
   const hasVerbInSelectedLessons = ALL_VERBS.some((v) => quizLessons.includes(v.lesson));
   const hasAdjInSelectedLessons = ALL_ADJECTIVES.some((a) => quizLessons.includes(a.lesson));
   const activeConjTypes: ConjType[] = conjTypes.length > 0 ? [...conjTypes] : ["te"];
+  const showHub = !selectedView;
+  const flashQueueEmpty = flashQueue.length === 0;
+
+  const pageMeta = selectedView
+    ? selectedView === "kana"
+      ? { title: "Kana Sprint", subtitle: "Entrena velocidad y precisión de hiragana/katakana." }
+      : selectedView === "flashcards"
+        ? { title: "Flashcards", subtitle: "Vocabulario completo por lección con SRS." }
+        : { title: "Quiz", subtitle: "Quizzes configurables para Genki I." }
+    : { title: "Study Lab", subtitle: "Selecciona una herramienta y practica por bloques." };
 
   useEffect(() => {
     void loadKanaLeaderboard();
@@ -997,19 +1314,41 @@ function StudyContent() {
         </header>
 
         <section style={{ background: "linear-gradient(145deg, #ffffff, #f7fffc)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 18, padding: 14 }}>
-          <h1 style={{ margin: 0, fontSize: 28, lineHeight: 1.1, letterSpacing: "-.02em" }}>Study Lab</h1>
+          <h1 style={{ margin: 0, fontSize: 28, lineHeight: 1.1, letterSpacing: "-.02em" }}>{pageMeta.title}</h1>
           <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 14, lineHeight: 1.5 }}>
-            Herramientas cortas y enfocadas para practicar Genki I: kana, flashcards SRS y quizzes configurables.
+            {pageMeta.subtitle}
           </p>
         </section>
 
-        <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 18, padding: 10, display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
-          <button type="button" onClick={() => setActiveTab("kana")} style={{ border: 0, borderRadius: 999, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: activeTab === "kana" ? "#fff" : "#61616e", background: activeTab === "kana" ? "#111114" : "#f3f4f6" }}>Kana Sprint</button>
-          <button type="button" onClick={() => setActiveTab("flashcards")} style={{ border: 0, borderRadius: 999, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: activeTab === "flashcards" ? "#fff" : "#61616e", background: activeTab === "flashcards" ? "#111114" : "#f3f4f6" }}>Flashcards</button>
-          <button type="button" onClick={() => setActiveTab("quiz")} style={{ border: 0, borderRadius: 999, padding: "8px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: activeTab === "quiz" ? "#fff" : "#61616e", background: activeTab === "quiz" ? "#111114" : "#f3f4f6" }}>QUIZ</button>
-        </section>
+        {!showHub && (
+          <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 14, padding: 10, display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
+            <Link href="/study?view=kana" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "kana" ? "#fff" : "#344054", background: activeTab === "kana" ? "#111114" : "#fff" }}>Kana Sprint</Link>
+            <Link href="/study?view=flashcards" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "flashcards" ? "#fff" : "#344054", background: activeTab === "flashcards" ? "#111114" : "#fff" }}>Flashcards</Link>
+            <Link href="/study?view=quiz" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "quiz" ? "#fff" : "#344054", background: activeTab === "quiz" ? "#111114" : "#fff" }}>Quiz</Link>
+          </section>
+        )}
 
-        {activeTab === "kana" && (
+        {showHub && (
+          <section style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
+            <Link href="/study?view=kana" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, background: "#fff", padding: 14 }}>
+              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Sprint</div>
+              <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Kana Sprint</div>
+              <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Hiragana/Katakana con timer, penalty y leaderboard.</p>
+            </Link>
+            <Link href="/study?view=flashcards" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, background: "#fff", padding: 14 }}>
+              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>SRS</div>
+              <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Flashcards</div>
+              <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Vocab Genki I por lección con repaso inteligente.</p>
+            </Link>
+            <Link href="/study?view=quiz" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, background: "#fff", padding: 14 }}>
+              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Custom</div>
+              <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Quiz</div>
+              <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Partículas, conjugación, vocab y kanji.</p>
+            </Link>
+          </section>
+        )}
+
+        {!showHub && activeTab === "kana" && (
           <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: 24 }}>Kana Sprint</h2>
@@ -1109,21 +1448,29 @@ function StudyContent() {
           </section>
         )}
 
-        {activeTab === "flashcards" && (
+        {!showHub && activeTab === "flashcards" && (
           <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: 24 }}>Flashcards Genki I</h2>
-              <select value={flashLesson} onChange={(e) => { setFlashLesson(Number(e.target.value)); setFlashIndex(0); setFlashBack(false); }} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 10, padding: "8px 10px", fontWeight: 700 }}>
+              <select value={flashLesson} onChange={(e) => { setFlashLesson(Number(e.target.value)); }} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 10, padding: "8px 10px", fontWeight: 700 }}>
+                <option value={0}>Todas las lecciones</option>
                 {LESSONS.map((l) => <option key={l} value={l}>Lección {l}</option>)}
               </select>
             </div>
-            <p style={{ color: "#6b7280", fontSize: 14, margin: "8px 0 12px" }}>Deck por lección, tarjeta volteable y SRS.</p>
+            <p style={{ color: "#6b7280", fontSize: 14, margin: "8px 0 12px" }}>
+              Deck completo de vocabulario Genki I, con cola de estudio (pendientes + nuevas) y modo repaso.
+            </p>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#0f766e", background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: 999, padding: "4px 8px" }}>Pendientes hoy: {flashDueCount}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#475467", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 999, padding: "4px 8px" }}>Deck: {flashDeck.length} tarjetas</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#0f766e", background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: 999, padding: "4px 8px" }}>Pendientes: {flashDueCount}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#5b21b6", background: "#f5f3ff", border: "1px solid #ddd6fe", borderRadius: 999, padding: "4px 8px" }}>Nuevas: {flashNewCount}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#475467", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 999, padding: "4px 8px" }}>Deck: {flashDeck.length}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#14532d", background: "#ecfdf3", border: "1px solid #bbf7d0", borderRadius: 999, padding: "4px 8px" }}>Dominadas: {flashMasteredCount}</span>
+              <button type="button" onClick={() => setFlashReviewMode((v) => !v)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: flashReviewMode ? "#111114" : "#fff", color: flashReviewMode ? "#fff" : "#344054", padding: "4px 10px", fontWeight: 700, cursor: "pointer" }}>
+                {flashReviewMode ? "Modo: Repaso libre" : "Modo: Estudio SRS"}
+              </button>
             </div>
 
-            {flashCard ? (
+            {flashCard && !flashQueueEmpty ? (
               <>
                 <button type="button" onClick={() => setFlashBack((v) => !v)} style={{ width: "100%", textAlign: "left", border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fbfbfc", minHeight: 170, padding: 16, cursor: "pointer" }}>
                   {!flashBack ? (
@@ -1142,7 +1489,9 @@ function StudyContent() {
                 </button>
 
                 <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ color: "#6b7280", fontSize: 13 }}>Tarjeta {flashCurrentNumber} de {Math.max(1, dueDeck.length)}</div>
+                  <div style={{ color: "#6b7280", fontSize: 13 }}>
+                    Tarjeta {flashCurrentNumber} de {Math.max(1, flashQueue.length)} · {flashReviewMode ? "Repaso libre" : "Estudio SRS"}
+                  </div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button type="button" onClick={() => setSrs(flashCard.id, "again")} style={{ border: "1px solid #fecaca", color: "#b91c1c", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700 }}>No lo sé</button>
                     <button type="button" onClick={() => setSrs(flashCard.id, "hard")} style={{ border: "1px solid #fde68a", color: "#b45309", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700 }}>Difícil</button>
@@ -1152,12 +1501,28 @@ function StudyContent() {
                 </div>
               </>
             ) : (
-              <div style={{ border: "1px dashed rgba(17,17,20,.14)", borderRadius: 12, padding: 16, color: "#7c7c85" }}>No hay tarjetas en esta lección.</div>
+              <div style={{ border: "1px dashed rgba(17,17,20,.14)", borderRadius: 12, padding: 16, color: "#7c7c85" }}>
+                {flashDeck.length === 0
+                  ? "No hay tarjetas para esta selección."
+                  : (
+                    <>
+                      <div style={{ fontWeight: 700, color: "#111114" }}>¡No hay tarjetas pendientes por ahora!</div>
+                      <div style={{ marginTop: 4 }}>
+                        {flashNextDueAt
+                          ? `Próxima tarjeta programada: ${new Date(flashNextDueAt).toLocaleString()}`
+                          : "Ya terminaste este deck."}
+                      </div>
+                      <button type="button" onClick={() => setFlashReviewMode(true)} style={{ marginTop: 10, border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                        Pasar a repaso libre
+                      </button>
+                    </>
+                  )}
+              </div>
             )}
           </section>
         )}
 
-        {activeTab === "quiz" && (
+        {!showHub && activeTab === "quiz" && (
           <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16 }}>
             <h2 style={{ margin: 0, fontSize: 24 }}>QUIZ</h2>
             <p style={{ color: "#6b7280", fontSize: 14 }}>Customiza tipo, lecciones y cantidad de preguntas.</p>
