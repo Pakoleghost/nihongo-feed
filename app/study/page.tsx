@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -592,7 +593,7 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
   return pickN(qs, count);
 }
 
-export default function StudyPage() {
+function StudyContent() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"kana" | "flashcards" | "quiz">("kana");
   const [userKey, setUserKey] = useState("anon");
@@ -1221,5 +1222,13 @@ export default function StudyPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function StudyPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "110px 16px", textAlign: "center", color: "#9ca3af" }}>Cargando estudio…</div>}>
+      <StudyContent />
+    </Suspense>
   );
 }
