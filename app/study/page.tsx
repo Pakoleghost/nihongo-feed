@@ -183,6 +183,38 @@ const KANJI_FROM_URL: Record<number, Array<{ kanji: string; hira: string }>> = {
   ],
 };
 
+const L3_MASU_FROM_URL: Array<{ dict: string; es: string; masu: string }> = [
+  { dict: "あう", es: "encontrarse", masu: "あいます" },
+  { dict: "ある", es: "haber (inanimado)", masu: "あります" },
+  { dict: "かく", es: "escribir", masu: "かきます" },
+  { dict: "きく", es: "escuchar / preguntar", masu: "ききます" },
+  { dict: "のむ", es: "beber", masu: "のみます" },
+  { dict: "はなす", es: "hablar", masu: "はなします" },
+  { dict: "よむ", es: "leer", masu: "よみます" },
+  { dict: "おきる", es: "levantarse", masu: "おきます" },
+  { dict: "たべる", es: "comer", masu: "たべます" },
+  { dict: "ねる", es: "dormir", masu: "ねます" },
+  { dict: "みる", es: "ver", masu: "みます" },
+  { dict: "くる", es: "venir", masu: "きます" },
+  { dict: "する", es: "hacer", masu: "します" },
+];
+
+const L6_TE_FROM_URL: Array<{ dict: string; es: string; te: string }> = [
+  { dict: "あう", es: "encontrarse", te: "あって" },
+  { dict: "ある", es: "haber (inanimado)", te: "あって" },
+  { dict: "かく", es: "escribir", te: "かいて" },
+  { dict: "きく", es: "escuchar / preguntar", te: "きいて" },
+  { dict: "のむ", es: "beber", te: "のんで" },
+  { dict: "はなす", es: "hablar", te: "はなして" },
+  { dict: "よむ", es: "leer", te: "よんで" },
+  { dict: "おきる", es: "levantarse", te: "おきて" },
+  { dict: "たべる", es: "comer", te: "たべて" },
+  { dict: "ねる", es: "dormir", te: "ねて" },
+  { dict: "かえる", es: "volver", te: "かえって" },
+  { dict: "くる", es: "venir", te: "きて" },
+  { dict: "する", es: "hacer", te: "して" },
+];
+
 const LESSONS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 const HIRAGANA: KanaPair[] = [
@@ -990,9 +1022,11 @@ function buildFlashcardSets() {
     lesson: 3,
     title: "Verbos forma ます",
     description: "Forma diccionario → forma ます",
-    items: ALL_VERBS
-      .filter((verb) => verb.lesson === 3)
-      .map((verb, index) => ({ id: `l3-m-${index + 1}`, front: `${verb.kana} (${verb.es})`, back: toMasu(verb) })),
+    items: L3_MASU_FROM_URL.map((verb, index) => ({
+      id: `l3-m-${index + 1}`,
+      front: `${verb.dict} (${verb.es})`,
+      back: verb.masu,
+    })),
   });
   addSet({
     id: "l3-kanji",
@@ -1063,9 +1097,11 @@ function buildFlashcardSets() {
     lesson: 6,
     title: "Verbos forma 〜て",
     description: "Forma diccionario → forma て",
-    items: ALL_VERBS
-      .filter((verb) => verb.lesson === 6)
-      .map((verb, index) => ({ id: `l6-te-${index + 1}`, front: `${verb.kana} (${verb.es})`, back: toTeForm(verb) })),
+    items: L6_TE_FROM_URL.map((verb, index) => ({
+      id: `l6-te-${index + 1}`,
+      front: `${verb.dict} (${verb.es})`,
+      back: verb.te,
+    })),
   });
   addSet({
     id: "l6-kanji",
@@ -1118,6 +1154,7 @@ function StudyContent() {
   const [flashLessonFolder, setFlashLessonFolder] = useState<number | null>(null);
   const [flashSetId, setFlashSetId] = useState<string | null>(null);
   const [flashMode, setFlashMode] = useState<"browse" | "cards" | "learn">("browse");
+  const [flashCardsDeck, setFlashCardsDeck] = useState<FlashcardItem[]>([]);
   const [flashCardIndex, setFlashCardIndex] = useState(0);
   const [flashCardFlipped, setFlashCardFlipped] = useState(false);
   const [flashLearnQuestions, setFlashLearnQuestions] = useState<FlashLearnQuestion[]>([]);
@@ -1292,18 +1329,21 @@ function StudyContent() {
     [flashSetsInLesson, flashSetId],
   );
   const activeFlashItems = activeFlashSet?.items || [];
-  const activeFlashCard = activeFlashItems[flashCardIndex] || null;
-  const flashCardProgressPct = activeFlashItems.length > 0 ? Math.round(((flashCardIndex + 1) / activeFlashItems.length) * 100) : 0;
+  const activeFlashDeck = flashCardsDeck.length > 0 ? flashCardsDeck : activeFlashItems;
+  const activeFlashCard = activeFlashDeck[flashCardIndex] || null;
+  const flashCardProgressPct = activeFlashDeck.length > 0 ? Math.round(((flashCardIndex + 1) / activeFlashDeck.length) * 100) : 0;
 
   const openFlashLesson = (lesson: number) => {
     setFlashLessonFolder(lesson);
     setFlashSetId(null);
     setFlashMode("browse");
+    setFlashCardsDeck([]);
   };
 
   const openFlashSet = (setId: string) => {
     setFlashSetId(setId);
     setFlashMode("browse");
+    setFlashCardsDeck([]);
     setFlashCardIndex(0);
     setFlashCardFlipped(false);
     setFlashLearnQuestions([]);
@@ -1313,26 +1353,33 @@ function StudyContent() {
     setFlashLearnFinished(false);
   };
 
+  const focusFlashArea = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.setTimeout(() => {
+      flashFocusRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+  };
+
   const startFlashCards = () => {
     if (!activeFlashSet || activeFlashItems.length === 0) return;
+    const randomizedDeck = shuffle([...activeFlashItems]);
+    setFlashCardsDeck(randomizedDeck);
     setFlashMode("cards");
     setFlashCardIndex(0);
     setFlashCardFlipped(false);
-    window.setTimeout(() => {
-      flashFocusRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 20);
+    focusFlashArea();
   };
 
-  const buildFlashLearnQuestions = (set: FlashcardSet) => {
-    const fallbackPool = set.items.map((item) => item.back);
-    const picked = pickN(set.items, Math.min(20, set.items.length));
+  const buildFlashLearnQuestions = (set: FlashcardSet, shuffledItems: FlashcardItem[]) => {
+    const fallbackPool = shuffledItems.map((item) => item.back);
+    const picked = shuffledItems.slice(0, Math.min(20, shuffledItems.length));
     return picked.map((item, index) => ({
       id: `${set.id}-learn-${index + 1}`,
       prompt: item.front,
       correct: item.back,
       options: buildOptionSet(
         item.back,
-        set.items.filter((candidate) => candidate.id !== item.id).map((candidate) => candidate.back),
+        shuffledItems.filter((candidate) => candidate.id !== item.id).map((candidate) => candidate.back),
         fallbackPool,
       ),
     }));
@@ -1343,20 +1390,20 @@ function StudyContent() {
       alert("Este set necesita al menos 4 tarjetas para el modo Aprender.");
       return;
     }
-    const questions = buildFlashLearnQuestions(activeFlashSet);
+    const shuffledItems = shuffle([...activeFlashItems]);
+    const questions = buildFlashLearnQuestions(activeFlashSet, shuffledItems);
     if (questions.length === 0) {
       alert("No se pudieron generar preguntas para este set.");
       return;
     }
+    setFlashCardsDeck([]);
     setFlashLearnQuestions(questions);
     setFlashLearnIndex(0);
     setFlashLearnChoice(null);
     setFlashLearnScore(0);
     setFlashLearnFinished(false);
     setFlashMode("learn");
-    window.setTimeout(() => {
-      flashFocusRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 20);
+    focusFlashArea();
   };
 
   const currentFlashLearnQ = flashLearnQuestions[flashLearnIndex] || null;
@@ -1491,8 +1538,8 @@ function StudyContent() {
   useEffect(() => {
     if (activeTab !== "flashcards") return;
     if (flashMode !== "cards" && flashMode !== "learn") return;
-    flashFocusRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [activeTab, flashMode, flashLearnIndex]);
+    focusFlashArea();
+  }, [activeTab, flashMode]);
 
   const answerQuiz = (option: string) => {
     if (!currentQ || quizChoice) return;
@@ -1819,11 +1866,6 @@ function StudyContent() {
                       </button>
                     </div>
                   </div>
-                  {activeFlashSet.sourceUrl && (
-                    <a href={activeFlashSet.sourceUrl} target="_blank" rel="noreferrer" style={{ marginTop: 8, display: "inline-block", color: "#3b82f6", fontSize: 12, fontWeight: 700, textDecoration: "none" }}>
-                      Fuente kanji
-                    </a>
-                  )}
                 </div>
 
                 {flashMode === "browse" && (
@@ -1844,7 +1886,7 @@ function StudyContent() {
                 {flashMode === "cards" && activeFlashCard && (
                   <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
                     <div style={{ marginBottom: 10, fontSize: 13, color: "#667085", fontWeight: 700 }}>
-                      Tarjeta {flashCardIndex + 1} de {activeFlashItems.length}
+                      Tarjeta {flashCardIndex + 1} de {activeFlashDeck.length}
                     </div>
                     <div style={{ height: 7, borderRadius: 999, background: "#eceff3", overflow: "hidden", marginBottom: 12 }}>
                       <div style={{ width: `${flashCardProgressPct}%`, height: "100%", background: "linear-gradient(90deg,#34c5a6,#25a98f)" }} />
@@ -1900,11 +1942,11 @@ function StudyContent() {
                       <button
                         type="button"
                         onClick={() => {
-                          setFlashCardIndex((value) => Math.min(activeFlashItems.length - 1, value + 1));
+                          setFlashCardIndex((value) => Math.min(activeFlashDeck.length - 1, value + 1));
                           setFlashCardFlipped(false);
                         }}
-                        disabled={flashCardIndex >= activeFlashItems.length - 1}
-                        style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: flashCardIndex >= activeFlashItems.length - 1 ? "not-allowed" : "pointer", opacity: flashCardIndex >= activeFlashItems.length - 1 ? 0.5 : 1 }}
+                        disabled={flashCardIndex >= activeFlashDeck.length - 1}
+                        style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: flashCardIndex >= activeFlashDeck.length - 1 ? "not-allowed" : "pointer", opacity: flashCardIndex >= activeFlashDeck.length - 1 ? 0.5 : 1 }}
                       >
                         Siguiente →
                       </button>

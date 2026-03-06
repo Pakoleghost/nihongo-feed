@@ -110,6 +110,7 @@ export default function HomePage() {
   const [fontScale, setFontScale] = useState<"normal" | "large">("normal");
   const [submissionByAssignment, setSubmissionByAssignment] = useState<Record<string, { submitted: boolean; late: boolean }>>({});
   const [homeKanaLeaders, setHomeKanaLeaders] = useState<Record<HomeKanaMode, HomeKanaRow[]>>({ hiragana: [], katakana: [] });
+  const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
   const inFlightRef = useRef(false);
   const pullStartY = useRef<number | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -227,6 +228,16 @@ export default function HomePage() {
         .eq("user_id", user.id)
         .or("is_read.eq.false,is_read.is.null");
       setUnreadNotifications(count || 0);
+
+      if (prof?.is_admin) {
+        const { count: pendingCount } = await supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true })
+          .eq("is_approved", false);
+        setPendingApprovalsCount(pendingCount || 0);
+      } else {
+        setPendingApprovalsCount(0);
+      }
 
       const { data: kanaRows } = await supabase
         .from("study_kana_scores")
@@ -669,7 +680,22 @@ export default function HomePage() {
             <Link href="/study?view=kana" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Kana Sprint</Link>
             <Link href="/study?view=flashcards" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Flashcards</Link>
             <Link href="/notifications" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><IconBell /> Notificaciones</span>{unreadNotifications > 0 && <span style={{ background: "#ff2d55", color: "#fff", borderRadius: 999, fontSize: 11, fontWeight: 700, padding: "2px 6px" }}>{unreadNotifications}</span>}</Link>
-            {myProfile?.is_admin && <Link href="/admin/groups" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconSettings /> Panel maestro</Link>}
+            {myProfile?.is_admin && (
+              <Link
+                href="/admin/groups"
+                onClick={() => setMenuOpen(false)}
+                style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}
+              >
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <IconSettings /> Panel maestro
+                </span>
+                {pendingApprovalsCount > 0 && (
+                  <span style={{ background: "#ff2d55", color: "#fff", borderRadius: 999, fontSize: 11, fontWeight: 700, padding: "2px 6px" }}>
+                    {pendingApprovalsCount > 99 ? "99+" : pendingApprovalsCount}
+                  </span>
+                )}
+              </Link>
+            )}
             <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: 10 }}>
               <div style={{ fontSize: 12, color: "#666a73", marginBottom: 6, fontWeight: 700 }}>Tamaño de texto</div>
               <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3 }}>
