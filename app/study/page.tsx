@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-l1-l7";
 
 type KanaPair = readonly [string, string];
 type QuizCount = 10 | 20 | 30;
@@ -60,12 +61,26 @@ type KanaScoreRow = {
 
 type StudyView = "kana" | "flashcards" | "quiz";
 
-type SrsCardState = {
-  dueAt: number;
-  intervalDays: number;
-  ease: number;
-  reps: number;
-  lapses: number;
+type FlashcardItem = {
+  id: string;
+  front: string;
+  back: string;
+};
+
+type FlashcardSet = {
+  id: string;
+  lesson: number;
+  title: string;
+  description: string;
+  sourceUrl?: string;
+  items: FlashcardItem[];
+};
+
+type FlashLearnQuestion = {
+  id: string;
+  prompt: string;
+  correct: string;
+  options: string[];
 };
 
 const LESSONS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -782,8 +797,6 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
   return pickN(qs, count);
 }
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
 function resolveStudyView(searchParams: Pick<URLSearchParams, "get">): StudyView | null {
   const view = searchParams.get("view");
   if (view === "kana" || view === "flashcards" || view === "quiz") return view;
@@ -793,86 +806,186 @@ function resolveStudyView(searchParams: Pick<URLSearchParams, "get">): StudyView
   return null;
 }
 
-function isSrsCardState(value: unknown): value is SrsCardState {
-  if (!value || typeof value !== "object") return false;
-  const item = value as Partial<SrsCardState>;
-  return (
-    typeof item.dueAt === "number" &&
-    typeof item.intervalDays === "number" &&
-    typeof item.ease === "number" &&
-    typeof item.reps === "number" &&
-    typeof item.lapses === "number"
-  );
-}
+const KANJI_SET_LINKS: Record<number, string> = {
+  3: "https://quizlet.com/jp/901868377/genki-leccion-3-kanji-flash-cards/",
+  4: "https://quizlet.com/jp/901873809/genki-leccion-4-kanji-flash-cards/",
+  5: "https://quizlet.com/jp/901079452/genki-leccion-5-vocabulario-flash-cards/",
+  6: "https://quizlet.com/jp/901874064/genki-leccion-6-kanji-flash-cards/",
+  7: "https://quizlet.com/jp/901874242/genki-leccion-7-kanji-flash-cards/",
+};
 
-function migrateSrsMap(raw: unknown): Record<string, SrsCardState> {
-  if (!raw || typeof raw !== "object") return {};
-  const now = Date.now();
-  const source = raw as Record<string, unknown>;
-  const next: Record<string, SrsCardState> = {};
-  Object.entries(source).forEach(([key, value]) => {
-    if (isSrsCardState(value)) {
-      next[key] = value;
-      return;
-    }
-    if (typeof value === "number") {
-      next[key] = {
-        dueAt: value,
-        intervalDays: 1,
-        ease: 2.3,
-        reps: value > now ? 1 : 0,
-        lapses: 0,
-      };
-    }
+function dedupeFlashItems(items: FlashcardItem[]) {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    const key = `${item.front}__${item.back}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
   });
-  return next;
 }
 
-function getDefaultSrsState(): SrsCardState {
-  return { dueAt: 0, intervalDays: 0, ease: 2.3, reps: 0, lapses: 0 };
+function toAdjNegativePolite(adj: AdjEntry) {
+  if (adj.kind === "i") return `${adj.kana.slice(0, -1)}くないです`;
+  return `${adj.kana}じゃないです`;
 }
 
-function gradeSrsCard(prevState: SrsCardState, quality: "again" | "hard" | "good"): SrsCardState {
-  const now = Date.now();
-  if (quality === "again") {
-    return {
-      dueAt: now + 15 * 60 * 1000,
-      intervalDays: 0.01,
-      ease: Math.max(1.3, prevState.ease - 0.2),
-      reps: 0,
-      lapses: prevState.lapses + 1,
-    };
-  }
+function toAdjPastPolite(adj: AdjEntry) {
+  if (adj.kind === "i") return `${adj.kana.slice(0, -1)}かったです`;
+  return `${adj.kana}でした`;
+}
 
-  if (quality === "hard") {
-    const reps = prevState.reps + 1;
-    const intervalDays = Math.max(1, Math.round(Math.max(1, prevState.intervalDays || 1) * 1.35));
-    return {
-      dueAt: now + intervalDays * DAY_MS,
-      intervalDays,
-      ease: Math.max(1.3, prevState.ease - 0.12),
-      reps,
-      lapses: prevState.lapses,
-    };
-  }
+function toAdjPastNegativePolite(adj: AdjEntry) {
+  if (adj.kind === "i") return `${adj.kana.slice(0, -1)}くなかったです`;
+  return `${adj.kana}じゃなかったです`;
+}
 
-  const reps = prevState.reps + 1;
-  const ease = Math.min(2.8, prevState.ease + 0.05);
-  const intervalDays =
-    reps <= 1
-      ? 1
-      : reps === 2
-        ? 3
-        : Math.max(4, Math.round(Math.max(1, prevState.intervalDays || 3) * ease));
+function buildFlashcardSets() {
+  const sets: FlashcardSet[] = [];
 
-  return {
-    dueAt: now + intervalDays * DAY_MS,
-    intervalDays,
-    ease,
-    reps,
-    lapses: prevState.lapses,
+  const addSet = (set: FlashcardSet) => {
+    sets.push({ ...set, items: dedupeFlashItems(set.items) });
   };
+
+  const mapVocab = (lesson: number) =>
+    (GENKI_VOCAB_BY_LESSON[lesson] || []).map((item, index) => ({
+      id: `l${lesson}-v-${index + 1}`,
+      front: item.hira,
+      back: item.es,
+    }));
+
+  const mapKanji = (lesson: number) =>
+    (GENKI_VOCAB_BY_LESSON[lesson] || [])
+      .filter((item) => item.kanji && item.hira)
+      .map((item, index) => ({
+        id: `l${lesson}-k-${index + 1}`,
+        front: item.kanji,
+        back: item.hira,
+      }));
+
+  addSet({
+    id: "l1-hiragana",
+    lesson: 1,
+    title: "Hiragana",
+    description: "Silabario básico hiragana",
+    items: HIRAGANA.map(([char, romaji], index) => ({ id: `h-${index + 1}`, front: char, back: romaji })),
+  });
+  addSet({ id: "l1-vocab", lesson: 1, title: "Vocabulario", description: "Lección 1", items: mapVocab(1) });
+
+  addSet({
+    id: "l2-katakana",
+    lesson: 2,
+    title: "Katakana",
+    description: "Silabario básico katakana",
+    items: KATAKANA.map(([char, romaji], index) => ({ id: `k-${index + 1}`, front: char, back: romaji })),
+  });
+  addSet({ id: "l2-vocab", lesson: 2, title: "Vocabulario", description: "Lección 2", items: mapVocab(2) });
+
+  addSet({ id: "l3-vocab", lesson: 3, title: "Vocabulario", description: "Lección 3", items: mapVocab(3) });
+  addSet({
+    id: "l3-masu",
+    lesson: 3,
+    title: "Verbos forma ます",
+    description: "Forma diccionario → forma ます",
+    items: ALL_VERBS
+      .filter((verb) => verb.lesson === 3)
+      .map((verb, index) => ({ id: `l3-m-${index + 1}`, front: `${verb.kana} (${verb.es})`, back: toMasu(verb) })),
+  });
+  addSet({
+    id: "l3-kanji",
+    lesson: 3,
+    title: "Kanji",
+    description: "Kanji → hiragana",
+    sourceUrl: KANJI_SET_LINKS[3],
+    items: mapKanji(3),
+  });
+
+  addSet({ id: "l4-vocab", lesson: 4, title: "Vocabulario", description: "Lección 4", items: mapVocab(4) });
+  addSet({
+    id: "l4-kanji",
+    lesson: 4,
+    title: "Kanji",
+    description: "Kanji → hiragana",
+    sourceUrl: KANJI_SET_LINKS[4],
+    items: mapKanji(4),
+  });
+
+  const lesson5Adjs = ALL_ADJECTIVES.filter((adj) => adj.lesson === 5);
+  addSet({ id: "l5-vocab", lesson: 5, title: "Vocabulario", description: "Lección 5", items: mapVocab(5) });
+  addSet({
+    id: "l5-adj-negative",
+    lesson: 5,
+    title: "Adjetivos · presente negativo",
+    description: "Diccionario → presente negativo (formal)",
+    items: lesson5Adjs.map((adj, index) => ({
+      id: `l5-an-${index + 1}`,
+      front: `${adj.kana} (${adj.es})`,
+      back: toAdjNegativePolite(adj),
+    })),
+  });
+  addSet({
+    id: "l5-adj-past",
+    lesson: 5,
+    title: "Adjetivos · pasado afirmativo",
+    description: "Diccionario → pasado afirmativo (formal)",
+    items: lesson5Adjs.map((adj, index) => ({
+      id: `l5-ap-${index + 1}`,
+      front: `${adj.kana} (${adj.es})`,
+      back: toAdjPastPolite(adj),
+    })),
+  });
+  addSet({
+    id: "l5-adj-past-negative",
+    lesson: 5,
+    title: "Adjetivos · pasado negativo",
+    description: "Diccionario → pasado negativo (formal)",
+    items: lesson5Adjs.map((adj, index) => ({
+      id: `l5-apn-${index + 1}`,
+      front: `${adj.kana} (${adj.es})`,
+      back: toAdjPastNegativePolite(adj),
+    })),
+  });
+  addSet({
+    id: "l5-kanji",
+    lesson: 5,
+    title: "Kanji",
+    description: "Kanji → hiragana",
+    sourceUrl: KANJI_SET_LINKS[5],
+    items: mapKanji(5),
+  });
+
+  addSet({ id: "l6-vocab", lesson: 6, title: "Vocabulario", description: "Lección 6", items: mapVocab(6) });
+  addSet({
+    id: "l6-te",
+    lesson: 6,
+    title: "Verbos forma 〜て",
+    description: "Forma diccionario → forma て",
+    items: ALL_VERBS
+      .filter((verb) => verb.lesson === 6)
+      .map((verb, index) => ({ id: `l6-te-${index + 1}`, front: `${verb.kana} (${verb.es})`, back: toTeForm(verb) })),
+  });
+  addSet({
+    id: "l6-kanji",
+    lesson: 6,
+    title: "Kanji",
+    description: "Kanji → hiragana",
+    sourceUrl: KANJI_SET_LINKS[6],
+    items: mapKanji(6),
+  });
+
+  addSet({ id: "l7-vocab", lesson: 7, title: "Vocabulario", description: "Lección 7", items: mapVocab(7) });
+  addSet({
+    id: "l7-kanji",
+    lesson: 7,
+    title: "Kanji",
+    description: "Kanji → hiragana",
+    sourceUrl: KANJI_SET_LINKS[7],
+    items: mapKanji(7),
+  });
+
+  return sets;
 }
+
+const FLASHCARD_SETS: FlashcardSet[] = buildFlashcardSets();
 
 function StudyContent() {
   const searchParams = useSearchParams();
@@ -898,11 +1011,16 @@ function StudyContent() {
   const kanaRoundSubmittedRef = useRef(false);
   const pendingKanaSubmitRef = useRef<{ mode: KanaMode; score: number } | null>(null);
 
-  const [flashLesson, setFlashLesson] = useState<number>(0);
-  const [flashIndex, setFlashIndex] = useState(0);
-  const [flashBack, setFlashBack] = useState(false);
-  const [flashReviewMode, setFlashReviewMode] = useState(false);
-  const [srsMap, setSrsMap] = useState<Record<string, SrsCardState>>({});
+  const [flashLessonFolder, setFlashLessonFolder] = useState<number | null>(null);
+  const [flashSetId, setFlashSetId] = useState<string | null>(null);
+  const [flashMode, setFlashMode] = useState<"browse" | "cards" | "learn">("browse");
+  const [flashCardIndex, setFlashCardIndex] = useState(0);
+  const [flashCardFlipped, setFlashCardFlipped] = useState(false);
+  const [flashLearnQuestions, setFlashLearnQuestions] = useState<FlashLearnQuestion[]>([]);
+  const [flashLearnIndex, setFlashLearnIndex] = useState(0);
+  const [flashLearnChoice, setFlashLearnChoice] = useState<string | null>(null);
+  const [flashLearnScore, setFlashLearnScore] = useState(0);
+  const [flashLearnFinished, setFlashLearnFinished] = useState(false);
 
   const [quizMode, setQuizMode] = useState<QuizMode>("particles");
   const [quizCount, setQuizCount] = useState<QuizCount>(10);
@@ -921,10 +1039,6 @@ function StudyContent() {
       const key = user?.id || "anon";
       setCurrentUserId(user?.id || null);
       setUserKey(key);
-      try {
-        const raw = localStorage.getItem(`study-srs-${key}`);
-        if (raw) setSrsMap(migrateSrsMap(JSON.parse(raw)));
-      } catch {}
       try {
         const rawBest = localStorage.getItem(`study-kana-best-map-${key}`);
         if (rawBest) {
@@ -1051,58 +1165,109 @@ function StudyContent() {
     createKanaQuestion();
   };
 
-  const flashDeck = useMemo(() => {
-    const base = flashLesson === 0 ? ALL_GENKI_VOCAB : ALL_GENKI_VOCAB.filter((v) => v.lesson === flashLesson);
-    return [...base].sort((a, b) => (a.lesson === b.lesson ? a.kana.localeCompare(b.kana) : a.lesson - b.lesson));
-  }, [flashLesson]);
-  const flashNow = Date.now();
-  const flashNewDeck = useMemo(() => flashDeck.filter((card) => !srsMap[card.id]), [flashDeck, srsMap]);
-  const flashDueDeck = useMemo(
-    () => flashDeck.filter((card) => {
-      const state = srsMap[card.id];
-      return state ? state.dueAt <= flashNow : false;
-    }),
-    [flashDeck, srsMap, flashNow],
+  const flashLessons = useMemo(
+    () => Array.from(new Set(FLASHCARD_SETS.map((set) => set.lesson))).sort((a, b) => a - b),
+    [],
   );
-  const flashLearningQueue = useMemo(() => [...flashDueDeck, ...flashNewDeck], [flashDueDeck, flashNewDeck]);
-  const flashQueue = flashReviewMode ? flashDeck : flashLearningQueue;
-  const flashCard = flashQueue[flashIndex % Math.max(1, flashQueue.length)];
-  const flashDueCount = flashDueDeck.length;
-  const flashNewCount = flashNewDeck.length;
-  const flashMasteredCount = useMemo(
-    () => flashDeck.filter((card) => (srsMap[card.id]?.intervalDays || 0) >= 21).length,
-    [flashDeck, srsMap],
+  const flashSetsByLesson = useMemo(
+    () =>
+      flashLessons.map((lesson) => ({
+        lesson,
+        sets: FLASHCARD_SETS.filter((set) => set.lesson === lesson),
+      })),
+    [flashLessons],
   );
-  const flashNextDueAt = useMemo(() => {
-    const dueValues = flashDeck
-      .map((card) => srsMap[card.id]?.dueAt || Number.POSITIVE_INFINITY)
-      .filter((dueAt) => dueAt > flashNow);
-    if (dueValues.length === 0) return null;
-    return Math.min(...dueValues);
-  }, [flashDeck, srsMap, flashNow]);
-  const flashCurrentNumber = flashQueue.length > 0 ? (flashIndex % flashQueue.length) + 1 : 0;
+  const activeFlashLesson = flashLessonFolder ?? flashLessons[0] ?? 1;
+  const flashSetsInLesson = useMemo(
+    () => FLASHCARD_SETS.filter((set) => set.lesson === activeFlashLesson),
+    [activeFlashLesson],
+  );
+  const activeFlashSet = useMemo(
+    () => flashSetsInLesson.find((set) => set.id === flashSetId) || null,
+    [flashSetsInLesson, flashSetId],
+  );
+  const activeFlashItems = activeFlashSet?.items || [];
+  const activeFlashCard = activeFlashItems[flashCardIndex] || null;
+  const flashCardProgressPct = activeFlashItems.length > 0 ? Math.round(((flashCardIndex + 1) / activeFlashItems.length) * 100) : 0;
 
-  const setSrs = (cardId: string, quality: "again" | "hard" | "good") => {
-    const prevState = srsMap[cardId] || getDefaultSrsState();
-    const nextState = gradeSrsCard(prevState, quality);
-    const nextMap = { ...srsMap, [cardId]: nextState };
-    setSrsMap(nextMap);
-    try {
-      localStorage.setItem(`study-srs-${userKey}`, JSON.stringify(nextMap));
-    } catch {}
-    setFlashBack(false);
-    setFlashIndex((v) => v + 1);
+  const openFlashLesson = (lesson: number) => {
+    setFlashLessonFolder(lesson);
+    setFlashSetId(null);
+    setFlashMode("browse");
   };
 
-  const skipFlash = () => {
-    setFlashBack(false);
-    setFlashIndex((v) => v + 1);
+  const openFlashSet = (setId: string) => {
+    setFlashSetId(setId);
+    setFlashMode("browse");
+    setFlashCardIndex(0);
+    setFlashCardFlipped(false);
+    setFlashLearnQuestions([]);
+    setFlashLearnIndex(0);
+    setFlashLearnChoice(null);
+    setFlashLearnScore(0);
+    setFlashLearnFinished(false);
   };
 
-  useEffect(() => {
-    setFlashIndex(0);
-    setFlashBack(false);
-  }, [flashLesson, flashReviewMode]);
+  const startFlashCards = () => {
+    if (!activeFlashSet || activeFlashItems.length === 0) return;
+    setFlashMode("cards");
+    setFlashCardIndex(0);
+    setFlashCardFlipped(false);
+  };
+
+  const buildFlashLearnQuestions = (set: FlashcardSet) => {
+    const fallbackPool = set.items.map((item) => item.back);
+    const picked = pickN(set.items, Math.min(20, set.items.length));
+    return picked.map((item, index) => ({
+      id: `${set.id}-learn-${index + 1}`,
+      prompt: item.front,
+      correct: item.back,
+      options: buildOptionSet(
+        item.back,
+        set.items.filter((candidate) => candidate.id !== item.id).map((candidate) => candidate.back),
+        fallbackPool,
+      ),
+    }));
+  };
+
+  const startFlashLearn = () => {
+    if (!activeFlashSet || activeFlashItems.length < 4) {
+      alert("Este set necesita al menos 4 tarjetas para el modo Aprender.");
+      return;
+    }
+    const questions = buildFlashLearnQuestions(activeFlashSet);
+    if (questions.length === 0) {
+      alert("No se pudieron generar preguntas para este set.");
+      return;
+    }
+    setFlashLearnQuestions(questions);
+    setFlashLearnIndex(0);
+    setFlashLearnChoice(null);
+    setFlashLearnScore(0);
+    setFlashLearnFinished(false);
+    setFlashMode("learn");
+  };
+
+  const currentFlashLearnQ = flashLearnQuestions[flashLearnIndex] || null;
+  const flashLearnProgressPct = flashLearnQuestions.length
+    ? Math.round(((flashLearnFinished ? flashLearnQuestions.length : flashLearnIndex + 1) / flashLearnQuestions.length) * 100)
+    : 0;
+
+  const answerFlashLearn = (option: string) => {
+    if (!currentFlashLearnQ || flashLearnChoice) return;
+    setFlashLearnChoice(option);
+    if (option === currentFlashLearnQ.correct) setFlashLearnScore((value) => value + 1);
+  };
+
+  const nextFlashLearn = () => {
+    if (!currentFlashLearnQ) return;
+    if (flashLearnIndex >= flashLearnQuestions.length - 1) {
+      setFlashLearnFinished(true);
+      return;
+    }
+    setFlashLearnIndex((value) => value + 1);
+    setFlashLearnChoice(null);
+  };
 
   const toggleLesson = (lesson: number) => {
     setQuizLessons((prev) => {
@@ -1153,13 +1318,12 @@ function StudyContent() {
   const hasAdjInSelectedLessons = ALL_ADJECTIVES.some((a) => quizLessons.includes(a.lesson));
   const activeConjTypes: ConjType[] = conjTypes.length > 0 ? [...conjTypes] : ["te"];
   const showHub = !selectedView;
-  const flashQueueEmpty = flashQueue.length === 0;
 
   const pageMeta = selectedView
     ? selectedView === "kana"
       ? { title: "Kana Sprint", subtitle: "Entrena velocidad y precisión de hiragana/katakana." }
       : selectedView === "flashcards"
-        ? { title: "Flashcards", subtitle: "Vocabulario completo por lección con SRS." }
+        ? { title: "Flashcards", subtitle: "Carpetas por lección y práctica por set." }
         : { title: "Quiz", subtitle: "Quizzes configurables para Genki I." }
     : { title: "Study Lab", subtitle: "Selecciona una herramienta y practica por bloques." };
 
@@ -1451,72 +1615,253 @@ function StudyContent() {
         {!showHub && activeTab === "flashcards" && (
           <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <h2 style={{ margin: 0, fontSize: 24 }}>Flashcards Genki I</h2>
-              <select value={flashLesson} onChange={(e) => { setFlashLesson(Number(e.target.value)); }} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 10, padding: "8px 10px", fontWeight: 700 }}>
-                <option value={0}>Todas las lecciones</option>
-                {LESSONS.map((l) => <option key={l} value={l}>Lección {l}</option>)}
-              </select>
-            </div>
-            <p style={{ color: "#6b7280", fontSize: 14, margin: "8px 0 12px" }}>
-              Deck completo de vocabulario Genki I, con cola de estudio (pendientes + nuevas) y modo repaso.
-            </p>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#0f766e", background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: 999, padding: "4px 8px" }}>Pendientes: {flashDueCount}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#5b21b6", background: "#f5f3ff", border: "1px solid #ddd6fe", borderRadius: 999, padding: "4px 8px" }}>Nuevas: {flashNewCount}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#475467", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 999, padding: "4px 8px" }}>Deck: {flashDeck.length}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#14532d", background: "#ecfdf3", border: "1px solid #bbf7d0", borderRadius: 999, padding: "4px 8px" }}>Dominadas: {flashMasteredCount}</span>
-              <button type="button" onClick={() => setFlashReviewMode((v) => !v)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: flashReviewMode ? "#111114" : "#fff", color: flashReviewMode ? "#fff" : "#344054", padding: "4px 10px", fontWeight: 700, cursor: "pointer" }}>
-                {flashReviewMode ? "Modo: Repaso libre" : "Modo: Estudio SRS"}
-              </button>
-            </div>
-
-            {flashCard && !flashQueueEmpty ? (
-              <>
-                <button type="button" onClick={() => setFlashBack((v) => !v)} style={{ width: "100%", textAlign: "left", border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fbfbfc", minHeight: 170, padding: 16, cursor: "pointer" }}>
-                  {!flashBack ? (
-                    <div>
-                      <div style={{ fontSize: 34, fontWeight: 800, color: "#111114" }}>{flashCard.kanji || flashCard.jp}</div>
-                      <div style={{ marginTop: 8, color: "#6b7280", fontSize: 20 }}>{flashCard.kana}</div>
-                      <div style={{ marginTop: 12, color: "#64748b", fontSize: 12, fontWeight: 700 }}>Toca para voltear</div>
-                    </div>
-                  ) : (
-                    <div>
-                      <div style={{ color: "#7c7c85", fontSize: 12, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>Traducción</div>
-                      <div style={{ marginTop: 8, fontSize: 30, fontWeight: 800 }}>{flashCard.es}</div>
-                      <div style={{ marginTop: 12, color: "#64748b", fontSize: 12, fontWeight: 700 }}>Lección {flashCard.lesson}</div>
-                    </div>
-                  )}
+              <h2 style={{ margin: 0, fontSize: 24 }}>Flashcards Genki (L1-L7)</h2>
+              {flashLessonFolder !== null && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFlashLessonFolder(null);
+                    setFlashSetId(null);
+                    setFlashMode("browse");
+                  }}
+                  style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}
+                >
+                  Ver lecciones
                 </button>
+              )}
+            </div>
+            <p style={{ color: "#6b7280", fontSize: 14, margin: "8px 0 14px" }}>
+              Selecciona una carpeta por lección, revisa la lista completa y luego practica con tarjetas o modo aprender.
+            </p>
 
-                <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ color: "#6b7280", fontSize: 13 }}>
-                    Tarjeta {flashCurrentNumber} de {Math.max(1, flashQueue.length)} · {flashReviewMode ? "Repaso libre" : "Estudio SRS"}
-                  </div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button type="button" onClick={() => setSrs(flashCard.id, "again")} style={{ border: "1px solid #fecaca", color: "#b91c1c", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700 }}>No lo sé</button>
-                    <button type="button" onClick={() => setSrs(flashCard.id, "hard")} style={{ border: "1px solid #fde68a", color: "#b45309", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700 }}>Difícil</button>
-                    <button type="button" onClick={() => setSrs(flashCard.id, "good")} style={{ border: "1px solid #86efac", color: "#15803d", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700 }}>Bien</button>
-                    <button type="button" onClick={skipFlash} style={{ border: "1px solid rgba(17,17,20,.1)", color: "#344054", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700 }}>Saltar</button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div style={{ border: "1px dashed rgba(17,17,20,.14)", borderRadius: 12, padding: 16, color: "#7c7c85" }}>
-                {flashDeck.length === 0
-                  ? "No hay tarjetas para esta selección."
-                  : (
-                    <>
-                      <div style={{ fontWeight: 700, color: "#111114" }}>¡No hay tarjetas pendientes por ahora!</div>
-                      <div style={{ marginTop: 4 }}>
-                        {flashNextDueAt
-                          ? `Próxima tarjeta programada: ${new Date(flashNextDueAt).toLocaleString()}`
-                          : "Ya terminaste este deck."}
+            {flashLessonFolder === null && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 10 }}>
+                {flashSetsByLesson.map((entry) => (
+                  <button
+                    key={entry.lesson}
+                    type="button"
+                    onClick={() => openFlashLesson(entry.lesson)}
+                    style={{ textAlign: "left", border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fbfbfc", padding: 12, cursor: "pointer" }}
+                  >
+                    <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Carpeta</div>
+                    <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Lección {entry.lesson}</div>
+                    <div style={{ marginTop: 6, fontSize: 13, color: "#667085" }}>{entry.sets.length} sets</div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {flashLessonFolder !== null && flashSetId === null && (
+              <div style={{ marginTop: 10, display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
+                {flashSetsInLesson.map((set) => (
+                  <button
+                    key={set.id}
+                    type="button"
+                    onClick={() => openFlashSet(set.id)}
+                    style={{ textAlign: "left", border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12, cursor: "pointer" }}
+                  >
+                    <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Set</div>
+                    <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800 }}>{set.title}</div>
+                    <div style={{ marginTop: 4, fontSize: 13, color: "#667085", lineHeight: 1.4 }}>{set.description}</div>
+                    <div style={{ marginTop: 8, fontSize: 12, color: "#344054", fontWeight: 700 }}>{set.items.length} tarjetas</div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {flashLessonFolder !== null && activeFlashSet && (
+              <div style={{ marginTop: 10, display: "grid", gap: 12 }}>
+                <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <div>
+                      <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>
+                        Lección {activeFlashSet.lesson}
                       </div>
-                      <button type="button" onClick={() => setFlashReviewMode(true)} style={{ marginTop: 10, border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
-                        Pasar a repaso libre
+                      <div style={{ marginTop: 4, fontSize: 20, fontWeight: 800 }}>{activeFlashSet.title}</div>
+                      <div style={{ marginTop: 4, color: "#667085", fontSize: 13 }}>{activeFlashSet.description}</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <button type="button" onClick={() => setFlashSetId(null)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                        Cambiar set
                       </button>
-                    </>
+                      <button type="button" onClick={startFlashCards} style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", padding: "7px 12px", fontWeight: 800, cursor: "pointer" }}>
+                        Empezar flashcards
+                      </button>
+                      <button type="button" onClick={startFlashLearn} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                        Aprender
+                      </button>
+                    </div>
+                  </div>
+                  {activeFlashSet.sourceUrl && (
+                    <a href={activeFlashSet.sourceUrl} target="_blank" rel="noreferrer" style={{ marginTop: 8, display: "inline-block", color: "#3b82f6", fontSize: 12, fontWeight: 700, textDecoration: "none" }}>
+                      Fuente kanji
+                    </a>
                   )}
+                </div>
+
+                {flashMode === "browse" && (
+                  <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
+                    <div style={{ fontSize: 12, color: "#7c7c85", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800, marginBottom: 8 }}>Lista del set</div>
+                    <div style={{ display: "grid", gap: 8 }}>
+                      {activeFlashItems.map((item) => (
+                        <div key={item.id} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 1px minmax(0,1fr)", gap: 10, alignItems: "center", background: "#1f2a4a", color: "#fff", borderRadius: 12, padding: "10px 12px" }}>
+                          <span style={{ fontSize: 22, fontWeight: 700, wordBreak: "break-word" }}>{item.front}</span>
+                          <span style={{ width: 1, height: "70%", background: "rgba(255,255,255,.25)" }} />
+                          <span style={{ fontSize: 20, fontWeight: 600, color: "#dbe7ff", wordBreak: "break-word" }}>{item.back}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {flashMode === "cards" && activeFlashCard && (
+                  <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
+                    <div style={{ marginBottom: 10, fontSize: 13, color: "#667085", fontWeight: 700 }}>
+                      Tarjeta {flashCardIndex + 1} de {activeFlashItems.length}
+                    </div>
+                    <div style={{ height: 7, borderRadius: 999, background: "#eceff3", overflow: "hidden", marginBottom: 12 }}>
+                      <div style={{ width: `${flashCardProgressPct}%`, height: "100%", background: "linear-gradient(90deg,#34c5a6,#25a98f)" }} />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFlashCardFlipped((value) => !value)}
+                      style={{
+                        width: "100%",
+                        minHeight: 240,
+                        border: 0,
+                        background: "transparent",
+                        cursor: "pointer",
+                        perspective: 1000,
+                      }}
+                    >
+                      <div
+                        style={{
+                          position: "relative",
+                          width: "100%",
+                          minHeight: 240,
+                          transformStyle: "preserve-3d",
+                          transition: "transform .32s ease",
+                          transform: flashCardFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+                        }}
+                      >
+                        <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#1f2a4a", color: "#fff", display: "grid", placeItems: "center", padding: 16 }}>
+                          <div style={{ textAlign: "center" }}>
+                            <div style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.2, wordBreak: "break-word" }}>{activeFlashCard.front}</div>
+                            <div style={{ marginTop: 10, fontSize: 12, color: "rgba(255,255,255,.72)", fontWeight: 700 }}>Toca para voltear</div>
+                          </div>
+                        </div>
+                        <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#111827", color: "#dbe7ff", display: "grid", placeItems: "center", padding: 16 }}>
+                          <div style={{ textAlign: "center" }}>
+                            <div style={{ fontSize: 36, fontWeight: 800, lineHeight: 1.2, wordBreak: "break-word" }}>{activeFlashCard.back}</div>
+                            <div style={{ marginTop: 10, fontSize: 12, color: "rgba(219,231,255,.66)", fontWeight: 700 }}>Toca para regresar</div>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                    <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFlashCardIndex((value) => Math.max(0, value - 1));
+                          setFlashCardFlipped(false);
+                        }}
+                        disabled={flashCardIndex <= 0}
+                        style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: flashCardIndex <= 0 ? "not-allowed" : "pointer", opacity: flashCardIndex <= 0 ? 0.5 : 1 }}
+                      >
+                        ← Anterior
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFlashCardIndex((value) => Math.min(activeFlashItems.length - 1, value + 1));
+                          setFlashCardFlipped(false);
+                        }}
+                        disabled={flashCardIndex >= activeFlashItems.length - 1}
+                        style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: flashCardIndex >= activeFlashItems.length - 1 ? "not-allowed" : "pointer", opacity: flashCardIndex >= activeFlashItems.length - 1 ? 0.5 : 1 }}
+                      >
+                        Siguiente →
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {flashMode === "learn" && (
+                  <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
+                    {!currentFlashLearnQ && !flashLearnFinished && (
+                      <div style={{ fontSize: 13, color: "#667085" }}>Generando quiz...</div>
+                    )}
+                    {currentFlashLearnQ && !flashLearnFinished && (
+                      <div>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                          <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Pregunta {flashLearnIndex + 1} / {flashLearnQuestions.length}</div>
+                          <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Score: {flashLearnScore}</div>
+                        </div>
+                        <div style={{ marginTop: 8, height: 7, borderRadius: 999, background: "#eceff3", overflow: "hidden" }}>
+                          <div style={{ width: `${flashLearnProgressPct}%`, height: "100%", background: "linear-gradient(90deg,#34c5a6,#25a98f)" }} />
+                        </div>
+                        <div style={{ marginTop: 10, fontSize: 13, color: "#7c7c85", fontWeight: 700 }}>Definición</div>
+                        <div style={{ marginTop: 6, fontSize: 30, fontWeight: 800, color: "#111114", wordBreak: "break-word" }}>{currentFlashLearnQ.prompt}</div>
+                        <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 8 }}>
+                          {currentFlashLearnQ.options.map((option) => {
+                            const isSelected = flashLearnChoice === option;
+                            const isCorrect = option === currentFlashLearnQ.correct;
+                            const showResult = Boolean(flashLearnChoice);
+                            let bg = "#fff";
+                            let color = "#111114";
+                            let border = "1px solid rgba(17,17,20,.1)";
+                            if (showResult && isCorrect) {
+                              bg = "#ecfdf5";
+                              color = "#166534";
+                              border = "1px solid #86efac";
+                            } else if (showResult && isSelected && !isCorrect) {
+                              bg = "#fef2f2";
+                              color = "#991b1b";
+                              border = "1px solid #fca5a5";
+                            }
+                            return (
+                              <button
+                                key={option}
+                                type="button"
+                                onClick={() => answerFlashLearn(option)}
+                                disabled={Boolean(flashLearnChoice)}
+                                style={{ textAlign: "left", border, borderRadius: 10, background: bg, color, padding: "10px 12px", fontSize: 20, fontWeight: 700, cursor: flashLearnChoice ? "default" : "pointer", wordBreak: "break-word" }}
+                              >
+                                {option}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {flashLearnChoice && (
+                          <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                            <div style={{ fontWeight: 700, color: flashLearnChoice === currentFlashLearnQ.correct ? "#15803d" : "#b91c1c" }}>
+                              {flashLearnChoice === currentFlashLearnQ.correct ? "Correcto" : `Incorrecto. Respuesta: ${currentFlashLearnQ.correct}`}
+                            </div>
+                            <button type="button" onClick={nextFlashLearn} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                              {flashLearnIndex >= flashLearnQuestions.length - 1 ? "Ver score" : "Siguiente"}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {flashLearnFinished && (
+                      <div>
+                        <div style={{ fontSize: 12, color: "#7c7c85", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Resultado</div>
+                        <div style={{ marginTop: 8, fontSize: 34, fontWeight: 800 }}>{flashLearnScore} / {flashLearnQuestions.length}</div>
+                        <div style={{ marginTop: 4, color: "#667085", fontSize: 14 }}>
+                          {Math.round((flashLearnScore / Math.max(1, flashLearnQuestions.length)) * 100)}% de aciertos
+                        </div>
+                        <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                          <button type="button" onClick={startFlashLearn} style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", padding: "8px 12px", fontWeight: 700, cursor: "pointer" }}>
+                            Repetir
+                          </button>
+                          <button type="button" onClick={() => setFlashMode("browse")} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "8px 12px", fontWeight: 700, cursor: "pointer" }}>
+                            Volver a lista
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </section>
