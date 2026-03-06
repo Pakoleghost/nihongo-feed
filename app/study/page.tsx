@@ -222,6 +222,8 @@ const L5_ADJECTIVES_FROM_URL: Array<{ kana: string; es: string; kind: AdjKind }>
   { kana: "あつい", es: "caluroso", kind: "i" },
   { kana: "さむい", es: "frío", kind: "i" },
   { kana: "いそがしい", es: "ocupado", kind: "i" },
+  { kana: "おおきい", es: "grande", kind: "i" },
+  { kana: "ちいさい", es: "pequeño", kind: "i" },
   { kana: "むずかしい", es: "difícil", kind: "i" },
   { kana: "やさしい", es: "fácil / amable", kind: "i" },
   { kana: "たかい", es: "caro / alto", kind: "i" },
@@ -229,19 +231,17 @@ const L5_ADJECTIVES_FROM_URL: Array<{ kana: string; es: string; kind: AdjKind }>
   { kana: "ひくい", es: "bajo", kind: "i" },
   { kana: "おもしろい", es: "interesante", kind: "i" },
   { kana: "おいしい", es: "delicioso", kind: "i" },
-  { kana: "きれい", es: "bonito / limpio", kind: "na" },
-  { kana: "げんき", es: "saludable / animado", kind: "na" },
-  { kana: "しずか", es: "tranquilo", kind: "na" },
-  { kana: "にぎやか", es: "animado", kind: "na" },
-  { kana: "ひま", es: "con tiempo libre", kind: "na" },
-  { kana: "しんせつ", es: "amable", kind: "na" },
+  { kana: "まずい", es: "malo (sabor)", kind: "i" },
   { kana: "すき", es: "gustar", kind: "na" },
   { kana: "きらい", es: "no gustar", kind: "na" },
+  { kana: "しずか", es: "tranquilo", kind: "na" },
+  { kana: "にぎやか", es: "animado", kind: "na" },
+  { kana: "きれい", es: "bonito / limpio", kind: "na" },
+  { kana: "げんき", es: "saludable / animado", kind: "na" },
+  { kana: "ひま", es: "con tiempo libre", kind: "na" },
+  { kana: "しんせつ", es: "amable", kind: "na" },
   { kana: "べんり", es: "conveniente", kind: "na" },
   { kana: "ゆうめい", es: "famoso", kind: "na" },
-  { kana: "だいじょうぶ", es: "estar bien", kind: "na" },
-  { kana: "たいへん", es: "duro / serio", kind: "na" },
-  { kana: "すてき", es: "maravilloso", kind: "na" },
 ];
 
 function toAdjNegativePoliteFromUrl(adj: { kana: string; kind: AdjKind }) {
@@ -1376,6 +1376,7 @@ function StudyContent() {
   );
   const activeFlashItems = activeFlashSet?.items || [];
   const activeFlashDeck = flashCardsDeck.length > 0 ? flashCardsDeck : activeFlashItems;
+  const isFlashFocusMode = flashMode === "cards" || flashMode === "learn";
   const activeFlashCard = activeFlashDeck[flashCardIndex] || null;
   const flashCardProgressPct = activeFlashDeck.length > 0 ? Math.round(((flashCardIndex + 1) / activeFlashDeck.length) * 100) : 0;
 
@@ -1890,8 +1891,33 @@ function StudyContent() {
             )}
 
             {flashLessonFolder !== null && activeFlashSet && (
-              <div ref={flashFocusRef} style={{ marginTop: 10, display: "grid", gap: 12 }}>
-                <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
+              <div
+                ref={flashFocusRef}
+                onClick={() => {
+                  if (isFlashFocusMode) setFlashMode("browse");
+                }}
+                style={
+                  isFlashFocusMode
+                    ? {
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 70,
+                        background: "rgba(17,17,20,.42)",
+                        padding: "max(12px,env(safe-area-inset-top)) 12px 12px",
+                        overflowY: "auto",
+                      }
+                    : { marginTop: 10, display: "grid", gap: 12 }
+                }
+              >
+                <div
+                  onClick={(event) => event.stopPropagation()}
+                  style={
+                    isFlashFocusMode
+                      ? { maxWidth: 920, margin: "0 auto", display: "grid", gap: 12 }
+                      : { display: "grid", gap: 12 }
+                  }
+                >
+                  <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                     <div>
                       <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>
@@ -1901,6 +1927,11 @@ function StudyContent() {
                       <div style={{ marginTop: 4, color: "#667085", fontSize: 13 }}>{activeFlashSet.description}</div>
                     </div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {isFlashFocusMode && (
+                        <button type="button" onClick={() => setFlashMode("browse")} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                          Cerrar práctica
+                        </button>
+                      )}
                       <button type="button" onClick={() => setFlashSetId(null)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
                         Cambiar set
                       </button>
@@ -2077,6 +2108,7 @@ function StudyContent() {
                     )}
                   </div>
                 )}
+              </div>
               </div>
             )}
           </section>
