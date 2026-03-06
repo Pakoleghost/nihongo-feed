@@ -215,6 +215,53 @@ const L6_TE_FROM_URL: Array<{ dict: string; es: string; te: string }> = [
   { dict: "する", es: "hacer", te: "して" },
 ];
 
+const L5_ADJECTIVES_FROM_URL: Array<{ kana: string; es: string; kind: AdjKind }> = [
+  { kana: "いい", es: "bueno", kind: "i" },
+  { kana: "あたらしい", es: "nuevo", kind: "i" },
+  { kana: "ふるい", es: "viejo", kind: "i" },
+  { kana: "あつい", es: "caluroso", kind: "i" },
+  { kana: "さむい", es: "frío", kind: "i" },
+  { kana: "いそがしい", es: "ocupado", kind: "i" },
+  { kana: "むずかしい", es: "difícil", kind: "i" },
+  { kana: "やさしい", es: "fácil / amable", kind: "i" },
+  { kana: "たかい", es: "caro / alto", kind: "i" },
+  { kana: "やすい", es: "barato", kind: "i" },
+  { kana: "ひくい", es: "bajo", kind: "i" },
+  { kana: "おもしろい", es: "interesante", kind: "i" },
+  { kana: "おいしい", es: "delicioso", kind: "i" },
+  { kana: "きれい", es: "bonito / limpio", kind: "na" },
+  { kana: "げんき", es: "saludable / animado", kind: "na" },
+  { kana: "しずか", es: "tranquilo", kind: "na" },
+  { kana: "にぎやか", es: "animado", kind: "na" },
+  { kana: "ひま", es: "con tiempo libre", kind: "na" },
+  { kana: "しんせつ", es: "amable", kind: "na" },
+  { kana: "すき", es: "gustar", kind: "na" },
+  { kana: "きらい", es: "no gustar", kind: "na" },
+  { kana: "べんり", es: "conveniente", kind: "na" },
+  { kana: "ゆうめい", es: "famoso", kind: "na" },
+  { kana: "だいじょうぶ", es: "estar bien", kind: "na" },
+  { kana: "たいへん", es: "duro / serio", kind: "na" },
+  { kana: "すてき", es: "maravilloso", kind: "na" },
+];
+
+function toAdjNegativePoliteFromUrl(adj: { kana: string; kind: AdjKind }) {
+  if (adj.kana === "いい") return "よくないです";
+  if (adj.kind === "i") return `${adj.kana.slice(0, -1)}くないです`;
+  return `${adj.kana}じゃないです`;
+}
+
+function toAdjPastPoliteFromUrl(adj: { kana: string; kind: AdjKind }) {
+  if (adj.kana === "いい") return "よかったです";
+  if (adj.kind === "i") return `${adj.kana.slice(0, -1)}かったです`;
+  return `${adj.kana}でした`;
+}
+
+function toAdjPastNegativePoliteFromUrl(adj: { kana: string; kind: AdjKind }) {
+  if (adj.kana === "いい") return "よくなかったです";
+  if (adj.kind === "i") return `${adj.kana.slice(0, -1)}くなかったです`;
+  return `${adj.kana}じゃなかったです`;
+}
+
 const LESSONS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 const HIRAGANA: KanaPair[] = [
@@ -1047,17 +1094,16 @@ function buildFlashcardSets() {
     items: mapKanji(4),
   });
 
-  const lesson5Adjs = ALL_ADJECTIVES.filter((adj) => adj.lesson === 5);
   addSet({ id: "l5-vocab", lesson: 5, title: "Vocabulario", description: "Lección 5", items: mapVocab(5) });
   addSet({
     id: "l5-adj-negative",
     lesson: 5,
     title: "Adjetivos · presente negativo",
     description: "Diccionario → presente negativo (formal)",
-    items: lesson5Adjs.map((adj, index) => ({
+    items: L5_ADJECTIVES_FROM_URL.map((adj, index) => ({
       id: `l5-an-${index + 1}`,
       front: `${adj.kana} (${adj.es})`,
-      back: toAdjNegativePolite(adj),
+      back: toAdjNegativePoliteFromUrl(adj),
     })),
   });
   addSet({
@@ -1065,10 +1111,10 @@ function buildFlashcardSets() {
     lesson: 5,
     title: "Adjetivos · pasado afirmativo",
     description: "Diccionario → pasado afirmativo (formal)",
-    items: lesson5Adjs.map((adj, index) => ({
+    items: L5_ADJECTIVES_FROM_URL.map((adj, index) => ({
       id: `l5-ap-${index + 1}`,
       front: `${adj.kana} (${adj.es})`,
-      back: toAdjPastPolite(adj),
+      back: toAdjPastPoliteFromUrl(adj),
     })),
   });
   addSet({
@@ -1076,10 +1122,10 @@ function buildFlashcardSets() {
     lesson: 5,
     title: "Adjetivos · pasado negativo",
     description: "Diccionario → pasado negativo (formal)",
-    items: lesson5Adjs.map((adj, index) => ({
+    items: L5_ADJECTIVES_FROM_URL.map((adj, index) => ({
       id: `l5-apn-${index + 1}`,
       front: `${adj.kana} (${adj.es})`,
-      back: toAdjPastNegativePolite(adj),
+      back: toAdjPastNegativePoliteFromUrl(adj),
     })),
   });
   addSet({
