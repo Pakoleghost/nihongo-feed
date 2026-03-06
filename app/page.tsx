@@ -76,6 +76,21 @@ function formatFeedDate(value?: string) {
   return date.toLocaleDateString("es-ES", { month: "short", day: "numeric" });
 }
 
+type HomeKanaMode = "hiragana" | "katakana";
+type HomeKanaRow = {
+  user_id: string;
+  mode: HomeKanaMode;
+  best_score: number;
+  profiles?: { username?: string | null; full_name?: string | null } | null;
+};
+
+function homeRankBadgeStyles(index: number) {
+  if (index === 0) return { bg: "linear-gradient(135deg,#fbbf24,#f59e0b)", border: "#f59e0b", color: "#111114" };
+  if (index === 1) return { bg: "linear-gradient(135deg,#d1d5db,#9ca3af)", border: "#9ca3af", color: "#111114" };
+  if (index === 2) return { bg: "linear-gradient(135deg,#f59e0b,#b45309)", border: "#b45309", color: "#fff" };
+  return { bg: "#fff", border: "#d1d5db", color: "#6b7280" };
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [posts, setPosts] = useState<any[]>([]);
@@ -94,6 +109,7 @@ export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [fontScale, setFontScale] = useState<"normal" | "large">("normal");
   const [submissionByAssignment, setSubmissionByAssignment] = useState<Record<string, { submitted: boolean; late: boolean }>>({});
+  const [homeKanaLeaders, setHomeKanaLeaders] = useState<Record<HomeKanaMode, HomeKanaRow[]>>({ hiragana: [], katakana: [] });
   const inFlightRef = useRef(false);
   const pullStartY = useRef<number | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -211,6 +227,18 @@ export default function HomePage() {
         .eq("user_id", user.id)
         .or("is_read.eq.false,is_read.is.null");
       setUnreadNotifications(count || 0);
+
+      const { data: kanaRows } = await supabase
+        .from("study_kana_scores")
+        .select("user_id, mode, best_score, profiles:user_id (username, full_name)")
+        .order("best_score", { ascending: false })
+        .order("updated_at", { ascending: true })
+        .limit(120);
+      const parsedRows = (kanaRows || []) as HomeKanaRow[];
+      setHomeKanaLeaders({
+        hiragana: parsedRows.filter((row) => row.mode === "hiragana").slice(0, 3),
+        katakana: parsedRows.filter((row) => row.mode === "katakana").slice(0, 3),
+      });
 
       const { data: mySubs } = await supabase
         .from("posts")
@@ -463,36 +491,58 @@ export default function HomePage() {
                 Tareas
               </button>
             </div>
-            <div style={{ display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
-              <Link href="/study?view=kana" style={{ textDecoration: "none", color: "#0f766e", background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: 999, padding: "7px 10px", fontSize: 12, fontWeight: 800 }}>
-                Kana
-              </Link>
-              <Link href="/study?view=flashcards" style={{ textDecoration: "none", color: "#0f766e", background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: 999, padding: "7px 10px", fontSize: 12, fontWeight: 800 }}>
-                Flashcards
-              </Link>
-              <Link href="/study?view=quiz" style={{ textDecoration: "none", color: "#0f766e", background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: 999, padding: "7px 10px", fontSize: 12, fontWeight: 800 }}>
-                Quiz
-              </Link>
-            </div>
           </div>
         </section>
 
         <section style={{ margin: "0 14px 12px", padding: "14px 16px", borderRadius: 16, border: "1px solid rgba(17,17,20,.07)", background: "linear-gradient(140deg,#f7fffc,#ffffff)", boxShadow: "0 10px 24px rgba(0,0,0,.03)" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 11, letterSpacing: ".08em", textTransform: "uppercase", color: "#0f766e", fontWeight: 800 }}>Estudio activo</div>
-              <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "#111114", letterSpacing: "-.01em" }}>Práctica diaria</div>
-              <p style={{ margin: "6px 0 0", color: "#667085", fontSize: 13 }}>Practica diario con seguimiento y leaderboard.</p>
+              <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "#111114", letterSpacing: "-.01em" }}>Kana Sprint Leaderboard</div>
+              <div style={{ marginTop: 10, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))" }}>
+                {(["hiragana", "katakana"] as HomeKanaMode[]).map((mode) => (
+                  <div key={mode} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, background: "#fff", padding: 10 }}>
+                    <div style={{ fontSize: 11, color: "#6b7280", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>{mode}</div>
+                    <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+                      {(homeKanaLeaders[mode] || []).map((row, index) => (
+                        <div key={`${mode}-${row.user_id}-${index}`} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, fontSize: 12 }}>
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+                            <span
+                              style={{
+                                minWidth: 18,
+                                height: 18,
+                                borderRadius: 999,
+                                border: `1px solid ${homeRankBadgeStyles(index).border}`,
+                                background: homeRankBadgeStyles(index).bg,
+                                color: homeRankBadgeStyles(index).color,
+                                fontSize: 10,
+                                fontWeight: 800,
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                padding: "0 4px",
+                              }}
+                            >
+                              {index + 1}
+                            </span>
+                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {row.profiles?.username || row.profiles?.full_name || "usuario"}
+                            </span>
+                          </span>
+                          <strong style={{ color: "#111114" }}>{row.best_score}</strong>
+                        </div>
+                      ))}
+                      {(homeKanaLeaders[mode] || []).length === 0 && (
+                        <div style={{ color: "#98a2b3", fontSize: 12 }}>Sin puntajes</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div style={{ display: "inline-flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-              <Link href="/study?view=kana" style={{ textDecoration: "none", background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", borderRadius: 999, padding: "9px 14px", fontSize: 13, fontWeight: 800, whiteSpace: "nowrap", boxShadow: "0 8px 18px rgba(44,182,150,.2)" }}>
+            <div style={{ display: "inline-flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end", paddingTop: 18 }}>
+              <Link href="/study?view=kana" style={{ textDecoration: "none", background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", borderRadius: 999, padding: "10px 16px", fontSize: 13, fontWeight: 800, whiteSpace: "nowrap", boxShadow: "0 8px 18px rgba(44,182,150,.2)" }}>
                 Kana Sprint
-              </Link>
-              <Link href="/study?view=flashcards" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", background: "#fff", color: "#222", borderRadius: 999, padding: "9px 14px", fontSize: 13, fontWeight: 800, whiteSpace: "nowrap" }}>
-                Flashcards
-              </Link>
-              <Link href="/study?view=quiz" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", background: "#fff", color: "#222", borderRadius: 999, padding: "9px 14px", fontSize: 13, fontWeight: 800, whiteSpace: "nowrap" }}>
-                Quiz
               </Link>
             </div>
           </div>
@@ -618,7 +668,6 @@ export default function HomePage() {
             <Link href="/resources" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Recursos</Link>
             <Link href="/study?view=kana" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Kana Sprint</Link>
             <Link href="/study?view=flashcards" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Flashcards</Link>
-            <Link href="/study?view=quiz" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Quiz</Link>
             <Link href="/notifications" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><IconBell /> Notificaciones</span>{unreadNotifications > 0 && <span style={{ background: "#ff2d55", color: "#fff", borderRadius: 999, fontSize: 11, fontWeight: 700, padding: "2px 6px" }}>{unreadNotifications}</span>}</Link>
             {myProfile?.is_admin && <Link href="/admin/groups" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconSettings /> Panel maestro</Link>}
             <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: 10 }}>

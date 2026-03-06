@@ -83,6 +83,106 @@ type FlashLearnQuestion = {
   options: string[];
 };
 
+const KANJI_FROM_URL: Record<number, Array<{ kanji: string; hira: string }>> = {
+  3: [
+    { kanji: "一", hira: "いち" },
+    { kanji: "二", hira: "に" },
+    { kanji: "三", hira: "さん" },
+    { kanji: "四", hira: "し" },
+    { kanji: "五", hira: "ご" },
+    { kanji: "六", hira: "ろく" },
+    { kanji: "七", hira: "しち" },
+    { kanji: "八", hira: "はち" },
+    { kanji: "九", hira: "きゅう" },
+    { kanji: "十", hira: "じゅう" },
+    { kanji: "百", hira: "ひゃく" },
+    { kanji: "千", hira: "せん" },
+    { kanji: "万", hira: "まん" },
+    { kanji: "円", hira: "えん" },
+    { kanji: "時", hira: "じ" },
+  ],
+  4: [
+    { kanji: "日", hira: "にち" },
+    { kanji: "本", hira: "ほん" },
+    { kanji: "人", hira: "ひと" },
+    { kanji: "月", hira: "げつ" },
+    { kanji: "火", hira: "か" },
+    { kanji: "水", hira: "すい" },
+    { kanji: "木", hira: "もく" },
+    { kanji: "金", hira: "きん" },
+    { kanji: "土", hira: "ど" },
+    { kanji: "曜", hira: "よう" },
+    { kanji: "上", hira: "うえ" },
+    { kanji: "下", hira: "した" },
+    { kanji: "中", hira: "なか" },
+    { kanji: "半", hira: "はん" },
+    { kanji: "山", hira: "やま" },
+    { kanji: "川", hira: "かわ" },
+    { kanji: "元", hira: "げん" },
+    { kanji: "気", hira: "き" },
+  ],
+  5: [
+    { kanji: "天", hira: "てん" },
+    { kanji: "私", hira: "わたし" },
+    { kanji: "今", hira: "いま" },
+    { kanji: "田", hira: "た" },
+    { kanji: "女", hira: "おんな" },
+    { kanji: "男", hira: "おとこ" },
+    { kanji: "見", hira: "み" },
+    { kanji: "行", hira: "い" },
+    { kanji: "食", hira: "た" },
+    { kanji: "飲", hira: "の" },
+    { kanji: "東", hira: "ひがし" },
+    { kanji: "西", hira: "にし" },
+    { kanji: "南", hira: "みなみ" },
+    { kanji: "北", hira: "きた" },
+    { kanji: "口", hira: "くち" },
+    { kanji: "出", hira: "で" },
+    { kanji: "右", hira: "みぎ" },
+    { kanji: "左", hira: "ひだり" },
+  ],
+  6: [
+    { kanji: "分", hira: "ふん" },
+    { kanji: "先", hira: "せん" },
+    { kanji: "生", hira: "せい" },
+    { kanji: "大", hira: "だい" },
+    { kanji: "学", hira: "がく" },
+    { kanji: "外", hira: "そと" },
+    { kanji: "国", hira: "くに" },
+    { kanji: "京", hira: "きょう" },
+    { kanji: "子", hira: "こ" },
+    { kanji: "小", hira: "ちい" },
+    { kanji: "高", hira: "たか" },
+    { kanji: "校", hira: "こう" },
+    { kanji: "前", hira: "まえ" },
+    { kanji: "後", hira: "あと" },
+    { kanji: "名", hira: "な" },
+    { kanji: "白", hira: "しろ" },
+    { kanji: "雨", hira: "あめ" },
+    { kanji: "書", hira: "か" },
+  ],
+  7: [
+    { kanji: "友", hira: "とも" },
+    { kanji: "間", hira: "あいだ" },
+    { kanji: "家", hira: "いえ" },
+    { kanji: "話", hira: "はな" },
+    { kanji: "少", hira: "すこ" },
+    { kanji: "古", hira: "ふる" },
+    { kanji: "知", hira: "し" },
+    { kanji: "来", hira: "らい" },
+    { kanji: "住", hira: "す" },
+    { kanji: "正", hira: "ただ" },
+    { kanji: "年", hira: "とし" },
+    { kanji: "売", hira: "う" },
+    { kanji: "買", hira: "か" },
+    { kanji: "町", hira: "まち" },
+    { kanji: "長", hira: "なが" },
+    { kanji: "道", hira: "みち" },
+    { kanji: "車", hira: "くるま" },
+    { kanji: "駅", hira: "えき" },
+  ],
+};
+
 const LESSONS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 const HIRAGANA: KanaPair[] = [
@@ -528,6 +628,13 @@ function buildOptionSet(correct: string, wrongCandidates: string[], fallbackPool
   return shuffle([correct, ...wrong.slice(0, 3)]);
 }
 
+function rankBadgeStyles(index: number) {
+  if (index === 0) return { bg: "linear-gradient(135deg,#fbbf24,#f59e0b)", border: "#f59e0b", color: "#111114" };
+  if (index === 1) return { bg: "linear-gradient(135deg,#d1d5db,#9ca3af)", border: "#9ca3af", color: "#111114" };
+  if (index === 2) return { bg: "linear-gradient(135deg,#f59e0b,#b45309)", border: "#b45309", color: "#fff" };
+  return { bg: "#fff", border: "#d1d5db", color: "#6b7280" };
+}
+
 function romajiOptions(pool: KanaPair[], correct: string) {
   const distractors = pickN(
     pool.map((p) => p[1]).filter((r) => r !== correct),
@@ -799,10 +906,9 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
 
 function resolveStudyView(searchParams: Pick<URLSearchParams, "get">): StudyView | null {
   const view = searchParams.get("view");
-  if (view === "kana" || view === "flashcards" || view === "quiz") return view;
+  if (view === "kana" || view === "flashcards") return view;
   if (searchParams.get("kana") === "1") return "kana";
   if (searchParams.get("flashcards") === "1") return "flashcards";
-  if (searchParams.get("quiz") === "1") return "quiz";
   return null;
 }
 
@@ -854,13 +960,11 @@ function buildFlashcardSets() {
     }));
 
   const mapKanji = (lesson: number) =>
-    (GENKI_VOCAB_BY_LESSON[lesson] || [])
-      .filter((item) => item.kanji && item.hira)
-      .map((item, index) => ({
-        id: `l${lesson}-k-${index + 1}`,
-        front: item.kanji,
-        back: item.hira,
-      }));
+    (KANJI_FROM_URL[lesson] || []).map((item, index) => ({
+      id: `l${lesson}-k-${index + 1}`,
+      front: item.kanji,
+      back: item.hira,
+    }));
 
   addSet({
     id: "l1-hiragana",
@@ -1032,6 +1136,7 @@ function StudyContent() {
   const [quizChoice, setQuizChoice] = useState<string | null>(null);
   const [quizFinished, setQuizFinished] = useState(false);
   const quizCardRef = useRef<HTMLDivElement | null>(null);
+  const flashFocusRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const boot = async () => {
@@ -1213,6 +1318,9 @@ function StudyContent() {
     setFlashMode("cards");
     setFlashCardIndex(0);
     setFlashCardFlipped(false);
+    window.setTimeout(() => {
+      flashFocusRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 20);
   };
 
   const buildFlashLearnQuestions = (set: FlashcardSet) => {
@@ -1246,6 +1354,9 @@ function StudyContent() {
     setFlashLearnScore(0);
     setFlashLearnFinished(false);
     setFlashMode("learn");
+    window.setTimeout(() => {
+      flashFocusRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 20);
   };
 
   const currentFlashLearnQ = flashLearnQuestions[flashLearnIndex] || null;
@@ -1322,9 +1433,7 @@ function StudyContent() {
   const pageMeta = selectedView
     ? selectedView === "kana"
       ? { title: "Kana Sprint", subtitle: "Entrena velocidad y precisión de hiragana/katakana." }
-      : selectedView === "flashcards"
-        ? { title: "Flashcards", subtitle: "Carpetas por lección y práctica por set." }
-        : { title: "Quiz", subtitle: "Quizzes configurables para Genki I." }
+      : { title: "Flashcards", subtitle: "Carpetas por lección y práctica por set." }
     : { title: "Study Lab", subtitle: "Selecciona una herramienta y practica por bloques." };
 
   useEffect(() => {
@@ -1378,6 +1487,12 @@ function StudyContent() {
     if (!quizCardRef.current) return;
     quizCardRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [activeTab, currentQ, quizFinished, quizIndex]);
+
+  useEffect(() => {
+    if (activeTab !== "flashcards") return;
+    if (flashMode !== "cards" && flashMode !== "learn") return;
+    flashFocusRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [activeTab, flashMode, flashLearnIndex]);
 
   const answerQuiz = (option: string) => {
     if (!currentQ || quizChoice) return;
@@ -1488,7 +1603,6 @@ function StudyContent() {
           <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 14, padding: 10, display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
             <Link href="/study?view=kana" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "kana" ? "#fff" : "#344054", background: activeTab === "kana" ? "#111114" : "#fff" }}>Kana Sprint</Link>
             <Link href="/study?view=flashcards" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "flashcards" ? "#fff" : "#344054", background: activeTab === "flashcards" ? "#111114" : "#fff" }}>Flashcards</Link>
-            <Link href="/study?view=quiz" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "quiz" ? "#fff" : "#344054", background: activeTab === "quiz" ? "#111114" : "#fff" }}>Quiz</Link>
           </section>
         )}
 
@@ -1503,11 +1617,6 @@ function StudyContent() {
               <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>SRS</div>
               <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Flashcards</div>
               <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Vocab Genki I por lección con repaso inteligente.</p>
-            </Link>
-            <Link href="/study?view=quiz" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, background: "#fff", padding: 14 }}>
-              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Custom</div>
-              <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Quiz</div>
-              <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Partículas, conjugación, vocab y kanji.</p>
             </Link>
           </section>
         )}
@@ -1594,8 +1703,30 @@ function StudyContent() {
                       <div style={{ display: "grid", gap: 6 }}>
                         {(kanaLeaderboard[mode] || []).map((row, index) => (
                           <div key={`${mode}-${row.user_id}-${index}`} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 13 }}>
-                            <span style={{ color: "#344054", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              #{index + 1} {row.profiles?.username || row.profiles?.full_name || "usuario"}
+                            <span style={{ color: "#344054", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                              {index < 3 ? (
+                                <span
+                                  style={{
+                                    minWidth: 20,
+                                    height: 20,
+                                    borderRadius: 999,
+                                    border: `1px solid ${rankBadgeStyles(index).border}`,
+                                    background: rankBadgeStyles(index).bg,
+                                    color: rankBadgeStyles(index).color,
+                                    fontSize: 11,
+                                    fontWeight: 800,
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    padding: "0 5px",
+                                  }}
+                                >
+                                  {index + 1}
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: 11, color: "#6b7280", fontWeight: 800 }}>#{index + 1}</span>
+                              )}
+                              {row.profiles?.username || row.profiles?.full_name || "usuario"}
                             </span>
                             <strong style={{ color: "#111114" }}>{row.best_score}</strong>
                           </div>
@@ -1614,9 +1745,8 @@ function StudyContent() {
 
         {!showHub && activeTab === "flashcards" && (
           <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <h2 style={{ margin: 0, fontSize: 24 }}>Flashcards Genki (L1-L7)</h2>
-              {flashLessonFolder !== null && (
+            {flashLessonFolder !== null && (
+              <div style={{ marginBottom: 10 }}>
                 <button
                   type="button"
                   onClick={() => {
@@ -1628,11 +1758,8 @@ function StudyContent() {
                 >
                   Ver lecciones
                 </button>
-              )}
-            </div>
-            <p style={{ color: "#6b7280", fontSize: 14, margin: "8px 0 14px" }}>
-              Selecciona una carpeta por lección, revisa la lista completa y luego practica con tarjetas o modo aprender.
-            </p>
+              </div>
+            )}
 
             {flashLessonFolder === null && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 10 }}>
@@ -1670,7 +1797,7 @@ function StudyContent() {
             )}
 
             {flashLessonFolder !== null && activeFlashSet && (
-              <div style={{ marginTop: 10, display: "grid", gap: 12 }}>
+              <div ref={flashFocusRef} style={{ marginTop: 10, display: "grid", gap: 12 }}>
                 <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                     <div>
@@ -1867,7 +1994,7 @@ function StudyContent() {
           </section>
         )}
 
-        {!showHub && activeTab === "quiz" && (
+        {false && !showHub && activeTab === "quiz" && (
           <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16 }}>
             <h2 style={{ margin: 0, fontSize: 24 }}>QUIZ</h2>
             <p style={{ color: "#6b7280", fontSize: 14 }}>Customiza tipo, lecciones y cantidad de preguntas.</p>
