@@ -215,33 +215,33 @@ const L6_TE_FROM_URL: Array<{ dict: string; es: string; te: string }> = [
   { dict: "する", es: "hacer", te: "して" },
 ];
 
-const L5_ADJECTIVES_FROM_URL: Array<{ kana: string; es: string; kind: AdjKind }> = [
-  { kana: "いい", es: "bueno", kind: "i" },
+const L5_ADJECTIVES_FROM_URL: Array<{ kana: string; es: string; kind: AdjKind; display?: string }> = [
+  { kana: "おもしろい", es: "interesante; divertido", kind: "i" },
+  { kana: "たのしい", es: "divertido", kind: "i" },
+  { kana: "げんき", display: "げんきな", es: "saludable; enérgico", kind: "na" },
   { kana: "あたらしい", es: "nuevo", kind: "i" },
-  { kana: "ふるい", es: "viejo", kind: "i" },
-  { kana: "あつい", es: "caluroso", kind: "i" },
-  { kana: "さむい", es: "frío", kind: "i" },
-  { kana: "いそがしい", es: "ocupado", kind: "i" },
-  { kana: "おおきい", es: "grande", kind: "i" },
-  { kana: "ちいさい", es: "pequeño", kind: "i" },
-  { kana: "むずかしい", es: "difícil", kind: "i" },
-  { kana: "やさしい", es: "fácil / amable", kind: "i" },
-  { kana: "たかい", es: "caro / alto", kind: "i" },
-  { kana: "やすい", es: "barato", kind: "i" },
-  { kana: "ひくい", es: "bajo", kind: "i" },
-  { kana: "おもしろい", es: "interesante", kind: "i" },
+  { kana: "たかい", es: "caro; alto", kind: "i" },
   { kana: "おいしい", es: "delicioso", kind: "i" },
-  { kana: "まずい", es: "malo (sabor)", kind: "i" },
-  { kana: "すき", es: "gustar", kind: "na" },
-  { kana: "きらい", es: "no gustar", kind: "na" },
-  { kana: "しずか", es: "tranquilo", kind: "na" },
-  { kana: "にぎやか", es: "animado", kind: "na" },
-  { kana: "きれい", es: "bonito / limpio", kind: "na" },
-  { kana: "げんき", es: "saludable / animado", kind: "na" },
-  { kana: "ひま", es: "con tiempo libre", kind: "na" },
-  { kana: "しんせつ", es: "amable", kind: "na" },
-  { kana: "べんり", es: "conveniente", kind: "na" },
-  { kana: "ゆうめい", es: "famoso", kind: "na" },
+  { kana: "かっこいい", es: "guapo", kind: "i" },
+  { kana: "ちいさい", es: "pequeño", kind: "i" },
+  { kana: "はやい", es: "temprano", kind: "i" },
+  { kana: "こわい", es: "espeluznante; que da miedo", kind: "i" },
+  { kana: "すき", display: "すきな", es: "gustar", kind: "na" },
+  { kana: "いそがしい", es: "ocupado (personas/días)", kind: "i" },
+  { kana: "つまらない", es: "aburrido", kind: "i" },
+  { kana: "きらい", display: "きらいな", es: "no gustar; disgustar", kind: "na" },
+  { kana: "おおきい", es: "grande", kind: "i" },
+  { kana: "いい", es: "bueno", kind: "i" },
+  { kana: "ふるい", es: "viejo (cosa, no se usa para personas)", kind: "i" },
+  { kana: "しずか", display: "しずかな", es: "tranquilo", kind: "na" },
+  { kana: "さむい", es: "frío (tiempo, no cosas)", kind: "i" },
+  { kana: "ひま", display: "ひまな", es: "desocupado; libre (tiempo)", kind: "na" },
+  { kana: "むずかしい", es: "difícil", kind: "i" },
+  { kana: "あつい", es: "caliente (cosa); caluroso (tiempo)", kind: "i" },
+  { kana: "にぎやか", display: "にぎやかな", es: "animado", kind: "na" },
+  { kana: "やさしい", es: "fácil (problema); amable (persona)", kind: "i" },
+  { kana: "きれい", display: "きれいな", es: "bonito; limpio", kind: "na" },
+  { kana: "やすい", es: "económico; barato (cosa)", kind: "i" },
 ];
 
 function toAdjNegativePoliteFromUrl(adj: { kana: string; kind: AdjKind }) {
@@ -1102,7 +1102,7 @@ function buildFlashcardSets() {
     description: "Diccionario → presente negativo (formal)",
     items: L5_ADJECTIVES_FROM_URL.map((adj, index) => ({
       id: `l5-an-${index + 1}`,
-      front: `${adj.kana} (${adj.es})`,
+      front: `${adj.display || adj.kana} (${adj.es})`,
       back: toAdjNegativePoliteFromUrl(adj),
     })),
   });
@@ -1113,7 +1113,7 @@ function buildFlashcardSets() {
     description: "Diccionario → pasado afirmativo (formal)",
     items: L5_ADJECTIVES_FROM_URL.map((adj, index) => ({
       id: `l5-ap-${index + 1}`,
-      front: `${adj.kana} (${adj.es})`,
+      front: `${adj.display || adj.kana} (${adj.es})`,
       back: toAdjPastPoliteFromUrl(adj),
     })),
   });
@@ -1124,7 +1124,7 @@ function buildFlashcardSets() {
     description: "Diccionario → pasado negativo (formal)",
     items: L5_ADJECTIVES_FROM_URL.map((adj, index) => ({
       id: `l5-apn-${index + 1}`,
-      front: `${adj.kana} (${adj.es})`,
+      front: `${adj.display || adj.kana} (${adj.es})`,
       back: toAdjPastNegativePoliteFromUrl(adj),
     })),
   });
@@ -1593,6 +1593,15 @@ function StudyContent() {
     setQuizChoice(option);
     if (option === currentQ.correct) setQuizScore((v) => v + 1);
   };
+
+  useEffect(() => {
+    if (!isFlashFocusMode) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isFlashFocusMode]);
 
   const nextQuiz = () => {
     if (!currentQ) return;
