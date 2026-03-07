@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -100,6 +100,17 @@ function formatCountdown(ms: number) {
   if (days > 0) return `${days}d ${hours}h ${mins}m`;
   if (hours > 0) return `${hours}h ${mins}m ${secs}s`;
   return `${mins}m ${secs}s`;
+}
+
+function parseDismissedList(raw: string | null) {
+  if (!raw) return [] as string[];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [] as string[];
+    return parsed.filter((value): value is string => typeof value === "string");
+  } catch {
+    return [] as string[];
+  }
 }
 
 type HomeKanaMode = "hiragana" | "katakana";
@@ -307,9 +318,6 @@ export default function HomePage() {
         next[pid] = { submitted: true, late };
       });
       setSubmissionByAssignment(next);
-
-      const saved = localStorage.getItem("dismissed_posts");
-      if (saved) setDismissedAnnouncements(JSON.parse(saved));
     }
     inFlightRef.current = false;
     setLoading(false);
@@ -343,6 +351,27 @@ export default function HomePage() {
     }, 6000);
     return () => clearInterval(timer);
   }, [myProfile, fetchData]);
+
+  useEffect(() => {
+    if (!currentUserId) return;
+    const scopedKey = `dismissed_posts:${currentUserId}`;
+    const scoped = parseDismissedList(localStorage.getItem(scopedKey));
+    const legacy = parseDismissedList(localStorage.getItem("dismissed_posts"));
+    const merged = Array.from(new Set([...legacy, ...scoped]));
+    setDismissedAnnouncements(merged);
+    try {
+      localStorage.setItem(scopedKey, JSON.stringify(merged));
+    } catch {}
+  }, [currentUserId]);
+
+  useEffect(() => {
+    if (!currentUserId) return;
+    const scopedKey = `dismissed_posts:${currentUserId}`;
+    const deduped = Array.from(new Set(dismissedAnnouncements.map((id) => String(id))));
+    try {
+      localStorage.setItem(scopedKey, JSON.stringify(deduped));
+    } catch {}
+  }, [dismissedAnnouncements, currentUserId]);
 
   useEffect(() => {
     if (!currentUserId) return;
@@ -426,12 +455,13 @@ export default function HomePage() {
 
   const visiblePosts = posts.filter((p) => canSeePost(p));
   const totalVisiblePosts = allFeedRows.filter((p) => canSeePostForProfile(p, myProfile));
+  const dismissedSet = useMemo(() => new Set(dismissedAnnouncements.map((id) => String(id))), [dismissedAnnouncements]);
   const pinnedAnnouncementsBase = visiblePosts.filter(
     (p) =>
       p.profiles?.is_admin &&
       !p.parent_assignment_id &&
       (p.type === "announcement" || (p.type === "assignment" && isTaskAnnouncementSubtype(p.assignment_subtype))) &&
-      !dismissedAnnouncements.includes(p.id),
+      !dismissedSet.has(String(p.id)),
   );
   const regularFeedBase = visiblePosts.filter(
     (p) =>
@@ -439,7 +469,7 @@ export default function HomePage() {
         p.profiles?.is_admin &&
         !p.parent_assignment_id &&
         (p.type === "announcement" || (p.type === "assignment" && isTaskAnnouncementSubtype(p.assignment_subtype))) &&
-        !dismissedAnnouncements.includes(p.id)
+        !dismissedSet.has(String(p.id))
       ),
   );
   const totalRegularFeedBase = totalVisiblePosts.filter(
@@ -448,7 +478,7 @@ export default function HomePage() {
         p.profiles?.is_admin &&
         !p.parent_assignment_id &&
         (p.type === "announcement" || (p.type === "assignment" && isTaskAnnouncementSubtype(p.assignment_subtype))) &&
-        !dismissedAnnouncements.includes(p.id)
+        !dismissedSet.has(String(p.id))
       ),
   );
 
@@ -623,7 +653,15 @@ export default function HomePage() {
         {pinnedAnnouncements.map(post => (
           <div key={post.id} style={{ margin: "0 14px 12px", padding: "16px 16px 14px 18px", borderRadius: "16px", backgroundColor: post.type === 'assignment' ? "#f2fffa" : "#f4fbff", border: "1px solid rgba(17,17,20,0.06)", position: "relative", boxShadow: "0 8px 24px rgba(0,0,0,.025)" }}>
             <div style={{ position: "absolute", left: "0", top: "12px", bottom: "12px", width: "4px", borderRadius: "0 6px 6px 0", background: post.type === "assignment" ? "#2cb696" : "#58a8ff" }} />
-            <button onClick={() => { const newD = [...dismissedAnnouncements, post.id]; setDismissedAnnouncements(newD); localStorage.setItem("dismissed_posts", JSON.stringify(newD)); }} style={{ position: "absolute", top: "10px", right: "10px", background: "#fff", border: "1px solid rgba(17,17,20,.08)", color: "#8b8b93", cursor: "pointer", fontSize: "13px", width: "24px", height: "24px", borderRadius: "999px", lineHeight: 1 }}>✕</button>
+            <button
+              onClick={() => {
+                const id = String(post.id);
+                setDismissedAnnouncements((prev) => (prev.includes(id) ? prev : [...prev, id]));
+              }}
+              style={{ position: "absolute", top: "10px", right: "10px", background: "#fff", border: "1px solid rgba(17,17,20,.08)", color: "#8b8b93", cursor: "pointer", fontSize: "13px", width: "24px", height: "24px", borderRadius: "999px", lineHeight: 1 }}
+            >
+              ✕
+            </button>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "10px", fontSize: "11px", fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase", color: "#3d81ce" }}>
               <span style={{ width: "6px", height: "6px", borderRadius: "999px", background: "currentColor" }} />
               {post.type === "assignment" ? "Anuncio de tarea" : "Anuncio"}
