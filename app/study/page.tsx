@@ -58,6 +58,52 @@ type KanaScoreRow = {
     full_name?: string | null;
   } | null;
 };
+type KanaRoundPayload = { mode: KanaMode; score: number; answers: number; durationMs: number };
+
+function getLocalWeekStart(date = new Date()) {
+  const value = new Date(date);
+  const day = value.getDay();
+  const diff = day === 0 ? 6 : day - 1;
+  value.setHours(0, 0, 0, 0);
+  value.setDate(value.getDate() - diff);
+  return value;
+}
+
+function getNextLocalWeekStart(date = new Date()) {
+  const start = getLocalWeekStart(date);
+  start.setDate(start.getDate() + 7);
+  return start;
+}
+
+function formatCountdown(ms: number) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const days = Math.floor(total / 86400);
+  const hours = Math.floor((total % 86400) / 3600);
+  const mins = Math.floor((total % 3600) / 60);
+  const secs = total % 60;
+  if (days > 0) return `${days}d ${hours}h ${mins}m`;
+  if (hours > 0) return `${hours}h ${mins}m ${secs}s`;
+  return `${mins}m ${secs}s`;
+}
+
+function isSameLocalWeek(isoA?: string | null, isoB?: string | null) {
+  if (!isoA || !isoB) return false;
+  const a = new Date(isoA);
+  const b = new Date(isoB);
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return false;
+  return getLocalWeekStart(a).getTime() === getLocalWeekStart(b).getTime();
+}
+
+function getKanaRunValidation(score: number, answers: number, durationMs: number) {
+  const durationSec = Math.max(1, durationMs / 1000);
+  const answersPerSecond = answers / durationSec;
+  const reasons: string[] = [];
+  if (score < 0 || answers < 0 || score > answers) reasons.push("conteo inválido");
+  if (durationMs < 45_000 || durationMs > 75_000) reasons.push("duración inválida");
+  if (score > 90) reasons.push("score fuera de rango humano");
+  if (answersPerSecond > 4.5) reasons.push("velocidad no plausible");
+  return { ok: reasons.length === 0, reasons };
+}
 
 type StudyView = "kana" | "flashcards" | "quiz";
 
@@ -1187,6 +1233,7 @@ function StudyContent() {
   const [kanaBestByMode, setKanaBestByMode] = useState<Record<KanaMode, number>>({ hiragana: 0, katakana: 0 });
   const [kanaCountdown, setKanaCountdown] = useState<number | null>(null);
   const [kanaPenalty, setKanaPenalty] = useState(0);
+  const [weeklyResetLabel, setWeeklyResetLabel] = useState("");
   const [kanaLeaderboard, setKanaLeaderboard] = useState<Record<KanaMode, KanaScoreRow[]>>({ hiragana: [], katakana: [] });
   const [leaderboardUnavailable, setLeaderboardUnavailable] = useState(false);
   const [kanaQuestion, setKanaQuestion] = useState<{ char: string; correct: string; options: string[] }>({
@@ -1195,7 +1242,10 @@ function StudyContent() {
     options: ["a", "i", "u", "e"],
   });
   const kanaRoundSubmittedRef = useRef(false);
-  const pendingKanaSubmitRef = useRef<{ mode: KanaMode; score: number } | null>(null);
+  const pendingKanaSubmitRef = useRef<KanaRoundPayload | null>(null);
+  const kanaRoundStartedAtRef = useRef<number | null>(null);
+  const kanaAnswersCountRef = useRef(0);
+  const weekKeyRef = useRef(getLocalWeekStart().toISOString().slice(0, 10));
 
   const [flashLessonFolder, setFlashLessonFolder] = useState<number | null>(null);
   const [flashSetId, setFlashSetId] = useState<string | null>(null);
@@ -1228,7 +1278,8 @@ function StudyContent() {
       setCurrentUserId(user?.id || null);
       setUserKey(key);
       try {
-        const rawBest = localStorage.getItem(`study-kana-best-map-${key}`);
+        const weekKey = getLocalWeekStart().toISOString().slice(0, 10);
+        const rawBest = localStorage.getItem(`study-kana-best-map-${key}-${weekKey}`);
         if (rawBest) {
           const parsed = JSON.parse(rawBest);
           const hira = Number(parsed?.hiragana || 0);
@@ -1266,6 +1317,7 @@ function StudyContent() {
     if (kanaCountdown <= 0) {
       setKanaCountdown(null);
       setKanaRunning(true);
+      kanaRoundStartedAtRef.current = Date.now();
       return;
     }
     const timer = window.setTimeout(() => setKanaCountdown((v) => (v == null ? null : v - 1)), 1000);
@@ -1286,9 +1338,11 @@ function StudyContent() {
   };
 
   const loadKanaLeaderboard = async () => {
+    const weekStartIso = getLocalWeekStart().toISOString();
     const { data, error } = await supabase
       .from("study_kana_scores")
       .select("user_id, mode, best_score, updated_at, profiles:user_id (username, full_name)")
+      .gte("updated_at", weekStartIso)
       .order("best_score", { ascending: false })
       .order("updated_at", { ascending: true })
       .limit(200);
@@ -1304,22 +1358,38 @@ function StudyContent() {
     setLeaderboardUnavailable(false);
   };
 
-  const submitKanaScore = async (mode: KanaMode, score: number) => {
+  const submitKanaScore = async ({ mode, score, answers, durationMs }: KanaRoundPayload) => {
+    const validation = getKanaRunValidation(score, answers, durationMs);
+    if (!validation.ok) {
+      alert(`Partida no válida (${validation.reasons.join(", ")}).`);
+      return;
+    }
+
+    const weekKey = getLocalWeekStart().toISOString().slice(0, 10);
     setKanaBestByMode((prev) => {
       const next: Record<KanaMode, number> = { ...prev, [mode]: Math.max(prev[mode] || 0, score) };
       try {
-        localStorage.setItem(`study-kana-best-map-${userKey}`, JSON.stringify(next));
+        localStorage.setItem(`study-kana-best-map-${userKey}-${weekKey}`, JSON.stringify(next));
       } catch {}
       return next;
     });
 
     if (!currentUserId) {
-      pendingKanaSubmitRef.current = { mode, score };
+      pendingKanaSubmitRef.current = { mode, score, answers, durationMs };
       return;
     }
-    const safeBestScore = Math.max(score, kanaBestByMode[mode] || 0);
+    const { data: existing } = await supabase
+      .from("study_kana_scores")
+      .select("best_score, updated_at")
+      .eq("user_id", currentUserId)
+      .eq("mode", mode)
+      .maybeSingle();
+    const nowIso = new Date().toISOString();
+    const safeBestScore = isSameLocalWeek(existing?.updated_at, nowIso)
+      ? Math.max(Number(existing?.best_score || 0), score)
+      : score;
     const { error } = await supabase.from("study_kana_scores").upsert(
-      { user_id: currentUserId, mode, best_score: safeBestScore, updated_at: new Date().toISOString() },
+      { user_id: currentUserId, mode, best_score: safeBestScore, updated_at: nowIso },
       { onConflict: "user_id,mode" },
     );
     if (error) {
@@ -1332,19 +1402,23 @@ function StudyContent() {
   const startKana = () => {
     if ((kanaRunning || kanaTime < 60) && kanaScore > 0 && !kanaRoundSubmittedRef.current) {
       kanaRoundSubmittedRef.current = true;
-      void submitKanaScore(kanaSet, kanaScore);
+      const durationMs = kanaRoundStartedAtRef.current ? Date.now() - kanaRoundStartedAtRef.current : 60_000;
+      void submitKanaScore({ mode: kanaSet, score: kanaScore, answers: kanaAnswersCountRef.current, durationMs });
     }
     setKanaRunning(false);
     setKanaTime(60);
     setKanaScore(0);
     setKanaPenalty(0);
     setKanaCountdown(3);
+    kanaAnswersCountRef.current = 0;
+    kanaRoundStartedAtRef.current = null;
     kanaRoundSubmittedRef.current = false;
     createKanaQuestion();
   };
 
   const answerKana = (choice: string) => {
     if (!kanaRunning || kanaPenalty > 0 || kanaCountdown !== null || kanaTime <= 0) return;
+    kanaAnswersCountRef.current += 1;
     if (choice === kanaQuestion.correct) {
       setKanaScore((v) => v + 1);
     } else {
@@ -1535,19 +1609,47 @@ function StudyContent() {
   }, []);
 
   useEffect(() => {
+    const tick = () => {
+      const now = new Date();
+      const weekKey = getLocalWeekStart(now).toISOString().slice(0, 10);
+      if (weekKeyRef.current !== weekKey) {
+        weekKeyRef.current = weekKey;
+        setKanaBestByMode({ hiragana: 0, katakana: 0 });
+        try {
+          const rawBest = localStorage.getItem(`study-kana-best-map-${userKey}-${weekKey}`);
+          if (rawBest) {
+            const parsed = JSON.parse(rawBest);
+            setKanaBestByMode({
+              hiragana: Number(parsed?.hiragana || 0) || 0,
+              katakana: Number(parsed?.katakana || 0) || 0,
+            });
+          }
+        } catch {}
+        void loadKanaLeaderboard();
+      }
+      const next = getNextLocalWeekStart(now);
+      setWeeklyResetLabel(formatCountdown(next.getTime() - now.getTime()));
+    };
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [userKey]);
+
+  useEffect(() => {
     if (!currentUserId) return;
     const pending = pendingKanaSubmitRef.current;
     if (!pending) return;
     pendingKanaSubmitRef.current = null;
-    void submitKanaScore(pending.mode, pending.score);
+    void submitKanaScore(pending);
   }, [currentUserId]);
 
   useEffect(() => {
     if (kanaTime > 0) return;
     if (kanaRoundSubmittedRef.current) return;
     kanaRoundSubmittedRef.current = true;
-    void submitKanaScore(kanaSet, kanaScore);
-  }, [kanaTime, kanaSet, kanaScore, currentUserId, kanaBestByMode]);
+    const durationMs = kanaRoundStartedAtRef.current ? Date.now() - kanaRoundStartedAtRef.current : 60_000;
+    void submitKanaScore({ mode: kanaSet, score: kanaScore, answers: kanaAnswersCountRef.current, durationMs });
+  }, [kanaTime, kanaSet, kanaScore]);
 
   useEffect(() => {
     if (quizMode !== "conjugation") return;
@@ -1734,13 +1836,16 @@ function StudyContent() {
               </div>
             </div>
             <p style={{ color: "#6b7280", fontSize: 14 }}>60 segundos. Elige la romanización correcta. Error = penalización de 2 segundos.</p>
+            <div style={{ marginTop: -4, marginBottom: 8, fontSize: 12, color: "#667085", fontWeight: 700 }}>
+              Reinicio semanal en: <span style={{ color: "#111114" }}>{weeklyResetLabel || "..."}</span>
+            </div>
             <div style={{ marginTop: 8, height: 7, borderRadius: 999, background: "#ecedf1", overflow: "hidden" }}>
               <div style={{ height: "100%", width: `${kanaTimePct}%`, background: "linear-gradient(90deg, #34c5a6, #25a98f)" }} />
             </div>
             <div style={{ marginTop: 12, display: "grid", gap: 12, gridTemplateColumns: "minmax(0,1fr)", alignItems: "start" }}>
               <div style={{ border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, padding: 14, background: "linear-gradient(145deg,#ffffff,#f8fafc)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <div style={{ color: "#374151", fontWeight: 700 }}>Tiempo: {kanaTime}s · Score: {kanaScore} · Mejor: {kanaBestByMode[kanaSet] || 0}</div>
+                  <div style={{ color: "#374151", fontWeight: 700 }}>Tiempo: {kanaTime}s · Score: {kanaScore} · Mejor semanal: {kanaBestByMode[kanaSet] || 0}</div>
                   <button
                     type="button"
                     onClick={startKana}

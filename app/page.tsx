@@ -76,6 +76,32 @@ function formatFeedDate(value?: string) {
   return date.toLocaleDateString("es-ES", { month: "short", day: "numeric" });
 }
 
+function getLocalWeekStart(date = new Date()) {
+  const value = new Date(date);
+  const day = value.getDay();
+  const diff = day === 0 ? 6 : day - 1;
+  value.setHours(0, 0, 0, 0);
+  value.setDate(value.getDate() - diff);
+  return value;
+}
+
+function getNextLocalWeekStart(date = new Date()) {
+  const start = getLocalWeekStart(date);
+  start.setDate(start.getDate() + 7);
+  return start;
+}
+
+function formatCountdown(ms: number) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const days = Math.floor(total / 86400);
+  const hours = Math.floor((total % 86400) / 3600);
+  const mins = Math.floor((total % 3600) / 60);
+  const secs = total % 60;
+  if (days > 0) return `${days}d ${hours}h ${mins}m`;
+  if (hours > 0) return `${hours}h ${mins}m ${secs}s`;
+  return `${mins}m ${secs}s`;
+}
+
 type HomeKanaMode = "hiragana" | "katakana";
 type HomeKanaRow = {
   user_id: string;
@@ -111,7 +137,9 @@ export default function HomePage() {
   const [submissionByAssignment, setSubmissionByAssignment] = useState<Record<string, { submitted: boolean; late: boolean }>>({});
   const [homeKanaLeaders, setHomeKanaLeaders] = useState<Record<HomeKanaMode, HomeKanaRow[]>>({ hiragana: [], katakana: [] });
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
+  const [weeklyResetLabel, setWeeklyResetLabel] = useState("");
   const inFlightRef = useRef(false);
+  const homeWeekKeyRef = useRef(getLocalWeekStart().toISOString().slice(0, 10));
   const pullStartY = useRef<number | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
@@ -242,6 +270,7 @@ export default function HomePage() {
       const { data: kanaRows } = await supabase
         .from("study_kana_scores")
         .select("user_id, mode, best_score, profiles:user_id (username, full_name)")
+        .gte("updated_at", getLocalWeekStart().toISOString())
         .order("best_score", { ascending: false })
         .order("updated_at", { ascending: true })
         .limit(120);
@@ -289,6 +318,22 @@ export default function HomePage() {
 
   useEffect(() => {
     void fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date();
+      const weekKey = getLocalWeekStart(now).toISOString().slice(0, 10);
+      if (homeWeekKeyRef.current !== weekKey) {
+        homeWeekKeyRef.current = weekKey;
+        void fetchData({ silent: true });
+      }
+      const next = getNextLocalWeekStart(now);
+      setWeeklyResetLabel(formatCountdown(next.getTime() - now.getTime()));
+    };
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
   }, [fetchData]);
 
   useEffect(() => {
@@ -510,6 +555,9 @@ export default function HomePage() {
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 11, letterSpacing: ".08em", textTransform: "uppercase", color: "#0f766e", fontWeight: 800 }}>Estudio activo</div>
               <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "#111114", letterSpacing: "-.01em" }}>Kana Sprint Leaderboard</div>
+              <div style={{ marginTop: 4, fontSize: 12, color: "#667085", fontWeight: 700 }}>
+                Reset semanal en: <span style={{ color: "#111114" }}>{weeklyResetLabel || "..."}</span>
+              </div>
               <div style={{ marginTop: 10, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))" }}>
                 {(["hiragana", "katakana"] as HomeKanaMode[]).map((mode) => (
                   <div key={mode} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, background: "#fff", padding: 10 }}>
