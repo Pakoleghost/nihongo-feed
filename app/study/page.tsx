@@ -1303,10 +1303,10 @@ function StudyContent() {
   }, [selectedView]);
 
   useEffect(() => {
-    if (!kanaRunning || kanaTime <= 0 || kanaPenalty > 0 || kanaCountdown !== null) return;
+    if (!kanaRunning || kanaTime <= 0 || kanaCountdown !== null) return;
     const timer = window.setTimeout(() => setKanaTime((v) => v - 1), 1000);
     return () => window.clearTimeout(timer);
-  }, [kanaRunning, kanaTime, kanaPenalty, kanaCountdown]);
+  }, [kanaRunning, kanaTime, kanaCountdown]);
 
   useEffect(() => {
     if (kanaTime <= 0) setKanaRunning(false);
