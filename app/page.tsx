@@ -113,6 +113,20 @@ function parseDismissedList(raw: string | null) {
   }
 }
 
+function safeStorageGet(key: string) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeStorageSet(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {}
+}
+
 type HomeKanaMode = "hiragana" | "katakana";
 type HomeKanaRow = {
   user_id: string;
@@ -355,22 +369,18 @@ export default function HomePage() {
   useEffect(() => {
     if (!currentUserId) return;
     const scopedKey = `dismissed_posts:${currentUserId}`;
-    const scoped = parseDismissedList(localStorage.getItem(scopedKey));
-    const legacy = parseDismissedList(localStorage.getItem("dismissed_posts"));
+    const scoped = parseDismissedList(safeStorageGet(scopedKey));
+    const legacy = parseDismissedList(safeStorageGet("dismissed_posts"));
     const merged = Array.from(new Set([...legacy, ...scoped]));
     setDismissedAnnouncements(merged);
-    try {
-      localStorage.setItem(scopedKey, JSON.stringify(merged));
-    } catch {}
+    safeStorageSet(scopedKey, JSON.stringify(merged));
   }, [currentUserId]);
 
   useEffect(() => {
     if (!currentUserId) return;
     const scopedKey = `dismissed_posts:${currentUserId}`;
     const deduped = Array.from(new Set(dismissedAnnouncements.map((id) => String(id))));
-    try {
-      localStorage.setItem(scopedKey, JSON.stringify(deduped));
-    } catch {}
+    safeStorageSet(scopedKey, JSON.stringify(deduped));
   }, [dismissedAnnouncements, currentUserId]);
 
   useEffect(() => {
