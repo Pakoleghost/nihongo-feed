@@ -14,7 +14,8 @@ type QuizMode = "particles" | "conjugation" | "vocab" | "kanji";
 type ConjType = "te" | "past" | "masu" | "dictionary" | "adj-negative" | "adj-past";
 type VerbKind = "ru" | "u" | "irregular";
 type AdjKind = "i" | "na";
-type KanaMode = "hiragana" | "katakana";
+type KanaMode = "hiragana" | "katakana" | "mixed";
+type VkBucketKey = "l1_2" | "l3_4" | "l5_6" | "l7_8" | "l9_10" | "l11_12";
 
 type VocabCard = {
   id: string;
@@ -51,7 +52,7 @@ type QuizQuestion = {
 
 type KanaScoreRow = {
   user_id: string;
-  mode: KanaMode;
+  mode: string;
   best_score: number;
   updated_at?: string | null;
   profiles?: {
@@ -60,6 +61,7 @@ type KanaScoreRow = {
   } | null;
 };
 type KanaRoundPayload = { mode: KanaMode; score: number; answers: number; durationMs: number };
+type VkRoundPayload = { bucket: VkBucketKey; score: number; answers: number; durationMs: number };
 
 function getLocalWeekStart(date = new Date()) {
   const value = new Date(date);
@@ -106,7 +108,27 @@ function getKanaRunValidation(score: number, answers: number, durationMs: number
   return { ok: reasons.length === 0, reasons };
 }
 
-type StudyView = "kana" | "flashcards" | "quiz";
+function getRunValidation(score: number, answers: number, durationMs: number, maxScore: number, maxAnswersPerSecond: number) {
+  const durationSec = Math.max(1, durationMs / 1000);
+  const answersPerSecond = answers / durationSec;
+  const reasons: string[] = [];
+  if (score < 0 || answers < 0 || score > answers) reasons.push("conteo inválido");
+  if (durationMs < 45_000 || durationMs > 75_000) reasons.push("duración inválida");
+  if (score > maxScore) reasons.push("score fuera de rango humano");
+  if (answersPerSecond > maxAnswersPerSecond) reasons.push("velocidad no plausible");
+  return { ok: reasons.length === 0, reasons };
+}
+
+const VK_BUCKETS: Array<{ key: VkBucketKey; label: string; lessons: number[] }> = [
+  { key: "l1_2", label: "L1-2", lessons: [1, 2] },
+  { key: "l3_4", label: "L3-4", lessons: [3, 4] },
+  { key: "l5_6", label: "L5-6", lessons: [5, 6] },
+  { key: "l7_8", label: "L7-8", lessons: [7, 8] },
+  { key: "l9_10", label: "L9-10", lessons: [9, 10] },
+  { key: "l11_12", label: "L11-12", lessons: [11, 12] },
+];
+
+type StudyView = "kana" | "flashcards" | "quiz" | "sprint";
 
 type FlashcardItem = {
   id: string;
@@ -1032,9 +1054,10 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
 
 function resolveStudyView(searchParams: Pick<URLSearchParams, "get">): StudyView | null {
   const view = searchParams.get("view");
-  if (view === "kana" || view === "flashcards") return view;
+  if (view === "kana" || view === "flashcards" || view === "sprint") return view;
   if (searchParams.get("kana") === "1") return "kana";
   if (searchParams.get("flashcards") === "1") return "flashcards";
+  if (searchParams.get("sprint") === "1") return "sprint";
   return null;
 }
 
@@ -1250,11 +1273,11 @@ function StudyContent() {
   const [kanaRunning, setKanaRunning] = useState(false);
   const [kanaTime, setKanaTime] = useState(60);
   const [kanaScore, setKanaScore] = useState(0);
-  const [kanaBestByMode, setKanaBestByMode] = useState<Record<KanaMode, number>>({ hiragana: 0, katakana: 0 });
+  const [kanaBestByMode, setKanaBestByMode] = useState<Record<KanaMode, number>>({ hiragana: 0, katakana: 0, mixed: 0 });
   const [kanaCountdown, setKanaCountdown] = useState<number | null>(null);
   const [kanaPenalty, setKanaPenalty] = useState(0);
   const [weeklyResetLabel, setWeeklyResetLabel] = useState("");
-  const [kanaLeaderboard, setKanaLeaderboard] = useState<Record<KanaMode, KanaScoreRow[]>>({ hiragana: [], katakana: [] });
+  const [kanaLeaderboard, setKanaLeaderboard] = useState<Record<KanaMode, KanaScoreRow[]>>({ hiragana: [], katakana: [], mixed: [] });
   const [leaderboardUnavailable, setLeaderboardUnavailable] = useState(false);
   const [kanaQuestion, setKanaQuestion] = useState<{ char: string; correct: string; options: string[] }>({
     char: "あ",
@@ -1266,6 +1289,39 @@ function StudyContent() {
   const kanaRoundStartedAtRef = useRef<number | null>(null);
   const kanaAnswersCountRef = useRef(0);
   const weekKeyRef = useRef(getLocalWeekStart().toISOString().slice(0, 10));
+
+  const [vkBucket, setVkBucket] = useState<VkBucketKey>("l1_2");
+  const [vkRunning, setVkRunning] = useState(false);
+  const [vkTime, setVkTime] = useState(60);
+  const [vkScore, setVkScore] = useState(0);
+  const [vkPenalty, setVkPenalty] = useState(0);
+  const [vkCountdown, setVkCountdown] = useState<number | null>(null);
+  const [vkBestByBucket, setVkBestByBucket] = useState<Record<VkBucketKey, number>>({
+    l1_2: 0,
+    l3_4: 0,
+    l5_6: 0,
+    l7_8: 0,
+    l9_10: 0,
+    l11_12: 0,
+  });
+  const [vkLeaderboard, setVkLeaderboard] = useState<Record<VkBucketKey, KanaScoreRow[]>>({
+    l1_2: [],
+    l3_4: [],
+    l5_6: [],
+    l7_8: [],
+    l9_10: [],
+    l11_12: [],
+  });
+  const [vkQuestion, setVkQuestion] = useState<{ prompt: string; correct: string; options: string[]; hint: string }>({
+    prompt: "だいがく",
+    correct: "universidad; instituto",
+    options: ["universidad; instituto", "escuela", "libro", "agua"],
+    hint: "Significado",
+  });
+  const vkRoundSubmittedRef = useRef(false);
+  const pendingVkSubmitRef = useRef<VkRoundPayload | null>(null);
+  const vkRoundStartedAtRef = useRef<number | null>(null);
+  const vkAnswersCountRef = useRef(0);
 
   const [flashLessonFolder, setFlashLessonFolder] = useState<number | null>(null);
   const [flashSetId, setFlashSetId] = useState<string | null>(null);
@@ -1304,9 +1360,23 @@ function StudyContent() {
           const parsed = JSON.parse(rawBest);
           const hira = Number(parsed?.hiragana || 0);
           const kata = Number(parsed?.katakana || 0);
+          const mixed = Number(parsed?.mixed || 0);
           setKanaBestByMode({
             hiragana: Number.isNaN(hira) ? 0 : hira,
             katakana: Number.isNaN(kata) ? 0 : kata,
+            mixed: Number.isNaN(mixed) ? 0 : mixed,
+          });
+        }
+        const rawVkBest = localStorage.getItem(`study-vk-best-map-${key}-${weekKey}`);
+        if (rawVkBest) {
+          const parsed = JSON.parse(rawVkBest);
+          setVkBestByBucket({
+            l1_2: Number(parsed?.l1_2 || 0) || 0,
+            l3_4: Number(parsed?.l3_4 || 0) || 0,
+            l5_6: Number(parsed?.l5_6 || 0) || 0,
+            l7_8: Number(parsed?.l7_8 || 0) || 0,
+            l9_10: Number(parsed?.l9_10 || 0) || 0,
+            l11_12: Number(parsed?.l11_12 || 0) || 0,
           });
         }
       } catch {}
@@ -1350,7 +1420,7 @@ function StudyContent() {
     return () => window.clearTimeout(timer);
   }, [kanaPenalty]);
 
-  const kanaPool = kanaSet === "hiragana" ? HIRAGANA : KATAKANA;
+  const kanaPool = kanaSet === "hiragana" ? HIRAGANA : kanaSet === "katakana" ? KATAKANA : [...HIRAGANA, ...KATAKANA];
 
   const createKanaQuestion = () => {
     const [char, romaji] = kanaPool[Math.floor(Math.random() * kanaPool.length)];
@@ -1374,12 +1444,13 @@ function StudyContent() {
     const rows = (data || []) as KanaScoreRow[];
     const hira = rows.filter((r) => r.mode === "hiragana").slice(0, 10);
     const kata = rows.filter((r) => r.mode === "katakana").slice(0, 10);
-    setKanaLeaderboard({ hiragana: hira, katakana: kata });
+    const mixed = rows.filter((r) => r.mode === "mixed").slice(0, 10);
+    setKanaLeaderboard({ hiragana: hira, katakana: kata, mixed });
     setLeaderboardUnavailable(false);
   };
 
   const submitKanaScore = async ({ mode, score, answers, durationMs }: KanaRoundPayload) => {
-    const validation = getKanaRunValidation(score, answers, durationMs);
+    const validation = getRunValidation(score, answers, durationMs, 90, 4.5);
     if (!validation.ok) {
       alert(`Partida no válida (${validation.reasons.join(", ")}).`);
       return;
@@ -1419,6 +1490,119 @@ function StudyContent() {
     await loadKanaLeaderboard();
   };
 
+  const vkBucketConfig = useMemo(() => VK_BUCKETS.find((bucket) => bucket.key === vkBucket) || VK_BUCKETS[0], [vkBucket]);
+  const vkVocabPool = useMemo(
+    () =>
+      vkBucketConfig.lessons.flatMap((lesson) =>
+        (GENKI_VOCAB_BY_LESSON[lesson] || []).map((item, index) => ({
+          id: `l${lesson}-v-${index}`,
+          jp: item.kanji || item.hira,
+          es: item.es,
+        })),
+      ),
+    [vkBucketConfig],
+  );
+  const vkKanjiPool = useMemo(
+    () =>
+      vkBucketConfig.lessons.flatMap((lesson) =>
+        (GENKI_KANJI_BY_LESSON[lesson] || []).map((item, index) => ({
+          id: `l${lesson}-k-${index}`,
+          kanji: item.kanji,
+          hira: item.hira,
+        })),
+      ),
+    [vkBucketConfig],
+  );
+
+  const createVkQuestion = () => {
+    const canUseKanji = vkKanjiPool.length >= 4;
+    const canUseVocab = vkVocabPool.length >= 4;
+    if (!canUseKanji && !canUseVocab) return;
+
+    const useKanji = canUseKanji && (!canUseVocab || Math.random() < 0.45);
+    if (useKanji) {
+      const picked = vkKanjiPool[Math.floor(Math.random() * vkKanjiPool.length)];
+      const options = buildOptionSet(
+        picked.hira,
+        vkKanjiPool.filter((row) => row.id !== picked.id).map((row) => row.hira),
+        vkKanjiPool.map((row) => row.hira),
+      );
+      setVkQuestion({ prompt: picked.kanji, correct: picked.hira, options, hint: "Lectura" });
+      return;
+    }
+
+    const picked = vkVocabPool[Math.floor(Math.random() * vkVocabPool.length)];
+    const options = buildOptionSet(
+      picked.es,
+      vkVocabPool.filter((row) => row.id !== picked.id).map((row) => row.es),
+      vkVocabPool.map((row) => row.es),
+    );
+    setVkQuestion({ prompt: picked.jp, correct: picked.es, options, hint: "Significado" });
+  };
+
+  const loadVkLeaderboard = async () => {
+    const weekStartIso = getLocalWeekStart().toISOString();
+    const modeKeys = VK_BUCKETS.map((bucket) => `vk:${bucket.key}`);
+    const { data, error } = await supabase
+      .from("study_kana_scores")
+      .select("user_id, mode, best_score, updated_at, profiles:user_id (username, full_name)")
+      .gte("updated_at", weekStartIso)
+      .in("mode", modeKeys)
+      .order("best_score", { ascending: false })
+      .order("updated_at", { ascending: true })
+      .limit(300);
+    if (error) return;
+    const rows = (data || []) as KanaScoreRow[];
+    const next: Record<VkBucketKey, KanaScoreRow[]> = {
+      l1_2: [],
+      l3_4: [],
+      l5_6: [],
+      l7_8: [],
+      l9_10: [],
+      l11_12: [],
+    };
+    VK_BUCKETS.forEach((bucket) => {
+      next[bucket.key] = rows.filter((row) => row.mode === `vk:${bucket.key}`).slice(0, 10);
+    });
+    setVkLeaderboard(next);
+  };
+
+  const submitVkScore = async ({ bucket, score, answers, durationMs }: VkRoundPayload) => {
+    const validation = getRunValidation(score, answers, durationMs, 85, 4);
+    if (!validation.ok) {
+      alert(`Partida no válida (${validation.reasons.join(", ")}).`);
+      return;
+    }
+    const weekKey = getLocalWeekStart().toISOString().slice(0, 10);
+    setVkBestByBucket((prev) => {
+      const next = { ...prev, [bucket]: Math.max(prev[bucket] || 0, score) };
+      try {
+        localStorage.setItem(`study-vk-best-map-${userKey}-${weekKey}`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+    if (!currentUserId) {
+      pendingVkSubmitRef.current = { bucket, score, answers, durationMs };
+      return;
+    }
+    const mode = `vk:${bucket}`;
+    const { data: existing } = await supabase
+      .from("study_kana_scores")
+      .select("best_score, updated_at")
+      .eq("user_id", currentUserId)
+      .eq("mode", mode)
+      .maybeSingle();
+    const nowIso = new Date().toISOString();
+    const safeBestScore = isSameLocalWeek(existing?.updated_at, nowIso)
+      ? Math.max(Number(existing?.best_score || 0), score)
+      : score;
+    const { error } = await supabase
+      .from("study_kana_scores")
+      .upsert({ user_id: currentUserId, mode, best_score: safeBestScore, updated_at: nowIso }, { onConflict: "user_id,mode" });
+    if (error) return;
+    await loadVkLeaderboard();
+  };
+
   const startKana = () => {
     if ((kanaRunning || kanaTime < 60) && kanaScore > 0 && !kanaRoundSubmittedRef.current) {
       kanaRoundSubmittedRef.current = true;
@@ -1445,6 +1629,63 @@ function StudyContent() {
       setKanaPenalty(2);
     }
     createKanaQuestion();
+  };
+
+  useEffect(() => {
+    if (!vkRunning || vkTime <= 0 || vkCountdown !== null) return;
+    const timer = window.setTimeout(() => setVkTime((v) => v - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [vkRunning, vkTime, vkCountdown]);
+
+  useEffect(() => {
+    if (vkTime <= 0) setVkRunning(false);
+  }, [vkTime]);
+
+  useEffect(() => {
+    if (vkCountdown === null) return;
+    if (vkCountdown <= 0) {
+      setVkCountdown(null);
+      setVkRunning(true);
+      vkRoundStartedAtRef.current = Date.now();
+      createVkQuestion();
+      return;
+    }
+    const timer = window.setTimeout(() => setVkCountdown((v) => (v == null ? null : v - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [vkCountdown]);
+
+  useEffect(() => {
+    if (vkPenalty <= 0) return;
+    const timer = window.setTimeout(() => setVkPenalty((v) => Math.max(0, v - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [vkPenalty]);
+
+  const startVkSprint = () => {
+    if ((vkRunning || vkTime < 60) && vkScore > 0 && !vkRoundSubmittedRef.current) {
+      vkRoundSubmittedRef.current = true;
+      const durationMs = vkRoundStartedAtRef.current ? Date.now() - vkRoundStartedAtRef.current : 60_000;
+      void submitVkScore({ bucket: vkBucket, score: vkScore, answers: vkAnswersCountRef.current, durationMs });
+    }
+    setVkRunning(false);
+    setVkTime(60);
+    setVkScore(0);
+    setVkPenalty(0);
+    setVkCountdown(3);
+    vkAnswersCountRef.current = 0;
+    vkRoundStartedAtRef.current = null;
+    vkRoundSubmittedRef.current = false;
+    createVkQuestion();
+  };
+
+  const answerVk = (choice: string) => {
+    if (!vkRunning || vkPenalty > 0 || vkCountdown !== null || vkTime <= 0) return;
+    vkAnswersCountRef.current += 1;
+    if (choice === vkQuestion.correct) {
+      setVkScore((v) => v + 1);
+    } else {
+      setVkPenalty(2);
+    }
+    createVkQuestion();
   };
 
   const flashLessons = useMemo(
@@ -1609,6 +1850,7 @@ function StudyContent() {
 
   const currentQ = quizQuestions[quizIndex] || null;
   const kanaTimePct = Math.max(0, Math.min(100, (kanaTime / 60) * 100));
+  const vkTimePct = Math.max(0, Math.min(100, (vkTime / 60) * 100));
   const quizProgressPct = quizQuestions.length
     ? Math.round(((quizFinished ? quizQuestions.length : quizIndex + 1) / quizQuestions.length) * 100)
     : 0;
@@ -1616,16 +1858,20 @@ function StudyContent() {
   const hasVerbInSelectedLessons = ALL_VERBS.some((v) => quizLessons.includes(v.lesson));
   const hasAdjInSelectedLessons = ALL_ADJECTIVES.some((a) => quizLessons.includes(a.lesson));
   const activeConjTypes: ConjType[] = conjTypes.length > 0 ? [...conjTypes] : ["te"];
+  const vkLeaderboardForBucket = vkLeaderboard[vkBucket] || [];
   const showHub = !selectedView;
 
   const pageMeta = selectedView
     ? selectedView === "kana"
       ? { title: "Kana Sprint", subtitle: "Entrena velocidad y precisión de hiragana/katakana." }
-      : { title: "Flashcards", subtitle: "Carpetas por lección y práctica por set." }
+      : selectedView === "sprint"
+        ? { title: "Vocab + Kanji Sprint", subtitle: "Compite por rangos de lección para mantener nivel justo." }
+        : { title: "Flashcards", subtitle: "Carpetas por lección y práctica por set." }
     : { title: "Study Lab", subtitle: "Selecciona una herramienta y practica por bloques." };
 
   useEffect(() => {
     void loadKanaLeaderboard();
+    void loadVkLeaderboard();
   }, []);
 
   useEffect(() => {
@@ -1634,7 +1880,8 @@ function StudyContent() {
       const weekKey = getLocalWeekStart(now).toISOString().slice(0, 10);
       if (weekKeyRef.current !== weekKey) {
         weekKeyRef.current = weekKey;
-        setKanaBestByMode({ hiragana: 0, katakana: 0 });
+        setKanaBestByMode({ hiragana: 0, katakana: 0, mixed: 0 });
+        setVkBestByBucket({ l1_2: 0, l3_4: 0, l5_6: 0, l7_8: 0, l9_10: 0, l11_12: 0 });
         try {
           const rawBest = localStorage.getItem(`study-kana-best-map-${userKey}-${weekKey}`);
           if (rawBest) {
@@ -1642,10 +1889,24 @@ function StudyContent() {
             setKanaBestByMode({
               hiragana: Number(parsed?.hiragana || 0) || 0,
               katakana: Number(parsed?.katakana || 0) || 0,
+              mixed: Number(parsed?.mixed || 0) || 0,
+            });
+          }
+          const rawVkBest = localStorage.getItem(`study-vk-best-map-${userKey}-${weekKey}`);
+          if (rawVkBest) {
+            const parsedVk = JSON.parse(rawVkBest);
+            setVkBestByBucket({
+              l1_2: Number(parsedVk?.l1_2 || 0) || 0,
+              l3_4: Number(parsedVk?.l3_4 || 0) || 0,
+              l5_6: Number(parsedVk?.l5_6 || 0) || 0,
+              l7_8: Number(parsedVk?.l7_8 || 0) || 0,
+              l9_10: Number(parsedVk?.l9_10 || 0) || 0,
+              l11_12: Number(parsedVk?.l11_12 || 0) || 0,
             });
           }
         } catch {}
         void loadKanaLeaderboard();
+        void loadVkLeaderboard();
       }
       const next = getNextLocalWeekStart(now);
       setWeeklyResetLabel(formatCountdown(next.getTime() - now.getTime()));
@@ -1658,9 +1919,15 @@ function StudyContent() {
   useEffect(() => {
     if (!currentUserId) return;
     const pending = pendingKanaSubmitRef.current;
-    if (!pending) return;
-    pendingKanaSubmitRef.current = null;
-    void submitKanaScore(pending);
+    if (pending) {
+      pendingKanaSubmitRef.current = null;
+      void submitKanaScore(pending);
+    }
+    const pendingVk = pendingVkSubmitRef.current;
+    if (pendingVk) {
+      pendingVkSubmitRef.current = null;
+      void submitVkScore(pendingVk);
+    }
   }, [currentUserId]);
 
   useEffect(() => {
@@ -1670,6 +1937,18 @@ function StudyContent() {
     const durationMs = kanaRoundStartedAtRef.current ? Date.now() - kanaRoundStartedAtRef.current : 60_000;
     void submitKanaScore({ mode: kanaSet, score: kanaScore, answers: kanaAnswersCountRef.current, durationMs });
   }, [kanaTime, kanaSet, kanaScore]);
+
+  useEffect(() => {
+    if (vkTime > 0) return;
+    if (vkRoundSubmittedRef.current) return;
+    vkRoundSubmittedRef.current = true;
+    const durationMs = vkRoundStartedAtRef.current ? Date.now() - vkRoundStartedAtRef.current : 60_000;
+    void submitVkScore({ bucket: vkBucket, score: vkScore, answers: vkAnswersCountRef.current, durationMs });
+  }, [vkTime, vkBucket, vkScore]);
+
+  useEffect(() => {
+    createVkQuestion();
+  }, [vkBucket]);
 
   useEffect(() => {
     if (quizMode !== "conjugation") return;
@@ -1827,6 +2106,7 @@ function StudyContent() {
         {!showHub && (
           <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 14, padding: 10, display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
             <Link href="/study?view=kana" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "kana" ? "#fff" : "#344054", background: activeTab === "kana" ? "#111114" : "#fff" }}>Kana Sprint</Link>
+            <Link href="/study?view=sprint" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "sprint" ? "#fff" : "#344054", background: activeTab === "sprint" ? "#111114" : "#fff" }}>Vocab+Kanji Sprint</Link>
             <Link href="/study?view=flashcards" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "flashcards" ? "#fff" : "#344054", background: activeTab === "flashcards" ? "#111114" : "#fff" }}>Flashcards</Link>
           </section>
         )}
@@ -1837,6 +2117,11 @@ function StudyContent() {
               <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Sprint</div>
               <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Kana Sprint</div>
               <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Hiragana/Katakana con timer, penalty y leaderboard.</p>
+            </Link>
+            <Link href="/study?view=sprint" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, background: "#fff", padding: 14 }}>
+              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Sprint</div>
+              <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Vocab + Kanji</div>
+              <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Compite en buckets por lección para nivelar dificultad.</p>
             </Link>
             <Link href="/study?view=flashcards" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, background: "#fff", padding: 14 }}>
               <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>SRS</div>
@@ -1853,6 +2138,7 @@ function StudyContent() {
               <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3 }}>
                 <button type="button" onClick={() => setKanaSet("hiragana")} style={{ border: 0, borderRadius: 999, padding: "6px 10px", background: kanaSet === "hiragana" ? "#111114" : "transparent", color: kanaSet === "hiragana" ? "#fff" : "#666" }}>Hiragana</button>
                 <button type="button" onClick={() => setKanaSet("katakana")} style={{ border: 0, borderRadius: 999, padding: "6px 10px", background: kanaSet === "katakana" ? "#111114" : "transparent", color: kanaSet === "katakana" ? "#fff" : "#666" }}>Katakana</button>
+                <button type="button" onClick={() => setKanaSet("mixed")} style={{ border: 0, borderRadius: 999, padding: "6px 10px", background: kanaSet === "mixed" ? "#111114" : "transparent", color: kanaSet === "mixed" ? "#fff" : "#666" }}>Mixto</button>
               </div>
             </div>
             <p style={{ color: "#6b7280", fontSize: 14 }}>60 segundos. Elige la romanización correcta. Error = penalización de 2 segundos.</p>
@@ -1925,7 +2211,7 @@ function StudyContent() {
                   <p style={{ margin: "8px 0 0", fontSize: 12, color: "#b42318" }}>Leaderboard temporalmente no disponible.</p>
                 )}
                 <div style={{ marginTop: 10, display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))" }}>
-                  {(["hiragana", "katakana"] as KanaMode[]).map((mode) => (
+                  {(["hiragana", "katakana", "mixed"] as KanaMode[]).map((mode) => (
                     <div key={mode} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: 10, background: "#fbfbfc" }}>
                       <div style={{ fontSize: 12, fontWeight: 800, color: "#111114", marginBottom: 8, textTransform: "capitalize" }}>{mode}</div>
                       <div style={{ display: "grid", gap: 6 }}>
@@ -1965,6 +2251,113 @@ function StudyContent() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {!showHub && activeTab === "sprint" && (
+          <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <h2 style={{ margin: 0, fontSize: 24 }}>Vocab + Kanji Sprint</h2>
+              <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3, flexWrap: "wrap" }}>
+                {VK_BUCKETS.map((bucket) => (
+                  <button
+                    key={bucket.key}
+                    type="button"
+                    onClick={() => setVkBucket(bucket.key)}
+                    style={{ border: 0, borderRadius: 999, padding: "6px 10px", background: vkBucket === bucket.key ? "#111114" : "transparent", color: vkBucket === bucket.key ? "#fff" : "#666", fontWeight: 700, fontSize: 12 }}
+                  >
+                    {bucket.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p style={{ color: "#6b7280", fontSize: 14 }}>60 segundos. Preguntas mixtas de significado y lectura según tu rango.</p>
+            <div style={{ marginTop: -4, marginBottom: 8, fontSize: 12, color: "#667085", fontWeight: 700 }}>
+              Reinicio semanal en: <span style={{ color: "#111114" }}>{weeklyResetLabel || "..."}</span>
+            </div>
+            <div style={{ marginTop: 8, height: 7, borderRadius: 999, background: "#ecedf1", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${vkTimePct}%`, background: "linear-gradient(90deg, #34c5a6, #25a98f)" }} />
+            </div>
+
+            <div style={{ marginTop: 12, display: "grid", gap: 12 }}>
+              <div style={{ border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, padding: 14, background: "linear-gradient(145deg,#ffffff,#f8fafc)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  <div style={{ color: "#374151", fontWeight: 700 }}>Tiempo: {vkTime}s · Score: {vkScore} · Mejor semanal: {vkBestByBucket[vkBucket] || 0}</div>
+                  <button
+                    type="button"
+                    onClick={startVkSprint}
+                    style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", padding: "10px 18px", fontWeight: 800, fontSize: 14, boxShadow: "0 10px 18px rgba(44,182,150,.22)" }}
+                  >
+                    Iniciar Sprint
+                  </button>
+                </div>
+                <div style={{ display: "grid", placeItems: "center", margin: "18px 0 14px", minHeight: 96 }}>
+                  {vkCountdown !== null ? (
+                    <div style={{ fontSize: 64, fontWeight: 900, lineHeight: 1, color: "#111114" }}>{vkCountdown > 0 ? vkCountdown : "GO!"}</div>
+                  ) : (
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: 12, color: "#667085", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>{vkQuestion.hint}</div>
+                      <div style={{ marginTop: 8, fontSize: 44, fontWeight: 900, lineHeight: 1.2, color: "#111114", wordBreak: "break-word" }}>{vkQuestion.prompt}</div>
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 10 }}>
+                  {vkQuestion.options.map((option) => (
+                    <button
+                      key={`${vkQuestion.prompt}-${option}`}
+                      type="button"
+                      onClick={() => answerVk(option)}
+                      disabled={!vkRunning || vkCountdown !== null || vkPenalty > 0 || vkTime <= 0}
+                      style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 12, background: "#fff", padding: "12px 12px", fontSize: 16, fontWeight: 700, cursor: vkRunning && vkCountdown === null && vkPenalty === 0 && vkTime > 0 ? "pointer" : "not-allowed", opacity: vkRunning && vkCountdown === null && vkPenalty === 0 && vkTime > 0 ? 1 : .55 }}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+                {vkPenalty > 0 && (
+                  <div style={{ marginTop: 12, color: "#b42318", fontWeight: 800, fontSize: 13 }}>
+                    Penalización: espera {vkPenalty}s antes de responder.
+                  </div>
+                )}
+              </div>
+
+              <div style={{ border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, padding: 12, background: "#fff" }}>
+                <div style={{ fontSize: 12, letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 800, color: "#7c7c85" }}>Leaderboard Vocab + Kanji · {vkBucketConfig.label}</div>
+                <div style={{ marginTop: 10, display: "grid", gap: 6 }}>
+                  {vkLeaderboardForBucket.map((row, index) => (
+                    <div key={`${vkBucket}-${row.user_id}-${index}`} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 13 }}>
+                      <span style={{ color: "#344054", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                        {index < 3 ? (
+                          <span
+                            style={{
+                              minWidth: 20,
+                              height: 20,
+                              borderRadius: 999,
+                              border: `1px solid ${rankBadgeStyles(index).border}`,
+                              background: rankBadgeStyles(index).bg,
+                              color: rankBadgeStyles(index).color,
+                              fontSize: 11,
+                              fontWeight: 800,
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              padding: "0 5px",
+                            }}
+                          >
+                            {index + 1}
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: 11, color: "#6b7280", fontWeight: 800 }}>#{index + 1}</span>
+                        )}
+                        {row.profiles?.username || row.profiles?.full_name || "usuario"}
+                      </span>
+                      <strong style={{ color: "#111114" }}>{row.best_score}</strong>
+                    </div>
+                  ))}
+                  {vkLeaderboardForBucket.length === 0 && <div style={{ color: "#98a2b3", fontSize: 12 }}>Sin puntajes todavía.</div>}
                 </div>
               </div>
             </div>
