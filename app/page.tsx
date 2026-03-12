@@ -50,6 +50,34 @@ function IconMenu() {
   );
 }
 
+function IconSpark() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconCards() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="4" y="6" width="14" height="11" rx="2.5" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M8 10h6M8 13h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M8.5 4h9A2.5 2.5 0 0 1 20 6.5V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconTarget() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="12" cy="12" r="1.2" fill="currentColor" />
+    </svg>
+  );
+}
+
 function AvatarPlaceholder({ size = 34 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -163,6 +191,7 @@ export default function HomePage() {
   const [homeKanaLeaders, setHomeKanaLeaders] = useState<Record<HomeKanaMode, HomeKanaRow[]>>({ hiragana: [], katakana: [] });
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
   const [weeklyResetLabel, setWeeklyResetLabel] = useState("");
+  const [studyExpanded, setStudyExpanded] = useState(false);
   const inFlightRef = useRef(false);
   const homeWeekKeyRef = useRef(getLocalWeekStart().toISOString().slice(0, 10));
   const pullStartY = useRef<number | null>(null);
@@ -506,6 +535,40 @@ export default function HomePage() {
   const totalFeedCount = feedMode === "tasks"
     ? totalRegularFeedBase.filter((p) => isTaskPost(p)).length
     : totalRegularFeedBase.length;
+  const studyTools = [
+    {
+      href: "/study?view=exam",
+      label: "Exámenes",
+      desc: "Autotests de 20 preguntas por lección.",
+      tone: "linear-gradient(135deg,#e0f2fe,#f8fbff)",
+      border: "rgba(14,165,233,.22)",
+      icon: <IconTarget />,
+    },
+    {
+      href: "/study?view=flashcards",
+      label: "Flashcards",
+      desc: "Revisión diaria por lección y enfoque.",
+      tone: "linear-gradient(135deg,#eef2ff,#f8faff)",
+      border: "rgba(99,102,241,.2)",
+      icon: <IconCards />,
+    },
+    {
+      href: "/study?view=kana",
+      label: "Kana Sprint",
+      desc: "Hiragana y katakana con ranking semanal.",
+      tone: "linear-gradient(135deg,#dcfce7,#f7fff9)",
+      border: "rgba(34,197,94,.2)",
+      icon: <IconSpark />,
+    },
+    {
+      href: "/study?view=sprint",
+      label: "Vocab+Kanji Sprint",
+      desc: "Velocidad por bloques de lecciones.",
+      tone: "linear-gradient(135deg,#fff7ed,#fffdf9)",
+      border: "rgba(249,115,22,.2)",
+      icon: <IconBook />,
+    },
+  ];
 
   return (
     <div style={{ maxWidth: "760px", margin: "0 auto", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', minHeight: "100vh", paddingBottom: "28px" }}>
@@ -590,15 +653,65 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ margin: "0 14px 12px", padding: "14px 16px", borderRadius: 16, border: "1px solid rgba(17,17,20,.07)", background: "linear-gradient(140deg,#f7fffc,#ffffff)", boxShadow: "0 10px 24px rgba(0,0,0,.03)" }}>
+        <section style={{ margin: "0 14px 12px", padding: "14px 16px", borderRadius: 16, border: "1px solid rgba(17,17,20,.07)", background: "linear-gradient(145deg,#f2fffb,#ffffff 60%, #f7faff)", boxShadow: "0 12px 26px rgba(0,0,0,.035)" }}>
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 11, letterSpacing: ".08em", textTransform: "uppercase", color: "#0f766e", fontWeight: 800 }}>Estudio activo</div>
-              <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "#111114", letterSpacing: "-.01em" }}>Kana Sprint Leaderboard</div>
-              <div style={{ marginTop: 4, fontSize: 12, color: "#667085", fontWeight: 700 }}>
-                Reset semanal en: <span style={{ color: "#111114" }}>{weeklyResetLabel || "..."}</span>
+              <div style={{ marginTop: 4, fontSize: 20, fontWeight: 850, color: "#111114", letterSpacing: "-.01em" }}>Practica diario, sin perderte</div>
+              <div style={{ marginTop: 4, fontSize: 12.5, color: "#667085", fontWeight: 600, maxWidth: 520 }}>
+                Accesos rápidos a tus herramientas. El home sigue siendo tu feed, y Study queda a un toque.
               </div>
-              <div style={{ marginTop: 10, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))" }}>
+            </div>
+            <div style={{ display: "inline-flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <Link href="/study" style={{ textDecoration: "none", background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", borderRadius: 999, padding: "9px 14px", fontSize: 13, fontWeight: 800, whiteSpace: "nowrap", boxShadow: "0 8px 18px rgba(44,182,150,.2)" }}>
+                Abrir Study
+              </Link>
+              <button
+                type="button"
+                onClick={() => setStudyExpanded((prev) => !prev)}
+                style={{ border: "1px solid rgba(17,17,20,.12)", background: "#fff", color: "#111114", borderRadius: 999, padding: "9px 12px", fontSize: 12, fontWeight: 800, cursor: "pointer" }}
+              >
+                {studyExpanded ? "Ocultar ranking" : "Ver ranking kana"}
+              </button>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 12, display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
+            {studyTools.map((tool) => (
+              <Link
+                key={tool.href}
+                href={tool.href}
+                style={{
+                  textDecoration: "none",
+                  color: "#111114",
+                  border: `1px solid ${tool.border}`,
+                  borderRadius: 14,
+                  background: tool.tone,
+                  padding: "11px 12px",
+                  display: "grid",
+                  gap: 6,
+                }}
+              >
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 800, color: "#344054" }}>
+                  <span style={{ width: 24, height: 24, borderRadius: 999, border: "1px solid rgba(17,17,20,.08)", background: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{tool.icon}</span>
+                  {tool.label}
+                </div>
+                <div style={{ fontSize: 12, lineHeight: 1.45, color: "#667085" }}>{tool.desc}</div>
+              </Link>
+            ))}
+          </div>
+
+          {studyExpanded && (
+            <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px dashed rgba(17,17,20,.1)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                <div style={{ fontSize: 12, color: "#667085", fontWeight: 700 }}>
+                  Ranking semanal Kana · reset en <span style={{ color: "#111114" }}>{weeklyResetLabel || "..."}</span>
+                </div>
+                <Link href="/study?view=kana" style={{ textDecoration: "none", fontSize: 12, fontWeight: 800, color: "#0f766e", border: "1px solid rgba(44,182,150,.28)", background: "#fff", borderRadius: 999, padding: "6px 10px" }}>
+                  Jugar ahora
+                </Link>
+              </div>
+              <div style={{ marginTop: 8, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))" }}>
                 {(["hiragana", "katakana"] as HomeKanaMode[]).map((mode) => (
                   <div key={mode} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, background: "#fff", padding: 10 }}>
                     <div style={{ fontSize: 11, color: "#6b7280", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>{mode}</div>
@@ -639,15 +752,7 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
-            <div style={{ display: "inline-flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end", paddingTop: 18 }}>
-              <Link href="/study?view=kana" style={{ textDecoration: "none", background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", borderRadius: 999, padding: "10px 16px", fontSize: 13, fontWeight: 800, whiteSpace: "nowrap", boxShadow: "0 8px 18px rgba(44,182,150,.2)" }}>
-                Kana Sprint
-              </Link>
-              <Link href="/study?view=exam" style={{ textDecoration: "none", background: "#fff", color: "#111114", border: "1px solid rgba(17,17,20,.12)", borderRadius: 999, padding: "10px 16px", fontSize: 13, fontWeight: 800, whiteSpace: "nowrap" }}>
-                Exámenes
-              </Link>
-            </div>
-          </div>
+          )}
         </section>
 
         {hasFreshPosts && (
@@ -776,10 +881,15 @@ export default function HomePage() {
             </div>
             <Link href={`/profile/${myProfile?.id}`} onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><AvatarPlaceholder size={18} /> Perfil</Link>
             <Link href="/resources" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Recursos</Link>
-            <Link href="/study?view=kana" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Kana Sprint</Link>
-            <Link href="/study?view=sprint" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Vocab+Kanji Sprint</Link>
-            <Link href="/study?view=flashcards" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Flashcards</Link>
-            <Link href="/study?view=exam" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Exámenes</Link>
+            <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, background: "#fbfbfc", padding: 10, display: "grid", gap: 8 }}>
+              <div style={{ fontSize: 11, color: "#667085", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Estudio</div>
+              <div style={{ display: "grid", gap: 6 }}>
+                <Link href="/study?view=exam" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#0c4a6e", border: "1px solid rgba(14,165,233,.2)", borderRadius: 10, padding: "9px 10px", display: "flex", alignItems: "center", gap: 8, background: "#f0f9ff" }}><IconTarget /> Exámenes</Link>
+                <Link href="/study?view=flashcards" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#3730a3", border: "1px solid rgba(99,102,241,.2)", borderRadius: 10, padding: "9px 10px", display: "flex", alignItems: "center", gap: 8, background: "#eef2ff" }}><IconCards /> Flashcards</Link>
+                <Link href="/study?view=kana" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#166534", border: "1px solid rgba(34,197,94,.2)", borderRadius: 10, padding: "9px 10px", display: "flex", alignItems: "center", gap: 8, background: "#ecfdf3" }}><IconSpark /> Kana Sprint</Link>
+                <Link href="/study?view=sprint" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#9a3412", border: "1px solid rgba(249,115,22,.2)", borderRadius: 10, padding: "9px 10px", display: "flex", alignItems: "center", gap: 8, background: "#fff7ed" }}><IconBook /> Vocab+Kanji Sprint</Link>
+              </div>
+            </div>
             <Link href="/notifications" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><IconBell /> Notificaciones</span>{unreadNotifications > 0 && <span style={{ background: "#ff2d55", color: "#fff", borderRadius: 999, fontSize: 11, fontWeight: 700, padding: "2px 6px" }}>{unreadNotifications}</span>}</Link>
             {myProfile?.is_admin && (
               <Link

@@ -2256,6 +2256,14 @@ function StudyContent() {
           ? { title: "Exámenes por Lección", subtitle: "Autoevaluación de 20 reactivos con feedback final y passing score de 70%." }
           : { title: "Flashcards", subtitle: "Carpetas por lección y práctica por set." }
     : { title: "Study Lab", subtitle: "Selecciona una herramienta y practica por bloques." };
+  const studyThemes: Record<string, { badge: string; bg: string; accent: string; soft: string }> = {
+    kana: { badge: "Kana", bg: "linear-gradient(145deg,#ecfdf5,#f8fffb)", accent: "#16a34a", soft: "rgba(22,163,74,.12)" },
+    sprint: { badge: "Sprint", bg: "linear-gradient(145deg,#fff7ed,#fffdf9)", accent: "#ea580c", soft: "rgba(234,88,12,.12)" },
+    flashcards: { badge: "Flashcards", bg: "linear-gradient(145deg,#eef2ff,#fafbff)", accent: "#4f46e5", soft: "rgba(79,70,229,.12)" },
+    exam: { badge: "Exámenes", bg: "linear-gradient(145deg,#e0f2fe,#f8fbff)", accent: "#0284c7", soft: "rgba(2,132,199,.12)" },
+    hub: { badge: "Study Lab", bg: "linear-gradient(145deg,#ffffff,#f7fffc)", accent: "#0f766e", soft: "rgba(15,118,110,.12)" },
+  };
+  const currentTheme = selectedView ? studyThemes[selectedView] : studyThemes.hub;
 
   useEffect(() => {
     void loadKanaLeaderboard();
@@ -2593,41 +2601,67 @@ function StudyContent() {
           <div style={{ fontSize: 12, color: "#7c7c85", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>Nihongo Study</div>
         </header>
 
-        <section style={{ background: "linear-gradient(145deg, #ffffff, #f7fffc)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 18, padding: 14 }}>
-          <h1 style={{ margin: 0, fontSize: 28, lineHeight: 1.1, letterSpacing: "-.02em" }}>{pageMeta.title}</h1>
+        <section style={{ background: currentTheme.bg, border: "1px solid rgba(17,17,20,.07)", borderRadius: 18, padding: 14, boxShadow: `0 10px 24px ${currentTheme.soft}` }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 999, border: `1px solid ${currentTheme.soft}`, color: currentTheme.accent, fontSize: 11, fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase", background: "#fff", padding: "4px 8px" }}>
+            <span style={{ width: 6, height: 6, borderRadius: 999, background: currentTheme.accent }} />
+            {currentTheme.badge}
+          </div>
+          <h1 style={{ margin: "8px 0 0", fontSize: 28, lineHeight: 1.1, letterSpacing: "-.02em" }}>{pageMeta.title}</h1>
           <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 14, lineHeight: 1.5 }}>
             {pageMeta.subtitle}
           </p>
         </section>
 
         {!showHub && (
-          <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 14, padding: 10, display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
-            <Link href="/study?view=kana" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "kana" ? "#fff" : "#344054", background: activeTab === "kana" ? "#111114" : "#fff" }}>Kana Sprint</Link>
-            <Link href="/study?view=sprint" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "sprint" ? "#fff" : "#344054", background: activeTab === "sprint" ? "#111114" : "#fff" }}>Vocab+Kanji Sprint</Link>
-            <Link href="/study?view=flashcards" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "flashcards" ? "#fff" : "#344054", background: activeTab === "flashcards" ? "#111114" : "#fff" }}>Flashcards</Link>
-            <Link href="/study?view=exam" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "exam" ? "#fff" : "#344054", background: activeTab === "exam" ? "#111114" : "#fff" }}>Exámenes</Link>
+          <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 14, padding: 10, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))" }}>
+            {[
+              { key: "kana", href: "/study?view=kana", title: "Kana Sprint", subtitle: "Lectura rápida", accent: "#16a34a", bg: "#ecfdf3" },
+              { key: "sprint", href: "/study?view=sprint", title: "Vocab+Kanji Sprint", subtitle: "Velocidad por buckets", accent: "#ea580c", bg: "#fff7ed" },
+              { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", subtitle: "Repaso visual", accent: "#4f46e5", bg: "#eef2ff" },
+              { key: "exam", href: "/study?view=exam", title: "Exámenes", subtitle: "Autoevaluación", accent: "#0284c7", bg: "#e0f2fe" },
+            ].map((tool) => {
+              const selected = activeTab === tool.key;
+              return (
+                <Link
+                  key={tool.key}
+                  href={tool.href}
+                  style={{
+                    textDecoration: "none",
+                    border: `1px solid ${selected ? tool.accent : "rgba(17,17,20,.1)"}`,
+                    borderRadius: 12,
+                    padding: "8px 10px",
+                    color: selected ? tool.accent : "#344054",
+                    background: selected ? tool.bg : "#fff",
+                    boxShadow: selected ? `0 8px 18px ${tool.accent}22` : "none",
+                  }}
+                >
+                  <div style={{ fontSize: 12, fontWeight: 800 }}>{tool.title}</div>
+                  <div style={{ marginTop: 2, fontSize: 11, color: "#667085", fontWeight: 600 }}>{tool.subtitle}</div>
+                </Link>
+              );
+            })}
           </section>
         )}
 
         {showHub && (
           <section style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
-            <Link href="/study?view=kana" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, background: "#fff", padding: 14 }}>
-              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Sprint</div>
+            <Link href="/study?view=kana" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(34,197,94,.22)", borderRadius: 16, background: "linear-gradient(145deg,#ecfdf3,#f9fffb)", padding: 14 }}>
+              <div style={{ fontSize: 12, color: "#15803d", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Sprint</div>
               <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Kana Sprint</div>
               <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Hiragana/Katakana con timer, penalty y leaderboard.</p>
             </Link>
-            <Link href="/study?view=sprint" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, background: "#fff", padding: 14 }}>
-              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Sprint</div>
+            <Link href="/study?view=sprint" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(249,115,22,.22)", borderRadius: 16, background: "linear-gradient(145deg,#fff7ed,#fffdf8)", padding: 14 }}>
+              <div style={{ fontSize: 12, color: "#c2410c", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Sprint</div>
               <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Vocab + Kanji</div>
               <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Compite en buckets por lección para nivelar dificultad.</p>
             </Link>
-            <Link href="/study?view=flashcards" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, background: "#fff", padding: 14 }}>
-              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>SRS</div>
+            <Link href="/study?view=flashcards" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(99,102,241,.22)", borderRadius: 16, background: "linear-gradient(145deg,#eef2ff,#fafbff)", padding: 14 }}>
+              <div style={{ fontSize: 12, color: "#4338ca", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Memoria</div>
               <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Flashcards</div>
-              <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Vocab Genki I por lección con repaso inteligente.</p>
+              <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Vocab y kanji por lección para repasar de forma visual.</p>
             </Link>
-            <Link href="/study?view=exam" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, background: "#fff", padding: 14 }}>
-              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Evaluación</div>
+            <Link href="/study?view=exam" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(14,165,233,.22)", borderRadius: 16, background: "linear-gradient(145deg,#e0f2fe,#f8fbff)", padding: 14 }}>
+              <div style={{ fontSize: 12, color: "#0f766e", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Evaluación</div>
               <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Examen por lección</div>
               <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>20 preguntas, passing de 70% y feedback completo al final.</p>
             </Link>
@@ -2635,7 +2669,7 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "kana" && (
-          <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16 }}>
+          <section style={{ background: "linear-gradient(145deg,#f7fff9,#ffffff)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16, boxShadow: "inset 0 0 0 2px rgba(34,197,94,.08)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: 24 }}>Kana Sprint</h2>
               <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3 }}>
@@ -2761,7 +2795,7 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "sprint" && (
-          <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16 }}>
+          <section style={{ background: "linear-gradient(145deg,#fffaf3,#ffffff)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16, boxShadow: "inset 0 0 0 2px rgba(249,115,22,.08)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: 24 }}>Vocab + Kanji Sprint</h2>
               <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3, flexWrap: "wrap" }}>
@@ -2871,7 +2905,7 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "flashcards" && (
-          <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16 }}>
+          <section style={{ background: "linear-gradient(145deg,#f6f7ff,#ffffff)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16, boxShadow: "inset 0 0 0 2px rgba(99,102,241,.08)" }}>
             {flashLessonFolder !== null && (
               <div style={{ marginBottom: 10 }}>
                 <button
@@ -3148,7 +3182,7 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "exam" && (
-          <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16 }}>
+          <section style={{ background: "linear-gradient(145deg,#f0f9ff,#ffffff)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16, boxShadow: "inset 0 0 0 2px rgba(14,165,233,.08)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: 24 }}>Examen por lección</h2>
               <div style={{ display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
