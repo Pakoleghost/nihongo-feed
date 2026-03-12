@@ -1496,7 +1496,9 @@ function StudyContent() {
       vkBucketConfig.lessons.flatMap((lesson) =>
         (GENKI_VOCAB_BY_LESSON[lesson] || []).map((item, index) => ({
           id: `l${lesson}-v-${index}`,
-          jp: item.kanji || item.hira,
+          // Vocab sprint siempre pregunta significado desde hiragana.
+          // La lectura/kanji se evalúa únicamente con el pool de kanji.
+          jp: item.hira,
           es: item.es,
         })),
       ),
@@ -1504,13 +1506,15 @@ function StudyContent() {
   );
   const vkKanjiPool = useMemo(
     () =>
-      vkBucketConfig.lessons.flatMap((lesson) =>
+      vkBucketConfig.lessons
+        .filter((lesson) => lesson >= 3)
+        .flatMap((lesson) =>
         (GENKI_KANJI_BY_LESSON[lesson] || []).map((item, index) => ({
           id: `l${lesson}-k-${index}`,
           kanji: item.kanji,
           hira: item.hira,
         })),
-      ),
+      )),
     [vkBucketConfig],
   );
 
