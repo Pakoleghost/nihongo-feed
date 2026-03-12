@@ -48,6 +48,10 @@ type QuizQuestion = {
   options: string[];
   correct: string;
   hint?: string;
+  type?: "mcq" | "text" | "match";
+  acceptedAnswers?: string[];
+  matchLeft?: string[];
+  matchRight?: string[];
   lesson?: number;
   category?: "vocab" | "kanji" | "particles" | "conjugation";
   explanation?: string;
@@ -1070,6 +1074,10 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
   return pickN(qs, count);
 }
 
+const EXAM_VOCAB_EXCLUSIONS: Record<number, string[]> = {
+  1: ["アジアけんきゅう", "せいぶつがく", "こくさいかんけい"],
+};
+
 const PARTICLE_EXAM_BANK: Array<{
   id: string;
   minLesson: number;
@@ -1078,43 +1086,88 @@ const PARTICLE_EXAM_BANK: Array<{
   correct: string;
   explanation: string;
 }> = [
-  { id: "p-l1-1", minLesson: 1, prompt: "わたし___パコです。", options: ["は", "を", "に", "で"], correct: "は", explanation: "「は」marca tema en oraciones copulativas." },
-  { id: "p-l1-2", minLesson: 1, prompt: "マリアさん___せんせいです。", options: ["が", "は", "を", "で"], correct: "は", explanation: "Para identificación, se usa tema 「は」." },
-  { id: "p-l2-1", minLesson: 2, prompt: "これはだれ___ほんですか。", options: ["の", "に", "で", "を"], correct: "の", explanation: "「の」indica posesión (libro de quién)." },
-  { id: "p-l2-2", minLesson: 2, prompt: "わたし___ともだちもにほんじんです。", options: ["の", "は", "も", "が"], correct: "の", explanation: "「わたしのともだち」= mi amigo/a." },
-  { id: "p-l3-1", minLesson: 3, prompt: "がっこう___いきます。", options: ["に", "で", "を", "は"], correct: "に", explanation: "Con verbos de movimiento, destino con 「に」." },
+  { id: "p-l1-1", minLesson: 1, prompt: "わたし___パコです。", options: ["は", "を", "に", "で"], correct: "は", explanation: "「は」marca tema." },
+  { id: "p-l1-2", minLesson: 1, prompt: "マリアさん___せんせいです。", options: ["が", "は", "を", "で"], correct: "は", explanation: "Oración copulativa con tema 「は」." },
+  { id: "p-l2-1", minLesson: 2, prompt: "これはだれ___ほんですか。", options: ["の", "に", "で", "を"], correct: "の", explanation: "Posesión con 「の」." },
+  { id: "p-l2-2", minLesson: 2, prompt: "わたし___ともだちもにほんじんです。", options: ["の", "は", "も", "が"], correct: "の", explanation: "「わたしのともだち」." },
+  { id: "p-l3-1", minLesson: 3, prompt: "がっこう___いきます。", options: ["に", "で", "を", "は"], correct: "に", explanation: "Destino con 「に」." },
   { id: "p-l3-2", minLesson: 3, prompt: "としょかん___べんきょうします。", options: ["に", "で", "を", "が"], correct: "で", explanation: "Lugar de acción con 「で」." },
   { id: "p-l3-3", minLesson: 3, prompt: "ほん___よみます。", options: ["を", "は", "に", "で"], correct: "を", explanation: "Objeto directo con 「を」." },
-  { id: "p-l4-1", minLesson: 4, prompt: "わたしは7じ___おきます。", options: ["に", "で", "を", "が"], correct: "に", explanation: "Hora específica con 「に」." },
+  { id: "p-l4-1", minLesson: 4, prompt: "7じ___おきます。", options: ["に", "で", "を", "が"], correct: "に", explanation: "Hora específica con 「に」." },
   { id: "p-l4-2", minLesson: 4, prompt: "うち___かえりました。", options: ["に", "を", "で", "が"], correct: "に", explanation: "Destino final con 「に」." },
-  { id: "p-l5-1", minLesson: 5, prompt: "ともだち___えいがをみました。", options: ["と", "に", "が", "を"], correct: "と", explanation: "Compañía con 「と」 (con alguien)." },
-  { id: "p-l5-2", minLesson: 5, prompt: "ケーキ___すきです。", options: ["が", "を", "に", "で"], correct: "が", explanation: "Con 「すき」, lo gustado suele ir con 「が」." },
-  { id: "p-l6-1", minLesson: 6, prompt: "こうえん___しんぶんをよみます。", options: ["で", "に", "を", "が"], correct: "で", explanation: "Lugar donde se realiza la acción con 「で」." },
-  { id: "p-l6-2", minLesson: 6, prompt: "あしたうち___たべます。", options: ["で", "に", "を", "と"], correct: "で", explanation: "Lugar de acción para comer con 「で」." },
-  { id: "p-l7-1", minLesson: 7, prompt: "にほん___りょうりはおいしいです。", options: ["の", "に", "を", "が"], correct: "の", explanation: "Relación nominal: 「日本の料理」." },
-  { id: "p-l7-2", minLesson: 7, prompt: "だれ___きましたか。", options: ["が", "は", "を", "で"], correct: "が", explanation: "En preguntas de sujeto, se usa 「が」." },
-  { id: "p-l8-1", minLesson: 8, prompt: "8じ___10じ___べんきょうしました。", options: ["に / に", "から / まで", "を / に", "で / から"], correct: "から / まで", explanation: "Rango temporal: 「から」(desde) + 「まで」(hasta)." },
-  { id: "p-l8-2", minLesson: 8, prompt: "とうきょう___きょうと___いきました。", options: ["に / で", "から / まで", "を / に", "で / を"], correct: "から / まで", explanation: "Trayecto origen→destino: 「から」→「まで」." },
-  { id: "p-l9-1", minLesson: 9, prompt: "くすり___のみました。", options: ["を", "に", "で", "が"], correct: "を", explanation: "Objeto directo con 「を」." },
-  { id: "p-l9-2", minLesson: 9, prompt: "びょういん___いきました。", options: ["に", "で", "を", "が"], correct: "に", explanation: "Destino con 「に」." },
-  { id: "p-l10-1", minLesson: 10, prompt: "ひだり___まがってください。", options: ["に", "で", "を", "が"], correct: "に", explanation: "Dirección con 「に」 (girar hacia)." },
-  { id: "p-l10-2", minLesson: 10, prompt: "えき___まえでまちましょう。", options: ["の", "に", "を", "で"], correct: "の", explanation: "Relación nominal: 「駅の前」." },
-  { id: "p-l11-1", minLesson: 11, prompt: "しゃしん___とりました。", options: ["を", "に", "で", "が"], correct: "を", explanation: "Objeto directo de tomar fotos con 「を」." },
-  { id: "p-l11-2", minLesson: 11, prompt: "せんせい___そうだんしました。", options: ["に", "を", "で", "が"], correct: "に", explanation: "Persona objetivo de consulta con 「に」." },
-  { id: "p-l12-1", minLesson: 12, prompt: "しょうらい___きょうしになりたいです。", options: ["は", "に", "で", "を"], correct: "は", explanation: "Tema general de la oración con 「は」." },
-  { id: "p-l12-2", minLesson: 12, prompt: "にほんご___じょうずになりました。", options: ["が", "を", "に", "で"], correct: "が", explanation: "Con adjetivos de habilidad, normalmente 「が」." },
+  { id: "p-l5-1", minLesson: 5, prompt: "ともだち___えいがをみました。", options: ["と", "に", "が", "を"], correct: "と", explanation: "Compañía con 「と」." },
+  { id: "p-l5-2", minLesson: 5, prompt: "ケーキ___すきです。", options: ["が", "を", "に", "で"], correct: "が", explanation: "Con 「すき」 se usa 「が」." },
+  { id: "p-l6-1", minLesson: 6, prompt: "こうえん___しんぶんをよみます。", options: ["で", "に", "を", "が"], correct: "で", explanation: "Lugar de acción con 「で」." },
+  { id: "p-l7-1", minLesson: 7, prompt: "にほん___りょうりはおいしいです。", options: ["の", "に", "を", "が"], correct: "の", explanation: "Modificador nominal con 「の」." },
+  { id: "p-l8-1", minLesson: 8, prompt: "8じ___10じ___べんきょうしました。", options: ["に / に", "から / まで", "を / に", "で / から"], correct: "から / まで", explanation: "Rango temporal." },
+  { id: "p-l9-1", minLesson: 9, prompt: "くすり___のみました。", options: ["を", "に", "で", "が"], correct: "を", explanation: "Objeto directo." },
+  { id: "p-l10-1", minLesson: 10, prompt: "ひだり___まがってください。", options: ["に", "で", "を", "が"], correct: "に", explanation: "Dirección con 「に」." },
+  { id: "p-l11-1", minLesson: 11, prompt: "せんせい___そうだんしました。", options: ["に", "を", "で", "が"], correct: "に", explanation: "Objetivo de consulta con 「に」." },
+  { id: "p-l12-1", minLesson: 12, prompt: "にほんご___じょうずになりました。", options: ["が", "を", "に", "で"], correct: "が", explanation: "Con habilidad, normalmente 「が」." },
 ];
+
+function normalizeExamText(value: string) {
+  return value.trim().normalize("NFKC").toLowerCase().replace(/\s+/g, "");
+}
+
+function isExamQuestionCorrect(question: QuizQuestion, answerValue: string | undefined) {
+  if (!answerValue) return false;
+  if (question.type === "text") {
+    const candidates = [question.correct, ...(question.acceptedAnswers || [])].map(normalizeExamText);
+    return candidates.includes(normalizeExamText(answerValue));
+  }
+  return answerValue === question.correct;
+}
+
+function isExamVocabEligible(lesson: number, item: { hira: string; es: string }) {
+  if (!item.hira || !item.es) return false;
+  if (item.hira.includes("…") || item.es.includes("…")) return false;
+  if (EXAM_VOCAB_EXCLUSIONS[lesson]?.includes(item.hira)) return false;
+  return true;
+}
+
+function buildVocabMatchingQuestion(lesson: number, vocab: Array<{ hira: string; kanji?: string; es: string }>, keySeed: string): QuizQuestion | null {
+  if (vocab.length < 3) return null;
+  const picked = pickN(vocab, 3);
+  if (picked.length < 3) return null;
+  const left = picked.map((item, i) => `${String.fromCharCode(65 + i)}. ${item.kanji?.trim() ? `${item.kanji.trim()} (${item.hira})` : item.hira}`);
+  const rightRaw = shuffle(picked.map((item) => item.es));
+  const right = rightRaw.map((item, i) => `${i + 1}. ${item}`);
+  const correctIndexes = picked.map((item) => rightRaw.indexOf(item.es) + 1);
+  const correctPattern = `A-${correctIndexes[0]}, B-${correctIndexes[1]}, C-${correctIndexes[2]}`;
+  const patterns = new Set<string>([correctPattern]);
+  while (patterns.size < 4) {
+    const candidate = shuffle([1, 2, 3]);
+    patterns.add(`A-${candidate[0]}, B-${candidate[1]}, C-${candidate[2]}`);
+  }
+  return {
+    id: `exam-vocab-match-${lesson}-${keySeed}`,
+    stableKey: `l${lesson}:vocab:match:${keySeed}`,
+    lesson,
+    category: "vocab",
+    type: "match",
+    prompt: "Relaciona cada término japonés con su significado.",
+    matchLeft: left,
+    matchRight: right,
+    options: shuffle(Array.from(patterns)),
+    correct: correctPattern,
+    hint: `Lección ${lesson} · Relacionar`,
+    explanation: `Relaciones correctas: ${correctPattern}.`,
+  };
+}
 
 function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
   const normalizedLesson = Math.max(1, Math.min(12, lesson));
   const pool: QuizQuestion[] = [];
 
-  const lessonVocab = GENKI_VOCAB_BY_LESSON[normalizedLesson] || [];
-  const allVocab = Object.values(GENKI_VOCAB_BY_LESSON).flat();
-  const allMeanings = Array.from(new Set(allVocab.map((item) => item.es).filter(Boolean)));
-  const allJapaneseForms = Array.from(
+  const lessonVocab = (GENKI_VOCAB_BY_LESSON[normalizedLesson] || []).filter((item) => isExamVocabEligible(normalizedLesson, item));
+  const neighborLessons = LESSONS.filter((l) => Math.abs(l - normalizedLesson) <= 1);
+  const neighborVocab = neighborLessons.flatMap((l) => (GENKI_VOCAB_BY_LESSON[l] || []).filter((item) => isExamVocabEligible(l, item)));
+  const allVocab = Object.values(GENKI_VOCAB_BY_LESSON).flat().filter((item) => isExamVocabEligible(normalizedLesson, item));
+  const meaningPool = Array.from(new Set((neighborVocab.length > 8 ? neighborVocab : allVocab).map((item) => item.es).filter(Boolean)));
+  const jpPool = Array.from(
     new Set(
-      allVocab
+      (neighborVocab.length > 8 ? neighborVocab : allVocab)
         .map((item) => (item.kanji?.trim() ? `${item.kanji.trim()} (${item.hira})` : item.hira))
         .filter(Boolean),
     ),
@@ -1127,8 +1180,9 @@ function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
       stableKey: `l${normalizedLesson}:vocab:es:${item.hira}:${index}`,
       lesson: normalizedLesson,
       category: "vocab",
+      type: "mcq",
       prompt: `¿Qué significa 「${item.hira}」?`,
-      options: buildOptionSet(item.es, allMeanings.filter((es) => es !== item.es), allMeanings),
+      options: buildOptionSet(item.es, meaningPool.filter((es) => es !== item.es), meaningPool),
       correct: item.es,
       hint: `Lección ${normalizedLesson} · Vocabulario`,
       explanation: `「${item.hira}」 significa “${item.es}”.`,
@@ -1138,39 +1192,73 @@ function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
       stableKey: `l${normalizedLesson}:vocab:jp:${item.hira}:${index}`,
       lesson: normalizedLesson,
       category: "vocab",
+      type: "mcq",
       prompt: `Selecciona el japonés para: “${item.es}”`,
-      options: buildOptionSet(jpForm, allJapaneseForms.filter((value) => value !== jpForm), allJapaneseForms),
+      options: buildOptionSet(jpForm, jpPool.filter((value) => value !== jpForm), jpPool),
       correct: jpForm,
       hint: `Lección ${normalizedLesson} · Vocabulario`,
       explanation: `La opción correcta para “${item.es}” es 「${jpForm}」.`,
     });
   });
 
+  for (let i = 0; i < 4; i += 1) {
+    const matchQ = buildVocabMatchingQuestion(normalizedLesson, lessonVocab, `${i}`);
+    if (matchQ) pool.push(matchQ);
+  }
+
   const lessonKanji = GENKI_KANJI_BY_LESSON[normalizedLesson] || [];
   const allKanjiReadings = Array.from(new Set(Object.values(GENKI_KANJI_BY_LESSON).flat().map((item) => item.hira).filter(Boolean)));
   lessonKanji.forEach((item, index) => {
     pool.push({
       id: `exam-kanji-l${normalizedLesson}-${index}`,
-      stableKey: `l${normalizedLesson}:kanji:${item.kanji}:${index}`,
+      stableKey: `l${normalizedLesson}:kanji:mcq:${item.kanji}:${index}`,
       lesson: normalizedLesson,
       category: "kanji",
+      type: "mcq",
       prompt: `¿Cómo se lee 「${item.kanji}」?`,
       options: buildOptionSet(item.hira, allKanjiReadings.filter((reading) => reading !== item.hira), allKanjiReadings),
       correct: item.hira,
       hint: `Lección ${normalizedLesson} · Kanji`,
       explanation: `「${item.kanji}」 se lee 「${item.hira}」.`,
     });
+    pool.push({
+      id: `exam-kanji-text-l${normalizedLesson}-${index}`,
+      stableKey: `l${normalizedLesson}:kanji:text:${item.kanji}:${index}`,
+      lesson: normalizedLesson,
+      category: "kanji",
+      type: "text",
+      prompt: `Escribe en hiragana la lectura de 「${item.kanji}」`,
+      options: [],
+      correct: item.hira,
+      acceptedAnswers: [item.hira.replace(/\s+/g, "")],
+      hint: `Lección ${normalizedLesson} · Kanji`,
+      explanation: `La lectura correcta es 「${item.hira}」.`,
+    });
   });
 
   PARTICLE_EXAM_BANK.filter((entry) => entry.minLesson <= normalizedLesson).forEach((entry) => {
     pool.push({
       id: `exam-particle-${entry.id}`,
-      stableKey: `l${normalizedLesson}:particle:${entry.id}`,
+      stableKey: `l${normalizedLesson}:particle:mcq:${entry.id}`,
       lesson: normalizedLesson,
       category: "particles",
+      type: "mcq",
       prompt: entry.prompt,
       options: shuffle(entry.options),
       correct: entry.correct,
+      hint: `Lección ${normalizedLesson} · Partículas`,
+      explanation: entry.explanation,
+    });
+    pool.push({
+      id: `exam-particle-text-${entry.id}`,
+      stableKey: `l${normalizedLesson}:particle:text:${entry.id}`,
+      lesson: normalizedLesson,
+      category: "particles",
+      type: "text",
+      prompt: `${entry.prompt}\nEscribe solo la partícula faltante.`,
+      options: [],
+      correct: entry.correct,
+      acceptedAnswers: [entry.correct.replace(/\s+/g, ""), entry.correct.replace(/\s*\/\s*/g, "/")],
       hint: `Lección ${normalizedLesson} · Partículas`,
       explanation: entry.explanation,
     });
@@ -1185,37 +1273,40 @@ function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
   const allVerbMasu = Array.from(new Set(ALL_VERBS.map((verb) => toMasu(verb))));
   verbs.forEach((verb) => {
     const te = toTeForm(verb);
+    const past = toPastShort(verb);
+    const masu = toMasu(verb);
     pool.push({
       id: `exam-conj-te-${verb.kana}-${normalizedLesson}`,
       stableKey: `l${normalizedLesson}:conj:te:${verb.kana}`,
       lesson: normalizedLesson,
       category: "conjugation",
+      type: "mcq",
       prompt: `Forma て de 「${verb.kana}」 (${verb.es})`,
       options: buildOptionSet(te, allVerbTe.filter((value) => value !== te), allVerbTe),
       correct: te,
       hint: `Lección ${normalizedLesson} · Conjugación`,
       explanation: `La forma て de 「${verb.kana}」 es 「${te}」.`,
     });
-    const past = toPastShort(verb);
     pool.push({
       id: `exam-conj-past-${verb.kana}-${normalizedLesson}`,
       stableKey: `l${normalizedLesson}:conj:past:${verb.kana}`,
       lesson: normalizedLesson,
       category: "conjugation",
+      type: "mcq",
       prompt: `Pasado corto de 「${verb.kana}」 (${verb.es})`,
       options: buildOptionSet(past, allVerbPast.filter((value) => value !== past), allVerbPast),
       correct: past,
       hint: `Lección ${normalizedLesson} · Conjugación`,
       explanation: `El pasado corto de 「${verb.kana}」 es 「${past}」.`,
     });
-    const masu = toMasu(verb);
     pool.push({
-      id: `exam-conj-masu-${verb.kana}-${normalizedLesson}`,
-      stableKey: `l${normalizedLesson}:conj:masu:${verb.kana}`,
+      id: `exam-conj-masu-text-${verb.kana}-${normalizedLesson}`,
+      stableKey: `l${normalizedLesson}:conj:masu:text:${verb.kana}`,
       lesson: normalizedLesson,
       category: "conjugation",
-      prompt: `Forma ます de 「${verb.kana}」 (${verb.es})`,
-      options: buildOptionSet(masu, allVerbMasu.filter((value) => value !== masu), allVerbMasu),
+      type: "text",
+      prompt: `Escribe la forma ます de 「${verb.kana}」 (${verb.es})`,
+      options: [],
       correct: masu,
       hint: `Lección ${normalizedLesson} · Conjugación`,
       explanation: `La forma ます de 「${verb.kana}」 es 「${masu}」.`,
@@ -1227,44 +1318,64 @@ function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
     adjs = ALL_ADJECTIVES.filter((adj) => adj.lesson <= normalizedLesson && adj.lesson >= 5);
   }
   const allAdjNeg = Array.from(new Set(ALL_ADJECTIVES.map((adj) => toAdjNegative(adj))));
-  const allAdjPast = Array.from(new Set(ALL_ADJECTIVES.map((adj) => toAdjPast(adj))));
   adjs.forEach((adj) => {
     const negative = toAdjNegative(adj);
-    const past = toAdjPast(adj);
     pool.push({
       id: `exam-conj-adj-neg-${adj.kana}-${normalizedLesson}`,
       stableKey: `l${normalizedLesson}:conj:adjneg:${adj.kana}`,
       lesson: normalizedLesson,
       category: "conjugation",
+      type: "mcq",
       prompt: `Forma negativa de 「${adj.kana}」 (${adj.es})`,
       options: buildOptionSet(negative, allAdjNeg.filter((value) => value !== negative), allAdjNeg),
       correct: negative,
       hint: `Lección ${normalizedLesson} · Conjugación`,
       explanation: `La forma negativa de 「${adj.kana}」 es 「${negative}」.`,
     });
-    pool.push({
-      id: `exam-conj-adj-past-${adj.kana}-${normalizedLesson}`,
-      stableKey: `l${normalizedLesson}:conj:adjpast:${adj.kana}`,
-      lesson: normalizedLesson,
-      category: "conjugation",
-      prompt: `Forma pasada de 「${adj.kana}」 (${adj.es})`,
-      options: buildOptionSet(past, allAdjPast.filter((value) => value !== past), allAdjPast),
-      correct: past,
-      hint: `Lección ${normalizedLesson} · Conjugación`,
-      explanation: `La forma pasada de 「${adj.kana}」 es 「${past}」.`,
-    });
   });
 
   return pool.filter((q, idx, arr) => arr.findIndex((entry) => entry.stableKey === q.stableKey) === idx);
 }
 
-function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, number>, count: number) {
-  const unseen = shuffle(pool.filter((question) => !seenMap[question.stableKey || question.id]));
-  if (unseen.length >= count) return unseen.slice(0, count);
-  const seen = pool
+function pickPrioritizedQuestions(
+  source: QuizQuestion[],
+  seenMap: Record<string, number>,
+  count: number,
+  used: Set<string>,
+) {
+  const candidates = source.filter((question) => !used.has(question.stableKey || question.id));
+  const unseen = shuffle(candidates.filter((question) => !seenMap[question.stableKey || question.id]));
+  const seen = candidates
     .filter((question) => seenMap[question.stableKey || question.id])
     .sort((a, b) => (seenMap[a.stableKey || a.id] || 0) - (seenMap[b.stableKey || b.id] || 0));
-  return [...unseen, ...seen].slice(0, count);
+  const picked = [...unseen, ...seen].slice(0, count);
+  picked.forEach((question) => used.add(question.stableKey || question.id));
+  return picked;
+}
+
+function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, number>, count: number, lesson: number) {
+  const used = new Set<string>();
+  const result: QuizQuestion[] = [];
+  const hasKanji = lesson >= 3;
+  const hasConj = lesson >= 3;
+
+  const targets: Record<"vocab" | "kanji" | "particles" | "conjugation", number> = {
+    vocab: hasConj ? 8 : 12,
+    kanji: hasKanji ? 4 : 0,
+    particles: 4,
+    conjugation: hasConj ? 4 : 4,
+  };
+  if (!hasConj) targets.particles = 8;
+
+  (["vocab", "kanji", "particles", "conjugation"] as const).forEach((category) => {
+    const categoryPool = pool.filter((question) => question.category === category);
+    result.push(...pickPrioritizedQuestions(categoryPool, seenMap, targets[category], used));
+  });
+
+  if (result.length < count) {
+    result.push(...pickPrioritizedQuestions(pool, seenMap, count - result.length, used));
+  }
+  return shuffle(result).slice(0, count);
 }
 
 function resolveStudyView(searchParams: Pick<URLSearchParams, "get">): StudyView | null {
@@ -2116,13 +2227,13 @@ function StudyContent() {
   const examCurrentChoice = examCurrentQ ? (examAnswers[examCurrentKey] || null) : null;
   const examScore = examQuestions.reduce((acc, question) => {
     const key = question.stableKey || question.id;
-    return acc + (examAnswers[key] === question.correct ? 1 : 0);
+    return acc + (isExamQuestionCorrect(question, examAnswers[key]) ? 1 : 0);
   }, 0);
   const examPercent = examQuestions.length ? Math.round((examScore / examQuestions.length) * 100) : 0;
   const examPassed = examPercent >= EXAM_PASSING_PERCENT;
   const examWrongQuestions = examQuestions.filter((question) => {
     const key = question.stableKey || question.id;
-    return examAnswers[key] !== question.correct;
+    return !isExamQuestionCorrect(question, examAnswers[key]);
   });
   const examCategoryBreakdown = Array.from(
     examQuestions.reduce((map, question) => {
@@ -2130,7 +2241,7 @@ function StudyContent() {
       const category = question.category || "general";
       const bucket = map.get(category) || { category, correct: 0, total: 0 };
       bucket.total += 1;
-      if (examAnswers[key] === question.correct) bucket.correct += 1;
+      if (isExamQuestionCorrect(question, examAnswers[key])) bucket.correct += 1;
       map.set(category, bucket);
       return map;
     }, new Map<string, { category: string; correct: number; total: number }>()),
@@ -2297,7 +2408,7 @@ function StudyContent() {
       const category = question.category || "general";
       const bucket = categoryMap.get(category) || { category, total: 0, correct: 0 };
       bucket.total += 1;
-      if (examAnswers[key] === question.correct) bucket.correct += 1;
+      if (isExamQuestionCorrect(question, examAnswers[key])) bucket.correct += 1;
       categoryMap.set(category, bucket);
     });
 
@@ -2357,7 +2468,7 @@ function StudyContent() {
       if (raw) seenMap = JSON.parse(raw);
     } catch {}
 
-    const selected = pickLessonExamQuestions(pool, seenMap, EXAM_QUESTION_COUNT);
+    const selected = pickLessonExamQuestions(pool, seenMap, EXAM_QUESTION_COUNT, examLesson);
     if (selected.length < EXAM_QUESTION_COUNT) {
       alert("No se pudo generar un examen completo. Intenta otra vez.");
       return;
@@ -2378,8 +2489,11 @@ function StudyContent() {
 
   const nextExamQuestion = () => {
     if (!examCurrentQ) return;
-    if (!examCurrentChoice) {
-      alert("Selecciona una respuesta para continuar.");
+    const hasAnswer = examCurrentQ.type === "text"
+      ? Boolean((examCurrentChoice || "").trim())
+      : Boolean(examCurrentChoice);
+    if (!hasAnswer) {
+      alert("Responde la pregunta para continuar.");
       return;
     }
     if (examIndex >= examQuestions.length - 1) {
@@ -3062,7 +3176,7 @@ function StudyContent() {
               </div>
             </div>
             <p style={{ color: "#6b7280", fontSize: 14 }}>
-              20 reactivos aleatorios. Passing score: {EXAM_PASSING_PERCENT}%. Feedback completo al final.
+              20 reactivos aleatorios (opción múltiple, relacionar y respuesta escrita). Passing score: {EXAM_PASSING_PERCENT}%. Feedback completo al final.
             </p>
 
             {examQuestions.length === 0 && (
@@ -3093,31 +3207,60 @@ function StudyContent() {
                 </div>
                 <div style={{ marginTop: 8, fontSize: 20, fontWeight: 800, color: "#111114" }}>{examCurrentQ.prompt}</div>
                 {examCurrentQ.hint && <div style={{ marginTop: 4, color: "#6b7280", fontSize: 13 }}>{examCurrentQ.hint}</div>}
-                <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
-                  {examCurrentQ.options.map((op) => {
-                    const isSelected = examCurrentChoice === op;
-                    return (
-                      <button
-                        key={op}
-                        type="button"
-                        onClick={() => answerExam(op)}
-                        style={{
-                          textAlign: "left",
-                          border: isSelected ? "1px solid #2cb696" : "1px solid rgba(17,17,20,.1)",
-                          borderRadius: 10,
-                          background: isSelected ? "#ecfdf5" : "#fff",
-                          color: isSelected ? "#166534" : "#222",
-                          padding: "8px 10px",
-                          fontSize: 14,
-                          fontWeight: 600,
-                          cursor: "pointer",
-                        }}
-                      >
-                        {op}
-                      </button>
-                    );
-                  })}
-                </div>
+                {examCurrentQ.type === "match" && examCurrentQ.matchLeft && examCurrentQ.matchRight && (
+                  <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
+                    <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))" }}>
+                      <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 10, background: "#fff", padding: 10 }}>
+                        <div style={{ fontSize: 11, color: "#667085", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em" }}>Columna A</div>
+                        <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
+                          {examCurrentQ.matchLeft.map((item) => <div key={item} style={{ fontSize: 14, color: "#111114" }}>{item}</div>)}
+                        </div>
+                      </div>
+                      <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 10, background: "#fff", padding: 10 }}>
+                        <div style={{ fontSize: 11, color: "#667085", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em" }}>Columna B</div>
+                        <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
+                          {examCurrentQ.matchRight.map((item) => <div key={item} style={{ fontSize: 14, color: "#111114" }}>{item}</div>)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {examCurrentQ.type === "text" ? (
+                  <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
+                    <input
+                      value={examCurrentChoice || ""}
+                      onChange={(event) => answerExam(event.target.value)}
+                      placeholder="Escribe tu respuesta aquí"
+                      style={{ border: "1px solid rgba(17,17,20,.12)", borderRadius: 12, background: "#fff", padding: "10px 12px", fontSize: 16, fontWeight: 600, color: "#111114" }}
+                    />
+                  </div>
+                ) : (
+                  <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
+                    {examCurrentQ.options.map((op) => {
+                      const isSelected = examCurrentChoice === op;
+                      return (
+                        <button
+                          key={op}
+                          type="button"
+                          onClick={() => answerExam(op)}
+                          style={{
+                            textAlign: "left",
+                            border: isSelected ? "1px solid #2cb696" : "1px solid rgba(17,17,20,.1)",
+                            borderRadius: 10,
+                            background: isSelected ? "#ecfdf5" : "#fff",
+                            color: isSelected ? "#166534" : "#222",
+                            padding: "8px 10px",
+                            fontSize: 14,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                          }}
+                        >
+                          {op}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                   <button
                     type="button"
