@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-l1-l7";
+import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 
 type KanaPair = readonly [string, string];
 type QuizCount = 10 | 20 | 30;
@@ -1085,7 +1086,7 @@ function buildFlashcardSets() {
     }));
 
   const mapKanji = (lesson: number) =>
-    (KANJI_FROM_URL[lesson] || []).map((item, index) => ({
+    (GENKI_KANJI_BY_LESSON[lesson] || []).map((item, index) => ({
       id: `l${lesson}-k-${index + 1}`,
       front: item.kanji,
       back: item.hira,
@@ -1213,6 +1214,25 @@ function buildFlashcardSets() {
     sourceUrl: KANJI_SET_LINKS[7],
     items: mapKanji(7),
   });
+
+  for (let lesson = 8; lesson <= 12; lesson += 1) {
+    addSet({
+      id: `l${lesson}-vocab`,
+      lesson,
+      title: "Vocabulario",
+      description: `Lección ${lesson}`,
+      items: mapVocab(lesson),
+    });
+    if ((GENKI_KANJI_BY_LESSON[lesson] || []).length > 0) {
+      addSet({
+        id: `l${lesson}-kanji`,
+        lesson,
+        title: "Kanji",
+        description: "Kanji → hiragana",
+        items: mapKanji(lesson),
+      });
+    }
+  }
 
   return sets;
 }
