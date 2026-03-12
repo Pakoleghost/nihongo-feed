@@ -1491,32 +1491,38 @@ function StudyContent() {
   };
 
   const vkBucketConfig = useMemo(() => VK_BUCKETS.find((bucket) => bucket.key === vkBucket) || VK_BUCKETS[0], [vkBucket]);
-  const vkVocabPool = useMemo(
-    () =>
-      vkBucketConfig.lessons.flatMap((lesson) =>
-        (GENKI_VOCAB_BY_LESSON[lesson] || []).map((item, index) => ({
+  const vkVocabPool = useMemo(() => {
+    const pool: Array<{ id: string; jp: string; es: string }> = [];
+    for (const lesson of vkBucketConfig.lessons) {
+      const rows = GENKI_VOCAB_BY_LESSON[lesson] || [];
+      rows.forEach((item, index) => {
+        pool.push({
           id: `l${lesson}-v-${index}`,
           // Vocab sprint siempre pregunta significado desde hiragana.
           // La lectura/kanji se evalúa únicamente con el pool de kanji.
           jp: item.hira,
           es: item.es,
-        })),
-      ),
-    [vkBucketConfig],
-  );
-  const vkKanjiPool = useMemo(
-    () =>
-      vkBucketConfig.lessons
-        .filter((lesson) => lesson >= 3)
-        .flatMap((lesson) =>
-        (GENKI_KANJI_BY_LESSON[lesson] || []).map((item, index) => ({
+        });
+      });
+    }
+    return pool;
+  }, [vkBucketConfig]);
+
+  const vkKanjiPool = useMemo(() => {
+    const pool: Array<{ id: string; kanji: string; hira: string }> = [];
+    for (const lesson of vkBucketConfig.lessons) {
+      if (lesson < 3) continue;
+      const rows = GENKI_KANJI_BY_LESSON[lesson] || [];
+      rows.forEach((item, index) => {
+        pool.push({
           id: `l${lesson}-k-${index}`,
           kanji: item.kanji,
           hira: item.hira,
-        })),
-      )),
-    [vkBucketConfig],
-  );
+        });
+      });
+    }
+    return pool;
+  }, [vkBucketConfig]);
 
   const createVkQuestion = () => {
     const canUseKanji = vkKanjiPool.length >= 4;
