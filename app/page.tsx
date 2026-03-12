@@ -643,6 +643,9 @@ export default function HomePage() {
               <Link href="/study?view=kana" style={{ textDecoration: "none", background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", borderRadius: 999, padding: "10px 16px", fontSize: 13, fontWeight: 800, whiteSpace: "nowrap", boxShadow: "0 8px 18px rgba(44,182,150,.2)" }}>
                 Kana Sprint
               </Link>
+              <Link href="/study?view=exam" style={{ textDecoration: "none", background: "#fff", color: "#111114", border: "1px solid rgba(17,17,20,.12)", borderRadius: 999, padding: "10px 16px", fontSize: 13, fontWeight: 800, whiteSpace: "nowrap" }}>
+                Exámenes
+              </Link>
             </div>
           </div>
         </section>
@@ -776,6 +779,7 @@ export default function HomePage() {
             <Link href="/study?view=kana" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Kana Sprint</Link>
             <Link href="/study?view=sprint" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Vocab+Kanji Sprint</Link>
             <Link href="/study?view=flashcards" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Flashcards</Link>
+            <Link href="/study?view=exam" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Exámenes</Link>
             <Link href="/notifications" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><IconBell /> Notificaciones</span>{unreadNotifications > 0 && <span style={{ background: "#ff2d55", color: "#fff", borderRadius: 999, fontSize: 11, fontWeight: 700, padding: "2px 6px" }}>{unreadNotifications}</span>}</Link>
             {myProfile?.is_admin && (
               <Link

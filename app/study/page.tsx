@@ -48,6 +48,10 @@ type QuizQuestion = {
   options: string[];
   correct: string;
   hint?: string;
+  lesson?: number;
+  category?: "vocab" | "kanji" | "particles" | "conjugation";
+  explanation?: string;
+  stableKey?: string;
 };
 
 type KanaScoreRow = {
@@ -62,6 +66,15 @@ type KanaScoreRow = {
 };
 type KanaRoundPayload = { mode: KanaMode; score: number; answers: number; durationMs: number };
 type VkRoundPayload = { bucket: VkBucketKey; score: number; answers: number; durationMs: number };
+type ExamAttempt = {
+  lesson: number;
+  score: number;
+  total: number;
+  percent: number;
+  passed: boolean;
+  createdAt: string;
+  categoryBreakdown: Array<{ category: string; correct: number; total: number }>;
+};
 
 function getLocalWeekStart(date = new Date()) {
   const value = new Date(date);
@@ -131,7 +144,9 @@ const VK_BUCKETS: Array<{ key: VkBucketKey; label: string; lessons: number[] }> 
 ];
 const VK_MODE_KEYS = VK_BUCKETS.map((bucket) => `vk:${bucket.key}`);
 
-type StudyView = "kana" | "flashcards" | "quiz" | "sprint";
+type StudyView = "kana" | "flashcards" | "quiz" | "sprint" | "exam";
+const EXAM_PASSING_PERCENT = 70;
+const EXAM_QUESTION_COUNT = 20;
 
 type FlashcardItem = {
   id: string;
@@ -1055,12 +1070,210 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
   return pickN(qs, count);
 }
 
+const PARTICLE_EXAM_BANK: Array<{
+  id: string;
+  minLesson: number;
+  prompt: string;
+  options: string[];
+  correct: string;
+  explanation: string;
+}> = [
+  { id: "p-l1-1", minLesson: 1, prompt: "わたし___パコです。", options: ["は", "を", "に", "で"], correct: "は", explanation: "「は」marca tema en oraciones copulativas." },
+  { id: "p-l1-2", minLesson: 1, prompt: "マリアさん___せんせいです。", options: ["が", "は", "を", "で"], correct: "は", explanation: "Para identificación, se usa tema 「は」." },
+  { id: "p-l2-1", minLesson: 2, prompt: "これはだれ___ほんですか。", options: ["の", "に", "で", "を"], correct: "の", explanation: "「の」indica posesión (libro de quién)." },
+  { id: "p-l2-2", minLesson: 2, prompt: "わたし___ともだちもにほんじんです。", options: ["の", "は", "も", "が"], correct: "の", explanation: "「わたしのともだち」= mi amigo/a." },
+  { id: "p-l3-1", minLesson: 3, prompt: "がっこう___いきます。", options: ["に", "で", "を", "は"], correct: "に", explanation: "Con verbos de movimiento, destino con 「に」." },
+  { id: "p-l3-2", minLesson: 3, prompt: "としょかん___べんきょうします。", options: ["に", "で", "を", "が"], correct: "で", explanation: "Lugar de acción con 「で」." },
+  { id: "p-l3-3", minLesson: 3, prompt: "ほん___よみます。", options: ["を", "は", "に", "で"], correct: "を", explanation: "Objeto directo con 「を」." },
+  { id: "p-l4-1", minLesson: 4, prompt: "わたしは7じ___おきます。", options: ["に", "で", "を", "が"], correct: "に", explanation: "Hora específica con 「に」." },
+  { id: "p-l4-2", minLesson: 4, prompt: "うち___かえりました。", options: ["に", "を", "で", "が"], correct: "に", explanation: "Destino final con 「に」." },
+  { id: "p-l5-1", minLesson: 5, prompt: "ともだち___えいがをみました。", options: ["と", "に", "が", "を"], correct: "と", explanation: "Compañía con 「と」 (con alguien)." },
+  { id: "p-l5-2", minLesson: 5, prompt: "ケーキ___すきです。", options: ["が", "を", "に", "で"], correct: "が", explanation: "Con 「すき」, lo gustado suele ir con 「が」." },
+  { id: "p-l6-1", minLesson: 6, prompt: "こうえん___しんぶんをよみます。", options: ["で", "に", "を", "が"], correct: "で", explanation: "Lugar donde se realiza la acción con 「で」." },
+  { id: "p-l6-2", minLesson: 6, prompt: "あしたうち___たべます。", options: ["で", "に", "を", "と"], correct: "で", explanation: "Lugar de acción para comer con 「で」." },
+  { id: "p-l7-1", minLesson: 7, prompt: "にほん___りょうりはおいしいです。", options: ["の", "に", "を", "が"], correct: "の", explanation: "Relación nominal: 「日本の料理」." },
+  { id: "p-l7-2", minLesson: 7, prompt: "だれ___きましたか。", options: ["が", "は", "を", "で"], correct: "が", explanation: "En preguntas de sujeto, se usa 「が」." },
+  { id: "p-l8-1", minLesson: 8, prompt: "8じ___10じ___べんきょうしました。", options: ["に / に", "から / まで", "を / に", "で / から"], correct: "から / まで", explanation: "Rango temporal: 「から」(desde) + 「まで」(hasta)." },
+  { id: "p-l8-2", minLesson: 8, prompt: "とうきょう___きょうと___いきました。", options: ["に / で", "から / まで", "を / に", "で / を"], correct: "から / まで", explanation: "Trayecto origen→destino: 「から」→「まで」." },
+  { id: "p-l9-1", minLesson: 9, prompt: "くすり___のみました。", options: ["を", "に", "で", "が"], correct: "を", explanation: "Objeto directo con 「を」." },
+  { id: "p-l9-2", minLesson: 9, prompt: "びょういん___いきました。", options: ["に", "で", "を", "が"], correct: "に", explanation: "Destino con 「に」." },
+  { id: "p-l10-1", minLesson: 10, prompt: "ひだり___まがってください。", options: ["に", "で", "を", "が"], correct: "に", explanation: "Dirección con 「に」 (girar hacia)." },
+  { id: "p-l10-2", minLesson: 10, prompt: "えき___まえでまちましょう。", options: ["の", "に", "を", "で"], correct: "の", explanation: "Relación nominal: 「駅の前」." },
+  { id: "p-l11-1", minLesson: 11, prompt: "しゃしん___とりました。", options: ["を", "に", "で", "が"], correct: "を", explanation: "Objeto directo de tomar fotos con 「を」." },
+  { id: "p-l11-2", minLesson: 11, prompt: "せんせい___そうだんしました。", options: ["に", "を", "で", "が"], correct: "に", explanation: "Persona objetivo de consulta con 「に」." },
+  { id: "p-l12-1", minLesson: 12, prompt: "しょうらい___きょうしになりたいです。", options: ["は", "に", "で", "を"], correct: "は", explanation: "Tema general de la oración con 「は」." },
+  { id: "p-l12-2", minLesson: 12, prompt: "にほんご___じょうずになりました。", options: ["が", "を", "に", "で"], correct: "が", explanation: "Con adjetivos de habilidad, normalmente 「が」." },
+];
+
+function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
+  const normalizedLesson = Math.max(1, Math.min(12, lesson));
+  const pool: QuizQuestion[] = [];
+
+  const lessonVocab = GENKI_VOCAB_BY_LESSON[normalizedLesson] || [];
+  const allVocab = Object.values(GENKI_VOCAB_BY_LESSON).flat();
+  const allMeanings = Array.from(new Set(allVocab.map((item) => item.es).filter(Boolean)));
+  const allJapaneseForms = Array.from(
+    new Set(
+      allVocab
+        .map((item) => (item.kanji?.trim() ? `${item.kanji.trim()} (${item.hira})` : item.hira))
+        .filter(Boolean),
+    ),
+  );
+
+  lessonVocab.forEach((item, index) => {
+    const jpForm = item.kanji?.trim() ? `${item.kanji.trim()} (${item.hira})` : item.hira;
+    pool.push({
+      id: `exam-vocab-es-l${normalizedLesson}-${index}`,
+      stableKey: `l${normalizedLesson}:vocab:es:${item.hira}:${index}`,
+      lesson: normalizedLesson,
+      category: "vocab",
+      prompt: `¿Qué significa 「${item.hira}」?`,
+      options: buildOptionSet(item.es, allMeanings.filter((es) => es !== item.es), allMeanings),
+      correct: item.es,
+      hint: `Lección ${normalizedLesson} · Vocabulario`,
+      explanation: `「${item.hira}」 significa “${item.es}”.`,
+    });
+    pool.push({
+      id: `exam-vocab-jp-l${normalizedLesson}-${index}`,
+      stableKey: `l${normalizedLesson}:vocab:jp:${item.hira}:${index}`,
+      lesson: normalizedLesson,
+      category: "vocab",
+      prompt: `Selecciona el japonés para: “${item.es}”`,
+      options: buildOptionSet(jpForm, allJapaneseForms.filter((value) => value !== jpForm), allJapaneseForms),
+      correct: jpForm,
+      hint: `Lección ${normalizedLesson} · Vocabulario`,
+      explanation: `La opción correcta para “${item.es}” es 「${jpForm}」.`,
+    });
+  });
+
+  const lessonKanji = GENKI_KANJI_BY_LESSON[normalizedLesson] || [];
+  const allKanjiReadings = Array.from(new Set(Object.values(GENKI_KANJI_BY_LESSON).flat().map((item) => item.hira).filter(Boolean)));
+  lessonKanji.forEach((item, index) => {
+    pool.push({
+      id: `exam-kanji-l${normalizedLesson}-${index}`,
+      stableKey: `l${normalizedLesson}:kanji:${item.kanji}:${index}`,
+      lesson: normalizedLesson,
+      category: "kanji",
+      prompt: `¿Cómo se lee 「${item.kanji}」?`,
+      options: buildOptionSet(item.hira, allKanjiReadings.filter((reading) => reading !== item.hira), allKanjiReadings),
+      correct: item.hira,
+      hint: `Lección ${normalizedLesson} · Kanji`,
+      explanation: `「${item.kanji}」 se lee 「${item.hira}」.`,
+    });
+  });
+
+  PARTICLE_EXAM_BANK.filter((entry) => entry.minLesson <= normalizedLesson).forEach((entry) => {
+    pool.push({
+      id: `exam-particle-${entry.id}`,
+      stableKey: `l${normalizedLesson}:particle:${entry.id}`,
+      lesson: normalizedLesson,
+      category: "particles",
+      prompt: entry.prompt,
+      options: shuffle(entry.options),
+      correct: entry.correct,
+      hint: `Lección ${normalizedLesson} · Partículas`,
+      explanation: entry.explanation,
+    });
+  });
+
+  let verbs = ALL_VERBS.filter((verb) => verb.lesson === normalizedLesson);
+  if (verbs.length < 4) {
+    verbs = ALL_VERBS.filter((verb) => verb.lesson <= normalizedLesson && verb.lesson >= 3);
+  }
+  const allVerbTe = Array.from(new Set(ALL_VERBS.map((verb) => toTeForm(verb))));
+  const allVerbPast = Array.from(new Set(ALL_VERBS.map((verb) => toPastShort(verb))));
+  const allVerbMasu = Array.from(new Set(ALL_VERBS.map((verb) => toMasu(verb))));
+  verbs.forEach((verb) => {
+    const te = toTeForm(verb);
+    pool.push({
+      id: `exam-conj-te-${verb.kana}-${normalizedLesson}`,
+      stableKey: `l${normalizedLesson}:conj:te:${verb.kana}`,
+      lesson: normalizedLesson,
+      category: "conjugation",
+      prompt: `Forma て de 「${verb.kana}」 (${verb.es})`,
+      options: buildOptionSet(te, allVerbTe.filter((value) => value !== te), allVerbTe),
+      correct: te,
+      hint: `Lección ${normalizedLesson} · Conjugación`,
+      explanation: `La forma て de 「${verb.kana}」 es 「${te}」.`,
+    });
+    const past = toPastShort(verb);
+    pool.push({
+      id: `exam-conj-past-${verb.kana}-${normalizedLesson}`,
+      stableKey: `l${normalizedLesson}:conj:past:${verb.kana}`,
+      lesson: normalizedLesson,
+      category: "conjugation",
+      prompt: `Pasado corto de 「${verb.kana}」 (${verb.es})`,
+      options: buildOptionSet(past, allVerbPast.filter((value) => value !== past), allVerbPast),
+      correct: past,
+      hint: `Lección ${normalizedLesson} · Conjugación`,
+      explanation: `El pasado corto de 「${verb.kana}」 es 「${past}」.`,
+    });
+    const masu = toMasu(verb);
+    pool.push({
+      id: `exam-conj-masu-${verb.kana}-${normalizedLesson}`,
+      stableKey: `l${normalizedLesson}:conj:masu:${verb.kana}`,
+      lesson: normalizedLesson,
+      category: "conjugation",
+      prompt: `Forma ます de 「${verb.kana}」 (${verb.es})`,
+      options: buildOptionSet(masu, allVerbMasu.filter((value) => value !== masu), allVerbMasu),
+      correct: masu,
+      hint: `Lección ${normalizedLesson} · Conjugación`,
+      explanation: `La forma ます de 「${verb.kana}」 es 「${masu}」.`,
+    });
+  });
+
+  let adjs = ALL_ADJECTIVES.filter((adj) => adj.lesson === normalizedLesson);
+  if (adjs.length < 2) {
+    adjs = ALL_ADJECTIVES.filter((adj) => adj.lesson <= normalizedLesson && adj.lesson >= 5);
+  }
+  const allAdjNeg = Array.from(new Set(ALL_ADJECTIVES.map((adj) => toAdjNegative(adj))));
+  const allAdjPast = Array.from(new Set(ALL_ADJECTIVES.map((adj) => toAdjPast(adj))));
+  adjs.forEach((adj) => {
+    const negative = toAdjNegative(adj);
+    const past = toAdjPast(adj);
+    pool.push({
+      id: `exam-conj-adj-neg-${adj.kana}-${normalizedLesson}`,
+      stableKey: `l${normalizedLesson}:conj:adjneg:${adj.kana}`,
+      lesson: normalizedLesson,
+      category: "conjugation",
+      prompt: `Forma negativa de 「${adj.kana}」 (${adj.es})`,
+      options: buildOptionSet(negative, allAdjNeg.filter((value) => value !== negative), allAdjNeg),
+      correct: negative,
+      hint: `Lección ${normalizedLesson} · Conjugación`,
+      explanation: `La forma negativa de 「${adj.kana}」 es 「${negative}」.`,
+    });
+    pool.push({
+      id: `exam-conj-adj-past-${adj.kana}-${normalizedLesson}`,
+      stableKey: `l${normalizedLesson}:conj:adjpast:${adj.kana}`,
+      lesson: normalizedLesson,
+      category: "conjugation",
+      prompt: `Forma pasada de 「${adj.kana}」 (${adj.es})`,
+      options: buildOptionSet(past, allAdjPast.filter((value) => value !== past), allAdjPast),
+      correct: past,
+      hint: `Lección ${normalizedLesson} · Conjugación`,
+      explanation: `La forma pasada de 「${adj.kana}」 es 「${past}」.`,
+    });
+  });
+
+  return pool.filter((q, idx, arr) => arr.findIndex((entry) => entry.stableKey === q.stableKey) === idx);
+}
+
+function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, number>, count: number) {
+  const unseen = shuffle(pool.filter((question) => !seenMap[question.stableKey || question.id]));
+  if (unseen.length >= count) return unseen.slice(0, count);
+  const seen = pool
+    .filter((question) => seenMap[question.stableKey || question.id])
+    .sort((a, b) => (seenMap[a.stableKey || a.id] || 0) - (seenMap[b.stableKey || b.id] || 0));
+  return [...unseen, ...seen].slice(0, count);
+}
+
 function resolveStudyView(searchParams: Pick<URLSearchParams, "get">): StudyView | null {
   const view = searchParams.get("view");
-  if (view === "kana" || view === "flashcards" || view === "sprint") return view;
+  if (view === "kana" || view === "flashcards" || view === "sprint" || view === "exam") return view;
   if (searchParams.get("kana") === "1") return "kana";
   if (searchParams.get("flashcards") === "1") return "flashcards";
   if (searchParams.get("sprint") === "1") return "sprint";
+  if (searchParams.get("exam") === "1") return "exam";
   return null;
 }
 
@@ -1349,6 +1562,16 @@ function StudyContent() {
   const [quizChoice, setQuizChoice] = useState<string | null>(null);
   const [quizFinished, setQuizFinished] = useState(false);
   const quizCardRef = useRef<HTMLDivElement | null>(null);
+
+  const [examLesson, setExamLesson] = useState(1);
+  const [examQuestions, setExamQuestions] = useState<QuizQuestion[]>([]);
+  const [examIndex, setExamIndex] = useState(0);
+  const [examAnswers, setExamAnswers] = useState<Record<string, string>>({});
+  const [examFinished, setExamFinished] = useState(false);
+  const [examHistory, setExamHistory] = useState<ExamAttempt[]>([]);
+  const examCardRef = useRef<HTMLDivElement | null>(null);
+  const examPersistedRef = useRef(false);
+
   const flashFocusRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -1382,6 +1605,13 @@ function StudyContent() {
             l9_10: Number(parsed?.l9_10 || 0) || 0,
             l11_12: Number(parsed?.l11_12 || 0) || 0,
           });
+        }
+        const rawExamHistory = localStorage.getItem(`study-exam-history-${key}`);
+        if (rawExamHistory) {
+          const parsedHistory = JSON.parse(rawExamHistory);
+          if (Array.isArray(parsedHistory)) {
+            setExamHistory(parsedHistory.slice(0, 20));
+          }
         }
       } catch {}
     };
@@ -1878,13 +2108,42 @@ function StudyContent() {
   const activeConjTypes: ConjType[] = conjTypes.length > 0 ? [...conjTypes] : ["te"];
   const vkLeaderboardForBucket = vkLeaderboard[vkBucket] || [];
   const showHub = !selectedView;
+  const examCurrentQ = examQuestions[examIndex] || null;
+  const examProgressPct = examQuestions.length
+    ? Math.round((((examFinished ? examQuestions.length : examIndex + 1)) / examQuestions.length) * 100)
+    : 0;
+  const examCurrentKey = examCurrentQ ? (examCurrentQ.stableKey || examCurrentQ.id) : "";
+  const examCurrentChoice = examCurrentQ ? (examAnswers[examCurrentKey] || null) : null;
+  const examScore = examQuestions.reduce((acc, question) => {
+    const key = question.stableKey || question.id;
+    return acc + (examAnswers[key] === question.correct ? 1 : 0);
+  }, 0);
+  const examPercent = examQuestions.length ? Math.round((examScore / examQuestions.length) * 100) : 0;
+  const examPassed = examPercent >= EXAM_PASSING_PERCENT;
+  const examWrongQuestions = examQuestions.filter((question) => {
+    const key = question.stableKey || question.id;
+    return examAnswers[key] !== question.correct;
+  });
+  const examCategoryBreakdown = Array.from(
+    examQuestions.reduce((map, question) => {
+      const key = question.stableKey || question.id;
+      const category = question.category || "general";
+      const bucket = map.get(category) || { category, correct: 0, total: 0 };
+      bucket.total += 1;
+      if (examAnswers[key] === question.correct) bucket.correct += 1;
+      map.set(category, bucket);
+      return map;
+    }, new Map<string, { category: string; correct: number; total: number }>()),
+  ).map(([, value]) => value);
 
   const pageMeta = selectedView
     ? selectedView === "kana"
       ? { title: "Kana Sprint", subtitle: "Entrena velocidad y precisión de hiragana/katakana." }
       : selectedView === "sprint"
         ? { title: "Vocab + Kanji Sprint", subtitle: "Compite por rangos de lección para mantener nivel justo." }
-        : { title: "Flashcards", subtitle: "Carpetas por lección y práctica por set." }
+        : selectedView === "exam"
+          ? { title: "Exámenes por Lección", subtitle: "Autoevaluación de 20 reactivos con feedback final y passing score de 70%." }
+          : { title: "Flashcards", subtitle: "Carpetas por lección y práctica por set." }
     : { title: "Study Lab", subtitle: "Selecciona una herramienta y practica por bloques." };
 
   useEffect(() => {
@@ -2007,6 +2266,59 @@ function StudyContent() {
     focusFlashArea();
   }, [activeTab, flashMode]);
 
+  useEffect(() => {
+    if (activeTab !== "exam") return;
+    if (!examCardRef.current) return;
+    examCardRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [activeTab, examIndex, examFinished]);
+
+  useEffect(() => {
+    if (!examFinished) return;
+    if (examPersistedRef.current) return;
+    if (examQuestions.length === 0) return;
+
+    examPersistedRef.current = true;
+    const now = Date.now();
+    const seenMap: Record<string, number> = {};
+    examQuestions.forEach((question) => {
+      seenMap[question.stableKey || question.id] = now;
+    });
+
+    try {
+      const storageKey = `study-exam-seen-${userKey}-l${examLesson}`;
+      const raw = localStorage.getItem(storageKey);
+      const previous = raw ? JSON.parse(raw) : {};
+      localStorage.setItem(storageKey, JSON.stringify({ ...previous, ...seenMap }));
+    } catch {}
+
+    const categoryMap = new Map<string, { category: string; total: number; correct: number }>();
+    examQuestions.forEach((question) => {
+      const key = question.stableKey || question.id;
+      const category = question.category || "general";
+      const bucket = categoryMap.get(category) || { category, total: 0, correct: 0 };
+      bucket.total += 1;
+      if (examAnswers[key] === question.correct) bucket.correct += 1;
+      categoryMap.set(category, bucket);
+    });
+
+    const attempt: ExamAttempt = {
+      lesson: examLesson,
+      score: examScore,
+      total: examQuestions.length,
+      percent: examPercent,
+      passed: examPassed,
+      createdAt: new Date().toISOString(),
+      categoryBreakdown: Array.from(categoryMap.values()),
+    };
+    setExamHistory((prev) => {
+      const next = [attempt, ...prev].slice(0, 20);
+      try {
+        localStorage.setItem(`study-exam-history-${userKey}`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, [examFinished, examQuestions, examAnswers, examLesson, examScore, examPercent, examPassed, userKey]);
+
   const answerQuiz = (option: string) => {
     if (!currentQ || quizChoice) return;
     setQuizChoice(option);
@@ -2030,6 +2342,59 @@ function StudyContent() {
     }
     setQuizIndex((v) => v + 1);
     setQuizChoice(null);
+  };
+
+  const startExam = () => {
+    const pool = buildLessonExamQuestionPool(examLesson);
+    if (pool.length < EXAM_QUESTION_COUNT) {
+      alert("No hay suficientes preguntas para esta lección todavía.");
+      return;
+    }
+
+    let seenMap: Record<string, number> = {};
+    try {
+      const raw = localStorage.getItem(`study-exam-seen-${userKey}-l${examLesson}`);
+      if (raw) seenMap = JSON.parse(raw);
+    } catch {}
+
+    const selected = pickLessonExamQuestions(pool, seenMap, EXAM_QUESTION_COUNT);
+    if (selected.length < EXAM_QUESTION_COUNT) {
+      alert("No se pudo generar un examen completo. Intenta otra vez.");
+      return;
+    }
+
+    setExamQuestions(selected);
+    setExamIndex(0);
+    setExamAnswers({});
+    setExamFinished(false);
+    examPersistedRef.current = false;
+  };
+
+  const answerExam = (option: string) => {
+    if (!examCurrentQ || examFinished) return;
+    const key = examCurrentQ.stableKey || examCurrentQ.id;
+    setExamAnswers((prev) => ({ ...prev, [key]: option }));
+  };
+
+  const nextExamQuestion = () => {
+    if (!examCurrentQ) return;
+    if (!examCurrentChoice) {
+      alert("Selecciona una respuesta para continuar.");
+      return;
+    }
+    if (examIndex >= examQuestions.length - 1) {
+      setExamFinished(true);
+      return;
+    }
+    setExamIndex((prev) => prev + 1);
+  };
+
+  const resetExam = () => {
+    setExamQuestions([]);
+    setExamAnswers({});
+    setExamIndex(0);
+    setExamFinished(false);
+    examPersistedRef.current = false;
   };
 
   const renderQuizConfigurator = (compact = false) => (
@@ -2126,6 +2491,7 @@ function StudyContent() {
             <Link href="/study?view=kana" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "kana" ? "#fff" : "#344054", background: activeTab === "kana" ? "#111114" : "#fff" }}>Kana Sprint</Link>
             <Link href="/study?view=sprint" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "sprint" ? "#fff" : "#344054", background: activeTab === "sprint" ? "#111114" : "#fff" }}>Vocab+Kanji Sprint</Link>
             <Link href="/study?view=flashcards" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "flashcards" ? "#fff" : "#344054", background: activeTab === "flashcards" ? "#111114" : "#fff" }}>Flashcards</Link>
+            <Link href="/study?view=exam" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: activeTab === "exam" ? "#fff" : "#344054", background: activeTab === "exam" ? "#111114" : "#fff" }}>Exámenes</Link>
           </section>
         )}
 
@@ -2145,6 +2511,11 @@ function StudyContent() {
               <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>SRS</div>
               <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Flashcards</div>
               <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Vocab Genki I por lección con repaso inteligente.</p>
+            </Link>
+            <Link href="/study?view=exam" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, background: "#fff", padding: 14 }}>
+              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Evaluación</div>
+              <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Examen por lección</div>
+              <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>20 preguntas, passing de 70% y feedback completo al final.</p>
             </Link>
           </section>
         )}
@@ -2662,84 +3033,176 @@ function StudyContent() {
           </section>
         )}
 
-        {false && !showHub && activeTab === "quiz" && (
+        {!showHub && activeTab === "exam" && (
           <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16 }}>
-            <h2 style={{ margin: 0, fontSize: 24 }}>QUIZ</h2>
-            <p style={{ color: "#6b7280", fontSize: 14 }}>Customiza tipo, lecciones y cantidad de preguntas.</p>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <h2 style={{ margin: 0, fontSize: 24 }}>Examen por lección</h2>
+              <div style={{ display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
+                {LESSONS.map((lesson) => (
+                  <button
+                    key={lesson}
+                    type="button"
+                    onClick={() => {
+                      setExamLesson(lesson);
+                      resetExam();
+                    }}
+                    style={{
+                      border: "1px solid rgba(17,17,20,.1)",
+                      borderRadius: 999,
+                      padding: "6px 10px",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      background: examLesson === lesson ? "#111114" : "#fff",
+                      color: examLesson === lesson ? "#fff" : "#333",
+                    }}
+                  >
+                    L{lesson}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p style={{ color: "#6b7280", fontSize: 14 }}>
+              20 reactivos aleatorios. Passing score: {EXAM_PASSING_PERCENT}%. Feedback completo al final.
+            </p>
 
-            {!currentQ && !quizFinished && renderQuizConfigurator(false)}
+            {examQuestions.length === 0 && (
+              <div ref={examCardRef} style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 14, background: "#fbfbfc" }}>
+                <div style={{ fontSize: 12, color: "#667085", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Configuración</div>
+                <div style={{ marginTop: 6, fontSize: 24, fontWeight: 800 }}>Examen L{examLesson}</div>
+                <p style={{ marginTop: 8, color: "#667085", fontSize: 14, lineHeight: 1.5 }}>
+                  El sistema prioriza reactivos no vistos. Si ya agotaste banco nuevo, rota por los menos recientes para evitar repetición inmediata.
+                </p>
+                <button
+                  type="button"
+                  onClick={startExam}
+                  style={{ marginTop: 10, border: 0, borderRadius: 999, background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", padding: "10px 16px", fontWeight: 800, fontSize: 14, boxShadow: "0 10px 18px rgba(44,182,150,.22)" }}
+                >
+                  Iniciar examen
+                </button>
+              </div>
+            )}
 
-            {currentQ && !quizFinished && (
-              <div ref={quizCardRef} style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 12, background: "#fbfbfc" }}>
+            {examCurrentQ && !examFinished && (
+              <div ref={examCardRef} style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 12, background: "#fbfbfc" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Pregunta {quizIndex + 1} / {quizQuestions.length}</div>
-                  <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Score actual: {quizScore}</div>
+                  <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Pregunta {examIndex + 1} / {examQuestions.length}</div>
+                  <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Lección {examLesson} · {examCurrentQ.category || "general"}</div>
                 </div>
                 <div style={{ marginTop: 8, height: 7, borderRadius: 999, background: "#ecedf1", overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${quizProgressPct}%`, background: "linear-gradient(90deg, #34c5a6, #25a98f)" }} />
+                  <div style={{ height: "100%", width: `${examProgressPct}%`, background: "linear-gradient(90deg, #34c5a6, #25a98f)" }} />
                 </div>
-                <div style={{ marginTop: 8, fontSize: 20, fontWeight: 800, color: "#111114" }}>{currentQ.prompt}</div>
-                {currentQ.hint && <div style={{ marginTop: 4, color: "#6b7280", fontSize: 13 }}>{currentQ.hint}</div>}
+                <div style={{ marginTop: 8, fontSize: 20, fontWeight: 800, color: "#111114" }}>{examCurrentQ.prompt}</div>
+                {examCurrentQ.hint && <div style={{ marginTop: 4, color: "#6b7280", fontSize: 13 }}>{examCurrentQ.hint}</div>}
                 <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
-                  {currentQ.options.map((op) => {
-                    const isSelected = quizChoice === op;
-                    const isCorrect = op === currentQ.correct;
-                    const showResult = Boolean(quizChoice);
-                    let bg = "#fff";
-                    let color = "#222";
-                    let border = "1px solid rgba(17,17,20,.1)";
-                    if (showResult && isCorrect) {
-                      bg = "#ecfdf5";
-                      color = "#166534";
-                      border = "1px solid #86efac";
-                    } else if (showResult && isSelected && !isCorrect) {
-                      bg = "#fef2f2";
-                      color = "#991b1b";
-                      border = "1px solid #fca5a5";
-                    }
-
+                  {examCurrentQ.options.map((op) => {
+                    const isSelected = examCurrentChoice === op;
                     return (
-                      <button key={op} type="button" onClick={() => answerQuiz(op)} disabled={Boolean(quizChoice)} style={{ textAlign: "left", border, borderRadius: 10, background: bg, color, padding: "8px 10px", fontSize: 14, fontWeight: 600, cursor: quizChoice ? "default" : "pointer" }}>
+                      <button
+                        key={op}
+                        type="button"
+                        onClick={() => answerExam(op)}
+                        style={{
+                          textAlign: "left",
+                          border: isSelected ? "1px solid #2cb696" : "1px solid rgba(17,17,20,.1)",
+                          borderRadius: 10,
+                          background: isSelected ? "#ecfdf5" : "#fff",
+                          color: isSelected ? "#166534" : "#222",
+                          padding: "8px 10px",
+                          fontSize: 14,
+                          fontWeight: 600,
+                          cursor: "pointer",
+                        }}
+                      >
                         {op}
                       </button>
                     );
                   })}
                 </div>
-
-                {quizChoice && (
-                  <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                    <div style={{ fontWeight: 700, color: quizChoice === currentQ.correct ? "#15803d" : "#b91c1c" }}>
-                      {quizChoice === currentQ.correct ? "Correcto" : `Incorrecto. Respuesta: ${currentQ.correct}`}
-                    </div>
-                    <button type="button" onClick={nextQuiz} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700 }}>
-                      {quizIndex >= quizQuestions.length - 1 ? "Ver score" : "Siguiente"}
-                    </button>
-                  </div>
-                )}
+                <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={nextExamQuestion}
+                    style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700 }}
+                  >
+                    {examIndex >= examQuestions.length - 1 ? "Terminar y ver feedback" : "Siguiente"}
+                  </button>
+                </div>
               </div>
             )}
 
-            {quizFinished && (
-              <div ref={quizCardRef} style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 14, background: "#f8fafc" }}>
-                <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>Resultado</div>
-                <div style={{ marginTop: 6, fontSize: 30, fontWeight: 800 }}>{quizScore} / {quizQuestions.length}</div>
+            {examFinished && (
+              <div ref={examCardRef} style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 14, background: "#f8fafc" }}>
+                <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>Resultado final</div>
+                <div style={{ marginTop: 6, fontSize: 30, fontWeight: 800 }}>{examScore} / {examQuestions.length}</div>
                 <div style={{ marginTop: 6, color: "#6b7280" }}>
-                  {Math.round((quizScore / Math.max(1, quizQuestions.length)) * 100)}% de aciertos
+                  {examPercent}% de aciertos · {examPassed ? "Aprobado" : "No aprobado"} (mínimo {EXAM_PASSING_PERCENT}%)
                 </div>
-                <button type="button" onClick={startQuiz} style={{ marginTop: 10, border: "1px solid rgba(17,17,20,.12)", background: "#fff", color: "#111114", borderRadius: 999, padding: "7px 10px", fontWeight: 700 }}>
-                  Repetir quiz
-                </button>
+                <div style={{ marginTop: 12, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
+                  {examCategoryBreakdown.map((row) => {
+                    const pct = Math.round((row.correct / Math.max(1, row.total)) * 100);
+                    return (
+                      <div key={row.category} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 10, background: "#fff", padding: 10 }}>
+                        <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".08em", color: "#667085", fontWeight: 800 }}>{row.category}</div>
+                        <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "#111114" }}>{row.correct}/{row.total}</div>
+                        <div style={{ marginTop: 2, fontSize: 12, color: "#667085" }}>{pct}%</div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button type="button" onClick={startExam} style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", padding: "8px 12px", fontWeight: 700 }}>
+                    Repetir examen L{examLesson}
+                  </button>
+                  <button type="button" onClick={resetExam} style={{ border: "1px solid rgba(17,17,20,.12)", background: "#fff", color: "#111114", borderRadius: 999, padding: "8px 12px", fontWeight: 700 }}>
+                    Cambiar lección
+                  </button>
+                </div>
+
+                <div style={{ marginTop: 14, borderTop: "1px dashed rgba(17,17,20,.1)", paddingTop: 12 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#7c7c85", textTransform: "uppercase", letterSpacing: ".08em" }}>
+                    Feedback de errores
+                  </div>
+                  {examWrongQuestions.length === 0 ? (
+                    <p style={{ marginTop: 8, color: "#15803d", fontWeight: 700 }}>Excelente. No hubo errores en este intento.</p>
+                  ) : (
+                    <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
+                      {examWrongQuestions.slice(0, 10).map((question, index) => {
+                        const key = question.stableKey || question.id;
+                        const chosen = examAnswers[key] || "Sin respuesta";
+                        return (
+                          <div key={`${key}-${index}`} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 10, background: "#fff", padding: 10 }}>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: "#111114" }}>{question.prompt}</div>
+                            <div style={{ marginTop: 4, fontSize: 12, color: "#b42318" }}>Tu respuesta: {chosen}</div>
+                            <div style={{ marginTop: 2, fontSize: 12, color: "#166534" }}>Correcta: {question.correct}</div>
+                            {question.explanation && <div style={{ marginTop: 4, fontSize: 12, color: "#667085" }}>{question.explanation}</div>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
-            {(currentQ || quizFinished) && (
-              <div style={{ marginTop: 14, borderTop: "1px dashed rgba(17,17,20,.1)", paddingTop: 12 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#7c7c85", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 8 }}>
-                  Configuración
-                </div>
-                {renderQuizConfigurator(true)}
+            <div style={{ marginTop: 14, borderTop: "1px dashed rgba(17,17,20,.1)", paddingTop: 12 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#7c7c85", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 8 }}>
+                Historial reciente
               </div>
-            )}
+              <div style={{ display: "grid", gap: 6 }}>
+                {examHistory.slice(0, 6).map((attempt, index) => (
+                  <div key={`${attempt.createdAt}-${index}`} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 10, background: "#fff", padding: "8px 10px", display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 13, color: "#111114", fontWeight: 700 }}>
+                      L{attempt.lesson} · {attempt.score}/{attempt.total} ({attempt.percent}%)
+                    </span>
+                    <span style={{ fontSize: 12, color: attempt.passed ? "#15803d" : "#b42318", fontWeight: 700 }}>
+                      {attempt.passed ? "Aprobado" : "No aprobado"}
+                    </span>
+                  </div>
+                ))}
+                {examHistory.length === 0 && <div style={{ color: "#98a2b3", fontSize: 12 }}>Aún no hay intentos.</div>}
+              </div>
+            </div>
           </section>
         )}
       </div>
