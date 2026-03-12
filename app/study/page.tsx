@@ -127,6 +127,7 @@ const VK_BUCKETS: Array<{ key: VkBucketKey; label: string; lessons: number[] }> 
   { key: "l9_10", label: "L9-10", lessons: [9, 10] },
   { key: "l11_12", label: "L11-12", lessons: [11, 12] },
 ];
+const VK_MODE_KEYS = VK_BUCKETS.map((bucket) => `vk:${bucket.key}`);
 
 type StudyView = "kana" | "flashcards" | "quiz" | "sprint";
 
@@ -1312,6 +1313,7 @@ function StudyContent() {
     l9_10: [],
     l11_12: [],
   });
+  const [vkLeaderboardUnavailable, setVkLeaderboardUnavailable] = useState(false);
   const [vkQuestion, setVkQuestion] = useState<{ prompt: string; correct: string; options: string[]; hint: string }>({
     prompt: "だいがく",
     correct: "universidad; instituto",
@@ -1438,6 +1440,7 @@ function StudyContent() {
       .limit(200);
 
     if (error) {
+      console.error("loadKanaLeaderboard error:", error.message);
       setLeaderboardUnavailable(true);
       return;
     }
@@ -1484,7 +1487,9 @@ function StudyContent() {
       { onConflict: "user_id,mode" },
     );
     if (error) {
+      console.error("submitKanaScore error:", error.message);
       setLeaderboardUnavailable(true);
+      alert(`No se pudo guardar score en leaderboard (${error.message}).`);
       return;
     }
     await loadKanaLeaderboard();
@@ -1552,16 +1557,19 @@ function StudyContent() {
 
   const loadVkLeaderboard = async () => {
     const weekStartIso = getLocalWeekStart().toISOString();
-    const modeKeys = VK_BUCKETS.map((bucket) => `vk:${bucket.key}`);
     const { data, error } = await supabase
       .from("study_kana_scores")
       .select("user_id, mode, best_score, updated_at, profiles:user_id (username, full_name)")
       .gte("updated_at", weekStartIso)
-      .in("mode", modeKeys)
+      .in("mode", VK_MODE_KEYS)
       .order("best_score", { ascending: false })
       .order("updated_at", { ascending: true })
       .limit(300);
-    if (error) return;
+    if (error) {
+      console.error("loadVkLeaderboard error:", error.message);
+      setVkLeaderboardUnavailable(true);
+      return;
+    }
     const rows = (data || []) as KanaScoreRow[];
     const next: Record<VkBucketKey, KanaScoreRow[]> = {
       l1_2: [],
@@ -1575,6 +1583,7 @@ function StudyContent() {
       next[bucket.key] = rows.filter((row) => row.mode === `vk:${bucket.key}`).slice(0, 10);
     });
     setVkLeaderboard(next);
+    setVkLeaderboardUnavailable(false);
   };
 
   const submitVkScore = async ({ bucket, score, answers, durationMs }: VkRoundPayload) => {
@@ -1609,7 +1618,12 @@ function StudyContent() {
     const { error } = await supabase
       .from("study_kana_scores")
       .upsert({ user_id: currentUserId, mode, best_score: safeBestScore, updated_at: nowIso }, { onConflict: "user_id,mode" });
-    if (error) return;
+    if (error) {
+      console.error("submitVkScore error:", error.message);
+      setVkLeaderboardUnavailable(true);
+      alert(`No se pudo guardar score en leaderboard (${error.message}).`);
+      return;
+    }
     await loadVkLeaderboard();
   };
 
@@ -2336,6 +2350,9 @@ function StudyContent() {
 
               <div style={{ border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, padding: 12, background: "#fff" }}>
                 <div style={{ fontSize: 12, letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 800, color: "#7c7c85" }}>Leaderboard Vocab + Kanji · {vkBucketConfig.label}</div>
+                {vkLeaderboardUnavailable && (
+                  <p style={{ margin: "8px 0 0", fontSize: 12, color: "#b42318" }}>Leaderboard temporalmente no disponible.</p>
+                )}
                 <div style={{ marginTop: 10, display: "grid", gap: 6 }}>
                   {vkLeaderboardForBucket.map((row, index) => (
                     <div key={`${vkBucket}-${row.user_id}-${index}`} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 13 }}>
