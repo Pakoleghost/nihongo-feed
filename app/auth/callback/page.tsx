@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 
 export default function AuthCallback() {
   const router = useRouter();
-  const [msg, setMsg] = useState("Signing you in…");
+  const [msg, setMsg] = useState("Entrando…");
 
   useEffect(() => {
     (async () => {
@@ -18,8 +18,7 @@ export default function AuthCallback() {
         if (code) {
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) {
-            setMsg(`Auth error: ${error.message}`);
-            return;
+            console.error("exchangeCodeForSession failed:", error.message);
           }
         }
 
@@ -27,7 +26,6 @@ export default function AuthCallback() {
         const { data } = await supabase.auth.getSession();
         const session = data.session;
         if (!session) {
-          setMsg("No session found. Redirecting to login…");
           router.replace("/login");
           return;
         }
@@ -37,17 +35,18 @@ export default function AuthCallback() {
 
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("approved, username")
+          .select("is_approved, username")
           .eq("id", userId)
           .maybeSingle();
 
         if (profileError) {
+          console.error("auth callback profile read failed:", profileError.message);
           // If profile lookup fails, fall back to pending which can handle onboarding states.
           router.replace("/pending");
           return;
         }
 
-        const approved = Boolean(profile?.approved);
+        const approved = Boolean(profile?.is_approved);
         const username = (profile?.username ?? "").toString().trim();
 
         if (approved && !username) {
@@ -64,7 +63,8 @@ export default function AuthCallback() {
         // Approved + username set.
         router.replace("/");
       } catch (e: any) {
-        setMsg(`Callback failed: ${e?.message ?? "unknown error"}`);
+        console.error("auth callback fatal:", e);
+        router.replace("/login");
       }
     })();
   }, [router]);

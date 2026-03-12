@@ -102,7 +102,8 @@ function getKanaRunValidation(score: number, answers: number, durationMs: number
   const answersPerSecond = answers / durationSec;
   const reasons: string[] = [];
   if (score < 0 || answers < 0 || score > answers) reasons.push("conteo inválido");
-  if (durationMs < 45_000 || durationMs > 75_000) reasons.push("duración inválida");
+  // Use a wider window to avoid false negatives from tab throttling/mobile sleep.
+  if (durationMs < 5_000 || durationMs > 300_000) reasons.push("duración inválida");
   if (score > 90) reasons.push("score fuera de rango humano");
   if (answersPerSecond > 4.5) reasons.push("velocidad no plausible");
   return { ok: reasons.length === 0, reasons };
@@ -113,7 +114,8 @@ function getRunValidation(score: number, answers: number, durationMs: number, ma
   const answersPerSecond = answers / durationSec;
   const reasons: string[] = [];
   if (score < 0 || answers < 0 || score > answers) reasons.push("conteo inválido");
-  if (durationMs < 45_000 || durationMs > 75_000) reasons.push("duración inválida");
+  // Use a wider window to avoid false negatives from tab throttling/mobile sleep.
+  if (durationMs < 5_000 || durationMs > 300_000) reasons.push("duración inválida");
   if (score > maxScore) reasons.push("score fuera de rango humano");
   if (answersPerSecond > maxAnswersPerSecond) reasons.push("velocidad no plausible");
   return { ok: reasons.length === 0, reasons };
@@ -1628,11 +1630,7 @@ function StudyContent() {
   };
 
   const startKana = () => {
-    if ((kanaRunning || kanaTime < 60) && kanaScore > 0 && !kanaRoundSubmittedRef.current) {
-      kanaRoundSubmittedRef.current = true;
-      const durationMs = kanaRoundStartedAtRef.current ? Date.now() - kanaRoundStartedAtRef.current : 60_000;
-      void submitKanaScore({ mode: kanaSet, score: kanaScore, answers: kanaAnswersCountRef.current, durationMs });
-    }
+    // Starting a new run cancels any current run without submitting partial scores.
     setKanaRunning(false);
     setKanaTime(60);
     setKanaScore(0);
@@ -1685,11 +1683,7 @@ function StudyContent() {
   }, [vkPenalty]);
 
   const startVkSprint = () => {
-    if ((vkRunning || vkTime < 60) && vkScore > 0 && !vkRoundSubmittedRef.current) {
-      vkRoundSubmittedRef.current = true;
-      const durationMs = vkRoundStartedAtRef.current ? Date.now() - vkRoundStartedAtRef.current : 60_000;
-      void submitVkScore({ bucket: vkBucket, score: vkScore, answers: vkAnswersCountRef.current, durationMs });
-    }
+    // Starting a new run cancels any current run without submitting partial scores.
     setVkRunning(false);
     setVkTime(60);
     setVkScore(0);

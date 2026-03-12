@@ -66,7 +66,7 @@ export default function PendingApprovalPage() {
 
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("approved,is_admin,username")
+        .select("is_approved,is_admin,username")
         .eq("id", userId)
         .maybeSingle();
 
@@ -81,7 +81,7 @@ export default function PendingApprovalPage() {
         return;
       }
 
-      if (profile?.approved) {
+      if (profile?.is_approved) {
         window.location.href = username ? "/" : "/pick-username";
         return;
       }
@@ -125,7 +125,7 @@ export default function PendingApprovalPage() {
     const tick = async () => {
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("approved,is_admin,username")
+        .select("is_approved,is_admin,username")
         .eq("id", userId)
         .maybeSingle();
 
@@ -142,7 +142,7 @@ export default function PendingApprovalPage() {
         return;
       }
 
-      if (profile?.approved) {
+      if (profile?.is_approved) {
         // Keep the session. Just move them into the app.
         window.location.href = username ? "/" : "/pick-username";
       }

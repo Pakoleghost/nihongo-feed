@@ -25,87 +25,92 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSignUp) {
-      if (!fullName.trim()) return alert("Escribe tu nombre completo.");
-      const normalizedUsername = normalizeUsername(username);
-      if (!normalizedUsername || !/^[a-z0-9._-]{3,24}$/.test(normalizedUsername)) {
-        return alert("Username inválido. Usa 3-24 caracteres: letras, números, punto, guion o guion_bajo.");
-      }
-      if (!gender) return alert("Selecciona tu género.");
-      if (!birthDate) return alert("Selecciona tu fecha de nacimiento.");
+    try {
+      if (isSignUp) {
+        if (!fullName.trim()) return alert("Escribe tu nombre completo.");
+        const normalizedUsername = normalizeUsername(username);
+        if (!normalizedUsername || !/^[a-z0-9._-]{3,24}$/.test(normalizedUsername)) {
+          return alert("Username inválido. Usa 3-24 caracteres: letras, números, punto, guion o guion_bajo.");
+        }
+        if (!gender) return alert("Selecciona tu género.");
+        if (!birthDate) return alert("Selecciona tu fecha de nacimiento.");
 
-      const { data: usernameTaken } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("username", normalizedUsername)
-        .limit(1);
-      if ((usernameTaken || []).length > 0) {
-        return alert("Ese username ya está en uso.");
-      }
+        const { data: usernameTaken } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("username", normalizedUsername)
+          .limit(1);
+        if ((usernameTaken || []).length > 0) {
+          return alert("Ese username ya está en uso.");
+        }
 
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName.trim(),
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName.trim(),
+              username: normalizedUsername,
+              gender,
+              birth_date: birthDate,
+            },
+          },
+        });
+        if (error) {
+          alert(error.message);
+          return;
+        }
+        if (data.user) {
+          const profilePayload = {
+            id: data.user.id,
             username: normalizedUsername,
+            full_name: fullName.trim(),
+            email: email.trim().toLowerCase(),
+            group_name: null,
             gender,
             birth_date: birthDate,
-          },
-        },
-      });
-      if (error) {
-        alert(error.message);
-        return;
-      }
-      if (data.user) {
-        const profilePayload = {
-          id: data.user.id,
-          username: normalizedUsername,
-          full_name: fullName.trim(),
-          email: email.trim().toLowerCase(),
-          group_name: null,
-          gender,
-          birth_date: birthDate,
-        };
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .upsert(profilePayload, { onConflict: "id" });
-        if (profileError) {
-          // Fallback if newer research fields are not in the schema yet.
-          const { error: fallbackError } = await supabase
+          };
+          const { error: profileError } = await supabase
             .from("profiles")
-            .upsert(
-              {
-                id: data.user.id,
-                username: normalizedUsername,
-                full_name: fullName.trim(),
-                group_name: null,
-              },
-              { onConflict: "id" },
-            );
-          if (fallbackError) {
-            alert(`Cuenta creada pero no se pudo completar el perfil: ${fallbackError.message}`);
-            return;
+            .upsert(profilePayload, { onConflict: "id" });
+          if (profileError) {
+            // Fallback if newer research fields are not in the schema yet.
+            const { error: fallbackError } = await supabase
+              .from("profiles")
+              .upsert(
+                {
+                  id: data.user.id,
+                  username: normalizedUsername,
+                  full_name: fullName.trim(),
+                  group_name: null,
+                },
+                { onConflict: "id" },
+              );
+            if (fallbackError) {
+              alert(`Cuenta creada pero no se pudo completar el perfil: ${fallbackError.message}`);
+              return;
+            }
+            alert("¡Cuenta creada! Tu perfil quedó listo (sin género/fecha por esquema actual).");
+          } else {
+            alert("¡Cuenta creada!");
           }
-          alert("¡Cuenta creada! Tu perfil quedó listo (sin género/fecha por esquema actual).");
-        } else {
-          alert("¡Cuenta creada!");
+          setIsSignUp(false);
+          setFullName("");
+          setUsername("");
+          setGender("");
+          setBirthDate("");
         }
-        setIsSignUp(false);
-        setFullName("");
-        setUsername("");
-        setGender("");
-        setBirthDate("");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) alert(error.message);
+        else {
+          router.push("/");
+          router.refresh();
+        }
       }
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) alert(error.message);
-      else {
-        router.push("/");
-        router.refresh();
-      }
+    } catch (err: any) {
+      console.error("handleAuth fatal:", err);
+      alert(err?.message || "Ocurrió un error inesperado. Intenta de nuevo.");
     }
   };
 
