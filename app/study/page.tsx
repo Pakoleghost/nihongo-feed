@@ -1355,7 +1355,7 @@ function buildLessonScenarioQuestions(lesson: number): QuizQuestion[] {
         createLessonQuestion(2, "particles:text:no", {
           category: "particles",
           type: "text",
-          prompt: "Completa con la partícula correcta: マリアさん___かばんです。",
+          prompt: "Completa con la partícula correcta: これは マリアさん___ かばんです。",
           options: [],
           correct: "の",
           hint: buildLessonHint(2, "Posesión"),
@@ -1501,9 +1501,9 @@ function buildLessonScenarioQuestions(lesson: number): QuizQuestion[] {
         createLessonQuestion(4, "reading:weekend-2", {
           category: "reading",
           type: "mcq",
-          prompt: "Lee el texto.\nきのう バスで びょういんへ いきました。でも せんせいに あいませんでした。\n\n¿Qué NO pasó?",
-          options: ["Fue al hospital", "Fue en autobús", "Vio al profesor", "Fue ayer"],
-          correct: "Vio al profesor",
+          prompt: "Lee el texto.\nきのう バスで えきへ いきました。でも ともだちに あいませんでした。\n\n¿Qué NO pasó?",
+          options: ["Fue a la estación", "Fue en autobús", "Vio a su amigo", "Fue ayer"],
+          correct: "Vio a su amigo",
           hint: buildLessonHint(4, "Lectura corta"),
           explanation: "El texto dice 「あいませんでした」.",
         }),
@@ -1565,11 +1565,11 @@ function buildLessonScenarioQuestions(lesson: number): QuizQuestion[] {
         createLessonQuestion(5, "reading:okinawa-2", {
           category: "reading",
           type: "mcq",
-          prompt: "Lee el diálogo.\nA: しずかな まちですね。\nB: はい。でも ひまじゃないです。\n\n¿Cómo es la ciudad?",
-          options: ["Ruidosa", "Tranquila", "Cara", "Nueva"],
-          correct: "Tranquila",
+          prompt: "Lee el diálogo.\nA: この まちは にぎやかですね。\nB: はい。レストランも たくさんあります。\n\n¿Cómo es la ciudad?",
+          options: ["Tranquila", "Animada", "Cara", "Pequeña"],
+          correct: "Animada",
           hint: buildLessonHint(5, "Lectura corta"),
-          explanation: "「しずかな」 describe a la ciudad.",
+          explanation: "「にぎやか」 describe una ciudad animada o concurrida.",
         }),
       ];
     case 6:
@@ -1735,16 +1735,16 @@ function buildLessonScenarioQuestions(lesson: number): QuizQuestion[] {
         createLessonQuestion(8, "grammar:mcq:quote-thought", {
           category: "grammar",
           type: "mcq",
-          prompt: "¿Cuál oración significa “Creo que mañana lloverá”?",
+          prompt: "¿Cuál oración significa “Creo que mañana hará frío”?",
           options: [
-            "あした あめだと おもいます。",
-            "あした あめです おもいます。",
-            "あした あめを おもいます。",
-            "あした あめで おもいます。",
+            "あしたは さむいと おもいます。",
+            "あしたは さむいです おもいます。",
+            "あしたは さむいを おもいます。",
+            "あしたは さむいで おもいます。",
           ],
-          correct: "あした あめだと おもいます。",
+          correct: "あしたは さむいと おもいます。",
           hint: buildLessonHint(8, "Citas y opinión"),
-          explanation: "Con sustantivos/adjetivos na en forma corta se usa 「だとおもいます」.",
+          explanation: "Con una oración en forma corta, la cita va antes de 「とおもいます」.",
         }),
         createLessonQuestion(8, "grammar:text:short-past", {
           category: "grammar",
@@ -1823,7 +1823,7 @@ function buildLessonScenarioQuestions(lesson: number): QuizQuestion[] {
         createLessonQuestion(9, "conjugation:text:modifier", {
           category: "grammar",
           type: "text",
-          prompt: "Completa con la forma correcta: きのう ___ ほん (read).\nEscribe solo el japonés faltante.",
+          prompt: "Completa para decir “el libro que leí ayer”: きのう ___ ほん\nEscribe solo el japonés faltante.",
           options: [],
           correct: "よんだ",
           hint: buildLessonHint(9, "Cláusula corta"),
