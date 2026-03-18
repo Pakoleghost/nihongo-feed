@@ -152,6 +152,12 @@ const VK_BUCKETS: Array<{ key: VkBucketKey; label: string; lessons: number[] }> 
   { key: "l11_12", label: "L11-12", lessons: [11, 12] },
 ];
 const VK_MODE_KEYS = VK_BUCKETS.map((bucket) => `vk:${bucket.key}`);
+const FLASHCARD_ROUTE_GROUPS = [
+  { id: "route-foundations", title: "Fundamentos", subtitle: "Kana, vocab base y primeras estructuras.", lessons: [1, 2], accent: "#4f46e5", surface: "linear-gradient(145deg,#eef2ff,#ffffff)" },
+  { id: "route-core-a", title: "Núcleo I", subtitle: "Verbos, kanji inicial y práctica cotidiana.", lessons: [3, 4, 5], accent: "#0f766e", surface: "linear-gradient(145deg,#ecfeff,#ffffff)" },
+  { id: "route-core-b", title: "Núcleo II", subtitle: "Forma て, más kanji y vocab de uso real.", lessons: [6, 7, 8], accent: "#b45309", surface: "linear-gradient(145deg,#fff7ed,#ffffff)" },
+  { id: "route-bridge", title: "Consolidación", subtitle: "Lecciones altas para repasar antes de examen.", lessons: [9, 10, 11, 12], accent: "#be185d", surface: "linear-gradient(145deg,#fdf2f8,#ffffff)" },
+] as const;
 
 type StudyView = "kana" | "flashcards" | "quiz" | "sprint" | "exam";
 const EXAM_PASSING_PERCENT = 70;
@@ -170,6 +176,15 @@ type FlashcardSet = {
   description: string;
   sourceUrl?: string;
   items: FlashcardItem[];
+  isCustom?: boolean;
+  sourceSetIds?: string[];
+};
+
+type CustomFlashDeckRecord = {
+  id: string;
+  name: string;
+  setIds: string[];
+  updatedAt: string;
 };
 
 type FlashLearnQuestion = {
@@ -2355,6 +2370,16 @@ function dedupeFlashItems(items: FlashcardItem[]) {
   });
 }
 
+function getCustomFlashDeckStorageKey(userKey: string) {
+  return `study-custom-flash-decks-${userKey || "anon"}`;
+}
+
+function buildCustomFlashDeckDescription(setCount: number, itemCount: number) {
+  const setLabel = `${setCount} ${setCount === 1 ? "set" : "sets"}`;
+  const itemLabel = `${itemCount} ${itemCount === 1 ? "tarjeta" : "tarjetas"}`;
+  return `${setLabel} combinados · ${itemLabel}`;
+}
+
 function toAdjNegativePolite(adj: AdjEntry) {
   if (adj.kind === "i") return `${adj.kana.slice(0, -1)}くないです`;
   return `${adj.kana}じゃないです`;
@@ -2611,6 +2636,12 @@ function StudyContent() {
   const [flashLearnChoice, setFlashLearnChoice] = useState<string | null>(null);
   const [flashLearnScore, setFlashLearnScore] = useState(0);
   const [flashLearnFinished, setFlashLearnFinished] = useState(false);
+  const [customFlashDecks, setCustomFlashDecks] = useState<CustomFlashDeckRecord[]>([]);
+  const [flashDeckBuilderOpen, setFlashDeckBuilderOpen] = useState(false);
+  const [flashDeckEditingId, setFlashDeckEditingId] = useState<string | null>(null);
+  const [flashDeckName, setFlashDeckName] = useState("");
+  const [flashDeckSelectedSetIds, setFlashDeckSelectedSetIds] = useState<string[]>([]);
+  const [flashRouteId, setFlashRouteId] = useState<string | null>(FLASHCARD_ROUTE_GROUPS[0]?.id ?? null);
 
   const [quizMode, setQuizMode] = useState<QuizMode>("particles");
   const [quizCount, setQuizCount] = useState<QuizCount>(10);
@@ -2677,6 +2708,32 @@ function StudyContent() {
     };
     void boot();
   }, []);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(getCustomFlashDeckStorageKey(userKey));
+      if (!raw) {
+        setCustomFlashDecks([]);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        setCustomFlashDecks(
+          parsed.filter((deck): deck is CustomFlashDeckRecord =>
+            Boolean(deck && typeof deck.id === "string" && typeof deck.name === "string" && Array.isArray(deck.setIds)),
+          ),
+        );
+      }
+    } catch {
+      setCustomFlashDecks([]);
+    }
+  }, [userKey]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(getCustomFlashDeckStorageKey(userKey), JSON.stringify(customFlashDecks));
+    } catch {}
+  }, [customFlashDecks, userKey]);
 
   useEffect(() => {
     if (selectedView) {
@@ -3000,6 +3057,29 @@ function StudyContent() {
     () => Array.from(new Set(FLASHCARD_SETS.map((set) => set.lesson))).sort((a, b) => a - b),
     [],
   );
+  const customFlashSets = useMemo<FlashcardSet[]>(
+    () =>
+      customFlashDecks
+        .map((deck) => {
+          const sourceSets = deck.setIds
+            .map((setId) => FLASHCARD_SETS.find((set) => set.id === setId))
+            .filter((set): set is FlashcardSet => Boolean(set));
+          const items = dedupeFlashItems(sourceSets.flatMap((set) => set.items));
+          if (sourceSets.length === 0 || items.length === 0) return null;
+          return {
+            id: deck.id,
+            lesson: 0,
+            title: deck.name,
+            description: buildCustomFlashDeckDescription(sourceSets.length, items.length),
+            items,
+            isCustom: true,
+            sourceSetIds: [...deck.setIds],
+          } satisfies FlashcardSet;
+        })
+        .filter((set): set is FlashcardSet => Boolean(set)),
+    [customFlashDecks],
+  );
+  const allFlashSets = useMemo(() => [...customFlashSets, ...FLASHCARD_SETS], [customFlashSets]);
   const flashSetsByLesson = useMemo(
     () =>
       flashLessons.map((lesson) => ({
@@ -3014,16 +3094,40 @@ function StudyContent() {
     [activeFlashLesson],
   );
   const activeFlashSet = useMemo(
-    () => flashSetsInLesson.find((set) => set.id === flashSetId) || null,
-    [flashSetsInLesson, flashSetId],
+    () => allFlashSets.find((set) => set.id === flashSetId) || null,
+    [allFlashSets, flashSetId],
   );
   const activeFlashItems = activeFlashSet?.items || [];
   const activeFlashDeck = flashCardsDeck.length > 0 ? flashCardsDeck : activeFlashItems;
   const isFlashFocusMode = flashMode === "cards" || flashMode === "learn";
   const activeFlashCard = activeFlashDeck[flashCardIndex] || null;
   const flashCardProgressPct = activeFlashDeck.length > 0 ? Math.round(((flashCardIndex + 1) / activeFlashDeck.length) * 100) : 0;
+  const flashDeckBuilderPreviewItems = useMemo(
+    () =>
+      dedupeFlashItems(
+        flashDeckSelectedSetIds.flatMap((setId) => FLASHCARD_SETS.find((set) => set.id === setId)?.items || []),
+      ),
+    [flashDeckSelectedSetIds],
+  );
+  const flashRoutes = useMemo(
+    () =>
+      FLASHCARD_ROUTE_GROUPS.map((route) => ({
+        ...route,
+        entries: route.lessons.map((lesson) => ({
+          lesson,
+          sets: FLASHCARD_SETS.filter((set) => set.lesson === lesson),
+        })).filter((entry) => entry.sets.length > 0),
+      })),
+    [],
+  );
+  const activeFlashRoute = useMemo(
+    () => flashRoutes.find((route) => route.id === flashRouteId) || flashRoutes[0] || null,
+    [flashRouteId, flashRoutes],
+  );
 
   const openFlashLesson = (lesson: number) => {
+    closeCustomFlashDeckBuilder();
+    setFlashRouteId(FLASHCARD_ROUTE_GROUPS.find((route) => route.lessons.includes(lesson))?.id || flashRouteId);
     setFlashLessonFolder(lesson);
     setFlashSetId(null);
     setFlashMode("browse");
@@ -3031,6 +3135,7 @@ function StudyContent() {
   };
 
   const openFlashSet = (setId: string) => {
+    closeCustomFlashDeckBuilder();
     setFlashSetId(setId);
     setFlashMode("browse");
     setFlashCardsDeck([]);
@@ -3041,6 +3146,70 @@ function StudyContent() {
     setFlashLearnChoice(null);
     setFlashLearnScore(0);
     setFlashLearnFinished(false);
+  };
+
+  const openCustomFlashDeckBuilder = (deck?: CustomFlashDeckRecord) => {
+    setFlashDeckBuilderOpen(true);
+    setFlashDeckEditingId(deck?.id || null);
+    setFlashDeckName(deck?.name || "");
+    setFlashDeckSelectedSetIds(deck?.setIds || []);
+  };
+
+  const closeCustomFlashDeckBuilder = () => {
+    setFlashDeckBuilderOpen(false);
+    setFlashDeckEditingId(null);
+    setFlashDeckName("");
+    setFlashDeckSelectedSetIds([]);
+  };
+
+  const toggleCustomFlashSetSelection = (setId: string) => {
+    setFlashDeckSelectedSetIds((prev) => (
+      prev.includes(setId)
+        ? prev.filter((id) => id !== setId)
+        : [...prev, setId]
+    ));
+  };
+
+  const saveCustomFlashDeck = () => {
+    const trimmedName = flashDeckName.trim();
+    if (!trimmedName) {
+      alert("Ponle nombre a tu deck.");
+      return;
+    }
+    if (flashDeckSelectedSetIds.length === 0) {
+      alert("Selecciona al menos un set para armar el deck.");
+      return;
+    }
+    const nowIso = new Date().toISOString();
+    setCustomFlashDecks((prev) => {
+      if (flashDeckEditingId) {
+        return prev.map((deck) => (
+          deck.id === flashDeckEditingId
+            ? { ...deck, name: trimmedName, setIds: [...flashDeckSelectedSetIds], updatedAt: nowIso }
+            : deck
+        ));
+      }
+      return [
+        {
+          id: `custom-${Date.now()}`,
+          name: trimmedName,
+          setIds: [...flashDeckSelectedSetIds],
+          updatedAt: nowIso,
+        },
+        ...prev,
+      ];
+    });
+    closeCustomFlashDeckBuilder();
+  };
+
+  const deleteCustomFlashDeck = (deckId: string) => {
+    if (!window.confirm("¿Borrar este deck personalizado?")) return;
+    setCustomFlashDecks((prev) => prev.filter((deck) => deck.id !== deckId));
+    if (flashSetId === deckId) {
+      setFlashSetId(null);
+      setFlashMode("browse");
+      setFlashCardsDeck([]);
+    }
   };
 
   const focusFlashArea = () => {
@@ -3873,7 +4042,7 @@ function StudyContent() {
 
         {!showHub && activeTab === "flashcards" && (
           <section style={{ background: "linear-gradient(145deg,#f6f7ff,#ffffff)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16, boxShadow: "inset 0 0 0 2px rgba(99,102,241,.08)" }}>
-            {flashLessonFolder !== null && (
+            {(flashLessonFolder !== null || Boolean(activeFlashSet?.isCustom)) && (
               <div style={{ marginBottom: 10 }}>
                 <button
                   type="button"
@@ -3884,25 +4053,302 @@ function StudyContent() {
                   }}
                   style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}
                 >
-                  Ver lecciones
+                  Volver a decks
                 </button>
               </div>
             )}
 
-            {flashLessonFolder === null && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 10 }}>
-                {flashSetsByLesson.map((entry) => (
-                  <button
-                    key={entry.lesson}
-                    type="button"
-                    onClick={() => openFlashLesson(entry.lesson)}
-                    style={{ textAlign: "left", border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fbfbfc", padding: 12, cursor: "pointer" }}
-                  >
-                    <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Carpeta</div>
-                    <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Lección {entry.lesson}</div>
-                    <div style={{ marginTop: 6, fontSize: 13, color: "#667085" }}>{entry.sets.length} sets</div>
-                  </button>
-                ))}
+            {flashLessonFolder === null && flashSetId === null && (
+              <div style={{ display: "grid", gap: 14 }}>
+                <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 22, background: "linear-gradient(145deg,#ffffff,#f8fafc)", padding: 16, boxShadow: "0 12px 30px rgba(15,23,42,.06)" }}>
+                  <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))" }}>
+                    <div>
+                      <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 800 }}>Flashcards</div>
+                      <div style={{ marginTop: 4, fontSize: 28, fontWeight: 900, color: "#111114", lineHeight: 1.05 }}>Repaso claro, por rutas y sin ruido</div>
+                      <div style={{ marginTop: 8, fontSize: 14, color: "#667085", lineHeight: 1.6, maxWidth: 620 }}>
+                        Aquí viven tus decks oficiales por lección y tus decks personalizados. La entrada es más ligera para que no se pierdan entre sí ni te aviente las 12 carpetas de golpe.
+                      </div>
+                    </div>
+                    <div style={{ display: "grid", gap: 10, alignContent: "start" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(90px,1fr))", gap: 8 }}>
+                        <div style={{ borderRadius: 16, background: "#f8fafc", border: "1px solid rgba(17,17,20,.06)", padding: 12 }}>
+                          <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Lecciones</div>
+                          <div style={{ marginTop: 4, fontSize: 26, fontWeight: 900, color: "#111114" }}>{flashLessons.length}</div>
+                        </div>
+                        <div style={{ borderRadius: 16, background: "#f8fafc", border: "1px solid rgba(17,17,20,.06)", padding: 12 }}>
+                          <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Sets</div>
+                          <div style={{ marginTop: 4, fontSize: 26, fontWeight: 900, color: "#111114" }}>{FLASHCARD_SETS.length}</div>
+                        </div>
+                        <div style={{ borderRadius: 16, background: "#f8fafc", border: "1px solid rgba(17,17,20,.06)", padding: 12 }}>
+                          <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Mis decks</div>
+                          <div style={{ marginTop: 4, fontSize: 26, fontWeight: 900, color: "#111114" }}>{customFlashSets.length}</div>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          onClick={() => openCustomFlashDeckBuilder()}
+                          style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#4f46e5,#6366f1)", color: "#fff", padding: "10px 14px", fontWeight: 800, cursor: "pointer", boxShadow: "0 10px 18px rgba(99,102,241,.2)" }}
+                        >
+                          Crear mi deck
+                        </button>
+                        {activeFlashRoute && (
+                          <button
+                            type="button"
+                            onClick={() => openFlashLesson(activeFlashRoute.entries[0]?.lesson || flashLessons[0] || 1)}
+                            style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "10px 14px", fontWeight: 800, cursor: "pointer" }}
+                          >
+                            Abrir ruta activa
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ border: "1px solid rgba(79,70,229,.14)", borderRadius: 18, background: "linear-gradient(145deg,#eef2ff,#ffffff)", padding: 14 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    <div>
+                      <div style={{ fontSize: 12, color: "#6366f1", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Mis decks</div>
+                      <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800, color: "#111114" }}>Combina sets oficiales</div>
+                      <div style={{ marginTop: 4, fontSize: 13, color: "#667085", maxWidth: 560 }}>
+                        Junta vocab, kanji o sets especiales en un solo deck para estudiar lo que tú quieras sin duplicar tarjetas.
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => openCustomFlashDeckBuilder()}
+                      style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#4f46e5,#6366f1)", color: "#fff", padding: "10px 14px", fontWeight: 800, cursor: "pointer", boxShadow: "0 10px 18px rgba(99,102,241,.2)" }}
+                    >
+                      Crear deck
+                    </button>
+                  </div>
+
+                  {customFlashSets.length > 0 ? (
+                    <div style={{ marginTop: 12, display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
+                      {customFlashSets.map((set) => (
+                        <div key={set.id} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
+                          <button
+                            type="button"
+                            onClick={() => openFlashSet(set.id)}
+                            style={{ display: "block", width: "100%", textAlign: "left", border: 0, background: "transparent", padding: 0, cursor: "pointer" }}
+                          >
+                            <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Deck personalizado</div>
+                            <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "#111114" }}>{set.title}</div>
+                            <div style={{ marginTop: 4, fontSize: 13, color: "#667085", lineHeight: 1.45 }}>{set.description}</div>
+                          </button>
+                          <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                            <button type="button" onClick={() => openCustomFlashDeckBuilder(customFlashDecks.find((deck) => deck.id === set.id))} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                              Editar
+                            </button>
+                            <button type="button" onClick={() => deleteCustomFlashDeck(set.id)} style={{ border: "1px solid rgba(185,28,28,.14)", borderRadius: 999, background: "#fff5f5", color: "#b42318", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                              Borrar
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ marginTop: 12, border: "1px dashed rgba(79,70,229,.22)", borderRadius: 14, background: "rgba(255,255,255,.7)", padding: 14, color: "#667085", fontSize: 14, lineHeight: 1.5 }}>
+                      Aún no tienes decks personalizados. Crea uno combinando varios sets oficiales para repasar justo lo que necesites.
+                    </div>
+                  )}
+
+                  {flashDeckBuilderOpen && (
+                    <div style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fff", padding: 14, display: "grid", gap: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <div>
+                          <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>
+                            {flashDeckEditingId ? "Editar deck" : "Nuevo deck"}
+                          </div>
+                          <div style={{ marginTop: 4, fontSize: 20, fontWeight: 800, color: "#111114" }}>
+                            {flashDeckEditingId ? "Ajusta tu combinación" : "Arma tu deck"}
+                          </div>
+                        </div>
+                        <button type="button" onClick={closeCustomFlashDeckBuilder} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                          Cerrar
+                        </button>
+                      </div>
+
+                      <div style={{ display: "grid", gap: 8 }}>
+                        <label style={{ fontSize: 12, color: "#667085", fontWeight: 700 }}>Nombre del deck</label>
+                        <input
+                          value={flashDeckName}
+                          onChange={(event) => setFlashDeckName(event.target.value)}
+                          placeholder="Ej. L3-L5 vocab + kanji"
+                          style={{ border: "1px solid rgba(17,17,20,.12)", borderRadius: 12, background: "#fff", padding: "10px 12px", fontSize: 15, fontWeight: 600, color: "#111114" }}
+                        />
+                      </div>
+
+                      <div style={{ border: "1px solid rgba(17,17,20,.06)", borderRadius: 14, background: "#fafbff", padding: 12 }}>
+                        <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Sets oficiales</div>
+                        <div style={{ marginTop: 10, display: "grid", gap: 12 }}>
+                          {flashSetsByLesson.map((entry) => (
+                            <div key={`builder-${entry.lesson}`} style={{ display: "grid", gap: 8 }}>
+                              <div style={{ fontSize: 13, fontWeight: 800, color: "#111114" }}>Lección {entry.lesson}</div>
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                {entry.sets.map((set) => {
+                                  const selected = flashDeckSelectedSetIds.includes(set.id);
+                                  return (
+                                    <button
+                                      key={`pick-${set.id}`}
+                                      type="button"
+                                      onClick={() => toggleCustomFlashSetSelection(set.id)}
+                                      style={{
+                                        border: selected ? "1px solid #4f46e5" : "1px solid rgba(17,17,20,.1)",
+                                        borderRadius: 999,
+                                        background: selected ? "#eef2ff" : "#fff",
+                                        color: selected ? "#3730a3" : "#344054",
+                                        padding: "8px 11px",
+                                        fontWeight: 700,
+                                        cursor: "pointer",
+                                      }}
+                                    >
+                                      {set.title}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
+                        <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Resumen</div>
+                        <div style={{ marginTop: 6, fontSize: 16, fontWeight: 800, color: "#111114" }}>
+                          {flashDeckSelectedSetIds.length} sets · {flashDeckBuilderPreviewItems.length} tarjetas únicas
+                        </div>
+                        <div style={{ marginTop: 4, fontSize: 13, color: "#667085" }}>
+                          El sistema une las tarjetas y elimina duplicados automáticamente.
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, flexWrap: "wrap" }}>
+                        <button type="button" onClick={closeCustomFlashDeckBuilder} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "8px 12px", fontWeight: 700, cursor: "pointer" }}>
+                          Cancelar
+                        </button>
+                        <button type="button" onClick={saveCustomFlashDeck} style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#4f46e5,#6366f1)", color: "#fff", padding: "8px 14px", fontWeight: 800, cursor: "pointer" }}>
+                          {flashDeckEditingId ? "Guardar cambios" : "Guardar deck"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: "grid", gap: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    <div>
+                      <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Decks oficiales</div>
+                      <div style={{ marginTop: 4, fontSize: 20, fontWeight: 800, color: "#111114" }}>Rutas por bloque</div>
+                      <div style={{ marginTop: 4, fontSize: 13, color: "#667085" }}>
+                        Elegimos mostrar rutas primero para que la página se sienta ligera y más fácil de navegar.
+                      </div>
+                    </div>
+                    {activeFlashRoute && (
+                      <div style={{ borderRadius: 999, background: "#f8fafc", border: "1px solid rgba(17,17,20,.08)", padding: "8px 12px", fontSize: 12, color: "#475467", fontWeight: 700 }}>
+                        {activeFlashRoute.entries.reduce((total, entry) => total + entry.sets.length, 0)} sets en esta ruta
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 10 }}>
+                    {flashRoutes.map((route) => {
+                      const selected = activeFlashRoute?.id === route.id;
+                      return (
+                        <button
+                          key={route.id}
+                          type="button"
+                          onClick={() => setFlashRouteId(route.id)}
+                          style={{
+                            textAlign: "left",
+                            border: selected ? `1px solid ${route.accent}` : "1px solid rgba(17,17,20,.08)",
+                            borderRadius: 18,
+                            background: route.surface,
+                            padding: 14,
+                            cursor: "pointer",
+                            boxShadow: selected ? `0 14px 26px ${route.accent}22` : "none",
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+                            <div>
+                              <div style={{ fontSize: 12, color: route.accent, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Ruta</div>
+                              <div style={{ marginTop: 4, fontSize: 20, fontWeight: 900, color: "#111114" }}>{route.title}</div>
+                            </div>
+                            <div style={{ minWidth: 38, height: 38, borderRadius: 14, background: `${route.accent}16`, color: route.accent, display: "grid", placeItems: "center", fontWeight: 900 }}>
+                              {route.lessons.length}
+                            </div>
+                          </div>
+                          <div style={{ marginTop: 8, fontSize: 13, color: "#667085", lineHeight: 1.5 }}>{route.subtitle}</div>
+                          <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                            {route.lessons.map((lesson) => (
+                              <span key={`${route.id}-${lesson}`} style={{ borderRadius: 999, background: "#fff", border: "1px solid rgba(17,17,20,.08)", padding: "5px 8px", fontSize: 12, color: "#344054", fontWeight: 700 }}>
+                                L{lesson}
+                              </span>
+                            ))}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {activeFlashRoute && (
+                    <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 18, background: "#ffffff", padding: 14, boxShadow: "0 12px 26px rgba(15,23,42,.05)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                        <div>
+                          <div style={{ fontSize: 12, color: activeFlashRoute.accent, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Ruta activa</div>
+                          <div style={{ marginTop: 4, fontSize: 22, fontWeight: 900, color: "#111114" }}>{activeFlashRoute.title}</div>
+                          <div style={{ marginTop: 4, fontSize: 13, color: "#667085", lineHeight: 1.5 }}>{activeFlashRoute.subtitle}</div>
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                          {activeFlashRoute.entries.map((entry) => (
+                            <button
+                              key={`route-jump-${entry.lesson}`}
+                              type="button"
+                              onClick={() => openFlashLesson(entry.lesson)}
+                              style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "8px 11px", fontWeight: 800, cursor: "pointer", color: "#111114" }}
+                            >
+                              Lección {entry.lesson}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 10 }}>
+                        {activeFlashRoute.entries.map((entry) => (
+                          <button
+                            key={`folder-${entry.lesson}`}
+                            type="button"
+                            onClick={() => openFlashLesson(entry.lesson)}
+                            style={{ textAlign: "left", border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fbfbfc", padding: 13, cursor: "pointer" }}
+                          >
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
+                              <div>
+                                <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Carpeta</div>
+                                <div style={{ marginTop: 4, fontSize: 20, fontWeight: 900, color: "#111114" }}>Lección {entry.lesson}</div>
+                              </div>
+                              <div style={{ borderRadius: 999, background: "#fff", border: "1px solid rgba(17,17,20,.08)", padding: "6px 9px", fontSize: 12, color: "#475467", fontWeight: 800 }}>
+                                {entry.sets.length} sets
+                              </div>
+                            </div>
+                            <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                              {entry.sets.slice(0, 4).map((set) => (
+                                <span key={`folder-preview-${set.id}`} style={{ borderRadius: 999, background: "#fff", border: "1px solid rgba(17,17,20,.08)", padding: "5px 8px", fontSize: 12, color: "#475467", fontWeight: 700 }}>
+                                  {set.title}
+                                </span>
+                              ))}
+                              {entry.sets.length > 4 && (
+                                <span style={{ borderRadius: 999, background: "#fff", border: "1px solid rgba(17,17,20,.08)", padding: "5px 8px", fontSize: 12, color: "#98a2b3", fontWeight: 700 }}>
+                                  +{entry.sets.length - 4}
+                                </span>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -3924,7 +4370,7 @@ function StudyContent() {
               </div>
             )}
 
-            {flashLessonFolder !== null && activeFlashSet && (
+            {activeFlashSet && (
               <div
                 ref={flashFocusRef}
                 onClick={() => {
@@ -3955,7 +4401,7 @@ function StudyContent() {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                     <div>
                       <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>
-                        Lección {activeFlashSet.lesson}
+                        {activeFlashSet.isCustom ? "Mi deck" : `Lección ${activeFlashSet.lesson}`}
                       </div>
                       <div style={{ marginTop: 4, fontSize: 20, fontWeight: 800 }}>{activeFlashSet.title}</div>
                       <div style={{ marginTop: 4, color: "#667085", fontSize: 13 }}>{activeFlashSet.description}</div>
