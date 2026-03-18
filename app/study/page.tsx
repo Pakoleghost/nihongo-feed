@@ -3057,26 +3057,25 @@ function StudyContent() {
     () => Array.from(new Set(FLASHCARD_SETS.map((set) => set.lesson))).sort((a, b) => a - b),
     [],
   );
-  const customFlashSets = useMemo<FlashcardSet[]>(
+  const customFlashSets = useMemo(
     () =>
-      customFlashDecks
-        .map((deck) => {
-          const sourceSets = deck.setIds
-            .map((setId) => FLASHCARD_SETS.find((set) => set.id === setId))
-            .filter((set): set is FlashcardSet => Boolean(set));
-          const items = dedupeFlashItems(sourceSets.flatMap((set) => set.items));
-          if (sourceSets.length === 0 || items.length === 0) return null;
-          return {
-            id: deck.id,
-            lesson: 0,
-            title: deck.name,
-            description: buildCustomFlashDeckDescription(sourceSets.length, items.length),
-            items,
-            isCustom: true,
-            sourceSetIds: [...deck.setIds],
-          } satisfies FlashcardSet;
-        })
-        .filter((set): set is FlashcardSet => Boolean(set)),
+      customFlashDecks.reduce<FlashcardSet[]>((acc, deck) => {
+        const sourceSets = deck.setIds
+          .map((setId) => FLASHCARD_SETS.find((set) => set.id === setId))
+          .filter((set): set is FlashcardSet => Boolean(set));
+        const items = dedupeFlashItems(sourceSets.flatMap((set) => set.items));
+        if (sourceSets.length === 0 || items.length === 0) return acc;
+        acc.push({
+          id: deck.id,
+          lesson: 0,
+          title: deck.name,
+          description: buildCustomFlashDeckDescription(sourceSets.length, items.length),
+          items,
+          isCustom: true,
+          sourceSetIds: [...deck.setIds],
+        });
+        return acc;
+      }, []),
     [customFlashDecks],
   );
   const allFlashSets = useMemo(() => [...customFlashSets, ...FLASHCARD_SETS], [customFlashSets]);
