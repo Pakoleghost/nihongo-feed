@@ -3126,7 +3126,7 @@ function StudyContent() {
 
   const openFlashLesson = (lesson: number) => {
     closeCustomFlashDeckBuilder();
-    setFlashRouteId(FLASHCARD_ROUTE_GROUPS.find((route) => route.lessons.includes(lesson))?.id || flashRouteId);
+    setFlashRouteId(FLASHCARD_ROUTE_GROUPS.find((route) => route.lessons.some((value) => value === lesson))?.id || flashRouteId);
     setFlashLessonFolder(lesson);
     setFlashSetId(null);
     setFlashMode("browse");
