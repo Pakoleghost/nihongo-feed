@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-l1-l7";
+import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 
 type KanaPair = readonly [string, string];
@@ -42,18 +42,23 @@ type AdjEntry = {
   kind: AdjKind;
 };
 
+type QuizQuestionType = "mcq" | "text" | "match" | "reorder";
+type QuizCategory = "vocab" | "kanji" | "particles" | "conjugation" | "grammar" | "reading";
+type ReorderToken = { id: string; label: string };
+
 type QuizQuestion = {
   id: string;
   prompt: string;
   options: string[];
   correct: string;
   hint?: string;
-  type?: "mcq" | "text" | "match";
+  type?: QuizQuestionType;
   acceptedAnswers?: string[];
   matchLeft?: string[];
   matchRight?: string[];
+  reorderTokens?: ReorderToken[];
   lesson?: number;
-  category?: "vocab" | "kanji" | "particles" | "conjugation";
+  category?: QuizCategory;
   explanation?: string;
   stableKey?: string;
 };
@@ -172,6 +177,15 @@ type FlashLearnQuestion = {
   prompt: string;
   correct: string;
   options: string[];
+};
+
+const EXAM_CATEGORY_LABELS: Record<QuizCategory, string> = {
+  vocab: "Vocabulario",
+  kanji: "Kanji",
+  particles: "Partículas",
+  conjugation: "Conjugación",
+  grammar: "Gramática",
+  reading: "Lectura",
 };
 
 const KANJI_FROM_URL: Record<number, Array<{ kanji: string; hira: string }>> = {
@@ -759,6 +773,21 @@ const ALL_GENKI_VOCAB: VocabCard[] = dedupeVocab([
   ...VERB_VOCAB,
   ...ADJ_VOCAB,
 ]);
+const ALL_GENKI_VOCAB_BY_LESSON: Record<number, VocabCard[]> = LESSONS.reduce((acc, lesson) => {
+  acc[lesson] = dedupeVocab(
+    ALL_GENKI_VOCAB.filter((card) => card.lesson === lesson).concat(
+      (GENKI_VOCAB_BY_LESSON[lesson] || []).map((item, index) => ({
+        id: `xlsx-${lesson}-${index + 1}`,
+        lesson,
+        jp: item.kanji || item.hira,
+        kana: item.hira,
+        es: item.es,
+        kanji: item.kanji,
+      })),
+    ),
+  );
+  return acc;
+}, {} as Record<number, VocabCard[]>);
 
 const U_ENDINGS: Record<string, { masu: string; te: string; past: string }> = {
   "う": { masu: "います", te: "って", past: "った" },
@@ -795,7 +824,7 @@ function buildOptionSet(correct: string, wrongCandidates: string[], fallbackPool
       if (wrong.length >= 3) break;
     }
   }
-  return shuffle([correct, ...wrong.slice(0, 3)]);
+  return shuffle([correct, ...wrong.slice(0, 3)]).slice(0, 4);
 }
 
 function rankBadgeStyles(index: number) {
@@ -806,11 +835,9 @@ function rankBadgeStyles(index: number) {
 }
 
 function romajiOptions(pool: KanaPair[], correct: string) {
-  const distractors = pickN(
-    pool.map((p) => p[1]).filter((r) => r !== correct),
-    3,
-  );
-  return shuffle([correct, ...distractors]);
+  const distractorPool = Array.from(new Set(pool.map((p) => p[1]).filter((r) => r && r !== correct)));
+  const distractors = pickN(distractorPool, 3);
+  return shuffle([correct, ...distractors]).slice(0, 4);
 }
 
 function toTeForm(verb: VerbEntry) {
@@ -1074,6 +1101,47 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
   return pickN(qs, count);
 }
 
+function buildReorderTokens(parts: string[]): ReorderToken[] {
+  return shuffle(parts.map((label, index) => ({ id: `t${index + 1}`, label })));
+}
+
+function encodeReorderAnswer(tokenIds: string[]) {
+  return tokenIds.join("\u001f");
+}
+
+function decodeReorderAnswer(value?: string) {
+  if (!value) return [];
+  return value.split("\u001f").filter(Boolean);
+}
+
+function buildReorderSentence(question: QuizQuestion, value?: string) {
+  if (!question.reorderTokens?.length) return value || "";
+  const labelMap = new Map(question.reorderTokens.map((token) => [token.id, token.label]));
+  return decodeReorderAnswer(value).map((id) => labelMap.get(id) || "").join(" ").trim();
+}
+
+function buildLessonHint(lesson: number, label: string) {
+  return `Lección ${lesson} · ${label}`;
+}
+
+function formatExamCategoryLabel(category?: string) {
+  if (!category) return "General";
+  return EXAM_CATEGORY_LABELS[category as QuizCategory] || category;
+}
+
+function createLessonQuestion(
+  lesson: number,
+  stableKey: string,
+  config: Omit<QuizQuestion, "id" | "stableKey" | "lesson">,
+): QuizQuestion {
+  return {
+    ...config,
+    id: `exam-${stableKey}`,
+    stableKey: `l${lesson}:${stableKey}`,
+    lesson,
+  };
+}
+
 const EXAM_VOCAB_EXCLUSIONS: Record<number, string[]> = {
   1: ["アジアけんきゅう", "せいぶつがく", "こくさいかんけい"],
 };
@@ -1112,25 +1180,44 @@ function normalizeExamText(value: string) {
 
 function isExamQuestionCorrect(question: QuizQuestion, answerValue: string | undefined) {
   if (!answerValue) return false;
-  if (question.type === "text") {
+  if (question.type === "text" || question.type === "reorder") {
+    const normalizedValue = question.type === "reorder"
+      ? buildReorderSentence(question, answerValue)
+      : answerValue;
     const candidates = [question.correct, ...(question.acceptedAnswers || [])].map(normalizeExamText);
-    return candidates.includes(normalizeExamText(answerValue));
+    return candidates.includes(normalizeExamText(normalizedValue));
   }
   return answerValue === question.correct;
 }
 
-function isExamVocabEligible(lesson: number, item: { hira: string; es: string }) {
-  if (!item.hira || !item.es) return false;
-  if (item.hira.includes("…") || item.es.includes("…")) return false;
-  if (EXAM_VOCAB_EXCLUSIONS[lesson]?.includes(item.hira)) return false;
+function formatExamAnswer(question: QuizQuestion, answerValue: string | undefined) {
+  if (!answerValue) return "Sin respuesta";
+  if (question.type === "reorder") {
+    return buildReorderSentence(question, answerValue) || "Sin respuesta";
+  }
+  return answerValue;
+}
+
+function getExamKana(item: { hira?: string; kana?: string }) {
+  return item.hira || item.kana || "";
+}
+
+function isExamVocabEligible(lesson: number, item: { hira?: string; kana?: string; es: string }) {
+  const kana = getExamKana(item);
+  if (!kana || !item.es) return false;
+  if (kana.includes("…") || item.es.includes("…")) return false;
+  if (EXAM_VOCAB_EXCLUSIONS[lesson]?.includes(kana)) return false;
   return true;
 }
 
-function buildVocabMatchingQuestion(lesson: number, vocab: Array<{ hira: string; kanji?: string; es: string }>, keySeed: string): QuizQuestion | null {
+function buildVocabMatchingQuestion(lesson: number, vocab: Array<{ hira?: string; kana?: string; kanji?: string; es: string }>, keySeed: string): QuizQuestion | null {
   if (vocab.length < 3) return null;
   const picked = pickN(vocab, 3);
   if (picked.length < 3) return null;
-  const left = picked.map((item, i) => `${String.fromCharCode(65 + i)}. ${item.kanji?.trim() ? `${item.kanji.trim()} (${item.hira})` : item.hira}`);
+  const left = picked.map((item, i) => {
+    const kana = getExamKana(item);
+    return `${String.fromCharCode(65 + i)}. ${item.kanji?.trim() ? `${item.kanji.trim()} (${kana})` : kana}`;
+  });
   const rightRaw = shuffle(picked.map((item) => item.es));
   const right = rightRaw.map((item, i) => `${i + 1}. ${item}`);
   const correctIndexes = picked.map((item) => rightRaw.indexOf(item.es) + 1);
@@ -1156,45 +1243,903 @@ function buildVocabMatchingQuestion(lesson: number, vocab: Array<{ hira: string;
   };
 }
 
+function buildLessonScenarioQuestions(lesson: number): QuizQuestion[] {
+  switch (lesson) {
+    case 1:
+      return [
+        createLessonQuestion(1, "grammar:reorder:intro", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena la oración de presentación.",
+          reorderTokens: buildReorderTokens(["わたし", "は", "マリア", "です"]),
+          options: [],
+          correct: "わたし は マリア です",
+          acceptedAnswers: ["わたしはマリアです"],
+          hint: buildLessonHint(1, "Presentación"),
+          explanation: "En L1 la forma básica es 「X は Y です」.",
+        }),
+        createLessonQuestion(1, "grammar:reorder:major", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena la oración sobre la especialidad.",
+          reorderTokens: buildReorderTokens(["せんこう", "は", "れきし", "です"]),
+          options: [],
+          correct: "せんこう は れきし です",
+          acceptedAnswers: ["せんこうはれきしです"],
+          hint: buildLessonHint(1, "Especialidad"),
+          explanation: "La estructura sigue siendo tema + predicado nominal.",
+        }),
+        createLessonQuestion(1, "grammar:mcq:negative-copula", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "¿Cuál oración significa “No soy profesor/a”?",
+          options: [
+            "わたしはせんせいです。",
+            "わたしはせんせいじゃないです。",
+            "わたしがせんせいじゃないです。",
+            "わたしはせんせいでした。",
+          ],
+          correct: "わたしはせんせいじゃないです。",
+          hint: buildLessonHint(1, "Copulativa negativa"),
+          explanation: "La negativa formal en L1 es 「じゃないです」.",
+        }),
+        createLessonQuestion(1, "particles:text:theme", {
+          category: "particles",
+          type: "text",
+          prompt: "Completa con la partícula correcta: わたし___がくせいです。",
+          options: [],
+          correct: "は",
+          hint: buildLessonHint(1, "Tema"),
+          explanation: "「は」 marca el tema de la oración.",
+        }),
+        createLessonQuestion(1, "reading:self-intro-1", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el diálogo.\nA: せんこうはなんですか。\nB: にほんごです。\n\n¿Cuál es la especialidad de B?",
+          options: ["にほんご", "れきし", "えいご", "コンピューター"],
+          correct: "にほんご",
+          hint: buildLessonHint(1, "Lectura corta"),
+          explanation: "B responde 「にほんごです」.",
+        }),
+        createLessonQuestion(1, "reading:self-intro-2", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee la presentación.\nわたしは ルイスです。メキシコじんです。がくせいです。\n\n¿Cuál opción es correcta?",
+          options: [
+            "Luis es profesor.",
+            "Luis es japonés.",
+            "Luis es estudiante.",
+            "Luis estudia historia.",
+          ],
+          correct: "Luis es estudiante.",
+          hint: buildLessonHint(1, "Lectura corta"),
+          explanation: "El texto dice 「がくせいです」.",
+        }),
+      ];
+    case 2:
+      return [
+        createLessonQuestion(2, "grammar:reorder:ownership", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena la pregunta de posesión.",
+          reorderTokens: buildReorderTokens(["それ", "は", "だれ", "の", "ほん", "です", "か"]),
+          options: [],
+          correct: "それ は だれ の ほん です か",
+          acceptedAnswers: ["それはだれのほんですか"],
+          hint: buildLessonHint(2, "Posesión"),
+          explanation: "En L2, la posesión se expresa con 「の」.",
+        }),
+        createLessonQuestion(2, "grammar:mcq:demonstrative", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "Tu amigo tiene el paraguas en la mano. ¿Cuál opción encaja mejor?\n___かさは あなたのですか。",
+          options: ["この", "その", "あの", "どの"],
+          correct: "その",
+          hint: buildLessonHint(2, "Demostrativos"),
+          explanation: "「その」 se usa para algo cercano a la persona con quien hablas.",
+        }),
+        createLessonQuestion(2, "grammar:mcq:error", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "¿Cuál oración está mal formada?",
+          options: [
+            "これはにほんごのほんです。",
+            "あのかばんはたけしさんのです。",
+            "それはだれのですか。",
+            "このはとけいです。",
+          ],
+          correct: "このはとけいです。",
+          hint: buildLessonHint(2, "Ko-so-a-do"),
+          explanation: "「この」 debe ir antes de un sustantivo: 「このとけい」.",
+        }),
+        createLessonQuestion(2, "particles:text:no", {
+          category: "particles",
+          type: "text",
+          prompt: "Completa con la partícula correcta: マリアさん___かばんです。",
+          options: [],
+          correct: "の",
+          hint: buildLessonHint(2, "Posesión"),
+          explanation: "La frase correcta es 「マリアさんのかばん」.",
+        }),
+        createLessonQuestion(2, "reading:store-1", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el diálogo.\nA: このほんはいくらですか。\nB: せんえんです。\n\n¿Cuánto cuesta el libro?",
+          options: ["100円", "500円", "1000円", "10000円"],
+          correct: "1000円",
+          hint: buildLessonHint(2, "Lectura corta"),
+          explanation: "「せんえん」 son mil yenes.",
+        }),
+        createLessonQuestion(2, "reading:ownership-2", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el diálogo.\nA: あれはだれのかさですか。\nB: わたしのです。\n\n¿Qué es de B?",
+          options: ["Un reloj", "Un libro", "Un paraguas", "Una bicicleta"],
+          correct: "Un paraguas",
+          hint: buildLessonHint(2, "Lectura corta"),
+          explanation: "「かさ」 significa paraguas.",
+        }),
+      ];
+    case 3:
+      return [
+        createLessonQuestion(3, "grammar:reorder:study-plan", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena la oración sobre el plan de hoy.",
+          reorderTokens: buildReorderTokens(["きょう", "としょかんで", "にほんごを", "べんきょうします"]),
+          options: [],
+          correct: "きょう としょかんで にほんごを べんきょうします",
+          acceptedAnswers: ["きょうとしょかんでにほんごをべんきょうします"],
+          hint: buildLessonHint(3, "Rutina"),
+          explanation: "「で」 marca el lugar donde se realiza la acción.",
+        }),
+        createLessonQuestion(3, "grammar:mcq:place-particle", {
+          category: "particles",
+          type: "mcq",
+          prompt: "Elige la mejor partícula: カフェ___コーヒーをのみます。",
+          options: ["に", "で", "を", "が"],
+          correct: "で",
+          hint: buildLessonHint(3, "Lugar de acción"),
+          explanation: "Con acciones se usa 「で」 para el lugar.",
+        }),
+        createLessonQuestion(3, "grammar:mcq:error", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "¿Cuál oración tiene un error de partícula?",
+          options: [
+            "がっこうにいきます。",
+            "ほんをよみます。",
+            "うちにかえります。",
+            "としょかんにべんきょうします。",
+          ],
+          correct: "としょかんにべんきょうします。",
+          hint: buildLessonHint(3, "Partículas básicas"),
+          explanation: "Debe ser 「としょかんでべんきょうします」.",
+        }),
+        createLessonQuestion(3, "particles:text:time", {
+          category: "particles",
+          type: "text",
+          prompt: "Completa con la partícula correcta: 7じ___おきます。",
+          options: [],
+          correct: "に",
+          hint: buildLessonHint(3, "Hora"),
+          explanation: "Con una hora específica, Genki usa 「に」.",
+        }),
+        createLessonQuestion(3, "reading:schedule-1", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee la rutina.\nまいあさ 6じに おきます。7じに あさごはんを たべます。8じに がっこうへ いきます。\n\n¿Qué hace esta persona a las 8?",
+          options: ["Se despierta", "Desayuna", "Va a la escuela", "Lee"],
+          correct: "Va a la escuela",
+          hint: buildLessonHint(3, "Lectura corta"),
+          explanation: "La última oración dice 「がっこうへいきます」.",
+        }),
+        createLessonQuestion(3, "reading:schedule-2", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el diálogo.\nA: なんじにねますか。\nB: 12じごろねます。\n\n¿A qué hora duerme B?",
+          options: ["A las diez", "Como a las once", "Como a las doce", "A las dos"],
+          correct: "Como a las doce",
+          hint: buildLessonHint(3, "Lectura corta"),
+          explanation: "「12じごろ」 significa alrededor de las doce.",
+        }),
+      ];
+    case 4:
+      return [
+        createLessonQuestion(4, "grammar:reorder:yesterday", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena la oración en pasado.",
+          reorderTokens: buildReorderTokens(["きのう", "ともだちと", "えいがを", "みました"]),
+          options: [],
+          correct: "きのう ともだちと えいがを みました",
+          acceptedAnswers: ["きのうともだちとえいがをみました"],
+          hint: buildLessonHint(4, "Pasado"),
+          explanation: "L4 trabaja el pasado formal de los verbos.",
+        }),
+        createLessonQuestion(4, "grammar:mcq:duration", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "Completa de manera natural: にほんごを ___ べんきょうしました。",
+          options: ["いちじかん", "いちじかんに", "いちじかんで", "いちじかんを"],
+          correct: "いちじかん",
+          hint: buildLessonHint(4, "Duración"),
+          explanation: "La duración normalmente va sin partícula.",
+        }),
+        createLessonQuestion(4, "grammar:mcq:negative-past", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "¿Cuál significa “No fui a la biblioteca”?",
+          options: [
+            "としょかんにいきました。",
+            "としょかんにいきません。",
+            "としょかんにいきませんでした。",
+            "としょかんでいきませんでした。",
+          ],
+          correct: "としょかんにいきませんでした。",
+          hint: buildLessonHint(4, "Pasado negativo"),
+          explanation: "La forma es 「〜ませんでした」.",
+        }),
+        createLessonQuestion(4, "particles:text:companion", {
+          category: "particles",
+          type: "text",
+          prompt: "Completa con la partícula correcta: ともだち___レストランへいきました。",
+          options: [],
+          correct: "と",
+          hint: buildLessonHint(4, "Compañía"),
+          explanation: "Para “con alguien” se usa 「と」.",
+        }),
+        createLessonQuestion(4, "reading:weekend-1", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el texto.\nせんしゅうの どようび、としょかんで レポートを かきました。それから うちで テレビを みました。\n\n¿Qué hizo primero?",
+          options: ["Vio TV", "Escribió un reporte", "Fue al parque", "Tomó fotos"],
+          correct: "Escribió un reporte",
+          hint: buildLessonHint(4, "Lectura corta"),
+          explanation: "La primera acción es 「レポートをかきました」.",
+        }),
+        createLessonQuestion(4, "reading:weekend-2", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el texto.\nきのう バスで びょういんへ いきました。でも せんせいに あいませんでした。\n\n¿Qué NO pasó?",
+          options: ["Fue al hospital", "Fue en autobús", "Vio al profesor", "Fue ayer"],
+          correct: "Vio al profesor",
+          hint: buildLessonHint(4, "Lectura corta"),
+          explanation: "El texto dice 「あいませんでした」.",
+        }),
+      ];
+    case 5:
+      return [
+        createLessonQuestion(5, "grammar:reorder:adjective", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena la oración con adjetivo.",
+          reorderTokens: buildReorderTokens(["この", "まち", "は", "にぎやか", "です"]),
+          options: [],
+          correct: "この まち は にぎやか です",
+          acceptedAnswers: ["このまちはにぎやかです"],
+          hint: buildLessonHint(5, "Adjetivos"),
+          explanation: "Los adjetivos na van antes de 「です」 sin 「な」 en predicado.",
+        }),
+        createLessonQuestion(5, "grammar:mcq:adj-past", {
+          category: "conjugation",
+          type: "mcq",
+          prompt: "¿Cuál es el pasado correcto de 「おもしろい」?",
+          options: ["おもしろいでした", "おもしろかったです", "おもしろくないです", "おもしろじゃないです"],
+          correct: "おもしろかったです",
+          hint: buildLessonHint(5, "Adjetivos en pasado"),
+          explanation: "Los adjetivos i cambian a 「〜かったです」.",
+        }),
+        createLessonQuestion(5, "grammar:mcq:suki", {
+          category: "particles",
+          type: "mcq",
+          prompt: "Elige la opción natural: えいが___すきです。",
+          options: ["は", "を", "が", "に"],
+          correct: "が",
+          hint: buildLessonHint(5, "好き / きらい"),
+          explanation: "Con 「すき」 y 「きらい」, Genki usa 「が」.",
+        }),
+        createLessonQuestion(5, "conjugation:text:adj-negative", {
+          category: "conjugation",
+          type: "text",
+          prompt: "Escribe la forma negativa formal de 「たかい」.",
+          options: [],
+          correct: "たかくないです",
+          hint: buildLessonHint(5, "Adjetivo negativo"),
+          explanation: "「たかい」 cambia a 「たかくないです」.",
+        }),
+        createLessonQuestion(5, "reading:okinawa-1", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el texto.\nおきなわの うみは とても きれいです。でも ひこうきの チケットは あまり やすくないです。\n\n¿Qué dice el texto?",
+          options: [
+            "El mar no es bonito.",
+            "Los boletos son muy baratos.",
+            "El mar es muy bonito.",
+            "No habla del mar.",
+          ],
+          correct: "El mar es muy bonito.",
+          hint: buildLessonHint(5, "Lectura corta"),
+          explanation: "La primera oración dice 「うみは とても きれいです」.",
+        }),
+        createLessonQuestion(5, "reading:okinawa-2", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el diálogo.\nA: しずかな まちですね。\nB: はい。でも ひまじゃないです。\n\n¿Cómo es la ciudad?",
+          options: ["Ruidosa", "Tranquila", "Cara", "Nueva"],
+          correct: "Tranquila",
+          hint: buildLessonHint(5, "Lectura corta"),
+          explanation: "「しずかな」 describe a la ciudad.",
+        }),
+      ];
+    case 6:
+      return [
+        createLessonQuestion(6, "grammar:reorder:sequence", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena la secuencia de acciones.",
+          reorderTokens: buildReorderTokens(["あさごはんを", "たべて", "がっこうへ", "いきます"]),
+          options: [],
+          correct: "あさごはんを たべて がっこうへ いきます",
+          acceptedAnswers: ["あさごはんをたべてがっこうへいきます"],
+          hint: buildLessonHint(6, "Forma て"),
+          explanation: "La forma て enlaza acciones en secuencia.",
+        }),
+        createLessonQuestion(6, "grammar:mcq:request", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "¿Cuál es la manera natural de decir “Por favor, come”?",
+          options: ["たべます", "たべて", "たべてください", "たべました"],
+          correct: "たべてください",
+          hint: buildLessonHint(6, "Peticiones"),
+          explanation: "La petición amable de L6 es 「〜てください」.",
+        }),
+        createLessonQuestion(6, "grammar:mcq:error", {
+          category: "conjugation",
+          type: "mcq",
+          prompt: "¿Cuál forma て está mal?",
+          options: ["よんで", "かいて", "たべて", "みりて"],
+          correct: "みりて",
+          hint: buildLessonHint(6, "Forma て"),
+          explanation: "「みる」 pasa a 「みて」, no a 「みりて」.",
+        }),
+        createLessonQuestion(6, "conjugation:text:te", {
+          category: "conjugation",
+          type: "text",
+          prompt: "Escribe la forma て de 「よむ」.",
+          options: [],
+          correct: "よんで",
+          hint: buildLessonHint(6, "Forma て"),
+          explanation: "「よむ」 es verbo u y cambia a 「よんで」.",
+        }),
+        createLessonQuestion(6, "reading:life-1", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el texto.\nロバートさんは まいあさ コーヒーを のんで、しんぶんを よみます。それから がっこうへ いきます。\n\n¿Qué hace antes de ir a la escuela?",
+          options: [
+            "Nada y cocina",
+            "Toma café y lee el periódico",
+            "Ve una película",
+            "Regresa a casa",
+          ],
+          correct: "Toma café y lee el periódico",
+          hint: buildLessonHint(6, "Lectura corta"),
+          explanation: "El texto enumera esas acciones antes de ir a la escuela.",
+        }),
+        createLessonQuestion(6, "reading:life-2", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el diálogo.\nA: ここで しゃしんを とっても いいですか。\nB: はい、いいです。\n\n¿Qué permiso recibe A?",
+          options: [
+            "Puede sacar fotos aquí",
+            "Puede comer aquí",
+            "Puede fumar aquí",
+            "Puede entrar al hospital",
+          ],
+          correct: "Puede sacar fotos aquí",
+          hint: buildLessonHint(6, "Lectura corta"),
+          explanation: "「しゃしんを とっても いいですか」 pregunta por permiso para tomar fotos.",
+        }),
+      ];
+    case 7:
+      return [
+        createLessonQuestion(7, "grammar:reorder:work", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena la oración sobre la familia.",
+          reorderTokens: buildReorderTokens(["ちち", "は", "とうきょうで", "はたらいています"]),
+          options: [],
+          correct: "ちち は とうきょうで はたらいています",
+          acceptedAnswers: ["ちちはとうきょうではたらいています"],
+          hint: buildLessonHint(7, "Familia"),
+          explanation: "La oración describe a un familiar usando presente progresivo.",
+        }),
+        createLessonQuestion(7, "grammar:mcq:family-term", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "Cuando hablas de tu propia madre, ¿qué palabra usa Genki?",
+          options: ["おかあさん", "はは", "おははさん", "かあさんさま"],
+          correct: "はは",
+          hint: buildLessonHint(7, "Términos familiares"),
+          explanation: "Para tu propia familia, Genki contrasta 「はは」 con 「おかあさん」.",
+        }),
+        createLessonQuestion(7, "grammar:mcq:description", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "¿Cuál oración describe a alguien de manera natural?",
+          options: [
+            "あねは せが たかいです。",
+            "あねは せが たかいじゃないです。",
+            "あねが せ は たかいです。",
+            "あねは せいぶつがくです。",
+          ],
+          correct: "あねは せが たかいです。",
+          hint: buildLessonHint(7, "Descripciones"),
+          explanation: "En descripciones físicas es natural decir 「せが たかい」.",
+        }),
+        createLessonQuestion(7, "particles:text:place-of-work", {
+          category: "particles",
+          type: "text",
+          prompt: "Completa con la partícula correcta: とうきょう___はたらいています。",
+          options: [],
+          correct: "で",
+          hint: buildLessonHint(7, "Lugar de acción"),
+          explanation: "Trabajar es una acción; el lugar va con 「で」.",
+        }),
+        createLessonQuestion(7, "reading:family-1", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el texto.\nわたしの あには だいがくせいです。まいにち としょかんで べんきょうしています。\n\n¿Qué hace el hermano todos los días?",
+          options: [
+            "Trabaja en un banco",
+            "Estudia en la biblioteca",
+            "Cocina en casa",
+            "Nada en el mar",
+          ],
+          correct: "Estudia en la biblioteca",
+          hint: buildLessonHint(7, "Lectura corta"),
+          explanation: "El texto dice 「としょかんで べんきょうしています」.",
+        }),
+        createLessonQuestion(7, "reading:family-2", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el diálogo.\nA: ごかぞくは なんにんですか。\nB: よにんです。\n\n¿Cuántas personas hay en la familia de B?",
+          options: ["2", "3", "4", "5"],
+          correct: "4",
+          hint: buildLessonHint(7, "Lectura corta"),
+          explanation: "「よにん」 significa cuatro personas.",
+        }),
+      ];
+    case 8:
+      return [
+        createLessonQuestion(8, "grammar:reorder:casual-question", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena la pregunta casual.",
+          reorderTokens: buildReorderTokens(["あした", "なにを", "する", "の"]),
+          options: [],
+          correct: "あした なにを する の",
+          acceptedAnswers: ["あしたなにをするの"],
+          hint: buildLessonHint(8, "Forma corta"),
+          explanation: "En contexto informal se usa la forma corta.",
+        }),
+        createLessonQuestion(8, "grammar:mcq:short-negative", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "¿Cuál es la forma corta negativa de 「いく」?",
+          options: ["いきません", "いかない", "いかなかった", "いくない"],
+          correct: "いかない",
+          hint: buildLessonHint(8, "Forma corta"),
+          explanation: "La forma corta negativa de 「いく」 es 「いかない」.",
+        }),
+        createLessonQuestion(8, "grammar:mcq:quote-thought", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "¿Cuál oración significa “Creo que mañana lloverá”?",
+          options: [
+            "あした あめだと おもいます。",
+            "あした あめです おもいます。",
+            "あした あめを おもいます。",
+            "あした あめで おもいます。",
+          ],
+          correct: "あした あめだと おもいます。",
+          hint: buildLessonHint(8, "Citas y opinión"),
+          explanation: "Con sustantivos/adjetivos na en forma corta se usa 「だとおもいます」.",
+        }),
+        createLessonQuestion(8, "grammar:text:short-past", {
+          category: "grammar",
+          type: "text",
+          prompt: "Escribe la forma corta en pasado de 「たべる」.",
+          options: [],
+          correct: "たべた",
+          hint: buildLessonHint(8, "Pasado corto"),
+          explanation: "El pasado corto de 「たべる」 es 「たべた」.",
+        }),
+        createLessonQuestion(8, "reading:bbq-1", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el diálogo.\nA: バーベキューに なにを もっていく？\nB: トマトと おにくを もっていくよ。\n\n¿Qué lleva B a la barbacoa?",
+          options: [
+            "Tomates y carne",
+            "Solo una cámara",
+            "Palillos y té",
+            "Nada",
+          ],
+          correct: "Tomates y carne",
+          hint: buildLessonHint(8, "Lectura corta"),
+          explanation: "B dice 「トマトと おにく」.",
+        }),
+        createLessonQuestion(8, "reading:bbq-2", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el texto.\nきょうは さむいから、ホームステイの うちで ばんごはんを たべます。\n\n¿Por qué comen en casa?",
+          options: [
+            "Porque hace calor",
+            "Porque hace frío",
+            "Porque están enfermos",
+            "Porque no tienen comida",
+          ],
+          correct: "Porque hace frío",
+          hint: buildLessonHint(8, "Lectura corta"),
+          explanation: "La causa aparece con 「さむいから」.",
+        }),
+      ];
+    case 9:
+      return [
+        createLessonQuestion(9, "grammar:reorder:noun-modifier", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena la oración con un modificador.",
+          reorderTokens: buildReorderTokens(["きのう", "みた", "えいが", "は", "おもしろかったです"]),
+          options: [],
+          correct: "きのう みた えいが は おもしろかったです",
+          acceptedAnswers: ["きのうみたえいがはおもしろかったです"],
+          hint: buildLessonHint(9, "Modificadores"),
+          explanation: "La cláusula corta 「きのうみた」 modifica a 「えいが」.",
+        }),
+        createLessonQuestion(9, "grammar:mcq:not-yet", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "¿Cuál significa “Todavía no he hecho la tarea”?",
+          options: [
+            "まだしゅくだいをしました。",
+            "まだしゅくだいをしていません。",
+            "しゅくだいをまだします。",
+            "しゅくだいはもうしました。",
+          ],
+          correct: "まだしゅくだいをしていません。",
+          hint: buildLessonHint(9, "まだ〜ていません"),
+          explanation: "Ese patrón expresa “todavía no”.",
+        }),
+        createLessonQuestion(9, "grammar:mcq:past-short", {
+          category: "conjugation",
+          type: "mcq",
+          prompt: "¿Cuál es el pasado corto de 「のむ」?",
+          options: ["のんだ", "のみた", "のんで", "のまない"],
+          correct: "のんだ",
+          hint: buildLessonHint(9, "Pasado corto"),
+          explanation: "「のむ」 pasa a 「のんだ」.",
+        }),
+        createLessonQuestion(9, "conjugation:text:modifier", {
+          category: "grammar",
+          type: "text",
+          prompt: "Completa con la forma correcta: きのう ___ ほん (read).\nEscribe solo el japonés faltante.",
+          options: [],
+          correct: "よんだ",
+          hint: buildLessonHint(9, "Cláusula corta"),
+          explanation: "Para modificar 「ほん」 se usa la forma corta pasada: 「よんだ」.",
+        }),
+        createLessonQuestion(9, "reading:kabuki-1", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el texto.\nかぶきの チケットを ふたつ かいました。でも まだ ともだちに あっていません。\n\n¿Qué NO ha hecho todavía esta persona?",
+          options: [
+            "Comprar dos boletos",
+            "Ver a su amigo",
+            "Hablar de Kabuki",
+            "Comprar boletos de Kabuki",
+          ],
+          correct: "Ver a su amigo",
+          hint: buildLessonHint(9, "Lectura corta"),
+          explanation: "El texto dice 「まだ ともだちに あっていません」.",
+        }),
+        createLessonQuestion(9, "reading:kabuki-2", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el texto.\nせんげつ かった あかい かばんは ちょっと たかかったです。でも きれいでした。\n\n¿Cómo era la bolsa?",
+          options: [
+            "Azul y barata",
+            "Roja, bonita y un poco cara",
+            "Negra y fea",
+            "Nueva y gratis",
+          ],
+          correct: "Roja, bonita y un poco cara",
+          hint: buildLessonHint(9, "Lectura corta"),
+          explanation: "Se menciona que es roja, bonita y algo cara.",
+        }),
+      ];
+    case 10:
+      return [
+        createLessonQuestion(10, "grammar:reorder:comparison", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena la comparación.",
+          reorderTokens: buildReorderTokens(["にほんご", "の", "ほうが", "えいご", "より", "むずかしいです"]),
+          options: [],
+          correct: "にほんご の ほうが えいご より むずかしいです",
+          acceptedAnswers: ["にほんごのほうがえいごよりむずかしいです"],
+          hint: buildLessonHint(10, "Comparaciones"),
+          explanation: "El patrón es 「A のほうが B より ...」.",
+        }),
+        createLessonQuestion(10, "grammar:mcq:comparison", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "Elige la comparación natural.",
+          options: [
+            "きょうとのほうが とうきょうより しずかです。",
+            "きょうとより のほうが とうきょう しずかです。",
+            "きょうとは とうきょうのほうが しずかです。",
+            "きょうとのほうが より とうきょう しずかです。",
+          ],
+          correct: "きょうとのほうが とうきょうより しずかです。",
+          hint: buildLessonHint(10, "Comparaciones"),
+          explanation: "La estructura correcta es A のほうが B より ...",
+        }),
+        createLessonQuestion(10, "grammar:mcq:superlative", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "¿Qué oración significa “El sushi es lo más delicioso”?",
+          options: [
+            "すしが いちばん おいしいです。",
+            "すしより おいしいです。",
+            "すしの ほうが おいしいです。",
+            "すしは もっと おいしいです。",
+          ],
+          correct: "すしが いちばん おいしいです。",
+          hint: buildLessonHint(10, "Superlativo"),
+          explanation: "Para “el más” Genki usa 「いちばん」.",
+        }),
+        createLessonQuestion(10, "particles:text:comparison", {
+          category: "grammar",
+          type: "text",
+          prompt: "Completa con la palabra correcta: えいご___にほんごのほうがむずかしいです。",
+          options: [],
+          correct: "より",
+          hint: buildLessonHint(10, "Comparaciones"),
+          explanation: "La comparación base se marca con 「より」.",
+        }),
+        createLessonQuestion(10, "reading:travel-plan-1", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el texto.\nふゆやすみに おおさかへ いきます。おおさかは とうきょうより たべものが やすいと おもいます。\n\n¿Qué piensa la persona?",
+          options: [
+            "Que Tokio es más barato",
+            "Que la comida en Osaka es más barata",
+            "Que Osaka está más lejos",
+            "Que no irá de vacaciones",
+          ],
+          correct: "Que la comida en Osaka es más barata",
+          hint: buildLessonHint(10, "Lectura corta"),
+          explanation: "Eso expresa la segunda oración.",
+        }),
+        createLessonQuestion(10, "reading:travel-plan-2", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el diálogo.\nA: どのまちが いちばん にぎやかですか。\nB: とうきょうが いちばん にぎやかです。\n\n¿Qué ciudad es la más animada?",
+          options: ["Kioto", "Osaka", "Tokio", "Nagasaki"],
+          correct: "Tokio",
+          hint: buildLessonHint(10, "Lectura corta"),
+          explanation: "B responde directamente 「とうきょう」.",
+        }),
+      ];
+    case 11:
+      return [
+        createLessonQuestion(11, "grammar:reorder:want-to", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena la oración de deseo.",
+          reorderTokens: buildReorderTokens(["きょうとへ", "いきたいです"]),
+          options: [],
+          correct: "きょうとへ いきたいです",
+          acceptedAnswers: ["きょうとへいきたいです"],
+          hint: buildLessonHint(11, "〜たい"),
+          explanation: "La forma de deseo se hace con la raíz de ます + 「たいです」.",
+        }),
+        createLessonQuestion(11, "grammar:reorder:tari", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena la oración con 「〜たり〜たりする」.",
+          reorderTokens: buildReorderTokens(["しゅうまつは", "ほんを", "よんだり", "えいがを", "みたり", "します"]),
+          options: [],
+          correct: "しゅうまつは ほんを よんだり えいがを みたり します",
+          acceptedAnswers: ["しゅうまつはほんをよんだりえいがをみたりします"],
+          hint: buildLessonHint(11, "〜たり〜たりする"),
+          explanation: "Ese patrón expresa una lista no exhaustiva de actividades.",
+        }),
+        createLessonQuestion(11, "grammar:mcq:want-to", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "¿Cuál oración significa “Quiero tomar fotos”?",
+          options: [
+            "しゃしんを とります。",
+            "しゃしんを とりたいです。",
+            "しゃしんを とったです。",
+            "しゃしんを とるたりします。",
+          ],
+          correct: "しゃしんを とりたいです。",
+          hint: buildLessonHint(11, "Deseo"),
+          explanation: "「とる」 pasa a 「とりたいです」.",
+        }),
+        createLessonQuestion(11, "grammar:text:want-to", {
+          category: "grammar",
+          type: "text",
+          prompt: "Escribe la forma 「quiero ir」 de 「いく」.",
+          options: [],
+          correct: "いきたいです",
+          hint: buildLessonHint(11, "Deseo"),
+          explanation: "La forma correcta es 「いきたいです」.",
+        }),
+        createLessonQuestion(11, "reading:vacation-1", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el texto.\nりょこうで おてらを みたり、しゃしんを とったり したいです。\n\n¿Qué quiere hacer esta persona?",
+          options: [
+            "Solo dormir",
+            "Ver templos y tomar fotos",
+            "Estudiar en la biblioteca",
+            "Regresar a casa",
+          ],
+          correct: "Ver templos y tomar fotos",
+          hint: buildLessonHint(11, "Lectura corta"),
+          explanation: "Las dos acciones aparecen con 「〜たり」.",
+        }),
+        createLessonQuestion(11, "reading:vacation-2", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el diálogo.\nA: しゅうまつ なにを したいですか。\nB: こうえんへ いって、さんぽしたいです。\n\n¿Qué quiere hacer B el fin de semana?",
+          options: [
+            "Ir al parque y pasear",
+            "Cantar en karaoke",
+            "Tomar medicina",
+            "Escribir una carta",
+          ],
+          correct: "Ir al parque y pasear",
+          hint: buildLessonHint(11, "Lectura corta"),
+          explanation: "B dice 「こうえんへ いって、さんぽしたいです」.",
+        }),
+      ];
+    case 12:
+      return [
+        createLessonQuestion(12, "grammar:reorder:advice", {
+          category: "grammar",
+          type: "reorder",
+          prompt: "Ordena el consejo.",
+          reorderTokens: buildReorderTokens(["きょうは", "やすんだ", "ほうが", "いいです"]),
+          options: [],
+          correct: "きょうは やすんだ ほうが いいです",
+          acceptedAnswers: ["きょうはやすんだほうがいいです"],
+          hint: buildLessonHint(12, "Consejos"),
+          explanation: "Para aconsejar, Genki usa 「〜たほうがいいです」.",
+        }),
+        createLessonQuestion(12, "grammar:mcq:too-much", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "¿Cuál significa “Bebí demasiado”?",
+          options: [
+            "のみすぎました。",
+            "のみたいです。",
+            "のんだほうがいいです。",
+            "のまないんです。",
+          ],
+          correct: "のみすぎました。",
+          hint: buildLessonHint(12, "〜すぎる"),
+          explanation: "La forma 「〜すぎる」 expresa exceso.",
+        }),
+        createLessonQuestion(12, "grammar:mcq:explanatory", {
+          category: "grammar",
+          type: "mcq",
+          prompt: "¿Cuál oración suena como una explicación de “Me duele la cabeza”?",
+          options: [
+            "あたまが いたいです。",
+            "あたまが いたいんです。",
+            "あたまを いたいです。",
+            "あたま いたいほうがいいです。",
+          ],
+          correct: "あたまが いたいんです。",
+          hint: buildLessonHint(12, "〜んです"),
+          explanation: "「〜んです」 da tono explicativo.",
+        }),
+        createLessonQuestion(12, "grammar:text:advice", {
+          category: "grammar",
+          type: "text",
+          prompt: "Escribe en japonés: “deberías tomar medicina”.",
+          options: [],
+          correct: "くすりをのんだほうがいいです",
+          acceptedAnswers: ["薬をのんだほうがいいです", "くすりを飲んだほうがいいです", "薬を飲んだほうがいいです"],
+          hint: buildLessonHint(12, "Consejos"),
+          explanation: "La estructura correcta es 「くすりを のんだほうがいいです」.",
+        }),
+        createLessonQuestion(12, "reading:illness-1", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el diálogo.\nA: どうしたんですか。\nB: ねつがあって、のどが いたいんです。\n\n¿Qué le pasa a B?",
+          options: [
+            "Tiene fiebre y le duele la garganta",
+            "Le duele el pie",
+            "Tiene hambre",
+            "Está de vacaciones",
+          ],
+          correct: "Tiene fiebre y le duele la garganta",
+          hint: buildLessonHint(12, "Lectura corta"),
+          explanation: "Eso dice exactamente B.",
+        }),
+        createLessonQuestion(12, "reading:illness-2", {
+          category: "reading",
+          type: "mcq",
+          prompt: "Lee el texto.\nきのう あまり ねませんでした。だから、きょうは はやく ねたほうがいいです。\n\n¿Qué consejo da el texto?",
+          options: [
+            "Comer más",
+            "Dormir más temprano",
+            "Tomar el tren",
+            "Estudiar toda la noche",
+          ],
+          correct: "Dormir más temprano",
+          hint: buildLessonHint(12, "Lectura corta"),
+          explanation: "El consejo aparece en la segunda oración.",
+        }),
+      ];
+    default:
+      return [];
+  }
+}
+
 function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
   const normalizedLesson = Math.max(1, Math.min(12, lesson));
   const pool: QuizQuestion[] = [];
 
-  const lessonVocab = (GENKI_VOCAB_BY_LESSON[normalizedLesson] || []).filter((item) => isExamVocabEligible(normalizedLesson, item));
+  const lessonVocab = (ALL_GENKI_VOCAB_BY_LESSON[normalizedLesson] || []).filter((item) => isExamVocabEligible(normalizedLesson, item));
   const neighborLessons = LESSONS.filter((l) => Math.abs(l - normalizedLesson) <= 1);
-  const neighborVocab = neighborLessons.flatMap((l) => (GENKI_VOCAB_BY_LESSON[l] || []).filter((item) => isExamVocabEligible(l, item)));
-  const allVocab = Object.values(GENKI_VOCAB_BY_LESSON).flat().filter((item) => isExamVocabEligible(normalizedLesson, item));
+  const neighborVocab = neighborLessons.flatMap((l) => (ALL_GENKI_VOCAB_BY_LESSON[l] || []).filter((item) => isExamVocabEligible(l, item)));
+  const allVocab = Object.values(ALL_GENKI_VOCAB_BY_LESSON).flat().filter((item) => isExamVocabEligible(normalizedLesson, item));
   const meaningPool = Array.from(new Set((neighborVocab.length > 8 ? neighborVocab : allVocab).map((item) => item.es).filter(Boolean)));
   const jpPool = Array.from(
     new Set(
       (neighborVocab.length > 8 ? neighborVocab : allVocab)
-        .map((item) => (item.kanji?.trim() ? `${item.kanji.trim()} (${item.hira})` : item.hira))
+        .map((item) => (item.kanji?.trim() ? `${item.kanji.trim()} (${item.kana})` : item.kana))
         .filter(Boolean),
     ),
   );
 
   lessonVocab.forEach((item, index) => {
-    const jpForm = item.kanji?.trim() ? `${item.kanji.trim()} (${item.hira})` : item.hira;
+    const sameLessonMeanings = Array.from(new Set(lessonVocab.map((entry) => entry.es).filter((value) => value && value !== item.es)));
+    const sameLessonJapanese = Array.from(
+      new Set(
+        lessonVocab
+          .map((entry) => (entry.kanji?.trim() ? `${entry.kanji.trim()} (${entry.kana})` : entry.kana))
+          .filter((value) => value && value !== (item.kanji?.trim() ? `${item.kanji.trim()} (${item.kana})` : item.kana)),
+      ),
+    );
+    const jpForm = item.kanji?.trim() ? `${item.kanji.trim()} (${item.kana})` : item.kana;
     pool.push({
       id: `exam-vocab-es-l${normalizedLesson}-${index}`,
-      stableKey: `l${normalizedLesson}:vocab:es:${item.hira}:${index}`,
+      stableKey: `l${normalizedLesson}:vocab:es:${item.kana}:${index}`,
       lesson: normalizedLesson,
       category: "vocab",
       type: "mcq",
-      prompt: `¿Qué significa 「${item.hira}」?`,
-      options: buildOptionSet(item.es, meaningPool.filter((es) => es !== item.es), meaningPool),
+      prompt: `¿Qué significa 「${item.kana}」?`,
+      options: buildOptionSet(item.es, sameLessonMeanings, meaningPool),
       correct: item.es,
       hint: `Lección ${normalizedLesson} · Vocabulario`,
-      explanation: `「${item.hira}」 significa “${item.es}”.`,
+      explanation: `「${item.kana}」 significa “${item.es}”.`,
     });
     pool.push({
       id: `exam-vocab-jp-l${normalizedLesson}-${index}`,
-      stableKey: `l${normalizedLesson}:vocab:jp:${item.hira}:${index}`,
+      stableKey: `l${normalizedLesson}:vocab:jp:${item.kana}:${index}`,
       lesson: normalizedLesson,
       category: "vocab",
       type: "mcq",
       prompt: `Selecciona el japonés para: “${item.es}”`,
-      options: buildOptionSet(jpForm, jpPool.filter((value) => value !== jpForm), jpPool),
+      options: buildOptionSet(jpForm, sameLessonJapanese, jpPool),
       correct: jpForm,
       hint: `Lección ${normalizedLesson} · Vocabulario`,
       explanation: `La opción correcta para “${item.es}” es 「${jpForm}」.`,
@@ -1334,6 +2279,8 @@ function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
     });
   });
 
+  pool.push(...buildLessonScenarioQuestions(normalizedLesson));
+
   return pool.filter((q, idx, arr) => arr.findIndex((entry) => entry.stableKey === q.stableKey) === idx);
 }
 
@@ -1359,15 +2306,17 @@ function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, n
   const hasKanji = lesson >= 3;
   const hasConj = lesson >= 3;
 
-  const targets: Record<"vocab" | "kanji" | "particles" | "conjugation", number> = {
-    vocab: hasConj ? 8 : 12,
-    kanji: hasKanji ? 4 : 0,
-    particles: 4,
-    conjugation: hasConj ? 4 : 4,
+  const targets: Record<QuizCategory, number> = {
+    vocab: hasConj ? 5 : 6,
+    kanji: hasKanji ? 2 : 0,
+    particles: hasConj ? 3 : 4,
+    conjugation: hasConj ? 3 : 0,
+    grammar: hasConj ? 5 : 7,
+    reading: 2,
   };
-  if (!hasConj) targets.particles = 8;
+  if (!hasConj) targets.grammar = 8;
 
-  (["vocab", "kanji", "particles", "conjugation"] as const).forEach((category) => {
+  (["vocab", "kanji", "particles", "conjugation", "grammar", "reading"] as const).forEach((category) => {
     const categoryPool = pool.filter((question) => question.category === category);
     result.push(...pickPrioritizedQuestions(categoryPool, seenMap, targets[category], used));
   });
@@ -2495,9 +3444,27 @@ function StudyContent() {
     setExamAnswers((prev) => ({ ...prev, [key]: option }));
   };
 
+  const appendExamReorderToken = (tokenId: string) => {
+    if (!examCurrentQ || examCurrentQ.type !== "reorder") return;
+    const chosenIds = decodeReorderAnswer(examCurrentChoice || "");
+    if (chosenIds.includes(tokenId)) return;
+    answerExam(encodeReorderAnswer([...chosenIds, tokenId]));
+  };
+
+  const popExamReorderToken = () => {
+    if (!examCurrentQ || examCurrentQ.type !== "reorder") return;
+    const chosenIds = decodeReorderAnswer(examCurrentChoice || "");
+    answerExam(encodeReorderAnswer(chosenIds.slice(0, -1)));
+  };
+
+  const clearExamReorder = () => {
+    if (!examCurrentQ || examCurrentQ.type !== "reorder") return;
+    answerExam("");
+  };
+
   const nextExamQuestion = () => {
     if (!examCurrentQ) return;
-    const hasAnswer = examCurrentQ.type === "text"
+    const hasAnswer = examCurrentQ.type === "text" || examCurrentQ.type === "reorder"
       ? Boolean((examCurrentChoice || "").trim())
       : Boolean(examCurrentChoice);
     if (!hasAnswer) {
@@ -3210,7 +4177,7 @@ function StudyContent() {
               </div>
             </div>
             <p style={{ color: "#6b7280", fontSize: 14 }}>
-              20 reactivos aleatorios (opción múltiple, relacionar y respuesta escrita). Passing score: {EXAM_PASSING_PERCENT}%. Feedback completo al final.
+              20 reactivos aleatorios basados en Genki (opción múltiple, abierta, relacionar, ordenar y contexto). Passing score: {EXAM_PASSING_PERCENT}%. Feedback completo al final.
             </p>
 
             {examQuestions.length === 0 && (
@@ -3234,12 +4201,12 @@ function StudyContent() {
               <div ref={examCardRef} style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 12, background: "#fbfbfc" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                   <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Pregunta {examIndex + 1} / {examQuestions.length}</div>
-                  <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Lección {examLesson} · {examCurrentQ.category || "general"}</div>
+                  <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Lección {examLesson} · {formatExamCategoryLabel(examCurrentQ.category)}</div>
                 </div>
                 <div style={{ marginTop: 8, height: 7, borderRadius: 999, background: "#ecedf1", overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${examProgressPct}%`, background: "linear-gradient(90deg, #34c5a6, #25a98f)" }} />
                 </div>
-                <div style={{ marginTop: 8, fontSize: 20, fontWeight: 800, color: "#111114" }}>{examCurrentQ.prompt}</div>
+                <div style={{ marginTop: 8, fontSize: 20, fontWeight: 800, color: "#111114", whiteSpace: "pre-line", lineHeight: 1.45 }}>{examCurrentQ.prompt}</div>
                 {examCurrentQ.hint && <div style={{ marginTop: 4, color: "#6b7280", fontSize: 13 }}>{examCurrentQ.hint}</div>}
                 {examCurrentQ.type === "match" && examCurrentQ.matchLeft && examCurrentQ.matchRight && (
                   <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
@@ -3259,7 +4226,60 @@ function StudyContent() {
                     </div>
                   </div>
                 )}
-                {examCurrentQ.type === "text" ? (
+                {examCurrentQ.type === "reorder" ? (
+                  <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
+                    <div style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 14, background: "#fff", padding: 12 }}>
+                      <div style={{ fontSize: 11, color: "#667085", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em" }}>Tu oración</div>
+                      <div style={{ marginTop: 8, minHeight: 52, display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                        {decodeReorderAnswer(examCurrentChoice || "").length > 0 ? (
+                          decodeReorderAnswer(examCurrentChoice || "").map((tokenId) => {
+                            const token = examCurrentQ.reorderTokens?.find((item) => item.id === tokenId);
+                            if (!token) return null;
+                            return (
+                              <span key={tokenId} style={{ borderRadius: 999, background: "#ecfdf5", color: "#166534", padding: "7px 10px", fontWeight: 700, fontSize: 14 }}>
+                                {token.label}
+                              </span>
+                            );
+                          })
+                        ) : (
+                          <span style={{ color: "#98a2b3", fontSize: 14 }}>Toca los bloques en el orden correcto.</span>
+                        )}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {(examCurrentQ.reorderTokens || []).map((token) => {
+                        const used = decodeReorderAnswer(examCurrentChoice || "").includes(token.id);
+                        return (
+                          <button
+                            key={token.id}
+                            type="button"
+                            disabled={used}
+                            onClick={() => appendExamReorderToken(token.id)}
+                            style={{
+                              border: used ? "1px solid rgba(17,17,20,.06)" : "1px solid rgba(17,17,20,.12)",
+                              borderRadius: 999,
+                              background: used ? "#f3f4f6" : "#fff",
+                              color: used ? "#98a2b3" : "#111114",
+                              padding: "8px 12px",
+                              fontWeight: 700,
+                              cursor: used ? "not-allowed" : "pointer",
+                            }}
+                          >
+                            {token.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <button type="button" onClick={popExamReorderToken} style={{ border: "1px solid rgba(17,17,20,.12)", borderRadius: 999, background: "#fff", padding: "8px 12px", fontWeight: 700 }}>
+                        Borrar último
+                      </button>
+                      <button type="button" onClick={clearExamReorder} style={{ border: "1px solid rgba(17,17,20,.12)", borderRadius: 999, background: "#fff", padding: "8px 12px", fontWeight: 700 }}>
+                        Limpiar
+                      </button>
+                    </div>
+                  </div>
+                ) : examCurrentQ.type === "text" ? (
                   <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
                     <input
                       value={examCurrentChoice || ""}
@@ -3319,7 +4339,7 @@ function StudyContent() {
                     const pct = Math.round((row.correct / Math.max(1, row.total)) * 100);
                     return (
                       <div key={row.category} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 10, background: "#fff", padding: 10 }}>
-                        <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".08em", color: "#667085", fontWeight: 800 }}>{row.category}</div>
+                        <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".08em", color: "#667085", fontWeight: 800 }}>{formatExamCategoryLabel(row.category)}</div>
                         <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "#111114" }}>{row.correct}/{row.total}</div>
                         <div style={{ marginTop: 2, fontSize: 12, color: "#667085" }}>{pct}%</div>
                       </div>
@@ -3346,12 +4366,13 @@ function StudyContent() {
                     <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
                       {examWrongQuestions.slice(0, 10).map((question, index) => {
                         const key = question.stableKey || question.id;
-                        const chosen = examAnswers[key] || "Sin respuesta";
+                        const chosen = formatExamAnswer(question, examAnswers[key]);
+                        const correct = question.correct;
                         return (
                           <div key={`${key}-${index}`} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 10, background: "#fff", padding: 10 }}>
-                            <div style={{ fontSize: 13, fontWeight: 700, color: "#111114" }}>{question.prompt}</div>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: "#111114", whiteSpace: "pre-line" }}>{question.prompt}</div>
                             <div style={{ marginTop: 4, fontSize: 12, color: "#b42318" }}>Tu respuesta: {chosen}</div>
-                            <div style={{ marginTop: 2, fontSize: 12, color: "#166534" }}>Correcta: {question.correct}</div>
+                            <div style={{ marginTop: 2, fontSize: 12, color: "#166534" }}>Correcta: {correct}</div>
                             {question.explanation && <div style={{ marginTop: 4, fontSize: 12, color: "#667085" }}>{question.explanation}</div>}
                           </div>
                         );
