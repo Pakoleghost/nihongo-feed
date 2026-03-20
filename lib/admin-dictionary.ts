@@ -61,8 +61,9 @@ const DATA_URL = new URL("./generated/admin-dictionary-data.json", import.meta.u
 export function loadAdminDictionary(): AdminDictionaryEntry[] {
   if (cachedEntries) return cachedEntries;
   const raw = JSON.parse(fs.readFileSync(DATA_URL, "utf8"));
-  cachedEntries = Array.isArray(raw.entries) ? raw.entries : [];
-  return cachedEntries;
+  const entries: AdminDictionaryEntry[] = Array.isArray(raw.entries) ? raw.entries : [];
+  cachedEntries = entries;
+  return entries;
 }
 
 function getCommonResults(): AdminDictionaryResult[] {
