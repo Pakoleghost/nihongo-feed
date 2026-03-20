@@ -67,7 +67,8 @@ export function loadAdminDictionary() {
 
 function getCommonResults() {
   if (cachedCommonResults) return cachedCommonResults;
-  cachedCommonResults = loadAdminDictionary()
+  const entries = loadAdminDictionary();
+  cachedCommonResults = entries
     .filter((entry) => entry.c)
     .slice(0, 24)
     .map(toResult);

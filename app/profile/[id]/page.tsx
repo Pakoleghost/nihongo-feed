@@ -89,42 +89,49 @@ export default function StudentProfilePage() {
         </header>
 
         <section className="heroCardV2">
-          <div className="heroRowV2">
-            {isMe ? (
-              <Link href="/profile/edit" className="avatarWrapV2" aria-label="Cambiar foto">
-                {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="avatarImgV2" /> : <AvatarPlaceholder size={52} />}
-              </Link>
-            ) : (
-              <div className="avatarWrapV2">
-                {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="avatarImgV2" /> : <AvatarPlaceholder size={52} />}
+          <div className="heroLayoutV2">
+            <div className="heroMainV2">
+              <div className="heroRowV2">
+                {isMe ? (
+                  <Link href="/profile/edit" className="avatarWrapV2" aria-label="Cambiar foto">
+                    {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="avatarImgV2" /> : <AvatarPlaceholder size={56} />}
+                  </Link>
+                ) : (
+                  <div className="avatarWrapV2">
+                    {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="avatarImgV2" /> : <AvatarPlaceholder size={56} />}
+                  </div>
+                )}
+
+                <div className="heroInfoV2">
+                  <div className="eyebrowV2">Perfil</div>
+                  <h1>{profile.full_name || profile.username || "Usuario"}</h1>
+                  <div className="heroMetaV2">
+                    <span>@{profile.username || "sin-username"}</span>
+                    {profile.group_name && <span>{profile.group_name}</span>}
+                    {profile.is_admin && <span>Sensei</span>}
+                  </div>
+                </div>
               </div>
-            )}
 
-            <div className="heroInfoV2">
-              <div className="eyebrowV2">Perfil</div>
-              <h1>{profile.full_name || profile.username || "Usuario"}</h1>
-              <p>
-                @{profile.username || "sin-username"}
-                {profile.group_name ? ` · ${profile.group_name}` : ""}
-                {profile.is_admin ? " · Sensei" : ""}
-              </p>
+              {profile.bio && <p className="bioV2">{profile.bio}</p>}
             </div>
-          </div>
 
-          {profile.bio && <p className="bioV2">{profile.bio}</p>}
-
-          <div className="statsRowV2">
-            <div className="statV2">
-              <span>Total</span>
-              <strong>{posts.length}</strong>
-            </div>
-            <div className="statV2">
-              <span>Portafolio</span>
-              <strong>{portfolioPosts.length}</strong>
-            </div>
-            <div className="statV2">
-              <span>Tareas</span>
-              <strong>{taskPosts.length}</strong>
+            <div className="statsPanelV2">
+              <div className="statsTitleV2">Resumen</div>
+              <div className="statsRowV2">
+                <div className="statV2">
+                  <span>Total</span>
+                  <strong>{posts.length}</strong>
+                </div>
+                <div className="statV2">
+                  <span>Portafolio</span>
+                  <strong>{portfolioPosts.length}</strong>
+                </div>
+                <div className="statV2">
+                  <span>Tareas</span>
+                  <strong>{taskPosts.length}</strong>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -149,12 +156,14 @@ export default function StudentProfilePage() {
                 const { title, preview } = getPostParts(post.content || "");
                 return (
                   <article key={post.id} className="rowV2" style={{ borderBottom: idx === shownPosts.length - 1 ? "none" : "1px solid rgba(17,17,20,.06)" }}>
-                    <div className="rowMetaV2">
-                      <span>{formatDate(post.created_at)}</span>
-                      {post.is_reviewed && <span className="sumiV2">済 Sumi</span>}
+                    <div className="rowContentV2">
+                      <div className="rowMetaV2">
+                        <span>{formatDate(post.created_at)}</span>
+                        {post.is_reviewed && <span className="sumiV2">済 Sumi</span>}
+                      </div>
+                      <Link href={`/post/${post.id}`} className="rowTitleV2">{title || "Sin título"}</Link>
+                      {preview && <p className="rowPreviewV2">{preview}</p>}
                     </div>
-                    <Link href={`/post/${post.id}`} className="rowTitleV2">{title || "Sin título"}</Link>
-                    {preview && <p className="rowPreviewV2">{preview}</p>}
                     {post.image_url && (
                       <Link href={`/post/${post.id}`} className="thumbV2" aria-label="Abrir post">
                         <img src={post.image_url} alt="" />
@@ -220,20 +229,29 @@ export default function StudentProfilePage() {
         .heroCardV2,
         .feedCardV2 {
           border: 1px solid rgba(17,17,20,.07);
-          border-radius: 20px;
+          border-radius: 18px;
           background: #fff;
           box-shadow: 0 12px 30px rgba(0,0,0,.035);
-          padding: 16px;
+          padding: 14px;
+        }
+        .heroLayoutV2 {
+          display: grid;
+          grid-template-columns: minmax(0, 1.4fr) minmax(240px, .8fr);
+          gap: 14px;
+          align-items: start;
+        }
+        .heroMainV2 {
+          min-width: 0;
         }
         .heroRowV2 {
           display: grid;
           grid-template-columns: auto 1fr;
-          gap: 12px;
+          gap: 10px;
           align-items: center;
         }
         .avatarWrapV2 {
-          width: 68px;
-          height: 68px;
+          width: 72px;
+          height: 72px;
           border-radius: 999px;
           overflow: hidden;
           border: 1px solid rgba(17,17,20,.09);
@@ -261,35 +279,61 @@ export default function StudentProfilePage() {
         }
         .heroInfoV2 h1 {
           margin: 2px 0 0;
-          font-size: clamp(24px, 4vw, 34px);
+          font-size: clamp(26px, 4vw, 40px);
           line-height: 1.1;
           letter-spacing: -.02em;
           color: #111114;
           overflow-wrap: anywhere;
         }
-        .heroInfoV2 p {
-          margin: 6px 0 0;
-          color: #72727c;
+        .heroMetaV2 {
+          margin: 8px 0 0;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+        }
+        .heroMetaV2 span {
+          display: inline-flex;
+          align-items: center;
+          min-height: 28px;
+          border-radius: 999px;
+          border: 1px solid rgba(17,17,20,.08);
+          background: #fbfbfc;
+          padding: 0 10px;
+          color: #61616b;
           font-size: 13px;
-          overflow-wrap: anywhere;
+          font-weight: 700;
         }
         .bioV2 {
-          margin: 14px 0 0;
+          margin: 12px 0 0;
           color: #1f2937;
           font-size: 14px;
-          line-height: 1.5;
+          line-height: 1.6;
+          max-width: 62ch;
+        }
+        .statsPanelV2 {
+          border: 1px solid rgba(17,17,20,.07);
+          border-radius: 16px;
+          background: #fbfbfc;
+          padding: 12px;
+        }
+        .statsTitleV2 {
+          font-size: 11px;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+          color: #7a7a84;
+          font-weight: 800;
+          margin-bottom: 10px;
         }
         .statsRowV2 {
-          margin-top: 12px;
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 8px;
         }
         .statV2 {
           border: 1px solid rgba(17,17,20,.07);
-          border-radius: 14px;
-          padding: 10px;
-          background: #fbfbfc;
+          border-radius: 12px;
+          padding: 10px 10px 9px;
+          background: #fff;
         }
         .statV2 span {
           display: block;
@@ -357,7 +401,13 @@ export default function StudentProfilePage() {
         }
         .rowV2 {
           padding: 12px;
-          position: relative;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 92px;
+          gap: 12px;
+          align-items: start;
+        }
+        .rowContentV2 {
+          min-width: 0;
         }
         .rowMetaV2 {
           display: inline-flex;
@@ -383,19 +433,14 @@ export default function StudentProfilePage() {
           font-weight: 800;
           color: #15151a;
           text-decoration: none;
-          padding-right: 108px;
         }
         .rowPreviewV2 {
           margin: 6px 0 0;
           font-size: 13px;
           line-height: 1.5;
           color: #656574;
-          padding-right: 108px;
         }
         .thumbV2 {
-          position: absolute;
-          top: 12px;
-          right: 12px;
           width: 92px;
           height: 72px;
           border-radius: 10px;
@@ -410,6 +455,9 @@ export default function StudentProfilePage() {
           display: block;
         }
         @media (max-width: 740px) {
+          .heroLayoutV2 {
+            grid-template-columns: minmax(0, 1fr);
+          }
           .heroInfoV2 h1 {
             font-size: 22px;
           }
@@ -428,14 +476,11 @@ export default function StudentProfilePage() {
             padding: 12px;
             border-radius: 16px;
           }
-          .rowTitleV2,
-          .rowPreviewV2 {
-            padding-right: 0;
+          .rowV2 {
+            grid-template-columns: minmax(0, 1fr);
           }
           .thumbV2 {
-            position: static;
             display: block;
-            margin-top: 10px;
             width: 100%;
             height: 170px;
           }
