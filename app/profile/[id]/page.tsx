@@ -89,45 +89,46 @@ export default function StudentProfilePage() {
         </header>
 
         <section className="heroCardV2">
-          <div className="heroRowV2">
-            {isMe ? (
-              <Link href="/profile/edit" className="avatarWrapV2" aria-label="Cambiar foto">
-                {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="avatarImgV2" /> : <AvatarPlaceholder size={72} />}
-              </Link>
-            ) : (
-              <div className="avatarWrapV2">
-                {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="avatarImgV2" /> : <AvatarPlaceholder size={72} />}
-              </div>
-            )}
+          <div className="heroHeadV2">
+            <div className="heroRowV2">
+              {isMe ? (
+                <Link href="/profile/edit" className="avatarWrapV2" aria-label="Cambiar foto">
+                  {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="avatarImgV2" /> : <AvatarPlaceholder size={64} />}
+                </Link>
+              ) : (
+                <div className="avatarWrapV2">
+                  {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="avatarImgV2" /> : <AvatarPlaceholder size={64} />}
+                </div>
+              )}
 
-            <div className="heroInfoV2">
-              <div className="eyebrowV2">Perfil</div>
-              <h1>{profile.full_name || profile.username || "Usuario"}</h1>
-              <div className="heroHandleV2">@{profile.username || "sin-username"}</div>
-              <div className="heroMetaV2">
-                {profile.group_name && <span>{profile.group_name}</span>}
-                {profile.is_admin && <span>Sensei</span>}
-                <span>{posts.length} publicaciones</span>
+              <div className="heroInfoV2">
+                <div className="eyebrowV2">Perfil</div>
+                <h1>{profile.full_name || profile.username || "Usuario"}</h1>
+                <div className="heroHandleV2">@{profile.username || "sin-username"}</div>
+                <div className="heroMetaV2">
+                  {profile.group_name && <span>{profile.group_name}</span>}
+                  {profile.is_admin && <span>Sensei</span>}
+                </div>
+              </div>
+            </div>
+
+            <div className="statsInlineV2">
+              <div className="statMiniV2">
+                <span>Total</span>
+                <strong>{posts.length}</strong>
+              </div>
+              <div className="statMiniV2">
+                <span>Portafolio</span>
+                <strong>{portfolioPosts.length}</strong>
+              </div>
+              <div className="statMiniV2">
+                <span>Tareas</span>
+                <strong>{taskPosts.length}</strong>
               </div>
             </div>
           </div>
 
           {profile.bio && <p className="bioV2">{profile.bio}</p>}
-
-          <div className="statsRowV2">
-            <div className="statV2">
-              <span>Total</span>
-              <strong>{posts.length}</strong>
-            </div>
-            <div className="statV2">
-              <span>Portafolio</span>
-              <strong>{portfolioPosts.length}</strong>
-            </div>
-            <div className="statV2">
-              <span>Tareas</span>
-              <strong>{taskPosts.length}</strong>
-            </div>
-          </div>
         </section>
 
         <section className="feedCardV2">
@@ -178,10 +179,10 @@ export default function StudentProfilePage() {
           padding: 14px;
         }
         .profileShellV2 {
-          max-width: 820px;
+          max-width: 760px;
           margin: 0 auto;
           display: grid;
-          gap: 14px;
+          gap: 12px;
         }
         .profileTopV2 {
           position: sticky;
@@ -223,26 +224,33 @@ export default function StudentProfilePage() {
         .heroCardV2,
         .feedCardV2 {
           border: 1px solid rgba(17,17,20,.07);
-          border-radius: 18px;
-          background: #fff;
-          box-shadow: 0 12px 30px rgba(0,0,0,.035);
-          padding: 18px;
+          border-radius: 20px;
+          background: linear-gradient(180deg,#ffffff,#fcfcfd);
+          box-shadow: 0 10px 26px rgba(15,23,42,.04);
+          padding: 16px;
+        }
+        .heroHeadV2 {
+          display: flex;
+          justify-content: space-between;
+          gap: 14px;
+          align-items: flex-start;
+          flex-wrap: wrap;
         }
         .heroRowV2 {
           display: flex;
           align-items: center;
-          gap: 14px;
+          gap: 12px;
           min-width: 0;
         }
         .avatarWrapV2 {
-          width: 84px;
-          height: 84px;
+          width: 72px;
+          height: 72px;
           border-radius: 999px;
           overflow: hidden;
-          border: 1px solid rgba(17,17,20,.09);
+          border: 1px solid rgba(17,17,20,.08);
           display: grid;
           place-items: center;
-          background: #f5f5f5;
+          background: #f8f8f8;
           text-decoration: none;
           flex-shrink: 0;
         }
@@ -264,20 +272,20 @@ export default function StudentProfilePage() {
         }
         .heroInfoV2 h1 {
           margin: 2px 0 0;
-          font-size: clamp(26px, 4vw, 38px);
-          line-height: 1.02;
+          font-size: clamp(24px, 4vw, 34px);
+          line-height: 1.04;
           letter-spacing: -.02em;
           color: #111114;
           overflow-wrap: anywhere;
         }
         .heroHandleV2 {
-          margin-top: 6px;
+          margin-top: 5px;
           color: #6b7280;
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 600;
         }
         .heroMetaV2 {
-          margin: 10px 0 0;
+          margin: 8px 0 0;
           display: flex;
           flex-wrap: wrap;
           gap: 6px;
@@ -294,39 +302,40 @@ export default function StudentProfilePage() {
           font-size: 12px;
           font-weight: 700;
         }
-        .bioV2 {
-          margin: 16px 0 0;
-          color: #1f2937;
-          font-size: 15px;
-          line-height: 1.65;
-          max-width: 64ch;
-        }
-        .statsRowV2 {
-          margin-top: 16px;
+        .statsInlineV2 {
           display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(3, minmax(72px, auto));
           gap: 8px;
+          align-items: stretch;
         }
-        .statV2 {
+        .statMiniV2 {
           border: 1px solid rgba(17,17,20,.07);
-          border-radius: 12px;
-          padding: 12px 12px 10px;
-          background: #fbfbfc;
+          border-radius: 14px;
+          background: #f8fafc;
+          padding: 10px 12px;
+          min-width: 0;
         }
-        .statV2 span {
+        .statMiniV2 span {
           display: block;
-          font-size: 11px;
-          letter-spacing: .06em;
+          font-size: 10px;
+          letter-spacing: .08em;
           text-transform: uppercase;
-          font-weight: 700;
           color: #808089;
+          font-weight: 800;
         }
-        .statV2 strong {
-          margin-top: 4px;
+        .statMiniV2 strong {
           display: block;
-          font-size: 24px;
+          margin-top: 4px;
+          font-size: 20px;
           color: #111114;
-          line-height: 1.1;
+          line-height: 1;
+        }
+        .bioV2 {
+          margin: 14px 0 0;
+          color: #1f2937;
+          font-size: 14px;
+          line-height: 1.65;
+          max-width: 58ch;
         }
         .feedHeadV2 {
           display: flex;
@@ -379,9 +388,9 @@ export default function StudentProfilePage() {
         .rowV2 {
           padding: 14px;
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 104px;
-          gap: 14px;
-          align-items: start;
+          grid-template-columns: minmax(0,1fr) 88px;
+          gap: 12px;
+          align-items: center;
           border: 1px solid rgba(17,17,20,.07);
           border-radius: 16px;
           background: #fff;
@@ -407,7 +416,7 @@ export default function StudentProfilePage() {
         }
         .rowTitleV2 {
           display: block;
-          font-size: 17px;
+          font-size: 16px;
           line-height: 1.35;
           letter-spacing: -.01em;
           font-weight: 800;
@@ -417,12 +426,12 @@ export default function StudentProfilePage() {
         .rowPreviewV2 {
           margin: 6px 0 0;
           font-size: 13px;
-          line-height: 1.6;
+          line-height: 1.55;
           color: #656574;
         }
         .thumbV2 {
-          width: 104px;
-          height: 82px;
+          width: 88px;
+          height: 88px;
           border-radius: 12px;
           overflow: hidden;
           border: 1px solid rgba(17,17,20,.07);
@@ -438,18 +447,20 @@ export default function StudentProfilePage() {
           .heroInfoV2 h1 {
             font-size: 22px;
           }
-          .heroRowV2 {
-            align-items: flex-start;
+          .heroHeadV2 {
+            display: grid;
+            grid-template-columns: minmax(0,1fr);
+            gap: 12px;
           }
           .avatarWrapV2 {
-            width: 72px;
-            height: 72px;
+            width: 64px;
+            height: 64px;
           }
           .heroHandleV2 {
             font-size: 14px;
           }
-          .statsRowV2 {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+          .statsInlineV2 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
           }
           .profileTopV2 {
             justify-content: flex-start;
@@ -464,13 +475,12 @@ export default function StudentProfilePage() {
             border-radius: 16px;
           }
           .rowV2 {
-            grid-template-columns: minmax(0, 1fr);
+            grid-template-columns: minmax(0,1fr) 76px;
             gap: 10px;
           }
           .thumbV2 {
-            display: block;
-            width: 100%;
-            height: 180px;
+            width: 76px;
+            height: 76px;
           }
         }
       `}</style>
