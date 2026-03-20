@@ -180,7 +180,7 @@ const FLASHCARD_ROUTE_GROUPS = [
   { id: "route-bridge", title: "Consolidación", subtitle: "Lecciones altas para repasar antes de examen.", lessons: [9, 10, 11, 12], accent: "#be185d", surface: "linear-gradient(145deg,#fdf2f8,#ffffff)" },
 ] as const;
 
-type StudyView = "kana" | "flashcards" | "quiz" | "sprint" | "exam";
+type StudyView = "kana" | "flashcards" | "quiz" | "sprint" | "exam" | "dictionary";
 const EXAM_PASSING_PERCENT = 70;
 const EXAM_QUESTION_COUNT = 20;
 
@@ -213,6 +213,18 @@ type FlashLearnQuestion = {
   prompt: string;
   correct: string;
   options: string[];
+};
+
+type AdminDictionaryResult = {
+  id: string;
+  primary: string;
+  secondary: string;
+  kanji: string[];
+  readings: string[];
+  gloss: string[];
+  fallbackGloss: string[];
+  pos: string[];
+  common: boolean;
 };
 
 const EXAM_CATEGORY_LABELS: Record<QuizCategory, string> = {
@@ -2365,11 +2377,12 @@ function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, n
 
 function resolveStudyView(searchParams: Pick<URLSearchParams, "get">): StudyView | null {
   const view = searchParams.get("view");
-  if (view === "kana" || view === "flashcards" || view === "sprint" || view === "exam") return view;
+  if (view === "kana" || view === "flashcards" || view === "sprint" || view === "exam" || view === "dictionary") return view;
   if (searchParams.get("kana") === "1") return "kana";
   if (searchParams.get("flashcards") === "1") return "flashcards";
   if (searchParams.get("sprint") === "1") return "sprint";
   if (searchParams.get("exam") === "1") return "exam";
+  if (searchParams.get("dictionary") === "1") return "dictionary";
   return null;
 }
 
@@ -2590,6 +2603,8 @@ function StudyContent() {
   const [activeTab, setActiveTab] = useState<StudyView>("kana");
   const [userKey, setUserKey] = useState("anon");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
 
   const [kanaSet, setKanaSet] = useState<KanaMode>("hiragana");
   const [kanaRunning, setKanaRunning] = useState(false);
@@ -2686,14 +2701,32 @@ function StudyContent() {
   const examCardRef = useRef<HTMLDivElement | null>(null);
   const examPersistedRef = useRef(false);
 
+  const [dictionaryQuery, setDictionaryQuery] = useState("");
+  const [dictionaryResults, setDictionaryResults] = useState<AdminDictionaryResult[]>([]);
+  const [dictionaryLoading, setDictionaryLoading] = useState(false);
+  const [dictionaryFallback, setDictionaryFallback] = useState(false);
+  const [dictionaryError, setDictionaryError] = useState("");
+
   const flashFocusRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const boot = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
       const key = user?.id || "anon";
       setCurrentUserId(user?.id || null);
       setUserKey(key);
+      setSessionToken(session?.access_token || null);
+      if (user?.id) {
+        try {
+          const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
+          setIsAdmin(Boolean(profile?.is_admin));
+        } catch {
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
       try {
         const weekKey = getLocalWeekStart().toISOString().slice(0, 10);
         const rawBest = localStorage.getItem(`study-kana-best-map-${key}-${weekKey}`);
@@ -2761,11 +2794,45 @@ function StudyContent() {
 
   useEffect(() => {
     if (selectedView) {
-      setActiveTab(selectedView);
+      setActiveTab(selectedView === "dictionary" && !isAdmin ? "kana" : selectedView);
       return;
     }
     setActiveTab("kana");
-  }, [selectedView]);
+  }, [isAdmin, selectedView]);
+
+  useEffect(() => {
+    if (!isAdmin || activeTab !== "dictionary" || !sessionToken) return;
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setDictionaryLoading(true);
+      setDictionaryError("");
+      try {
+        const response = await fetch(`/api/admin/dictionary?q=${encodeURIComponent(dictionaryQuery)}`, {
+          headers: { Authorization: `Bearer ${sessionToken}` },
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}));
+          throw new Error(payload?.error || "No se pudo consultar el diccionario.");
+        }
+        const payload = await response.json();
+        setDictionaryResults(Array.isArray(payload?.results) ? payload.results : []);
+        setDictionaryFallback(Boolean(payload?.fallback));
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setDictionaryResults([]);
+        setDictionaryFallback(false);
+        setDictionaryError(error instanceof Error ? error.message : "No se pudo consultar el diccionario.");
+      } finally {
+        if (!controller.signal.aborted) setDictionaryLoading(false);
+      }
+    }, dictionaryQuery ? 220 : 0);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [activeTab, dictionaryQuery, isAdmin, sessionToken]);
 
   useEffect(() => {
     if (!kanaRunning || kanaTime <= 0 || kanaCountdown !== null) return;
@@ -3395,6 +3462,8 @@ function StudyContent() {
         ? { title: "Vocab + Kanji Sprint", subtitle: "Compite por rangos de lección para mantener nivel justo." }
         : selectedView === "exam"
           ? { title: "Exámenes por Lección", subtitle: "Autoevaluación de 20 reactivos con feedback final y passing score de 70%." }
+          : selectedView === "dictionary"
+            ? { title: "Diccionario", subtitle: "Consulta rápida con cobertura amplia y fallback español-inglés." }
           : { title: "Flashcards", subtitle: "Carpetas por lección y práctica por set." }
     : { title: "Study Lab", subtitle: "Selecciona una herramienta y practica por bloques." };
   const studyThemes: Record<string, { badge: string; bg: string; accent: string; soft: string }> = {
@@ -3402,6 +3471,7 @@ function StudyContent() {
     sprint: { badge: "Sprint", bg: "linear-gradient(145deg,#fff7ed,#fffdf9)", accent: "#ea580c", soft: "rgba(234,88,12,.12)" },
     flashcards: { badge: "Flashcards", bg: "linear-gradient(145deg,#eef2ff,#fafbff)", accent: "#4f46e5", soft: "rgba(79,70,229,.12)" },
     exam: { badge: "Exámenes", bg: "linear-gradient(145deg,#e0f2fe,#f8fbff)", accent: "#0284c7", soft: "rgba(2,132,199,.12)" },
+    dictionary: { badge: "Diccionario", bg: "linear-gradient(145deg,#ecfeff,#f8ffff)", accent: "#0f766e", soft: "rgba(15,118,110,.12)" },
     hub: { badge: "Study Lab", bg: "linear-gradient(145deg,#ffffff,#f7fffc)", accent: "#0f766e", soft: "rgba(15,118,110,.12)" },
   };
   const currentTheme = selectedView ? studyThemes[selectedView] : studyThemes.hub;
@@ -3784,6 +3854,7 @@ function StudyContent() {
               { key: "sprint", href: "/study?view=sprint", title: "Vocab+Kanji Sprint", subtitle: "Velocidad por buckets", accent: "#ea580c", bg: "#fff7ed" },
               { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", subtitle: "Repaso visual", accent: "#4f46e5", bg: "#eef2ff" },
               { key: "exam", href: "/study?view=exam", title: "Exámenes", subtitle: "Autoevaluación", accent: "#0284c7", bg: "#e0f2fe" },
+              ...(isAdmin ? [{ key: "dictionary", href: "/study?view=dictionary", title: "Diccionario", subtitle: "Lookup admin", accent: "#0f766e", bg: "#ecfeff" }] : []),
             ].map((tool) => {
               const selected = activeTab === tool.key;
               return (
@@ -3830,6 +3901,13 @@ function StudyContent() {
               <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Examen por lección</div>
               <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>20 preguntas, passing de 70% y feedback completo al final.</p>
             </Link>
+            {isAdmin && (
+              <Link href="/study?view=dictionary" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(15,118,110,.22)", borderRadius: 16, background: "linear-gradient(145deg,#ecfeff,#f8ffff)", padding: 14 }}>
+                <div style={{ fontSize: 12, color: "#0f766e", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Admin</div>
+                <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Diccionario</div>
+                <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Consulta amplia con fallback español-inglés.</p>
+              </Link>
+            )}
           </section>
         )}
 
@@ -4508,6 +4586,79 @@ function StudyContent() {
               </div>
               </div>
             )}
+          </section>
+        )}
+
+        {!showHub && activeTab === "dictionary" && isAdmin && (
+          <section style={{ background: "linear-gradient(145deg,#f4fffe,#ffffff)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16, boxShadow: "inset 0 0 0 2px rgba(15,118,110,.08)" }}>
+            <div style={{ display: "grid", gap: 12 }}>
+              <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fff", padding: 14, display: "grid", gap: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start", flexWrap: "wrap" }}>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#0f766e", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Solo admin</div>
+                    <div style={{ marginTop: 4, fontSize: 24, fontWeight: 900, color: "#111114" }}>Diccionario interno</div>
+                    <div style={{ marginTop: 4, fontSize: 13, color: "#667085", lineHeight: 1.5 }}>
+                      Busca en japonés, español o inglés. Si no hay coincidencia exacta, el sistema intenta darte resultados relacionados o entradas comunes.
+                    </div>
+                  </div>
+                  <div style={{ borderRadius: 999, background: "#ecfeff", border: "1px solid rgba(15,118,110,.16)", padding: "8px 12px", fontSize: 12, color: "#0f766e", fontWeight: 800 }}>
+                    {dictionaryResults.length} resultados
+                  </div>
+                </div>
+
+                <input
+                  value={dictionaryQuery}
+                  onChange={(event) => setDictionaryQuery(event.target.value)}
+                  placeholder="Busca palabra, lectura o significado..."
+                  style={{ border: "1px solid rgba(17,17,20,.12)", borderRadius: 14, background: "#fff", padding: "12px 14px", fontSize: 16, fontWeight: 600, color: "#111114" }}
+                />
+
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap", fontSize: 12, color: "#667085", fontWeight: 700 }}>
+                  <span>{dictionaryLoading ? "Buscando..." : dictionaryFallback ? "Sin coincidencia exacta. Mostrando alternativas útiles." : "Coincidencias directas."}</span>
+                  <button type="button" onClick={() => setDictionaryQuery("")} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "6px 10px", fontWeight: 700, cursor: "pointer" }}>
+                    Limpiar
+                  </button>
+                </div>
+                {dictionaryError && <div style={{ fontSize: 13, color: "#b42318", fontWeight: 700 }}>{dictionaryError}</div>}
+              </div>
+
+              <div style={{ display: "grid", gap: 10 }}>
+                {dictionaryResults.map((entry) => (
+                  <article key={entry.id} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fff", padding: 14, display: "grid", gap: 8 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start", flexWrap: "wrap" }}>
+                      <div>
+                        <div style={{ fontSize: 28, fontWeight: 900, color: "#111114", lineHeight: 1.05 }}>{entry.primary}</div>
+                        <div style={{ marginTop: 4, fontSize: 16, color: "#475467", fontWeight: 700 }}>{entry.secondary}</div>
+                      </div>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                        {entry.common && <span style={{ borderRadius: 999, background: "#ecfeff", border: "1px solid rgba(15,118,110,.16)", padding: "5px 8px", fontSize: 12, color: "#0f766e", fontWeight: 800 }}>Common</span>}
+                        {entry.pos.map((tag) => (
+                          <span key={`${entry.id}-${tag}`} style={{ borderRadius: 999, background: "#f8fafc", border: "1px solid rgba(17,17,20,.08)", padding: "5px 8px", fontSize: 12, color: "#475467", fontWeight: 700 }}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {(entry.kanji.length > 1 || entry.readings.length > 1) && (
+                      <div style={{ display: "grid", gap: 6 }}>
+                        {entry.kanji.length > 1 && <div style={{ fontSize: 13, color: "#667085" }}><strong style={{ color: "#111114" }}>Variantes:</strong> {entry.kanji.join(" ・ ")}</div>}
+                        {entry.readings.length > 1 && <div style={{ fontSize: 13, color: "#667085" }}><strong style={{ color: "#111114" }}>Lecturas:</strong> {entry.readings.join(" ・ ")}</div>}
+                      </div>
+                    )}
+                    <div style={{ display: "grid", gap: 6 }}>
+                      <div style={{ fontSize: 12, color: "#0f766e", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Significado principal</div>
+                      <div style={{ fontSize: 15, color: "#111114", lineHeight: 1.6 }}>{entry.gloss.join(" · ")}</div>
+                    </div>
+                    {entry.fallbackGloss.length > 0 && (
+                      <div style={{ display: "grid", gap: 6 }}>
+                        <div style={{ fontSize: 12, color: "#667085", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Fallback inglés</div>
+                        <div style={{ fontSize: 14, color: "#475467", lineHeight: 1.55 }}>{entry.fallbackGloss.join(" · ")}</div>
+                      </div>
+                    )}
+                  </article>
+                ))}
+              </div>
+            </div>
           </section>
         )}
 
