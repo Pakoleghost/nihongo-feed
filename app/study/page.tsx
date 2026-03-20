@@ -100,6 +100,19 @@ function getNextLocalWeekStart(date = new Date()) {
   return start;
 }
 
+function getLocalMonthStart(date = new Date()) {
+  const value = new Date(date);
+  value.setHours(0, 0, 0, 0);
+  value.setDate(1);
+  return value;
+}
+
+function getNextLocalMonthStart(date = new Date()) {
+  const start = getLocalMonthStart(date);
+  start.setMonth(start.getMonth() + 1);
+  return start;
+}
+
 function formatCountdown(ms: number) {
   const total = Math.max(0, Math.floor(ms / 1000));
   const days = Math.floor(total / 86400);
@@ -117,6 +130,14 @@ function isSameLocalWeek(isoA?: string | null, isoB?: string | null) {
   const b = new Date(isoB);
   if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return false;
   return getLocalWeekStart(a).getTime() === getLocalWeekStart(b).getTime();
+}
+
+function isSameLocalMonth(isoA?: string | null, isoB?: string | null) {
+  if (!isoA || !isoB) return false;
+  const a = new Date(isoA);
+  const b = new Date(isoB);
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return false;
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
 }
 
 function getKanaRunValidation(score: number, answers: number, durationMs: number) {
@@ -2578,6 +2599,7 @@ function StudyContent() {
   const [kanaCountdown, setKanaCountdown] = useState<number | null>(null);
   const [kanaPenalty, setKanaPenalty] = useState(0);
   const [weeklyResetLabel, setWeeklyResetLabel] = useState("");
+  const [vkResetLabel, setVkResetLabel] = useState("");
   const [kanaLeaderboard, setKanaLeaderboard] = useState<Record<KanaMode, KanaScoreRow[]>>({ hiragana: [], katakana: [], mixed: [] });
   const [leaderboardUnavailable, setLeaderboardUnavailable] = useState(false);
   const [kanaQuestion, setKanaQuestion] = useState<{ char: string; correct: string; options: string[] }>({
@@ -2590,6 +2612,7 @@ function StudyContent() {
   const kanaRoundStartedAtRef = useRef<number | null>(null);
   const kanaAnswersCountRef = useRef(0);
   const weekKeyRef = useRef(getLocalWeekStart().toISOString().slice(0, 10));
+  const vkMonthKeyRef = useRef(getLocalMonthStart().toISOString().slice(0, 7));
 
   const [vkBucket, setVkBucket] = useState<VkBucketKey>("l1_2");
   const [vkRunning, setVkRunning] = useState(false);
@@ -2685,7 +2708,8 @@ function StudyContent() {
             mixed: Number.isNaN(mixed) ? 0 : mixed,
           });
         }
-        const rawVkBest = localStorage.getItem(`study-vk-best-map-${key}-${weekKey}`);
+        const monthKey = getLocalMonthStart().toISOString().slice(0, 7);
+        const rawVkBest = localStorage.getItem(`study-vk-best-map-${key}-${monthKey}`);
         if (rawVkBest) {
           const parsed = JSON.parse(rawVkBest);
           setVkBestByBucket({
@@ -2905,11 +2929,11 @@ function StudyContent() {
   };
 
   const loadVkLeaderboard = async () => {
-    const weekStartIso = getLocalWeekStart().toISOString();
+    const monthStartIso = getLocalMonthStart().toISOString();
     const { data, error } = await supabase
       .from("study_kana_scores")
       .select("user_id, mode, best_score, updated_at, profiles:user_id (username, full_name)")
-      .gte("updated_at", weekStartIso)
+      .gte("updated_at", monthStartIso)
       .in("mode", VK_MODE_KEYS)
       .order("best_score", { ascending: false })
       .order("updated_at", { ascending: true })
@@ -2941,11 +2965,11 @@ function StudyContent() {
       alert(`Partida no válida (${validation.reasons.join(", ")}).`);
       return;
     }
-    const weekKey = getLocalWeekStart().toISOString().slice(0, 10);
+    const monthKey = getLocalMonthStart().toISOString().slice(0, 7);
     setVkBestByBucket((prev) => {
       const next = { ...prev, [bucket]: Math.max(prev[bucket] || 0, score) };
       try {
-        localStorage.setItem(`study-vk-best-map-${userKey}-${weekKey}`, JSON.stringify(next));
+        localStorage.setItem(`study-vk-best-map-${userKey}-${monthKey}`, JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -2961,7 +2985,7 @@ function StudyContent() {
       .eq("mode", mode)
       .maybeSingle();
     const nowIso = new Date().toISOString();
-    const safeBestScore = isSameLocalWeek(existing?.updated_at, nowIso)
+    const safeBestScore = isSameLocalMonth(existing?.updated_at, nowIso)
       ? Math.max(Number(existing?.best_score || 0), score)
       : score;
     const { error } = await supabase
@@ -3391,10 +3415,10 @@ function StudyContent() {
     const tick = () => {
       const now = new Date();
       const weekKey = getLocalWeekStart(now).toISOString().slice(0, 10);
+      const monthKey = getLocalMonthStart(now).toISOString().slice(0, 7);
       if (weekKeyRef.current !== weekKey) {
         weekKeyRef.current = weekKey;
         setKanaBestByMode({ hiragana: 0, katakana: 0, mixed: 0 });
-        setVkBestByBucket({ l1_2: 0, l3_4: 0, l5_6: 0, l7_8: 0, l9_10: 0, l11_12: 0 });
         try {
           const rawBest = localStorage.getItem(`study-kana-best-map-${userKey}-${weekKey}`);
           if (rawBest) {
@@ -3405,7 +3429,14 @@ function StudyContent() {
               mixed: Number(parsed?.mixed || 0) || 0,
             });
           }
-          const rawVkBest = localStorage.getItem(`study-vk-best-map-${userKey}-${weekKey}`);
+        } catch {}
+        void loadKanaLeaderboard();
+      }
+      if (vkMonthKeyRef.current !== monthKey) {
+        vkMonthKeyRef.current = monthKey;
+        setVkBestByBucket({ l1_2: 0, l3_4: 0, l5_6: 0, l7_8: 0, l9_10: 0, l11_12: 0 });
+        try {
+          const rawVkBest = localStorage.getItem(`study-vk-best-map-${userKey}-${monthKey}`);
           if (rawVkBest) {
             const parsedVk = JSON.parse(rawVkBest);
             setVkBestByBucket({
@@ -3418,11 +3449,10 @@ function StudyContent() {
             });
           }
         } catch {}
-        void loadKanaLeaderboard();
         void loadVkLeaderboard();
       }
-      const next = getNextLocalWeekStart(now);
-      setWeeklyResetLabel(formatCountdown(next.getTime() - now.getTime()));
+      setWeeklyResetLabel(formatCountdown(getNextLocalWeekStart(now).getTime() - now.getTime()));
+      setVkResetLabel(formatCountdown(getNextLocalMonthStart(now).getTime() - now.getTime()));
     };
     tick();
     const timer = window.setInterval(tick, 1000);
@@ -3948,7 +3978,7 @@ function StudyContent() {
             </div>
             <p style={{ color: "#6b7280", fontSize: 14 }}>60 segundos. Preguntas mixtas de significado y lectura según tu rango.</p>
             <div style={{ marginTop: -4, marginBottom: 8, fontSize: 12, color: "#667085", fontWeight: 700 }}>
-              Reinicio semanal en: <span style={{ color: "#111114" }}>{weeklyResetLabel || "..."}</span>
+              Reinicio mensual en: <span style={{ color: "#111114" }}>{vkResetLabel || "..."}</span>
             </div>
             <div style={{ marginTop: 8, height: 7, borderRadius: 999, background: "#ecedf1", overflow: "hidden" }}>
               <div style={{ height: "100%", width: `${vkTimePct}%`, background: "linear-gradient(90deg, #34c5a6, #25a98f)" }} />
@@ -3957,7 +3987,7 @@ function StudyContent() {
             <div style={{ marginTop: 12, display: "grid", gap: 12 }}>
               <div style={{ border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, padding: 14, background: "linear-gradient(145deg,#ffffff,#f8fafc)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <div style={{ color: "#374151", fontWeight: 700 }}>Tiempo: {vkTime}s · Score: {vkScore} · Mejor semanal: {vkBestByBucket[vkBucket] || 0}</div>
+                  <div style={{ color: "#374151", fontWeight: 700 }}>Tiempo: {vkTime}s · Score: {vkScore} · Mejor mensual: {vkBestByBucket[vkBucket] || 0}</div>
                   <button
                     type="button"
                     onClick={startVkSprint}
@@ -4058,60 +4088,14 @@ function StudyContent() {
             )}
 
             {flashLessonFolder === null && flashSetId === null && (
-              <div style={{ display: "grid", gap: 14 }}>
-                <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 22, background: "linear-gradient(145deg,#ffffff,#f8fafc)", padding: 16, boxShadow: "0 12px 30px rgba(15,23,42,.06)" }}>
-                  <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))" }}>
-                    <div>
-                      <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".1em", fontWeight: 800 }}>Flashcards</div>
-                      <div style={{ marginTop: 4, fontSize: 28, fontWeight: 900, color: "#111114", lineHeight: 1.05 }}>Repaso claro, por rutas y sin ruido</div>
-                      <div style={{ marginTop: 8, fontSize: 14, color: "#667085", lineHeight: 1.6, maxWidth: 620 }}>
-                        Aquí viven tus decks oficiales por lección y tus decks personalizados. La entrada es más ligera para que no se pierdan entre sí ni te aviente las 12 carpetas de golpe.
-                      </div>
-                    </div>
-                    <div style={{ display: "grid", gap: 10, alignContent: "start" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(90px,1fr))", gap: 8 }}>
-                        <div style={{ borderRadius: 16, background: "#f8fafc", border: "1px solid rgba(17,17,20,.06)", padding: 12 }}>
-                          <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Lecciones</div>
-                          <div style={{ marginTop: 4, fontSize: 26, fontWeight: 900, color: "#111114" }}>{flashLessons.length}</div>
-                        </div>
-                        <div style={{ borderRadius: 16, background: "#f8fafc", border: "1px solid rgba(17,17,20,.06)", padding: 12 }}>
-                          <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Sets</div>
-                          <div style={{ marginTop: 4, fontSize: 26, fontWeight: 900, color: "#111114" }}>{FLASHCARD_SETS.length}</div>
-                        </div>
-                        <div style={{ borderRadius: 16, background: "#f8fafc", border: "1px solid rgba(17,17,20,.06)", padding: 12 }}>
-                          <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Mis decks</div>
-                          <div style={{ marginTop: 4, fontSize: 26, fontWeight: 900, color: "#111114" }}>{customFlashSets.length}</div>
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        <button
-                          type="button"
-                          onClick={() => openCustomFlashDeckBuilder()}
-                          style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#4f46e5,#6366f1)", color: "#fff", padding: "10px 14px", fontWeight: 800, cursor: "pointer", boxShadow: "0 10px 18px rgba(99,102,241,.2)" }}
-                        >
-                          Crear mi deck
-                        </button>
-                        {activeFlashRoute && (
-                          <button
-                            type="button"
-                            onClick={() => openFlashLesson(activeFlashRoute.entries[0]?.lesson || flashLessons[0] || 1)}
-                            style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "10px 14px", fontWeight: 800, cursor: "pointer" }}
-                          >
-                            Abrir ruta activa
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ border: "1px solid rgba(79,70,229,.14)", borderRadius: 18, background: "linear-gradient(145deg,#eef2ff,#ffffff)", padding: 14 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <div style={{ display: "grid", gap: 14, gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))", alignItems: "start" }}>
+                <div style={{ border: "1px solid rgba(99,102,241,.14)", borderRadius: 18, background: "linear-gradient(145deg,#eef2ff,#ffffff)", padding: 14, display: "grid", gap: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10, flexWrap: "wrap" }}>
                     <div>
                       <div style={{ fontSize: 12, color: "#6366f1", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Mis decks</div>
-                      <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800, color: "#111114" }}>Combina sets oficiales</div>
-                      <div style={{ marginTop: 4, fontSize: 13, color: "#667085", maxWidth: 560 }}>
-                        Junta vocab, kanji o sets especiales en un solo deck para estudiar lo que tú quieras sin duplicar tarjetas.
+                      <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800, color: "#111114" }}>Tus combinaciones</div>
+                      <div style={{ marginTop: 4, fontSize: 13, color: "#667085", maxWidth: 440 }}>
+                        Mezcla sets oficiales y guarda un deck simple para estudiar lo que te haga falta.
                       </div>
                     </div>
                     <button
@@ -4124,7 +4108,7 @@ function StudyContent() {
                   </div>
 
                   {customFlashSets.length > 0 ? (
-                    <div style={{ marginTop: 12, display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
+                    <div style={{ display: "grid", gap: 10 }}>
                       {customFlashSets.map((set) => (
                         <div key={set.id} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
                           <button
@@ -4132,9 +4116,13 @@ function StudyContent() {
                             onClick={() => openFlashSet(set.id)}
                             style={{ display: "block", width: "100%", textAlign: "left", border: 0, background: "transparent", padding: 0, cursor: "pointer" }}
                           >
-                            <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Deck personalizado</div>
-                            <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "#111114" }}>{set.title}</div>
-                            <div style={{ marginTop: 4, fontSize: 13, color: "#667085", lineHeight: 1.45 }}>{set.description}</div>
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                              <div style={{ fontSize: 18, fontWeight: 800, color: "#111114" }}>{set.title}</div>
+                              <div style={{ borderRadius: 999, background: "#f8fafc", border: "1px solid rgba(17,17,20,.08)", padding: "6px 9px", fontSize: 12, color: "#475467", fontWeight: 800 }}>
+                                {set.items.length} tarjetas
+                              </div>
+                            </div>
+                            <div style={{ marginTop: 6, fontSize: 13, color: "#667085", lineHeight: 1.45 }}>{set.description}</div>
                           </button>
                           <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
                             <button type="button" onClick={() => openCustomFlashDeckBuilder(customFlashDecks.find((deck) => deck.id === set.id))} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
@@ -4148,22 +4136,15 @@ function StudyContent() {
                       ))}
                     </div>
                   ) : (
-                    <div style={{ marginTop: 12, border: "1px dashed rgba(79,70,229,.22)", borderRadius: 14, background: "rgba(255,255,255,.7)", padding: 14, color: "#667085", fontSize: 14, lineHeight: 1.5 }}>
-                      Aún no tienes decks personalizados. Crea uno combinando varios sets oficiales para repasar justo lo que necesites.
+                    <div style={{ border: "1px dashed rgba(79,70,229,.22)", borderRadius: 14, background: "rgba(255,255,255,.8)", padding: 14, color: "#667085", fontSize: 14, lineHeight: 1.5 }}>
+                      Todavía no tienes decks personalizados.
                     </div>
                   )}
 
                   {flashDeckBuilderOpen && (
-                    <div style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fff", padding: 14, display: "grid", gap: 12 }}>
+                    <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fff", padding: 14, display: "grid", gap: 12 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                        <div>
-                          <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>
-                            {flashDeckEditingId ? "Editar deck" : "Nuevo deck"}
-                          </div>
-                          <div style={{ marginTop: 4, fontSize: 20, fontWeight: 800, color: "#111114" }}>
-                            {flashDeckEditingId ? "Ajusta tu combinación" : "Arma tu deck"}
-                          </div>
-                        </div>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: "#111114" }}>{flashDeckEditingId ? "Editar deck" : "Nuevo deck"}</div>
                         <button type="button" onClick={closeCustomFlashDeckBuilder} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
                           Cerrar
                         </button>
@@ -4213,20 +4194,10 @@ function StudyContent() {
                         </div>
                       </div>
 
-                      <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
-                        <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Resumen</div>
-                        <div style={{ marginTop: 6, fontSize: 16, fontWeight: 800, color: "#111114" }}>
+                      <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <div style={{ fontSize: 14, color: "#475467", fontWeight: 700 }}>
                           {flashDeckSelectedSetIds.length} sets · {flashDeckBuilderPreviewItems.length} tarjetas únicas
                         </div>
-                        <div style={{ marginTop: 4, fontSize: 13, color: "#667085" }}>
-                          El sistema une las tarjetas y elimina duplicados automáticamente.
-                        </div>
-                      </div>
-
-                      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, flexWrap: "wrap" }}>
-                        <button type="button" onClick={closeCustomFlashDeckBuilder} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "8px 12px", fontWeight: 700, cursor: "pointer" }}>
-                          Cancelar
-                        </button>
                         <button type="button" onClick={saveCustomFlashDeck} style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#4f46e5,#6366f1)", color: "#fff", padding: "8px 14px", fontWeight: 800, cursor: "pointer" }}>
                           {flashDeckEditingId ? "Guardar cambios" : "Guardar deck"}
                         </button>
@@ -4235,23 +4206,13 @@ function StudyContent() {
                   )}
                 </div>
 
-                <div style={{ display: "grid", gap: 12 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                    <div>
-                      <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Decks oficiales</div>
-                      <div style={{ marginTop: 4, fontSize: 20, fontWeight: 800, color: "#111114" }}>Rutas por bloque</div>
-                      <div style={{ marginTop: 4, fontSize: 13, color: "#667085" }}>
-                        Elegimos mostrar rutas primero para que la página se sienta ligera y más fácil de navegar.
-                      </div>
-                    </div>
-                    {activeFlashRoute && (
-                      <div style={{ borderRadius: 999, background: "#f8fafc", border: "1px solid rgba(17,17,20,.08)", padding: "8px 12px", fontSize: 12, color: "#475467", fontWeight: 700 }}>
-                        {activeFlashRoute.entries.reduce((total, entry) => total + entry.sets.length, 0)} sets en esta ruta
-                      </div>
-                    )}
+                <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 18, background: "#fff", padding: 14, display: "grid", gap: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Decks oficiales</div>
+                    <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800, color: "#111114" }}>Rutas</div>
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 10 }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                     {flashRoutes.map((route) => {
                       const selected = activeFlashRoute?.id === route.id;
                       return (
@@ -4260,87 +4221,44 @@ function StudyContent() {
                           type="button"
                           onClick={() => setFlashRouteId(route.id)}
                           style={{
-                            textAlign: "left",
-                            border: selected ? `1px solid ${route.accent}` : "1px solid rgba(17,17,20,.08)",
-                            borderRadius: 18,
-                            background: route.surface,
-                            padding: 14,
+                            border: selected ? `1px solid ${route.accent}` : "1px solid rgba(17,17,20,.1)",
+                            borderRadius: 999,
+                            background: selected ? route.surface : "#fff",
+                            color: selected ? route.accent : "#344054",
+                            padding: "8px 12px",
+                            fontWeight: 800,
                             cursor: "pointer",
-                            boxShadow: selected ? `0 14px 26px ${route.accent}22` : "none",
                           }}
                         >
-                          <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
-                            <div>
-                              <div style={{ fontSize: 12, color: route.accent, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Ruta</div>
-                              <div style={{ marginTop: 4, fontSize: 20, fontWeight: 900, color: "#111114" }}>{route.title}</div>
-                            </div>
-                            <div style={{ minWidth: 38, height: 38, borderRadius: 14, background: `${route.accent}16`, color: route.accent, display: "grid", placeItems: "center", fontWeight: 900 }}>
-                              {route.lessons.length}
-                            </div>
-                          </div>
-                          <div style={{ marginTop: 8, fontSize: 13, color: "#667085", lineHeight: 1.5 }}>{route.subtitle}</div>
-                          <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
-                            {route.lessons.map((lesson) => (
-                              <span key={`${route.id}-${lesson}`} style={{ borderRadius: 999, background: "#fff", border: "1px solid rgba(17,17,20,.08)", padding: "5px 8px", fontSize: 12, color: "#344054", fontWeight: 700 }}>
-                                L{lesson}
-                              </span>
-                            ))}
-                          </div>
+                          {route.title}
                         </button>
                       );
                     })}
                   </div>
 
                   {activeFlashRoute && (
-                    <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 18, background: "#ffffff", padding: 14, boxShadow: "0 12px 26px rgba(15,23,42,.05)" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                        <div>
-                          <div style={{ fontSize: 12, color: activeFlashRoute.accent, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Ruta activa</div>
-                          <div style={{ marginTop: 4, fontSize: 22, fontWeight: 900, color: "#111114" }}>{activeFlashRoute.title}</div>
-                          <div style={{ marginTop: 4, fontSize: 13, color: "#667085", lineHeight: 1.5 }}>{activeFlashRoute.subtitle}</div>
-                        </div>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                          {activeFlashRoute.entries.map((entry) => (
-                            <button
-                              key={`route-jump-${entry.lesson}`}
-                              type="button"
-                              onClick={() => openFlashLesson(entry.lesson)}
-                              style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "8px 11px", fontWeight: 800, cursor: "pointer", color: "#111114" }}
-                            >
-                              Lección {entry.lesson}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 10 }}>
+                    <div style={{ border: "1px solid rgba(17,17,20,.06)", borderRadius: 16, background: "#fafbff", padding: 12, display: "grid", gap: 10 }}>
+                      <div style={{ fontSize: 13, color: "#667085", lineHeight: 1.5 }}>{activeFlashRoute.subtitle}</div>
+                      <div style={{ display: "grid", gap: 10 }}>
                         {activeFlashRoute.entries.map((entry) => (
                           <button
                             key={`folder-${entry.lesson}`}
                             type="button"
                             onClick={() => openFlashLesson(entry.lesson)}
-                            style={{ textAlign: "left", border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fbfbfc", padding: 13, cursor: "pointer" }}
+                            style={{ textAlign: "left", border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fff", padding: 13, cursor: "pointer" }}
                           >
-                            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
-                              <div>
-                                <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Carpeta</div>
-                                <div style={{ marginTop: 4, fontSize: 20, fontWeight: 900, color: "#111114" }}>Lección {entry.lesson}</div>
-                              </div>
-                              <div style={{ borderRadius: 999, background: "#fff", border: "1px solid rgba(17,17,20,.08)", padding: "6px 9px", fontSize: 12, color: "#475467", fontWeight: 800 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                              <div style={{ fontSize: 18, fontWeight: 800, color: "#111114" }}>Lección {entry.lesson}</div>
+                              <div style={{ borderRadius: 999, background: "#f8fafc", border: "1px solid rgba(17,17,20,.08)", padding: "6px 9px", fontSize: 12, color: "#475467", fontWeight: 800 }}>
                                 {entry.sets.length} sets
                               </div>
                             </div>
                             <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
-                              {entry.sets.slice(0, 4).map((set) => (
-                                <span key={`folder-preview-${set.id}`} style={{ borderRadius: 999, background: "#fff", border: "1px solid rgba(17,17,20,.08)", padding: "5px 8px", fontSize: 12, color: "#475467", fontWeight: 700 }}>
+                              {entry.sets.map((set) => (
+                                <span key={`folder-preview-${set.id}`} style={{ borderRadius: 999, background: "#f8fafc", border: "1px solid rgba(17,17,20,.08)", padding: "5px 8px", fontSize: 12, color: "#475467", fontWeight: 700 }}>
                                   {set.title}
                                 </span>
                               ))}
-                              {entry.sets.length > 4 && (
-                                <span style={{ borderRadius: 999, background: "#fff", border: "1px solid rgba(17,17,20,.08)", padding: "5px 8px", fontSize: 12, color: "#98a2b3", fontWeight: 700 }}>
-                                  +{entry.sets.length - 4}
-                                </span>
-                              )}
                             </div>
                           </button>
                         ))}
