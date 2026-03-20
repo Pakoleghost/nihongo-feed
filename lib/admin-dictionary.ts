@@ -58,14 +58,14 @@ function toResult(entry: AdminDictionaryEntry): AdminDictionaryResult {
 
 const DATA_URL = new URL("./generated/admin-dictionary-data.json", import.meta.url);
 
-export function loadAdminDictionary() {
+export function loadAdminDictionary(): AdminDictionaryEntry[] {
   if (cachedEntries) return cachedEntries;
   const raw = JSON.parse(fs.readFileSync(DATA_URL, "utf8"));
   cachedEntries = Array.isArray(raw.entries) ? raw.entries : [];
   return cachedEntries;
 }
 
-function getCommonResults() {
+function getCommonResults(): AdminDictionaryResult[] {
   if (cachedCommonResults) return cachedCommonResults;
   const entries = loadAdminDictionary();
   cachedCommonResults = entries
