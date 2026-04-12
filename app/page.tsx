@@ -461,6 +461,27 @@ export default function HomePage() {
   const totalFeedCount = feedMode === "tasks"
     ? totalRegularFeedBase.filter((p) => isTaskPost(p)).length
     : totalRegularFeedBase.length;
+  const rootAssignments = regularFeedBase.filter((p) => p.type === "assignment" && !p.parent_assignment_id);
+  const taskCards = rootAssignments
+    .map((post) => {
+      const { title, preview } = getPostParts(post.content || "");
+      const submission = submissionByAssignment[String(post.id)];
+      const isForum = Boolean(post.is_forum || isForumTaskSubtype(post.assignment_subtype));
+      return {
+        id: String(post.id),
+        title: title || "Tarea",
+        preview,
+        href: isForum ? `/post/${post.id}` : `/write?assignment_id=${post.id}&title=${encodeURIComponent(title || "Tarea")}`,
+        cta: isForum ? "Entrar" : "Resolver",
+        submitted: Boolean(submission?.submitted),
+        late: Boolean(submission?.late),
+        group: isPublicTargetGroup(post.target_group) ? "General" : post.target_group || post.profiles?.group_name || "General",
+      };
+    })
+    .sort((a, b) => Number(a.submitted) - Number(b.submitted))
+    .slice(0, 4);
+  const pendingTaskCount = taskCards.filter((task) => !task.submitted).length;
+  const announcementCount = pinnedAnnouncements.length;
 
   return (
     <div className="homePage">
@@ -489,125 +510,138 @@ export default function HomePage() {
         </header>
 
         <main className="homeMain">
-          <section className="feedToolbar">
-            <div className="segmentedControl">
-              <button type="button" onClick={() => setFeedMode("all")} className={feedMode === "all" ? "active" : ""}>Todo</button>
-              <button type="button" onClick={() => setFeedMode("tasks")} className={feedMode === "tasks" ? "active" : ""}>Tareas</button>
+          <section className="heroPanel">
+            <div className="heroCopy">
+              <div className="sectionKicker">Centro de estudio</div>
+              <h1 className="heroTitle">Estudia sin perderte</h1>
+              <p className="heroText">Tus herramientas, tareas y recursos en un solo lugar.</p>
             </div>
-            <div className="feedMeta">
-              <span className="feedCount">{refreshing ? "..." : totalFeedCount}</span>
+            <div className="heroStats">
+              <div className="heroStat">
+                <span>Pendientes</span>
+                <strong>{pendingTaskCount}</strong>
+              </div>
+              <div className="heroStat mint">
+                <span>Anuncios</span>
+                <strong>{announcementCount}</strong>
+              </div>
+              <div className="heroStat blue">
+                <span>Recursos</span>
+                <strong>→</strong>
+              </div>
+            </div>
+            <div className="heroActions">
+              <Link href="/study" className="primaryAction">Abrir estudio</Link>
+              <Link href="/resources" className="secondaryAction">Ver recursos</Link>
             </div>
           </section>
 
           {hasFreshPosts && (
             <section className="refreshBanner">
-              <span>Hay publicaciones nuevas</span>
+              <span>Hay actualizaciones nuevas</span>
               <button type="button" onClick={() => void softRefresh()}>Actualizar</button>
             </section>
           )}
 
-          {pinnedAnnouncements.map((post) => (
-            <section key={post.id} className={`announceCard ${post.type === "assignment" ? "task" : "info"}`}>
-              <button
-                type="button"
-                onClick={() => {
-                  const id = String(post.id);
-                  setDismissedAnnouncements((prev) => (prev.includes(id) ? prev : [...prev, id]));
-                }}
-                className="dismissButton"
-                aria-label="Cerrar anuncio"
-              >
-                ✕
-              </button>
-              <div className="announceKicker">{post.type === "assignment" ? "Anuncio de tarea" : "Anuncio"}</div>
-              <h3>{getPostParts(post.content || "").title}</h3>
-              <Link href={`/post/${post.id}`}>Abrir</Link>
-            </section>
-          ))}
+          <section className="shortcutGrid">
+            <Link href="/study?view=flashcards" className="shortcutCard accentRed">
+              <span className="shortcutIcon"><IconCards /></span>
+              <div>
+                <strong>Flashcards</strong>
+                <small>Repasa por deck</small>
+              </div>
+            </Link>
+            <Link href="/study?view=exam" className="shortcutCard accentMint">
+              <span className="shortcutIcon"><IconTarget /></span>
+              <div>
+                <strong>Exámenes</strong>
+                <small>Autoevaluación</small>
+              </div>
+            </Link>
+            <Link href="/study?view=kana" className="shortcutCard accentOrange">
+              <span className="shortcutIcon"><IconSpark /></span>
+              <div>
+                <strong>Kana Sprint</strong>
+                <small>Velocidad semanal</small>
+              </div>
+            </Link>
+            <Link href="/resources" className="shortcutCard accentBlue">
+              <span className="shortcutIcon"><IconBook /></span>
+              <div>
+                <strong>Recursos</strong>
+                <small>Material y tareas</small>
+              </div>
+            </Link>
+          </section>
 
-          <section className="feedPanel">
-            {regularFeed.map((post) => {
-              const { title: titulo, preview } = getPostParts(post.content || "");
-              const edited = Boolean(
-                post?.updated_at &&
-                  post?.created_at &&
-                  new Date(post.updated_at).getTime() - new Date(post.created_at).getTime() > 60_000,
-              );
-              const isAssignmentPost = post.type === "assignment" && !post.parent_assignment_id;
-              const isForumAssignment = isAssignmentPost && (post.is_forum || isForumTaskSubtype(post.assignment_subtype));
-              const isAssignedToMe = isPublicTargetGroup(post.target_group) || normalizeGroupValue(post.target_group) === normalizeGroupValue(myProfile?.group_name);
-              const isForumAccent = isForumAssignment && isAssignedToMe;
-
-              return (
-                <article key={post.id} className={`feedRow ${isAssignmentPost ? "taskRow" : ""}`}>
-                  <div className="feedCardMain">
-                    <div className="postHeader">
-                      <div className="avatarMini">
-                        {post.profiles?.avatar_url ? (
-                          <img src={post.profiles.avatar_url} alt="" />
-                        ) : (
-                          <AvatarPlaceholder size={30} />
-                        )}
-                      </div>
-                      <div className="postHeaderCopy">
-                        <div className="authorRow">
-                          <Link href={`/profile/${post.user_id}`}>{post.profiles?.is_admin ? "Sensei" : post.profiles?.username}</Link>
-                          <span className="dotSep" />
-                          <span>{formatFeedDate(post.created_at)}</span>
-                          {edited && <span className="tinyTag neutral">editado</span>}
-                          {post.is_reviewed && <span className="tinyTag mint">済 Sumi</span>}
-                        </div>
-                      </div>
-                    </div>
-
-                    <Link href={`/post/${post.id}`} className="cardLinkBlock">
-                      {isAssignmentPost && (
-                        <span className={`postTypeTag ${isForumAccent ? "forum" : "task"}`}>
-                          {isForumAssignment ? (isAssignedToMe ? "Tarea foro" : "Foro abierto") : "Tarea"}
-                        </span>
-                      )}
-                      <h2 className={`postTitle ${fontScale === "large" ? "large" : ""}`}>{titulo}</h2>
-                      {preview && <p className={`postPreview ${fontScale === "large" ? "large" : ""}`}>{preview}</p>}
-                    </Link>
-
-                    <div className="postFooter">
-                      <span>{isPublicTargetGroup(post.target_group) ? "General" : post.target_group || post.profiles?.group_name || "General"}</span>
-                      {isAssignmentPost && (
-                        <div className="taskActions">
-                          <Link href={isForumAssignment ? `/post/${post.id}` : `/write?assignment_id=${post.id}&title=${encodeURIComponent(titulo || "Tarea")}`}>
-                            {isForumAssignment ? "Entrar" : "Entregar"}
-                          </Link>
-                          {!post.parent_assignment_id && (
-                            <span className={`statusPill ${submissionByAssignment[String(post.id)]?.submitted ? (submissionByAssignment[String(post.id)]?.late ? "late" : "done") : "pending"}`}>
-                              {submissionByAssignment[String(post.id)]?.submitted
-                                ? submissionByAssignment[String(post.id)]?.late
-                                  ? "Tardía"
-                                  : "Entregada"
-                                : "Pendiente"}
-                            </span>
-                          )}
-                        </div>
-                      )}
+          <section className="dashboardPanel">
+            <div className="panelHead">
+              <div>
+                <div className="sectionKicker">Tareas</div>
+                <h2>Lo importante</h2>
+              </div>
+              <Link href="/resources">Abrir recursos</Link>
+            </div>
+            <div className="taskList">
+              {taskCards.map((task) => (
+                <article key={task.id} className="taskCard">
+                  <div className="taskDot" />
+                  <div className="taskCopy">
+                    <strong>{task.title}</strong>
+                    {task.preview && <p>{task.preview}</p>}
+                    <div className="taskMetaLine">
+                      <span>{task.group}</span>
+                      <span className={`statusPill ${task.submitted ? (task.late ? "late" : "done") : "pending"}`}>
+                        {task.submitted ? (task.late ? "Tardía" : "Entregada") : "Pendiente"}
+                      </span>
                     </div>
                   </div>
-
-                  {post.image_url && (
-                    <Link href={`/post/${post.id}`} className="feedThumb">
-                      <img src={post.image_url} alt="" />
-                    </Link>
-                  )}
+                  <Link href={task.href} className="taskLink">{task.cta}</Link>
                 </article>
-              );
-            })}
-            {regularFeed.length === 0 && !loading && (
-              <div className="emptyFeed">
-                <strong>No hay publicaciones aquí todavía.</strong>
-                <span>Cuando alguien publique, aparecerá aquí.</span>
-              </div>
-            )}
-            {hasMore && <div ref={loadMoreRef} style={{ height: 24 }} />}
-            {loadingMore && <div className="loadingMore">Cargando más...</div>}
+              ))}
+              {taskCards.length === 0 && (
+                <div className="emptyFeed">
+                  <strong>No hay tareas activas.</strong>
+                  <span>Cuando tengas una nueva, aparecerá aquí.</span>
+                </div>
+              )}
+            </div>
           </section>
+
+          {pinnedAnnouncements.length > 0 && (
+            <section className="dashboardPanel">
+              <div className="panelHead">
+                <div>
+                  <div className="sectionKicker">Avisos</div>
+                  <h2>Novedades</h2>
+                </div>
+              </div>
+              <div className="noticeList">
+                {pinnedAnnouncements.slice(0, 3).map((post) => (
+                  <article key={post.id} className={`noticeRow ${post.type === "assignment" ? "task" : "info"}`}>
+                    <div className="noticeCopy">
+                      <strong>{getPostParts(post.content || "").title}</strong>
+                      <span>{post.type === "assignment" ? "Tarea nueva" : "Aviso del curso"}</span>
+                    </div>
+                    <div className="noticeActions">
+                      <Link href={`/post/${post.id}`}>Abrir</Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const id = String(post.id);
+                          setDismissedAnnouncements((prev) => (prev.includes(id) ? prev : [...prev, id]));
+                        }}
+                        className="dismissNotice"
+                        aria-label="Cerrar aviso"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
         </main>
       </div>
 
@@ -798,20 +832,72 @@ export default function HomePage() {
           display: grid;
           gap: 10px;
         }
-        .feedToolbar,
-        .announceCard,
-        .feedPanel {
+        .heroPanel,
+        .shortcutGrid,
+        .dashboardPanel {
           border-radius: 16px;
           border: 1px solid rgba(26, 26, 46, 0.08);
           background: rgba(255, 255, 255, 0.94);
           box-shadow: 0 8px 22px rgba(26, 26, 46, 0.04);
         }
-        .feedToolbar {
-          padding: 14px;
+        .heroPanel {
+          padding: 18px;
+          display: grid;
+          gap: 16px;
+        }
+        .heroCopy {
+          display: grid;
+          gap: 4px;
+        }
+        .heroTitle {
+          margin: 0;
+          font-size: clamp(28px, 6vw, 40px);
+          line-height: 0.98;
+          letter-spacing: -0.04em;
+          color: #1a1a2e;
+        }
+        .heroText {
+          margin: 0;
+          font-size: 14px;
+          line-height: 1.5;
+          color: #5f6577;
+          max-width: 34ch;
+        }
+        .heroStats {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .heroStat {
+          padding: 14px 12px;
+          border-radius: 16px;
+          background: rgba(230, 57, 70, 0.08);
+          display: grid;
+          gap: 6px;
+        }
+        .heroStat.mint {
+          background: rgba(78, 205, 196, 0.12);
+        }
+        .heroStat.blue {
+          background: rgba(69, 123, 157, 0.12);
+        }
+        .heroStat span {
+          font-size: 10px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: #6a7081;
+          font-weight: 800;
+        }
+        .heroStat strong {
+          font-size: 28px;
+          line-height: 1;
+          color: #1a1a2e;
+        }
+        .heroActions {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 12px;
+          gap: 10px;
+          flex-wrap: wrap;
         }
         .sectionKicker {
           font-size: 10px;
@@ -820,23 +906,92 @@ export default function HomePage() {
           text-transform: uppercase;
           color: #e63946;
         }
-        .feedMeta {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .feedCount {
-          min-width: 44px;
-          height: 36px;
-          padding: 0 12px;
+        .primaryAction,
+        .secondaryAction {
+          min-height: 42px;
+          padding: 0 16px;
           border-radius: 999px;
-          background: #1a1a2e;
-          color: #fff8e7;
+          text-decoration: none;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           font-size: 13px;
           font-weight: 800;
+        }
+        .primaryAction {
+          background: #1a1a2e;
+          color: #fff8e7;
+        }
+        .secondaryAction {
+          background: rgba(26, 26, 46, 0.06);
+          color: #1a1a2e;
+        }
+        .shortcutGrid {
+          padding: 8px;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+          background: transparent;
+          border: 0;
+          box-shadow: none;
+        }
+        .shortcutCard {
+          border-radius: 18px;
+          padding: 14px;
+          text-decoration: none;
+          color: #1a1a2e;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          background: rgba(255, 255, 255, 0.92);
+          border: 1px solid rgba(26, 26, 46, 0.08);
+          box-shadow: 0 8px 20px rgba(26, 26, 46, 0.03);
+        }
+        .shortcutCard strong {
+          display: block;
+          font-size: 15px;
+          line-height: 1.2;
+        }
+        .shortcutCard small {
+          display: block;
+          margin-top: 3px;
+          font-size: 12px;
+          color: #646a7a;
+        }
+        .shortcutIcon {
+          width: 38px;
+          height: 38px;
+          border-radius: 14px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .accentRed .shortcutIcon {
+          background: rgba(230, 57, 70, 0.1);
+          color: #e63946;
+        }
+        .accentMint .shortcutIcon {
+          background: rgba(78, 205, 196, 0.14);
+          color: #1a1a2e;
+        }
+        .accentOrange .shortcutIcon {
+          background: rgba(244, 162, 97, 0.18);
+          color: #8c4d17;
+        }
+        .accentBlue .shortcutIcon {
+          background: rgba(69, 123, 157, 0.16);
+          color: #1a1a2e;
+        }
+        .refreshBanner {
+          padding: 10px 12px;
+          border-radius: 14px;
+          background: rgba(78, 205, 196, 0.12);
+          border: 1px solid rgba(78, 205, 196, 0.28);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          justify-content: center;
         }
         .segmentedControl {
           display: inline-flex;
@@ -862,16 +1017,6 @@ export default function HomePage() {
           color: #1a1a2e;
           box-shadow: 0 4px 12px rgba(26, 26, 46, 0.08);
         }
-        .refreshBanner {
-          padding: 10px 12px;
-          border-radius: 14px;
-          background: rgba(78, 205, 196, 0.12);
-          border: 1px solid rgba(78, 205, 196, 0.28);
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 10px;
-        }
         .refreshBanner span {
           font-size: 13px;
           font-weight: 800;
@@ -888,194 +1033,86 @@ export default function HomePage() {
           font-weight: 800;
           cursor: pointer;
         }
-        .announceCard {
-          position: relative;
-          padding: 14px;
+        .dashboardPanel {
+          padding: 16px;
           display: grid;
-          gap: 8px;
+          gap: 14px;
         }
-        .announceCard.task {
-          background: linear-gradient(135deg, rgba(78, 205, 196, 0.08), rgba(255, 255, 255, 0.98));
+        .panelHead {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
         }
-        .announceCard.info {
-          background: linear-gradient(135deg, rgba(69, 123, 157, 0.08), rgba(255, 255, 255, 0.98));
-        }
-        .announceKicker {
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: #e63946;
-        }
-        .announceCard h3 {
-          margin: 0;
-          font-size: 16px;
-          line-height: 1.3;
+        .panelHead h2 {
+          margin: 4px 0 0;
+          font-size: 24px;
+          line-height: 1;
+          letter-spacing: -0.03em;
           color: #1a1a2e;
         }
-        .announceCard a {
-          width: fit-content;
-          min-height: 32px;
+        .panelHead a {
+          min-height: 36px;
           padding: 0 12px;
           border-radius: 999px;
-          text-decoration: none;
           display: inline-flex;
           align-items: center;
           justify-content: center;
+          text-decoration: none;
           background: rgba(26, 26, 46, 0.06);
           color: #1a1a2e;
           font-size: 12px;
           font-weight: 800;
         }
-        .dismissButton {
-          position: absolute;
-          top: 12px;
-          right: 12px;
-          width: 30px;
-          height: 30px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.9);
-          color: #6d7284;
-          cursor: pointer;
-        }
-        .feedPanel {
-          overflow: hidden;
-        }
-        .feedRow {
-          padding: 16px 14px;
+        .taskList,
+        .noticeList {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 88px;
-          gap: 14px;
-          align-items: center;
-          border-bottom: 1px solid rgba(26, 26, 46, 0.08);
+          gap: 10px;
         }
-        .feedRow:last-of-type {
-          border-bottom: 0;
-        }
-        .taskRow {
-          background: linear-gradient(180deg, rgba(78, 205, 196, 0.04), rgba(255, 255, 255, 0.95));
-        }
-        .feedCardMain {
-          min-width: 0;
-          display: grid;
-          gap: 8px;
-        }
-        .postHeader {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          min-width: 0;
-        }
-        .avatarMini {
-          width: 30px;
-          height: 30px;
-          border-radius: 999px;
-          overflow: hidden;
+        .taskCard,
+        .noticeRow {
+          border-radius: 18px;
           border: 1px solid rgba(26, 26, 46, 0.08);
-          background: #fff;
+          background: rgba(255, 255, 255, 0.92);
+          padding: 14px;
+        }
+        .taskCard {
           display: grid;
-          place-items: center;
-          flex-shrink: 0;
+          grid-template-columns: 14px minmax(0, 1fr) auto;
+          gap: 12px;
+          align-items: start;
         }
-        .avatarMini img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
+        .taskDot {
+          width: 14px;
+          height: 14px;
+          border-radius: 999px;
+          border: 2px solid #e63946;
+          margin-top: 5px;
         }
-        .postHeaderCopy {
+        .taskCopy {
           min-width: 0;
         }
-        .authorRow {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          flex-wrap: wrap;
-          color: #656a7b;
-          font-size: 11px;
-          font-weight: 700;
-        }
-        .authorRow a {
-          text-decoration: none;
-          color: #1a1a2e;
-          font-weight: 800;
-        }
-        .dotSep {
-          width: 4px;
-          height: 4px;
-          border-radius: 999px;
-          background: #aab0c0;
-        }
-        .tinyTag {
-          min-height: 18px;
-          padding: 0 6px;
-          border-radius: 999px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 10px;
-          font-weight: 800;
-        }
-        .tinyTag.neutral {
-          background: rgba(26, 26, 46, 0.06);
-          color: #5f6577;
-        }
-        .tinyTag.mint {
-          background: rgba(78, 205, 196, 0.16);
-          color: #1a1a2e;
-        }
-        .cardLinkBlock {
-          display: grid;
-          gap: 7px;
-          text-decoration: none;
-          color: inherit;
-        }
-        .postTypeTag {
-          width: fit-content;
-          min-height: 22px;
-          padding: 0 8px;
-          border-radius: 999px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-        }
-        .postTypeTag.task {
-          background: rgba(78, 205, 196, 0.16);
-          color: #1a1a2e;
-        }
-        .postTypeTag.forum {
-          background: rgba(69, 123, 157, 0.14);
-          color: #1a1a2e;
-        }
-        .postTitle {
-          margin: 0;
-          color: #1a1a2e;
+        .taskCopy strong,
+        .noticeCopy strong {
+          display: block;
           font-size: 16px;
-          line-height: 1.25;
-          font-weight: 850;
+          line-height: 1.28;
+          color: #1a1a2e;
           letter-spacing: -0.02em;
         }
-        .postTitle.large {
-          font-size: 17px;
-        }
-        .postPreview {
-          margin: 0;
-          color: #5b6072;
-          font-size: 12.5px;
-          line-height: 1.48;
+        .taskCopy p {
+          margin: 6px 0 0;
+          font-size: 13px;
+          line-height: 1.5;
+          color: #646a7a;
           display: -webkit-box;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
-        .postPreview.large {
-          font-size: 13.5px;
-        }
-        .postFooter {
+        .taskMetaLine {
+          margin-top: 8px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -1085,24 +1122,58 @@ export default function HomePage() {
           color: #74798a;
           font-weight: 700;
         }
-        .taskActions {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          flex-wrap: wrap;
-        }
-        .taskActions a {
-          min-height: 30px;
-          padding: 0 10px;
+        .taskLink,
+        .noticeActions a {
+          min-height: 36px;
+          padding: 0 12px;
           border-radius: 999px;
-          background: rgba(26, 26, 46, 0.08);
-          color: #1a1a2e;
-          text-decoration: none;
           display: inline-flex;
           align-items: center;
           justify-content: center;
+          text-decoration: none;
+          background: rgba(26, 26, 46, 0.08);
+          color: #1a1a2e;
           font-size: 12px;
           font-weight: 800;
+          white-space: nowrap;
+        }
+        .noticeRow {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+        }
+        .noticeRow.task {
+          background: linear-gradient(135deg, rgba(78, 205, 196, 0.08), rgba(255,255,255,.98));
+        }
+        .noticeRow.info {
+          background: linear-gradient(135deg, rgba(69, 123, 157, 0.08), rgba(255,255,255,.98));
+        }
+        .noticeCopy {
+          min-width: 0;
+        }
+        .noticeCopy span {
+          display: block;
+          margin-top: 4px;
+          font-size: 12px;
+          color: #646a7a;
+          font-weight: 700;
+        }
+        .noticeActions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+        .dismissNotice {
+          width: 34px;
+          height: 34px;
+          border-radius: 999px;
+          border: 0;
+          background: rgba(26, 26, 46, 0.06);
+          color: #6d7284;
+          cursor: pointer;
+          font: inherit;
         }
         .statusPill {
           min-height: 26px;
@@ -1125,27 +1196,6 @@ export default function HomePage() {
         .statusPill.pending {
           background: rgba(26, 26, 46, 0.06);
           color: #5e6476;
-        }
-        .feedThumb {
-          width: 88px;
-          height: 88px;
-          border-radius: 14px;
-          overflow: hidden;
-          border: 1px solid rgba(26, 26, 46, 0.08);
-          display: block;
-          flex-shrink: 0;
-        }
-        .feedThumb img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-        .loadingMore {
-          padding: 10px 14px 14px;
-          color: #767b8b;
-          font-size: 12px;
-          font-weight: 700;
         }
         .emptyFeed {
           padding: 28px 18px;
@@ -1267,20 +1317,20 @@ export default function HomePage() {
           .homeShell {
             padding: 0 12px 24px;
           }
-          .feedToolbar,
-          .announceCard,
-          .feedPanel {
+          .heroPanel,
+          .dashboardPanel {
             border-radius: 14px;
           }
-          .feedRow {
-            grid-template-columns: minmax(0, 1fr) 74px;
-            gap: 12px;
-            padding: 14px 12px;
+          .heroStats,
+          .shortcutGrid {
+            grid-template-columns: 1fr 1fr;
           }
-          .feedThumb {
-            width: 74px;
-            height: 74px;
-            border-radius: 12px;
+          .taskCard {
+            grid-template-columns: 14px minmax(0, 1fr);
+          }
+          .taskLink {
+            grid-column: 2;
+            width: fit-content;
           }
         }
         @media (max-width: 480px) {
@@ -1296,6 +1346,17 @@ export default function HomePage() {
           .brandTitle {
             font-size: 26px;
           }
+          .heroPanel,
+          .dashboardPanel {
+            padding: 14px;
+          }
+          .heroTitle {
+            font-size: 30px;
+          }
+          .heroStats,
+          .shortcutGrid {
+            grid-template-columns: 1fr;
+          }
           .segmentedControl,
           .panelSegmented {
             width: 100%;
@@ -1304,22 +1365,14 @@ export default function HomePage() {
           .panelSegmented button {
             flex: 1 1 0;
           }
-          .feedToolbar {
+          .heroActions,
+          .feedToolbar,
+          .noticeRow {
             flex-wrap: wrap;
           }
-          .feedMeta {
+          .noticeActions {
             width: 100%;
-            justify-content: flex-end;
-          }
-          .feedRow {
-            grid-template-columns: minmax(0, 1fr) 64px;
-          }
-          .postFooter {
-            align-items: flex-start;
-          }
-          .feedThumb {
-            width: 64px;
-            height: 64px;
+            justify-content: flex-start;
           }
         }
       `}</style>
