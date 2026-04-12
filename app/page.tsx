@@ -104,32 +104,6 @@ function formatFeedDate(value?: string) {
   return date.toLocaleDateString("es-ES", { month: "short", day: "numeric" });
 }
 
-function getLocalWeekStart(date = new Date()) {
-  const value = new Date(date);
-  const day = value.getDay();
-  const diff = day === 0 ? 6 : day - 1;
-  value.setHours(0, 0, 0, 0);
-  value.setDate(value.getDate() - diff);
-  return value;
-}
-
-function getNextLocalWeekStart(date = new Date()) {
-  const start = getLocalWeekStart(date);
-  start.setDate(start.getDate() + 7);
-  return start;
-}
-
-function formatCountdown(ms: number) {
-  const total = Math.max(0, Math.floor(ms / 1000));
-  const days = Math.floor(total / 86400);
-  const hours = Math.floor((total % 86400) / 3600);
-  const mins = Math.floor((total % 3600) / 60);
-  const secs = total % 60;
-  if (days > 0) return `${days}d ${hours}h ${mins}m`;
-  if (hours > 0) return `${hours}h ${mins}m ${secs}s`;
-  return `${mins}m ${secs}s`;
-}
-
 function parseDismissedList(raw: string | null) {
   if (!raw) return [] as string[];
   try {
@@ -155,21 +129,6 @@ function safeStorageSet(key: string, value: string) {
   } catch {}
 }
 
-type HomeKanaMode = "hiragana" | "katakana";
-type HomeKanaRow = {
-  user_id: string;
-  mode: HomeKanaMode;
-  best_score: number;
-  profiles?: { username?: string | null; full_name?: string | null } | null;
-};
-
-function homeRankBadgeStyles(index: number) {
-  if (index === 0) return { bg: "linear-gradient(135deg,#fbbf24,#f59e0b)", border: "#f59e0b", color: "#111114" };
-  if (index === 1) return { bg: "linear-gradient(135deg,#d1d5db,#9ca3af)", border: "#9ca3af", color: "#111114" };
-  if (index === 2) return { bg: "linear-gradient(135deg,#f59e0b,#b45309)", border: "#b45309", color: "#fff" };
-  return { bg: "#fff", border: "#d1d5db", color: "#6b7280" };
-}
-
 export default function HomePage() {
   const router = useRouter();
   const [posts, setPosts] = useState<any[]>([]);
@@ -188,12 +147,8 @@ export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [fontScale, setFontScale] = useState<"normal" | "large">("normal");
   const [submissionByAssignment, setSubmissionByAssignment] = useState<Record<string, { submitted: boolean; late: boolean }>>({});
-  const [homeKanaLeaders, setHomeKanaLeaders] = useState<Record<HomeKanaMode, HomeKanaRow[]>>({ hiragana: [], katakana: [] });
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
-  const [weeklyResetLabel, setWeeklyResetLabel] = useState("");
-  const [studyExpanded, setStudyExpanded] = useState(false);
   const inFlightRef = useRef(false);
-  const homeWeekKeyRef = useRef(getLocalWeekStart().toISOString().slice(0, 10));
   const pullStartY = useRef<number | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
@@ -321,19 +276,6 @@ export default function HomePage() {
         setPendingApprovalsCount(0);
       }
 
-      const { data: kanaRows } = await supabase
-        .from("study_kana_scores")
-        .select("user_id, mode, best_score, profiles:user_id (username, full_name)")
-        .gte("updated_at", getLocalWeekStart().toISOString())
-        .order("best_score", { ascending: false })
-        .order("updated_at", { ascending: true })
-        .limit(120);
-      const parsedRows = (kanaRows || []) as HomeKanaRow[];
-      setHomeKanaLeaders({
-        hiragana: parsedRows.filter((row) => row.mode === "hiragana").slice(0, 3),
-        katakana: parsedRows.filter((row) => row.mode === "katakana").slice(0, 3),
-      });
-
       const { data: mySubs } = await supabase
         .from("posts")
         .select("parent_assignment_id, created_at")
@@ -369,22 +311,6 @@ export default function HomePage() {
 
   useEffect(() => {
     void fetchData();
-  }, [fetchData]);
-
-  useEffect(() => {
-    const tick = () => {
-      const now = new Date();
-      const weekKey = getLocalWeekStart(now).toISOString().slice(0, 10);
-      if (homeWeekKeyRef.current !== weekKey) {
-        homeWeekKeyRef.current = weekKey;
-        void fetchData({ silent: true });
-      }
-      const next = getNextLocalWeekStart(now);
-      setWeeklyResetLabel(formatCountdown(next.getTime() - now.getTime()));
-    };
-    tick();
-    const timer = window.setInterval(tick, 1000);
-    return () => window.clearInterval(timer);
   }, [fetchData]);
 
   useEffect(() => {
@@ -535,6 +461,7 @@ export default function HomePage() {
   const totalFeedCount = feedMode === "tasks"
     ? totalRegularFeedBase.filter((p) => isTaskPost(p)).length
     : totalRegularFeedBase.length;
+
   const studyTools = [
     {
       href: "/study?view=exam",
@@ -610,70 +537,6 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section className="studyCard">
-            <div className="studyHeader">
-              <div>
-                <div className="sectionKicker accentTurquoise">Estudio</div>
-                <h2 className="studyTitle">Herramientas rápidas</h2>
-              </div>
-              <div className="studyActions">
-                <Link href="/study" className="studyOpenButton">Abrir</Link>
-                <button type="button" onClick={() => setStudyExpanded((prev) => !prev)} className="studyGhostButton">
-                  {studyExpanded ? "Menos" : "Ranking"}
-                </button>
-              </div>
-            </div>
-
-            <div className="toolGrid">
-              {studyTools.map((tool) => (
-                <Link key={tool.href} href={tool.href} className="toolCard">
-                  <span className="toolIcon" style={{ color: tool.accent, borderColor: `${tool.accent}33` }}>{tool.icon}</span>
-                  <span className="toolCopy">
-                    <strong>{tool.label}</strong>
-                    <small>{tool.desc}</small>
-                  </span>
-                </Link>
-              ))}
-            </div>
-
-            {studyExpanded && (
-              <div className="leaderboardWrap">
-                <div className="leaderboardHead">
-                  <span>Reset kana en {weeklyResetLabel || "..."}</span>
-                  <Link href="/study?view=kana">Jugar</Link>
-                </div>
-                <div className="leaderboardGrid">
-                  {(["hiragana", "katakana"] as HomeKanaMode[]).map((mode) => (
-                    <div key={mode} className="leaderboardCard">
-                      <div className="leaderboardLabel">{mode}</div>
-                      <div className="leaderboardList">
-                        {(homeKanaLeaders[mode] || []).map((row, index) => (
-                          <div key={`${mode}-${row.user_id}-${index}`} className="leaderboardRow">
-                            <span className="leaderboardUser">
-                              <span
-                                className="leaderboardRank"
-                                style={{
-                                  borderColor: homeRankBadgeStyles(index).border,
-                                  background: homeRankBadgeStyles(index).bg,
-                                  color: homeRankBadgeStyles(index).color,
-                                }}
-                              >
-                                {index + 1}
-                              </span>
-                              <span className="leaderboardName">{row.profiles?.username || row.profiles?.full_name || "usuario"}</span>
-                            </span>
-                            <strong>{row.best_score}</strong>
-                          </div>
-                        ))}
-                        {(homeKanaLeaders[mode] || []).length === 0 && <div className="leaderboardEmpty">Sin puntajes</div>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </section>
-
           {hasFreshPosts && (
             <section className="refreshBanner">
               <span>Hay publicaciones nuevas</span>
@@ -714,7 +577,7 @@ export default function HomePage() {
               const isForumAccent = isForumAssignment && isAssignedToMe;
 
               return (
-                <article key={post.id} className={`feedCard ${isAssignmentPost ? "taskCard" : ""} ${idx === 0 ? "firstCard" : ""}`}>
+                <article key={post.id} className={`feedCard ${isAssignmentPost ? "taskCard" : ""}`}>
                   <div className="feedCardMain">
                     <div className="postHeader">
                       <div className="avatarMini">
@@ -746,7 +609,7 @@ export default function HomePage() {
                     </Link>
 
                     <div className="postFooter">
-                      <span>{post.target_group || post.profiles?.group_name || "General"}</span>
+                      {!isPublicTargetGroup(post.target_group) && <span>{post.target_group || post.profiles?.group_name || "General"}</span>}
                       {isAssignmentPost && (
                         <div className="taskActions">
                           <Link href={isForumAssignment ? `/post/${post.id}` : `/write?assignment_id=${post.id}&title=${encodeURIComponent(titulo || "Tarea")}`}>
@@ -954,7 +817,6 @@ export default function HomePage() {
           gap: 12px;
         }
         .feedControlCard,
-        .studyCard,
         .announceCard,
         .feedCard {
           border-radius: 22px;
@@ -1031,163 +893,6 @@ export default function HomePage() {
           color: #1a1a2e;
           box-shadow: 0 4px 12px rgba(26, 26, 46, 0.08);
         }
-        .studyCard {
-          padding: 18px;
-          background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 248, 231, 0.9)),
-            #fff;
-          display: grid;
-          gap: 14px;
-        }
-        .studyActions {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-        .studyOpenButton,
-        .studyGhostButton {
-          min-height: 38px;
-          padding: 0 14px;
-          border-radius: 999px;
-          font-size: 13px;
-          font-weight: 800;
-          cursor: pointer;
-          text-decoration: none;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .studyOpenButton {
-          background: #4ecdc4;
-          color: #1a1a2e;
-        }
-        .studyGhostButton {
-          background: rgba(26, 26, 46, 0.06);
-          color: #1a1a2e;
-        }
-        .toolGrid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
-        }
-        .toolCard {
-          display: flex;
-          align-items: flex-start;
-          gap: 10px;
-          padding: 12px;
-          border-radius: 18px;
-          text-decoration: none;
-          color: #1a1a2e;
-          background: #fff8e7;
-          border: 1px solid rgba(26, 26, 46, 0.07);
-        }
-        .toolIcon {
-          width: 34px;
-          height: 34px;
-          border-radius: 12px;
-          background: #fff;
-          border: 1px solid;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-        .toolCopy {
-          display: grid;
-          gap: 2px;
-          min-width: 0;
-        }
-        .toolCopy strong {
-          font-size: 14px;
-          line-height: 1.2;
-        }
-        .toolCopy small {
-          font-size: 12px;
-          color: #606579;
-          line-height: 1.35;
-        }
-        .leaderboardWrap {
-          padding-top: 4px;
-          border-top: 1px dashed rgba(26, 26, 46, 0.12);
-          display: grid;
-          gap: 10px;
-        }
-        .leaderboardHead span {
-          font-size: 12px;
-          color: #606579;
-          font-weight: 700;
-        }
-        .leaderboardHead a {
-          min-height: 34px;
-          padding: 0 12px;
-          border-radius: 999px;
-          background: #1a1a2e;
-          color: #fff8e7;
-          text-decoration: none;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          font-weight: 800;
-        }
-        .leaderboardGrid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
-        }
-        .leaderboardCard {
-          padding: 12px;
-          border-radius: 18px;
-          background: rgba(255, 255, 255, 0.85);
-          border: 1px solid rgba(26, 26, 46, 0.07);
-        }
-        .leaderboardLabel {
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: #457b9d;
-        }
-        .leaderboardList {
-          margin-top: 10px;
-          display: grid;
-          gap: 8px;
-        }
-        .leaderboardRow {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-          font-size: 12px;
-        }
-        .leaderboardUser {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          min-width: 0;
-        }
-        .leaderboardRank {
-          min-width: 20px;
-          height: 20px;
-          border-radius: 999px;
-          border: 1px solid;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0 5px;
-          font-size: 10px;
-          font-weight: 800;
-          flex-shrink: 0;
-        }
-        .leaderboardName {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-        .leaderboardEmpty {
-          font-size: 12px;
-          color: #8e93a5;
-        }
         .refreshBanner {
           padding: 12px 14px;
           border-radius: 18px;
@@ -1216,15 +921,15 @@ export default function HomePage() {
         }
         .announceCard {
           position: relative;
-          padding: 18px;
+          padding: 16px;
           display: grid;
-          gap: 12px;
+          gap: 10px;
         }
         .announceCard.task {
-          background: linear-gradient(135deg, rgba(78, 205, 196, 0.16), rgba(255, 255, 255, 0.94));
+          background: linear-gradient(135deg, rgba(78, 205, 196, 0.12), rgba(255, 255, 255, 0.96));
         }
         .announceCard.info {
-          background: linear-gradient(135deg, rgba(69, 123, 157, 0.13), rgba(255, 255, 255, 0.94));
+          background: linear-gradient(135deg, rgba(69, 123, 157, 0.1), rgba(255, 255, 255, 0.96));
         }
         .announceKicker {
           font-size: 10px;
@@ -1235,7 +940,7 @@ export default function HomePage() {
         }
         .announceCard h3 {
           margin: 0;
-          font-size: 18px;
+          font-size: 17px;
           line-height: 1.3;
           color: #1a1a2e;
         }
@@ -1269,14 +974,14 @@ export default function HomePage() {
           gap: 12px;
         }
         .feedCard {
-          padding: 16px;
+          padding: 14px;
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 116px;
-          gap: 14px;
-          align-items: center;
+          grid-template-columns: minmax(0, 1fr) 88px;
+          gap: 12px;
+          align-items: start;
         }
         .taskCard {
-          background: linear-gradient(180deg, rgba(78, 205, 196, 0.08), rgba(255, 255, 255, 0.92));
+          background: linear-gradient(180deg, rgba(78, 205, 196, 0.06), rgba(255, 255, 255, 0.94));
         }
         .feedCardMain {
           min-width: 0;
@@ -1349,7 +1054,7 @@ export default function HomePage() {
         }
         .cardLinkBlock {
           display: grid;
-          gap: 8px;
+          gap: 7px;
           text-decoration: none;
           color: inherit;
         }
@@ -1377,21 +1082,21 @@ export default function HomePage() {
         .postTitle {
           margin: 0;
           color: #1a1a2e;
-          font-size: 18px;
-          line-height: 1.28;
+          font-size: 17px;
+          line-height: 1.26;
           font-weight: 850;
           letter-spacing: -0.02em;
         }
         .postTitle.large {
-          font-size: 19px;
+          font-size: 18px;
         }
         .postPreview {
           margin: 0;
           color: #5b6072;
-          font-size: 13.5px;
-          line-height: 1.55;
+          font-size: 13px;
+          line-height: 1.5;
           display: -webkit-box;
-          -webkit-line-clamp: 2;
+          -webkit-line-clamp: 3;
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
@@ -1402,9 +1107,9 @@ export default function HomePage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 10px;
+          gap: 8px;
           flex-wrap: wrap;
-          font-size: 12px;
+          font-size: 11px;
           color: #74798a;
           font-weight: 700;
         }
@@ -1450,13 +1155,14 @@ export default function HomePage() {
           color: #5e6476;
         }
         .feedThumb {
-          width: 116px;
-          height: 96px;
-          border-radius: 18px;
+          width: 88px;
+          height: 88px;
+          border-radius: 14px;
           overflow: hidden;
           border: 1px solid rgba(26, 26, 46, 0.08);
           display: block;
           flex-shrink: 0;
+          align-self: center;
         }
         .feedThumb img {
           width: 100%;
@@ -1580,32 +1286,24 @@ export default function HomePage() {
             padding: 0 12px 24px;
           }
           .feedControlCard,
-          .studyCard,
           .announceCard,
           .feedCard {
             border-radius: 18px;
           }
           .feedControlCard,
-          .studyCard,
           .announceCard,
           .feedCard {
             padding-left: 14px;
             padding-right: 14px;
           }
-          .toolGrid,
-          .leaderboardGrid {
-            grid-template-columns: 1fr;
-          }
           .feedCard {
-            grid-template-columns: minmax(0, 1fr) 92px;
-            gap: 12px;
-            padding-top: 14px;
-            padding-bottom: 14px;
+            grid-template-columns: minmax(0, 1fr) 78px;
+            gap: 10px;
           }
           .feedThumb {
-            width: 92px;
-            height: 84px;
-            border-radius: 14px;
+            width: 78px;
+            height: 78px;
+            border-radius: 12px;
           }
         }
         @media (max-width: 480px) {
@@ -1615,13 +1313,10 @@ export default function HomePage() {
           .brandTitle {
             font-size: 26px;
           }
-          .feedHeading,
-          .studyTitle {
+          .feedHeading {
             font-size: 28px;
           }
-          .feedControlRow,
-          .studyHeader,
-          .leaderboardHead {
+          .feedControlRow {
             align-items: flex-start;
           }
           .segmentedControl,
@@ -1633,14 +1328,14 @@ export default function HomePage() {
             flex: 1 1 0;
           }
           .feedCard {
-            grid-template-columns: minmax(0, 1fr);
-          }
-          .feedThumb {
-            width: 100%;
-            height: 180px;
+            grid-template-columns: minmax(0, 1fr) 72px;
           }
           .postFooter {
             align-items: flex-start;
+          }
+          .feedThumb {
+            width: 72px;
+            height: 72px;
           }
         }
       `}</style>
