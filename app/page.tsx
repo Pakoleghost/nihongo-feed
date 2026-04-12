@@ -479,6 +479,7 @@ export default function HomePage() {
           </Link>
 
           <div className="headerActions">
+            <Link href="/study" className="ghostButton">Estudio</Link>
             <Link href="/write" className="writeButton">書く</Link>
             <button type="button" onClick={() => setMenuOpen(true)} className="iconButton" aria-label="Abrir menú">
               <IconMenu />
@@ -488,17 +489,13 @@ export default function HomePage() {
         </header>
 
         <main className="homeMain">
-          <section className="feedControlCard">
-            <div className="feedControlRow">
-              <div>
-                <div className="sectionKicker">Home Feed</div>
-                <h1 className="feedHeading">Publicaciones</h1>
-              </div>
-              <div className="feedStats">{refreshing ? "..." : totalFeedCount}</div>
-            </div>
+          <section className="feedToolbar">
             <div className="segmentedControl">
               <button type="button" onClick={() => setFeedMode("all")} className={feedMode === "all" ? "active" : ""}>Todo</button>
               <button type="button" onClick={() => setFeedMode("tasks")} className={feedMode === "tasks" ? "active" : ""}>Tareas</button>
+            </div>
+            <div className="feedMeta">
+              <span className="feedCount">{refreshing ? "..." : totalFeedCount}</span>
             </div>
           </section>
 
@@ -528,8 +525,8 @@ export default function HomePage() {
             </section>
           ))}
 
-          <section className="feedStack">
-            {regularFeed.map((post, idx) => {
+          <section className="feedPanel">
+            {regularFeed.map((post) => {
               const { title: titulo, preview } = getPostParts(post.content || "");
               const edited = Boolean(
                 post?.updated_at &&
@@ -542,7 +539,7 @@ export default function HomePage() {
               const isForumAccent = isForumAssignment && isAssignedToMe;
 
               return (
-                <article key={post.id} className={`feedCard ${isAssignmentPost ? "taskCard" : ""}`}>
+                <article key={post.id} className={`feedRow ${isAssignmentPost ? "taskRow" : ""}`}>
                   <div className="feedCardMain">
                     <div className="postHeader">
                       <div className="avatarMini">
@@ -602,6 +599,12 @@ export default function HomePage() {
                 </article>
               );
             })}
+            {regularFeed.length === 0 && !loading && (
+              <div className="emptyFeed">
+                <strong>No hay publicaciones aquí todavía.</strong>
+                <span>Cuando alguien publique, aparecerá aquí.</span>
+              </div>
+            )}
             {hasMore && <div ref={loadMoreRef} style={{ height: 24 }} />}
             {loadingMore && <div className="loadingMore">Cargando más...</div>}
           </section>
@@ -678,14 +681,14 @@ export default function HomePage() {
         .homePage {
           min-height: 100vh;
           background:
-            radial-gradient(720px 340px at 50% -10%, rgba(78, 205, 196, 0.1), transparent 60%),
-            linear-gradient(180deg, #fff8e7 0%, #fffdf9 58%, #fff8e7 100%);
+            radial-gradient(620px 280px at 50% -6%, rgba(78, 205, 196, 0.08), transparent 58%),
+            linear-gradient(180deg, #fff8e7 0%, #fffdf9 64%, #fff8e7 100%);
           color: #1a1a2e;
         }
         .homeShell {
-          width: min(100%, 700px);
+          width: min(100%, 760px);
           margin: 0 auto;
-          padding: 0 14px 22px;
+          padding: 0 14px 26px;
         }
         .homeHeader {
           position: sticky;
@@ -695,7 +698,7 @@ export default function HomePage() {
           align-items: center;
           justify-content: space-between;
           gap: 12px;
-          padding: 16px 0 12px;
+          padding: 16px 0 10px;
           background: linear-gradient(180deg, rgba(255, 248, 231, 0.96), rgba(255, 248, 231, 0.82));
           backdrop-filter: blur(10px);
         }
@@ -725,9 +728,8 @@ export default function HomePage() {
           align-items: center;
           gap: 8px;
         }
+        .ghostButton,
         .writeButton,
-        .studyOpenButton,
-        .studyGhostButton,
         .iconButton,
         .dismissButton,
         .menuHead button,
@@ -736,9 +738,22 @@ export default function HomePage() {
           border: 0;
           font: inherit;
         }
+        .ghostButton {
+          min-height: 40px;
+          padding: 0 14px;
+          border-radius: 999px;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(26, 26, 46, 0.06);
+          color: #1a1a2e;
+          font-size: 13px;
+          font-weight: 800;
+        }
         .writeButton {
-          min-height: 42px;
-          padding: 0 18px;
+          min-height: 40px;
+          padding: 0 16px;
           border-radius: 999px;
           text-decoration: none;
           display: inline-flex;
@@ -746,14 +761,14 @@ export default function HomePage() {
           justify-content: center;
           background: #e63946;
           color: #fff8e7;
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 800;
-          box-shadow: 0 10px 22px rgba(230, 57, 70, 0.2);
+          box-shadow: 0 8px 18px rgba(230, 57, 70, 0.16);
         }
         .iconButton {
           position: relative;
-          width: 42px;
-          height: 42px;
+          width: 40px;
+          height: 40px;
           border-radius: 999px;
           display: inline-flex;
           align-items: center;
@@ -783,25 +798,20 @@ export default function HomePage() {
           display: grid;
           gap: 10px;
         }
-        .feedControlCard,
+        .feedToolbar,
         .announceCard,
-        .feedCard {
+        .feedPanel {
           border-radius: 16px;
           border: 1px solid rgba(26, 26, 46, 0.08);
           background: rgba(255, 255, 255, 0.94);
           box-shadow: 0 8px 22px rgba(26, 26, 46, 0.04);
         }
-        .feedControlCard {
+        .feedToolbar {
           padding: 14px;
-          display: grid;
-          gap: 10px;
-        }
-        .feedControlRow {
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 12px;
-          flex-wrap: wrap;
         }
         .sectionKicker {
           font-size: 10px;
@@ -810,14 +820,12 @@ export default function HomePage() {
           text-transform: uppercase;
           color: #e63946;
         }
-        .feedHeading {
-          margin: 4px 0 0;
-          font-size: clamp(24px, 5vw, 30px);
-          line-height: 1;
-          color: #1a1a2e;
-          letter-spacing: -0.03em;
+        .feedMeta {
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
-        .feedStats {
+        .feedCount {
           min-width: 44px;
           height: 36px;
           padding: 0 12px;
@@ -930,18 +938,21 @@ export default function HomePage() {
           color: #6d7284;
           cursor: pointer;
         }
-        .feedStack {
-          display: grid;
-          gap: 10px;
+        .feedPanel {
+          overflow: hidden;
         }
-        .feedCard {
-          padding: 12px;
+        .feedRow {
+          padding: 16px 14px;
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 72px;
-          gap: 10px;
-          align-items: start;
+          grid-template-columns: minmax(0, 1fr) 88px;
+          gap: 14px;
+          align-items: center;
+          border-bottom: 1px solid rgba(26, 26, 46, 0.08);
         }
-        .taskCard {
+        .feedRow:last-of-type {
+          border-bottom: 0;
+        }
+        .taskRow {
           background: linear-gradient(180deg, rgba(78, 205, 196, 0.04), rgba(255, 255, 255, 0.95));
         }
         .feedCardMain {
@@ -1116,14 +1127,13 @@ export default function HomePage() {
           color: #5e6476;
         }
         .feedThumb {
-          width: 72px;
-          height: 72px;
-          border-radius: 12px;
+          width: 88px;
+          height: 88px;
+          border-radius: 14px;
           overflow: hidden;
           border: 1px solid rgba(26, 26, 46, 0.08);
           display: block;
           flex-shrink: 0;
-          align-self: center;
         }
         .feedThumb img {
           width: 100%;
@@ -1132,10 +1142,21 @@ export default function HomePage() {
           display: block;
         }
         .loadingMore {
-          padding: 6px 8px;
+          padding: 10px 14px 14px;
           color: #767b8b;
           font-size: 12px;
           font-weight: 700;
+        }
+        .emptyFeed {
+          padding: 28px 18px;
+          display: grid;
+          gap: 6px;
+          text-align: center;
+          color: #6c7182;
+        }
+        .emptyFeed strong {
+          color: #1a1a2e;
+          font-size: 15px;
         }
         .menuBackdrop {
           position: fixed;
@@ -1246,18 +1267,19 @@ export default function HomePage() {
           .homeShell {
             padding: 0 12px 24px;
           }
-          .feedControlCard,
+          .feedToolbar,
           .announceCard,
-          .feedCard {
+          .feedPanel {
             border-radius: 14px;
           }
-          .feedCard {
-            grid-template-columns: minmax(0, 1fr) 68px;
-            gap: 9px;
+          .feedRow {
+            grid-template-columns: minmax(0, 1fr) 74px;
+            gap: 12px;
+            padding: 14px 12px;
           }
           .feedThumb {
-            width: 68px;
-            height: 68px;
+            width: 74px;
+            height: 74px;
             border-radius: 12px;
           }
         }
@@ -1265,14 +1287,14 @@ export default function HomePage() {
           .homeHeader {
             padding-top: 14px;
           }
+          .headerActions {
+            gap: 6px;
+          }
+          .ghostButton {
+            display: none;
+          }
           .brandTitle {
             font-size: 26px;
-          }
-          .feedHeading {
-            font-size: 24px;
-          }
-          .feedControlRow {
-            align-items: flex-start;
           }
           .segmentedControl,
           .panelSegmented {
@@ -1282,15 +1304,22 @@ export default function HomePage() {
           .panelSegmented button {
             flex: 1 1 0;
           }
-          .feedCard {
-            grid-template-columns: minmax(0, 1fr) 60px;
+          .feedToolbar {
+            flex-wrap: wrap;
+          }
+          .feedMeta {
+            width: 100%;
+            justify-content: flex-end;
+          }
+          .feedRow {
+            grid-template-columns: minmax(0, 1fr) 64px;
           }
           .postFooter {
             align-items: flex-start;
           }
           .feedThumb {
-            width: 60px;
-            height: 60px;
+            width: 64px;
+            height: 64px;
           }
         }
       `}</style>
