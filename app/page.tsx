@@ -539,394 +539,1111 @@ export default function HomePage() {
     {
       href: "/study?view=exam",
       label: "Exámenes",
-      desc: "Autotests de 20 preguntas por lección.",
-      tone: "linear-gradient(135deg,#e0f2fe,#f8fbff)",
-      border: "rgba(14,165,233,.22)",
+      desc: "20 preguntas por lección.",
+      tone: "#FFF8E7",
+      accent: "#E63946",
       icon: <IconTarget />,
     },
     {
       href: "/study?view=flashcards",
       label: "Flashcards",
-      desc: "Revisión diaria por lección y enfoque.",
-      tone: "linear-gradient(135deg,#eef2ff,#f8faff)",
-      border: "rgba(99,102,241,.2)",
+      desc: "Repaso rápido por deck.",
+      tone: "#FFF8E7",
+      accent: "#4ECDC4",
       icon: <IconCards />,
     },
     {
       href: "/study?view=kana",
       label: "Kana Sprint",
-      desc: "Hiragana y katakana con ranking semanal.",
-      tone: "linear-gradient(135deg,#dcfce7,#f7fff9)",
-      border: "rgba(34,197,94,.2)",
+      desc: "Ranking semanal.",
+      tone: "#FFF8E7",
+      accent: "#F4A261",
       icon: <IconSpark />,
     },
     {
       href: "/study?view=sprint",
       label: "Vocab+Kanji Sprint",
-      desc: "Velocidad por bloques de lecciones.",
-      tone: "linear-gradient(135deg,#fff7ed,#fffdf9)",
-      border: "rgba(249,115,22,.2)",
+      desc: "Ranking mensual.",
+      tone: "#FFF8E7",
+      accent: "#457B9D",
       icon: <IconBook />,
     },
   ];
 
   return (
-    <div style={{ maxWidth: "760px", margin: "0 auto", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', minHeight: "100vh", paddingBottom: "28px" }}>
-      <header style={{ 
-        display: "flex", justifyContent: "space-between", alignItems: "center", 
-        padding: "14px 16px", borderBottom: "1px solid rgba(17,17,20,.08)", position: "sticky", 
-        top: 0, background: "rgba(255,255,255,.88)", backdropFilter: "blur(12px)", zIndex: 20,
-        boxShadow: "0 8px 30px rgba(0,0,0,.03)"
-      }}>
-        <Link
-          href="/"
-          onClick={(e) => {
-            e.preventDefault();
-            void softRefresh();
-          }}
-          style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", flexShrink: 1, minWidth: 0, textDecoration: "none" }}
-        >
-          <span style={{ fontSize: "10px", color: "#7f7f88", letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 700 }}>Nihongo Feed</span>
-          <span style={{ fontSize: "28px", lineHeight: 1, fontWeight: 900, color: "#111114", letterSpacing: "-0.02em" }}>フィード</span>
-        </Link>
-        
-        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-          <Link href="/write" style={{ background: "linear-gradient(135deg, #34c5a6, #25a98f)", color: "#fff", padding: "10px 20px", borderRadius: "999px", textDecoration: "none", fontSize: "14px", fontWeight: "700", boxShadow: "0 8px 18px rgba(44,182,150,.22)" }}>書く</Link>
-
-          <button
-            type="button"
-            onClick={() => setMenuOpen(true)}
-            title="Menú"
-            aria-label="Abrir menú"
-            style={{ color: "#555", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "38px", height: "38px", borderRadius: "999px", border: "1px solid rgba(17,17,20,.08)", background: "#fff", position: "relative" }}
+    <div className="homePage">
+      <div className="homeShell">
+        <header className="homeHeader">
+          <Link
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              void softRefresh();
+            }}
+            className="brandBlock"
           >
-            <IconMenu />
-            {unreadNotifications > 0 && (
-              <span style={{ position: "absolute", top: "-6px", right: "-8px", backgroundColor: "#ff2d55", color: "#fff", fontSize: "10px", padding: "2px 5px", borderRadius: "10px", fontWeight: "bold", lineHeight: 1.2 }}>
-                {unreadNotifications}
-              </span>
-            )}
-          </button>
-        </div>
-      </header>
+            <span className="brandKicker">Nihongo Feed</span>
+            <span className="brandTitle">フィード</span>
+          </Link>
 
-      <main style={{ paddingTop: "14px", background: "linear-gradient(to bottom, rgba(255,255,255,.8), rgba(255,255,255,.7))" }}>
-        <section style={{ margin: "0 14px 14px", padding: "12px 14px", borderRadius: "16px", background: "#fff", border: "1px solid rgba(17,17,20,.07)", boxShadow: "0 10px 28px rgba(0,0,0,.03)" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", flexWrap: "wrap" }}>
-            <div style={{ fontSize: "12px", color: "#777", background: "#f6f7f8", border: "1px solid rgba(17,17,20,.06)", borderRadius: "999px", padding: "6px 10px", fontWeight: 600 }}>
-              {refreshing ? "actualizando..." : `${totalFeedCount} posts`}
-            </div>
-            <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3, background: "#fff" }}>
-              <button
-                type="button"
-                onClick={() => setFeedMode("all")}
-                style={{
-                  border: 0,
-                  borderRadius: 999,
-                  padding: "7px 10px",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  color: feedMode === "all" ? "#fff" : "#666a73",
-                  background: feedMode === "all" ? "#111114" : "transparent",
-                }}
-              >
-                Todos
-              </button>
-              <button
-                type="button"
-                onClick={() => setFeedMode("tasks")}
-                style={{
-                  border: 0,
-                  borderRadius: 999,
-                  padding: "7px 10px",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  color: feedMode === "tasks" ? "#fff" : "#666a73",
-                  background: feedMode === "tasks" ? "#111114" : "transparent",
-                }}
-              >
-                Tareas
-              </button>
-            </div>
+          <div className="headerActions">
+            <Link href="/write" className="writeButton">書く</Link>
+            <button type="button" onClick={() => setMenuOpen(true)} className="iconButton" aria-label="Abrir menú">
+              <IconMenu />
+              {unreadNotifications > 0 && <span className="notifDot">{unreadNotifications > 9 ? "9+" : unreadNotifications}</span>}
+            </button>
           </div>
-        </section>
+        </header>
 
-        <section style={{ margin: "0 14px 12px", padding: "14px 16px", borderRadius: 16, border: "1px solid rgba(17,17,20,.07)", background: "linear-gradient(145deg,#f2fffb,#ffffff 60%, #f7faff)", boxShadow: "0 12px 26px rgba(0,0,0,.035)" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 11, letterSpacing: ".08em", textTransform: "uppercase", color: "#0f766e", fontWeight: 800 }}>Estudio activo</div>
-              <div style={{ marginTop: 4, fontSize: 20, fontWeight: 850, color: "#111114", letterSpacing: "-.01em" }}>Practica diario, sin perderte</div>
-              <div style={{ marginTop: 4, fontSize: 12.5, color: "#667085", fontWeight: 600, maxWidth: 520 }}>
-                Accesos rápidos a tus herramientas. El home sigue siendo tu feed, y Study queda a un toque.
+        <main className="homeMain">
+          <section className="feedControlCard">
+            <div className="feedControlRow">
+              <div>
+                <div className="sectionKicker">Home</div>
+                <h1 className="feedHeading">Tu feed</h1>
+              </div>
+              <div className="feedStats">{refreshing ? "Actualizando..." : `${totalFeedCount}`}</div>
+            </div>
+            <div className="segmentedControl">
+              <button type="button" onClick={() => setFeedMode("all")} className={feedMode === "all" ? "active" : ""}>Todo</button>
+              <button type="button" onClick={() => setFeedMode("tasks")} className={feedMode === "tasks" ? "active" : ""}>Tareas</button>
+            </div>
+          </section>
+
+          <section className="studyCard">
+            <div className="studyHeader">
+              <div>
+                <div className="sectionKicker accentTurquoise">Estudio</div>
+                <h2 className="studyTitle">Herramientas rápidas</h2>
+              </div>
+              <div className="studyActions">
+                <Link href="/study" className="studyOpenButton">Abrir</Link>
+                <button type="button" onClick={() => setStudyExpanded((prev) => !prev)} className="studyGhostButton">
+                  {studyExpanded ? "Menos" : "Ranking"}
+                </button>
               </div>
             </div>
-            <div style={{ display: "inline-flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-              <Link href="/study" style={{ textDecoration: "none", background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", borderRadius: 999, padding: "9px 14px", fontSize: 13, fontWeight: 800, whiteSpace: "nowrap", boxShadow: "0 8px 18px rgba(44,182,150,.2)" }}>
-                Abrir Study
-              </Link>
-              <button
-                type="button"
-                onClick={() => setStudyExpanded((prev) => !prev)}
-                style={{ border: "1px solid rgba(17,17,20,.12)", background: "#fff", color: "#111114", borderRadius: 999, padding: "9px 12px", fontSize: 12, fontWeight: 800, cursor: "pointer" }}
-              >
-                {studyExpanded ? "Ocultar ranking" : "Ver ranking kana"}
-              </button>
-            </div>
-          </div>
 
-          <div style={{ marginTop: 12, display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
-            {studyTools.map((tool) => (
-              <Link
-                key={tool.href}
-                href={tool.href}
-                style={{
-                  textDecoration: "none",
-                  color: "#111114",
-                  border: `1px solid ${tool.border}`,
-                  borderRadius: 14,
-                  background: tool.tone,
-                  padding: "11px 12px",
-                  display: "grid",
-                  gap: 6,
-                }}
-              >
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 800, color: "#344054" }}>
-                  <span style={{ width: 24, height: 24, borderRadius: 999, border: "1px solid rgba(17,17,20,.08)", background: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{tool.icon}</span>
-                  {tool.label}
-                </div>
-                <div style={{ fontSize: 12, lineHeight: 1.45, color: "#667085" }}>{tool.desc}</div>
-              </Link>
-            ))}
-          </div>
-
-          {studyExpanded && (
-            <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px dashed rgba(17,17,20,.1)" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-                <div style={{ fontSize: 12, color: "#667085", fontWeight: 700 }}>
-                  Ranking semanal Kana · reset en <span style={{ color: "#111114" }}>{weeklyResetLabel || "..."}</span>
-                </div>
-                <Link href="/study?view=kana" style={{ textDecoration: "none", fontSize: 12, fontWeight: 800, color: "#0f766e", border: "1px solid rgba(44,182,150,.28)", background: "#fff", borderRadius: 999, padding: "6px 10px" }}>
-                  Jugar ahora
+            <div className="toolGrid">
+              {studyTools.map((tool) => (
+                <Link key={tool.href} href={tool.href} className="toolCard">
+                  <span className="toolIcon" style={{ color: tool.accent, borderColor: `${tool.accent}33` }}>{tool.icon}</span>
+                  <span className="toolCopy">
+                    <strong>{tool.label}</strong>
+                    <small>{tool.desc}</small>
+                  </span>
                 </Link>
+              ))}
+            </div>
+
+            {studyExpanded && (
+              <div className="leaderboardWrap">
+                <div className="leaderboardHead">
+                  <span>Reset kana en {weeklyResetLabel || "..."}</span>
+                  <Link href="/study?view=kana">Jugar</Link>
+                </div>
+                <div className="leaderboardGrid">
+                  {(["hiragana", "katakana"] as HomeKanaMode[]).map((mode) => (
+                    <div key={mode} className="leaderboardCard">
+                      <div className="leaderboardLabel">{mode}</div>
+                      <div className="leaderboardList">
+                        {(homeKanaLeaders[mode] || []).map((row, index) => (
+                          <div key={`${mode}-${row.user_id}-${index}`} className="leaderboardRow">
+                            <span className="leaderboardUser">
+                              <span
+                                className="leaderboardRank"
+                                style={{
+                                  borderColor: homeRankBadgeStyles(index).border,
+                                  background: homeRankBadgeStyles(index).bg,
+                                  color: homeRankBadgeStyles(index).color,
+                                }}
+                              >
+                                {index + 1}
+                              </span>
+                              <span className="leaderboardName">{row.profiles?.username || row.profiles?.full_name || "usuario"}</span>
+                            </span>
+                            <strong>{row.best_score}</strong>
+                          </div>
+                        ))}
+                        {(homeKanaLeaders[mode] || []).length === 0 && <div className="leaderboardEmpty">Sin puntajes</div>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div style={{ marginTop: 8, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))" }}>
-                {(["hiragana", "katakana"] as HomeKanaMode[]).map((mode) => (
-                  <div key={mode} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, background: "#fff", padding: 10 }}>
-                    <div style={{ fontSize: 11, color: "#6b7280", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>{mode}</div>
-                    <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
-                      {(homeKanaLeaders[mode] || []).map((row, index) => (
-                        <div key={`${mode}-${row.user_id}-${index}`} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, fontSize: 12 }}>
-                          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0 }}>
-                            <span
-                              style={{
-                                minWidth: 18,
-                                height: 18,
-                                borderRadius: 999,
-                                border: `1px solid ${homeRankBadgeStyles(index).border}`,
-                                background: homeRankBadgeStyles(index).bg,
-                                color: homeRankBadgeStyles(index).color,
-                                fontSize: 10,
-                                fontWeight: 800,
-                                display: "inline-flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                padding: "0 4px",
-                              }}
-                            >
-                              {index + 1}
-                            </span>
-                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              {row.profiles?.username || row.profiles?.full_name || "usuario"}
-                            </span>
-                          </span>
-                          <strong style={{ color: "#111114" }}>{row.best_score}</strong>
+            )}
+          </section>
+
+          {hasFreshPosts && (
+            <section className="refreshBanner">
+              <span>Hay publicaciones nuevas</span>
+              <button type="button" onClick={() => void softRefresh()}>Actualizar</button>
+            </section>
+          )}
+
+          {pinnedAnnouncements.map((post) => (
+            <section key={post.id} className={`announceCard ${post.type === "assignment" ? "task" : "info"}`}>
+              <button
+                type="button"
+                onClick={() => {
+                  const id = String(post.id);
+                  setDismissedAnnouncements((prev) => (prev.includes(id) ? prev : [...prev, id]));
+                }}
+                className="dismissButton"
+                aria-label="Cerrar anuncio"
+              >
+                ✕
+              </button>
+              <div className="announceKicker">{post.type === "assignment" ? "Anuncio de tarea" : "Anuncio"}</div>
+              <h3>{getPostParts(post.content || "").title}</h3>
+              <Link href={`/post/${post.id}`}>Abrir</Link>
+            </section>
+          ))}
+
+          <section className="feedStack">
+            {regularFeed.map((post, idx) => {
+              const { title: titulo, preview } = getPostParts(post.content || "");
+              const edited = Boolean(
+                post?.updated_at &&
+                  post?.created_at &&
+                  new Date(post.updated_at).getTime() - new Date(post.created_at).getTime() > 60_000,
+              );
+              const isAssignmentPost = post.type === "assignment" && !post.parent_assignment_id;
+              const isForumAssignment = isAssignmentPost && (post.is_forum || isForumTaskSubtype(post.assignment_subtype));
+              const isAssignedToMe = isPublicTargetGroup(post.target_group) || normalizeGroupValue(post.target_group) === normalizeGroupValue(myProfile?.group_name);
+              const isForumAccent = isForumAssignment && isAssignedToMe;
+
+              return (
+                <article key={post.id} className={`feedCard ${isAssignmentPost ? "taskCard" : ""} ${idx === 0 ? "firstCard" : ""}`}>
+                  <div className="feedCardMain">
+                    <div className="postHeader">
+                      <div className="avatarMini">
+                        {post.profiles?.avatar_url ? (
+                          <img src={post.profiles.avatar_url} alt="" />
+                        ) : (
+                          <AvatarPlaceholder size={30} />
+                        )}
+                      </div>
+                      <div className="postHeaderCopy">
+                        <div className="authorRow">
+                          <Link href={`/profile/${post.user_id}`}>{post.profiles?.is_admin ? "Sensei" : post.profiles?.username}</Link>
+                          <span className="dotSep" />
+                          <span>{formatFeedDate(post.created_at)}</span>
+                          {edited && <span className="tinyTag neutral">editado</span>}
+                          {post.is_reviewed && <span className="tinyTag mint">済 Sumi</span>}
                         </div>
-                      ))}
-                      {(homeKanaLeaders[mode] || []).length === 0 && (
-                        <div style={{ color: "#98a2b3", fontSize: 12 }}>Sin puntajes</div>
+                      </div>
+                    </div>
+
+                    <Link href={`/post/${post.id}`} className="cardLinkBlock">
+                      {isAssignmentPost && (
+                        <span className={`postTypeTag ${isForumAccent ? "forum" : "task"}`}>
+                          {isForumAssignment ? (isAssignedToMe ? "Tarea foro" : "Foro abierto") : "Tarea"}
+                        </span>
+                      )}
+                      <h2 className={`postTitle ${fontScale === "large" ? "large" : ""}`}>{titulo}</h2>
+                      {preview && <p className={`postPreview ${fontScale === "large" ? "large" : ""}`}>{preview}</p>}
+                    </Link>
+
+                    <div className="postFooter">
+                      <span>{post.target_group || post.profiles?.group_name || "General"}</span>
+                      {isAssignmentPost && (
+                        <div className="taskActions">
+                          <Link href={isForumAssignment ? `/post/${post.id}` : `/write?assignment_id=${post.id}&title=${encodeURIComponent(titulo || "Tarea")}`}>
+                            {isForumAssignment ? "Entrar" : "Entregar"}
+                          </Link>
+                          {!post.parent_assignment_id && (
+                            <span className={`statusPill ${submissionByAssignment[String(post.id)]?.submitted ? (submissionByAssignment[String(post.id)]?.late ? "late" : "done") : "pending"}`}>
+                              {submissionByAssignment[String(post.id)]?.submitted
+                                ? submissionByAssignment[String(post.id)]?.late
+                                  ? "Tardía"
+                                  : "Entregada"
+                                : "Pendiente"}
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
 
-        {hasFreshPosts && (
-          <section style={{ margin: "0 14px 12px", padding: "10px 12px", borderRadius: 12, border: "1px solid rgba(44,182,150,.24)", background: "#ecfdf5", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-            <span style={{ color: "#0f766e", fontSize: 13, fontWeight: 700 }}>Hay publicaciones nuevas</span>
-            <button
-              type="button"
-              onClick={() => void softRefresh()}
-              style={{ border: "1px solid rgba(44,182,150,.35)", background: "#fff", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: "#0f766e" }}
-            >
-              Actualizar
-            </button>
-          </section>
-        )}
-
-        {pinnedAnnouncements.map(post => (
-          <div key={post.id} style={{ margin: "0 14px 12px", padding: "16px 16px 14px 18px", borderRadius: "16px", backgroundColor: post.type === 'assignment' ? "#f2fffa" : "#f4fbff", border: "1px solid rgba(17,17,20,0.06)", position: "relative", boxShadow: "0 8px 24px rgba(0,0,0,.025)" }}>
-            <div style={{ position: "absolute", left: "0", top: "12px", bottom: "12px", width: "4px", borderRadius: "0 6px 6px 0", background: post.type === "assignment" ? "#2cb696" : "#58a8ff" }} />
-            <button
-              onClick={() => {
-                const id = String(post.id);
-                setDismissedAnnouncements((prev) => (prev.includes(id) ? prev : [...prev, id]));
-              }}
-              style={{ position: "absolute", top: "10px", right: "10px", background: "#fff", border: "1px solid rgba(17,17,20,.08)", color: "#8b8b93", cursor: "pointer", fontSize: "13px", width: "24px", height: "24px", borderRadius: "999px", lineHeight: 1 }}
-            >
-              ✕
-            </button>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "10px", fontSize: "11px", fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase", color: "#3d81ce" }}>
-              <span style={{ width: "6px", height: "6px", borderRadius: "999px", background: "currentColor" }} />
-              {post.type === "assignment" ? "Anuncio de tarea" : "Anuncio"}
-            </div>
-            <h3 style={{ margin: "0 0 12px 0", fontSize: "16px", lineHeight: 1.35, fontWeight: "800", color: "#222" }}>{getPostParts(post.content || "").title}</h3>
-            <Link href={`/post/${post.id}`} style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#3d81ce", fontWeight: 700, textDecoration: "none", background: "#fff", border: "1px solid rgba(88,168,255,.2)", padding: "8px 10px", borderRadius: "999px" }}>Abrir anuncio</Link>
-          </div>
-        ))}
-
-        <section style={{ margin: "0 14px", background: "#fff", borderRadius: "20px", border: "1px solid rgba(17,17,20,.06)", overflow: "hidden", boxShadow: "0 12px 34px rgba(0,0,0,.035)" }}>
-        {regularFeed.map((post, idx) => {
-          const { title: titulo, preview } = getPostParts(post.content || "");
-          const edited = Boolean(
-            post?.updated_at &&
-              post?.created_at &&
-              new Date(post.updated_at).getTime() - new Date(post.created_at).getTime() > 60_000,
-          );
-          const isAssignmentPost = post.type === "assignment" && !post.parent_assignment_id;
-          const isForumAssignment = isAssignmentPost && (post.is_forum || isForumTaskSubtype(post.assignment_subtype));
-          const isAssignedToMe = isPublicTargetGroup(post.target_group) || normalizeGroupValue(post.target_group) === normalizeGroupValue(myProfile?.group_name);
-          const isForumAccent = isForumAssignment && isAssignedToMe;
-          const isHighlightedTask = isAssignmentPost && (!isForumAssignment || isAssignedToMe);
-          const rowBg = isHighlightedTask ? "#f6fffb" : idx % 2 === 0 ? "rgba(255,255,255,1)" : "rgba(251,251,252,1)";
-          return (
-            <article key={post.id} style={{ padding: "18px 16px", borderBottom: idx === regularFeed.length - 1 ? "none" : "1px solid rgba(17,17,20,.06)", display: "flex", gap: "14px", alignItems: "flex-start", background: rowBg }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center", minWidth: 0 }}>
-                  <div style={{ width: "28px", height: "28px", borderRadius: "50%", overflow: "hidden", background: "#f5f5f5", flexShrink: 0, border: "1px solid rgba(17,17,20,.06)" }}>
-                    {post.profiles?.avatar_url ? (
-                      <img src={post.profiles.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    ) : <div style={{ textAlign: "center", fontSize: "12px", lineHeight: "26px", color: "#ccc" }}>👤</div>}
-                  </div>
-                  <Link href={`/profile/${post.user_id}`} style={{ textDecoration: "none", color: "#2b2b30", fontWeight: 700, fontSize: "13px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "44%" }}>
-                    {post.profiles?.is_admin ? "Sensei" : post.profiles?.username}
-                  </Link>
-                  <span style={{ width: "3px", height: "3px", borderRadius: "50%", background: "#b7b7bf", flexShrink: 0 }} />
-                  <span style={{ color: "#7c7c85", fontSize: "12px", fontWeight: 500, whiteSpace: "nowrap" }}>{formatFeedDate(post.created_at)}</span>
-                  {edited && <span style={{ fontSize: "10px", color: "#64748b", fontWeight: 700, border: "1px solid #cbd5e1", padding: "1px 6px", borderRadius: "4px" }}>editado</span>}
-                  {post.is_reviewed && <span style={{ fontSize: "10px", color: "#2cb696", fontWeight: "700", border: "1px solid #2cb696", padding: "1px 6px", borderRadius: "4px" }}>済 Sumi</span>}
-                </div>
-                <Link href={`/post/${post.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                  {isAssignmentPost && (
-                    <div style={{ marginBottom: "8px", display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "10px", letterSpacing: ".06em", textTransform: "uppercase", fontWeight: 800, color: isForumAccent ? "#3d81ce" : isForumAssignment ? "#667085" : "#159578", background: isForumAccent ? "#eff6ff" : isForumAssignment ? "#f8fafc" : "#ecfdf5", border: `1px solid ${isForumAccent ? "#bfdbfe" : isForumAssignment ? "#e4e7ec" : "#bbf7d0"}`, borderRadius: "999px", padding: "4px 8px" }}>
-                      <span style={{ width: 5, height: 5, borderRadius: "999px", background: "currentColor" }} />
-                      {isForumAssignment ? (isAssignedToMe ? "Tarea Foro" : "Foro Abierto") : "Tarea"}
-                    </div>
-                  )}
-                  <h2 style={{ margin: "0 0 8px 0", fontSize: fontScale === "large" ? "18px" : "17px", fontWeight: 800, lineHeight: "1.35", color: "#17171b", letterSpacing: "-0.01em" }}>{titulo}</h2>
-                  {preview && (
-                    <p style={{ margin: 0, fontSize: fontScale === "large" ? "14.5px" : "13.5px", color: "#666a73", lineHeight: "1.55", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{preview}</p>
-                  )}
-                </Link>
-                <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "8px", color: "#8a8a94", fontSize: "12px", fontWeight: 500 }}>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                    <span style={{ width: "14px", height: "14px", borderRadius: "999px", border: "1.4px solid currentColor", display: "inline-block" }} />
-                    投稿
-                  </span>
-                  <span>·</span>
-                  <span>{post.target_group || post.profiles?.group_name || "General"}</span>
-                </div>
-                {isAssignmentPost && (
-                  <div style={{ marginTop: "10px" }}>
-                    <Link href={isForumAssignment ? `/post/${post.id}` : `/write?assignment_id=${post.id}&title=${encodeURIComponent(titulo || "Tarea")}`} style={{ display: "inline-flex", alignItems: "center", gap: "8px", fontSize: "12px", color: isForumAccent ? "#3d81ce" : isForumAssignment ? "#667085" : "#147f68", fontWeight: 700, textDecoration: "none", background: "#fff", border: `1px solid ${isForumAccent ? "rgba(61,129,206,.24)" : isForumAssignment ? "#e4e7ec" : "rgba(44,182,150,.2)"}`, padding: "7px 10px", borderRadius: "999px" }}>
-                      {isForumAssignment ? "Entrar al foro" : "Entregar tarea"}
+                  {post.image_url && (
+                    <Link href={`/post/${post.id}`} className="feedThumb">
+                      <img src={post.image_url} alt="" />
                     </Link>
-                    {!post.parent_assignment_id && (
-                      <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, color: submissionByAssignment[String(post.id)]?.submitted ? (submissionByAssignment[String(post.id)]?.late ? "#b45309" : "#147f68") : "#7c7c85", background: submissionByAssignment[String(post.id)]?.submitted ? (submissionByAssignment[String(post.id)]?.late ? "#fffbeb" : "#ecfdf5") : "#f8fafc", border: `1px solid ${submissionByAssignment[String(post.id)]?.submitted ? (submissionByAssignment[String(post.id)]?.late ? "#fde68a" : "#bbf7d0") : "#e2e8f0"}`, borderRadius: 999, padding: "4px 8px" }}>
-                        {submissionByAssignment[String(post.id)]?.submitted ? (submissionByAssignment[String(post.id)]?.late ? "Entregada tardía" : "Entregada") : "Pendiente"}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-              {post.image_url && (
-                <Link href={`/post/${post.id}`} style={{ flexShrink: 0, alignSelf: "center" }}>
-                  <img src={post.image_url} style={{ width: "120px", height: "88px", borderRadius: "12px", objectFit: "cover", border: "1px solid rgba(17,17,20,.06)", boxShadow: "0 8px 20px rgba(0,0,0,.08)" }} />
-                </Link>
-              )}
-            </article>
-          );
-        })}
-        {hasMore && <div ref={loadMoreRef} style={{ height: 24 }} />}
-        {loadingMore && <div style={{ padding: "8px 12px", color: "#7c7c85", fontSize: 12 }}>Cargando más...</div>}
-        </section>
-      </main>
+                  )}
+                </article>
+              );
+            })}
+            {hasMore && <div ref={loadMoreRef} style={{ height: 24 }} />}
+            {loadingMore && <div className="loadingMore">Cargando más...</div>}
+          </section>
+        </main>
+      </div>
 
       {menuOpen && (
         <>
-          <button
-            type="button"
-            onClick={() => setMenuOpen(false)}
-            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.28)", border: 0, zIndex: 50 }}
-            aria-label="Cerrar menú"
-          />
-          <aside style={{ position: "fixed", top: 0, right: 0, height: "100vh", width: "min(360px, 86vw)", background: "#fff", borderLeft: "1px solid rgba(17,17,20,.08)", zIndex: 60, padding: 16, display: "grid", gap: 12, alignContent: "start" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <strong style={{ fontSize: 16 }}>Menú</strong>
-              <button onClick={() => setMenuOpen(false)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "6px 10px", cursor: "pointer" }}>Cerrar</button>
+          <button type="button" onClick={() => setMenuOpen(false)} className="menuBackdrop" aria-label="Cerrar menú" />
+          <aside className="menuPanel">
+            <div className="menuHead">
+              <strong>Menú</strong>
+              <button type="button" onClick={() => setMenuOpen(false)}>Cerrar</button>
             </div>
-            <Link href={`/profile/${myProfile?.id}`} onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><AvatarPlaceholder size={18} /> Perfil</Link>
-            <Link href="/resources" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}><IconBook /> Recursos</Link>
-            <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, background: "#fbfbfc", padding: 10, display: "grid", gap: 8 }}>
-              <div style={{ fontSize: 11, color: "#667085", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Estudio</div>
-              <div style={{ display: "grid", gap: 6 }}>
-                <Link href="/study?view=exam" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#0c4a6e", border: "1px solid rgba(14,165,233,.2)", borderRadius: 10, padding: "9px 10px", display: "flex", alignItems: "center", gap: 8, background: "#f0f9ff" }}><IconTarget /> Exámenes</Link>
-                <Link href="/study?view=flashcards" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#3730a3", border: "1px solid rgba(99,102,241,.2)", borderRadius: 10, padding: "9px 10px", display: "flex", alignItems: "center", gap: 8, background: "#eef2ff" }}><IconCards /> Flashcards</Link>
-                <Link href="/study?view=kana" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#166534", border: "1px solid rgba(34,197,94,.2)", borderRadius: 10, padding: "9px 10px", display: "flex", alignItems: "center", gap: 8, background: "#ecfdf3" }}><IconSpark /> Kana Sprint</Link>
-                <Link href="/study?view=sprint" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#9a3412", border: "1px solid rgba(249,115,22,.2)", borderRadius: 10, padding: "9px 10px", display: "flex", alignItems: "center", gap: 8, background: "#fff7ed" }}><IconBook /> Vocab+Kanji Sprint</Link>
-                {myProfile?.is_admin && <Link href="/study?view=dictionary" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#0f766e", border: "1px solid rgba(15,118,110,.2)", borderRadius: 10, padding: "9px 10px", display: "flex", alignItems: "center", gap: 8, background: "#ecfeff" }}><IconBook /> Diccionario</Link>}
-              </div>
-            </div>
-            <Link href="/notifications" onClick={() => setMenuOpen(false)} style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><IconBell /> Notificaciones</span>{unreadNotifications > 0 && <span style={{ background: "#ff2d55", color: "#fff", borderRadius: 999, fontSize: 11, fontWeight: 700, padding: "2px 6px" }}>{unreadNotifications}</span>}</Link>
-            {myProfile?.is_admin && (
-              <Link
-                href="/admin/groups"
-                onClick={() => setMenuOpen(false)}
-                style={{ textDecoration: "none", color: "#222", border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}
-              >
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                  <IconSettings /> Panel maestro
-                </span>
-                {pendingApprovalsCount > 0 && (
-                  <span style={{ background: "#ff2d55", color: "#fff", borderRadius: 999, fontSize: 11, fontWeight: 700, padding: "2px 6px" }}>
-                    {pendingApprovalsCount > 99 ? "99+" : pendingApprovalsCount}
-                  </span>
-                )}
+            <div className="menuList">
+              <Link href={`/profile/${myProfile?.id}`} onClick={() => setMenuOpen(false)} className="menuLink">
+                <AvatarPlaceholder size={18} /> Perfil
               </Link>
-            )}
-            <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: 10 }}>
-              <div style={{ fontSize: 12, color: "#666a73", marginBottom: 6, fontWeight: 700 }}>Tamaño de texto</div>
-              <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3 }}>
-                <button onClick={() => setFontScale("normal")} style={{ border: 0, borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: fontScale === "normal" ? "#fff" : "#666a73", background: fontScale === "normal" ? "#111114" : "transparent" }}>Normal</button>
-                <button onClick={() => setFontScale("large")} style={{ border: 0, borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, color: fontScale === "large" ? "#fff" : "#666a73", background: fontScale === "large" ? "#111114" : "transparent" }}>Grande</button>
+              <Link href="/resources" onClick={() => setMenuOpen(false)} className="menuLink">
+                <IconBook /> Recursos
+              </Link>
+              <Link href="/notifications" onClick={() => setMenuOpen(false)} className="menuLink split">
+                <span className="menuLabel"><IconBell /> Notificaciones</span>
+                {unreadNotifications > 0 && <span className="menuBadge">{unreadNotifications}</span>}
+              </Link>
+              {myProfile?.is_admin && (
+                <Link href="/admin/groups" onClick={() => setMenuOpen(false)} className="menuLink split">
+                  <span className="menuLabel"><IconSettings /> Panel maestro</span>
+                  {pendingApprovalsCount > 0 && <span className="menuBadge">{pendingApprovalsCount > 99 ? "99+" : pendingApprovalsCount}</span>}
+                </Link>
+              )}
+            </div>
+
+            <div className="menuSection">
+              <div className="menuSectionTitle">Estudio</div>
+              <div className="menuList">
+                {studyTools.map((tool) => (
+                  <Link key={`menu-${tool.href}`} href={tool.href} onClick={() => setMenuOpen(false)} className="menuLink">
+                    {tool.icon} {tool.label}
+                  </Link>
+                ))}
+                {myProfile?.is_admin && (
+                  <Link href="/study?view=dictionary" onClick={() => setMenuOpen(false)} className="menuLink">
+                    <IconBook /> Diccionario
+                  </Link>
+                )}
               </div>
             </div>
+
+            <div className="menuSection">
+              <div className="menuSectionTitle">Texto</div>
+              <div className="segmentedControl panelSegmented">
+                <button type="button" onClick={() => setFontScale("normal")} className={fontScale === "normal" ? "active" : ""}>Normal</button>
+                <button type="button" onClick={() => setFontScale("large")} className={fontScale === "large" ? "active" : ""}>Grande</button>
+              </div>
+            </div>
+
             <button
               onClick={async () => {
                 await supabase.auth.signOut();
                 router.push("/login");
               }}
-              style={{ border: "1px solid #fecaca", color: "#b91c1c", borderRadius: 12, padding: "10px 12px", background: "#fff", textAlign: "left", cursor: "pointer" }}
+              className="logoutButton"
             >
               Cerrar sesión
             </button>
           </aside>
         </>
       )}
+
+      <style jsx>{`
+        .homePage {
+          min-height: 100vh;
+          background:
+            radial-gradient(900px 460px at 50% -10%, rgba(78, 205, 196, 0.18), transparent 60%),
+            linear-gradient(180deg, #fff8e7 0%, #fffdf8 46%, #fff8e7 100%);
+          color: #1a1a2e;
+        }
+        .homeShell {
+          width: min(100%, 760px);
+          margin: 0 auto;
+          padding: 0 14px 28px;
+        }
+        .homeHeader {
+          position: sticky;
+          top: 0;
+          z-index: 30;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 18px 0 14px;
+          background: linear-gradient(180deg, rgba(255, 248, 231, 0.96), rgba(255, 248, 231, 0.82));
+          backdrop-filter: blur(10px);
+        }
+        .brandBlock {
+          text-decoration: none;
+          color: inherit;
+          min-width: 0;
+          display: grid;
+          gap: 3px;
+        }
+        .brandKicker {
+          font-size: 10px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: #457b9d;
+          font-weight: 800;
+        }
+        .brandTitle {
+          font-size: 28px;
+          line-height: 1;
+          font-weight: 900;
+          letter-spacing: -0.02em;
+          color: #1a1a2e;
+        }
+        .headerActions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .writeButton,
+        .studyOpenButton,
+        .studyGhostButton,
+        .iconButton,
+        .dismissButton,
+        .menuHead button,
+        .logoutButton {
+          appearance: none;
+          border: 0;
+          font: inherit;
+        }
+        .writeButton {
+          min-height: 42px;
+          padding: 0 18px;
+          border-radius: 999px;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: #e63946;
+          color: #fff8e7;
+          font-size: 14px;
+          font-weight: 800;
+          box-shadow: 0 10px 22px rgba(230, 57, 70, 0.2);
+        }
+        .iconButton {
+          position: relative;
+          width: 42px;
+          height: 42px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.88);
+          color: #1a1a2e;
+          border: 1px solid rgba(26, 26, 46, 0.08);
+          cursor: pointer;
+        }
+        .notifDot {
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          min-width: 18px;
+          height: 18px;
+          padding: 0 5px;
+          border-radius: 999px;
+          background: #e63946;
+          color: #fff;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 10px;
+          font-weight: 800;
+        }
+        .homeMain {
+          display: grid;
+          gap: 12px;
+        }
+        .feedControlCard,
+        .studyCard,
+        .announceCard,
+        .feedCard {
+          border-radius: 22px;
+          border: 1px solid rgba(26, 26, 46, 0.08);
+          background: rgba(255, 255, 255, 0.9);
+          box-shadow: 0 14px 34px rgba(26, 26, 46, 0.05);
+        }
+        .feedControlCard {
+          padding: 18px;
+          display: grid;
+          gap: 14px;
+        }
+        .feedControlRow,
+        .studyHeader,
+        .leaderboardHead {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .sectionKicker {
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: #e63946;
+        }
+        .accentTurquoise {
+          color: #4ecdc4;
+        }
+        .feedHeading,
+        .studyTitle {
+          margin: 4px 0 0;
+          font-size: clamp(24px, 5vw, 34px);
+          line-height: 0.98;
+          color: #1a1a2e;
+          letter-spacing: -0.03em;
+        }
+        .feedStats {
+          min-width: 54px;
+          height: 42px;
+          padding: 0 16px;
+          border-radius: 999px;
+          background: #1a1a2e;
+          color: #fff8e7;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          font-weight: 800;
+        }
+        .segmentedControl {
+          display: inline-flex;
+          gap: 4px;
+          padding: 4px;
+          border-radius: 999px;
+          background: rgba(26, 26, 46, 0.06);
+          width: fit-content;
+        }
+        .segmentedControl button {
+          border: 0;
+          background: transparent;
+          min-height: 38px;
+          padding: 0 14px;
+          border-radius: 999px;
+          color: #4d5162;
+          font-size: 13px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+        .segmentedControl button.active {
+          background: #fff;
+          color: #1a1a2e;
+          box-shadow: 0 4px 12px rgba(26, 26, 46, 0.08);
+        }
+        .studyCard {
+          padding: 18px;
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 248, 231, 0.9)),
+            #fff;
+          display: grid;
+          gap: 14px;
+        }
+        .studyActions {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .studyOpenButton,
+        .studyGhostButton {
+          min-height: 38px;
+          padding: 0 14px;
+          border-radius: 999px;
+          font-size: 13px;
+          font-weight: 800;
+          cursor: pointer;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .studyOpenButton {
+          background: #4ecdc4;
+          color: #1a1a2e;
+        }
+        .studyGhostButton {
+          background: rgba(26, 26, 46, 0.06);
+          color: #1a1a2e;
+        }
+        .toolGrid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .toolCard {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 12px;
+          border-radius: 18px;
+          text-decoration: none;
+          color: #1a1a2e;
+          background: #fff8e7;
+          border: 1px solid rgba(26, 26, 46, 0.07);
+        }
+        .toolIcon {
+          width: 34px;
+          height: 34px;
+          border-radius: 12px;
+          background: #fff;
+          border: 1px solid;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .toolCopy {
+          display: grid;
+          gap: 2px;
+          min-width: 0;
+        }
+        .toolCopy strong {
+          font-size: 14px;
+          line-height: 1.2;
+        }
+        .toolCopy small {
+          font-size: 12px;
+          color: #606579;
+          line-height: 1.35;
+        }
+        .leaderboardWrap {
+          padding-top: 4px;
+          border-top: 1px dashed rgba(26, 26, 46, 0.12);
+          display: grid;
+          gap: 10px;
+        }
+        .leaderboardHead span {
+          font-size: 12px;
+          color: #606579;
+          font-weight: 700;
+        }
+        .leaderboardHead a {
+          min-height: 34px;
+          padding: 0 12px;
+          border-radius: 999px;
+          background: #1a1a2e;
+          color: #fff8e7;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: 800;
+        }
+        .leaderboardGrid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .leaderboardCard {
+          padding: 12px;
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.85);
+          border: 1px solid rgba(26, 26, 46, 0.07);
+        }
+        .leaderboardLabel {
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: #457b9d;
+        }
+        .leaderboardList {
+          margin-top: 10px;
+          display: grid;
+          gap: 8px;
+        }
+        .leaderboardRow {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          font-size: 12px;
+        }
+        .leaderboardUser {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          min-width: 0;
+        }
+        .leaderboardRank {
+          min-width: 20px;
+          height: 20px;
+          border-radius: 999px;
+          border: 1px solid;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0 5px;
+          font-size: 10px;
+          font-weight: 800;
+          flex-shrink: 0;
+        }
+        .leaderboardName {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .leaderboardEmpty {
+          font-size: 12px;
+          color: #8e93a5;
+        }
+        .refreshBanner {
+          padding: 12px 14px;
+          border-radius: 18px;
+          background: rgba(78, 205, 196, 0.14);
+          border: 1px solid rgba(78, 205, 196, 0.35);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+        }
+        .refreshBanner span {
+          font-size: 13px;
+          font-weight: 800;
+          color: #1a1a2e;
+        }
+        .refreshBanner button {
+          border: 0;
+          min-height: 34px;
+          padding: 0 12px;
+          border-radius: 999px;
+          background: #fff;
+          color: #1a1a2e;
+          font-size: 12px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+        .announceCard {
+          position: relative;
+          padding: 18px;
+          display: grid;
+          gap: 12px;
+        }
+        .announceCard.task {
+          background: linear-gradient(135deg, rgba(78, 205, 196, 0.16), rgba(255, 255, 255, 0.94));
+        }
+        .announceCard.info {
+          background: linear-gradient(135deg, rgba(69, 123, 157, 0.13), rgba(255, 255, 255, 0.94));
+        }
+        .announceKicker {
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: #e63946;
+        }
+        .announceCard h3 {
+          margin: 0;
+          font-size: 18px;
+          line-height: 1.3;
+          color: #1a1a2e;
+        }
+        .announceCard a {
+          width: fit-content;
+          min-height: 36px;
+          padding: 0 14px;
+          border-radius: 999px;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: #1a1a2e;
+          color: #fff8e7;
+          font-size: 13px;
+          font-weight: 800;
+        }
+        .dismissButton {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          width: 30px;
+          height: 30px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.9);
+          color: #6d7284;
+          cursor: pointer;
+        }
+        .feedStack {
+          display: grid;
+          gap: 12px;
+        }
+        .feedCard {
+          padding: 16px;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 116px;
+          gap: 14px;
+          align-items: center;
+        }
+        .taskCard {
+          background: linear-gradient(180deg, rgba(78, 205, 196, 0.08), rgba(255, 255, 255, 0.92));
+        }
+        .feedCardMain {
+          min-width: 0;
+          display: grid;
+          gap: 10px;
+        }
+        .postHeader {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          min-width: 0;
+        }
+        .avatarMini {
+          width: 30px;
+          height: 30px;
+          border-radius: 999px;
+          overflow: hidden;
+          border: 1px solid rgba(26, 26, 46, 0.08);
+          background: #fff;
+          display: grid;
+          place-items: center;
+          flex-shrink: 0;
+        }
+        .avatarMini img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+        .postHeaderCopy {
+          min-width: 0;
+        }
+        .authorRow {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          flex-wrap: wrap;
+          color: #656a7b;
+          font-size: 12px;
+          font-weight: 700;
+        }
+        .authorRow a {
+          text-decoration: none;
+          color: #1a1a2e;
+          font-weight: 800;
+        }
+        .dotSep {
+          width: 4px;
+          height: 4px;
+          border-radius: 999px;
+          background: #aab0c0;
+        }
+        .tinyTag {
+          min-height: 18px;
+          padding: 0 7px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 10px;
+          font-weight: 800;
+        }
+        .tinyTag.neutral {
+          background: rgba(26, 26, 46, 0.06);
+          color: #5f6577;
+        }
+        .tinyTag.mint {
+          background: rgba(78, 205, 196, 0.16);
+          color: #1a1a2e;
+        }
+        .cardLinkBlock {
+          display: grid;
+          gap: 8px;
+          text-decoration: none;
+          color: inherit;
+        }
+        .postTypeTag {
+          width: fit-content;
+          min-height: 24px;
+          padding: 0 10px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+        .postTypeTag.task {
+          background: rgba(78, 205, 196, 0.16);
+          color: #1a1a2e;
+        }
+        .postTypeTag.forum {
+          background: rgba(69, 123, 157, 0.14);
+          color: #1a1a2e;
+        }
+        .postTitle {
+          margin: 0;
+          color: #1a1a2e;
+          font-size: 18px;
+          line-height: 1.28;
+          font-weight: 850;
+          letter-spacing: -0.02em;
+        }
+        .postTitle.large {
+          font-size: 19px;
+        }
+        .postPreview {
+          margin: 0;
+          color: #5b6072;
+          font-size: 13.5px;
+          line-height: 1.55;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .postPreview.large {
+          font-size: 14.5px;
+        }
+        .postFooter {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          flex-wrap: wrap;
+          font-size: 12px;
+          color: #74798a;
+          font-weight: 700;
+        }
+        .taskActions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .taskActions a {
+          min-height: 32px;
+          padding: 0 12px;
+          border-radius: 999px;
+          background: #1a1a2e;
+          color: #fff8e7;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: 800;
+        }
+        .statusPill {
+          min-height: 28px;
+          padding: 0 10px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 11px;
+          font-weight: 800;
+        }
+        .statusPill.done {
+          background: rgba(78, 205, 196, 0.16);
+          color: #1a1a2e;
+        }
+        .statusPill.late {
+          background: rgba(244, 162, 97, 0.2);
+          color: #8c4d17;
+        }
+        .statusPill.pending {
+          background: rgba(26, 26, 46, 0.06);
+          color: #5e6476;
+        }
+        .feedThumb {
+          width: 116px;
+          height: 96px;
+          border-radius: 18px;
+          overflow: hidden;
+          border: 1px solid rgba(26, 26, 46, 0.08);
+          display: block;
+          flex-shrink: 0;
+        }
+        .feedThumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+        .loadingMore {
+          padding: 6px 8px;
+          color: #767b8b;
+          font-size: 12px;
+          font-weight: 700;
+        }
+        .menuBackdrop {
+          position: fixed;
+          inset: 0;
+          background: rgba(26, 26, 46, 0.3);
+          border: 0;
+          z-index: 50;
+        }
+        .menuPanel {
+          position: fixed;
+          top: 0;
+          right: 0;
+          width: min(360px, 88vw);
+          height: 100vh;
+          z-index: 60;
+          background: #fff8e7;
+          border-left: 1px solid rgba(26, 26, 46, 0.08);
+          padding: 18px 16px;
+          display: grid;
+          align-content: start;
+          gap: 14px;
+          overflow-y: auto;
+        }
+        .menuHead {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+        }
+        .menuHead strong {
+          font-size: 18px;
+          color: #1a1a2e;
+        }
+        .menuHead button {
+          min-height: 36px;
+          padding: 0 12px;
+          border-radius: 999px;
+          background: rgba(26, 26, 46, 0.06);
+          color: #1a1a2e;
+          cursor: pointer;
+        }
+        .menuSection {
+          display: grid;
+          gap: 8px;
+        }
+        .menuSectionTitle {
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: #457b9d;
+        }
+        .menuList {
+          display: grid;
+          gap: 8px;
+        }
+        .menuLink {
+          min-height: 46px;
+          padding: 0 14px;
+          border-radius: 16px;
+          border: 1px solid rgba(26, 26, 46, 0.07);
+          background: rgba(255, 255, 255, 0.88);
+          color: #1a1a2e;
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 14px;
+          font-weight: 700;
+        }
+        .menuLink.split {
+          justify-content: space-between;
+        }
+        .menuLabel {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .menuBadge {
+          min-width: 20px;
+          height: 20px;
+          padding: 0 6px;
+          border-radius: 999px;
+          background: #e63946;
+          color: #fff;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 10px;
+          font-weight: 800;
+        }
+        .panelSegmented {
+          width: 100%;
+        }
+        .panelSegmented button {
+          flex: 1 1 0;
+        }
+        .logoutButton {
+          min-height: 46px;
+          border-radius: 16px;
+          background: rgba(230, 57, 70, 0.1);
+          color: #a92b36;
+          font-size: 14px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+        @media (max-width: 640px) {
+          .homeShell {
+            padding: 0 12px 24px;
+          }
+          .feedControlCard,
+          .studyCard,
+          .announceCard,
+          .feedCard {
+            border-radius: 18px;
+          }
+          .feedControlCard,
+          .studyCard,
+          .announceCard,
+          .feedCard {
+            padding-left: 14px;
+            padding-right: 14px;
+          }
+          .toolGrid,
+          .leaderboardGrid {
+            grid-template-columns: 1fr;
+          }
+          .feedCard {
+            grid-template-columns: minmax(0, 1fr) 92px;
+            gap: 12px;
+            padding-top: 14px;
+            padding-bottom: 14px;
+          }
+          .feedThumb {
+            width: 92px;
+            height: 84px;
+            border-radius: 14px;
+          }
+        }
+        @media (max-width: 480px) {
+          .homeHeader {
+            padding-top: 14px;
+          }
+          .brandTitle {
+            font-size: 26px;
+          }
+          .feedHeading,
+          .studyTitle {
+            font-size: 28px;
+          }
+          .feedControlRow,
+          .studyHeader,
+          .leaderboardHead {
+            align-items: flex-start;
+          }
+          .segmentedControl,
+          .panelSegmented {
+            width: 100%;
+          }
+          .segmentedControl button,
+          .panelSegmented button {
+            flex: 1 1 0;
+          }
+          .feedCard {
+            grid-template-columns: minmax(0, 1fr);
+          }
+          .feedThumb {
+            width: 100%;
+            height: 180px;
+          }
+          .postFooter {
+            align-items: flex-start;
+          }
+        }
+      `}</style>
     </div>
   );
 }
