@@ -3457,22 +3457,22 @@ function StudyContent() {
 
   const pageMeta = selectedView
     ? selectedView === "kana"
-      ? { title: "Kana Sprint", subtitle: "Entrena velocidad y precisión de hiragana/katakana." }
+      ? { title: "Kana Sprint", subtitle: "" }
       : selectedView === "sprint"
-        ? { title: "Vocab + Kanji Sprint", subtitle: "Compite por rangos de lección para mantener nivel justo." }
+        ? { title: "Vocab Sprint", subtitle: "" }
         : selectedView === "exam"
-          ? { title: "Exámenes por Lección", subtitle: "Autoevaluación de 20 reactivos con feedback final y passing score de 70%." }
+          ? { title: "Exámenes", subtitle: "" }
           : selectedView === "dictionary"
-            ? { title: "Diccionario", subtitle: "Consulta rápida con cobertura amplia y fallback español-inglés." }
-          : { title: "Flashcards", subtitle: "Carpetas por lección y práctica por set." }
-    : { title: "Study Lab", subtitle: "Selecciona una herramienta y practica por bloques." };
+            ? { title: "Diccionario", subtitle: "" }
+          : { title: "Flashcards", subtitle: "" }
+    : { title: "Study", subtitle: "" };
   const studyThemes: Record<string, { badge: string; bg: string; accent: string; soft: string }> = {
     kana: { badge: "Kana", bg: "linear-gradient(145deg,#ecfdf5,#f8fffb)", accent: "#16a34a", soft: "rgba(22,163,74,.12)" },
     sprint: { badge: "Sprint", bg: "linear-gradient(145deg,#fff7ed,#fffdf9)", accent: "#ea580c", soft: "rgba(234,88,12,.12)" },
     flashcards: { badge: "Flashcards", bg: "linear-gradient(145deg,#eef2ff,#fafbff)", accent: "#4f46e5", soft: "rgba(79,70,229,.12)" },
     exam: { badge: "Exámenes", bg: "linear-gradient(145deg,#e0f2fe,#f8fbff)", accent: "#0284c7", soft: "rgba(2,132,199,.12)" },
     dictionary: { badge: "Diccionario", bg: "linear-gradient(145deg,#ecfeff,#f8ffff)", accent: "#0f766e", soft: "rgba(15,118,110,.12)" },
-    hub: { badge: "Study Lab", bg: "linear-gradient(145deg,#ffffff,#f7fffc)", accent: "#0f766e", soft: "rgba(15,118,110,.12)" },
+    hub: { badge: "Study", bg: "linear-gradient(145deg,#ffffff,#fffdf8)", accent: "#1A1A2E", soft: "rgba(26,26,46,.08)" },
   };
   const currentTheme = selectedView ? studyThemes[selectedView] : studyThemes.hub;
 
@@ -3828,34 +3828,81 @@ function StudyContent() {
     </div>
   );
 
+  const toolCards = [
+    { key: "kana", href: "/study?view=kana", title: "Kana Sprint", accent: "#4ECDC4", bg: "linear-gradient(145deg,#f1fffd,#ffffff)", text: "#1A1A2E" },
+    { key: "sprint", href: "/study?view=sprint", title: "Vocab Sprint", accent: "#F4A261", bg: "linear-gradient(145deg,#fff8f1,#ffffff)", text: "#1A1A2E" },
+    { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", accent: "#457B9D", bg: "linear-gradient(145deg,#f3f9fd,#ffffff)", text: "#1A1A2E" },
+    { key: "exam", href: "/study?view=exam", title: "Exámenes", accent: "#E63946", bg: "linear-gradient(145deg,#fff4f5,#ffffff)", text: "#1A1A2E" },
+    ...(isAdmin ? [{ key: "dictionary", href: "/study?view=dictionary", title: "Diccionario", accent: "#4ECDC4", bg: "linear-gradient(145deg,#f1fffd,#ffffff)", text: "#1A1A2E" }] : []),
+  ];
+
   return (
-    <div style={{ minHeight: "100vh", background: "radial-gradient(900px 420px at 50% -10%, rgba(52,197,166,.08), transparent 65%), #f6f7f8", padding: 14 }}>
-      <div style={{ maxWidth: 980, margin: "0 auto", display: "grid", gap: 12 }}>
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-          <Link href="/" style={{ textDecoration: "none", border: "1px solid rgba(17,17,20,.1)", background: "#fff", color: "#222", borderRadius: 999, padding: "8px 12px", fontSize: 13 }}>← Volver</Link>
-          <div style={{ fontSize: 12, color: "#7c7c85", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>Nihongo Study</div>
+    <div style={{ minHeight: "100vh", background: "radial-gradient(900px 420px at 50% -10%, rgba(78,205,196,.08), transparent 65%), #fff8e7", padding: 14 }}>
+      <div style={{ maxWidth: 960, margin: "0 auto", display: "grid", gap: 14 }}>
+        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, paddingTop: 4 }}>
+          <Link href="/study" style={{ textDecoration: "none", color: "#1A1A2E", display: "inline-flex", alignItems: "center", gap: 10 }}>
+            <span style={{ width: 10, height: 10, borderRadius: 999, background: "#E63946", boxShadow: "0 0 0 6px rgba(230,57,70,.1)" }} />
+            <span style={{ fontSize: 28, lineHeight: 1, letterSpacing: "-.05em", fontWeight: 900 }}>Nihongo Feed</span>
+          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <Link href="/resources" style={{ textDecoration: "none", minHeight: 40, padding: "0 14px", borderRadius: 999, background: "rgba(255,255,255,.88)", border: "1px solid rgba(26,26,46,.08)", color: "#1A1A2E", fontSize: 13, fontWeight: 800, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>Recursos</Link>
+            <Link href="/notifications" style={{ textDecoration: "none", minHeight: 40, padding: "0 14px", borderRadius: 999, background: unreadNotifications > 0 ? "rgba(230,57,70,.1)" : "rgba(255,255,255,.88)", border: "1px solid rgba(26,26,46,.08)", color: "#1A1A2E", fontSize: 13, fontWeight: 800, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              Avisos
+              {unreadNotifications > 0 && (
+                <span style={{ minWidth: 18, height: 18, padding: "0 5px", borderRadius: 999, background: "#E63946", color: "#fff", fontSize: 10, fontWeight: 800, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  {unreadNotifications > 9 ? "9+" : unreadNotifications}
+                </span>
+              )}
+            </Link>
+          </div>
         </header>
 
-        <section style={{ background: currentTheme.bg, border: "1px solid rgba(17,17,20,.07)", borderRadius: 18, padding: 14, boxShadow: `0 10px 24px ${currentTheme.soft}` }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 999, border: `1px solid ${currentTheme.soft}`, color: currentTheme.accent, fontSize: 11, fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase", background: "#fff", padding: "4px 8px" }}>
-            <span style={{ width: 6, height: 6, borderRadius: 999, background: currentTheme.accent }} />
+        <section
+          style={{
+            background: showHub ? "linear-gradient(145deg,#1A1A2E,#23233e)" : currentTheme.bg,
+            border: "1px solid rgba(26,26,46,.08)",
+            borderRadius: 30,
+            padding: showHub ? 22 : 16,
+            boxShadow: showHub ? "0 24px 44px rgba(26,26,46,.16)" : `0 10px 24px ${currentTheme.soft}`,
+            color: showHub ? "#FFF8E7" : "#1A1A2E",
+            display: "grid",
+            gap: showHub ? 18 : 8,
+          }}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              width: "fit-content",
+              alignItems: "center",
+              gap: 8,
+              borderRadius: 999,
+              background: showHub ? "rgba(255,248,231,.08)" : "#fff",
+              border: showHub ? "1px solid rgba(255,248,231,.08)" : `1px solid ${currentTheme.soft}`,
+              color: showHub ? "#FFF8E7" : currentTheme.accent,
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: ".08em",
+              textTransform: "uppercase",
+              padding: "6px 10px",
+            }}
+          >
+            <span style={{ width: 6, height: 6, borderRadius: 999, background: showHub ? "#4ECDC4" : currentTheme.accent }} />
             {currentTheme.badge}
           </div>
-          <h1 style={{ margin: "8px 0 0", fontSize: 28, lineHeight: 1.1, letterSpacing: "-.02em" }}>{pageMeta.title}</h1>
-          <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 14, lineHeight: 1.5 }}>
-            {pageMeta.subtitle}
-          </p>
+          <div style={{ fontSize: showHub ? "clamp(48px, 11vw, 88px)" : 32, lineHeight: showHub ? 0.9 : 1, letterSpacing: showHub ? "-.08em" : "-.04em", fontWeight: 900 }}>
+            {pageMeta.title}
+          </div>
+          {showHub && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 10 }}>
+              <Link href="/study?view=flashcards" style={{ textDecoration: "none", minHeight: 82, borderRadius: 20, background: "rgba(255,255,255,.06)", color: "#FFF8E7", border: "1px solid rgba(255,255,255,.08)", padding: 16, display: "flex", alignItems: "flex-end", fontSize: 22, fontWeight: 800, letterSpacing: "-.04em" }}>Flashcards</Link>
+              <Link href="/study?view=exam" style={{ textDecoration: "none", minHeight: 82, borderRadius: 20, background: "rgba(255,255,255,.06)", color: "#FFF8E7", border: "1px solid rgba(255,255,255,.08)", padding: 16, display: "flex", alignItems: "flex-end", fontSize: 22, fontWeight: 800, letterSpacing: "-.04em" }}>Exámenes</Link>
+            </div>
+          )}
         </section>
 
         {!showHub && (
-          <section style={{ background: "#fff", border: "1px solid rgba(17,17,20,.07)", borderRadius: 14, padding: 10, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))" }}>
-            {[
-              { key: "kana", href: "/study?view=kana", title: "Kana Sprint", subtitle: "Lectura rápida", accent: "#16a34a", bg: "#ecfdf3" },
-              { key: "sprint", href: "/study?view=sprint", title: "Vocab+Kanji Sprint", subtitle: "Velocidad por buckets", accent: "#ea580c", bg: "#fff7ed" },
-              { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", subtitle: "Repaso visual", accent: "#4f46e5", bg: "#eef2ff" },
-              { key: "exam", href: "/study?view=exam", title: "Exámenes", subtitle: "Autoevaluación", accent: "#0284c7", bg: "#e0f2fe" },
-              ...(isAdmin ? [{ key: "dictionary", href: "/study?view=dictionary", title: "Diccionario", subtitle: "Lookup admin", accent: "#0f766e", bg: "#ecfeff" }] : []),
-            ].map((tool) => {
+          <section style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {toolCards.map((tool) => {
               const selected = activeTab === tool.key;
               return (
                 <Link
@@ -3863,16 +3910,21 @@ function StudyContent() {
                   href={tool.href}
                   style={{
                     textDecoration: "none",
-                    border: `1px solid ${selected ? tool.accent : "rgba(17,17,20,.1)"}`,
-                    borderRadius: 12,
-                    padding: "8px 10px",
-                    color: selected ? tool.accent : "#344054",
-                    background: selected ? tool.bg : "#fff",
-                    boxShadow: selected ? `0 8px 18px ${tool.accent}22` : "none",
+                    minHeight: 42,
+                    padding: "0 14px",
+                    borderRadius: 999,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: selected ? tool.accent : "rgba(255,255,255,.88)",
+                    border: `1px solid ${selected ? tool.accent : "rgba(26,26,46,.08)"}`,
+                    color: selected ? "#fff" : "#1A1A2E",
+                    fontSize: 13,
+                    fontWeight: 800,
+                    boxShadow: selected ? `0 10px 20px ${tool.accent}33` : "none",
                   }}
                 >
-                  <div style={{ fontSize: 12, fontWeight: 800 }}>{tool.title}</div>
-                  <div style={{ marginTop: 2, fontSize: 11, color: "#667085", fontWeight: 600 }}>{tool.subtitle}</div>
+                  {tool.title}
                 </Link>
               );
             })}
@@ -3880,34 +3932,32 @@ function StudyContent() {
         )}
 
         {showHub && (
-          <section style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
-            <Link href="/study?view=kana" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(34,197,94,.22)", borderRadius: 16, background: "linear-gradient(145deg,#ecfdf3,#f9fffb)", padding: 14 }}>
-              <div style={{ fontSize: 12, color: "#15803d", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Sprint</div>
-              <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Kana Sprint</div>
-              <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Hiragana/Katakana con timer, penalty y leaderboard.</p>
-            </Link>
-            <Link href="/study?view=sprint" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(249,115,22,.22)", borderRadius: 16, background: "linear-gradient(145deg,#fff7ed,#fffdf8)", padding: 14 }}>
-              <div style={{ fontSize: 12, color: "#c2410c", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Sprint</div>
-              <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Vocab + Kanji</div>
-              <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Compite en buckets por lección para nivelar dificultad.</p>
-            </Link>
-            <Link href="/study?view=flashcards" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(99,102,241,.22)", borderRadius: 16, background: "linear-gradient(145deg,#eef2ff,#fafbff)", padding: 14 }}>
-              <div style={{ fontSize: 12, color: "#4338ca", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Memoria</div>
-              <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Flashcards</div>
-              <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Vocab y kanji por lección para repasar de forma visual.</p>
-            </Link>
-            <Link href="/study?view=exam" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(14,165,233,.22)", borderRadius: 16, background: "linear-gradient(145deg,#e0f2fe,#f8fbff)", padding: 14 }}>
-              <div style={{ fontSize: 12, color: "#0f766e", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Evaluación</div>
-              <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Examen por lección</div>
-              <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>20 preguntas, passing de 70% y feedback completo al final.</p>
-            </Link>
-            {isAdmin && (
-              <Link href="/study?view=dictionary" style={{ textDecoration: "none", color: "#111114", border: "1px solid rgba(15,118,110,.22)", borderRadius: 16, background: "linear-gradient(145deg,#ecfeff,#f8ffff)", padding: 14 }}>
-                <div style={{ fontSize: 12, color: "#0f766e", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Admin</div>
-                <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800 }}>Diccionario</div>
-                <p style={{ margin: "8px 0 0", color: "#667085", fontSize: 13 }}>Consulta amplia con fallback español-inglés.</p>
+          <section style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))" }}>
+            {toolCards.map((tool) => (
+              <Link
+                key={tool.key}
+                href={tool.href}
+                style={{
+                  textDecoration: "none",
+                  color: tool.text,
+                  minHeight: 124,
+                  border: "1px solid rgba(26,26,46,.08)",
+                  borderRadius: 24,
+                  background: tool.bg,
+                  padding: 18,
+                  boxShadow: "0 18px 36px rgba(26,26,46,.06)",
+                  display: "flex",
+                  alignItems: "flex-end",
+                  justifyContent: "space-between",
+                  gap: 10,
+                }}
+              >
+                <div style={{ display: "grid", gap: 14 }}>
+                  <span style={{ width: 14, height: 14, borderRadius: 999, background: tool.accent }} />
+                  <span style={{ fontSize: 28, lineHeight: 1, letterSpacing: "-.05em", fontWeight: 800 }}>{tool.title}</span>
+                </div>
               </Link>
-            )}
+            ))}
           </section>
         )}
 
