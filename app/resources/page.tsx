@@ -379,7 +379,6 @@ export default function ResourcesPage() {
                 Las carpetas vacías se guardan localmente hasta que agregues contenido.
               </p>
             </aside>
-            )}
 
             <section className="contentPanel">
               <div className="panelHead">
