@@ -336,59 +336,25 @@ export default function ResourcesPage() {
           {errorMsg && <div className="errorBox">{errorMsg}</div>}
 
           <div className="layoutGrid">
-            <aside className="foldersPanel">
-              <div className="panelHead">
-                <div>
-                  <div className="eyebrow">Carpetas</div>
-                  <h2>Explorar</h2>
-                </div>
-                <span className="countPill">{folders.length}</span>
-              </div>
-
-              {isAdmin && (
-                <div className="folderCreator">
-                  <input
-                    value={newFolderName}
-                    onChange={(e) => setNewFolderName(e.target.value)}
-                    placeholder="Nueva carpeta"
-                  />
-                  <button type="button" onClick={addFolder}>Crear</button>
-                </div>
-              )}
-
-              <div className="folderList">
-                {folders.map((folder) => {
-                  const count = resources.filter((resource) => (resource.category || "General") === folder).length;
-                  const active = folder === selectedFolder;
-                  return (
-                    <button
-                      key={folder}
-                      type="button"
-                      className={`folderBtn ${active ? "active" : ""}`}
-                      onClick={() => setSelectedFolder(folder)}
-                    >
-                      <span className="folderBtnLabel">
-                        <IconFolder />
-                        <span>{folder}</span>
-                      </span>
-                      <span className="folderCount">{count}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <p className="panelHint">
-                Las carpetas vacías se guardan localmente hasta que agregues contenido.
-              </p>
-            </aside>
-
             <section className="contentPanel">
-              <div className="panelHead">
-                <div>
-                  <div className="eyebrow">Contenido</div>
+              <div className="contentHero">
+                <div className="contentHeroMain">
+                  <div className="eyebrow">Carpeta actual</div>
                   <h2>{selectedFolder}</h2>
+                  <p>
+                    {resourcesInFolder.length === 0
+                      ? "No hay contenido en esta carpeta todavía."
+                      : `${resourcesInFolder.length} elemento${resourcesInFolder.length === 1 ? "" : "s"} disponible${resourcesInFolder.length === 1 ? "" : "s"}.`}
+                  </p>
                 </div>
-                <span className="countPill">{resourcesInFolder.length} items</span>
+                <div className="contentHeroMeta">
+                  <span className="countPill">{resourcesInFolder.length} items</span>
+                  {isAdmin && (
+                    <button type="button" onClick={() => startCreateInFolder(selectedFolder)} className="primaryBtn">
+                      + Nuevo recurso
+                    </button>
+                  )}
+                </div>
               </div>
 
               {showComposer && isAdmin && (
@@ -563,6 +529,52 @@ export default function ResourcesPage() {
                 </div>
               )}
             </section>
+
+            <aside className="foldersPanel">
+              <div className="panelHead compact">
+                <div>
+                  <div className="eyebrow">Carpetas</div>
+                  <h2>Biblioteca</h2>
+                </div>
+                <span className="countPill">{folders.length}</span>
+              </div>
+
+              {isAdmin && (
+                <div className="folderCreator">
+                  <input
+                    value={newFolderName}
+                    onChange={(e) => setNewFolderName(e.target.value)}
+                    placeholder="Nueva carpeta"
+                  />
+                  <button type="button" onClick={addFolder}>Crear</button>
+                </div>
+              )}
+
+              <div className="folderList">
+                {folders.map((folder) => {
+                  const count = resources.filter((resource) => (resource.category || "General") === folder).length;
+                  const active = folder === selectedFolder;
+                  return (
+                    <button
+                      key={folder}
+                      type="button"
+                      className={`folderBtn ${active ? "active" : ""}`}
+                      onClick={() => setSelectedFolder(folder)}
+                    >
+                      <span className="folderBtnLabel">
+                        <IconFolder />
+                        <span>{folder}</span>
+                      </span>
+                      <span className="folderCount">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <p className="panelHint">
+                Las carpetas vacías se guardan localmente hasta que agregues contenido.
+              </p>
+            </aside>
           </div>
         </div>
       </div>
@@ -661,6 +673,10 @@ export default function ResourcesPage() {
           box-shadow: var(--shadow-card);
           padding: var(--space-4);
         }
+        .foldersPanel {
+          background: color-mix(in srgb, var(--color-surface-muted) 46%, white);
+          box-shadow: none;
+        }
         .panelHead {
           display: flex;
           align-items: center;
@@ -668,12 +684,51 @@ export default function ResourcesPage() {
           gap: var(--space-3);
           margin-bottom: var(--space-4);
         }
+        .panelHead.compact {
+          margin-bottom: var(--space-3);
+        }
         .panelHead h2 {
           margin: 4px 0 0;
           font-size: var(--text-h3);
           line-height: 1;
           letter-spacing: -.03em;
           color: var(--color-text);
+        }
+        .contentHero {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: var(--space-3);
+          margin-bottom: var(--space-4);
+          padding-bottom: var(--space-3);
+          border-bottom: 1px solid var(--color-border);
+          flex-wrap: wrap;
+        }
+        .contentHeroMain {
+          display: grid;
+          gap: 6px;
+          min-width: 0;
+        }
+        .contentHeroMain h2 {
+          margin: 0;
+          font-size: clamp(2rem, 5vw, 3rem);
+          line-height: .96;
+          letter-spacing: -.06em;
+          color: var(--color-text);
+        }
+        .contentHeroMain p {
+          margin: 0;
+          color: var(--color-text-muted);
+          font-size: var(--text-body-sm);
+          line-height: 1.55;
+          max-width: 420px;
+        }
+        .contentHeroMeta {
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+          flex-wrap: wrap;
+          justify-content: flex-end;
         }
         .countPill {
           border-radius: var(--radius-pill);
@@ -727,7 +782,7 @@ export default function ResourcesPage() {
           text-align: left;
         }
         .folderBtn.active {
-          background: var(--color-accent-soft);
+          background: color-mix(in srgb, var(--color-accent-soft) 60%, white);
           border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
         }
         .folderBtnLabel {
@@ -972,7 +1027,7 @@ export default function ResourcesPage() {
 
         @media (min-width: 1024px) {
           .layoutGrid {
-            grid-template-columns: 280px minmax(0, 1fr);
+            grid-template-columns: minmax(0, 1fr) 260px;
             align-items: start;
           }
           .foldersPanel {
