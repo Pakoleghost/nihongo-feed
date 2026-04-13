@@ -2605,6 +2605,7 @@ function StudyContent() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   const [kanaSet, setKanaSet] = useState<KanaMode>("hiragana");
   const [kanaRunning, setKanaRunning] = useState(false);
@@ -2721,11 +2722,19 @@ function StudyContent() {
         try {
           const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
           setIsAdmin(Boolean(profile?.is_admin));
+          const { count } = await supabase
+            .from("notifications")
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", user.id)
+            .or("is_read.eq.false,is_read.is.null");
+          setUnreadNotifications(count || 0);
         } catch {
           setIsAdmin(false);
+          setUnreadNotifications(0);
         }
       } else {
         setIsAdmin(false);
+        setUnreadNotifications(0);
       }
       try {
         const weekKey = getLocalWeekStart().toISOString().slice(0, 10);
