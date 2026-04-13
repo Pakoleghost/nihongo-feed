@@ -67,16 +67,22 @@ export default function StudentProfilePage() {
   );
 
   if (loading || !profile) {
-    return <div style={{ padding: "110px 16px", textAlign: "center", color: "#9ca3af" }}>Cargando perfil…</div>;
+    return <div style={{ padding: "110px 16px", textAlign: "center", color: "var(--color-text-muted)" }}>Cargando perfil…</div>;
   }
 
   return (
     <div className="profilePage">
-      <div className="profileShell">
+      <div className="profileShell ds-container">
         <header className="profileTop">
-          <Link href="/" className="ghostPill">← Volver</Link>
+          <div className="profileTopMain">
+            <Link href="/study" className="ghostPill">Study</Link>
+            <div className="topCopy">
+              <div className="eyebrow">Perfil</div>
+              <h1>{profile.full_name || profile.username || "Usuario"}</h1>
+            </div>
+          </div>
           <div className="topActions">
-            {isMe && <Link href="/profile/edit" className="ghostPill">Editar perfil</Link>}
+            {isMe && <Link href="/profile/edit" className="ghostPill">Editar</Link>}
             <Link href="/write" className="primaryPill">Escribir</Link>
           </div>
         </header>
@@ -94,29 +100,27 @@ export default function StudentProfilePage() {
             )}
 
             <div className="identityCopy">
-              <div className="eyebrow">Perfil</div>
-              <h1>{profile.full_name || profile.username || "Usuario"}</h1>
               <p className="handle">@{profile.username || "sin-username"}</p>
               <div className="metaLine">
                 {profile.group_name && <span>{profile.group_name}</span>}
                 {profile.is_admin && <span>Sensei</span>}
               </div>
-              {profile.bio ? <p className="bio">{profile.bio}</p> : <p className="bio muted">Sin biografía todavía.</p>}
+              {profile.bio ? <p className="bio">{profile.bio}</p> : null}
             </div>
           </div>
 
           <div className="statsStrip">
             <div className="statCell">
-              <span>Total</span>
-              <strong>{posts.length}</strong>
-            </div>
-            <div className="statCell">
-              <span>Portafolio</span>
-              <strong>{portfolioPosts.length}</strong>
-            </div>
-            <div className="statCell">
               <span>Publicaciones</span>
               <strong>{portfolioPosts.length}</strong>
+            </div>
+            <div className="statCell">
+              <span>Grupo</span>
+              <strong>{profile.group_name || "—"}</strong>
+            </div>
+            <div className="statCell">
+              <span>Rol</span>
+              <strong>{profile.is_admin ? "Sensei" : "Alumno"}</strong>
             </div>
           </div>
         </section>
@@ -125,8 +129,9 @@ export default function StudentProfilePage() {
           <div className="archiveHead">
             <div>
               <div className="eyebrow">Archivo</div>
-              <h2>Portafolio</h2>
+              <h2>Publicaciones</h2>
             </div>
+            <span className="countPill">{portfolioPosts.length}</span>
           </div>
 
           {portfolioPosts.length === 0 ? (
@@ -140,7 +145,6 @@ export default function StudentProfilePage() {
                     <div className="postBody">
                       <div className="postMeta">
                         <span>{formatDate(post.created_at)}</span>
-                        {post.is_reviewed && <span className="statusTag">済 Sumi</span>}
                       </div>
                       <Link href={`/post/${post.id}`} className="postTitle">
                         {title || "Sin título"}
@@ -167,84 +171,93 @@ export default function StudentProfilePage() {
       <style jsx>{`
         .profilePage {
           min-height: 100vh;
-          background:
-            radial-gradient(900px 420px at 50% -10%, rgba(52, 197, 166, 0.09), transparent 68%),
-            linear-gradient(180deg, #fafafa 0%, #f4f5f6 100%);
-          padding: 16px;
+          background: var(--color-bg);
+          padding: var(--page-padding);
         }
         .profileShell {
-          width: min(100%, 780px);
-          margin: 0 auto;
           display: grid;
-          gap: 14px;
+          gap: var(--space-4);
         }
         .profileTop {
-          position: sticky;
-          top: 0;
-          z-index: 30;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 10px;
+          gap: var(--space-3);
           flex-wrap: wrap;
-          padding: 6px 0;
-          background: rgba(244, 245, 246, 0.88);
-          backdrop-filter: blur(10px);
+          padding: var(--space-2) 0;
+        }
+        .profileTopMain {
+          display: flex;
+          align-items: center;
+          gap: var(--space-3);
+          min-width: 0;
+        }
+        .topCopy {
+          display: grid;
+          gap: 2px;
+          min-width: 0;
+        }
+        .topCopy h1 {
+          margin: 0;
+          font-size: var(--text-h1);
+          line-height: 0.98;
+          letter-spacing: -0.04em;
+          color: var(--color-text);
+          overflow-wrap: anywhere;
         }
         .topActions {
           display: flex;
-          gap: 8px;
+          gap: var(--space-2);
           flex-wrap: wrap;
         }
         .ghostPill,
         .primaryPill {
           min-height: 40px;
           padding: 0 14px;
-          border-radius: 999px;
+          border-radius: var(--radius-pill);
           display: inline-flex;
           align-items: center;
           justify-content: center;
           text-decoration: none;
-          font-size: 13px;
+          font-size: var(--text-body-sm);
           font-weight: 700;
         }
         .ghostPill {
-          border: 1px solid rgba(17, 17, 20, 0.1);
-          background: rgba(255, 255, 255, 0.88);
-          color: #17171c;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          color: var(--color-text);
         }
         .primaryPill {
           border: 1px solid transparent;
           color: #fff;
-          background: linear-gradient(135deg, #34c5a6, #27ad93);
-          box-shadow: 0 10px 24px rgba(39, 173, 147, 0.18);
+          background: var(--color-primary);
         }
         .profileCard,
         .archiveCard {
-          background: rgba(255, 255, 255, 0.9);
-          border: 1px solid rgba(17, 17, 20, 0.08);
-          border-radius: 24px;
-          box-shadow: 0 18px 42px rgba(15, 23, 42, 0.05);
+          background: var(--color-surface);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-card);
         }
         .profileCard {
-          padding: 22px;
+          padding: var(--space-5);
           display: grid;
-          gap: 20px;
+          gap: var(--space-4);
         }
         .profileIdentity {
           display: grid;
-          grid-template-columns: 96px minmax(0, 1fr);
-          gap: 18px;
-          align-items: start;
+          grid-template-columns: 72px minmax(0, 1fr);
+          gap: var(--space-4);
+          align-items: center;
         }
         .avatarWrap {
-          width: 96px;
-          height: 96px;
+          width: 72px;
+          height: 72px;
           border-radius: 999px;
           overflow: hidden;
           flex-shrink: 0;
-          border: 1px solid rgba(17, 17, 20, 0.08);
-          background: #f3f4f6;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface-muted);
           display: grid;
           place-items: center;
           text-decoration: none;
@@ -259,171 +272,169 @@ export default function StudentProfilePage() {
           min-width: 0;
         }
         .eyebrow {
-          font-size: 11px;
+          font-size: var(--text-label);
           font-weight: 800;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: #7d7d87;
+          color: var(--color-text-muted);
         }
-        .identityCopy h1,
         .archiveHead h2 {
-          margin: 4px 0 0;
-          color: #111114;
-          letter-spacing: -0.03em;
+          margin: 2px 0 0;
+          color: var(--color-text);
+          letter-spacing: -0.02em;
           overflow-wrap: anywhere;
         }
-        .identityCopy h1 {
-          font-size: clamp(28px, 5vw, 40px);
-          line-height: 0.96;
-        }
         .handle {
-          margin: 8px 0 0;
-          color: #6b7280;
-          font-size: 15px;
+          margin: 0;
+          color: var(--color-text);
+          font-size: var(--text-body-lg);
           font-weight: 600;
           overflow-wrap: anywhere;
         }
         .metaLine {
-          margin-top: 10px;
+          margin-top: var(--space-2);
           display: flex;
-          gap: 8px;
+          gap: var(--space-2);
           flex-wrap: wrap;
-          color: #555862;
-          font-size: 13px;
+          color: var(--color-text-muted);
+          font-size: var(--text-body-sm);
           font-weight: 600;
         }
         .metaLine span {
           display: inline-flex;
           align-items: center;
-          min-height: 30px;
+          min-height: 28px;
           padding: 0 10px;
-          border-radius: 999px;
-          background: #f4f6f7;
-          border: 1px solid rgba(17, 17, 20, 0.07);
+          border-radius: var(--radius-pill);
+          background: var(--color-surface-muted);
+          border: 1px solid var(--color-border);
         }
         .bio {
-          margin: 14px 0 0;
+          margin: var(--space-3) 0 0;
           max-width: 60ch;
-          font-size: 15px;
+          font-size: var(--text-body);
           line-height: 1.65;
-          color: #21232b;
+          color: var(--color-text);
           overflow-wrap: anywhere;
         }
         .muted {
-          color: #92929b;
+          color: var(--color-text-muted);
         }
         .statsStrip {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 10px;
+          gap: var(--space-3);
         }
         .statCell {
           min-width: 0;
-          padding: 14px 16px;
-          border-radius: 18px;
-          background: linear-gradient(180deg, #fbfbfc, #f5f6f7);
-          border: 1px solid rgba(17, 17, 20, 0.07);
+          padding: var(--space-4);
+          border-radius: var(--radius-md);
+          background: var(--color-surface-muted);
+          border: 1px solid var(--color-border);
         }
         .statCell span {
           display: block;
-          font-size: 11px;
+          font-size: var(--text-label);
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: #80808a;
+          color: var(--color-text-muted);
           font-weight: 800;
         }
         .statCell strong {
           display: block;
-          margin-top: 6px;
-          color: #111114;
-          font-size: clamp(22px, 4vw, 30px);
-          line-height: 1;
+          margin-top: var(--space-2);
+          color: var(--color-text);
+          font-size: var(--text-body-lg);
+          line-height: 1.2;
+          overflow-wrap: anywhere;
         }
         .archiveCard {
-          padding: 18px;
+          padding: var(--space-5);
         }
         .archiveHead {
           display: flex;
           justify-content: space-between;
-          align-items: end;
-          gap: 12px;
-          margin-bottom: 14px;
+          align-items: center;
+          gap: var(--space-3);
+          margin-bottom: var(--space-4);
           flex-wrap: wrap;
         }
         .archiveHead h2 {
-          font-size: clamp(22px, 4vw, 28px);
-          line-height: 1.04;
+          font-size: var(--text-h2);
+          line-height: 1.08;
+        }
+        .countPill {
+          min-height: 32px;
+          padding: 0 12px;
+          border-radius: var(--radius-pill);
+          border: 1px solid var(--color-border);
+          background: var(--color-surface-muted);
+          color: var(--color-text-muted);
+          font-size: var(--text-body-sm);
+          font-weight: 700;
+          display: inline-flex;
+          align-items: center;
         }
         .emptyState {
-          padding: 28px 18px;
-          border: 1px dashed rgba(17, 17, 20, 0.15);
-          border-radius: 18px;
+          padding: var(--space-6) var(--space-4);
+          border: 1px dashed var(--color-border-strong);
+          border-radius: var(--radius-md);
           text-align: center;
-          color: #7f818a;
-          font-size: 14px;
-          background: rgba(249, 250, 251, 0.7);
+          color: var(--color-text-muted);
+          font-size: var(--text-body);
+          background: var(--color-surface-muted);
         }
         .postList {
           display: grid;
-          gap: 10px;
+          gap: var(--space-3);
         }
         .postRow {
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 84px;
-          gap: 14px;
+          grid-template-columns: minmax(0, 1fr) 72px;
+          gap: var(--space-3);
           align-items: center;
-          padding: 14px;
-          border-radius: 18px;
-          border: 1px solid rgba(17, 17, 20, 0.07);
-          background: linear-gradient(180deg, #fff, #fcfcfd);
+          padding: var(--space-4);
+          border-radius: var(--radius-md);
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
         }
         .postBody {
           min-width: 0;
         }
         .postMeta {
           display: flex;
-          gap: 8px;
+          gap: var(--space-2);
           flex-wrap: wrap;
           align-items: center;
           margin-bottom: 6px;
-          color: #7c7f88;
-          font-size: 12px;
+          color: var(--color-text-muted);
+          font-size: var(--text-body-sm);
           font-weight: 600;
-        }
-        .statusTag {
-          border-radius: 999px;
-          border: 1px solid rgba(39, 173, 147, 0.28);
-          color: #229c85;
-          background: rgba(39, 173, 147, 0.08);
-          padding: 2px 8px;
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 0.04em;
         }
         .postTitle {
           display: block;
-          color: #111114;
+          color: var(--color-text);
           text-decoration: none;
-          font-size: 17px;
+          font-size: var(--text-body-lg);
           line-height: 1.3;
-          font-weight: 800;
+          font-weight: 700;
           letter-spacing: -0.01em;
           overflow-wrap: anywhere;
         }
         .postPreview {
-          margin: 7px 0 0;
-          color: #626673;
-          font-size: 14px;
+          margin: 6px 0 0;
+          color: var(--color-text-muted);
+          font-size: var(--text-body);
           line-height: 1.55;
           overflow-wrap: anywhere;
         }
         .postThumb {
-          width: 84px;
-          height: 84px;
-          border-radius: 16px;
+          width: 72px;
+          height: 72px;
+          border-radius: var(--radius-md);
           overflow: hidden;
-          background: #eef0f2;
-          border: 1px solid rgba(17, 17, 20, 0.06);
+          background: var(--color-surface-muted);
+          border: 1px solid var(--color-border);
           flex-shrink: 0;
         }
         .postThumb img {
@@ -437,59 +448,42 @@ export default function StudentProfilePage() {
           place-items: center;
         }
         .placeholderThumb span {
-          font-size: 12px;
+          font-size: var(--text-label);
           font-weight: 800;
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: #9a9da7;
+          color: var(--color-text-muted);
         }
         @media (max-width: 720px) {
-          .profilePage {
-            padding: 12px;
-          }
           .profileCard {
-            padding: 18px;
+            padding: var(--space-4);
           }
           .profileIdentity {
-            grid-template-columns: 76px minmax(0, 1fr);
-            gap: 14px;
+            grid-template-columns: 64px minmax(0, 1fr);
+            gap: var(--space-3);
           }
           .avatarWrap {
-            width: 76px;
-            height: 76px;
-          }
-          .identityCopy h1 {
-            font-size: 28px;
+            width: 64px;
+            height: 64px;
           }
           .statsStrip {
-            gap: 8px;
+            grid-template-columns: 1fr;
           }
           .statCell {
-            padding: 12px;
+            padding: var(--space-3);
           }
           .archiveCard {
-            padding: 14px;
+            padding: var(--space-4);
           }
           .postRow {
             grid-template-columns: minmax(0, 1fr) 72px;
-            gap: 10px;
-            padding: 12px;
-          }
-          .postThumb {
-            width: 72px;
-            height: 72px;
-            border-radius: 14px;
-          }
-          .postTitle {
-            font-size: 16px;
-          }
-          .postPreview {
-            font-size: 13px;
+            gap: var(--space-3);
+            padding: var(--space-3);
           }
         }
         @media (max-width: 520px) {
           .profileTop {
-            justify-content: flex-start;
+            align-items: flex-start;
           }
           .topActions {
             width: 100%;
@@ -499,16 +493,17 @@ export default function StudentProfilePage() {
           }
           .profileIdentity {
             grid-template-columns: minmax(0, 1fr);
+            align-items: start;
           }
           .avatarWrap {
-            width: 84px;
-            height: 84px;
-          }
-          .statsStrip {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            width: 72px;
+            height: 72px;
           }
           .archiveHead {
             align-items: stretch;
+          }
+          .countPill {
+            width: fit-content;
           }
         }
       `}</style>
