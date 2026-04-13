@@ -3901,6 +3901,44 @@ function StudyContent() {
     { key: "exam", href: "/study?view=exam", title: "Exámenes", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
     ...(isAdmin ? [{ key: "dictionary", href: "/study?view=dictionary", title: "Diccionario", accent: "var(--color-primary)", surface: "rgba(26, 26, 46, 0.06)" }] : []),
   ];
+  const featuredKanaCardStyle: CSSProperties = {
+    ...sectionStyle,
+    padding: "var(--space-6)",
+    gap: "var(--space-5)",
+    background: "var(--color-surface)",
+    borderColor: "color-mix(in srgb, var(--color-accent) 34%, var(--color-border))",
+    boxShadow: "0 20px 40px rgba(26, 26, 46, 0.08)",
+  };
+  const secondaryFeatureStyle: CSSProperties = {
+    ...panelStyle,
+    display: "grid",
+    gap: "var(--space-3)",
+    alignContent: "space-between",
+    minHeight: 164,
+  };
+  const compactSurfaceStyle: CSSProperties = {
+    ...panelStyle,
+    display: "grid",
+    gap: "var(--space-3)",
+  };
+  const compactLinkStyle = (accent: string, selected = false): CSSProperties => ({
+    textDecoration: "none",
+    color: "var(--color-text)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "var(--space-3)",
+    padding: "12px 14px",
+    borderRadius: "var(--radius-md)",
+    border: `1px solid ${selected ? accent : "var(--color-border)"}`,
+    background: selected ? "color-mix(in srgb, var(--color-surface-muted) 72%, white)" : "var(--color-surface)",
+  });
+  const compactArrowStyle: CSSProperties = {
+    color: "var(--color-text-muted)",
+    fontSize: "var(--text-body-sm)",
+    fontWeight: 800,
+    lineHeight: 1,
+  };
 
   const renderToolPill = (tool: { key: string; href: string; title: string; accent: string; surface: string }) => {
     const selected = activeTab === tool.key;
@@ -3933,9 +3971,9 @@ function StudyContent() {
       <div className="ds-container" style={{ display: "grid", gap: "var(--space-4)" }}>
         <AppTopNav primary="study" />
 
-        <section style={{ ...sectionStyle, gap: "var(--space-3)" }}>
+        <section style={{ ...sectionStyle, gap: "var(--space-3)", padding: showHub ? "var(--space-5)" : "var(--space-5)" }}>
           <div style={sectionKickerStyle}>{showHub ? "Study" : "Herramienta"}</div>
-          <div style={{ fontSize: showHub ? "clamp(40px, 10vw, 68px)" : "var(--text-h1)", lineHeight: 0.95, letterSpacing: "-.06em", fontWeight: 900, color: "var(--color-text)" }}>
+          <div style={{ fontSize: showHub ? "clamp(44px, 11vw, 74px)" : "var(--text-h1)", lineHeight: 0.92, letterSpacing: "-.065em", fontWeight: 900, color: "var(--color-text)" }}>
             {pageTitle}
           </div>
         </section>
@@ -3947,29 +3985,113 @@ function StudyContent() {
         )}
 
         {showHub && (
-          <section style={{ display: "grid", gap: "var(--space-3)", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
-            {toolCards.map((tool) => (
-              <Link
-                key={tool.key}
-                href={tool.href}
-                style={{
-                  textDecoration: "none",
-                  color: "var(--color-text)",
-                  minHeight: 110,
-                  border: `1px solid ${tool.accent}`,
-                  borderRadius: "var(--radius-lg)",
-                  background: tool.surface,
-                  padding: "var(--space-4)",
-                  boxShadow: "var(--shadow-card)",
-                  display: "grid",
-                  gap: "var(--space-4)",
-                  alignContent: "space-between",
-                }}
-              >
-                <span style={{ ...sectionKickerStyle, color: tool.accent }}>Abrir</span>
-                <span style={{ fontSize: "var(--text-h2)", lineHeight: 1, letterSpacing: "-.04em", fontWeight: 800 }}>{tool.title}</span>
-              </Link>
-            ))}
+          <section style={{ display: "grid", gap: "var(--space-4)" }}>
+            <section style={featuredKanaCardStyle}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-3)", flexWrap: "wrap" }}>
+                <div style={{ display: "grid", gap: "var(--space-2)" }}>
+                  <div style={{ ...sectionKickerStyle, color: "var(--color-accent)" }}>Principal</div>
+                  <div style={{ fontSize: "clamp(28px, 7vw, 44px)", lineHeight: 0.98, letterSpacing: "-.055em", fontWeight: 900, color: "var(--color-text)" }}>
+                    Kana Sprint
+                  </div>
+                  <div style={{ maxWidth: 420, fontSize: "var(--text-body)", lineHeight: 1.55, color: "var(--color-text-muted)" }}>
+                    Entrenamiento rápido para hiragana, katakana y mixto.
+                  </div>
+                </div>
+                <div style={{ display: "grid", gap: 8, minWidth: 160 }}>
+                  <div style={{ ...sectionKickerStyle, color: "var(--color-text-muted)" }}>Top semanal</div>
+                  <div style={{ display: "grid", gap: 8 }}>
+                    {(["hiragana", "katakana", "mixed"] as KanaMode[]).map((mode) => {
+                      const leader = kanaLeaderboard[mode]?.[0];
+                      return (
+                        <div key={`hub-${mode}`} style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
+                          <span style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700, textTransform: "capitalize" }}>{mode}</span>
+                          <span style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text)", fontWeight: 800 }}>
+                            {leader ? `${leader.profiles?.username || leader.profiles?.full_name || "usuario"} · ${leader.best_score}` : "—"}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gap: "var(--space-3)", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))" }}>
+                <div style={{ ...mutedPanelStyle, display: "grid", gap: "var(--space-3)", background: "var(--color-accent-soft)", borderColor: "color-mix(in srgb, var(--color-accent) 24%, var(--color-border))" }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {([
+                      ["hiragana", "Hiragana"],
+                      ["katakana", "Katakana"],
+                      ["mixed", "Mixto"],
+                    ] as [KanaMode, string][]).map(([mode, label]) => (
+                      <span
+                        key={`kana-hub-${mode}`}
+                        style={{
+                          borderRadius: "var(--radius-pill)",
+                          border: "1px solid color-mix(in srgb, var(--color-accent) 26%, var(--color-border))",
+                          background: kanaSet === mode ? "var(--color-surface)" : "transparent",
+                          color: "var(--color-primary)",
+                          padding: "7px 11px",
+                          fontSize: "var(--text-label)",
+                          fontWeight: 800,
+                        }}
+                      >
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "var(--space-3)", flexWrap: "wrap" }}>
+                    <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                      Reinicio semanal · <span style={{ color: "var(--color-text)" }}>{weeklyResetLabel || "..."}</span>
+                    </div>
+                    <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                      Mejor actual · <span style={{ color: "var(--color-text)" }}>{kanaBestByMode[kanaSet] || 0}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", alignContent: "end" }}>
+                  <Link href="/study?view=kana" style={{ ...primaryButtonStyle, textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 52 }}>
+                    Abrir Kana Sprint
+                  </Link>
+                </div>
+              </div>
+            </section>
+
+            <section style={{ display: "grid", gap: "var(--space-3)", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))" }}>
+              <div style={secondaryFeatureStyle}>
+                <div style={{ display: "grid", gap: 8 }}>
+                  <div style={{ ...sectionKickerStyle, color: "#457B9D" }}>Práctica</div>
+                  <h2 style={{ margin: 0, fontSize: "var(--text-h2)", lineHeight: 1.02 }}>Vocab + Kanji Sprint</h2>
+                  <p style={{ margin: 0, maxWidth: 430, color: "var(--color-text-muted)", fontSize: "var(--text-body-sm)", lineHeight: 1.55 }}>
+                    Rondas rápidas por bloques de lecciones con ranking mensual.
+                  </p>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "var(--space-3)", alignItems: "center", flexWrap: "wrap" }}>
+                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                    {vkBucketConfig.label} · Mejor {vkBestByBucket[vkBucket] || 0}
+                  </div>
+                  <Link href="/study?view=sprint" style={{ ...secondaryButtonStyle, textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                    Abrir
+                  </Link>
+                </div>
+              </div>
+
+              <div style={compactSurfaceStyle}>
+                <div style={{ ...sectionKickerStyle, color: "var(--color-text-muted)" }}>Biblioteca</div>
+                <div style={{ display: "grid", gap: 10 }}>
+                  {toolCards
+                    .filter((tool) => tool.key !== "kana" && tool.key !== "sprint")
+                    .map((tool) => (
+                      <Link key={`compact-${tool.key}`} href={tool.href} style={compactLinkStyle(tool.accent, false)}>
+                        <span style={{ display: "grid", gap: 2 }}>
+                          <span style={{ fontSize: "var(--text-body)", fontWeight: 800, color: "var(--color-text)" }}>{tool.title}</span>
+                        </span>
+                        <span style={compactArrowStyle}>↗</span>
+                      </Link>
+                    ))}
+                </div>
+              </div>
+            </section>
           </section>
         )}
 
