@@ -114,45 +114,160 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
     }
   };
 
+  const shellStyle: React.CSSProperties = {
+    minHeight: "100vh",
+    background: "var(--color-bg)",
+    padding: "var(--page-padding)",
+    display: "grid",
+    placeItems: "center",
+  };
+  const cardStyle: React.CSSProperties = {
+    width: "100%",
+    maxWidth: 480,
+    background: "var(--color-surface)",
+    border: "1px solid var(--color-border)",
+    borderRadius: "var(--radius-lg)",
+    boxShadow: "var(--shadow-card)",
+    padding: "var(--space-6)",
+    display: "grid",
+    gap: "var(--space-5)",
+  };
+  const headerStyle: React.CSSProperties = {
+    display: "grid",
+    gap: "var(--space-2)",
+  };
+  const eyebrowStyle: React.CSSProperties = {
+    fontSize: "var(--text-label)",
+    color: "var(--color-text-muted)",
+    fontWeight: 800,
+    letterSpacing: ".08em",
+    textTransform: "uppercase",
+  };
+  const titleStyle: React.CSSProperties = {
+    margin: 0,
+    fontSize: "var(--text-h1)",
+    lineHeight: 0.95,
+    letterSpacing: "-.05em",
+    color: "var(--color-text)",
+  };
+  const copyStyle: React.CSSProperties = {
+    margin: 0,
+    fontSize: "var(--text-body)",
+    color: "var(--color-text-muted)",
+    lineHeight: 1.5,
+  };
+  const formStyle: React.CSSProperties = {
+    display: "grid",
+    gap: "var(--space-3)",
+  };
+  const fieldStyle: React.CSSProperties = {
+    display: "grid",
+    gap: 6,
+  };
+  const labelStyle: React.CSSProperties = {
+    fontSize: "var(--text-label)",
+    color: "var(--color-text-muted)",
+    fontWeight: 700,
+  };
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    border: "1px solid var(--color-border)",
+    borderRadius: "var(--radius-md)",
+    background: "var(--color-surface)",
+    padding: "12px 14px",
+    fontSize: "var(--text-body)",
+    color: "var(--color-text)",
+    outline: "none",
+  };
+  const primaryButtonStyle: React.CSSProperties = {
+    border: 0,
+    borderRadius: "var(--radius-pill)",
+    background: "var(--color-primary)",
+    color: "#fff",
+    padding: "12px 16px",
+    fontWeight: 800,
+    fontSize: "var(--text-body)",
+    cursor: "pointer",
+  };
+  const ghostButtonStyle: React.CSSProperties = {
+    border: "1px solid var(--color-border)",
+    background: "transparent",
+    color: "var(--color-text-muted)",
+    borderRadius: "var(--radius-pill)",
+    padding: "10px 14px",
+    fontWeight: 700,
+    fontSize: "var(--text-body-sm)",
+    cursor: "pointer",
+    width: "100%",
+  };
+
   return (
-    <div style={{ maxWidth: "400px", margin: "60px auto", padding: "20px", fontFamily: "sans-serif", border: "1px solid #eee", borderRadius: "10px" }}>
-      <h1 style={{ textAlign: "center" }}>Nihongo Feed</h1>
-      <p style={{ textAlign: "center", margin: "6px 0 18px", color: "#6b7280", fontSize: "13px" }}>
-        {isSignUp ? "Crear cuenta nueva" : "Iniciar sesión"}
-      </p>
-      <form onSubmit={handleAuth} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-        {isSignUp && (
-          <>
-            <input type="text" placeholder="Nombre completo" value={fullName} onChange={(e) => setFullName(e.target.value)} required style={{ padding: "12px", borderRadius: "5px", border: "1px solid #ddd" }} />
-            <input
-              type="text"
-              placeholder="Username (ej. sakura_01)"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              style={{ padding: "12px", borderRadius: "5px", border: "1px solid #ddd" }}
-            />
-            <select value={gender} onChange={(e) => setGender(e.target.value)} required style={{ padding: "12px", borderRadius: "5px", border: "1px solid #ddd" }}>
-              <option value="">Género</option>
-              <option value="mujer">Mujer</option>
-              <option value="hombre">Hombre</option>
-              <option value="no_binario">No binario</option>
-              <option value="prefiero_no_decir">Prefiero no decir</option>
-              <option value="otro">Otro</option>
-            </select>
-            <div style={{ display: "grid", gap: "6px" }}>
-              <label style={{ fontSize: "12px", color: "#666" }}>Fecha de nacimiento</label>
-              <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} required style={{ padding: "12px", borderRadius: "5px", border: "1px solid #ddd" }} />
-            </div>
-          </>
-        )}
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ padding: "12px", borderRadius: "5px", border: "1px solid #ddd" }} />
-        <input type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ padding: "12px", borderRadius: "5px", border: "1px solid #ddd" }} />
-        <button type="submit" style={{ padding: "12px", backgroundColor: "#2cb696", color: "white", border: "none", borderRadius: "5px", fontWeight: "bold" }}>{isSignUp ? "Crear Cuenta" : "Entrar"}</button>
-      </form>
-      <button onClick={() => setIsSignUp(!isSignUp)} style={{ marginTop: "20px", background: "none", border: "none", color: "#2cb696", cursor: "pointer", width: "100%" }}>
-        {isSignUp ? "¿Ya tienes cuenta? Inicia sesión" : "¿Eres nuevo? Regístrate aquí"}
-      </button>
+    <div style={shellStyle}>
+      <div style={cardStyle}>
+        <div style={headerStyle}>
+          <div style={eyebrowStyle}>Nihongo Feed</div>
+          <h1 style={titleStyle}>{isSignUp ? "Crear cuenta" : "Entrar"}</h1>
+          <p style={copyStyle}>
+            {isSignUp ? "Tu acceso queda listo aquí mismo." : "Accede a estudio y recursos."}
+          </p>
+        </div>
+
+        <form onSubmit={handleAuth} style={formStyle}>
+          {isSignUp && (
+            <>
+              <label style={fieldStyle}>
+                <span style={labelStyle}>Nombre completo</span>
+                <input type="text" placeholder="Nombre completo" value={fullName} onChange={(e) => setFullName(e.target.value)} required style={inputStyle} />
+              </label>
+
+              <label style={fieldStyle}>
+                <span style={labelStyle}>Username</span>
+                <input
+                  type="text"
+                  placeholder="ej. sakura_01"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  style={inputStyle}
+                />
+              </label>
+
+              <label style={fieldStyle}>
+                <span style={labelStyle}>Género</span>
+                <select value={gender} onChange={(e) => setGender(e.target.value)} required style={inputStyle}>
+                  <option value="">Selecciona una opción</option>
+                  <option value="mujer">Mujer</option>
+                  <option value="hombre">Hombre</option>
+                  <option value="no_binario">No binario</option>
+                  <option value="prefiero_no_decir">Prefiero no decir</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </label>
+
+              <label style={fieldStyle}>
+                <span style={labelStyle}>Fecha de nacimiento</span>
+                <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} required style={inputStyle} />
+              </label>
+            </>
+          )}
+
+          <label style={fieldStyle}>
+            <span style={labelStyle}>Email</span>
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={inputStyle} />
+          </label>
+
+          <label style={fieldStyle}>
+            <span style={labelStyle}>Contraseña</span>
+            <input type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required style={inputStyle} />
+          </label>
+
+          <button type="submit" style={primaryButtonStyle}>{isSignUp ? "Crear cuenta" : "Entrar"}</button>
+        </form>
+
+        <button onClick={() => setIsSignUp(!isSignUp)} style={ghostButtonStyle}>
+          {isSignUp ? "Ya tengo cuenta" : "Crear cuenta nueva"}
+        </button>
+      </div>
     </div>
   );
 }
