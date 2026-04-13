@@ -3902,12 +3902,9 @@ function StudyContent() {
     ...(isAdmin ? [{ key: "dictionary", href: "/study?view=dictionary", title: "Diccionario", accent: "var(--color-primary)", surface: "rgba(26, 26, 46, 0.06)" }] : []),
   ];
   const featuredKanaCardStyle: CSSProperties = {
-    ...sectionStyle,
-    padding: "var(--space-6)",
+    display: "grid",
     gap: "var(--space-5)",
-    background: "var(--color-surface)",
-    borderColor: "color-mix(in srgb, var(--color-accent) 34%, var(--color-border))",
-    boxShadow: "0 20px 40px rgba(26, 26, 46, 0.08)",
+    padding: "var(--space-2) 0 var(--space-5)",
   };
   const secondaryFeatureStyle: CSSProperties = {
     ...panelStyle,
@@ -3971,12 +3968,19 @@ function StudyContent() {
       <div className="ds-container" style={{ display: "grid", gap: "var(--space-4)" }}>
         <AppTopNav primary="study" />
 
-        <section style={{ ...sectionStyle, gap: "var(--space-3)", padding: showHub ? "var(--space-5)" : "var(--space-5)" }}>
-          <div style={sectionKickerStyle}>{showHub ? "Study" : "Herramienta"}</div>
-          <div style={{ fontSize: showHub ? "clamp(44px, 11vw, 74px)" : "var(--text-h1)", lineHeight: 0.92, letterSpacing: "-.065em", fontWeight: 900, color: "var(--color-text)" }}>
-            {pageTitle}
-          </div>
-        </section>
+        {showHub ? (
+          <section style={{ display: "grid", gap: "var(--space-2)", padding: "var(--space-1) 0" }}>
+            <div style={{ fontSize: "clamp(48px, 12vw, 82px)", lineHeight: 0.9, letterSpacing: "-.075em", fontWeight: 900, color: "var(--color-text)" }}>
+              Study
+            </div>
+          </section>
+        ) : (
+          <section style={{ ...sectionStyle, gap: "var(--space-2)", padding: "var(--space-4) var(--space-5)" }}>
+            <div style={{ fontSize: "var(--text-h1)", lineHeight: 0.96, letterSpacing: "-.055em", fontWeight: 900, color: "var(--color-text)" }}>
+              {pageTitle}
+            </div>
+          </section>
+        )}
 
         {!showHub && (
           <section style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap" }}>
@@ -3985,20 +3989,16 @@ function StudyContent() {
         )}
 
         {showHub && (
-          <section style={{ display: "grid", gap: "var(--space-4)" }}>
+          <section style={{ display: "grid", gap: "var(--space-6)" }}>
             <section style={featuredKanaCardStyle}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-3)", flexWrap: "wrap" }}>
                 <div style={{ display: "grid", gap: "var(--space-2)" }}>
-                  <div style={{ ...sectionKickerStyle, color: "var(--color-accent)" }}>Principal</div>
-                  <div style={{ fontSize: "clamp(28px, 7vw, 44px)", lineHeight: 0.98, letterSpacing: "-.055em", fontWeight: 900, color: "var(--color-text)" }}>
+                  <div style={{ fontSize: "clamp(34px, 8vw, 56px)", lineHeight: 0.96, letterSpacing: "-.06em", fontWeight: 900, color: "var(--color-text)" }}>
                     Kana Sprint
-                  </div>
-                  <div style={{ maxWidth: 420, fontSize: "var(--text-body)", lineHeight: 1.55, color: "var(--color-text-muted)" }}>
-                    Entrenamiento rápido para hiragana, katakana y mixto.
                   </div>
                 </div>
                 <div style={{ display: "grid", gap: 8, minWidth: 160 }}>
-                  <div style={{ ...sectionKickerStyle, color: "var(--color-text-muted)" }}>Top semanal</div>
+                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>Top semanal</div>
                   <div style={{ display: "grid", gap: 8 }}>
                     {(["hiragana", "katakana", "mixed"] as KanaMode[]).map((mode) => {
                       const leader = kanaLeaderboard[mode]?.[0];
@@ -4016,7 +4016,7 @@ function StudyContent() {
               </div>
 
               <div style={{ display: "grid", gap: "var(--space-3)", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))" }}>
-                <div style={{ ...mutedPanelStyle, display: "grid", gap: "var(--space-3)", background: "var(--color-accent-soft)", borderColor: "color-mix(in srgb, var(--color-accent) 24%, var(--color-border))" }}>
+                <div style={{ display: "grid", gap: "var(--space-3)", padding: "var(--space-4) 0", borderTop: "1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-border))", borderBottom: "1px solid var(--color-border)" }}>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {([
                       ["hiragana", "Hiragana"],
@@ -4027,8 +4027,8 @@ function StudyContent() {
                         key={`kana-hub-${mode}`}
                         style={{
                           borderRadius: "var(--radius-pill)",
-                          border: "1px solid color-mix(in srgb, var(--color-accent) 26%, var(--color-border))",
-                          background: kanaSet === mode ? "var(--color-surface)" : "transparent",
+                          border: kanaSet === mode ? "1px solid color-mix(in srgb, var(--color-accent) 30%, var(--color-border))" : "1px solid transparent",
+                          background: kanaSet === mode ? "var(--color-accent-soft)" : "transparent",
                           color: "var(--color-primary)",
                           padding: "7px 11px",
                           fontSize: "var(--text-label)",
@@ -4050,8 +4050,8 @@ function StudyContent() {
                 </div>
 
                 <div style={{ display: "grid", alignContent: "end" }}>
-                  <Link href="/study?view=kana" style={{ ...primaryButtonStyle, textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 52 }}>
-                    Abrir Kana Sprint
+                  <Link href="/study?view=kana" style={{ ...primaryButtonStyle, textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 52, minWidth: 180 }}>
+                    Kana Sprint
                   </Link>
                 </div>
               </div>
@@ -4060,11 +4060,7 @@ function StudyContent() {
             <section style={{ display: "grid", gap: "var(--space-3)", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))" }}>
               <div style={secondaryFeatureStyle}>
                 <div style={{ display: "grid", gap: 8 }}>
-                  <div style={{ ...sectionKickerStyle, color: "#457B9D" }}>Práctica</div>
                   <h2 style={{ margin: 0, fontSize: "var(--text-h2)", lineHeight: 1.02 }}>Vocab + Kanji Sprint</h2>
-                  <p style={{ margin: 0, maxWidth: 430, color: "var(--color-text-muted)", fontSize: "var(--text-body-sm)", lineHeight: 1.55 }}>
-                    Rondas rápidas por bloques de lecciones con ranking mensual.
-                  </p>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: "var(--space-3)", alignItems: "center", flexWrap: "wrap" }}>
                   <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
@@ -4077,7 +4073,6 @@ function StudyContent() {
               </div>
 
               <div style={compactSurfaceStyle}>
-                <div style={{ ...sectionKickerStyle, color: "var(--color-text-muted)" }}>Biblioteca</div>
                 <div style={{ display: "grid", gap: 10 }}>
                   {toolCards
                     .filter((tool) => tool.key !== "kana" && tool.key !== "sprint")
