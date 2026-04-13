@@ -99,7 +99,7 @@ export default function BottomNav({
         right: 0,
         bottom: 0,
         zIndex: 50,
-        borderTop: "1px solid rgba(17,17,20,.10)",
+        borderTop: "1px solid var(--color-border)",
         background: "rgba(255,255,255,.92)",
         backdropFilter: "blur(12px)",
         paddingBottom: "env(safe-area-inset-bottom)",
@@ -107,12 +107,12 @@ export default function BottomNav({
     >
       <div
         style={{
-          maxWidth: 720,
+          maxWidth: 760,
           margin: "0 auto",
           padding: "10px 12px",
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
-          gap: 6,
+          gap: 8,
         }}
       >
         {items.map((it) => {
@@ -156,21 +156,22 @@ export default function BottomNav({
               }}
               style={{
                 textDecoration: "none",
-                color: active ? "#111114" : "rgba(17,17,20,.55)",
+                color: active ? "var(--color-text)" : "color-mix(in srgb, var(--color-text) 56%, transparent)",
               }}
               title={it.label}
             >
               <div
                 style={{
-                  height: 44,
-                  borderRadius: 14,
+                  height: 46,
+                  borderRadius: 16,
                   display: "grid",
                   placeItems: "center",
                   border: active
-                    ? "1px solid rgba(17,17,20,.14)"
-                    : "1px solid rgba(17,17,20,.08)",
-                  background: active ? "rgba(17,17,20,.04)" : "rgba(17,17,20,.02)",
-                  fontWeight: 800,
+                    ? "1px solid var(--color-border-strong)"
+                    : "1px solid var(--color-border)",
+                  background: active ? "var(--color-surface)" : "rgba(255,255,255,.55)",
+                  boxShadow: active ? "var(--shadow-card)" : "none",
+                  fontWeight: 700,
                   letterSpacing: 0.5,
                 }}
               >
@@ -191,9 +192,9 @@ export default function BottomNav({
                         display: "grid",
                         placeItems: "center",
                         border: active
-                          ? "1px solid rgba(17,17,20,.16)"
-                          : "1px solid rgba(17,17,20,.10)",
-                        color: active ? "#111114" : "rgba(17,17,20,.70)",
+                          ? "1px solid var(--color-border-strong)"
+                          : "1px solid var(--color-border)",
+                        color: active ? "var(--color-text)" : "color-mix(in srgb, var(--color-text) 70%, transparent)",
                         fontSize: 12,
                         fontWeight: 900,
                       }}
@@ -215,7 +216,7 @@ export default function BottomNav({
                           width: 8,
                           height: 8,
                           borderRadius: 999,
-                          background: "#ff3b30",
+                          background: "var(--color-accent-strong)",
                           boxShadow: "0 0 0 2px rgba(255,255,255,.92)",
                           animation: "nhfPulse 1.35s ease-in-out infinite",
                         }}

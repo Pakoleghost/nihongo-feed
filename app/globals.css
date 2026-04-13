@@ -1,13 +1,59 @@
-/* Minimal Japanese aesthetic */
+/* Design system foundation */
 
 :root{
-  --bg: #f7f7f5;
-  --card: #ffffff;
-  --ink: #111114;
-  --muted: #6b6b74;
-  --line: rgba(17,17,20,.10);
-  --shadow: 0 10px 30px rgba(0,0,0,.06);
-  --radius: 18px;
+  /* spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+
+  /* typography */
+  --text-display: clamp(2rem, 4vw, 3.25rem);
+  --text-h1: 2rem;
+  --text-h2: 1.5rem;
+  --text-h3: 1.125rem;
+  --text-body-lg: 1rem;
+  --text-body: 0.9375rem;
+  --text-body-sm: 0.8125rem;
+  --text-label: 0.75rem;
+
+  /* colors */
+  --color-primary: #1A1A2E;
+  --color-primary-strong: #111122;
+  --color-accent: #4ECDC4;
+  --color-accent-strong: #E63946;
+  --color-bg: #FFF8E7;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #FFFCF4;
+  --color-text: #1A1A2E;
+  --color-text-muted: #666C7A;
+  --color-border: rgba(26, 26, 46, 0.10);
+  --color-border-strong: rgba(26, 26, 46, 0.16);
+  --color-focus: rgba(78, 205, 196, 0.28);
+
+  /* primitives */
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --shadow-card: 0 14px 34px rgba(26, 26, 46, 0.05);
+  --shadow-raised: 0 20px 44px rgba(26, 26, 46, 0.08);
+  --container-max: 760px;
+  --page-padding: 16px;
+
+  /* legacy aliases kept for old pages */
+  --bg: var(--color-bg);
+  --card: var(--color-surface);
+  --ink: var(--color-text);
+  --muted: var(--color-text-muted);
+  --line: var(--color-border);
+  --shadow: var(--shadow-card);
+  --radius: var(--radius-md);
 }
 
 * { box-sizing: border-box; }
@@ -16,12 +62,14 @@ html, body { height: 100%; }
 
 body{
   margin: 0;
-  background: radial-gradient(1200px 700px at 50% -200px, #ffffff 0%, var(--bg) 55%, var(--bg) 100%);
+  background: var(--color-bg);
   color: var(--ink);
   font-family: var(--font-latin), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
     "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
-  letter-spacing: .2px;
+  letter-spacing: 0.01em;
+  font-size: var(--text-body);
+  line-height: 1.55;
 }
 
 a {
@@ -29,30 +77,143 @@ a {
   text-decoration: none;
 }
 
-a:hover {
-  text-decoration: underline;
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  color: var(--color-text);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+h1 { font-size: var(--text-h1); font-weight: 800; }
+h2 { font-size: var(--text-h2); font-weight: 800; }
+h3 { font-size: var(--text-h3); font-weight: 700; }
+
+p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, var(--color-text-muted) 82%, transparent);
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+button:focus-visible,
+a:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-primary));
+  box-shadow: 0 0 0 4px var(--color-focus);
+}
+
+.ds-container {
+  width: min(100%, var(--container-max));
+  margin: 0 auto;
+  padding-left: var(--page-padding);
+  padding-right: var(--page-padding);
+}
+
+.ds-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.ds-btn,
+.ds-btn-secondary,
+.ds-btn-ghost {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  text-decoration: none;
+  font-size: var(--text-body-sm);
+  font-weight: 700;
+}
+
+.ds-btn {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-bg);
+}
+
+.ds-btn-secondary {
+  background: var(--color-surface);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.ds-btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-text);
+}
+
+.ds-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
 /* App shell */
 .feed{
-  max-width: 420px;
-  margin: 18px auto 40px;
+  max-width: var(--container-max);
+  margin: var(--space-5) auto var(--space-8);
   background: var(--card);
   min-height: calc(100vh - 58px);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
   clip-path: inset(0 round var(--radius));
 }
 
 /* Header */
 .header{
-  padding: 14px 16px;
+  padding: var(--space-4);
   font-weight: 700;
   text-align: center;
   position: sticky;
   top: 0;
-  background: rgba(255,255,255,.85);
+  background: rgba(255,255,255,.88);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
   z-index: 20;
@@ -111,12 +272,11 @@ a:hover {
 }
 
 .brand {
-  /* Keep header title consistent across iOS/desktop */
-  font-size: 34px;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
   line-height: 1;
-  font-weight: 900;
-  letter-spacing: 0.10em;
-  color: #2b2b2b;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: var(--color-text);
   font-family: var(--font-latin), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
     "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
@@ -124,11 +284,11 @@ a:hover {
 
 /* Reuse the same header title sizing on any page */
 .headerTitle{
-  font-size: 34px;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
   line-height: 1;
-  font-weight: 900;
-  letter-spacing: 0.10em;
-  color: #2b2b2b;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: var(--color-text);
   font-family: var(--font-latin), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
     "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
@@ -139,11 +299,11 @@ a:hover {
   all: unset;
   cursor: pointer;
   display: inline-block;
-  font-size: 34px;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
   line-height: 1;
-  font-weight: 900;
-  letter-spacing: 0.10em;
-  color: #2b2b2b;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: var(--color-text);
   font-family: var(--font-latin), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
     "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
@@ -163,7 +323,7 @@ a:hover {
   border-radius: 999px;
   overflow: hidden;
   border: 1px solid var(--line);
-  background: linear-gradient(135deg, #f1f1f6, #ffffff);
+  background: var(--color-surface-muted);
   display: grid;
   place-items: center;
   font-weight: 700;
@@ -188,36 +348,33 @@ a:hover {
   width: 100%;
   min-height: 78px;
   resize: none;
-  padding: 12px 12px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   outline: none;
-  background: #fbfbfc;
-  color: var(--ink);
-  font-size: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-body);
   line-height: 1.55;
 }
 .textarea:focus{
   background: #fff;
-  box-shadow: 0 0 0 4px rgba(60, 120, 255, .10);
-  border-color: rgba(60, 120, 255, .25);
+  box-shadow: 0 0 0 4px var(--color-focus);
+  border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-primary));
 }
 
 /* Buttons */
-button{
-  font-family: inherit;
-}
-
 .postBtn{
-  padding: 10px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(17,17,20,.12);
-  background: #111114;
-  color: #fff;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-bg);
   font-weight: 700;
-  font-size: 13px;
+  font-size: var(--text-body-sm);
   cursor: pointer;
-  min-width: 86px;
+  min-width: 96px;
 }
 .postBtn:disabled{
   opacity: .45;
@@ -225,15 +382,17 @@ button{
 }
 
 .miniBtn{
-  padding: 7px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: #fff;
-  font-size: 12px;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  font-size: var(--text-label);
+  font-weight: 700;
   cursor: pointer;
   user-select: none;
 }
-.miniBtn:hover{ background: #fafafa; }
+.miniBtn:hover{ background: var(--color-surface-muted); }
 .miniBtn.disabled{ opacity: .5; cursor: not-allowed; }
 
 /* Posts */
