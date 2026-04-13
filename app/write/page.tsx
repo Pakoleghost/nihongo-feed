@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { normalizeAssignmentSubtype } from "@/lib/feed-utils";
 
 type GroupRow = { name: string };
 
@@ -55,7 +54,6 @@ async function compressImageFile(file: File, options?: { maxWidth?: number; maxH
 function WriteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const assignmentId = searchParams.get("assignment_id");
   const editId = searchParams.get("edit_id");
 
   const [title, setTitle] = useState("");
@@ -68,10 +66,8 @@ function WriteContent() {
   const [editingPostUserId, setEditingPostUserId] = useState<string | null>(null);
 
   const [isAdmin, setIsAdmin] = useState(false);
-  const [postType, setPostType] = useState<"post" | "assignment" | "linkpost">("post");
+  const [postType, setPostType] = useState<"post" | "linkpost">("post");
   const [targetGroup, setTargetGroup] = useState("Todos");
-  const [deadline, setDeadline] = useState("");
-  const [assignmentSubtype, setAssignmentSubtype] = useState<"post" | "forum">("post");
   const [linkUrl, setLinkUrl] = useState("");
   const [availableGroups, setAvailableGroups] = useState<GroupRow[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -90,7 +86,6 @@ function WriteContent() {
         const { data: groups } = await supabase.from("groups").select("name").order("name");
         if (groups) setAvailableGroups(groups as GroupRow[]);
       }
-      if (assignmentId) setPostType("assignment");
 
       if (editId) {
         setLoadingDraft(true);
@@ -115,60 +110,44 @@ function WriteContent() {
         setTitle(rawTitle || "");
         setBody(rest.join("\n").trim());
         if (existing.image_url) setPreviewUrl(existing.image_url);
-        if (existing.type === "assignment") setPostType("assignment");
-        else setPostType("post");
-        if (existing.assignment_subtype) {
-          setAssignmentSubtype(normalizeAssignmentSubtype(existing.assignment_subtype) as "post" | "forum");
-        }
+        setPostType("post");
         if (existing.target_group) setTargetGroup(existing.target_group);
-        if (existing.deadline) {
-          const d = new Date(existing.deadline);
-          if (!Number.isNaN(d.getTime())) setDeadline(d.toISOString().slice(0, 16));
-        }
         setLoadingDraft(false);
       } else {
-        const draftKey = assignmentId ? `write-draft-assignment-${assignmentId}` : "write-draft-main";
+        const draftKey = "write-draft-main";
         try {
           const raw = localStorage.getItem(draftKey);
           if (raw) {
             const parsed = JSON.parse(raw);
             setTitle(parsed?.title || "");
             setBody(parsed?.body || "");
-            if (!assignmentId) {
-              if (parsed?.postType === "assignment" || parsed?.postType === "linkpost") setPostType(parsed.postType);
-              else setPostType("post");
-              if (parsed?.targetGroup) setTargetGroup(parsed.targetGroup);
-              if (parsed?.deadline) setDeadline(parsed.deadline);
-              if (parsed?.assignmentSubtype) {
-                setAssignmentSubtype(normalizeAssignmentSubtype(parsed.assignmentSubtype) as "post" | "forum");
-              }
-              if (parsed?.linkUrl) setLinkUrl(parsed.linkUrl);
-            }
+            if (parsed?.postType === "linkpost") setPostType("linkpost");
+            else setPostType("post");
+            if (parsed?.targetGroup) setTargetGroup(parsed.targetGroup);
+            if (parsed?.linkUrl) setLinkUrl(parsed.linkUrl);
           }
         } catch {}
       }
     };
 
     void checkUser();
-  }, [router, assignmentId, editId]);
+  }, [router, editId]);
 
   useEffect(() => {
     if (editId) return;
-    const draftKey = assignmentId ? `write-draft-assignment-${assignmentId}` : "write-draft-main";
+    const draftKey = "write-draft-main";
     const payload = {
       title,
       body,
       postType,
       targetGroup,
-      deadline,
-      assignmentSubtype,
       linkUrl,
       savedAt: Date.now(),
     };
     try {
       localStorage.setItem(draftKey, JSON.stringify(payload));
     } catch {}
-  }, [title, body, postType, targetGroup, deadline, assignmentSubtype, linkUrl, assignmentId, editId]);
+  }, [title, body, postType, targetGroup, linkUrl, editId]);
 
   useEffect(() => {
     return () => {
@@ -259,9 +238,8 @@ function WriteContent() {
         imageUrl = await uploadToStorage(user.id, imageFile, "post-images");
       }
 
-      const normalizedTargetGroup = isAdmin && !assignmentId ? (targetGroup || "Todos").trim() : null;
-      const normalizedSubtype = normalizeAssignmentSubtype(assignmentSubtype);
-      const finalType = postType === "linkpost" ? "post" : postType;
+      const normalizedTargetGroup = isAdmin ? (targetGroup || "Todos").trim() : null;
+      const finalType = "post";
       const finalContent =
         postType === "linkpost"
           ? `${title}\n${linkUrl.trim()}\n${body}`.trim()
@@ -272,11 +250,7 @@ function WriteContent() {
         user_id: editingPostUserId || user.id,
         image_url: imageUrl || (editId ? previewUrl : null),
         type: finalType,
-        is_forum: !assignmentId && postType === "assignment" && normalizedSubtype === "forum",
-        parent_assignment_id: assignmentId ? parseInt(assignmentId, 10) : null,
-        target_group: assignmentId ? null : normalizedTargetGroup,
-        deadline: postType === "assignment" ? deadline || null : null,
-        assignment_subtype: postType === "assignment" ? normalizedSubtype : null,
+        target_group: normalizedTargetGroup,
       } as any;
 
       let insertedPost: { id: number; type: string; target_group: string | null } | null = editId
@@ -291,7 +265,7 @@ function WriteContent() {
         if (created) insertedPost = created as any;
       }
 
-      const draftKey = assignmentId ? `write-draft-assignment-${assignmentId}` : "write-draft-main";
+      const draftKey = "write-draft-main";
       try {
         localStorage.removeItem(draftKey);
       } catch {}
@@ -303,11 +277,6 @@ function WriteContent() {
     }
   };
 
-  const estimatedRead = useMemo(() => {
-    const words = `${title} ${body}`.trim().split(/\s+/).filter(Boolean).length;
-    return Math.max(1, Math.ceil(words / 180));
-  }, [title, body]);
-
   return (
     <>
       <div className="writePage">
@@ -316,28 +285,70 @@ function WriteContent() {
             <div className="leftTop">
               <Link href="/" className="ghostPill">Cancelar</Link>
               <div className="pageLabel">
-                <span className="eyebrow">Editor</span>
-                <strong>{assignmentId ? "Entrega de tarea" : "Nueva publicación"}</strong>
+                <span className="eyebrow">{editId ? "Editar" : "Escribir"}</span>
+                <strong>{editId ? "Actualizar contenido" : "Nuevo contenido"}</strong>
               </div>
             </div>
 
             <button onClick={handlePublish} disabled={loading || loadingDraft} className="publishBtn">
-              {editId ? "Guardar cambios" : assignmentId ? "📤 Entregar" : loading ? "Publicando..." : "Publicar"}
+              {editId ? "Guardar" : loading ? "Guardando..." : "Guardar"}
             </button>
           </header>
 
           <div className="editorGrid">
             <section className="editorCard">
               <div className="fieldBlock">
-                <label className="label">{postType === "assignment" ? "Título de la tarea" : postType === "linkpost" ? "Título del link" : "Título"}</label>
+                <label className="label">{postType === "linkpost" ? "Título del link" : "Título"}</label>
                 <input
                   type="text"
-                  placeholder={assignmentId ? "Título de tu entrega..." : "Título de tu publicación..."}
+                  placeholder="Título"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="titleInput"
                 />
               </div>
+
+              {isAdmin && (
+                <section className="inlineOptionsCard">
+                  <div className="inlineOptionsHeader">
+                    <span className="eyebrow">Opciones</span>
+                  </div>
+
+                  <div className="inlineOptionsGrid">
+                    <label className="miniField">
+                      <span>Tipo</span>
+                      <select value={postType} onChange={(e) => setPostType(e.target.value as any)}>
+                        <option value="post">Contenido</option>
+                        <option value="linkpost">Link</option>
+                      </select>
+                    </label>
+
+                    <label className="miniField">
+                      <span>Visible para</span>
+                      <select value={targetGroup} onChange={(e) => setTargetGroup(e.target.value)}>
+                        <option value="Todos">Todos</option>
+                        {availableGroups.map((g) => (
+                          <option key={g.name} value={g.name}>
+                            {g.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    {postType === "linkpost" && (
+                      <label className="miniField fullWidthField">
+                        <span>URL</span>
+                        <input
+                          type="url"
+                          value={linkUrl}
+                          onChange={(e) => setLinkUrl(e.target.value)}
+                          placeholder="https://..."
+                        />
+                      </label>
+                    )}
+                  </div>
+                </section>
+              )}
 
               <div className="fieldBlock">
                 <div className="contentLabelRow">
@@ -368,7 +379,7 @@ function WriteContent() {
                   className="bodyTextarea"
                 />
                 <div className="bodyHelp">
-                  Este botón agrega una imagen dentro del texto, en la posición del cursor (entre párrafos).
+                  Inserta imágenes dentro del texto en la posición del cursor.
                 </div>
               </div>
             </section>
@@ -376,27 +387,15 @@ function WriteContent() {
             <aside className="sideStack">
               <section className="sideCard">
                 <div className="sideHeader">
-                  <span className="eyebrow">Vista rápida</span>
-                  <span className="muted">{estimatedRead} min lectura</span>
-                </div>
-
-                <div className="previewCard">
-                  <h3>{title.trim() || "Sin título aún"}</h3>
-                    <p>{(postType === "linkpost" && linkUrl ? `${linkUrl}\n${body}` : body).trim() || "Tu contenido aparecerá aquí en una vista resumida."}</p>
-                </div>
-              </section>
-
-              <section className="sideCard">
-                <div className="sideHeader">
-                  <span className="eyebrow">Imagen de Portada (Header)</span>
-                  <span className="muted">{imageFile ? imageFile.name : "Opcional"}</span>
+                  <span className="eyebrow">Portada</span>
+                  <span className="muted">{imageFile ? "Lista" : "Opcional"}</span>
                 </div>
                 <label className="uploadBox">
                   <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} />
                   <span>{imageFile ? "Cambiar portada" : "Seleccionar portada"}</span>
                 </label>
                 <p className="coverHelp">
-                  Esta imagen va arriba del post como portada. No se inserta en el cuerpo del texto.
+                  Va arriba del contenido. No se inserta dentro del texto.
                 </p>
                 {previewUrl && (
                   <div className="imagePreviewWrap">
@@ -404,69 +403,6 @@ function WriteContent() {
                   </div>
                 )}
               </section>
-
-              {isAdmin && !assignmentId && (
-                <section className="sideCard toneMint">
-                  <div className="sideHeader">
-                    <span className="eyebrow">Modo Sensei</span>
-                  </div>
-
-                  <div className="formGrid">
-                    <label className="miniField">
-                      <span>Tipo</span>
-                      <select value={postType} onChange={(e) => setPostType(e.target.value as any)}>
-                        <option value="post">Post normal</option>
-                        <option value="linkpost">Link en el feed</option>
-                        <option value="assignment">宿題 (Tarea)</option>
-                      </select>
-                    </label>
-
-                    <label className="miniField">
-                      <span>Visible para</span>
-                      <select value={targetGroup} onChange={(e) => setTargetGroup(e.target.value)}>
-                        <option value="Todos">Todos</option>
-                        {availableGroups.map((g) => (
-                          <option key={g.name} value={g.name}>
-                            {g.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-
-                    {postType === "linkpost" && (
-                      <label className="miniField">
-                        <span>URL del link</span>
-                        <input
-                          type="url"
-                          value={linkUrl}
-                          onChange={(e) => setLinkUrl(e.target.value)}
-                          placeholder="https://..."
-                        />
-                      </label>
-                    )}
-
-                    {postType === "assignment" && (
-                      <label className="miniField">
-                        <span>Modalidad de tarea</span>
-                        <select
-                          value={assignmentSubtype}
-                          onChange={(e) => setAssignmentSubtype(e.target.value as "post" | "forum")}
-                        >
-                          <option value="post">Tarea tipo post (entrega en editor)</option>
-                          <option value="forum">Tarea tipo foro (responden en el post)</option>
-                        </select>
-                      </label>
-                    )}
-
-                    {postType === "assignment" && (
-                      <label className="miniField">
-                        <span>Fecha límite</span>
-                        <input type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
-                      </label>
-                    )}
-                  </div>
-                </section>
-              )}
             </aside>
           </div>
         </div>
@@ -475,120 +411,121 @@ function WriteContent() {
       <style jsx>{`
         .writePage {
           min-height: 100vh;
-          background: radial-gradient(900px 420px at 50% -10%, rgba(44, 182, 150, 0.08), transparent 65%), #f6f7f8;
-          padding: 14px;
+          background: var(--color-bg);
+          padding: var(--page-padding);
         }
         .writeShell {
-          max-width: 1240px;
+          max-width: 960px;
           margin: 0 auto;
         }
         .writeTopBar {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 10px;
+          gap: var(--space-3);
           position: sticky;
           top: 0;
           z-index: 20;
-          background: rgba(246, 247, 248, 0.84);
+          background: color-mix(in srgb, var(--color-bg) 92%, transparent);
           backdrop-filter: blur(10px);
-          padding: 10px 0 14px;
-          margin-bottom: 4px;
+          padding: var(--space-2) 0 var(--space-4);
+          margin-bottom: var(--space-2);
         }
         .leftTop {
           display: flex;
-          gap: 10px;
+          gap: var(--space-3);
           align-items: center;
           min-width: 0;
         }
         .ghostPill {
-          border: 1px solid rgba(17, 17, 20, 0.1);
-          background: #fff;
-          color: #222;
-          border-radius: 999px;
-          padding: 8px 12px;
-          font-size: 13px;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          color: var(--color-text);
+          border-radius: var(--radius-pill);
+          padding: 10px 14px;
+          font-size: var(--text-body-sm);
+          font-weight: 700;
           text-decoration: none;
           flex-shrink: 0;
         }
         .pageLabel {
           display: grid;
           min-width: 0;
+          gap: 2px;
         }
         .pageLabel strong {
-          color: #111114;
-          font-size: 14px;
+          color: var(--color-text);
+          font-size: var(--text-body);
+          font-weight: 800;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
         .eyebrow {
-          font-size: 11px;
+          font-size: var(--text-label);
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: #7a7a84;
+          color: var(--color-text-muted);
           font-weight: 800;
         }
         .publishBtn {
           border: 0;
-          background: linear-gradient(135deg, #34c5a6, #25a98f);
+          background: var(--color-primary);
           color: #fff;
-          border-radius: 999px;
-          padding: 10px 16px;
-          font-size: 13px;
-          font-weight: 700;
+          border-radius: var(--radius-pill);
+          padding: 11px 16px;
+          font-size: var(--text-body-sm);
+          font-weight: 800;
           cursor: pointer;
-          box-shadow: 0 8px 18px rgba(44, 182, 150, 0.2);
         }
         .publishBtn:disabled {
           opacity: 0.55;
           cursor: not-allowed;
-          box-shadow: none;
         }
         .editorGrid {
           display: grid;
           grid-template-columns: minmax(0, 1fr);
-          gap: 14px;
+          gap: var(--space-4);
         }
         .editorCard {
-          background: #fff;
-          border: 1px solid rgba(17, 17, 20, 0.07);
-          border-radius: 22px;
-          box-shadow: 0 14px 34px rgba(0, 0, 0, 0.04);
-          padding: 16px;
+          background: var(--color-surface);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-card);
+          padding: var(--space-5);
         }
         .fieldBlock + .fieldBlock {
-          margin-top: 14px;
+          margin-top: var(--space-5);
         }
         .contentLabelRow {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 8px;
-          margin-bottom: 8px;
+          gap: var(--space-2);
+          margin-bottom: var(--space-2);
           flex-wrap: wrap;
         }
         .contentTools {
           display: flex;
-          gap: 8px;
+          gap: var(--space-2);
           align-items: center;
         }
         .label {
           display: block;
-          font-size: 12px;
-          color: #666a73;
+          font-size: var(--text-label);
+          color: var(--color-text-muted);
           font-weight: 700;
           letter-spacing: 0.04em;
           text-transform: uppercase;
         }
         .miniToolBtn {
-          border: 1px solid rgba(17,17,20,.1);
-          background: #fff;
-          border-radius: 999px;
-          padding: 7px 10px;
-          font-size: 12px;
-          font-weight: 600;
-          color: #333;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          border-radius: var(--radius-pill);
+          padding: 8px 12px;
+          font-size: var(--text-body-sm);
+          font-weight: 700;
+          color: var(--color-text);
           cursor: pointer;
         }
         .miniToolBtn:disabled {
@@ -597,169 +534,163 @@ function WriteContent() {
         }
         .titleInput {
           width: 100%;
-          border: 1px solid rgba(17, 17, 20, 0.08);
-          background: #fbfbfc;
-          border-radius: 14px;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          border-radius: var(--radius-md);
           padding: 14px 14px;
-          font-size: 24px;
+          font-size: var(--text-h2);
           line-height: 1.2;
           font-weight: 800;
           outline: none;
-          color: #111114;
+          color: var(--color-text);
           letter-spacing: -0.02em;
         }
         .bodyTextarea {
           width: 100%;
-          min-height: 42vh;
-          border: 1px solid rgba(17, 17, 20, 0.08);
-          background: #fbfbfc;
-          border-radius: 16px;
+          min-height: 48vh;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          border-radius: var(--radius-md);
           padding: 14px;
-          font-size: 16px;
-          line-height: 1.75;
+          font-size: var(--text-body);
+          line-height: 1.7;
           resize: vertical;
           outline: none;
-          color: #222;
+          color: var(--color-text);
           font-family: inherit;
         }
         .bodyHelp {
-          margin-top: 8px;
-          color: #7c7c85;
-          font-size: 12px;
+          margin-top: var(--space-2);
+          color: var(--color-text-muted);
+          font-size: var(--text-body-sm);
           line-height: 1.4;
+        }
+        .inlineOptionsCard {
+          margin-top: var(--space-5);
+          border-top: 1px solid var(--color-border);
+          padding-top: var(--space-4);
+          display: grid;
+          gap: var(--space-3);
+        }
+        .inlineOptionsHeader {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: var(--space-2);
+        }
+        .inlineOptionsGrid {
+          display: grid;
+          gap: var(--space-3);
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .fullWidthField {
+          grid-column: 1 / -1;
         }
         .titleInput:focus,
         .bodyTextarea:focus,
         .miniField select:focus,
         .miniField input:focus {
-          border-color: rgba(44, 182, 150, 0.35);
-          box-shadow: 0 0 0 4px rgba(44, 182, 150, 0.08);
-          background: #fff;
+          border-color: var(--color-focus);
+          box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-focus) 16%, transparent);
+          background: var(--color-surface);
         }
         .sideStack {
           display: grid;
-          gap: 14px;
+          gap: var(--space-4);
           align-content: start;
         }
         .sideCard {
-          background: #fff;
-          border: 1px solid rgba(17, 17, 20, 0.07);
-          border-radius: 18px;
-          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.03);
-          padding: 14px;
-        }
-        .toneMint {
-          background: linear-gradient(180deg, #f4fffb 0%, #ffffff 38%);
-          border-color: rgba(44, 182, 150, 0.16);
+          background: var(--color-surface);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-card);
+          padding: var(--space-4);
         }
         .sideHeader {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 8px;
-          margin-bottom: 10px;
+          gap: var(--space-2);
+          margin-bottom: var(--space-3);
         }
         .muted {
-          color: #7c7c85;
-          font-size: 12px;
-        }
-        .previewCard {
-          border: 1px solid rgba(17,17,20,.06);
-          border-radius: 14px;
-          padding: 12px;
-          background: #fbfbfc;
-        }
-        .previewCard h3 {
-          margin: 0 0 8px;
-          font-size: 16px;
-          line-height: 1.3;
-          color: #17171b;
-          letter-spacing: -0.01em;
-        }
-        .previewCard p {
-          margin: 0;
-          font-size: 13px;
-          color: #666a73;
-          line-height: 1.55;
-          display: -webkit-box;
-          -webkit-line-clamp: 4;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          white-space: pre-wrap;
+          color: var(--color-text-muted);
+          font-size: var(--text-body-sm);
         }
         .uploadBox {
           display: grid;
           place-items: center;
-          border: 1px dashed rgba(17, 17, 20, 0.16);
-          background: #fbfbfc;
-          border-radius: 14px;
-          min-height: 82px;
+          border: 1px dashed var(--color-border-strong);
+          background: var(--color-surface);
+          border-radius: var(--radius-md);
+          min-height: 84px;
           cursor: pointer;
-          font-size: 13px;
-          color: #2cb696;
+          font-size: var(--text-body-sm);
+          color: var(--color-text);
           font-weight: 700;
         }
         .imagePreviewWrap {
-          margin-top: 10px;
-          border-radius: 14px;
+          margin-top: var(--space-3);
+          border-radius: var(--radius-md);
           overflow: hidden;
-          border: 1px solid rgba(17,17,20,.06);
-          background: #f5f5f5;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface-muted);
         }
         .imagePreview {
           width: 100%;
-          height: 180px;
+          height: 200px;
           object-fit: cover;
           display: block;
         }
         .coverHelp {
-          margin: 8px 0 0;
-          color: #667085;
-          font-size: 12px;
+          margin: var(--space-2) 0 0;
+          color: var(--color-text-muted);
+          font-size: var(--text-body-sm);
           line-height: 1.45;
-        }
-        .formGrid {
-          display: grid;
-          gap: 10px;
         }
         .miniField {
           display: grid;
           gap: 6px;
-          font-size: 12px;
-          color: #555;
+          font-size: var(--text-body-sm);
+          color: var(--color-text-muted);
           font-weight: 600;
         }
         .miniField select,
         .miniField input {
           width: 100%;
-          border: 1px solid rgba(17,17,20,.1);
-          border-radius: 10px;
-          background: #fff;
-          padding: 9px 10px;
-          font-size: 13px;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          background: var(--color-surface);
+          padding: 10px 12px;
+          font-size: var(--text-body-sm);
           font-family: inherit;
-          color: #222;
+          color: var(--color-text);
           outline: none;
         }
 
         @media (min-width: 1040px) {
-          .writePage {
-            padding: 18px 22px 28px;
-          }
           .editorGrid {
-            grid-template-columns: minmax(0, 1fr) 360px;
+            grid-template-columns: minmax(0, 1fr) 300px;
             align-items: start;
           }
           .sideStack {
             position: sticky;
-            top: 76px;
-          }
-          .editorCard {
-            padding: 18px;
+            top: 84px;
           }
           .bodyTextarea {
-            min-height: 70vh;
-            font-size: 17px;
+            min-height: 64vh;
+          }
+        }
+
+        @media (max-width: 720px) {
+          .writeTopBar {
+            align-items: flex-start;
+          }
+          .publishBtn {
+            min-width: fit-content;
+          }
+          .inlineOptionsGrid {
+            grid-template-columns: minmax(0, 1fr);
           }
         }
       `}</style>

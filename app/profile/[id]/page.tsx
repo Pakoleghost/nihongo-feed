@@ -36,7 +36,6 @@ export default function StudentProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [myId, setMyId] = useState<string | null>(null);
   const [posts, setPosts] = useState<any[]>([]);
-  const [viewMode, setViewMode] = useState<"portfolio" | "tasks">("portfolio");
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -66,12 +65,6 @@ export default function StudentProfilePage() {
     () => posts.filter((p) => p.type === "post" && !p.parent_assignment_id),
     [posts],
   );
-  const taskPosts = useMemo(
-    () => posts.filter((p) => p.type === "assignment" || Boolean(p.parent_assignment_id)),
-    [posts],
-  );
-
-  const shownPosts = viewMode === "portfolio" ? portfolioPosts : taskPosts;
 
   if (loading || !profile) {
     return <div style={{ padding: "110px 16px", textAlign: "center", color: "#9ca3af" }}>Cargando perfil…</div>;
@@ -122,8 +115,8 @@ export default function StudentProfilePage() {
               <strong>{portfolioPosts.length}</strong>
             </div>
             <div className="statCell">
-              <span>Tareas</span>
-              <strong>{taskPosts.length}</strong>
+              <span>Publicaciones</span>
+              <strong>{portfolioPosts.length}</strong>
             </div>
           </div>
         </section>
@@ -132,23 +125,15 @@ export default function StudentProfilePage() {
           <div className="archiveHead">
             <div>
               <div className="eyebrow">Archivo</div>
-              <h2>{viewMode === "portfolio" ? "Portafolio" : "Tareas"}</h2>
-            </div>
-            <div className="segmented">
-              <button type="button" className={viewMode === "portfolio" ? "active" : ""} onClick={() => setViewMode("portfolio")}>
-                Portafolio
-              </button>
-              <button type="button" className={viewMode === "tasks" ? "active" : ""} onClick={() => setViewMode("tasks")}>
-                Tareas
-              </button>
+              <h2>Portafolio</h2>
             </div>
           </div>
 
-          {shownPosts.length === 0 ? (
+          {portfolioPosts.length === 0 ? (
             <div className="emptyState">Todavía no hay publicaciones aquí.</div>
           ) : (
             <div className="postList">
-              {shownPosts.map((post) => {
+              {portfolioPosts.map((post) => {
                 const { title, preview } = getPostParts(post.content || "");
                 return (
                   <article key={post.id} className="postRow">
@@ -168,7 +153,7 @@ export default function StudentProfilePage() {
                       </Link>
                     ) : (
                       <div className="postThumb placeholderThumb" aria-hidden="true">
-                        <span>{viewMode === "portfolio" ? "Post" : "Task"}</span>
+                        <span>Post</span>
                       </div>
                     )}
                   </article>
@@ -369,29 +354,6 @@ export default function StudentProfilePage() {
           font-size: clamp(22px, 4vw, 28px);
           line-height: 1.04;
         }
-        .segmented {
-          display: inline-flex;
-          gap: 4px;
-          padding: 4px;
-          border-radius: 999px;
-          background: #f4f6f7;
-          border: 1px solid rgba(17, 17, 20, 0.07);
-        }
-        .segmented button {
-          border: 0;
-          background: transparent;
-          color: #656874;
-          cursor: pointer;
-          border-radius: 999px;
-          min-height: 38px;
-          padding: 0 14px;
-          font-size: 13px;
-          font-weight: 700;
-        }
-        .segmented button.active {
-          background: #111114;
-          color: #fff;
-        }
         .emptyState {
           padding: 28px 18px;
           border: 1px dashed rgba(17, 17, 20, 0.15);
@@ -547,12 +509,6 @@ export default function StudentProfilePage() {
           }
           .archiveHead {
             align-items: stretch;
-          }
-          .segmented {
-            width: 100%;
-          }
-          .segmented button {
-            flex: 1 1 0;
           }
         }
       `}</style>

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { isForumTaskSubtype } from "@/lib/feed-utils";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
 const HeartIcon = ({ filled }: { filled: boolean }) => (
@@ -50,35 +49,6 @@ function formatPostDate(value?: string) {
     dateStyle: "long",
     timeStyle: "short",
   }).format(date);
-}
-
-async function compressSmallImage(file: File) {
-  if (!file.type.startsWith("image/")) return file;
-  const url = URL.createObjectURL(file);
-  try {
-    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const el = new Image();
-      el.onload = () => resolve(el);
-      el.onerror = () => reject(new Error("img"));
-      el.src = url;
-    });
-    const max = 1600;
-    let { width, height } = img;
-    const scale = Math.min(1, max / width, max / height);
-    width = Math.round(width * scale);
-    height = Math.round(height * scale);
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return file;
-    ctx.drawImage(img, 0, 0, width, height);
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));
-    if (!blob) return file;
-    return new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" });
-  } finally {
-    URL.revokeObjectURL(url);
-  }
 }
 
 type BodyBlock =
@@ -130,11 +100,6 @@ export default function PostDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isExpandedImage, setIsExpandedImage] = useState(false);
   const [publishingLike, setPublishingLike] = useState(false);
-  const [taskReplies, setTaskReplies] = useState<any[]>([]);
-  const [replyBody, setReplyBody] = useState("");
-  const [replyImageFile, setReplyImageFile] = useState<File | null>(null);
-  const [replyImagePreview, setReplyImagePreview] = useState<string | null>(null);
-  const [postingReply, setPostingReply] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const fetchPostAndLikes = useCallback(async () => {
@@ -171,16 +136,6 @@ export default function PostDetailPage() {
         setIsLiked(false);
       }
 
-      if (postData.type === "assignment") {
-        const { data: replies } = await supabase
-          .from("posts")
-          .select("*, profiles:user_id(username, avatar_url, group_name)")
-          .eq("parent_assignment_id", postId)
-          .order("created_at", { ascending: true });
-        setTaskReplies(replies || []);
-      } else {
-        setTaskReplies([]);
-      }
     }
 
     setLoading(false);
@@ -189,12 +144,6 @@ export default function PostDetailPage() {
   useEffect(() => {
     void fetchPostAndLikes();
   }, [fetchPostAndLikes]);
-
-  useEffect(() => {
-    return () => {
-      if (replyImagePreview) URL.revokeObjectURL(replyImagePreview);
-    };
-  }, [replyImagePreview]);
 
   const handleLike = async () => {
     if (!myId || publishingLike) return;
@@ -232,74 +181,11 @@ export default function PostDetailPage() {
     return new Date(post.updated_at).getTime() - new Date(post.created_at).getTime() > 60_000;
   }, [post]);
   const bodyBlocks = useMemo(() => parseBodyBlocks(parsed.body || ""), [parsed.body]);
-  const isRootAssignment = post?.type === "assignment" && !post?.parent_assignment_id;
-  const isForumAssignment = Boolean(
-    isRootAssignment &&
-      (post?.is_forum || isForumTaskSubtype(post?.assignment_subtype)),
-  );
-  const isPostAssignment = Boolean(isRootAssignment && !isForumAssignment);
-  const postDeadline = post?.deadline ? new Date(post.deadline) : null;
-  const deadlinePassed = Boolean(postDeadline && postDeadline.getTime() < Date.now());
-
-  const mySubmission = useMemo(
-    () => taskReplies.find((reply) => reply.user_id === myId) || null,
-    [taskReplies, myId],
-  );
-  const canSeeAllTaskReplies = Boolean(myId && (myId === post?.user_id || post?.profiles?.is_admin));
-  const visibleTaskReplies = isForumAssignment
-    ? taskReplies
-    : canSeeAllTaskReplies
-      ? taskReplies
-      : taskReplies.filter((reply) => reply.user_id === myId);
   const canEditPost = Boolean(myId && (myId === post?.user_id || post?.profiles?.is_admin));
-
-  const submitForumReply = async () => {
-    if (!myId || !isForumAssignment || postingReply) return;
-    if (!replyBody.trim() && !replyImageFile) return alert("Escribe una respuesta o agrega una imagen.");
-
-    setPostingReply(true);
-    try {
-      let imageUrl: string | null = null;
-      if (replyImageFile) {
-        const compressed = await compressSmallImage(replyImageFile);
-        const ext = compressed.name.split(".").pop() || "jpg";
-        const path = `forum-replies/${myId}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const { error } = await supabase.storage.from("uploads").upload(path, compressed);
-        if (error) throw error;
-        const { data } = supabase.storage.from("uploads").getPublicUrl(path);
-        imageUrl = data.publicUrl;
-      }
-
-      const title = `Respuesta · ${new Date().toLocaleString("es-MX")}`;
-      const content = `${title}\n${replyBody}`.trim();
-      const { error } = await supabase.from("posts").insert({
-        user_id: myId,
-        content,
-        image_url: imageUrl,
-        type: "assignment",
-        parent_assignment_id: Number(postId),
-        target_group: null,
-      });
-      if (error) throw error;
-
-      setReplyBody("");
-      setReplyImageFile(null);
-      if (replyImagePreview) URL.revokeObjectURL(replyImagePreview);
-      setReplyImagePreview(null);
-      await fetchPostAndLikes();
-    } catch {
-      alert("No se pudo publicar la respuesta del foro.");
-    } finally {
-      setPostingReply(false);
-    }
-  };
 
   const handleDeletePost = async () => {
     if (!canEditPost) return;
     try {
-      if (isRootAssignment) {
-        await supabase.from("posts").delete().eq("parent_assignment_id", Number(postId));
-      }
       const { error } = await supabase.from("posts").delete().eq("id", Number(postId));
       if (error) throw error;
       router.push("/");
@@ -412,112 +298,6 @@ export default function PostDetailPage() {
                   </div>
                 )}
 
-                {isRootAssignment && (
-                  <div className="assignmentPanel">
-                    <div className={`assignmentBanner ${isForumAssignment ? "forum" : "task"}`}>
-                      <div>
-                        <div className="assignmentEyebrow">{isForumAssignment ? "Tarea tipo foro" : "Tarea"}</div>
-                        <p className="assignmentText">
-                          {isForumAssignment
-                            ? "Responde directamente en esta página. Tu participación contará como entrega."
-                            : "Entrega tu tarea usando el editor. Tu entrega contará para la matriz de tareas."}
-                        </p>
-                        {postDeadline && (
-                          <p className="assignmentDeadline">
-                            Deadline: {formatPostDate(post.deadline)}
-                            {deadlinePassed ? " · vencido (se marcará tardía)" : ""}
-                          </p>
-                        )}
-                      </div>
-                      {isPostAssignment && (
-                        <Link
-                          href={`/write?assignment_id=${post.id}&title=${encodeURIComponent(parsed.title)}`}
-                          className="assignmentCTA"
-                        >
-                          {mySubmission ? "Actualizar entrega" : "Entregar tarea"}
-                        </Link>
-                      )}
-                    </div>
-
-                    {isForumAssignment && (
-                      <div className="forumComposer">
-                        <h3>Responder en el foro</h3>
-                        <textarea
-                          value={replyBody}
-                          onChange={(e) => setReplyBody(e.target.value)}
-                          placeholder="Escribe tu respuesta..."
-                          className="forumTextarea"
-                        />
-                        <div className="forumComposerRow">
-                          <label className="forumFileBtn">
-                            {replyImageFile ? "Cambiar imagen" : "Agregar imagen"}
-                            <input
-                              type="file"
-                              accept="image/*"
-                              style={{ display: "none" }}
-                              onChange={(e) => {
-                                const file = e.target.files?.[0] || null;
-                                setReplyImageFile(file);
-                                if (replyImagePreview) URL.revokeObjectURL(replyImagePreview);
-                                setReplyImagePreview(file ? URL.createObjectURL(file) : null);
-                              }}
-                            />
-                          </label>
-                          <button type="button" onClick={submitForumReply} className="forumSendBtn" disabled={postingReply}>
-                            {postingReply ? "Publicando..." : "Publicar respuesta"}
-                          </button>
-                        </div>
-                        {replyImagePreview && (
-                          <img src={replyImagePreview} alt="" className="forumPreviewImage" />
-                        )}
-                      </div>
-                    )}
-
-                    <div className="forumReplies">
-                      <h3>{isForumAssignment ? "Respuestas" : "Entregas"}</h3>
-                      {visibleTaskReplies.length === 0 ? (
-                        <p className="emptyReplies">
-                          {isForumAssignment ? "Todavía no hay respuestas." : "Todavía no hay entregas visibles."}
-                        </p>
-                      ) : (
-                        <div className="replyList">
-                          {visibleTaskReplies.map((reply: any) => {
-                            const [replyTitle, ...replyRest] = String(reply.content || "").split("\n");
-                            const isLate = postDeadline ? new Date(reply.created_at).getTime() > postDeadline.getTime() : false;
-                            return (
-                              <article key={reply.id} className="replyCard">
-                                <div className="replyHead">
-                                  <div className="replyAuthor">
-                                    <div className="replyAvatar">
-                                      {reply.profiles?.avatar_url ? (
-                                        <img src={reply.profiles.avatar_url} alt="" />
-                                      ) : (
-                                        <AvatarFallback size={30} />
-                                      )}
-                                    </div>
-                                    <div>
-                                      <div className="replyAuthorName">{reply.profiles?.username || "usuario"}</div>
-                                      <div className="replyMeta">
-                                        {formatPostDate(reply.created_at)}
-                                        {isLate && <span className="lateTag">Entrega tardía</span>}
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <Link href={`/post/${reply.id}`} className="miniReplyLink">
-                                    Abrir
-                                  </Link>
-                                </div>
-                                <div className="replyTitle">{replyTitle || "Respuesta"}</div>
-                                {replyRest.join("\n").trim() && <p className="replyBody">{replyRest.join("\n").trim()}</p>}
-                                {reply.image_url && <img src={reply.image_url} alt="" className="replyImage" />}
-                              </article>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
             </article>
 
@@ -827,216 +607,6 @@ export default function PostDetailPage() {
           font-size: 12px;
           line-height: 1.45;
         }
-        .assignmentPanel {
-          margin-top: 22px;
-          display: grid;
-          gap: 14px;
-          border-top: 1px solid rgba(17,17,20,.07);
-          padding-top: 18px;
-        }
-        .assignmentBanner {
-          border: 1px solid rgba(17,17,20,.07);
-          border-radius: 14px;
-          padding: 14px;
-          background: #fbfffd;
-          display: grid;
-          gap: 10px;
-        }
-        .assignmentBanner.task {
-          background: linear-gradient(180deg, #f2fffa 0%, #fff 55%);
-          border-color: rgba(44,182,150,.18);
-        }
-        .assignmentBanner.forum {
-          background: linear-gradient(180deg, #f4fbff 0%, #fff 55%);
-          border-color: rgba(88,168,255,.18);
-        }
-        .assignmentEyebrow {
-          font-size: 11px;
-          letter-spacing: .08em;
-          text-transform: uppercase;
-          font-weight: 800;
-          color: #159578;
-        }
-        .assignmentBanner.forum .assignmentEyebrow { color: #3d81ce; }
-        .assignmentText {
-          margin: 6px 0 0;
-          font-size: 13px;
-          line-height: 1.45;
-          color: #444;
-        }
-        .assignmentDeadline {
-          margin: 8px 0 0;
-          font-size: 12px;
-          color: #7c7c85;
-        }
-        .assignmentCTA {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: fit-content;
-          border-radius: 999px;
-          background: #fff;
-          border: 1px solid rgba(44,182,150,.22);
-          color: #147f68;
-          padding: 9px 12px;
-          font-size: 13px;
-          font-weight: 700;
-          text-decoration: none;
-        }
-        .forumComposer {
-          border: 1px solid rgba(17,17,20,.07);
-          border-radius: 14px;
-          padding: 14px;
-          background: #fff;
-        }
-        .forumComposer h3,
-        .forumReplies h3 {
-          margin: 0 0 10px;
-          font-size: 15px;
-          color: #17171b;
-        }
-        .forumTextarea {
-          width: 100%;
-          min-height: 120px;
-          border: 1px solid rgba(17,17,20,.1);
-          border-radius: 12px;
-          padding: 10px 12px;
-          font-family: inherit;
-          font-size: 14px;
-          line-height: 1.6;
-          resize: vertical;
-          outline: none;
-          background: #fbfbfc;
-        }
-        .forumComposerRow {
-          margin-top: 10px;
-          display: flex;
-          gap: 8px;
-          justify-content: space-between;
-          flex-wrap: wrap;
-        }
-        .forumFileBtn {
-          border: 1px solid rgba(17,17,20,.1);
-          border-radius: 999px;
-          padding: 8px 12px;
-          font-size: 12px;
-          font-weight: 600;
-          color: #333;
-          background: #fff;
-          cursor: pointer;
-        }
-        .forumSendBtn {
-          border: 0;
-          border-radius: 999px;
-          padding: 9px 13px;
-          background: linear-gradient(135deg, #34c5a6, #25a98f);
-          color: #fff;
-          font-size: 12px;
-          font-weight: 700;
-          cursor: pointer;
-        }
-        .forumSendBtn:disabled { opacity: .6; cursor: not-allowed; }
-        .forumPreviewImage {
-          margin-top: 10px;
-          width: 100%;
-          max-height: 220px;
-          object-fit: cover;
-          border-radius: 12px;
-          border: 1px solid rgba(17,17,20,.06);
-          display: block;
-          background: #f5f5f5;
-        }
-        .forumReplies {
-          border: 1px solid rgba(17,17,20,.07);
-          border-radius: 14px;
-          padding: 14px;
-          background: #fff;
-        }
-        .emptyReplies {
-          margin: 0;
-          color: #8a8a94;
-          font-size: 13px;
-        }
-        .replyList { display: grid; gap: 10px; }
-        .replyCard {
-          border: 1px solid rgba(17,17,20,.06);
-          border-radius: 12px;
-          padding: 10px;
-          background: #fbfbfc;
-        }
-        .replyHead {
-          display: flex;
-          justify-content: space-between;
-          gap: 10px;
-          align-items: flex-start;
-          margin-bottom: 8px;
-        }
-        .replyAuthor {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-          min-width: 0;
-        }
-        .replyAvatar {
-          width: 30px;
-          height: 30px;
-          border-radius: 999px;
-          overflow: hidden;
-          border: 1px solid rgba(17,17,20,.08);
-          background: #f5f5f5;
-          flex-shrink: 0;
-        }
-        .replyAvatar img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-        .replyAuthorName { font-size: 13px; font-weight: 700; color: #222; }
-        .replyMeta {
-          font-size: 11px;
-          color: #7c7c85;
-          display: flex;
-          gap: 6px;
-          align-items: center;
-          flex-wrap: wrap;
-        }
-        .lateTag {
-          color: #b45309;
-          background: #fffbeb;
-          border: 1px solid #fde68a;
-          border-radius: 999px;
-          padding: 2px 6px;
-          font-weight: 700;
-        }
-        .miniReplyLink {
-          font-size: 12px;
-          color: #2cb696;
-          font-weight: 700;
-          text-decoration: none;
-        }
-        .replyTitle {
-          font-size: 13px;
-          color: #17171b;
-          font-weight: 700;
-          margin-bottom: 4px;
-        }
-        .replyBody {
-          margin: 0;
-          font-size: 13px;
-          color: #444;
-          line-height: 1.5;
-          white-space: pre-wrap;
-        }
-        .replyImage {
-          margin-top: 8px;
-          width: 100%;
-          max-height: 260px;
-          object-fit: cover;
-          border-radius: 10px;
-          border: 1px solid rgba(17,17,20,.06);
-          display: block;
-        }
         .sideActions {
           display: grid;
           gap: 8px;
@@ -1099,7 +669,7 @@ export default function PostDetailPage() {
       <ConfirmDialog
         open={confirmDeleteOpen}
         title="¿Borrar publicación?"
-        description="Esta acción eliminará el post. Si es una tarea raíz también se eliminarán sus respuestas."
+        description="Esta acción eliminará el post de forma permanente."
         confirmLabel="Sí, borrar"
         destructive
         onCancel={() => setConfirmDeleteOpen(false)}

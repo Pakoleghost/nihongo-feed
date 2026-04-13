@@ -12,19 +12,13 @@ export default function AdminGroupsPage() {
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
   const [pastRequests, setPastRequests] = useState<any[]>([]);
   const [pendingGroupByUser, setPendingGroupByUser] = useState<Record<string, string>>({});
-  
-  // Estados nuevos (Aditivos)
   const [newGroupName, setNewGroupName] = useState("");
-  const [assignmentsCount, setAssignmentsCount] = useState<Record<string, number>>({});
-  const [submissionsCount, setSubmissionsCount] = useState<Record<string, number>>({});
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
 
   const fetchData = useCallback(async () => {
-    // 1. Cargar Grupos
     const { data: grps } = await supabase.from("groups").select("name").order("name");
     setGroups(grps || []);
     
-    // 2. Cargar Solicitudes Pendientes/Pasadas con email via API admin
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
@@ -56,37 +50,10 @@ export default function AdminGroupsPage() {
       setPastRequests([]);
     }
     
-    // 3. Cargar Alumnos
     let query = supabase.from("profiles").select("*").eq("is_approved", true);
     if (selectedGroup !== "Todos") query = query.eq("group_name", selectedGroup);
     const { data: stds } = await query.order("username");
     setStudents(stds || []);
-
-    // 4. Lógica de Resumen de Tareas (Aditivo)
-    if (stds) {
-      // Contar tareas totales por grupo
-      const { data: asgn } = await supabase.from("posts").select("id, target_group").eq("type", "assignment");
-      const aCount: Record<string, number> = {};
-      asgn?.forEach(a => {
-        aCount[a.target_group] = (aCount[a.target_group] || 0) + 1;
-        if (a.target_group !== "Todos") aCount["Todos"] = (aCount["Todos"] || 0) + 1;
-      });
-      setAssignmentsCount(aCount);
-
-      // Contar entregas por alumno
-      const studentIds = stds.map(s => s.id);
-      const { data: subs } = await supabase.from("posts")
-        .select("user_id")
-        .in("user_id", studentIds)
-        .not("parent_assignment_id", "is", null)
-        .eq("type", "assignment");
-      
-      const sCount: Record<string, number> = {};
-      subs?.forEach(s => {
-        sCount[s.user_id] = (sCount[s.user_id] || 0) + 1;
-      });
-      setSubmissionsCount(sCount);
-    }
   }, [selectedGroup]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -200,7 +167,6 @@ export default function AdminGroupsPage() {
         </div>
       ) : (
         <div>
-          {/* SECCIÓN CREAR GRUPO (Aditivo) */}
           <div style={{ backgroundColor: "#f9f9f9", padding: "15px", borderRadius: "10px", marginBottom: "20px", display: "flex", gap: "10px" }}>
             <input 
               type="text" 
@@ -218,9 +184,6 @@ export default function AdminGroupsPage() {
           </select>
 
           {students.map(s => {
-            const total = assignmentsCount[s.group_name] || assignmentsCount["Todos"] || 0;
-            const done = submissionsCount[s.id] || 0;
-            
             return (
               <div key={s.id} style={{ display: "flex", justifyContent: "space-between", padding: "15px", borderBottom: "1px solid #eee", alignItems: "center" }}>
                 <div style={{ flex: 1 }}>
@@ -228,10 +191,6 @@ export default function AdminGroupsPage() {
                     {s.full_name || s.username || "Sin nombre"}
                   </Link>
                   {s.username && <div style={{ fontSize: "12px", color: "#888" }}>@{s.username}</div>}
-                  {/* RESUMEN DE TAREAS (Aditivo) */}
-                  <div style={{ fontSize: "11px", color: done >= total && total > 0 ? "#2cb696" : "#888", fontWeight: "bold" }}>
-                    Tareas: {done} / {total} {done >= total && total > 0 ? "✅" : ""}
-                  </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
                   <select value={s.group_name || ""} onChange={e => handleUpdateGroup(s.id, e.target.value)} style={{ padding: "5px", borderRadius: "5px", border: "1px solid #ddd" }}>

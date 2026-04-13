@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { isPublicTargetGroup, normalizeGroupValue, isForumTaskSubtype } from "@/lib/feed-utils";
 
 type ResourceRow = {
   id: number | string;
@@ -105,9 +104,7 @@ function IconNote() {
 
 export default function ResourcesPage() {
   const [resources, setResources] = useState<ResourceRow[]>([]);
-  const [tasks, setTasks] = useState<any[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [myProfile, setMyProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -120,7 +117,6 @@ export default function ResourcesPage() {
   const [extraFolders, setExtraFolders] = useState<string[]>([]);
   const [newFolderName, setNewFolderName] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [contentMode, setContentMode] = useState<"resources" | "tasks">("resources");
 
   useEffect(() => {
     try {
@@ -143,28 +139,10 @@ export default function ResourcesPage() {
     } = await supabase.auth.getUser();
 
     if (user) {
-      const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-      setMyProfile(prof || null);
+      const { data: prof } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
       setIsAdmin(Boolean(prof?.is_admin));
-
-      const { data: taskRows } = await supabase
-        .from("posts")
-        .select("id, content, created_at, target_group, deadline, is_forum, assignment_subtype")
-        .eq("type", "assignment")
-        .is("parent_assignment_id", null)
-        .order("created_at", { ascending: false });
-
-      const visibleTasks = (taskRows || []).filter((task: any) => {
-        if (prof?.is_admin) return true;
-        if (task?.assignment_subtype === "forum" || task?.assignment_subtype === "internal" || task?.is_forum) return true;
-        if (isPublicTargetGroup(task.target_group)) return true;
-        return normalizeGroupValue(task.target_group) === normalizeGroupValue(prof?.group_name);
-      });
-      setTasks(visibleTasks);
     } else {
       setIsAdmin(false);
-      setMyProfile(null);
-      setTasks([]);
     }
 
     const { data, error } = await supabase.from("resources").select("*").order("category").order("title");
@@ -345,14 +323,6 @@ export default function ResourcesPage() {
               </div>
             </div>
             <div className="pageHeaderActions">
-              <div className="toggleTabs" role="tablist" aria-label="Cambiar vista">
-                <button type="button" className={`toggleTab ${contentMode === "resources" ? "active" : ""}`} onClick={() => setContentMode("resources")}>
-                  Recursos
-                </button>
-                <button type="button" className={`toggleTab ${contentMode === "tasks" ? "active" : ""}`} onClick={() => setContentMode("tasks")}>
-                  Tareas
-                </button>
-              </div>
               {isAdmin && (
                 <button type="button" onClick={() => startCreateInFolder(selectedFolder)} className="primaryBtn">
                   + Nuevo recurso
@@ -363,8 +333,7 @@ export default function ResourcesPage() {
 
           {errorMsg && <div className="errorBox">{errorMsg}</div>}
 
-          <div className={`layoutGrid ${contentMode === "tasks" ? "tasksMode" : ""}`}>
-            {contentMode === "resources" && (
+          <div className="layoutGrid">
             <aside className="foldersPanel">
               <div className="panelHead">
                 <div>
@@ -412,16 +381,16 @@ export default function ResourcesPage() {
             </aside>
             )}
 
-            <section className={`contentPanel ${contentMode === "tasks" ? "fullWidth" : ""}`}>
+            <section className="contentPanel">
               <div className="panelHead">
                 <div>
-                  <div className="eyebrow">{contentMode === "resources" ? "Contenido" : "Tareas"}</div>
-                  <h2>{contentMode === "resources" ? selectedFolder : "Disponibles"}</h2>
+                  <div className="eyebrow">Contenido</div>
+                  <h2>{selectedFolder}</h2>
                 </div>
-                <span className="countPill">{contentMode === "resources" ? `${resourcesInFolder.length} items` : `${tasks.length} tareas`}</span>
+                <span className="countPill">{resourcesInFolder.length} items</span>
               </div>
 
-              {contentMode === "resources" && showComposer && isAdmin && (
+              {showComposer && isAdmin && (
                 <div className="composerCard">
                   <div className="composerHeader">
                     <strong>{editingId ? "Editar recurso" : "Nuevo recurso"}</strong>
@@ -514,59 +483,6 @@ export default function ResourcesPage() {
 
               {loading ? (
                 <div className="emptyBox">Cargando recursos…</div>
-              ) : contentMode === "tasks" ? (
-                tasks.length === 0 ? (
-                  <div className="emptyBox">
-                    <p>No hay tareas visibles para ti.</p>
-                  </div>
-                ) : (
-                  <div className="resourceList">
-                    {tasks.map((task) => {
-                      const [taskTitle, ...taskBody] = String(task.content || "").split("\n");
-                      const deadline = task.deadline ? new Date(task.deadline) : null;
-                      const isExpired = Boolean(deadline && deadline.getTime() < Date.now());
-                      const isForum = Boolean(task.is_forum || isForumTaskSubtype(task.assignment_subtype));
-                      const isAssignedToMe =
-                        isAdmin ||
-                        isPublicTargetGroup(task.target_group) ||
-                        normalizeGroupValue(task.target_group) === normalizeGroupValue(myProfile?.group_name);
-                      return (
-                        <Link key={task.id} href={`/post/${task.id}`} className="resourceRow" style={{ textDecoration: "none" }}>
-                          <div className="resourceMain">
-                            <div className="resourceIcon">
-                              {isForum ? "💬" : "📝"}
-                            </div>
-                            <div className="resourceText">
-                              <div className="resourceTitleRow">
-                                <strong>{taskTitle || "Tarea"}</strong>
-                                <span className={`typeTag ${isForum ? "note" : "link"}`}>
-                                  {isForum ? "foro" : "tarea"}
-                                </span>
-                              </div>
-                              <p>{taskBody.join(" ").trim() || "Abrir para ver instrucciones."}</p>
-                              <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                                <span className="typeTag quietTag">{task.target_group || "Todos"}</span>
-                                {isForum && !isAssignedToMe && (
-                                  <span className="typeTag quietTag">
-                                    Foro abierto
-                                  </span>
-                                )}
-                                {deadline && (
-                                  <span className="typeTag quietTag">
-                                    {isExpired ? "Vencida" : "Deadline"} · {deadline.toLocaleString("es-MX")}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="resourceActions">
-                            <span className="miniGhost">Abrir</span>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )
               ) : resourcesInFolder.length === 0 ? (
                 <div className="emptyBox">
                   <p>No hay recursos en esta carpeta.</p>
@@ -704,28 +620,6 @@ export default function ResourcesPage() {
           flex-wrap: wrap;
           justify-content: flex-end;
         }
-        .toggleTabs {
-          display: inline-flex;
-          gap: 4px;
-          border: 1px solid var(--color-border);
-          background: var(--color-surface-muted);
-          border-radius: var(--radius-pill);
-          padding: 4px;
-        }
-        .toggleTab {
-          border: 0;
-          background: transparent;
-          border-radius: var(--radius-pill);
-          padding: 7px 10px;
-          font-size: var(--text-body-sm);
-          font-weight: 800;
-          color: var(--color-text-muted);
-          cursor: pointer;
-        }
-        .toggleTab.active {
-          background: var(--color-primary);
-          color: #fff;
-        }
         .primaryBtn, .secondaryBtn {
           border-radius: var(--radius-pill);
           padding: 10px 14px;
@@ -756,9 +650,6 @@ export default function ResourcesPage() {
           display: grid;
           grid-template-columns: minmax(0, 1fr);
           gap: var(--space-4);
-        }
-        .layoutGrid.tasksMode {
-          grid-template-columns: minmax(0, 1fr);
         }
         .foldersPanel, .contentPanel {
           background: var(--color-surface);
@@ -1080,9 +971,6 @@ export default function ResourcesPage() {
           .layoutGrid {
             grid-template-columns: 280px minmax(0, 1fr);
             align-items: start;
-          }
-          .layoutGrid.tasksMode {
-            grid-template-columns: minmax(0, 1fr);
           }
           .foldersPanel {
             position: sticky;

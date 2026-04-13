@@ -7,23 +7,6 @@ export function isPublicTargetGroup(value?: string | null) {
   return !normalized || normalized === "todos" || normalized === "general";
 }
 
-export function normalizeAssignmentSubtype(value?: string | null) {
-  const normalized = normalizeGroupValue(value);
-  if (!normalized) return "post";
-  if (normalized === "external") return "post";
-  if (normalized === "internal") return "forum";
-  if (normalized === "forum") return "forum";
-  return "post";
-}
-
-export function isForumTaskSubtype(value?: string | null) {
-  return normalizeAssignmentSubtype(value) === "forum";
-}
-
-export function isTaskPostSubtype(value?: string | null) {
-  return normalizeAssignmentSubtype(value) === "post";
-}
-
 export function cleanFeedText(value: string) {
   return String(value || "")
     .replace(/!\[[^\]]*]\((https?:\/\/[^\s)]+)\)/gi, "")
