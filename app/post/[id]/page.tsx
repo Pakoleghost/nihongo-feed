@@ -198,7 +198,7 @@ export default function PostDetailPage() {
 
   if (loading || !post) {
     return (
-      <div style={{ padding: "120px 20px", textAlign: "center", color: "#9ca3af" }}>
+      <div style={{ padding: "120px 20px", textAlign: "center", color: "var(--color-text-muted)" }}>
         Cargando publicación…
       </div>
     );
@@ -207,13 +207,19 @@ export default function PostDetailPage() {
   return (
     <>
       <div className="postPage">
-        <div className="postChrome">
+        <div className="postChrome ds-container">
           <header className="postTopBar">
-            <button type="button" onClick={() => router.back()} className="ghostBtn">
-              ← Volver
-            </button>
+            <div className="topBarMain">
+              <button type="button" onClick={() => router.back()} className="ghostBtn">
+                Volver
+              </button>
+              <div className="topBarCopy">
+                <div className="eyebrow">Publicación</div>
+                <h1>{parsed.title}</h1>
+              </div>
+            </div>
             <div className="topBarActions">
-              <Link href="/" className="ghostBtnLink">Home</Link>
+              <Link href="/study" className="ghostBtnLink">Study</Link>
               <Link href="/write" className="primaryBtnLink">Escribir</Link>
             </div>
           </header>
@@ -233,39 +239,13 @@ export default function PostDetailPage() {
               )}
 
               <div className="postBodyShell">
-                <div className="eyebrowRow">
-                  <span className="eyebrow">POST</span>
-                  <span className="eyebrowDot" />
-                  <span className="eyebrowMeta">{formatPostDate(post.created_at)}</span>
-                  {isEdited && <span className="editedTag">editado</span>}
-                </div>
-
-                <h1 className="postTitle">{parsed.title}</h1>
-
                 <div className="authorRow">
                   <Link
                     href={`/profile/${post.user_id}`}
                     className="authorAvatar"
-                    style={{
-                      width: 42,
-                      height: 42,
-                      minWidth: 42,
-                      minHeight: 42,
-                      maxWidth: 42,
-                      maxHeight: 42,
-                      borderRadius: 999,
-                      overflow: "hidden",
-                      display: "block",
-                      flexShrink: 0,
-                    }}
                   >
                     {post.profiles?.avatar_url ? (
-                      <img
-                        src={post.profiles.avatar_url}
-                        alt=""
-                        className="authorAvatarImg"
-                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                      />
+                      <img src={post.profiles.avatar_url} alt="" className="authorAvatarImg" />
                     ) : (
                       <AvatarFallback size={42} />
                     )}
@@ -275,11 +255,15 @@ export default function PostDetailPage() {
                       {post.profiles?.username || "usuario"}
                     </Link>
                     <div className="authorSub">
-                      {post.profiles?.group_name || "General"}
-                      {post.profiles?.is_admin ? " · Sensei" : ""}
+                      <span>{formatPostDate(post.created_at)}</span>
+                      {post.profiles?.group_name ? <span>{post.profiles.group_name}</span> : null}
+                      {post.profiles?.is_admin ? <span>Sensei</span> : null}
+                      {isEdited && <span>Editado</span>}
                     </div>
                   </div>
                 </div>
+
+                <h2 className="postTitle">{parsed.title}</h2>
 
                 {parsed.body && (
                   <div className="postContent">
@@ -303,7 +287,7 @@ export default function PostDetailPage() {
 
             <aside className="postSidebar">
               <section className="sideCard">
-                <p className="sideLabel">Interacción</p>
+                <p className="sideLabel">Guardar</p>
                 <button
                   type="button"
                   onClick={handleLike}
@@ -311,22 +295,19 @@ export default function PostDetailPage() {
                   className={`likeBtn ${isLiked ? "liked" : ""}`}
                 >
                   <HeartIcon filled={isLiked} />
-                  <span>{likesCount > 0 ? likesCount : "Suki"}</span>
+                  <span>{likesCount > 0 ? likesCount : "Me gusta"}</span>
                 </button>
-                <p className="sideHint">
-                  {isLiked ? "Te gusta esta publicación" : "Marca esta publicación para apoyar al autor"}
-                </p>
               </section>
 
               <section className="sideCard">
                 <p className="sideLabel">Acciones</p>
                 <div className="sideActions">
                   <Link href={`/profile/${post.user_id}`} className="pillLink">Ver perfil</Link>
-                  <Link href="/write" className="pillLink">Escribir nuevo post</Link>
-                  {canEditPost && <Link href={`/write?edit_id=${post.id}`} className="pillLink">Editar post</Link>}
+                  <Link href="/write" className="pillLink">Escribir</Link>
+                  {canEditPost && <Link href={`/write?edit_id=${post.id}`} className="pillLink">Editar</Link>}
                   {canEditPost && (
                     <button type="button" onClick={() => setConfirmDeleteOpen(true)} className="pillDangerBtn">
-                      Borrar post
+                      Borrar
                     </button>
                   )}
                 </div>
@@ -339,62 +320,78 @@ export default function PostDetailPage() {
       <style jsx>{`
         .postPage {
           min-height: 100vh;
-          background: radial-gradient(900px 420px at 50% -10%, rgba(52, 197, 166, 0.08), transparent 65%), #f6f7f8;
-          padding: 14px;
+          background: var(--color-bg);
+          padding: var(--page-padding);
         }
         .postChrome {
-          max-width: 1180px;
-          margin: 0 auto;
+          display: grid;
+          gap: var(--space-4);
         }
         .postTopBar {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 12px;
-          padding: 10px 2px 14px;
-          position: sticky;
-          top: 0;
-          z-index: 20;
-          background: rgba(246, 247, 248, 0.82);
-          backdrop-filter: blur(10px);
+          gap: var(--space-3);
+          padding: var(--space-2) 0;
+          flex-wrap: wrap;
+        }
+        .topBarMain {
+          display: flex;
+          align-items: center;
+          gap: var(--space-3);
+          min-width: 0;
+        }
+        .topBarCopy {
+          display: grid;
+          gap: 2px;
+          min-width: 0;
+        }
+        .topBarCopy h1 {
+          margin: 0;
+          font-size: var(--text-h1);
+          line-height: 0.98;
+          letter-spacing: -0.04em;
+          color: var(--color-text);
+          overflow-wrap: anywhere;
         }
         .topBarActions {
           display: flex;
-          gap: 8px;
+          gap: var(--space-2);
           align-items: center;
+          flex-wrap: wrap;
         }
         .ghostBtn,
         .ghostBtnLink {
-          border: 1px solid rgba(17, 17, 20, 0.1);
-          background: #fff;
-          border-radius: 999px;
-          padding: 8px 12px;
-          font-size: 13px;
-          color: #222;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          border-radius: var(--radius-pill);
+          padding: 10px 14px;
+          font-size: var(--text-body-sm);
+          font-weight: 700;
+          color: var(--color-text);
           text-decoration: none;
           cursor: pointer;
         }
         .primaryBtnLink {
           text-decoration: none;
-          border-radius: 999px;
-          padding: 9px 14px;
-          font-size: 13px;
+          border-radius: var(--radius-pill);
+          padding: 10px 14px;
+          font-size: var(--text-body-sm);
           font-weight: 700;
           color: #fff;
-          background: linear-gradient(135deg, #34c5a6, #25a98f);
-          box-shadow: 0 8px 18px rgba(44, 182, 150, 0.2);
+          background: var(--color-primary);
         }
         .postGrid {
           display: grid;
           grid-template-columns: minmax(0, 1fr);
-          gap: 14px;
+          gap: var(--space-4);
         }
         .postCard {
-          background: #fff;
-          border: 1px solid rgba(17, 17, 20, 0.07);
-          border-radius: 22px;
+          background: var(--color-surface);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-lg);
           overflow: hidden;
-          box-shadow: 0 14px 34px rgba(0, 0, 0, 0.04);
+          box-shadow: var(--shadow-card);
         }
         .heroImageWrap {
           width: 100%;
@@ -402,7 +399,7 @@ export default function PostDetailPage() {
           border: 0;
           padding: 0;
           margin: 0;
-          background: #f3f4f6;
+          background: var(--color-surface-muted);
           display: block;
           position: relative;
           cursor: zoom-in;
@@ -421,71 +418,45 @@ export default function PostDetailPage() {
         .heroImageWrap.expanded .heroImage {
           object-fit: contain;
           max-height: 80vh;
-          background: #f8fafc;
+          background: var(--color-surface);
         }
         .heroHint {
           position: absolute;
           right: 12px;
           bottom: 12px;
-          background: rgba(17, 17, 20, 0.6);
-          color: #fff;
-          font-size: 11px;
+          background: color-mix(in srgb, var(--color-text) 75%, transparent);
+          color: white;
+          font-size: var(--text-label);
           font-weight: 600;
-          border-radius: 999px;
+          border-radius: var(--radius-pill);
           padding: 6px 10px;
         }
         .postBodyShell {
-          padding: 20px 18px 24px;
-        }
-        .eyebrowRow {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          color: #71717a;
-          margin-bottom: 10px;
-          flex-wrap: wrap;
+          padding: var(--space-5);
         }
         .eyebrow {
-          font-size: 11px;
-          letter-spacing: 0.08em;
+          font-size: var(--text-label);
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           font-weight: 800;
-          color: #2cb696;
-        }
-        .eyebrowDot {
-          width: 3px;
-          height: 3px;
-          border-radius: 999px;
-          background: #b4b4bd;
-        }
-        .eyebrowMeta {
-          font-size: 12px;
-        }
-        .editedTag {
-          font-size: 10px;
-          color: #64748b;
-          font-weight: 700;
-          border: 1px solid #cbd5e1;
-          border-radius: 4px;
-          padding: 1px 6px;
-          text-transform: uppercase;
-          letter-spacing: .04em;
+          color: var(--color-text-muted);
         }
         .postTitle {
-          margin: 0 0 18px;
-          font-size: 30px;
-          line-height: 1.18;
-          color: #111114;
+          margin: 0 0 var(--space-4);
+          font-size: var(--text-h2);
+          line-height: 1.16;
+          color: var(--color-text);
           letter-spacing: -0.02em;
-          font-weight: 800;
+          font-weight: 700;
+          overflow-wrap: anywhere;
         }
         .authorRow {
           display: flex;
           align-items: center;
-          gap: 10px;
-          padding: 10px 0 18px;
-          border-bottom: 1px solid rgba(17, 17, 20, 0.07);
-          margin-bottom: 18px;
+          gap: var(--space-3);
+          padding: 0 0 var(--space-4);
+          border-bottom: 1px solid var(--color-border);
+          margin-bottom: var(--space-4);
         }
         .authorAvatar {
           width: 42px;
@@ -494,14 +465,8 @@ export default function PostDetailPage() {
           overflow: hidden;
           display: block;
           flex-shrink: 0;
-          border: 1px solid rgba(17, 17, 20, 0.08);
-          background: #f5f5f5;
-        }
-        .authorAvatar img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface-muted);
         }
         .authorAvatarImg {
           width: 100%;
@@ -513,156 +478,164 @@ export default function PostDetailPage() {
           min-width: 0;
         }
         .authorName {
-          font-size: 14px;
+          font-size: var(--text-body);
           font-weight: 700;
-          color: #17171b;
+          color: var(--color-text);
           text-decoration: none;
         }
         .authorSub {
           margin-top: 2px;
-          font-size: 12px;
-          color: #7c7c85;
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          font-size: var(--text-body-sm);
+          color: var(--color-text-muted);
         }
         .postContent {
-          font-size: 17px;
-          line-height: 1.82;
-          color: #2a2a31;
+          font-size: var(--text-body-lg);
+          line-height: 1.85;
+          color: var(--color-text);
           letter-spacing: 0.01em;
         }
         .bodyParagraph {
-          margin: 0 0 18px;
+          margin: 0 0 var(--space-4);
           white-space: pre-wrap;
         }
         .bodyParagraph:last-child {
           margin-bottom: 0;
         }
         .inlineFigure {
-          margin: 0 0 18px;
-          border-radius: 14px;
+          margin: 0 0 var(--space-4);
+          border-radius: var(--radius-md);
           overflow: hidden;
-          border: 1px solid rgba(17, 17, 20, 0.07);
-          background: #fafafa;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface-muted);
         }
         .inlineImage {
           width: 100%;
           max-height: 620px;
           object-fit: contain;
           display: block;
-          background: #f5f5f5;
+          background: var(--color-surface-muted);
         }
         .inlineFigure figcaption {
           padding: 8px 10px;
-          font-size: 12px;
-          color: #71717a;
-          border-top: 1px solid rgba(17, 17, 20, 0.06);
-          background: #fff;
+          font-size: var(--text-body-sm);
+          color: var(--color-text-muted);
+          border-top: 1px solid var(--color-border);
+          background: var(--color-surface);
         }
         .postSidebar {
           display: grid;
-          gap: 14px;
+          gap: var(--space-3);
           align-content: start;
         }
         .sideCard {
-          background: #fff;
-          border: 1px solid rgba(17, 17, 20, 0.07);
-          border-radius: 18px;
-          padding: 16px;
-          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.03);
+          background: var(--color-surface);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          padding: var(--space-4);
+          box-shadow: var(--shadow-card);
         }
         .sideLabel {
-          margin: 0 0 12px;
-          font-size: 11px;
+          margin: 0 0 var(--space-3);
+          font-size: var(--text-label);
           letter-spacing: 0.08em;
           text-transform: uppercase;
           font-weight: 800;
-          color: #7a7a84;
+          color: var(--color-text-muted);
         }
         .likeBtn {
           width: 100%;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
-          border-radius: 999px;
-          border: 1px solid rgba(17, 17, 20, 0.12);
-          background: #fff;
-          color: #555;
+          gap: var(--space-2);
+          border-radius: var(--radius-pill);
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          color: var(--color-text);
           padding: 11px 14px;
           cursor: pointer;
           font-weight: 700;
-          font-size: 14px;
+          font-size: var(--text-body);
         }
         .likeBtn.liked {
-          border-color: #ffd6df;
-          background: #fff4f7;
-          color: #ff2d55;
+          border-color: color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
+          background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+          color: var(--color-primary);
         }
         .likeBtn:disabled {
           opacity: 0.6;
           cursor: not-allowed;
         }
-        .sideHint {
-          margin: 10px 0 0;
-          color: #7c7c85;
-          font-size: 12px;
-          line-height: 1.45;
-        }
         .sideActions {
           display: grid;
-          gap: 8px;
+          gap: var(--space-2);
         }
         .pillLink {
-          border: 1px solid rgba(17, 17, 20, 0.1);
-          border-radius: 12px;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
           padding: 10px 12px;
-          background: #fff;
-          color: #222;
+          background: var(--color-surface);
+          color: var(--color-text);
           text-decoration: none;
-          font-size: 13px;
+          font-size: var(--text-body-sm);
           font-weight: 600;
         }
         .pillLink:hover {
-          background: #fafafa;
+          background: var(--color-surface-muted);
         }
         .pillDangerBtn {
-          border: 1px solid #fecaca;
-          border-radius: 12px;
+          border: 1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+          border-radius: var(--radius-md);
           padding: 10px 12px;
-          background: #fff;
-          color: #b91c1c;
+          background: var(--color-surface);
+          color: var(--color-primary);
           text-align: left;
-          font-size: 13px;
+          font-size: var(--text-body-sm);
           font-weight: 700;
           cursor: pointer;
         }
         .pillDangerBtn:hover {
-          background: #fff5f5;
+          background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
         }
 
         @media (min-width: 980px) {
-          .postPage {
-            padding: 18px 22px 28px;
-          }
           .postGrid {
-            grid-template-columns: minmax(0, 1fr) 300px;
+            grid-template-columns: minmax(0, 1fr) 240px;
             align-items: start;
           }
           .postSidebar {
             position: sticky;
-            top: 74px;
+            top: 24px;
           }
           .heroImageWrap {
             height: 340px;
           }
           .postBodyShell {
-            padding: 24px 28px 30px;
+            padding: var(--space-6);
           }
           .postTitle {
-            font-size: 38px;
+            font-size: calc(var(--text-h1) - 2px);
           }
           .postContent {
-            font-size: 18px;
+            font-size: var(--text-body-lg);
             line-height: 1.9;
+          }
+        }
+        @media (max-width: 680px) {
+          .postTopBar {
+            align-items: flex-start;
+          }
+          .topBarMain {
+            width: 100%;
+          }
+          .topBarActions {
+            width: 100%;
+          }
+          .postBodyShell {
+            padding: var(--space-4);
           }
         }
       `}</style>
