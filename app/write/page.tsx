@@ -466,22 +466,25 @@ function WriteContent() {
           font-size: var(--text-label);
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: var(--color-text-muted);
+          color: var(--color-accent-strong);
           font-weight: 800;
         }
         .publishBtn {
           border: 0;
-          background: var(--color-primary);
+          background: var(--color-accent-strong);
           color: #fff;
           border-radius: var(--radius-pill);
           padding: 11px 16px;
           font-size: var(--text-body-sm);
           font-weight: 800;
           cursor: pointer;
+          box-shadow: 0 8px 18px rgba(230, 57, 70, 0.16);
         }
+        .publishBtn:hover { background: color-mix(in srgb, var(--color-accent-strong) 88%, #000 12%); }
         .publishBtn:disabled {
           opacity: 0.55;
           cursor: not-allowed;
+          box-shadow: none;
         }
         .editorGrid {
           display: grid;
@@ -520,13 +523,13 @@ function WriteContent() {
           text-transform: uppercase;
         }
         .miniToolBtn {
-          border: 1px solid var(--color-border);
-          background: var(--color-surface);
+          border: 1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+          background: var(--color-accent-soft);
           border-radius: var(--radius-pill);
           padding: 8px 12px;
           font-size: var(--text-body-sm);
           font-weight: 700;
-          color: var(--color-text);
+          color: var(--color-primary);
           cursor: pointer;
         }
         .miniToolBtn:disabled {
@@ -568,7 +571,7 @@ function WriteContent() {
         }
         .inlineOptionsCard {
           margin-top: var(--space-5);
-          border-top: 1px solid var(--color-border);
+          border-top: 1px solid color-mix(in srgb, var(--color-accent) 32%, var(--color-border));
           padding-top: var(--space-4);
           display: grid;
           gap: var(--space-3);
@@ -621,13 +624,13 @@ function WriteContent() {
         .uploadBox {
           display: grid;
           place-items: center;
-          border: 1px dashed var(--color-border-strong);
-          background: var(--color-surface);
+          border: 1px dashed color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
+          background: color-mix(in srgb, var(--color-accent-soft) 45%, white);
           border-radius: var(--radius-md);
           min-height: 84px;
           cursor: pointer;
           font-size: var(--text-body-sm);
-          color: var(--color-text);
+          color: var(--color-primary);
           font-weight: 700;
         }
         .imagePreviewWrap {

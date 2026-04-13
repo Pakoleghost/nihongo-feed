@@ -17,7 +17,7 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  title: "フィード",
+  title: "Nihongo",
   icons: {
     icon: "/icon.png",
     apple: "/apple-icon.png",

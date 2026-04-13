@@ -217,7 +217,7 @@ export default function PostDetailPage() {
                 Volver
               </button>
               <div className="topBarCopy">
-                <div className="eyebrow">Publicación</div>
+                <div className="eyebrow">Contenido</div>
                 <h1>{parsed.title}</h1>
               </div>
             </div>
@@ -437,7 +437,7 @@ export default function PostDetailPage() {
           letter-spacing: 0.12em;
           text-transform: uppercase;
           font-weight: 800;
-          color: var(--color-text-muted);
+          color: var(--color-accent-strong);
         }
         .postTitle {
           margin: 0 0 var(--space-4);
@@ -541,7 +541,7 @@ export default function PostDetailPage() {
           letter-spacing: 0.08em;
           text-transform: uppercase;
           font-weight: 800;
-          color: var(--color-text-muted);
+          color: var(--color-accent-strong);
         }
         .likeBtn {
           width: 100%;
@@ -550,8 +550,8 @@ export default function PostDetailPage() {
           justify-content: center;
           gap: var(--space-2);
           border-radius: var(--radius-pill);
-          border: 1px solid var(--color-border);
-          background: var(--color-surface);
+          border: 1px solid color-mix(in srgb, var(--color-accent-strong) 35%, var(--color-border));
+          background: var(--color-highlight-soft);
           color: var(--color-text);
           padding: 11px 14px;
           cursor: pointer;
@@ -559,9 +559,9 @@ export default function PostDetailPage() {
           font-size: var(--text-body);
         }
         .likeBtn.liked {
-          border-color: color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
-          background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
-          color: var(--color-primary);
+          border-color: color-mix(in srgb, var(--color-accent-strong) 45%, var(--color-border));
+          background: color-mix(in srgb, var(--color-accent-strong) 12%, white);
+          color: var(--color-accent-strong);
         }
         .likeBtn:disabled {
           opacity: 0.6;
@@ -582,21 +582,22 @@ export default function PostDetailPage() {
           font-weight: 600;
         }
         .pillLink:hover {
-          background: var(--color-surface-muted);
+          background: var(--color-accent-soft);
+          border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
         }
         .pillDangerBtn {
-          border: 1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+          border: 1px solid color-mix(in srgb, var(--color-accent-strong) 24%, var(--color-border));
           border-radius: var(--radius-md);
           padding: 10px 12px;
           background: var(--color-surface);
-          color: var(--color-primary);
+          color: var(--color-accent-strong);
           text-align: left;
           font-size: var(--text-body-sm);
           font-weight: 700;
           cursor: pointer;
         }
         .pillDangerBtn:hover {
-          background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+          background: color-mix(in srgb, var(--color-accent-strong) 8%, var(--color-surface));
         }
 
         @media (min-width: 980px) {

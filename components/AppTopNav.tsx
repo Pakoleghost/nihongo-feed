@@ -80,6 +80,7 @@ export default function AppTopNav({ primary = null, secondary = null }: AppTopNa
       <div className="ds-container appTopNavInner">
         <div className="appTopNavBar ds-card">
           <Link href="/study" className="appNavBrand" aria-label="Ir a Study">
+            <span className="appNavMark" aria-hidden="true" />
             Nihongo
           </Link>
 

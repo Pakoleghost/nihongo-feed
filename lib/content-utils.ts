@@ -7,7 +7,7 @@ export function isPublicTargetGroup(value?: string | null) {
   return !normalized || normalized === "todos" || normalized === "general";
 }
 
-export function cleanFeedText(value: string) {
+export function cleanContentText(value: string) {
   return String(value || "")
     .replace(/!\[[^\]]*]\((https?:\/\/[^\s)]+)\)/gi, "")
     .replace(/https?:\/\/\S+\.(?:png|jpe?g|gif|webp|svg)(?:\?\S+)?/gi, "")
@@ -15,9 +15,9 @@ export function cleanFeedText(value: string) {
     .trim();
 }
 
-export function getPostParts(content?: string | null) {
+export function getContentParts(content?: string | null) {
   const lines = String(content || "").split("\n");
-  const title = cleanFeedText(lines[0] || "");
+  const title = cleanContentText(lines[0] || "");
   const bodyLines = lines.slice(1).filter((line) => {
     const trimmed = line.trim();
     if (!trimmed) return false;
@@ -27,6 +27,6 @@ export function getPostParts(content?: string | null) {
   });
   return {
     title: title || "Sin título",
-    preview: cleanFeedText(bodyLines.join(" ")),
+    preview: cleanContentText(bodyLines.join(" ")),
   };
 }

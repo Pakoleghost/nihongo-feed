@@ -604,7 +604,7 @@ export default function ResourcesPage() {
           font-size: var(--text-label);
           letter-spacing: .08em;
           text-transform: uppercase;
-          color: var(--color-text-muted);
+          color: var(--color-accent-strong);
           font-weight: 800;
         }
         .title {
@@ -631,9 +631,11 @@ export default function ResourcesPage() {
         .primaryBtn {
           border: 0;
           color: #fff;
-          background: var(--color-primary);
+          background: var(--color-accent-strong);
+          box-shadow: 0 8px 18px rgba(230, 57, 70, 0.16);
         }
-        .primaryBtn:disabled { opacity: .6; cursor: not-allowed; }
+        .primaryBtn:hover { background: color-mix(in srgb, var(--color-accent-strong) 88%, #000 12%); }
+        .primaryBtn:disabled { opacity: .6; cursor: not-allowed; box-shadow: none; }
         .secondaryBtn {
           color: var(--color-text);
           background: var(--color-surface);
@@ -675,9 +677,9 @@ export default function ResourcesPage() {
         }
         .countPill {
           border-radius: var(--radius-pill);
-          border: 1px solid var(--color-border);
-          background: var(--color-surface-muted);
-          color: var(--color-text-muted);
+          border: 1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+          background: var(--color-accent-soft);
+          color: var(--color-primary);
           font-size: var(--text-label);
           font-weight: 800;
           padding: 6px 10px;
@@ -699,14 +701,14 @@ export default function ResourcesPage() {
           background: var(--color-surface);
         }
         .folderCreator button {
-          border: 1px solid var(--color-border);
-          background: var(--color-surface);
+          border: 1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+          background: var(--color-accent-soft);
           border-radius: var(--radius-md);
           padding: 9px 12px;
           cursor: pointer;
           font-size: var(--text-body-sm);
           font-weight: 700;
-          color: var(--color-text);
+          color: var(--color-primary);
         }
         .folderList {
           display: grid;
@@ -725,8 +727,8 @@ export default function ResourcesPage() {
           text-align: left;
         }
         .folderBtn.active {
-          background: var(--color-surface-muted);
-          border-color: var(--color-border-strong);
+          background: var(--color-accent-soft);
+          border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
         }
         .folderBtnLabel {
           display: inline-flex;
@@ -744,9 +746,9 @@ export default function ResourcesPage() {
         }
         .folderCount {
           font-size: var(--text-label);
-          color: var(--color-text-muted);
+          color: var(--color-primary);
           border-radius: var(--radius-pill);
-          background: var(--color-surface-muted);
+          background: var(--color-accent-soft);
           padding: 3px 8px;
           font-weight: 800;
         }
@@ -759,7 +761,7 @@ export default function ResourcesPage() {
         .composerCard {
           border: 1px solid var(--color-border);
           border-radius: var(--radius-md);
-          background: var(--color-surface-muted);
+          background: color-mix(in srgb, var(--color-accent-soft) 55%, white);
           padding: var(--space-4);
           margin-bottom: var(--space-4);
         }
@@ -817,9 +819,9 @@ export default function ResourcesPage() {
           cursor: pointer;
         }
         .kindTab.active {
-          border-color: var(--color-border-strong);
-          background: var(--color-surface);
-          color: var(--color-text);
+          border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+          background: var(--color-accent-soft);
+          color: var(--color-primary);
         }
         .fileInputWrap {
           border: 1px dashed var(--color-border-strong);

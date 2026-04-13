@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { getPostParts } from "@/lib/feed-utils";
+import { getContentParts } from "@/lib/content-utils";
 import AppTopNav from "@/components/AppTopNav";
 
 function AvatarPlaceholder({ size = 44 }: { size?: number }) {
@@ -112,7 +112,7 @@ export default function StudentProfilePage() {
 
           <div className="statsStrip">
             <div className="statCell">
-              <span>Publicaciones</span>
+              <span>Entradas</span>
               <strong>{portfolioPosts.length}</strong>
             </div>
             <div className="statCell">
@@ -130,7 +130,7 @@ export default function StudentProfilePage() {
           <div className="archiveHead">
             <div>
               <div className="eyebrow">Archivo</div>
-              <h2>Publicaciones</h2>
+              <h2>Entradas</h2>
             </div>
             <span className="countPill">{portfolioPosts.length}</span>
           </div>
@@ -140,7 +140,7 @@ export default function StudentProfilePage() {
           ) : (
             <div className="postList">
               {portfolioPosts.map((post) => {
-                const { title, preview } = getPostParts(post.content || "");
+                const { title, preview } = getContentParts(post.content || "");
                 return (
                   <article key={post.id} className="postRow">
                     <div className="postBody">
@@ -277,7 +277,7 @@ export default function StudentProfilePage() {
           font-weight: 800;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: var(--color-text-muted);
+          color: var(--color-accent-strong);
         }
         .archiveHead h2 {
           margin: 2px 0 0;
@@ -307,8 +307,8 @@ export default function StudentProfilePage() {
           min-height: 28px;
           padding: 0 10px;
           border-radius: var(--radius-pill);
-          background: var(--color-surface-muted);
-          border: 1px solid var(--color-border);
+          background: var(--color-accent-soft);
+          border: 1px solid color-mix(in srgb, var(--color-accent) 32%, var(--color-border));
         }
         .bio {
           margin: var(--space-3) 0 0;
@@ -332,6 +332,10 @@ export default function StudentProfilePage() {
           border-radius: var(--radius-md);
           background: var(--color-surface-muted);
           border: 1px solid var(--color-border);
+        }
+        .statCell:first-child {
+          background: color-mix(in srgb, var(--color-accent-soft) 55%, white);
+          border-color: color-mix(in srgb, var(--color-accent) 36%, var(--color-border));
         }
         .statCell span {
           display: block;
@@ -368,9 +372,9 @@ export default function StudentProfilePage() {
           min-height: 32px;
           padding: 0 12px;
           border-radius: var(--radius-pill);
-          border: 1px solid var(--color-border);
-          background: var(--color-surface-muted);
-          color: var(--color-text-muted);
+          border: 1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+          background: var(--color-accent-soft);
+          color: var(--color-primary);
           font-size: var(--text-body-sm);
           font-weight: 700;
           display: inline-flex;
@@ -398,6 +402,10 @@ export default function StudentProfilePage() {
           border-radius: var(--radius-md);
           border: 1px solid var(--color-border);
           background: var(--color-surface);
+        }
+        .postRow:hover {
+          border-color: color-mix(in srgb, var(--color-accent) 28%, var(--color-border));
+          background: color-mix(in srgb, var(--color-accent-soft) 26%, white);
         }
         .postBody {
           min-width: 0;

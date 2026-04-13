@@ -138,7 +138,7 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
   };
   const eyebrowStyle: React.CSSProperties = {
     fontSize: "var(--text-label)",
-    color: "var(--color-text-muted)",
+    color: "var(--color-accent-strong)",
     fontWeight: 800,
     letterSpacing: ".08em",
     textTransform: "uppercase",
@@ -182,12 +182,13 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
   const primaryButtonStyle: React.CSSProperties = {
     border: 0,
     borderRadius: "var(--radius-pill)",
-    background: "var(--color-primary)",
+    background: "var(--color-accent-strong)",
     color: "#fff",
     padding: "12px 16px",
     fontWeight: 800,
     fontSize: "var(--text-body)",
     cursor: "pointer",
+    boxShadow: "0 10px 20px rgba(230, 57, 70, 0.15)",
   };
   const ghostButtonStyle: React.CSSProperties = {
     border: "1px solid var(--color-border)",
@@ -261,7 +262,7 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
             <input type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required style={inputStyle} />
           </label>
 
-          <button type="submit" style={primaryButtonStyle}>{isSignUp ? "Crear cuenta" : "Entrar"}</button>
+        <button type="submit" style={primaryButtonStyle}>{isSignUp ? "Crear cuenta" : "Entrar"}</button>
         </form>
 
         <button onClick={() => setIsSignUp(!isSignUp)} style={ghostButtonStyle}>

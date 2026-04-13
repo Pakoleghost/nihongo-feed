@@ -176,10 +176,10 @@ const VK_BUCKETS: Array<{ key: VkBucketKey; label: string; lessons: number[] }> 
 ];
 const VK_MODE_KEYS = VK_BUCKETS.map((bucket) => `vk:${bucket.key}`);
 const FLASHCARD_ROUTE_GROUPS = [
-  { id: "route-foundations", title: "Fundamentos", subtitle: "Kana, vocab base y primeras estructuras.", lessons: [1, 2], accent: "#4f46e5", surface: "linear-gradient(145deg,#eef2ff,#ffffff)" },
-  { id: "route-core-a", title: "Núcleo I", subtitle: "Verbos, kanji inicial y práctica cotidiana.", lessons: [3, 4, 5], accent: "#0f766e", surface: "linear-gradient(145deg,#ecfeff,#ffffff)" },
-  { id: "route-core-b", title: "Núcleo II", subtitle: "Forma て, más kanji y vocab de uso real.", lessons: [6, 7, 8], accent: "#b45309", surface: "linear-gradient(145deg,#fff7ed,#ffffff)" },
-  { id: "route-bridge", title: "Consolidación", subtitle: "Lecciones altas para repasar antes de examen.", lessons: [9, 10, 11, 12], accent: "#be185d", surface: "linear-gradient(145deg,#fdf2f8,#ffffff)" },
+  { id: "route-foundations", title: "Fundamentos", subtitle: "Kana, vocab base y primeras estructuras.", lessons: [1, 2], accent: "#4ECDC4", surface: "rgba(78, 205, 196, 0.12)" },
+  { id: "route-core-a", title: "Núcleo I", subtitle: "Verbos, kanji inicial y práctica cotidiana.", lessons: [3, 4, 5], accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
+  { id: "route-core-b", title: "Núcleo II", subtitle: "Forma て, más kanji y vocab de uso real.", lessons: [6, 7, 8], accent: "#F4A261", surface: "rgba(244, 162, 97, 0.12)" },
+  { id: "route-bridge", title: "Consolidación", subtitle: "Lecciones altas para repasar antes de examen.", lessons: [9, 10, 11, 12], accent: "#E63946", surface: "rgba(230, 57, 70, 0.08)" },
 ] as const;
 
 type StudyView = "kana" | "flashcards" | "quiz" | "sprint" | "exam" | "dictionary";
@@ -878,9 +878,9 @@ function buildOptionSet(correct: string, wrongCandidates: string[], fallbackPool
 }
 
 function rankBadgeStyles(index: number) {
-  if (index === 0) return { bg: "linear-gradient(135deg,#fbbf24,#f59e0b)", border: "#f59e0b", color: "#111114" };
-  if (index === 1) return { bg: "linear-gradient(135deg,#d1d5db,#9ca3af)", border: "#9ca3af", color: "#111114" };
-  if (index === 2) return { bg: "linear-gradient(135deg,#f59e0b,#b45309)", border: "#b45309", color: "#fff" };
+  if (index === 0) return { bg: "#f4c95d", border: "#e2b648", color: "#111114" };
+  if (index === 1) return { bg: "#d7dce3", border: "#bdc4ce", color: "#111114" };
+  if (index === 2) return { bg: "#d59a62", border: "#c48141", color: "#fff" };
   return { bg: "#fff", border: "#d1d5db", color: "#6b7280" };
 }
 
@@ -3491,7 +3491,7 @@ function StudyContent() {
   };
   const sectionKickerStyle: CSSProperties = {
     fontSize: "var(--text-label)",
-    color: "var(--color-text-muted)",
+    color: "var(--color-accent-strong)",
     textTransform: "uppercase",
     letterSpacing: ".08em",
     fontWeight: 800,
@@ -3508,12 +3508,13 @@ function StudyContent() {
   const primaryButtonStyle: CSSProperties = {
     border: 0,
     borderRadius: "var(--radius-pill)",
-    background: "var(--color-primary)",
+    background: "var(--color-accent-strong)",
     color: "#fff",
     padding: "10px 16px",
     fontWeight: 800,
     fontSize: "var(--text-body-sm)",
     cursor: "pointer",
+    boxShadow: "0 8px 18px rgba(230, 57, 70, 0.16)",
   };
   const secondaryButtonStyle: CSSProperties = {
     border: "1px solid var(--color-border)",
@@ -3527,17 +3528,17 @@ function StudyContent() {
   };
   const chipStyle: CSSProperties = {
     borderRadius: "var(--radius-pill)",
-    background: "var(--color-surface-muted)",
-    border: "1px solid var(--color-border)",
+    background: "var(--color-accent-soft)",
+    border: "1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-border))",
     padding: "6px 10px",
     fontSize: "var(--text-label)",
-    color: "var(--color-text-muted)",
+    color: "var(--color-text)",
     fontWeight: 800,
   };
   const progressTrackStyle: CSSProperties = {
     height: 7,
     borderRadius: 999,
-    background: "var(--color-surface-muted)",
+    background: "var(--color-accent-soft)",
     overflow: "hidden",
   };
 
@@ -3894,14 +3895,14 @@ function StudyContent() {
   );
 
   const toolCards = [
-    { key: "kana", href: "/study?view=kana", title: "Kana Sprint" },
-    { key: "sprint", href: "/study?view=sprint", title: "Vocab Sprint" },
-    { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards" },
-    { key: "exam", href: "/study?view=exam", title: "Exámenes" },
-    ...(isAdmin ? [{ key: "dictionary", href: "/study?view=dictionary", title: "Diccionario" }] : []),
+    { key: "kana", href: "/study?view=kana", title: "Kana Sprint", accent: "var(--color-accent)", surface: "var(--color-accent-soft)" },
+    { key: "sprint", href: "/study?view=sprint", title: "Vocab Sprint", accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
+    { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", accent: "#F4A261", surface: "rgba(244, 162, 97, 0.12)" },
+    { key: "exam", href: "/study?view=exam", title: "Exámenes", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
+    ...(isAdmin ? [{ key: "dictionary", href: "/study?view=dictionary", title: "Diccionario", accent: "var(--color-primary)", surface: "rgba(26, 26, 46, 0.06)" }] : []),
   ];
 
-  const renderToolPill = (tool: { key: string; href: string; title: string }) => {
+  const renderToolPill = (tool: { key: string; href: string; title: string; accent: string; surface: string }) => {
     const selected = activeTab === tool.key;
     return (
       <Link
@@ -3915,9 +3916,9 @@ function StudyContent() {
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          background: selected ? "var(--color-primary)" : "var(--color-surface)",
-          border: selected ? "1px solid var(--color-primary)" : "1px solid var(--color-border)",
-          color: selected ? "#fff" : "var(--color-text)",
+          background: selected ? tool.surface : "var(--color-surface)",
+          border: selected ? `1px solid ${tool.accent}` : "1px solid var(--color-border)",
+          color: selected ? "var(--color-text)" : "var(--color-text)",
           fontSize: "var(--text-body-sm)",
           fontWeight: 800,
         }}
@@ -3955,9 +3956,9 @@ function StudyContent() {
                   textDecoration: "none",
                   color: "var(--color-text)",
                   minHeight: 110,
-                  border: "1px solid var(--color-border)",
+                  border: `1px solid ${tool.accent}`,
                   borderRadius: "var(--radius-lg)",
-                  background: "var(--color-surface)",
+                  background: tool.surface,
                   padding: "var(--space-4)",
                   boxShadow: "var(--shadow-card)",
                   display: "grid",
@@ -3965,7 +3966,7 @@ function StudyContent() {
                   alignContent: "space-between",
                 }}
               >
-                <span style={sectionKickerStyle}>Abrir</span>
+                <span style={{ ...sectionKickerStyle, color: tool.accent }}>Abrir</span>
                 <span style={{ fontSize: "var(--text-h2)", lineHeight: 1, letterSpacing: "-.04em", fontWeight: 800 }}>{tool.title}</span>
               </Link>
             ))}
@@ -3977,9 +3978,9 @@ function StudyContent() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Kana Sprint</h2>
               <div style={pillGroupStyle}>
-                <button type="button" onClick={() => setKanaSet("hiragana")} style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: kanaSet === "hiragana" ? "var(--color-text)" : "transparent", color: kanaSet === "hiragana" ? "#fff" : "var(--color-text-muted)" }}>Hiragana</button>
-                <button type="button" onClick={() => setKanaSet("katakana")} style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: kanaSet === "katakana" ? "var(--color-text)" : "transparent", color: kanaSet === "katakana" ? "#fff" : "var(--color-text-muted)" }}>Katakana</button>
-                <button type="button" onClick={() => setKanaSet("mixed")} style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: kanaSet === "mixed" ? "var(--color-text)" : "transparent", color: kanaSet === "mixed" ? "#fff" : "var(--color-text-muted)" }}>Mixto</button>
+                <button type="button" onClick={() => setKanaSet("hiragana")} style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: kanaSet === "hiragana" ? "var(--color-accent)" : "transparent", color: kanaSet === "hiragana" ? "var(--color-primary)" : "var(--color-text-muted)" }}>Hiragana</button>
+                <button type="button" onClick={() => setKanaSet("katakana")} style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: kanaSet === "katakana" ? "var(--color-accent)" : "transparent", color: kanaSet === "katakana" ? "var(--color-primary)" : "var(--color-text-muted)" }}>Katakana</button>
+                <button type="button" onClick={() => setKanaSet("mixed")} style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: kanaSet === "mixed" ? "var(--color-accent)" : "transparent", color: kanaSet === "mixed" ? "var(--color-primary)" : "var(--color-text-muted)" }}>Mixto</button>
               </div>
             </div>
             <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
@@ -4098,7 +4099,7 @@ function StudyContent() {
                     key={bucket.key}
                     type="button"
                     onClick={() => setVkBucket(bucket.key)}
-                    style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: vkBucket === bucket.key ? "var(--color-text)" : "transparent", color: vkBucket === bucket.key ? "#fff" : "var(--color-text-muted)", fontWeight: 700, fontSize: 12 }}
+                    style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: vkBucket === bucket.key ? "var(--color-accent)" : "transparent", color: vkBucket === bucket.key ? "var(--color-primary)" : "var(--color-text-muted)", fontWeight: 700, fontSize: 12 }}
                   >
                     {bucket.label}
                   </button>
