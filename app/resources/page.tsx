@@ -335,16 +335,16 @@ export default function ResourcesPage() {
   return (
     <>
       <div className="resourcesPage">
-        <div className="resourcesShell">
-          <header className="topBar">
-            <div className="topLeft">
-              <Link href="/" className="ghostBtn">← Volver</Link>
+        <div className="resourcesShell ds-container">
+          <header className="pageHeader">
+            <div className="pageHeaderMain">
+              <Link href="/study" className="ghostBtn">Study</Link>
               <div>
                 <div className="eyebrow">Recursos</div>
                 <h1 className="title">Biblioteca</h1>
               </div>
             </div>
-            <div className="topActions">
+            <div className="pageHeaderActions">
               <div className="toggleTabs" role="tablist" aria-label="Cambiar vista">
                 <button type="button" className={`toggleTab ${contentMode === "resources" ? "active" : ""}`} onClick={() => setContentMode("resources")}>
                   Recursos
@@ -363,13 +363,13 @@ export default function ResourcesPage() {
 
           {errorMsg && <div className="errorBox">{errorMsg}</div>}
 
-          <div className="layoutGrid">
-            {contentMode === "resources" ? (
+          <div className={`layoutGrid ${contentMode === "tasks" ? "tasksMode" : ""}`}>
+            {contentMode === "resources" && (
             <aside className="foldersPanel">
               <div className="panelHead">
                 <div>
                   <div className="eyebrow">Carpetas</div>
-                  <h2>Organización</h2>
+                  <h2>Explorar</h2>
                 </div>
                 <span className="countPill">{folders.length}</span>
               </div>
@@ -410,26 +410,13 @@ export default function ResourcesPage() {
                 Las carpetas vacías se guardan localmente hasta que agregues contenido.
               </p>
             </aside>
-            ) : (
-              <aside className="foldersPanel">
-                <div className="panelHead">
-                  <div>
-                    <div className="eyebrow">Tareas</div>
-                    <h2>Asignadas</h2>
-                  </div>
-                  <span className="countPill">{tasks.length}</span>
-                </div>
-                <p className="panelHint">
-                  {isAdmin ? "Vista de todas las tareas publicadas." : `Solo ves tareas para ${myProfile?.group_name || "tu grupo"} o para Todos.`}
-                </p>
-              </aside>
             )}
 
-            <section className="contentPanel">
+            <section className={`contentPanel ${contentMode === "tasks" ? "fullWidth" : ""}`}>
               <div className="panelHead">
                 <div>
                   <div className="eyebrow">{contentMode === "resources" ? "Contenido" : "Tareas"}</div>
-                  <h2>{contentMode === "resources" ? selectedFolder : "Pendientes y activas"}</h2>
+                  <h2>{contentMode === "resources" ? selectedFolder : "Disponibles"}</h2>
                 </div>
                 <span className="countPill">{contentMode === "resources" ? `${resourcesInFolder.length} items` : `${tasks.length} tareas`}</span>
               </div>
@@ -547,7 +534,7 @@ export default function ResourcesPage() {
                       return (
                         <Link key={task.id} href={`/post/${task.id}`} className="resourceRow" style={{ textDecoration: "none" }}>
                           <div className="resourceMain">
-                            <div className="resourceIcon" style={{ color: isForum ? "#3d81ce" : isAnnouncementTask ? "#3d81ce" : "#159578", background: isForum ? "#eff6ff" : isAnnouncementTask ? "#f4fbff" : "#ecfdf5" }}>
+                            <div className="resourceIcon">
                               {isForum ? "💬" : isAnnouncementTask ? "📌" : "📝"}
                             </div>
                             <div className="resourceText">
@@ -559,14 +546,14 @@ export default function ResourcesPage() {
                               </div>
                               <p>{taskBody.join(" ").trim() || "Abrir para ver instrucciones."}</p>
                               <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                                <span className="typeTag" style={{ textTransform: "none", letterSpacing: 0, fontWeight: 700 }}>{task.target_group || "Todos"}</span>
+                                <span className="typeTag quietTag">{task.target_group || "Todos"}</span>
                                 {isForum && !isAssignedToMe && (
-                                  <span className="typeTag" style={{ textTransform: "none", letterSpacing: 0, fontWeight: 700, color: "#64748b", background: "#f8fafc", borderColor: "#e2e8f0" }}>
+                                  <span className="typeTag quietTag">
                                     Foro abierto
                                   </span>
                                 )}
                                 {deadline && (
-                                  <span className="typeTag" style={{ textTransform: "none", letterSpacing: 0, fontWeight: 700, color: isExpired ? "#b45309" : "#475569", background: isExpired ? "#fffbeb" : "#f8fafc", borderColor: isExpired ? "#fde68a" : "#e2e8f0" }}>
+                                  <span className="typeTag quietTag">
                                     {isExpired ? "Vencida" : "Deadline"} · {deadline.toLocaleString("es-MX")}
                                   </span>
                                 )}
@@ -605,7 +592,7 @@ export default function ResourcesPage() {
                           <div className="resourceText">
                             <div className="resourceTitleRow">
                               <strong>{resource.title}</strong>
-                              <span className={`typeTag ${kind}`}>{kind}</span>
+                              <span className="typeTag quietTag">{kind}</span>
                             </div>
                             <p>
                               {kind === "note"
@@ -667,59 +654,53 @@ export default function ResourcesPage() {
       <style jsx>{`
         .resourcesPage {
           min-height: 100vh;
-          background: radial-gradient(900px 420px at 50% -10%, rgba(88, 168, 255, 0.07), transparent 65%), #f6f7f8;
-          padding: 14px;
+          background: var(--color-bg);
+          padding: var(--page-padding);
         }
         .resourcesShell {
-          max-width: 1320px;
-          margin: 0 auto;
+          display: grid;
+          gap: var(--space-4);
         }
-        .topBar {
-          position: sticky;
-          top: 0;
-          z-index: 20;
-          background: rgba(246,247,248,.84);
-          backdrop-filter: blur(10px);
-          padding: 10px 0 14px;
+        .pageHeader {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 12px;
-          margin-bottom: 4px;
+          gap: var(--space-3);
         }
-        .topLeft {
+        .pageHeaderMain {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: var(--space-3);
           min-width: 0;
         }
         .ghostBtn {
-          border: 1px solid rgba(17,17,20,.1);
-          background: #fff;
-          border-radius: 999px;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          border-radius: var(--radius-pill);
           padding: 8px 12px;
-          font-size: 13px;
+          font-size: var(--text-body-sm);
           text-decoration: none;
-          color: #222;
+          color: var(--color-text);
           flex-shrink: 0;
+          font-weight: 700;
         }
         .eyebrow {
-          font-size: 11px;
+          font-size: var(--text-label);
           letter-spacing: .08em;
           text-transform: uppercase;
-          color: #7a7a84;
+          color: var(--color-text-muted);
           font-weight: 800;
         }
         .title {
           margin: 4px 0 0;
-          font-size: 28px;
+          font-size: var(--text-h2);
           line-height: 1;
-          letter-spacing: -.02em;
-          color: #111114;
+          letter-spacing: -.04em;
+          color: var(--color-text);
         }
-        .topActions {
+        .pageHeaderActions {
           display: flex;
-          gap: 8px;
+          gap: var(--space-2);
           align-items: center;
           flex-wrap: wrap;
           justify-content: flex-end;
@@ -727,140 +708,142 @@ export default function ResourcesPage() {
         .toggleTabs {
           display: inline-flex;
           gap: 4px;
-          border: 1px solid rgba(17,17,20,.08);
-          background: #fff;
-          border-radius: 999px;
-          padding: 3px;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface-muted);
+          border-radius: var(--radius-pill);
+          padding: 4px;
         }
         .toggleTab {
           border: 0;
           background: transparent;
-          border-radius: 999px;
+          border-radius: var(--radius-pill);
           padding: 7px 10px;
-          font-size: 12px;
-          font-weight: 700;
-          color: #666a73;
+          font-size: var(--text-body-sm);
+          font-weight: 800;
+          color: var(--color-text-muted);
           cursor: pointer;
         }
         .toggleTab.active {
-          background: #111114;
+          background: var(--color-primary);
           color: #fff;
         }
         .primaryBtn, .secondaryBtn {
-          border: 0;
-          border-radius: 999px;
+          border-radius: var(--radius-pill);
           padding: 10px 14px;
-          font-size: 13px;
-          font-weight: 700;
+          font-size: var(--text-body-sm);
+          font-weight: 800;
           cursor: pointer;
         }
         .primaryBtn {
+          border: 0;
           color: #fff;
-          background: linear-gradient(135deg, #34c5a6, #25a98f);
-          box-shadow: 0 8px 18px rgba(44,182,150,.2);
+          background: var(--color-primary);
         }
-        .primaryBtn:disabled { opacity: .6; cursor: not-allowed; box-shadow: none; }
+        .primaryBtn:disabled { opacity: .6; cursor: not-allowed; }
         .secondaryBtn {
-          color: #222;
-          background: #fff;
-          border: 1px solid rgba(17,17,20,.1);
+          color: var(--color-text);
+          background: var(--color-surface);
+          border: 1px solid var(--color-border);
         }
         .errorBox {
-          border: 1px solid #fecaca;
-          background: #fff1f2;
-          color: #9f1239;
-          border-radius: 12px;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          color: var(--color-text);
+          border-radius: var(--radius-md);
           padding: 12px 14px;
-          margin-bottom: 10px;
-          font-size: 14px;
+          font-size: var(--text-body);
         }
         .layoutGrid {
           display: grid;
           grid-template-columns: minmax(0, 1fr);
-          gap: 14px;
+          gap: var(--space-4);
+        }
+        .layoutGrid.tasksMode {
+          grid-template-columns: minmax(0, 1fr);
         }
         .foldersPanel, .contentPanel {
-          background: #fff;
-          border: 1px solid rgba(17,17,20,.07);
-          border-radius: 20px;
-          box-shadow: 0 12px 30px rgba(0,0,0,.035);
-          padding: 14px;
+          background: var(--color-surface);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-card);
+          padding: var(--space-4);
         }
         .panelHead {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 10px;
-          margin-bottom: 12px;
+          gap: var(--space-3);
+          margin-bottom: var(--space-4);
         }
         .panelHead h2 {
           margin: 4px 0 0;
-          font-size: 20px;
+          font-size: var(--text-h3);
           line-height: 1;
-          letter-spacing: -.01em;
-          color: #111114;
+          letter-spacing: -.03em;
+          color: var(--color-text);
         }
         .countPill {
-          border-radius: 999px;
-          border: 1px solid rgba(17,17,20,.07);
-          background: #f6f7f8;
-          color: #666a73;
-          font-size: 12px;
-          font-weight: 600;
+          border-radius: var(--radius-pill);
+          border: 1px solid var(--color-border);
+          background: var(--color-surface-muted);
+          color: var(--color-text-muted);
+          font-size: var(--text-label);
+          font-weight: 800;
           padding: 6px 10px;
           white-space: nowrap;
         }
         .folderCreator {
           display: grid;
           grid-template-columns: 1fr auto;
-          gap: 8px;
-          margin-bottom: 10px;
+          gap: var(--space-2);
+          margin-bottom: var(--space-3);
         }
         .folderCreator input {
-          border: 1px solid rgba(17,17,20,.1);
-          border-radius: 10px;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
           padding: 9px 10px;
           outline: none;
-          font-size: 13px;
+          font-size: var(--text-body-sm);
           font-family: inherit;
-          background: #fff;
+          background: var(--color-surface);
         }
         .folderCreator button {
-          border: 1px solid rgba(17,17,20,.1);
-          background: #fff;
-          border-radius: 10px;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          border-radius: var(--radius-md);
           padding: 9px 12px;
           cursor: pointer;
-          font-size: 12px;
-          font-weight: 600;
+          font-size: var(--text-body-sm);
+          font-weight: 700;
+          color: var(--color-text);
         }
         .folderList {
           display: grid;
-          gap: 6px;
+          gap: 8px;
         }
         .folderBtn {
-          border: 1px solid rgba(17,17,20,.06);
-          background: #fff;
-          border-radius: 12px;
-          padding: 10px 10px;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          border-radius: var(--radius-md);
+          padding: 10px 12px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 10px;
+          gap: var(--space-2);
           cursor: pointer;
           text-align: left;
         }
         .folderBtn.active {
-          background: #f2fffa;
-          border-color: rgba(44,182,150,.2);
+          background: var(--color-surface-muted);
+          border-color: var(--color-border-strong);
         }
         .folderBtnLabel {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          color: #222;
-          font-size: 13px;
-          font-weight: 600;
+          color: var(--color-text);
+          font-size: var(--text-body-sm);
+          font-weight: 700;
           min-width: 0;
         }
         .folderBtnLabel span:last-child {
@@ -869,40 +852,40 @@ export default function ResourcesPage() {
           text-overflow: ellipsis;
         }
         .folderCount {
-          font-size: 11px;
-          color: #7c7c85;
-          border-radius: 999px;
-          background: #f5f5f5;
+          font-size: var(--text-label);
+          color: var(--color-text-muted);
+          border-radius: var(--radius-pill);
+          background: var(--color-surface-muted);
           padding: 3px 8px;
-          font-weight: 700;
+          font-weight: 800;
         }
         .panelHint {
-          margin: 10px 2px 0;
-          color: #8a8a94;
-          font-size: 11px;
+          margin: var(--space-3) 2px 0;
+          color: var(--color-text-muted);
+          font-size: var(--text-label);
           line-height: 1.4;
         }
         .composerCard {
-          border: 1px solid rgba(17,17,20,.07);
-          border-radius: 16px;
-          background: linear-gradient(180deg, #fcfffe 0%, #fff 50%);
-          padding: 12px;
-          margin-bottom: 12px;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          background: var(--color-surface-muted);
+          padding: var(--space-4);
+          margin-bottom: var(--space-4);
         }
         .composerHeader {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 8px;
-          margin-bottom: 10px;
+          gap: var(--space-2);
+          margin-bottom: var(--space-3);
         }
         .composerHeader strong {
-          color: #111114;
-          font-size: 14px;
+          color: var(--color-text);
+          font-size: var(--text-body);
         }
         .composerGrid {
           display: grid;
-          gap: 10px;
+          gap: var(--space-3);
           grid-template-columns: minmax(0, 1fr);
         }
         .field {
@@ -911,20 +894,20 @@ export default function ResourcesPage() {
         }
         .field.full { grid-column: 1 / -1; }
         .field > span {
-          color: #666a73;
-          font-size: 12px;
-          font-weight: 600;
+          color: var(--color-text-muted);
+          font-size: var(--text-label);
+          font-weight: 700;
         }
         .field input, .field textarea {
           width: 100%;
-          border: 1px solid rgba(17,17,20,.1);
-          border-radius: 10px;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
           padding: 9px 10px;
-          font-size: 13px;
+          font-size: var(--text-body-sm);
           font-family: inherit;
           outline: none;
-          background: #fff;
-          color: #222;
+          background: var(--color-surface);
+          color: var(--color-text);
         }
         .field textarea { resize: vertical; min-height: 120px; line-height: 1.55; }
         .kindTabs {
@@ -933,25 +916,25 @@ export default function ResourcesPage() {
           flex-wrap: wrap;
         }
         .kindTab {
-          border: 1px solid rgba(17,17,20,.1);
-          background: #fff;
-          color: #444;
-          border-radius: 999px;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          color: var(--color-text-muted);
+          border-radius: var(--radius-pill);
           padding: 7px 10px;
-          font-size: 12px;
-          font-weight: 600;
+          font-size: var(--text-body-sm);
+          font-weight: 700;
           cursor: pointer;
         }
         .kindTab.active {
-          border-color: rgba(44,182,150,.22);
-          background: #f2fffa;
-          color: #12745e;
+          border-color: var(--color-border-strong);
+          background: var(--color-surface);
+          color: var(--color-text);
         }
         .fileInputWrap {
-          border: 1px dashed rgba(17,17,20,.16);
-          border-radius: 10px;
+          border: 1px dashed var(--color-border-strong);
+          border-radius: var(--radius-md);
           padding: 10px;
-          background: #fbfbfc;
+          background: var(--color-surface);
         }
         .fileInputWrap input {
           border: 0;
@@ -961,54 +944,55 @@ export default function ResourcesPage() {
         .fileInputWrap small {
           display: block;
           margin-top: 6px;
-          color: #7c7c85;
-          font-size: 11px;
+          color: var(--color-text-muted);
+          font-size: var(--text-label);
         }
         .composerActions {
-          margin-top: 10px;
+          margin-top: var(--space-3);
           display: flex;
           justify-content: flex-end;
         }
         .miniGhost, .miniDanger {
-          border: 1px solid rgba(17,17,20,.1);
-          background: #fff;
-          border-radius: 999px;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          border-radius: var(--radius-pill);
           padding: 6px 10px;
-          font-size: 12px;
+          font-size: var(--text-body-sm);
           cursor: pointer;
-          color: #444;
+          color: var(--color-text-muted);
           text-decoration: none;
+          font-weight: 700;
         }
         .miniDanger {
-          border-color: #fecaca;
-          color: #b91c1c;
-          background: #fff;
+          border-color: var(--color-border);
+          color: var(--color-text-muted);
+          background: var(--color-surface);
         }
         .emptyBox {
-          border: 1px dashed rgba(17,17,20,.12);
-          border-radius: 14px;
+          border: 1px dashed var(--color-border);
+          border-radius: var(--radius-md);
           padding: 24px 16px;
           text-align: center;
-          color: #8a8a94;
-          background: #fcfcfd;
-          font-size: 14px;
+          color: var(--color-text-muted);
+          background: var(--color-surface-muted);
+          font-size: var(--text-body);
         }
         .emptyBox p { margin: 0 0 10px; }
         .resourceList {
           display: grid;
-          gap: 8px;
+          gap: var(--space-2);
         }
         .resourceRow {
-          border: 1px solid rgba(17,17,20,.06);
-          border-radius: 14px;
-          background: #fff;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          background: var(--color-surface);
           padding: 10px;
           display: grid;
           gap: 10px;
         }
         .resourceRow.selected {
-          border-color: rgba(44,182,150,.22);
-          background: #fbfffd;
+          border-color: var(--color-border-strong);
+          background: var(--color-surface-muted);
         }
         .resourceMain {
           display: flex;
@@ -1019,12 +1003,12 @@ export default function ResourcesPage() {
         .resourceIcon {
           width: 34px;
           height: 34px;
-          border-radius: 10px;
+          border-radius: var(--radius-md);
           display: grid;
           place-items: center;
-          background: #f6f7f8;
-          color: #5f636d;
-          border: 1px solid rgba(17,17,20,.06);
+          background: var(--color-surface-muted);
+          color: var(--color-text-muted);
+          border: 1px solid var(--color-border);
           flex-shrink: 0;
         }
         .resourceText { min-width: 0; flex: 1; }
@@ -1035,40 +1019,30 @@ export default function ResourcesPage() {
           flex-wrap: wrap;
         }
         .resourceTitleRow strong {
-          color: #17171b;
-          font-size: 14px;
+          color: var(--color-text);
+          font-size: var(--text-body);
           line-height: 1.3;
         }
         .typeTag {
-          font-size: 10px;
+          font-size: var(--text-label);
           font-weight: 800;
           text-transform: uppercase;
           letter-spacing: .06em;
-          border-radius: 999px;
+          border-radius: var(--radius-pill);
           padding: 3px 7px;
-          border: 1px solid rgba(17,17,20,.08);
-          color: #666a73;
-          background: #f6f7f8;
+          border: 1px solid var(--color-border);
+          color: var(--color-text-muted);
+          background: var(--color-surface-muted);
         }
-        .typeTag.note {
-          color: #2563eb;
-          background: #eff6ff;
-          border-color: #bfdbfe;
-        }
-        .typeTag.file {
-          color: #7c3aed;
-          background: #f5f3ff;
-          border-color: #ddd6fe;
-        }
-        .typeTag.link {
-          color: #0f766e;
-          background: #ecfdf5;
-          border-color: #bbf7d0;
+        .quietTag {
+          text-transform: none;
+          letter-spacing: 0;
+          font-weight: 700;
         }
         .resourceText p {
           margin: 5px 0 0;
-          color: #73737d;
-          font-size: 12px;
+          color: var(--color-text-muted);
+          font-size: var(--text-body-sm);
           line-height: 1.45;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -1080,38 +1054,40 @@ export default function ResourcesPage() {
           flex-wrap: wrap;
         }
         .noteViewer {
-          border-top: 1px solid rgba(17,17,20,.06);
+          border-top: 1px solid var(--color-border);
           padding-top: 10px;
         }
         .noteViewerHeader {
           margin-bottom: 8px;
-          font-size: 13px;
-          color: #222;
+          font-size: var(--text-body-sm);
+          color: var(--color-text);
         }
         .noteViewer pre {
           margin: 0;
           white-space: pre-wrap;
           font-family: inherit;
-          font-size: 13px;
+          font-size: var(--text-body-sm);
           line-height: 1.65;
-          color: #2f2f35;
-          background: #fbfbfc;
-          border: 1px solid rgba(17,17,20,.06);
-          border-radius: 12px;
+          color: var(--color-text);
+          background: var(--color-surface-muted);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
           padding: 12px;
           max-height: 320px;
           overflow: auto;
         }
 
         @media (min-width: 1024px) {
-          .resourcesPage { padding: 18px 22px 28px; }
           .layoutGrid {
-            grid-template-columns: 320px minmax(0, 1fr);
+            grid-template-columns: 280px minmax(0, 1fr);
             align-items: start;
+          }
+          .layoutGrid.tasksMode {
+            grid-template-columns: minmax(0, 1fr);
           }
           .foldersPanel {
             position: sticky;
-            top: 76px;
+            top: 16px;
           }
           .composerGrid {
             grid-template-columns: repeat(2, minmax(0, 1fr));

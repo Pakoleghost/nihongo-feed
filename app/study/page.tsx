@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Suspense } from "react";
+import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -3464,26 +3465,89 @@ function StudyContent() {
     }, new Map<string, { category: string; correct: number; total: number }>()),
   ).map(([, value]) => value);
 
-  const pageMeta = selectedView
+  const pageTitle = selectedView
     ? selectedView === "kana"
-      ? { title: "Kana Sprint", subtitle: "" }
+      ? "Kana Sprint"
       : selectedView === "sprint"
-        ? { title: "Vocab Sprint", subtitle: "" }
+        ? "Vocab Sprint"
         : selectedView === "exam"
-          ? { title: "Exámenes", subtitle: "" }
+          ? "Exámenes"
           : selectedView === "dictionary"
-            ? { title: "Diccionario", subtitle: "" }
-          : { title: "Flashcards", subtitle: "" }
-    : { title: "Study", subtitle: "" };
-  const studyThemes: Record<string, { badge: string; bg: string; accent: string; soft: string }> = {
-    kana: { badge: "Kana", bg: "linear-gradient(145deg,#ecfdf5,#f8fffb)", accent: "#16a34a", soft: "rgba(22,163,74,.12)" },
-    sprint: { badge: "Sprint", bg: "linear-gradient(145deg,#fff7ed,#fffdf9)", accent: "#ea580c", soft: "rgba(234,88,12,.12)" },
-    flashcards: { badge: "Flashcards", bg: "linear-gradient(145deg,#eef2ff,#fafbff)", accent: "#4f46e5", soft: "rgba(79,70,229,.12)" },
-    exam: { badge: "Exámenes", bg: "linear-gradient(145deg,#e0f2fe,#f8fbff)", accent: "#0284c7", soft: "rgba(2,132,199,.12)" },
-    dictionary: { badge: "Diccionario", bg: "linear-gradient(145deg,#ecfeff,#f8ffff)", accent: "#0f766e", soft: "rgba(15,118,110,.12)" },
-    hub: { badge: "Study", bg: "linear-gradient(145deg,#ffffff,#fffdf8)", accent: "#1A1A2E", soft: "rgba(26,26,46,.08)" },
+            ? "Diccionario"
+            : "Flashcards"
+    : "Study";
+  const sectionStyle: CSSProperties = {
+    background: "var(--color-surface)",
+    border: "1px solid var(--color-border)",
+    borderRadius: "var(--radius-lg)",
+    padding: "var(--space-5)",
+    display: "grid",
+    gap: "var(--space-4)",
+    boxShadow: "var(--shadow-card)",
   };
-  const currentTheme = selectedView ? studyThemes[selectedView] : studyThemes.hub;
+  const panelStyle: CSSProperties = {
+    background: "var(--color-surface)",
+    border: "1px solid var(--color-border)",
+    borderRadius: "var(--radius-md)",
+    padding: "var(--space-4)",
+  };
+  const mutedPanelStyle: CSSProperties = {
+    background: "var(--color-surface-muted)",
+    border: "1px solid var(--color-border)",
+    borderRadius: "var(--radius-md)",
+    padding: "var(--space-4)",
+  };
+  const sectionKickerStyle: CSSProperties = {
+    fontSize: "var(--text-label)",
+    color: "var(--color-text-muted)",
+    textTransform: "uppercase",
+    letterSpacing: ".08em",
+    fontWeight: 800,
+  };
+  const pillGroupStyle: CSSProperties = {
+    display: "inline-flex",
+    flexWrap: "wrap",
+    gap: "6px",
+    padding: "4px",
+    border: "1px solid var(--color-border)",
+    borderRadius: "var(--radius-pill)",
+    background: "var(--color-surface-muted)",
+  };
+  const primaryButtonStyle: CSSProperties = {
+    border: 0,
+    borderRadius: "var(--radius-pill)",
+    background: "var(--color-primary)",
+    color: "#fff",
+    padding: "10px 16px",
+    fontWeight: 800,
+    fontSize: "var(--text-body-sm)",
+    cursor: "pointer",
+  };
+  const secondaryButtonStyle: CSSProperties = {
+    border: "1px solid var(--color-border)",
+    borderRadius: "var(--radius-pill)",
+    background: "var(--color-surface)",
+    color: "var(--color-text)",
+    padding: "8px 12px",
+    fontWeight: 700,
+    fontSize: "var(--text-body-sm)",
+    cursor: "pointer",
+  };
+  const chipStyle: CSSProperties = {
+    borderRadius: "var(--radius-pill)",
+    background: "var(--color-surface-muted)",
+    border: "1px solid var(--color-border)",
+    padding: "6px 10px",
+    fontSize: "var(--text-label)",
+    color: "var(--color-text-muted)",
+    fontWeight: 800,
+  };
+  const progressTrackStyle: CSSProperties = {
+    height: 7,
+    borderRadius: 999,
+    background: "var(--color-surface-muted)",
+    overflow: "hidden",
+  };
 
   useEffect(() => {
     void loadKanaLeaderboard();
@@ -3832,33 +3896,59 @@ function StudyContent() {
       )}
 
       <div>
-        <button type="button" onClick={startQuiz} style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", padding: "9px 14px", fontWeight: 700 }}>Iniciar quiz</button>
+        <button type="button" onClick={startQuiz} style={primaryButtonStyle}>Iniciar quiz</button>
       </div>
     </div>
   );
 
   const toolCards = [
-    { key: "kana", href: "/study?view=kana", title: "Kana Sprint", accent: "#4ECDC4", bg: "linear-gradient(145deg,#f1fffd,#ffffff)", text: "#1A1A2E" },
-    { key: "sprint", href: "/study?view=sprint", title: "Vocab Sprint", accent: "#F4A261", bg: "linear-gradient(145deg,#fff8f1,#ffffff)", text: "#1A1A2E" },
-    { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", accent: "#457B9D", bg: "linear-gradient(145deg,#f3f9fd,#ffffff)", text: "#1A1A2E" },
-    { key: "exam", href: "/study?view=exam", title: "Exámenes", accent: "#E63946", bg: "linear-gradient(145deg,#fff4f5,#ffffff)", text: "#1A1A2E" },
-    ...(isAdmin ? [{ key: "dictionary", href: "/study?view=dictionary", title: "Diccionario", accent: "#4ECDC4", bg: "linear-gradient(145deg,#f1fffd,#ffffff)", text: "#1A1A2E" }] : []),
+    { key: "kana", href: "/study?view=kana", title: "Kana Sprint" },
+    { key: "sprint", href: "/study?view=sprint", title: "Vocab Sprint" },
+    { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards" },
+    { key: "exam", href: "/study?view=exam", title: "Exámenes" },
+    ...(isAdmin ? [{ key: "dictionary", href: "/study?view=dictionary", title: "Diccionario" }] : []),
   ];
 
+  const renderToolPill = (tool: { key: string; href: string; title: string }) => {
+    const selected = activeTab === tool.key;
+    return (
+      <Link
+        key={tool.key}
+        href={tool.href}
+        style={{
+          textDecoration: "none",
+          minHeight: 40,
+          padding: "0 14px",
+          borderRadius: "var(--radius-pill)",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: selected ? "var(--color-primary)" : "var(--color-surface)",
+          border: selected ? "1px solid var(--color-primary)" : "1px solid var(--color-border)",
+          color: selected ? "#fff" : "var(--color-text)",
+          fontSize: "var(--text-body-sm)",
+          fontWeight: 800,
+        }}
+      >
+        {tool.title}
+      </Link>
+    );
+  };
+
   return (
-    <div style={{ minHeight: "100vh", background: "radial-gradient(900px 420px at 50% -10%, rgba(78,205,196,.08), transparent 65%), #fff8e7", padding: 14 }}>
-      <div style={{ maxWidth: 960, margin: "0 auto", display: "grid", gap: 14 }}>
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, paddingTop: 4 }}>
-          <Link href="/study" style={{ textDecoration: "none", color: "#1A1A2E", display: "inline-flex", alignItems: "center", gap: 10 }}>
-            <span style={{ width: 10, height: 10, borderRadius: 999, background: "#E63946", boxShadow: "0 0 0 6px rgba(230,57,70,.1)" }} />
-            <span style={{ fontSize: 28, lineHeight: 1, letterSpacing: "-.05em", fontWeight: 900 }}>Nihongo Feed</span>
+    <div style={{ minHeight: "100vh", background: "var(--color-bg)", padding: "var(--page-padding)" }}>
+      <div className="ds-container" style={{ display: "grid", gap: "var(--space-4)" }}>
+        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "var(--space-3)", paddingTop: "var(--space-2)" }}>
+          <Link href="/study" style={{ textDecoration: "none", color: "var(--color-text)", display: "inline-flex", alignItems: "center", gap: 10 }}>
+            <span style={{ width: 10, height: 10, borderRadius: 999, background: "var(--color-primary)" }} />
+            <span style={{ fontSize: "var(--text-h2)", lineHeight: 1, letterSpacing: "-.05em", fontWeight: 900 }}>Nihongo Feed</span>
           </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-            <Link href="/resources" style={{ textDecoration: "none", minHeight: 40, padding: "0 14px", borderRadius: 999, background: "rgba(255,255,255,.88)", border: "1px solid rgba(26,26,46,.08)", color: "#1A1A2E", fontSize: 13, fontWeight: 800, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>Recursos</Link>
-            <Link href="/notifications" style={{ textDecoration: "none", minHeight: 40, padding: "0 14px", borderRadius: 999, background: unreadNotifications > 0 ? "rgba(230,57,70,.1)" : "rgba(255,255,255,.88)", border: "1px solid rgba(26,26,46,.08)", color: "#1A1A2E", fontSize: 13, fontWeight: 800, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <Link href="/resources" style={{ ...secondaryButtonStyle, textDecoration: "none", minHeight: 40, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>Recursos</Link>
+            <Link href="/notifications" style={{ ...secondaryButtonStyle, textDecoration: "none", minHeight: 40, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
               Avisos
               {unreadNotifications > 0 && (
-                <span style={{ minWidth: 18, height: 18, padding: "0 5px", borderRadius: 999, background: "#E63946", color: "#fff", fontSize: 10, fontWeight: 800, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ minWidth: 18, height: 18, padding: "0 5px", borderRadius: 999, background: "var(--color-primary)", color: "#fff", fontSize: 10, fontWeight: 800, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                   {unreadNotifications > 9 ? "9+" : unreadNotifications}
                 </span>
               )}
@@ -3866,144 +3956,70 @@ function StudyContent() {
           </div>
         </header>
 
-        <section
-          style={{
-            background: showHub ? "linear-gradient(145deg,#1A1A2E,#23233e)" : currentTheme.bg,
-            border: "1px solid rgba(26,26,46,.08)",
-            borderRadius: 30,
-            padding: showHub ? 22 : 16,
-            boxShadow: showHub ? "0 24px 44px rgba(26,26,46,.16)" : `0 10px 24px ${currentTheme.soft}`,
-            color: showHub ? "#FFF8E7" : "#1A1A2E",
-            display: "grid",
-            gap: showHub ? 18 : 8,
-          }}
-        >
-          <div
-            style={{
-              display: "inline-flex",
-              width: "fit-content",
-              alignItems: "center",
-              gap: 8,
-              borderRadius: 999,
-              background: showHub ? "rgba(255,248,231,.08)" : "#fff",
-              border: showHub ? "1px solid rgba(255,248,231,.08)" : `1px solid ${currentTheme.soft}`,
-              color: showHub ? "#FFF8E7" : currentTheme.accent,
-              fontSize: 11,
-              fontWeight: 800,
-              letterSpacing: ".08em",
-              textTransform: "uppercase",
-              padding: "6px 10px",
-            }}
-          >
-            <span style={{ width: 6, height: 6, borderRadius: 999, background: showHub ? "#4ECDC4" : currentTheme.accent }} />
-            {currentTheme.badge}
+        <section style={{ ...sectionStyle, gap: "var(--space-3)" }}>
+          <div style={sectionKickerStyle}>{showHub ? "Study" : "Herramienta"}</div>
+          <div style={{ fontSize: showHub ? "clamp(40px, 10vw, 68px)" : "var(--text-h1)", lineHeight: 0.95, letterSpacing: "-.06em", fontWeight: 900, color: "var(--color-text)" }}>
+            {pageTitle}
           </div>
-          <div style={{ fontSize: showHub ? "clamp(48px, 11vw, 88px)" : 32, lineHeight: showHub ? 0.9 : 1, letterSpacing: showHub ? "-.08em" : "-.04em", fontWeight: 900 }}>
-            {pageMeta.title}
-          </div>
-          {showHub && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 10 }}>
-              <Link href="/study?view=flashcards" style={{ textDecoration: "none", minHeight: 82, borderRadius: 20, background: "rgba(255,255,255,.06)", color: "#FFF8E7", border: "1px solid rgba(255,255,255,.08)", padding: 16, display: "flex", alignItems: "flex-end", fontSize: 22, fontWeight: 800, letterSpacing: "-.04em" }}>Flashcards</Link>
-              <Link href="/study?view=exam" style={{ textDecoration: "none", minHeight: 82, borderRadius: 20, background: "rgba(255,255,255,.06)", color: "#FFF8E7", border: "1px solid rgba(255,255,255,.08)", padding: 16, display: "flex", alignItems: "flex-end", fontSize: 22, fontWeight: 800, letterSpacing: "-.04em" }}>Exámenes</Link>
-            </div>
-          )}
         </section>
 
         {!showHub && (
-          <section style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {toolCards.map((tool) => {
-              const selected = activeTab === tool.key;
-              return (
-                <Link
-                  key={tool.key}
-                  href={tool.href}
-                  style={{
-                    textDecoration: "none",
-                    minHeight: 42,
-                    padding: "0 14px",
-                    borderRadius: 999,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: selected ? tool.accent : "rgba(255,255,255,.88)",
-                    border: `1px solid ${selected ? tool.accent : "rgba(26,26,46,.08)"}`,
-                    color: selected ? "#fff" : "#1A1A2E",
-                    fontSize: 13,
-                    fontWeight: 800,
-                    boxShadow: selected ? `0 10px 20px ${tool.accent}33` : "none",
-                  }}
-                >
-                  {tool.title}
-                </Link>
-              );
-            })}
+          <section style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap" }}>
+            {toolCards.map(renderToolPill)}
           </section>
         )}
 
         {showHub && (
-          <section style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))" }}>
+          <section style={{ display: "grid", gap: "var(--space-3)", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
             {toolCards.map((tool) => (
               <Link
                 key={tool.key}
                 href={tool.href}
                 style={{
                   textDecoration: "none",
-                  color: tool.text,
-                  minHeight: 124,
-                  border: "1px solid rgba(26,26,46,.08)",
-                  borderRadius: 24,
-                  background: tool.bg,
-                  padding: 18,
-                  boxShadow: "0 18px 36px rgba(26,26,46,.06)",
-                  display: "flex",
-                  alignItems: "flex-end",
-                  justifyContent: "space-between",
-                  gap: 10,
+                  color: "var(--color-text)",
+                  minHeight: 110,
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "var(--radius-lg)",
+                  background: "var(--color-surface)",
+                  padding: "var(--space-4)",
+                  boxShadow: "var(--shadow-card)",
+                  display: "grid",
+                  gap: "var(--space-4)",
+                  alignContent: "space-between",
                 }}
               >
-                <div style={{ display: "grid", gap: 14 }}>
-                  <span style={{ width: 14, height: 14, borderRadius: 999, background: tool.accent }} />
-                  <span style={{ fontSize: 28, lineHeight: 1, letterSpacing: "-.05em", fontWeight: 800 }}>{tool.title}</span>
-                </div>
+                <span style={sectionKickerStyle}>Abrir</span>
+                <span style={{ fontSize: "var(--text-h2)", lineHeight: 1, letterSpacing: "-.04em", fontWeight: 800 }}>{tool.title}</span>
               </Link>
             ))}
           </section>
         )}
 
         {!showHub && activeTab === "kana" && (
-          <section style={{ background: "linear-gradient(145deg,#f7fff9,#ffffff)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16, boxShadow: "inset 0 0 0 2px rgba(34,197,94,.08)" }}>
+          <section style={sectionStyle}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <h2 style={{ margin: 0, fontSize: 24 }}>Kana Sprint</h2>
-              <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3 }}>
-                <button type="button" onClick={() => setKanaSet("hiragana")} style={{ border: 0, borderRadius: 999, padding: "6px 10px", background: kanaSet === "hiragana" ? "#111114" : "transparent", color: kanaSet === "hiragana" ? "#fff" : "#666" }}>Hiragana</button>
-                <button type="button" onClick={() => setKanaSet("katakana")} style={{ border: 0, borderRadius: 999, padding: "6px 10px", background: kanaSet === "katakana" ? "#111114" : "transparent", color: kanaSet === "katakana" ? "#fff" : "#666" }}>Katakana</button>
-                <button type="button" onClick={() => setKanaSet("mixed")} style={{ border: 0, borderRadius: 999, padding: "6px 10px", background: kanaSet === "mixed" ? "#111114" : "transparent", color: kanaSet === "mixed" ? "#fff" : "#666" }}>Mixto</button>
+              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Kana Sprint</h2>
+              <div style={pillGroupStyle}>
+                <button type="button" onClick={() => setKanaSet("hiragana")} style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: kanaSet === "hiragana" ? "var(--color-text)" : "transparent", color: kanaSet === "hiragana" ? "#fff" : "var(--color-text-muted)" }}>Hiragana</button>
+                <button type="button" onClick={() => setKanaSet("katakana")} style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: kanaSet === "katakana" ? "var(--color-text)" : "transparent", color: kanaSet === "katakana" ? "#fff" : "var(--color-text-muted)" }}>Katakana</button>
+                <button type="button" onClick={() => setKanaSet("mixed")} style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: kanaSet === "mixed" ? "var(--color-text)" : "transparent", color: kanaSet === "mixed" ? "#fff" : "var(--color-text-muted)" }}>Mixto</button>
               </div>
             </div>
-            <p style={{ color: "#6b7280", fontSize: 14 }}>60 segundos. Elige la romanización correcta. Error = penalización de 2 segundos.</p>
-            <div style={{ marginTop: -4, marginBottom: 8, fontSize: 12, color: "#667085", fontWeight: 700 }}>
-              Reinicio semanal en: <span style={{ color: "#111114" }}>{weeklyResetLabel || "..."}</span>
+            <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+              Reinicio semanal en <span style={{ color: "var(--color-text)" }}>{weeklyResetLabel || "..."}</span>
             </div>
-            <div style={{ marginTop: 8, height: 7, borderRadius: 999, background: "#ecedf1", overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${kanaTimePct}%`, background: "linear-gradient(90deg, #34c5a6, #25a98f)" }} />
+            <div style={progressTrackStyle}>
+              <div style={{ height: "100%", width: `${kanaTimePct}%`, background: "var(--color-accent)" }} />
             </div>
             <div style={{ marginTop: 12, display: "grid", gap: 12, gridTemplateColumns: "minmax(0,1fr)", alignItems: "start" }}>
-              <div style={{ border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, padding: 14, background: "linear-gradient(145deg,#ffffff,#f8fafc)" }}>
+              <div style={panelStyle}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <div style={{ color: "#374151", fontWeight: 700 }}>Tiempo: {kanaTime}s · Score: {kanaScore} · Mejor semanal: {kanaBestByMode[kanaSet] || 0}</div>
+                  <div style={{ color: "var(--color-text-muted)", fontWeight: 700, fontSize: "var(--text-body-sm)" }}>Tiempo: {kanaTime}s · Score: {kanaScore} · Mejor semanal: {kanaBestByMode[kanaSet] || 0}</div>
                   <button
                     type="button"
                     onClick={startKana}
-                    style={{
-                      border: 0,
-                      borderRadius: 999,
-                      background: "linear-gradient(135deg,#34c5a6,#25a98f)",
-                      color: "#fff",
-                      padding: "10px 18px",
-                      fontWeight: 800,
-                      fontSize: 14,
-                      boxShadow: "0 10px 18px rgba(44,182,150,.22)",
-                    }}
+                    style={primaryButtonStyle}
                   >
                     Iniciar Sprint
                   </button>
@@ -4044,8 +4060,8 @@ function StudyContent() {
                 )}
               </div>
 
-              <div style={{ border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, padding: 12, background: "#fff" }}>
-                <div style={{ fontSize: 12, letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 800, color: "#7c7c85" }}>Leaderboard Kana</div>
+              <div style={panelStyle}>
+                <div style={sectionKickerStyle}>Leaderboard Kana</div>
                 {leaderboardUnavailable && (
                   <p style={{ margin: "8px 0 0", fontSize: 12, color: "#b42318" }}>Leaderboard temporalmente no disponible.</p>
                 )}
@@ -4097,38 +4113,37 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "sprint" && (
-          <section style={{ background: "linear-gradient(145deg,#fffaf3,#ffffff)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16, boxShadow: "inset 0 0 0 2px rgba(249,115,22,.08)" }}>
+          <section style={sectionStyle}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <h2 style={{ margin: 0, fontSize: 24 }}>Vocab + Kanji Sprint</h2>
-              <div style={{ display: "inline-flex", gap: 4, border: "1px solid rgba(17,17,20,.08)", borderRadius: 999, padding: 3, flexWrap: "wrap" }}>
+              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Vocab + Kanji Sprint</h2>
+              <div style={{ ...pillGroupStyle, gap: 4 }}>
                 {VK_BUCKETS.map((bucket) => (
                   <button
                     key={bucket.key}
                     type="button"
                     onClick={() => setVkBucket(bucket.key)}
-                    style={{ border: 0, borderRadius: 999, padding: "6px 10px", background: vkBucket === bucket.key ? "#111114" : "transparent", color: vkBucket === bucket.key ? "#fff" : "#666", fontWeight: 700, fontSize: 12 }}
+                    style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: vkBucket === bucket.key ? "var(--color-text)" : "transparent", color: vkBucket === bucket.key ? "#fff" : "var(--color-text-muted)", fontWeight: 700, fontSize: 12 }}
                   >
                     {bucket.label}
                   </button>
                 ))}
               </div>
             </div>
-            <p style={{ color: "#6b7280", fontSize: 14 }}>60 segundos. Preguntas mixtas de significado y lectura según tu rango.</p>
-            <div style={{ marginTop: -4, marginBottom: 8, fontSize: 12, color: "#667085", fontWeight: 700 }}>
-              Reinicio mensual en: <span style={{ color: "#111114" }}>{vkResetLabel || "..."}</span>
+            <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+              Reinicio mensual en <span style={{ color: "var(--color-text)" }}>{vkResetLabel || "..."}</span>
             </div>
-            <div style={{ marginTop: 8, height: 7, borderRadius: 999, background: "#ecedf1", overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${vkTimePct}%`, background: "linear-gradient(90deg, #34c5a6, #25a98f)" }} />
+            <div style={progressTrackStyle}>
+              <div style={{ height: "100%", width: `${vkTimePct}%`, background: "var(--color-accent-strong)" }} />
             </div>
 
             <div style={{ marginTop: 12, display: "grid", gap: 12 }}>
-              <div style={{ border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, padding: 14, background: "linear-gradient(145deg,#ffffff,#f8fafc)" }}>
+              <div style={panelStyle}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <div style={{ color: "#374151", fontWeight: 700 }}>Tiempo: {vkTime}s · Score: {vkScore} · Mejor mensual: {vkBestByBucket[vkBucket] || 0}</div>
+                  <div style={{ color: "var(--color-text-muted)", fontWeight: 700, fontSize: "var(--text-body-sm)" }}>Tiempo: {vkTime}s · Score: {vkScore} · Mejor mensual: {vkBestByBucket[vkBucket] || 0}</div>
                   <button
                     type="button"
                     onClick={startVkSprint}
-                    style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", padding: "10px 18px", fontWeight: 800, fontSize: 14, boxShadow: "0 10px 18px rgba(44,182,150,.22)" }}
+                    style={primaryButtonStyle}
                   >
                     Iniciar Sprint
                   </button>
@@ -4163,8 +4178,8 @@ function StudyContent() {
                 )}
               </div>
 
-              <div style={{ border: "1px solid rgba(17,17,20,.07)", borderRadius: 16, padding: 12, background: "#fff" }}>
-                <div style={{ fontSize: 12, letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 800, color: "#7c7c85" }}>Leaderboard Vocab + Kanji · {vkBucketConfig.label}</div>
+              <div style={panelStyle}>
+                <div style={sectionKickerStyle}>Leaderboard Vocab + Kanji · {vkBucketConfig.label}</div>
                 {vkLeaderboardUnavailable && (
                   <p style={{ margin: "8px 0 0", fontSize: 12, color: "#b42318" }}>Leaderboard temporalmente no disponible.</p>
                 )}
@@ -4207,7 +4222,7 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "flashcards" && (
-          <section style={{ background: "linear-gradient(145deg,#f6f7ff,#ffffff)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16, boxShadow: "inset 0 0 0 2px rgba(99,102,241,.08)" }}>
+          <section style={sectionStyle}>
             {(flashLessonFolder !== null || Boolean(activeFlashSet?.isCustom)) && (
               <div style={{ marginBottom: 10 }}>
                 <button
@@ -4217,7 +4232,7 @@ function StudyContent() {
                     setFlashSetId(null);
                     setFlashMode("browse");
                   }}
-                  style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}
+                  style={secondaryButtonStyle}
                 >
                   Volver a decks
                 </button>
@@ -4225,20 +4240,20 @@ function StudyContent() {
             )}
 
             {flashLessonFolder === null && flashSetId === null && (
-              <div style={{ display: "grid", gap: 14, gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))", alignItems: "start" }}>
-                <div style={{ border: "1px solid rgba(99,102,241,.14)", borderRadius: 18, background: "linear-gradient(145deg,#eef2ff,#ffffff)", padding: 14, display: "grid", gap: 12 }}>
+              <div style={{ display: "grid", gap: 14 }}>
+                <div style={panelStyle}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10, flexWrap: "wrap" }}>
                     <div>
-                      <div style={{ fontSize: 12, color: "#6366f1", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Mis decks</div>
-                      <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800, color: "#111114" }}>Tus combinaciones</div>
-                      <div style={{ marginTop: 4, fontSize: 13, color: "#667085", maxWidth: 440 }}>
+                      <div style={sectionKickerStyle}>Mis decks</div>
+                      <div style={{ marginTop: 4, fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>Tus combinaciones</div>
+                      <div style={{ marginTop: 4, fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", maxWidth: 440 }}>
                         Mezcla sets oficiales y guarda un deck simple para estudiar lo que te haga falta.
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => openCustomFlashDeckBuilder()}
-                      style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#4f46e5,#6366f1)", color: "#fff", padding: "10px 14px", fontWeight: 800, cursor: "pointer", boxShadow: "0 10px 18px rgba(99,102,241,.2)" }}
+                      style={primaryButtonStyle}
                     >
                       Crear deck
                     </button>
@@ -4247,25 +4262,25 @@ function StudyContent() {
                   {customFlashSets.length > 0 ? (
                     <div style={{ display: "grid", gap: 10 }}>
                       {customFlashSets.map((set) => (
-                        <div key={set.id} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
+                        <div key={set.id} style={mutedPanelStyle}>
                           <button
                             type="button"
                             onClick={() => openFlashSet(set.id)}
                             style={{ display: "block", width: "100%", textAlign: "left", border: 0, background: "transparent", padding: 0, cursor: "pointer" }}
                           >
                             <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                              <div style={{ fontSize: 18, fontWeight: 800, color: "#111114" }}>{set.title}</div>
-                              <div style={{ borderRadius: 999, background: "#f8fafc", border: "1px solid rgba(17,17,20,.08)", padding: "6px 9px", fontSize: 12, color: "#475467", fontWeight: 800 }}>
+                              <div style={{ fontSize: 18, fontWeight: 800, color: "var(--color-text)" }}>{set.title}</div>
+                              <div style={chipStyle}>
                                 {set.items.length} tarjetas
                               </div>
                             </div>
-                            <div style={{ marginTop: 6, fontSize: 13, color: "#667085", lineHeight: 1.45 }}>{set.description}</div>
+                            <div style={{ marginTop: 6, fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", lineHeight: 1.45 }}>{set.description}</div>
                           </button>
                           <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                            <button type="button" onClick={() => openCustomFlashDeckBuilder(customFlashDecks.find((deck) => deck.id === set.id))} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                            <button type="button" onClick={() => openCustomFlashDeckBuilder(customFlashDecks.find((deck) => deck.id === set.id))} style={secondaryButtonStyle}>
                               Editar
                             </button>
-                            <button type="button" onClick={() => deleteCustomFlashDeck(set.id)} style={{ border: "1px solid rgba(185,28,28,.14)", borderRadius: 999, background: "#fff5f5", color: "#b42318", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                            <button type="button" onClick={() => deleteCustomFlashDeck(set.id)} style={{ ...secondaryButtonStyle, color: "var(--color-text-muted)" }}>
                               Borrar
                             </button>
                           </div>
@@ -4273,22 +4288,22 @@ function StudyContent() {
                       ))}
                     </div>
                   ) : (
-                    <div style={{ border: "1px dashed rgba(79,70,229,.22)", borderRadius: 14, background: "rgba(255,255,255,.8)", padding: 14, color: "#667085", fontSize: 14, lineHeight: 1.5 }}>
+                    <div style={{ ...mutedPanelStyle, borderStyle: "dashed", color: "var(--color-text-muted)", fontSize: "var(--text-body)" }}>
                       Todavía no tienes decks personalizados.
                     </div>
                   )}
 
                   {flashDeckBuilderOpen && (
-                    <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fff", padding: 14, display: "grid", gap: 12 }}>
+                    <div style={{ ...mutedPanelStyle, display: "grid", gap: 12 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                         <div style={{ fontSize: 18, fontWeight: 800, color: "#111114" }}>{flashDeckEditingId ? "Editar deck" : "Nuevo deck"}</div>
-                        <button type="button" onClick={closeCustomFlashDeckBuilder} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                        <button type="button" onClick={closeCustomFlashDeckBuilder} style={secondaryButtonStyle}>
                           Cerrar
                         </button>
                       </div>
 
                       <div style={{ display: "grid", gap: 8 }}>
-                        <label style={{ fontSize: 12, color: "#667085", fontWeight: 700 }}>Nombre del deck</label>
+                        <label style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>Nombre del deck</label>
                         <input
                           value={flashDeckName}
                           onChange={(event) => setFlashDeckName(event.target.value)}
@@ -4297,12 +4312,12 @@ function StudyContent() {
                         />
                       </div>
 
-                      <div style={{ border: "1px solid rgba(17,17,20,.06)", borderRadius: 14, background: "#fafbff", padding: 12 }}>
-                        <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Sets oficiales</div>
+                      <div style={mutedPanelStyle}>
+                        <div style={sectionKickerStyle}>Sets oficiales</div>
                         <div style={{ marginTop: 10, display: "grid", gap: 12 }}>
                           {flashSetsByLesson.map((entry) => (
                             <div key={`builder-${entry.lesson}`} style={{ display: "grid", gap: 8 }}>
-                              <div style={{ fontSize: 13, fontWeight: 800, color: "#111114" }}>Lección {entry.lesson}</div>
+                              <div style={{ fontSize: "var(--text-body-sm)", fontWeight: 800, color: "var(--color-text)" }}>Lección {entry.lesson}</div>
                               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                                 {entry.sets.map((set) => {
                                   const selected = flashDeckSelectedSetIds.includes(set.id);
@@ -4312,10 +4327,10 @@ function StudyContent() {
                                       type="button"
                                       onClick={() => toggleCustomFlashSetSelection(set.id)}
                                       style={{
-                                        border: selected ? "1px solid #4f46e5" : "1px solid rgba(17,17,20,.1)",
+                                        border: selected ? "1px solid var(--color-border-strong)" : "1px solid var(--color-border)",
                                         borderRadius: 999,
-                                        background: selected ? "#eef2ff" : "#fff",
-                                        color: selected ? "#3730a3" : "#344054",
+                                        background: selected ? "var(--color-surface-muted)" : "var(--color-surface)",
+                                        color: selected ? "var(--color-text)" : "var(--color-text-muted)",
                                         padding: "8px 11px",
                                         fontWeight: 700,
                                         cursor: "pointer",
@@ -4331,11 +4346,11 @@ function StudyContent() {
                         </div>
                       </div>
 
-                      <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                        <div style={{ fontSize: 14, color: "#475467", fontWeight: 700 }}>
+                      <div style={{ ...panelStyle, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
                           {flashDeckSelectedSetIds.length} sets · {flashDeckBuilderPreviewItems.length} tarjetas únicas
                         </div>
-                        <button type="button" onClick={saveCustomFlashDeck} style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#4f46e5,#6366f1)", color: "#fff", padding: "8px 14px", fontWeight: 800, cursor: "pointer" }}>
+                        <button type="button" onClick={saveCustomFlashDeck} style={primaryButtonStyle}>
                           {flashDeckEditingId ? "Guardar cambios" : "Guardar deck"}
                         </button>
                       </div>
@@ -4343,10 +4358,10 @@ function StudyContent() {
                   )}
                 </div>
 
-                <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 18, background: "#fff", padding: 14, display: "grid", gap: 12 }}>
+                <div style={panelStyle}>
                   <div>
-                    <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Decks oficiales</div>
-                    <div style={{ marginTop: 4, fontSize: 22, fontWeight: 800, color: "#111114" }}>Rutas</div>
+                    <div style={sectionKickerStyle}>Decks oficiales</div>
+                    <div style={{ marginTop: 4, fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>Decks oficiales</div>
                   </div>
 
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -4358,10 +4373,10 @@ function StudyContent() {
                           type="button"
                           onClick={() => setFlashRouteId(route.id)}
                           style={{
-                            border: selected ? `1px solid ${route.accent}` : "1px solid rgba(17,17,20,.1)",
+                            border: selected ? "1px solid var(--color-border-strong)" : "1px solid var(--color-border)",
                             borderRadius: 999,
-                            background: selected ? route.surface : "#fff",
-                            color: selected ? route.accent : "#344054",
+                            background: selected ? "var(--color-surface-muted)" : "var(--color-surface)",
+                            color: selected ? "var(--color-text)" : "var(--color-text-muted)",
                             padding: "8px 12px",
                             fontWeight: 800,
                             cursor: "pointer",
@@ -4374,25 +4389,25 @@ function StudyContent() {
                   </div>
 
                   {activeFlashRoute && (
-                    <div style={{ border: "1px solid rgba(17,17,20,.06)", borderRadius: 16, background: "#fafbff", padding: 12, display: "grid", gap: 10 }}>
-                      <div style={{ fontSize: 13, color: "#667085", lineHeight: 1.5 }}>{activeFlashRoute.subtitle}</div>
+                    <div style={{ ...mutedPanelStyle, display: "grid", gap: 10 }}>
+                      <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", lineHeight: 1.5 }}>{activeFlashRoute.subtitle}</div>
                       <div style={{ display: "grid", gap: 10 }}>
                         {activeFlashRoute.entries.map((entry) => (
                           <button
                             key={`folder-${entry.lesson}`}
                             type="button"
                             onClick={() => openFlashLesson(entry.lesson)}
-                            style={{ textAlign: "left", border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fff", padding: 13, cursor: "pointer" }}
+                            style={{ textAlign: "left", border: "1px solid var(--color-border)", borderRadius: 16, background: "var(--color-surface)", padding: 13, cursor: "pointer" }}
                           >
                             <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                              <div style={{ fontSize: 18, fontWeight: 800, color: "#111114" }}>Lección {entry.lesson}</div>
-                              <div style={{ borderRadius: 999, background: "#f8fafc", border: "1px solid rgba(17,17,20,.08)", padding: "6px 9px", fontSize: 12, color: "#475467", fontWeight: 800 }}>
+                              <div style={{ fontSize: 18, fontWeight: 800, color: "var(--color-text)" }}>Lección {entry.lesson}</div>
+                              <div style={chipStyle}>
                                 {entry.sets.length} sets
                               </div>
                             </div>
                             <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
                               {entry.sets.map((set) => (
-                                <span key={`folder-preview-${set.id}`} style={{ borderRadius: 999, background: "#f8fafc", border: "1px solid rgba(17,17,20,.08)", padding: "5px 8px", fontSize: 12, color: "#475467", fontWeight: 700 }}>
+                                <span key={`folder-preview-${set.id}`} style={chipStyle}>
                                   {set.title}
                                 </span>
                               ))}
@@ -4413,9 +4428,9 @@ function StudyContent() {
                     key={set.id}
                     type="button"
                     onClick={() => openFlashSet(set.id)}
-                    style={{ textAlign: "left", border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12, cursor: "pointer" }}
+                  style={{ ...panelStyle, textAlign: "left", cursor: "pointer" }}
                   >
-                    <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>Set</div>
+                    <div style={sectionKickerStyle}>Set</div>
                     <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800 }}>{set.title}</div>
                     <div style={{ marginTop: 4, fontSize: 13, color: "#667085", lineHeight: 1.4 }}>{set.description}</div>
                     <div style={{ marginTop: 8, fontSize: 12, color: "#344054", fontWeight: 700 }}>{set.items.length} tarjetas</div>
@@ -4451,10 +4466,10 @@ function StudyContent() {
                       : { display: "grid", gap: 12 }
                   }
                 >
-                  <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
+                  <div style={panelStyle}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                     <div>
-                      <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>
+                      <div style={sectionKickerStyle}>
                         {activeFlashSet.isCustom ? "Mi deck" : `Lección ${activeFlashSet.lesson}`}
                       </div>
                       <div style={{ marginTop: 4, fontSize: 20, fontWeight: 800 }}>{activeFlashSet.title}</div>
@@ -4462,17 +4477,17 @@ function StudyContent() {
                     </div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       {isFlashFocusMode && (
-                        <button type="button" onClick={() => setFlashMode("browse")} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                        <button type="button" onClick={() => setFlashMode("browse")} style={secondaryButtonStyle}>
                           Cerrar práctica
                         </button>
                       )}
-                      <button type="button" onClick={() => setFlashSetId(null)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                      <button type="button" onClick={() => setFlashSetId(null)} style={secondaryButtonStyle}>
                         Cambiar set
                       </button>
-                      <button type="button" onClick={startFlashCards} style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", padding: "7px 12px", fontWeight: 800, cursor: "pointer" }}>
+                      <button type="button" onClick={startFlashCards} style={primaryButtonStyle}>
                         Empezar flashcards
                       </button>
-                      <button type="button" onClick={startFlashLearn} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                      <button type="button" onClick={startFlashLearn} style={secondaryButtonStyle}>
                         Aprender
                       </button>
                     </div>
@@ -4480,14 +4495,14 @@ function StudyContent() {
                 </div>
 
                 {flashMode === "browse" && (
-                  <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
-                    <div style={{ fontSize: 12, color: "#7c7c85", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800, marginBottom: 8 }}>Lista del set</div>
+                  <div style={panelStyle}>
+                    <div style={{ ...sectionKickerStyle, marginBottom: 8 }}>Lista del set</div>
                     <div style={{ display: "grid", gap: 8 }}>
                       {activeFlashItems.map((item) => (
-                        <div key={item.id} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 1px minmax(0,1fr)", gap: 10, alignItems: "center", background: "#1f2a4a", color: "#fff", borderRadius: 12, padding: "10px 12px" }}>
+                        <div key={item.id} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 1px minmax(0,1fr)", gap: 10, alignItems: "center", background: "var(--color-surface-muted)", color: "var(--color-text)", borderRadius: 12, padding: "10px 12px", border: "1px solid var(--color-border)" }}>
                           <span style={{ fontSize: 22, fontWeight: 700, wordBreak: "break-word" }}>{item.front}</span>
-                          <span style={{ width: 1, height: "70%", background: "rgba(255,255,255,.25)" }} />
-                          <span style={{ fontSize: 20, fontWeight: 600, color: "#dbe7ff", wordBreak: "break-word" }}>{item.back}</span>
+                          <span style={{ width: 1, height: "70%", background: "var(--color-border-strong)" }} />
+                          <span style={{ fontSize: 20, fontWeight: 600, color: "var(--color-text-muted)", wordBreak: "break-word" }}>{item.back}</span>
                         </div>
                       ))}
                     </div>
@@ -4495,12 +4510,12 @@ function StudyContent() {
                 )}
 
                 {flashMode === "cards" && activeFlashCard && (
-                  <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
+                  <div style={panelStyle}>
                     <div style={{ marginBottom: 10, fontSize: 13, color: "#667085", fontWeight: 700 }}>
                       Tarjeta {flashCardIndex + 1} de {activeFlashDeck.length}
                     </div>
-                    <div style={{ height: 7, borderRadius: 999, background: "#eceff3", overflow: "hidden", marginBottom: 12 }}>
-                      <div style={{ width: `${flashCardProgressPct}%`, height: "100%", background: "linear-gradient(90deg,#34c5a6,#25a98f)" }} />
+                    <div style={{ ...progressTrackStyle, marginBottom: 12 }}>
+                      <div style={{ width: `${flashCardProgressPct}%`, height: "100%", background: "var(--color-accent)" }} />
                     </div>
                     <button
                       type="button"
@@ -4524,16 +4539,16 @@ function StudyContent() {
                           transform: flashCardFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
                         }}
                       >
-                        <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#1f2a4a", color: "#fff", display: "grid", placeItems: "center", padding: 16 }}>
+                        <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", border: "1px solid var(--color-border)", borderRadius: 14, background: "var(--color-surface-muted)", color: "var(--color-text)", display: "grid", placeItems: "center", padding: 16 }}>
                           <div style={{ textAlign: "center" }}>
                             <div style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.2, wordBreak: "break-word" }}>{activeFlashCard.front}</div>
-                            <div style={{ marginTop: 10, fontSize: 12, color: "rgba(255,255,255,.72)", fontWeight: 700 }}>Toca para voltear</div>
+                            <div style={{ marginTop: 10, fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>Toca para voltear</div>
                           </div>
                         </div>
-                        <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#111827", color: "#dbe7ff", display: "grid", placeItems: "center", padding: 16 }}>
+                        <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", border: "1px solid var(--color-border)", borderRadius: 14, background: "var(--color-surface)", color: "var(--color-text)", display: "grid", placeItems: "center", padding: 16 }}>
                           <div style={{ textAlign: "center" }}>
                             <div style={{ fontSize: 36, fontWeight: 800, lineHeight: 1.2, wordBreak: "break-word" }}>{activeFlashCard.back}</div>
-                            <div style={{ marginTop: 10, fontSize: 12, color: "rgba(219,231,255,.66)", fontWeight: 700 }}>Toca para regresar</div>
+                            <div style={{ marginTop: 10, fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>Toca para regresar</div>
                           </div>
                         </div>
                       </div>
@@ -4546,7 +4561,7 @@ function StudyContent() {
                           setFlashCardFlipped(false);
                         }}
                         disabled={flashCardIndex <= 0}
-                        style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: flashCardIndex <= 0 ? "not-allowed" : "pointer", opacity: flashCardIndex <= 0 ? 0.5 : 1 }}
+                        style={{ ...secondaryButtonStyle, cursor: flashCardIndex <= 0 ? "not-allowed" : "pointer", opacity: flashCardIndex <= 0 ? 0.5 : 1 }}
                       >
                         ← Anterior
                       </button>
@@ -4557,7 +4572,7 @@ function StudyContent() {
                           setFlashCardFlipped(false);
                         }}
                         disabled={flashCardIndex >= activeFlashDeck.length - 1}
-                        style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: flashCardIndex >= activeFlashDeck.length - 1 ? "not-allowed" : "pointer", opacity: flashCardIndex >= activeFlashDeck.length - 1 ? 0.5 : 1 }}
+                        style={{ ...secondaryButtonStyle, cursor: flashCardIndex >= activeFlashDeck.length - 1 ? "not-allowed" : "pointer", opacity: flashCardIndex >= activeFlashDeck.length - 1 ? 0.5 : 1 }}
                       >
                         Siguiente →
                       </button>
@@ -4566,37 +4581,37 @@ function StudyContent() {
                 )}
 
                 {flashMode === "learn" && (
-                  <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, background: "#fff", padding: 12 }}>
+                  <div style={panelStyle}>
                     {!currentFlashLearnQ && !flashLearnFinished && (
                       <div style={{ fontSize: 13, color: "#667085" }}>Generando quiz...</div>
                     )}
                     {currentFlashLearnQ && !flashLearnFinished && (
                       <div>
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                          <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Pregunta {flashLearnIndex + 1} / {flashLearnQuestions.length}</div>
-                          <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Score: {flashLearnScore}</div>
+                          <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>Pregunta {flashLearnIndex + 1} / {flashLearnQuestions.length}</div>
+                          <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>Score: {flashLearnScore}</div>
                         </div>
-                        <div style={{ marginTop: 8, height: 7, borderRadius: 999, background: "#eceff3", overflow: "hidden" }}>
-                          <div style={{ width: `${flashLearnProgressPct}%`, height: "100%", background: "linear-gradient(90deg,#34c5a6,#25a98f)" }} />
+                        <div style={{ ...progressTrackStyle, marginTop: 8 }}>
+                          <div style={{ width: `${flashLearnProgressPct}%`, height: "100%", background: "var(--color-accent)" }} />
                         </div>
-                        <div style={{ marginTop: 10, fontSize: 13, color: "#7c7c85", fontWeight: 700 }}>Definición</div>
+                        <div style={{ ...sectionKickerStyle, marginTop: 10 }}>Definición</div>
                         <div style={{ marginTop: 6, fontSize: 30, fontWeight: 800, color: "#111114", wordBreak: "break-word" }}>{currentFlashLearnQ.prompt}</div>
                         <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 8 }}>
                           {currentFlashLearnQ.options.map((option) => {
                             const isSelected = flashLearnChoice === option;
                             const isCorrect = option === currentFlashLearnQ.correct;
                             const showResult = Boolean(flashLearnChoice);
-                            let bg = "#fff";
-                            let color = "#111114";
-                            let border = "1px solid rgba(17,17,20,.1)";
+                            let bg = "var(--color-surface)";
+                            let color = "var(--color-text)";
+                            let border = "1px solid var(--color-border)";
                             if (showResult && isCorrect) {
-                              bg = "#ecfdf5";
-                              color = "#166534";
-                              border = "1px solid #86efac";
+                              bg = "var(--color-surface-muted)";
+                              color = "var(--color-text)";
+                              border = "1px solid var(--color-border-strong)";
                             } else if (showResult && isSelected && !isCorrect) {
-                              bg = "#fef2f2";
-                              color = "#991b1b";
-                              border = "1px solid #fca5a5";
+                              bg = "var(--color-surface-muted)";
+                              color = "var(--color-text)";
+                              border = "1px solid var(--color-border-strong)";
                             }
                             return (
                               <button
@@ -4613,10 +4628,10 @@ function StudyContent() {
                         </div>
                         {flashLearnChoice && (
                           <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                            <div style={{ fontWeight: 700, color: flashLearnChoice === currentFlashLearnQ.correct ? "#15803d" : "#b91c1c" }}>
+                            <div style={{ fontWeight: 700, color: "var(--color-text)" }}>
                               {flashLearnChoice === currentFlashLearnQ.correct ? "Correcto" : `Incorrecto. Respuesta: ${currentFlashLearnQ.correct}`}
                             </div>
-                            <button type="button" onClick={nextFlashLearn} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700, cursor: "pointer" }}>
+                            <button type="button" onClick={nextFlashLearn} style={secondaryButtonStyle}>
                               {flashLearnIndex >= flashLearnQuestions.length - 1 ? "Ver score" : "Siguiente"}
                             </button>
                           </div>
@@ -4625,16 +4640,16 @@ function StudyContent() {
                     )}
                     {flashLearnFinished && (
                       <div>
-                        <div style={{ fontSize: 12, color: "#7c7c85", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Resultado</div>
+                        <div style={sectionKickerStyle}>Resultado</div>
                         <div style={{ marginTop: 8, fontSize: 34, fontWeight: 800 }}>{flashLearnScore} / {flashLearnQuestions.length}</div>
                         <div style={{ marginTop: 4, color: "#667085", fontSize: 14 }}>
                           {Math.round((flashLearnScore / Math.max(1, flashLearnQuestions.length)) * 100)}% de aciertos
                         </div>
                         <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                          <button type="button" onClick={startFlashLearn} style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", padding: "8px 12px", fontWeight: 700, cursor: "pointer" }}>
+                          <button type="button" onClick={startFlashLearn} style={primaryButtonStyle}>
                             Repetir
                           </button>
-                          <button type="button" onClick={() => setFlashMode("browse")} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "8px 12px", fontWeight: 700, cursor: "pointer" }}>
+                          <button type="button" onClick={() => setFlashMode("browse")} style={secondaryButtonStyle}>
                             Volver a lista
                           </button>
                         </div>
@@ -4649,18 +4664,18 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "dictionary" && isAdmin && (
-          <section style={{ background: "linear-gradient(145deg,#f4fffe,#ffffff)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16, boxShadow: "inset 0 0 0 2px rgba(15,118,110,.08)" }}>
+          <section style={sectionStyle}>
             <div style={{ display: "grid", gap: 12 }}>
-              <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fff", padding: 14, display: "grid", gap: 10 }}>
+              <div style={{ ...panelStyle, display: "grid", gap: 10 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start", flexWrap: "wrap" }}>
                   <div>
-                    <div style={{ fontSize: 12, color: "#0f766e", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Solo admin</div>
-                    <div style={{ marginTop: 4, fontSize: 24, fontWeight: 900, color: "#111114" }}>Diccionario interno</div>
-                    <div style={{ marginTop: 4, fontSize: 13, color: "#667085", lineHeight: 1.5 }}>
+                    <div style={sectionKickerStyle}>Solo admin</div>
+                    <div style={{ marginTop: 4, fontSize: "var(--text-h2)", fontWeight: 900, color: "var(--color-text)" }}>Diccionario interno</div>
+                    <div style={{ marginTop: 4, fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", lineHeight: 1.5 }}>
                       Busca en japonés, español o inglés. Si no hay coincidencia exacta, el sistema intenta darte resultados relacionados o entradas comunes.
                     </div>
                   </div>
-                  <div style={{ borderRadius: 999, background: "#ecfeff", border: "1px solid rgba(15,118,110,.16)", padding: "8px 12px", fontSize: 12, color: "#0f766e", fontWeight: 800 }}>
+                  <div style={chipStyle}>
                     {dictionaryResults.length} resultados
                   </div>
                 </div>
@@ -4672,9 +4687,9 @@ function StudyContent() {
                   style={{ border: "1px solid rgba(17,17,20,.12)", borderRadius: 14, background: "#fff", padding: "12px 14px", fontSize: 16, fontWeight: 600, color: "#111114" }}
                 />
 
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap", fontSize: 12, color: "#667085", fontWeight: 700 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap", fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>
                   <span>{dictionaryLoading ? "Buscando..." : dictionaryFallback ? "Sin coincidencia exacta. Mostrando alternativas útiles." : "Coincidencias directas."}</span>
-                  <button type="button" onClick={() => setDictionaryQuery("")} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "6px 10px", fontWeight: 700, cursor: "pointer" }}>
+                  <button type="button" onClick={() => setDictionaryQuery("")} style={secondaryButtonStyle}>
                     Limpiar
                   </button>
                 </div>
@@ -4683,16 +4698,16 @@ function StudyContent() {
 
               <div style={{ display: "grid", gap: 10 }}>
                 {dictionaryResults.map((entry) => (
-                  <article key={entry.id} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 16, background: "#fff", padding: 14, display: "grid", gap: 8 }}>
+                  <article key={entry.id} style={{ ...panelStyle, display: "grid", gap: 8 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start", flexWrap: "wrap" }}>
                       <div>
                         <div style={{ fontSize: 28, fontWeight: 900, color: "#111114", lineHeight: 1.05 }}>{entry.primary}</div>
                         <div style={{ marginTop: 4, fontSize: 16, color: "#475467", fontWeight: 700 }}>{entry.secondary}</div>
                       </div>
                       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                        {entry.common && <span style={{ borderRadius: 999, background: "#ecfeff", border: "1px solid rgba(15,118,110,.16)", padding: "5px 8px", fontSize: 12, color: "#0f766e", fontWeight: 800 }}>Common</span>}
+                        {entry.common && <span style={chipStyle}>Common</span>}
                         {entry.pos.map((tag) => (
-                          <span key={`${entry.id}-${tag}`} style={{ borderRadius: 999, background: "#f8fafc", border: "1px solid rgba(17,17,20,.08)", padding: "5px 8px", fontSize: 12, color: "#475467", fontWeight: 700 }}>
+                          <span key={`${entry.id}-${tag}`} style={chipStyle}>
                             {tag}
                           </span>
                         ))}
@@ -4705,13 +4720,13 @@ function StudyContent() {
                       </div>
                     )}
                     <div style={{ display: "grid", gap: 6 }}>
-                      <div style={{ fontSize: 12, color: "#0f766e", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Significado principal</div>
-                      <div style={{ fontSize: 15, color: "#111114", lineHeight: 1.6 }}>{entry.gloss.join(" · ")}</div>
+                      <div style={sectionKickerStyle}>Significado principal</div>
+                      <div style={{ fontSize: 15, color: "var(--color-text)", lineHeight: 1.6 }}>{entry.gloss.join(" · ")}</div>
                     </div>
                     {entry.fallbackGloss.length > 0 && (
                       <div style={{ display: "grid", gap: 6 }}>
-                        <div style={{ fontSize: 12, color: "#667085", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Fallback inglés</div>
-                        <div style={{ fontSize: 14, color: "#475467", lineHeight: 1.55 }}>{entry.fallbackGloss.join(" · ")}</div>
+                        <div style={sectionKickerStyle}>Fallback inglés</div>
+                        <div style={{ fontSize: 14, color: "var(--color-text-muted)", lineHeight: 1.55 }}>{entry.fallbackGloss.join(" · ")}</div>
                       </div>
                     )}
                   </article>
@@ -4722,9 +4737,9 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "exam" && (
-          <section style={{ background: "linear-gradient(145deg,#f0f9ff,#ffffff)", border: "1px solid rgba(17,17,20,.07)", borderRadius: 20, padding: 16, boxShadow: "inset 0 0 0 2px rgba(14,165,233,.08)" }}>
+          <section style={sectionStyle}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <h2 style={{ margin: 0, fontSize: 24 }}>Examen por lección</h2>
+              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Examen por lección</h2>
               <div style={{ display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
                 {LESSONS.map((lesson) => (
                   <button
@@ -4749,21 +4764,21 @@ function StudyContent() {
                 ))}
               </div>
             </div>
-            <p style={{ color: "#6b7280", fontSize: 14 }}>
+            <p style={{ color: "var(--color-text-muted)", fontSize: "var(--text-body-sm)", margin: 0 }}>
               20 reactivos aleatorios basados en Genki (opción múltiple, abierta, relacionar, ordenar y contexto). Passing score: {EXAM_PASSING_PERCENT}%. Feedback completo al final.
             </p>
 
             {examQuestions.length === 0 && (
-              <div ref={examCardRef} style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 14, background: "#fbfbfc" }}>
-                <div style={{ fontSize: 12, color: "#667085", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 800 }}>Configuración</div>
-                <div style={{ marginTop: 6, fontSize: 24, fontWeight: 800 }}>Examen L{examLesson}</div>
-                <p style={{ marginTop: 8, color: "#667085", fontSize: 14, lineHeight: 1.5 }}>
+              <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14 }}>
+                <div style={sectionKickerStyle}>Configuración</div>
+                <div style={{ marginTop: 6, fontSize: "var(--text-h2)", fontWeight: 800 }}>Examen L{examLesson}</div>
+                <p style={{ marginTop: 8, color: "var(--color-text-muted)", fontSize: "var(--text-body-sm)", lineHeight: 1.5 }}>
                   El sistema prioriza reactivos no vistos. Si ya agotaste banco nuevo, rota por los menos recientes para evitar repetición inmediata.
                 </p>
                 <button
                   type="button"
                   onClick={startExam}
-                  style={{ marginTop: 10, border: 0, borderRadius: 999, background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", padding: "10px 16px", fontWeight: 800, fontSize: 14, boxShadow: "0 10px 18px rgba(44,182,150,.22)" }}
+                  style={{ ...primaryButtonStyle, marginTop: 10 }}
                 >
                   Iniciar examen
                 </button>
@@ -4771,29 +4786,29 @@ function StudyContent() {
             )}
 
             {examCurrentQ && !examFinished && (
-              <div ref={examCardRef} style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 12, background: "#fbfbfc" }}>
+              <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Pregunta {examIndex + 1} / {examQuestions.length}</div>
-                  <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>Lección {examLesson} · {formatExamCategoryLabel(examCurrentQ.category)}</div>
+                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>Pregunta {examIndex + 1} / {examQuestions.length}</div>
+                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>Lección {examLesson} · {formatExamCategoryLabel(examCurrentQ.category)}</div>
                 </div>
-                <div style={{ marginTop: 8, height: 7, borderRadius: 999, background: "#ecedf1", overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${examProgressPct}%`, background: "linear-gradient(90deg, #34c5a6, #25a98f)" }} />
+                <div style={{ ...progressTrackStyle, marginTop: 8 }}>
+                  <div style={{ height: "100%", width: `${examProgressPct}%`, background: "var(--color-accent)" }} />
                 </div>
-                <div style={{ marginTop: 8, fontSize: 20, fontWeight: 800, color: "#111114", whiteSpace: "pre-line", lineHeight: 1.45 }}>{examCurrentQ.prompt}</div>
-                {examCurrentQ.hint && <div style={{ marginTop: 4, color: "#6b7280", fontSize: 13 }}>{examCurrentQ.hint}</div>}
+                <div style={{ marginTop: 8, fontSize: 20, fontWeight: 800, color: "var(--color-text)", whiteSpace: "pre-line", lineHeight: 1.45 }}>{examCurrentQ.prompt}</div>
+                {examCurrentQ.hint && <div style={{ marginTop: 4, color: "var(--color-text-muted)", fontSize: "var(--text-body-sm)" }}>{examCurrentQ.hint}</div>}
                 {examCurrentQ.type === "match" && examCurrentQ.matchLeft && examCurrentQ.matchRight && (
                   <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
                     <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))" }}>
-                      <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 10, background: "#fff", padding: 10 }}>
-                        <div style={{ fontSize: 11, color: "#667085", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em" }}>Columna A</div>
+                      <div style={panelStyle}>
+                        <div style={sectionKickerStyle}>Columna A</div>
                         <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
-                          {examCurrentQ.matchLeft.map((item) => <div key={item} style={{ fontSize: 14, color: "#111114" }}>{item}</div>)}
+                          {examCurrentQ.matchLeft.map((item) => <div key={item} style={{ fontSize: 14, color: "var(--color-text)" }}>{item}</div>)}
                         </div>
                       </div>
-                      <div style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 10, background: "#fff", padding: 10 }}>
-                        <div style={{ fontSize: 11, color: "#667085", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em" }}>Columna B</div>
+                      <div style={panelStyle}>
+                        <div style={sectionKickerStyle}>Columna B</div>
                         <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
-                          {examCurrentQ.matchRight.map((item) => <div key={item} style={{ fontSize: 14, color: "#111114" }}>{item}</div>)}
+                          {examCurrentQ.matchRight.map((item) => <div key={item} style={{ fontSize: 14, color: "var(--color-text)" }}>{item}</div>)}
                         </div>
                       </div>
                     </div>
@@ -4801,15 +4816,15 @@ function StudyContent() {
                 )}
                 {examCurrentQ.type === "reorder" ? (
                   <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
-                    <div style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 14, background: "#fff", padding: 12 }}>
-                      <div style={{ fontSize: 11, color: "#667085", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em" }}>Tu oración</div>
+                    <div style={panelStyle}>
+                      <div style={sectionKickerStyle}>Tu oración</div>
                       <div style={{ marginTop: 8, minHeight: 52, display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                         {decodeReorderAnswer(examCurrentChoice || "").length > 0 ? (
                           decodeReorderAnswer(examCurrentChoice || "").map((tokenId) => {
                             const token = examCurrentQ.reorderTokens?.find((item) => item.id === tokenId);
                             if (!token) return null;
                             return (
-                              <span key={tokenId} style={{ borderRadius: 999, background: "#ecfdf5", color: "#166534", padding: "7px 10px", fontWeight: 700, fontSize: 14 }}>
+                              <span key={tokenId} style={chipStyle}>
                                 {token.label}
                               </span>
                             );
@@ -4829,10 +4844,10 @@ function StudyContent() {
                             disabled={used}
                             onClick={() => appendExamReorderToken(token.id)}
                             style={{
-                              border: used ? "1px solid rgba(17,17,20,.06)" : "1px solid rgba(17,17,20,.12)",
+                              border: used ? "1px solid var(--color-border)" : "1px solid var(--color-border)",
                               borderRadius: 999,
-                              background: used ? "#f3f4f6" : "#fff",
-                              color: used ? "#98a2b3" : "#111114",
+                              background: used ? "var(--color-surface-muted)" : "var(--color-surface)",
+                              color: used ? "var(--color-text-muted)" : "var(--color-text)",
                               padding: "8px 12px",
                               fontWeight: 700,
                               cursor: used ? "not-allowed" : "pointer",
@@ -4844,10 +4859,10 @@ function StudyContent() {
                       })}
                     </div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      <button type="button" onClick={popExamReorderToken} style={{ border: "1px solid rgba(17,17,20,.12)", borderRadius: 999, background: "#fff", padding: "8px 12px", fontWeight: 700 }}>
+                      <button type="button" onClick={popExamReorderToken} style={secondaryButtonStyle}>
                         Borrar último
                       </button>
-                      <button type="button" onClick={clearExamReorder} style={{ border: "1px solid rgba(17,17,20,.12)", borderRadius: 999, background: "#fff", padding: "8px 12px", fontWeight: 700 }}>
+                      <button type="button" onClick={clearExamReorder} style={secondaryButtonStyle}>
                         Limpiar
                       </button>
                     </div>
@@ -4858,7 +4873,7 @@ function StudyContent() {
                       value={examCurrentChoice || ""}
                       onChange={(event) => answerExam(event.target.value)}
                       placeholder="Escribe tu respuesta aquí"
-                      style={{ border: "1px solid rgba(17,17,20,.12)", borderRadius: 12, background: "#fff", padding: "10px 12px", fontSize: 16, fontWeight: 600, color: "#111114" }}
+                      style={{ border: "1px solid var(--color-border)", borderRadius: 12, background: "var(--color-surface)", padding: "10px 12px", fontSize: 16, fontWeight: 600, color: "var(--color-text)" }}
                     />
                   </div>
                 ) : (
@@ -4872,10 +4887,10 @@ function StudyContent() {
                           onClick={() => answerExam(op)}
                           style={{
                             textAlign: "left",
-                            border: isSelected ? "1px solid #2cb696" : "1px solid rgba(17,17,20,.1)",
+                            border: isSelected ? "1px solid var(--color-border-strong)" : "1px solid var(--color-border)",
                             borderRadius: 10,
-                            background: isSelected ? "#ecfdf5" : "#fff",
-                            color: isSelected ? "#166534" : "#222",
+                            background: isSelected ? "var(--color-surface-muted)" : "var(--color-surface)",
+                            color: "var(--color-text)",
                             padding: "8px 10px",
                             fontSize: 14,
                             fontWeight: 600,
@@ -4892,7 +4907,7 @@ function StudyContent() {
                   <button
                     type="button"
                     onClick={nextExamQuestion}
-                    style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, background: "#fff", padding: "7px 10px", fontWeight: 700 }}
+                    style={secondaryButtonStyle}
                   >
                     {examIndex >= examQuestions.length - 1 ? "Terminar y ver feedback" : "Siguiente"}
                   </button>
@@ -4901,40 +4916,40 @@ function StudyContent() {
             )}
 
             {examFinished && (
-              <div ref={examCardRef} style={{ marginTop: 14, border: "1px solid rgba(17,17,20,.08)", borderRadius: 14, padding: 14, background: "#f8fafc" }}>
-                <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>Resultado final</div>
+              <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14 }}>
+                <div style={sectionKickerStyle}>Resultado final</div>
                 <div style={{ marginTop: 6, fontSize: 30, fontWeight: 800 }}>{examScore} / {examQuestions.length}</div>
-                <div style={{ marginTop: 6, color: "#6b7280" }}>
+                <div style={{ marginTop: 6, color: "var(--color-text-muted)" }}>
                   {examPercent}% de aciertos · {examPassed ? "Aprobado" : "No aprobado"} (mínimo {EXAM_PASSING_PERCENT}%)
                 </div>
                 <div style={{ marginTop: 12, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
                   {examCategoryBreakdown.map((row) => {
                     const pct = Math.round((row.correct / Math.max(1, row.total)) * 100);
                     return (
-                      <div key={row.category} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 10, background: "#fff", padding: 10 }}>
-                        <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: ".08em", color: "#667085", fontWeight: 800 }}>{formatExamCategoryLabel(row.category)}</div>
-                        <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "#111114" }}>{row.correct}/{row.total}</div>
-                        <div style={{ marginTop: 2, fontSize: 12, color: "#667085" }}>{pct}%</div>
+                      <div key={row.category} style={{ ...panelStyle, padding: 10 }}>
+                        <div style={sectionKickerStyle}>{formatExamCategoryLabel(row.category)}</div>
+                        <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "var(--color-text)" }}>{row.correct}/{row.total}</div>
+                        <div style={{ marginTop: 2, fontSize: 12, color: "var(--color-text-muted)" }}>{pct}%</div>
                       </div>
                     );
                   })}
                 </div>
 
                 <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <button type="button" onClick={startExam} style={{ border: 0, borderRadius: 999, background: "linear-gradient(135deg,#34c5a6,#25a98f)", color: "#fff", padding: "8px 12px", fontWeight: 700 }}>
+                  <button type="button" onClick={startExam} style={primaryButtonStyle}>
                     Repetir examen L{examLesson}
                   </button>
-                  <button type="button" onClick={resetExam} style={{ border: "1px solid rgba(17,17,20,.12)", background: "#fff", color: "#111114", borderRadius: 999, padding: "8px 12px", fontWeight: 700 }}>
+                  <button type="button" onClick={resetExam} style={secondaryButtonStyle}>
                     Cambiar lección
                   </button>
                 </div>
 
                 <div style={{ marginTop: 14, borderTop: "1px dashed rgba(17,17,20,.1)", paddingTop: 12 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#7c7c85", textTransform: "uppercase", letterSpacing: ".08em" }}>
+                  <div style={sectionKickerStyle}>
                     Feedback de errores
                   </div>
                   {examWrongQuestions.length === 0 ? (
-                    <p style={{ marginTop: 8, color: "#15803d", fontWeight: 700 }}>Excelente. No hubo errores en este intento.</p>
+                    <p style={{ marginTop: 8, color: "var(--color-text)", fontWeight: 700 }}>Excelente. No hubo errores en este intento.</p>
                   ) : (
                     <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
                       {examWrongQuestions.slice(0, 10).map((question, index) => {
@@ -4942,11 +4957,11 @@ function StudyContent() {
                         const chosen = formatExamAnswer(question, examAnswers[key]);
                         const correct = question.correct;
                         return (
-                          <div key={`${key}-${index}`} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 10, background: "#fff", padding: 10 }}>
-                            <div style={{ fontSize: 13, fontWeight: 700, color: "#111114", whiteSpace: "pre-line" }}>{question.prompt}</div>
-                            <div style={{ marginTop: 4, fontSize: 12, color: "#b42318" }}>Tu respuesta: {chosen}</div>
-                            <div style={{ marginTop: 2, fontSize: 12, color: "#166534" }}>Correcta: {correct}</div>
-                            {question.explanation && <div style={{ marginTop: 4, fontSize: 12, color: "#667085" }}>{question.explanation}</div>}
+                          <div key={`${key}-${index}`} style={{ ...panelStyle, padding: 10 }}>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--color-text)", whiteSpace: "pre-line" }}>{question.prompt}</div>
+                            <div style={{ marginTop: 4, fontSize: 12, color: "var(--color-text-muted)" }}>Tu respuesta: {chosen}</div>
+                            <div style={{ marginTop: 2, fontSize: 12, color: "var(--color-text)" }}>Correcta: {correct}</div>
+                            {question.explanation && <div style={{ marginTop: 4, fontSize: 12, color: "var(--color-text-muted)" }}>{question.explanation}</div>}
                           </div>
                         );
                       })}
@@ -4957,16 +4972,16 @@ function StudyContent() {
             )}
 
             <div style={{ marginTop: 14, borderTop: "1px dashed rgba(17,17,20,.1)", paddingTop: 12 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#7c7c85", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 8 }}>
+              <div style={{ ...sectionKickerStyle, marginBottom: 8 }}>
                 Historial reciente
               </div>
               <div style={{ display: "grid", gap: 6 }}>
                 {examHistory.slice(0, 6).map((attempt, index) => (
-                  <div key={`${attempt.createdAt}-${index}`} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 10, background: "#fff", padding: "8px 10px", display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 13, color: "#111114", fontWeight: 700 }}>
+                  <div key={`${attempt.createdAt}-${index}`} style={{ ...panelStyle, padding: "8px 10px", display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 13, color: "var(--color-text)", fontWeight: 700 }}>
                       L{attempt.lesson} · {attempt.score}/{attempt.total} ({attempt.percent}%)
                     </span>
-                    <span style={{ fontSize: 12, color: attempt.passed ? "#15803d" : "#b42318", fontWeight: 700 }}>
+                    <span style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
                       {attempt.passed ? "Aprobado" : "No aprobado"}
                     </span>
                   </div>
