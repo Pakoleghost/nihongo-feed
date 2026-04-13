@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import AppTopNav from "@/components/AppTopNav";
 
 type GroupRow = { name: string };
 
@@ -97,7 +97,7 @@ function WriteContent() {
         if (!existing) {
           alert("No se encontró el post a editar.");
           setLoadingDraft(false);
-          return router.push("/");
+          return router.push("/study");
         }
         const canEdit = existing.user_id === user.id || Boolean(profile?.is_admin);
         if (!canEdit) {
@@ -269,7 +269,7 @@ function WriteContent() {
       try {
         localStorage.removeItem(draftKey);
       } catch {}
-      router.push("/");
+      router.push("/study");
     } catch {
       alert("Error al publicar");
     } finally {
@@ -281,9 +281,10 @@ function WriteContent() {
     <>
       <div className="writePage">
         <div className="writeShell">
+          <AppTopNav secondary={isAdmin ? "write" : null} />
+
           <header className="writeTopBar">
             <div className="leftTop">
-              <Link href="/" className="ghostPill">Cancelar</Link>
               <div className="pageLabel">
                 <span className="eyebrow">{editId ? "Editar" : "Escribir"}</span>
                 <strong>{editId ? "Actualizar contenido" : "Nuevo contenido"}</strong>

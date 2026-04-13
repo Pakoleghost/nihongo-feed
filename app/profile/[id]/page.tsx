@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { getPostParts } from "@/lib/feed-utils";
+import AppTopNav from "@/components/AppTopNav";
 
 function AvatarPlaceholder({ size = 44 }: { size?: number }) {
   return (
@@ -73,9 +74,10 @@ export default function StudentProfilePage() {
   return (
     <div className="profilePage">
       <div className="profileShell ds-container">
+        <AppTopNav secondary={isMe ? "profile" : null} />
+
         <header className="profileTop">
           <div className="profileTopMain">
-            <Link href="/study" className="ghostPill">Study</Link>
             <div className="topCopy">
               <div className="eyebrow">Perfil</div>
               <h1>{profile.full_name || profile.username || "Usuario"}</h1>
@@ -83,7 +85,6 @@ export default function StudentProfilePage() {
           </div>
           <div className="topActions">
             {isMe && <Link href="/profile/edit" className="ghostPill">Editar</Link>}
-            <Link href="/write" className="primaryPill">Escribir</Link>
           </div>
         </header>
 

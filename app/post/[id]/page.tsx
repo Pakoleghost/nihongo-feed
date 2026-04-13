@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import AppTopNav from "@/components/AppTopNav";
 
 const HeartIcon = ({ filled }: { filled: boolean }) => (
   <svg
@@ -188,7 +189,7 @@ export default function PostDetailPage() {
     try {
       const { error } = await supabase.from("posts").delete().eq("id", Number(postId));
       if (error) throw error;
-      router.push("/");
+      router.push("/study");
     } catch {
       alert("No se pudo borrar el post.");
     } finally {
@@ -208,6 +209,8 @@ export default function PostDetailPage() {
     <>
       <div className="postPage">
         <div className="postChrome ds-container">
+          <AppTopNav />
+
           <header className="postTopBar">
             <div className="topBarMain">
               <button type="button" onClick={() => router.back()} className="ghostBtn">
@@ -217,10 +220,6 @@ export default function PostDetailPage() {
                 <div className="eyebrow">Publicación</div>
                 <h1>{parsed.title}</h1>
               </div>
-            </div>
-            <div className="topBarActions">
-              <Link href="/study" className="ghostBtnLink">Study</Link>
-              <Link href="/write" className="primaryBtnLink">Escribir</Link>
             </div>
           </header>
 
@@ -303,7 +302,6 @@ export default function PostDetailPage() {
                 <p className="sideLabel">Acciones</p>
                 <div className="sideActions">
                   <Link href={`/profile/${post.user_id}`} className="pillLink">Ver perfil</Link>
-                  <Link href="/write" className="pillLink">Escribir</Link>
                   {canEditPost && <Link href={`/write?edit_id=${post.id}`} className="pillLink">Editar</Link>}
                   {canEditPost && (
                     <button type="button" onClick={() => setConfirmDeleteOpen(true)} className="pillDangerBtn">

@@ -6,6 +6,7 @@ import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import AppTopNav from "@/components/AppTopNav";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 
@@ -3929,15 +3930,7 @@ function StudyContent() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--color-bg)", padding: "var(--page-padding)" }}>
       <div className="ds-container" style={{ display: "grid", gap: "var(--space-4)" }}>
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "var(--space-3)", paddingTop: "var(--space-2)" }}>
-          <Link href="/study" style={{ textDecoration: "none", color: "var(--color-text)", display: "inline-flex", alignItems: "center", gap: 10 }}>
-            <span style={{ width: 10, height: 10, borderRadius: 999, background: "var(--color-primary)" }} />
-            <span style={{ fontSize: "var(--text-h2)", lineHeight: 1, letterSpacing: "-.05em", fontWeight: 900 }}>Nihongo Feed</span>
-          </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap", justifyContent: "flex-end" }}>
-            <Link href="/resources" style={{ ...secondaryButtonStyle, textDecoration: "none", minHeight: 40, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>Recursos</Link>
-          </div>
-        </header>
+        <AppTopNav primary="study" />
 
         <section style={{ ...sectionStyle, gap: "var(--space-3)" }}>
           <div style={sectionKickerStyle}>{showHub ? "Study" : "Herramienta"}</div>

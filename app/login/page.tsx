@@ -104,7 +104,7 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) alert(error.message);
         else {
-          router.push("/");
+          router.push("/study");
           router.refresh();
         }
       }
@@ -205,7 +205,7 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
     <div style={shellStyle}>
       <div style={cardStyle}>
         <div style={headerStyle}>
-          <div style={eyebrowStyle}>Nihongo Feed</div>
+          <div style={eyebrowStyle}>Nihongo</div>
           <h1 style={titleStyle}>{isSignUp ? "Crear cuenta" : "Entrar"}</h1>
           <p style={copyStyle}>
             {isSignUp ? "Tu acceso queda listo aquí mismo." : "Accede a estudio y recursos."}

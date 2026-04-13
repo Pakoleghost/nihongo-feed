@@ -82,7 +82,7 @@ export default function PendingApprovalPage() {
       }
 
       if (profile?.is_approved) {
-        window.location.href = username ? "/" : "/pick-username";
+        window.location.href = username ? "/study" : "/pick-username";
         return;
       }
 
@@ -103,7 +103,7 @@ export default function PendingApprovalPage() {
       if (app?.status === "approved") {
         // Fallback: if applications is approved but profiles.approved hasn't propagated yet,
         // still move the user forward.
-        window.location.href = username ? "/" : "/pick-username";
+        window.location.href = username ? "/study" : "/pick-username";
         return;
       }
 
@@ -115,7 +115,7 @@ export default function PendingApprovalPage() {
     checkStatus();
   }, [authReady, userId]);
 
-  // While pending, poll for approval and then send the user to the feed (no re-login).
+  // While pending, poll for approval and then send the user into Study (no re-login).
   useEffect(() => {
     if (!authReady) return;
     if (!userId) return;
@@ -144,7 +144,7 @@ export default function PendingApprovalPage() {
 
       if (profile?.is_approved) {
         // Keep the session. Just move them into the app.
-        window.location.href = username ? "/" : "/pick-username";
+        window.location.href = username ? "/study" : "/pick-username";
       }
 
       const { data: app } = await supabase
@@ -156,7 +156,7 @@ export default function PendingApprovalPage() {
         .maybeSingle();
 
       if (app?.status === "approved") {
-        window.location.href = username ? "/" : "/pick-username";
+        window.location.href = username ? "/study" : "/pick-username";
       }
     };
 
@@ -195,7 +195,7 @@ export default function PendingApprovalPage() {
           <h1 style={{ fontSize: 22, marginBottom: 12 }}>Session expired</h1>
           <p style={{ opacity: 0.7 }}>
             Please log in again to continue.<br />
-            If your application is already approved, you will go straight to the feed.
+            If your application is already approved, you will go straight into Study.
           </p>
           <button onClick={goToLogin} style={{ marginTop: 14 }}>
             Go to login
@@ -212,7 +212,7 @@ export default function PendingApprovalPage() {
           <h1 style={{ fontSize: 22, marginBottom: 12 }}>Pending approval</h1>
           <p style={{ opacity: 0.7 }}>
             Your application is under review.<br />
-            Once an administrator approves your account, you will be sent to the feed automatically.
+            Once an administrator approves your account, you will be sent into Study automatically.
           </p>
           <p style={{ marginTop: 14, fontSize: 12, opacity: 0.5 }}>User: {userId}</p>
         </div>

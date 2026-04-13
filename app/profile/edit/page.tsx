@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import AppTopNav from "@/components/AppTopNav";
 
 async function compressAvatar(file: File) {
   if (!file.type.startsWith("image/")) return file;
@@ -119,8 +119,9 @@ export default function EditProfilePage() {
     <>
       <div className="editProfilePage">
         <div className="editShell">
+          <AppTopNav secondary="profile" />
+
           <header className="editTop">
-            <Link href="/" className="ghostBtn">← Volver</Link>
             <div>
               <div className="eyebrow">Perfil</div>
               <h1>Editar perfil</h1>

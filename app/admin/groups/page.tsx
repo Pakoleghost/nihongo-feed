@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import AppTopNav from "@/components/AppTopNav";
 
 export default function AdminGroupsPage() {
   const [activeTab, setActiveTab] = useState<'groups' | 'approvals'>('groups');
@@ -113,8 +114,8 @@ export default function AdminGroupsPage() {
   return (
     <>
     <div style={{ maxWidth: "800px", margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif" }}>
-      <nav style={{ marginBottom: "20px", display: "flex", gap: "20px", borderBottom: "1px solid #eee", paddingBottom: "10px" }}>
-        <Link href="/" style={{ color: "#2cb696", textDecoration: "none", fontWeight: "bold" }}>← Volver</Link>
+      <AppTopNav secondary="admin" />
+      <nav style={{ marginBottom: "20px", marginTop: "16px", display: "flex", gap: "20px", borderBottom: "1px solid #eee", paddingBottom: "10px" }}>
         <button onClick={() => setActiveTab('groups')} style={{ border: "none", background: "none", fontWeight: activeTab === 'groups' ? "bold" : "normal", color: activeTab === 'groups' ? "#2cb696" : "#888", cursor: "pointer" }}>Grupos</button>
         <button onClick={() => setActiveTab('approvals')} style={{ border: "none", background: "none", fontWeight: activeTab === 'approvals' ? "bold" : "normal", color: activeTab === 'approvals' ? "#d9534f" : "#888", cursor: "pointer" }}>Solicitudes ({pendingUsers.length})</button>
       </nav>

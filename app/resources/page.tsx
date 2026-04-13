@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import AppTopNav from "@/components/AppTopNav";
 
 type ResourceRow = {
   id: number | string;
@@ -314,9 +315,10 @@ export default function ResourcesPage() {
     <>
       <div className="resourcesPage">
         <div className="resourcesShell ds-container">
+          <AppTopNav primary="resources" />
+
           <header className="pageHeader">
             <div className="pageHeaderMain">
-              <Link href="/study" className="ghostBtn">Study</Link>
               <div>
                 <div className="eyebrow">Recursos</div>
                 <h1 className="title">Biblioteca</h1>
