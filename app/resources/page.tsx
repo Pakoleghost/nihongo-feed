@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { isPublicTargetGroup, normalizeGroupValue, isForumTaskSubtype, isTaskAnnouncementSubtype } from "@/lib/feed-utils";
+import { isPublicTargetGroup, normalizeGroupValue, isForumTaskSubtype } from "@/lib/feed-utils";
 
 type ResourceRow = {
   id: number | string;
@@ -526,7 +526,6 @@ export default function ResourcesPage() {
                       const deadline = task.deadline ? new Date(task.deadline) : null;
                       const isExpired = Boolean(deadline && deadline.getTime() < Date.now());
                       const isForum = Boolean(task.is_forum || isForumTaskSubtype(task.assignment_subtype));
-                      const isAnnouncementTask = isTaskAnnouncementSubtype(task.assignment_subtype);
                       const isAssignedToMe =
                         isAdmin ||
                         isPublicTargetGroup(task.target_group) ||
@@ -535,13 +534,13 @@ export default function ResourcesPage() {
                         <Link key={task.id} href={`/post/${task.id}`} className="resourceRow" style={{ textDecoration: "none" }}>
                           <div className="resourceMain">
                             <div className="resourceIcon">
-                              {isForum ? "💬" : isAnnouncementTask ? "📌" : "📝"}
+                              {isForum ? "💬" : "📝"}
                             </div>
                             <div className="resourceText">
                               <div className="resourceTitleRow">
                                 <strong>{taskTitle || "Tarea"}</strong>
                                 <span className={`typeTag ${isForum ? "note" : "link"}`}>
-                                  {isForum ? "foro" : isAnnouncementTask ? "anuncio" : "tarea"}
+                                  {isForum ? "foro" : "tarea"}
                                 </span>
                               </div>
                               <p>{taskBody.join(" ").trim() || "Abrir para ver instrucciones."}</p>

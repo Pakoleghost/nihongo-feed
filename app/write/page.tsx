@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { normalizeAssignmentSubtype, normalizeGroupValue } from "@/lib/feed-utils";
+import { normalizeAssignmentSubtype } from "@/lib/feed-utils";
 
 type GroupRow = { name: string };
 
@@ -68,10 +68,10 @@ function WriteContent() {
   const [editingPostUserId, setEditingPostUserId] = useState<string | null>(null);
 
   const [isAdmin, setIsAdmin] = useState(false);
-  const [postType, setPostType] = useState<"post" | "assignment" | "announcement" | "linkpost">("post");
+  const [postType, setPostType] = useState<"post" | "assignment" | "linkpost">("post");
   const [targetGroup, setTargetGroup] = useState("Todos");
   const [deadline, setDeadline] = useState("");
-  const [assignmentSubtype, setAssignmentSubtype] = useState<"announcement" | "post" | "forum">("post");
+  const [assignmentSubtype, setAssignmentSubtype] = useState<"post" | "forum">("post");
   const [linkUrl, setLinkUrl] = useState("");
   const [availableGroups, setAvailableGroups] = useState<GroupRow[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -115,11 +115,10 @@ function WriteContent() {
         setTitle(rawTitle || "");
         setBody(rest.join("\n").trim());
         if (existing.image_url) setPreviewUrl(existing.image_url);
-        if (existing.type === "announcement") setPostType("announcement");
-        else if (existing.type === "assignment") setPostType("assignment");
+        if (existing.type === "assignment") setPostType("assignment");
         else setPostType("post");
         if (existing.assignment_subtype) {
-          setAssignmentSubtype(normalizeAssignmentSubtype(existing.assignment_subtype) as "announcement" | "post" | "forum");
+          setAssignmentSubtype(normalizeAssignmentSubtype(existing.assignment_subtype) as "post" | "forum");
         }
         if (existing.target_group) setTargetGroup(existing.target_group);
         if (existing.deadline) {
@@ -136,10 +135,13 @@ function WriteContent() {
             setTitle(parsed?.title || "");
             setBody(parsed?.body || "");
             if (!assignmentId) {
-              if (parsed?.postType) setPostType(parsed.postType);
+              if (parsed?.postType === "assignment" || parsed?.postType === "linkpost") setPostType(parsed.postType);
+              else setPostType("post");
               if (parsed?.targetGroup) setTargetGroup(parsed.targetGroup);
               if (parsed?.deadline) setDeadline(parsed.deadline);
-              if (parsed?.assignmentSubtype) setAssignmentSubtype(parsed.assignmentSubtype);
+              if (parsed?.assignmentSubtype) {
+                setAssignmentSubtype(normalizeAssignmentSubtype(parsed.assignmentSubtype) as "post" | "forum");
+              }
               if (parsed?.linkUrl) setLinkUrl(parsed.linkUrl);
             }
           }
@@ -289,55 +291,6 @@ function WriteContent() {
         if (created) insertedPost = created as any;
       }
 
-      // Notify students when the teacher posts announcements or new assignments.
-      if (
-        isAdmin &&
-        !editId &&
-        !assignmentId &&
-        insertedPost &&
-        (postType === "announcement" || postType === "assignment")
-      ) {
-        let recipientsQuery = supabase
-          .from("profiles")
-          .select("id, group_name")
-          .eq("is_admin", false)
-          .eq("is_approved", true);
-
-        if (normalizedTargetGroup && normalizeGroupValue(normalizedTargetGroup) !== "todos") {
-          recipientsQuery = recipientsQuery.eq("group_name", normalizedTargetGroup);
-        }
-
-        const { data: recipients } = await recipientsQuery;
-        const notifications = (recipients || [])
-          .filter((r: any) => r?.id && r.id !== user.id)
-          .map((r: any) => ({
-            user_id: r.id,
-            message:
-              postType === "announcement"
-                ? `Nuevo anuncio: ${title}`
-                : `Nueva tarea: ${title}`,
-            link: `/post/${insertedPost.id}`,
-            post_id: insertedPost.id,
-            actor_user_id: user.id,
-            type: postType === "announcement" ? "announcement" : "assignment",
-            is_read: false,
-          }));
-
-        if (notifications.length > 0) {
-          const { error: notifError } = await supabase.from("notifications").insert(notifications);
-          if (notifError) {
-            await supabase.from("notifications").insert(
-              notifications.map((n) => ({
-                user_id: n.user_id,
-                message: n.message,
-                link: n.link,
-                is_read: n.is_read,
-              })),
-            );
-          }
-        }
-      }
-
       const draftKey = assignmentId ? `write-draft-assignment-${assignmentId}` : "write-draft-main";
       try {
         localStorage.removeItem(draftKey);
@@ -376,7 +329,7 @@ function WriteContent() {
           <div className="editorGrid">
             <section className="editorCard">
               <div className="fieldBlock">
-                <label className="label">{postType === "announcement" ? "Título del anuncio" : postType === "assignment" ? "Título de la tarea" : postType === "linkpost" ? "Título del link" : "Título"}</label>
+                <label className="label">{postType === "assignment" ? "Título de la tarea" : postType === "linkpost" ? "Título del link" : "Título"}</label>
                 <input
                   type="text"
                   placeholder={assignmentId ? "Título de tu entrega..." : "Título de tu publicación..."}
@@ -463,7 +416,6 @@ function WriteContent() {
                       <span>Tipo</span>
                       <select value={postType} onChange={(e) => setPostType(e.target.value as any)}>
                         <option value="post">Post normal</option>
-                        <option value="announcement">お知らせ (Anuncio)</option>
                         <option value="linkpost">Link en el feed</option>
                         <option value="assignment">宿題 (Tarea)</option>
                       </select>
@@ -498,9 +450,8 @@ function WriteContent() {
                         <span>Modalidad de tarea</span>
                         <select
                           value={assignmentSubtype}
-                          onChange={(e) => setAssignmentSubtype(e.target.value as "announcement" | "post" | "forum")}
+                          onChange={(e) => setAssignmentSubtype(e.target.value as "post" | "forum")}
                         >
-                          <option value="announcement">Anuncio de tarea (pinned)</option>
                           <option value="post">Tarea tipo post (entrega en editor)</option>
                           <option value="forum">Tarea tipo foro (responden en el post)</option>
                         </select>

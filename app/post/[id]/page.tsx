@@ -214,34 +214,6 @@ export default function PostDetailPage() {
       setLikesCount((prev) => prev + 1);
       setIsLiked(true);
 
-      if (post?.user_id && post.user_id !== myId) {
-        const { data: actor } = await supabase
-          .from("profiles")
-          .select("full_name, username")
-          .eq("id", myId)
-          .maybeSingle();
-        const actorName = actor?.full_name || actor?.username || "Un estudiante";
-        const postTitle = (post.content || "").split("\n")[0] || "tu publicación";
-
-        const notificationPayload = {
-          user_id: post.user_id,
-          message: `${actorName} indicó que le gustó: ${postTitle}`,
-          link: `/post/${postId}`,
-          post_id: postId,
-          actor_user_id: myId,
-          type: "like",
-          is_read: false,
-        };
-        const { error: notifError } = await supabase.from("notifications").insert(notificationPayload);
-        if (notifError) {
-          await supabase.from("notifications").insert({
-            user_id: post.user_id,
-            message: `${actorName} indicó que le gustó: ${postTitle}`,
-            link: `/post/${postId}`,
-            is_read: false,
-          });
-        }
-      }
     } finally {
       setPublishingLike(false);
     }

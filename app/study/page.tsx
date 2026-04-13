@@ -2606,7 +2606,6 @@ function StudyContent() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   const [kanaSet, setKanaSet] = useState<KanaMode>("hiragana");
   const [kanaRunning, setKanaRunning] = useState(false);
@@ -2723,19 +2722,11 @@ function StudyContent() {
         try {
           const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
           setIsAdmin(Boolean(profile?.is_admin));
-          const { count } = await supabase
-            .from("notifications")
-            .select("*", { count: "exact", head: true })
-            .eq("user_id", user.id)
-            .or("is_read.eq.false,is_read.is.null");
-          setUnreadNotifications(count || 0);
         } catch {
           setIsAdmin(false);
-          setUnreadNotifications(0);
         }
       } else {
         setIsAdmin(false);
-        setUnreadNotifications(0);
       }
       try {
         const weekKey = getLocalWeekStart().toISOString().slice(0, 10);
@@ -3945,14 +3936,6 @@ function StudyContent() {
           </Link>
           <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap", justifyContent: "flex-end" }}>
             <Link href="/resources" style={{ ...secondaryButtonStyle, textDecoration: "none", minHeight: 40, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>Recursos</Link>
-            <Link href="/notifications" style={{ ...secondaryButtonStyle, textDecoration: "none", minHeight: 40, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-              Avisos
-              {unreadNotifications > 0 && (
-                <span style={{ minWidth: 18, height: 18, padding: "0 5px", borderRadius: 999, background: "var(--color-primary)", color: "#fff", fontSize: 10, fontWeight: 800, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                  {unreadNotifications > 9 ? "9+" : unreadNotifications}
-                </span>
-              )}
-            </Link>
           </div>
         </header>
 

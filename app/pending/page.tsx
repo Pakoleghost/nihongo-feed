@@ -77,7 +77,7 @@ export default function PendingApprovalPage() {
       const username = (profile?.username ?? "").toString().trim();
 
       if (profile?.is_admin) {
-        window.location.href = "/notifications";
+        window.location.href = "/study";
         return;
       }
 
@@ -138,7 +138,7 @@ export default function PendingApprovalPage() {
       if (!alive) return;
 
       if (profile?.is_admin) {
-        window.location.href = "/notifications";
+        window.location.href = "/study";
         return;
       }
 
