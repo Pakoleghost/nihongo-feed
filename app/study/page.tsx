@@ -3928,19 +3928,26 @@ function StudyContent() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--color-bg)", padding: "var(--page-padding)" }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--color-bg)",
+        padding: "var(--page-padding)",
+        fontFamily: `var(--font-study), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif`,
+      }}
+    >
       <div className="ds-container" style={{ display: "grid", gap: "var(--space-4)" }}>
         <AppTopNav primary="study" tone="study" />
 
         {showHub ? (
           <section style={{ display: "grid", gap: "var(--space-2)", padding: "var(--space-3) 0 var(--space-2)" }}>
-            <div style={{ fontSize: "clamp(50px, 12vw, 86px)", lineHeight: 0.88, letterSpacing: "-.08em", fontWeight: 900, color: "var(--color-text)" }}>
+            <div style={{ fontSize: "clamp(48px, 11vw, 82px)", lineHeight: 0.9, letterSpacing: "-.065em", fontWeight: 800, color: "var(--color-text)" }}>
               Study
             </div>
           </section>
         ) : (
           <section style={{ ...sectionStyle, gap: "var(--space-2)", padding: "var(--space-4) var(--space-5)" }}>
-            <div style={{ fontSize: "var(--text-h1)", lineHeight: 0.96, letterSpacing: "-.055em", fontWeight: 900, color: "var(--color-text)" }}>
+            <div style={{ fontSize: "var(--text-h1)", lineHeight: 0.98, letterSpacing: "-.04em", fontWeight: 800, color: "var(--color-text)" }}>
               {pageTitle}
             </div>
           </section>
@@ -4003,15 +4010,15 @@ function StudyContent() {
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-3)" }}>
-                      <span
-                        style={{
-                          fontSize: isWide ? "clamp(30px, 7vw, 42px)" : "clamp(24px, 5vw, 32px)",
-                          lineHeight: 0.98,
-                          letterSpacing: isWide ? "-.06em" : "-.05em",
-                          fontWeight: 900,
-                          color: "var(--color-text)",
-                          textWrap: "balance",
-                          maxWidth: isWide ? "70%" : "100%",
+                    <span
+                      style={{
+                        fontSize: isWide ? "clamp(28px, 6.8vw, 40px)" : "clamp(23px, 4.8vw, 30px)",
+                        lineHeight: 1,
+                        letterSpacing: isWide ? "-.04em" : "-.03em",
+                        fontWeight: isWide ? 800 : 700,
+                        color: "var(--color-text)",
+                        textWrap: "balance",
+                        maxWidth: isWide ? "70%" : "100%",
                         }}
                       >
                         {tool.title}
