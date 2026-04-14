@@ -24,7 +24,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あさ」?
-- choices: ["autobús","mañana","fin de semana","noche"]
+- choices: ["noche","autobús","mañana","fin de semana"]
 - correct: "mañana"
 - explanation: 「あさ」 significa “mañana”.
 - hint: Lección 4 · Vocabulario
@@ -34,7 +34,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “mañana”
-- choices: ["朝 (あさ)","週末 (しゅうまつ)","バス","晩 (ばん)"]
+- choices: ["バス","朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)"]
 - correct: "朝 (あさ)"
 - explanation: La opción correcta para “mañana” es 「朝 (あさ)」.
 - hint: Lección 4 · Vocabulario
@@ -44,7 +44,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ばん」?
-- choices: ["fin de semana","mañana","autobús","noche"]
+- choices: ["autobús","mañana","fin de semana","noche"]
 - correct: "noche"
 - explanation: 「ばん」 significa “noche”.
 - hint: Lección 4 · Vocabulario
@@ -54,7 +54,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “noche”
-- choices: ["バス","晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)"]
+- choices: ["週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)","バス"]
 - correct: "晩 (ばん)"
 - explanation: La opción correcta para “noche” es 「晩 (ばん)」.
 - hint: Lección 4 · Vocabulario
@@ -64,7 +64,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しゅうまつ」?
-- choices: ["autobús","mañana","noche","fin de semana"]
+- choices: ["fin de semana","mañana","noche","autobús"]
 - correct: "fin de semana"
 - explanation: 「しゅうまつ」 significa “fin de semana”.
 - hint: Lección 4 · Vocabulario
@@ -74,7 +74,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “fin de semana”
-- choices: ["週末 (しゅうまつ)","晩 (ばん)","バス","朝 (あさ)"]
+- choices: ["朝 (あさ)","バス","晩 (ばん)","週末 (しゅうまつ)"]
 - correct: "週末 (しゅうまつ)"
 - explanation: La opción correcta para “fin de semana” es 「週末 (しゅうまつ)」.
 - hint: Lección 4 · Vocabulario
@@ -84,7 +84,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「バス」?
-- choices: ["noche","mañana","autobús","fin de semana"]
+- choices: ["noche","fin de semana","autobús","mañana"]
 - correct: "autobús"
 - explanation: 「バス」 significa “autobús”.
 - hint: Lección 4 · Vocabulario
@@ -94,7 +94,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “autobús”
-- choices: ["バス","晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)"]
+- choices: ["朝 (あさ)","晩 (ばん)","バス","週末 (しゅうまつ)"]
 - correct: "バス"
 - explanation: La opción correcta para “autobús” es 「バス」.
 - hint: Lección 4 · Vocabulario
@@ -104,7 +104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「でんしゃ」?
-- choices: ["mañana","fin de semana","noche","tren"]
+- choices: ["tren","noche","mañana","fin de semana"]
 - correct: "tren"
 - explanation: 「でんしゃ」 significa “tren”.
 - hint: Lección 4 · Vocabulario
@@ -114,7 +114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tren”
-- choices: ["朝 (あさ)","週末 (しゅうまつ)","電車 (でんしゃ)","晩 (ばん)"]
+- choices: ["晩 (ばん)","週末 (しゅうまつ)","電車 (でんしゃ)","朝 (あさ)"]
 - correct: "電車 (でんしゃ)"
 - explanation: La opción correcta para “tren” es 「電車 (でんしゃ)」.
 - hint: Lección 4 · Vocabulario
@@ -124,7 +124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せんしゅう」?
-- choices: ["noche","mañana","la semana pasada","fin de semana"]
+- choices: ["noche","la semana pasada","fin de semana","mañana"]
 - correct: "la semana pasada"
 - explanation: 「せんしゅう」 significa “la semana pasada”.
 - hint: Lección 4 · Vocabulario
@@ -134,7 +134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “la semana pasada”
-- choices: ["週末 (しゅうまつ)","晩 (ばん)","先週 (せんしゅう)","朝 (あさ)"]
+- choices: ["週末 (しゅうまつ)","先週 (せんしゅう)","朝 (あさ)","晩 (ばん)"]
 - correct: "先週 (せんしゅう)"
 - explanation: La opción correcta para “la semana pasada” es 「先週 (せんしゅう)」.
 - hint: Lección 4 · Vocabulario
@@ -144,7 +144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「こんしゅう」?
-- choices: ["noche","esta semana","fin de semana","mañana"]
+- choices: ["fin de semana","mañana","esta semana","noche"]
 - correct: "esta semana"
 - explanation: 「こんしゅう」 significa “esta semana”.
 - hint: Lección 4 · Vocabulario
@@ -154,7 +154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “esta semana”
-- choices: ["今週 (こんしゅう)","晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)"]
+- choices: ["週末 (しゅうまつ)","朝 (あさ)","今週 (こんしゅう)","晩 (ばん)"]
 - correct: "今週 (こんしゅう)"
 - explanation: La opción correcta para “esta semana” es 「今週 (こんしゅう)」.
 - hint: Lección 4 · Vocabulario
@@ -164,7 +164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「らいしゅう」?
-- choices: ["fin de semana","la próxima semana","noche","mañana"]
+- choices: ["fin de semana","noche","mañana","la próxima semana"]
 - correct: "la próxima semana"
 - explanation: 「らいしゅう」 significa “la próxima semana”.
 - hint: Lección 4 · Vocabulario
@@ -174,7 +174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “la próxima semana”
-- choices: ["朝 (あさ)","来週 (らいしゅう)","晩 (ばん)","週末 (しゅうまつ)"]
+- choices: ["週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)","来週 (らいしゅう)"]
 - correct: "来週 (らいしゅう)"
 - explanation: La opción correcta para “la próxima semana” es 「来週 (らいしゅう)」.
 - hint: Lección 4 · Vocabulario
@@ -184,7 +184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いつ」?
-- choices: ["cuándo","mañana","noche","fin de semana"]
+- choices: ["noche","mañana","cuándo","fin de semana"]
 - correct: "cuándo"
 - explanation: 「いつ」 significa “cuándo”.
 - hint: Lección 4 · Vocabulario
@@ -194,7 +194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cuándo”
-- choices: ["晩 (ばん)","週末 (しゅうまつ)","いつ","朝 (あさ)"]
+- choices: ["朝 (あさ)","週末 (しゅうまつ)","いつ","晩 (ばん)"]
 - correct: "いつ"
 - explanation: La opción correcta para “cuándo” es 「いつ」.
 - hint: Lección 4 · Vocabulario
@@ -204,7 +204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きのう」?
-- choices: ["noche","mañana","fin de semana","ayer"]
+- choices: ["mañana","noche","ayer","fin de semana"]
 - correct: "ayer"
 - explanation: 「きのう」 significa “ayer”.
 - hint: Lección 4 · Vocabulario
@@ -214,7 +214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ayer”
-- choices: ["晩 (ばん)","昨日 (きのう)","朝 (あさ)","週末 (しゅうまつ)"]
+- choices: ["週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)","昨日 (きのう)"]
 - correct: "昨日 (きのう)"
 - explanation: La opción correcta para “ayer” es 「昨日 (きのう)」.
 - hint: Lección 4 · Vocabulario
@@ -224,7 +224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あした」?
-- choices: ["autobús","mañana","fin de semana","noche"]
+- choices: ["fin de semana","autobús","noche","mañana"]
 - correct: "mañana"
 - explanation: 「あした」 significa “mañana”.
 - hint: Lección 4 · Vocabulario
@@ -234,7 +234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “mañana”
-- choices: ["朝 (あさ)","晩 (ばん)","明日 (あした)","週末 (しゅうまつ)"]
+- choices: ["晩 (ばん)","朝 (あさ)","明日 (あした)","週末 (しゅうまつ)"]
 - correct: "明日 (あした)"
 - explanation: La opción correcta para “mañana” es 「明日 (あした)」.
 - hint: Lección 4 · Vocabulario
@@ -244,7 +244,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ひる」?
-- choices: ["mañana","noche","fin de semana","mediodía"]
+- choices: ["noche","fin de semana","mañana","mediodía"]
 - correct: "mediodía"
 - explanation: 「ひる」 significa “mediodía”.
 - hint: Lección 4 · Vocabulario
@@ -254,7 +254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “mediodía”
-- choices: ["昼 (ひる)","朝 (あさ)","晩 (ばん)","週末 (しゅうまつ)"]
+- choices: ["昼 (ひる)","週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)"]
 - correct: "昼 (ひる)"
 - explanation: La opción correcta para “mediodía” es 「昼 (ひる)」.
 - hint: Lección 4 · Vocabulario
@@ -264,7 +264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「よる」?
-- choices: ["noche","fin de semana","mañana","autobús"]
+- choices: ["mañana","noche","fin de semana","autobús"]
 - correct: "noche"
 - explanation: 「よる」 significa “noche”.
 - hint: Lección 4 · Vocabulario
@@ -274,7 +274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “noche”
-- choices: ["朝 (あさ)","夜 (よる)","週末 (しゅうまつ)","晩 (ばん)"]
+- choices: ["朝 (あさ)","夜 (よる)","晩 (ばん)","週末 (しゅうまつ)"]
 - correct: "夜 (よる)"
 - explanation: La opción correcta para “noche” es 「夜 (よる)」.
 - hint: Lección 4 · Vocabulario
@@ -284,7 +284,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きょう」?
-- choices: ["fin de semana","mañana","noche","hoy"]
+- choices: ["hoy","noche","mañana","fin de semana"]
 - correct: "hoy"
 - explanation: 「きょう」 significa “hoy”.
 - hint: Lección 4 · Vocabulario
@@ -294,7 +294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hoy”
-- choices: ["朝 (あさ)","今日 (きょう)","週末 (しゅうまつ)","晩 (ばん)"]
+- choices: ["週末 (しゅうまつ)","今日 (きょう)","朝 (あさ)","晩 (ばん)"]
 - correct: "今日 (きょう)"
 - explanation: La opción correcta para “hoy” es 「今日 (きょう)」.
 - hint: Lección 4 · Vocabulario
@@ -304,7 +304,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せんげつ」?
-- choices: ["noche","mes pasado","fin de semana","mañana"]
+- choices: ["fin de semana","noche","mes pasado","mañana"]
 - correct: "mes pasado"
 - explanation: 「せんげつ」 significa “mes pasado”.
 - hint: Lección 4 · Vocabulario
@@ -314,7 +314,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “mes pasado”
-- choices: ["朝 (あさ)","晩 (ばん)","先月 (せんげつ)","週末 (しゅうまつ)"]
+- choices: ["晩 (ばん)","先月 (せんげつ)","週末 (しゅうまつ)","朝 (あさ)"]
 - correct: "先月 (せんげつ)"
 - explanation: La opción correcta para “mes pasado” es 「先月 (せんげつ)」.
 - hint: Lección 4 · Vocabulario
@@ -324,7 +324,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「こんげつ」?
-- choices: ["mañana","noche","este mes","fin de semana"]
+- choices: ["noche","mañana","este mes","fin de semana"]
 - correct: "este mes"
 - explanation: 「こんげつ」 significa “este mes”.
 - hint: Lección 4 · Vocabulario
@@ -334,7 +334,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “este mes”
-- choices: ["今月 (こんげつ)","週末 (しゅうまつ)","朝 (あさ)","晩 (ばん)"]
+- choices: ["週末 (しゅうまつ)","今月 (こんげつ)","朝 (あさ)","晩 (ばん)"]
 - correct: "今月 (こんげつ)"
 - explanation: La opción correcta para “este mes” es 「今月 (こんげつ)」.
 - hint: Lección 4 · Vocabulario
@@ -344,7 +344,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「らいげつ」?
-- choices: ["mes siguiente","fin de semana","noche","mañana"]
+- choices: ["fin de semana","mañana","noche","mes siguiente"]
 - correct: "mes siguiente"
 - explanation: 「らいげつ」 significa “mes siguiente”.
 - hint: Lección 4 · Vocabulario
@@ -354,7 +354,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “mes siguiente”
-- choices: ["晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)","来月 (らいげつ)"]
+- choices: ["晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)","来月 (らいげつ)"]
 - correct: "来月 (らいげつ)"
 - explanation: La opción correcta para “mes siguiente” es 「来月 (らいげつ)」.
 - hint: Lección 4 · Vocabulario
@@ -364,7 +364,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「バイト」?
-- choices: ["mañana","noche","trabajo de medio tiempo","fin de semana"]
+- choices: ["trabajo de medio tiempo","mañana","noche","fin de semana"]
 - correct: "trabajo de medio tiempo"
 - explanation: 「バイト」 significa “trabajo de medio tiempo”.
 - hint: Lección 4 · Vocabulario
@@ -374,7 +374,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “trabajo de medio tiempo”
-- choices: ["バイト","朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)"]
+- choices: ["朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)","バイト"]
 - correct: "バイト"
 - explanation: La opción correcta para “trabajo de medio tiempo” es 「バイト」.
 - hint: Lección 4 · Vocabulario
@@ -384,7 +384,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「としょかん」?
-- choices: ["biblioteca","noche","fin de semana","mañana"]
+- choices: ["noche","fin de semana","biblioteca","mañana"]
 - correct: "biblioteca"
 - explanation: 「としょかん」 significa “biblioteca”.
 - hint: Lección 4 · Vocabulario
@@ -394,7 +394,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “biblioteca”
-- choices: ["晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)","図書館 (としょかん)"]
+- choices: ["晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)","図書館 (としょかん)"]
 - correct: "図書館 (としょかん)"
 - explanation: La opción correcta para “biblioteca” es 「図書館 (としょかん)」.
 - hint: Lección 4 · Vocabulario
@@ -404,7 +404,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おきる」?
-- choices: ["fin de semana","mañana","noche","levantarse"]
+- choices: ["noche","mañana","levantarse","fin de semana"]
 - correct: "levantarse"
 - explanation: 「おきる」 significa “levantarse”.
 - hint: Lección 4 · Vocabulario
@@ -414,7 +414,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “levantarse”
-- choices: ["おきる","週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)"]
+- choices: ["朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)","おきる"]
 - correct: "おきる"
 - explanation: La opción correcta para “levantarse” es 「おきる」.
 - hint: Lección 4 · Vocabulario
@@ -424,7 +424,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ねる」?
-- choices: ["fin de semana","mañana","dormir","noche"]
+- choices: ["mañana","dormir","noche","fin de semana"]
 - correct: "dormir"
 - explanation: 「ねる」 significa “dormir”.
 - hint: Lección 4 · Vocabulario
@@ -434,7 +434,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “dormir”
-- choices: ["週末 (しゅうまつ)","ねる","晩 (ばん)","朝 (あさ)"]
+- choices: ["晩 (ばん)","ねる","週末 (しゅうまつ)","朝 (あさ)"]
 - correct: "ねる"
 - explanation: La opción correcta para “dormir” es 「ねる」.
 - hint: Lección 4 · Vocabulario
@@ -444,7 +444,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かえる」?
-- choices: ["noche","volver","mañana","fin de semana"]
+- choices: ["fin de semana","volver","noche","mañana"]
 - correct: "volver"
 - explanation: 「かえる」 significa “volver”.
 - hint: Lección 4 · Vocabulario
@@ -454,7 +454,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “volver”
-- choices: ["かえる","晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)"]
+- choices: ["かえる","週末 (しゅうまつ)","朝 (あさ)","晩 (ばん)"]
 - correct: "かえる"
 - explanation: La opción correcta para “volver” es 「かえる」.
 - hint: Lección 4 · Vocabulario
@@ -464,7 +464,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あびる」?
-- choices: ["noche","fin de semana","ducharse","mañana"]
+- choices: ["noche","fin de semana","mañana","ducharse"]
 - correct: "ducharse"
 - explanation: 「あびる」 significa “ducharse”.
 - hint: Lección 4 · Vocabulario
@@ -474,7 +474,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ducharse”
-- choices: ["あびる","晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)"]
+- choices: ["週末 (しゅうまつ)","朝 (あさ)","晩 (ばん)","あびる"]
 - correct: "あびる"
 - explanation: La opción correcta para “ducharse” es 「あびる」.
 - hint: Lección 4 · Vocabulario
@@ -484,7 +484,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ゲーム」?
-- choices: ["noche","mañana","fin de semana","juego"]
+- choices: ["fin de semana","juego","noche","mañana"]
 - correct: "juego"
 - explanation: 「ゲーム」 significa “juego”.
 - hint: Lección 4 · Vocabulario
@@ -494,7 +494,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “juego”
-- choices: ["週末 (しゅうまつ)","朝 (あさ)","ゲーム","晩 (ばん)"]
+- choices: ["ゲーム","朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)"]
 - correct: "ゲーム"
 - explanation: La opción correcta para “juego” es 「ゲーム」.
 - hint: Lección 4 · Vocabulario
@@ -504,7 +504,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「アルバイト」?
-- choices: ["fin de semana","mañana","noche","trabajo a tiempo parcial"]
+- choices: ["noche","trabajo a tiempo parcial","mañana","fin de semana"]
 - correct: "trabajo a tiempo parcial"
 - explanation: 「アルバイト」 significa “trabajo a tiempo parcial”.
 - hint: Lección 4 · Vocabulario
@@ -514,7 +514,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “trabajo a tiempo parcial”
-- choices: ["晩 (ばん)","週末 (しゅうまつ)","アルバイト","朝 (あさ)"]
+- choices: ["晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)","アルバイト"]
 - correct: "アルバイト"
 - explanation: La opción correcta para “trabajo a tiempo parcial” es 「アルバイト」.
 - hint: Lección 4 · Vocabulario
@@ -524,7 +524,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かいもの」?
-- choices: ["noche","mañana","fin de semana","compras"]
+- choices: ["noche","compras","mañana","fin de semana"]
 - correct: "compras"
 - explanation: 「かいもの」 significa “compras”.
 - hint: Lección 4 · Vocabulario
@@ -534,7 +534,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “compras”
-- choices: ["週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)","買い物 (かいもの)"]
+- choices: ["週末 (しゅうまつ)","晩 (ばん)","買い物 (かいもの)","朝 (あさ)"]
 - correct: "買い物 (かいもの)"
 - explanation: La opción correcta para “compras” es 「買い物 (かいもの)」.
 - hint: Lección 4 · Vocabulario
@@ -544,7 +544,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「クラス」?
-- choices: ["clase","mañana","fin de semana","noche"]
+- choices: ["clase","fin de semana","mañana","noche"]
 - correct: "clase"
 - explanation: 「クラス」 significa “clase”.
 - hint: Lección 4 · Vocabulario
@@ -554,7 +554,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “clase”
-- choices: ["週末 (しゅうまつ)","晩 (ばん)","クラス","朝 (あさ)"]
+- choices: ["晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)","クラス"]
 - correct: "クラス"
 - explanation: La opción correcta para “clase” es 「クラス」.
 - hint: Lección 4 · Vocabulario
@@ -564,7 +564,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いぬ」?
-- choices: ["mañana","perro/a","noche","fin de semana"]
+- choices: ["noche","perro/a","fin de semana","mañana"]
 - correct: "perro/a"
 - explanation: 「いぬ」 significa “perro/a”.
 - hint: Lección 4 · Vocabulario
@@ -574,7 +574,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “perro/a”
-- choices: ["週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)","犬 (いぬ)"]
+- choices: ["朝 (あさ)","週末 (しゅうまつ)","犬 (いぬ)","晩 (ばん)"]
 - correct: "犬 (いぬ)"
 - explanation: La opción correcta para “perro/a” es 「犬 (いぬ)」.
 - hint: Lección 4 · Vocabulario
@@ -584,7 +584,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ねこ」?
-- choices: ["gato/a","mañana","noche","fin de semana"]
+- choices: ["noche","gato/a","mañana","fin de semana"]
 - correct: "gato/a"
 - explanation: 「ねこ」 significa “gato/a”.
 - hint: Lección 4 · Vocabulario
@@ -594,7 +594,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “gato/a”
-- choices: ["朝 (あさ)","猫 (ねこ)","週末 (しゅうまつ)","晩 (ばん)"]
+- choices: ["晩 (ばん)","猫 (ねこ)","朝 (あさ)","週末 (しゅうまつ)"]
 - correct: "猫 (ねこ)"
 - explanation: La opción correcta para “gato/a” es 「猫 (ねこ)」.
 - hint: Lección 4 · Vocabulario
@@ -604,7 +604,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ひと」?
-- choices: ["persona","mañana","noche","fin de semana"]
+- choices: ["fin de semana","noche","mañana","persona"]
 - correct: "persona"
 - explanation: 「ひと」 significa “persona”.
 - hint: Lección 4 · Vocabulario
@@ -614,7 +614,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “persona”
-- choices: ["人 (ひと)","週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)"]
+- choices: ["朝 (あさ)","週末 (しゅうまつ)","人 (ひと)","晩 (ばん)"]
 - correct: "人 (ひと)"
 - explanation: La opción correcta para “persona” es 「人 (ひと)」.
 - hint: Lección 4 · Vocabulario
@@ -624,7 +624,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「こども」?
-- choices: ["mañana","fin de semana","niño/a","noche"]
+- choices: ["noche","mañana","fin de semana","niño/a"]
 - correct: "niño/a"
 - explanation: 「こども」 significa “niño/a”.
 - hint: Lección 4 · Vocabulario
@@ -634,7 +634,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “niño/a”
-- choices: ["晩 (ばん)","子供 (こども)","週末 (しゅうまつ)","朝 (あさ)"]
+- choices: ["子供 (こども)","朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)"]
 - correct: "子供 (こども)"
 - explanation: La opción correcta para “niño/a” es 「子供 (こども)」.
 - hint: Lección 4 · Vocabulario
@@ -644,7 +644,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あなた」?
-- choices: ["usted","mañana","noche","fin de semana"]
+- choices: ["mañana","usted","noche","fin de semana"]
 - correct: "usted"
 - explanation: 「あなた」 significa “usted”.
 - hint: Lección 4 · Vocabulario
@@ -654,7 +654,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “usted”
-- choices: ["朝 (あさ)","晩 (ばん)","週末 (しゅうまつ)","あなた"]
+- choices: ["朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)","あなた"]
 - correct: "あなた"
 - explanation: La opción correcta para “usted” es 「あなた」.
 - hint: Lección 4 · Vocabulario
@@ -664,7 +664,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いす」?
-- choices: ["silla","fin de semana","mañana","noche"]
+- choices: ["mañana","silla","fin de semana","noche"]
 - correct: "silla"
 - explanation: 「いす」 significa “silla”.
 - hint: Lección 4 · Vocabulario
@@ -674,7 +674,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “silla”
-- choices: ["晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)","椅子 (いす)"]
+- choices: ["晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)","椅子 (いす)"]
 - correct: "椅子 (いす)"
 - explanation: La opción correcta para “silla” es 「椅子 (いす)」.
 - hint: Lección 4 · Vocabulario
@@ -684,7 +684,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「つくえ」?
-- choices: ["escritorio","noche","fin de semana","mañana"]
+- choices: ["escritorio","mañana","fin de semana","noche"]
 - correct: "escritorio"
 - explanation: 「つくえ」 significa “escritorio”.
 - hint: Lección 4 · Vocabulario
@@ -694,7 +694,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “escritorio”
-- choices: ["晩 (ばん)","週末 (しゅうまつ)","机 (つくえ)","朝 (あさ)"]
+- choices: ["机 (つくえ)","週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)"]
 - correct: "机 (つくえ)"
 - explanation: La opción correcta para “escritorio” es 「机 (つくえ)」.
 - hint: Lección 4 · Vocabulario
@@ -704,7 +704,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しゃしん」?
-- choices: ["noche","fin de semana","imagen; fotografía","mañana"]
+- choices: ["fin de semana","mañana","noche","imagen; fotografía"]
 - correct: "imagen; fotografía"
 - explanation: 「しゃしん」 significa “imagen; fotografía”.
 - hint: Lección 4 · Vocabulario
@@ -714,7 +714,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “imagen; fotografía”
-- choices: ["写真 (しゃしん)","朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)"]
+- choices: ["朝 (あさ)","写真 (しゃしん)","週末 (しゅうまつ)","晩 (ばん)"]
 - correct: "写真 (しゃしん)"
 - explanation: La opción correcta para “imagen; fotografía” es 「写真 (しゃしん)」.
 - hint: Lección 4 · Vocabulario
@@ -724,7 +724,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はな」?
-- choices: ["mañana","fin de semana","flor","noche"]
+- choices: ["flor","noche","mañana","fin de semana"]
 - correct: "flor"
 - explanation: 「はな」 significa “flor”.
 - hint: Lección 4 · Vocabulario
@@ -734,7 +734,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “flor”
-- choices: ["週末 (しゅうまつ)","晩 (ばん)","花 (はな)","朝 (あさ)"]
+- choices: ["晩 (ばん)","花 (はな)","朝 (あさ)","週末 (しゅうまつ)"]
 - correct: "花 (はな)"
 - explanation: La opción correcta para “flor” es 「花 (はな)」.
 - hint: Lección 4 · Vocabulario
@@ -744,7 +744,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「レポート」?
-- choices: ["noche","mañana","informe","fin de semana"]
+- choices: ["informe","noche","mañana","fin de semana"]
 - correct: "informe"
 - explanation: 「レポート」 significa “informe”.
 - hint: Lección 4 · Vocabulario
@@ -754,7 +754,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “informe”
-- choices: ["晩 (ばん)","朝 (あさ)","レポート","週末 (しゅうまつ)"]
+- choices: ["朝 (あさ)","晩 (ばん)","レポート","週末 (しゅうまつ)"]
 - correct: "レポート"
 - explanation: La opción correcta para “informe” es 「レポート」.
 - hint: Lección 4 · Vocabulario
@@ -764,7 +764,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ごはん」?
-- choices: ["noche","fin de semana","arroz; comida","mañana"]
+- choices: ["fin de semana","mañana","noche","arroz; comida"]
 - correct: "arroz; comida"
 - explanation: 「ごはん」 significa “arroz; comida”.
 - hint: Lección 4 · Vocabulario
@@ -774,7 +774,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “arroz; comida”
-- choices: ["晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)","ご飯 (ごはん)"]
+- choices: ["ご飯 (ごはん)","晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)"]
 - correct: "ご飯 (ごはん)"
 - explanation: La opción correcta para “arroz; comida” es 「ご飯 (ごはん)」.
 - hint: Lección 4 · Vocabulario
@@ -784,7 +784,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「パン」?
-- choices: ["fin de semana","noche","mañana","pan"]
+- choices: ["pan","fin de semana","mañana","noche"]
 - correct: "pan"
 - explanation: 「パン」 significa “pan”.
 - hint: Lección 4 · Vocabulario
@@ -794,7 +794,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pan”
-- choices: ["晩 (ばん)","朝 (あさ)","パン","週末 (しゅうまつ)"]
+- choices: ["週末 (しゅうまつ)","朝 (あさ)","晩 (ばん)","パン"]
 - correct: "パン"
 - explanation: La opción correcta para “pan” es 「パン」.
 - hint: Lección 4 · Vocabulario
@@ -804,7 +804,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おてら」?
-- choices: ["noche","fin de semana","mañana","templo"]
+- choices: ["mañana","templo","noche","fin de semana"]
 - correct: "templo"
 - explanation: 「おてら」 significa “templo”.
 - hint: Lección 4 · Vocabulario
@@ -814,7 +814,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “templo”
-- choices: ["晩 (ばん)","朝 (あさ)","お寺 (おてら)","週末 (しゅうまつ)"]
+- choices: ["晩 (ばん)","週末 (しゅうまつ)","お寺 (おてら)","朝 (あさ)"]
 - correct: "お寺 (おてら)"
 - explanation: La opción correcta para “templo” es 「お寺 (おてら)」.
 - hint: Lección 4 · Vocabulario
@@ -824,7 +824,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「こうえん」?
-- choices: ["fin de semana","mañana","parque","noche"]
+- choices: ["fin de semana","parque","mañana","noche"]
 - correct: "parque"
 - explanation: 「こうえん」 significa “parque”.
 - hint: Lección 4 · Vocabulario
@@ -834,7 +834,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “parque”
-- choices: ["朝 (あさ)","公園 (こうえん)","週末 (しゅうまつ)","晩 (ばん)"]
+- choices: ["週末 (しゅうまつ)","公園 (こうえん)","晩 (ばん)","朝 (あさ)"]
 - correct: "公園 (こうえん)"
 - explanation: La opción correcta para “parque” es 「公園 (こうえん)」.
 - hint: Lección 4 · Vocabulario
@@ -844,7 +844,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「スーパー」?
-- choices: ["noche","supermercado","fin de semana","mañana"]
+- choices: ["noche","supermercado","mañana","fin de semana"]
 - correct: "supermercado"
 - explanation: 「スーパー」 significa “supermercado”.
 - hint: Lección 4 · Vocabulario
@@ -854,7 +854,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “supermercado”
-- choices: ["週末 (しゅうまつ)","晩 (ばん)","スーパー","朝 (あさ)"]
+- choices: ["晩 (ばん)","朝 (あさ)","スーパー","週末 (しゅうまつ)"]
 - correct: "スーパー"
 - explanation: La opción correcta para “supermercado” es 「スーパー」.
 - hint: Lección 4 · Vocabulario
@@ -864,7 +864,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「バスてい」?
-- choices: ["fin de semana","parada de autobús","noche","mañana"]
+- choices: ["fin de semana","mañana","parada de autobús","noche"]
 - correct: "parada de autobús"
 - explanation: 「バスてい」 significa “parada de autobús”.
 - hint: Lección 4 · Vocabulario
@@ -874,7 +874,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “parada de autobús”
-- choices: ["朝 (あさ)","バス停 (バスてい)","週末 (しゅうまつ)","晩 (ばん)"]
+- choices: ["バス停 (バスてい)","晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)"]
 - correct: "バス停 (バスてい)"
 - explanation: La opción correcta para “parada de autobús” es 「バス停 (バスてい)」.
 - hint: Lección 4 · Vocabulario
@@ -884,7 +884,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「びょういん」?
-- choices: ["noche","hospital","fin de semana","mañana"]
+- choices: ["fin de semana","mañana","hospital","noche"]
 - correct: "hospital"
 - explanation: 「びょういん」 significa “hospital”.
 - hint: Lección 4 · Vocabulario
@@ -894,7 +894,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hospital”
-- choices: ["病院 (びょういん)","週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)"]
+- choices: ["病院 (びょういん)","朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)"]
 - correct: "病院 (びょういん)"
 - explanation: La opción correcta para “hospital” es 「病院 (びょういん)」.
 - hint: Lección 4 · Vocabulario
@@ -904,7 +904,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ホテル」?
-- choices: ["fin de semana","mañana","hotel","noche"]
+- choices: ["hotel","mañana","fin de semana","noche"]
 - correct: "hotel"
 - explanation: 「ホテル」 significa “hotel”.
 - hint: Lección 4 · Vocabulario
@@ -914,7 +914,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hotel”
-- choices: ["朝 (あさ)","晩 (ばん)","週末 (しゅうまつ)","ホテル"]
+- choices: ["ホテル","朝 (あさ)","晩 (ばん)","週末 (しゅうまつ)"]
 - correct: "ホテル"
 - explanation: La opción correcta para “hotel” es 「ホテル」.
 - hint: Lección 4 · Vocabulario
@@ -924,7 +924,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ほんや」?
-- choices: ["librería","noche","fin de semana","mañana"]
+- choices: ["librería","noche","mañana","fin de semana"]
 - correct: "librería"
 - explanation: 「ほんや」 significa “librería”.
 - hint: Lección 4 · Vocabulario
@@ -934,7 +934,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “librería”
-- choices: ["週末 (しゅうまつ)","朝 (あさ)","本屋 (ほんや)","晩 (ばん)"]
+- choices: ["晩 (ばん)","本屋 (ほんや)","週末 (しゅうまつ)","朝 (あさ)"]
 - correct: "本屋 (ほんや)"
 - explanation: La opción correcta para “librería” es 「本屋 (ほんや)」.
 - hint: Lección 4 · Vocabulario
@@ -944,7 +944,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「まち」?
-- choices: ["fin de semana","noche","mañana","pueblo; ciudad"]
+- choices: ["pueblo; ciudad","fin de semana","noche","mañana"]
 - correct: "pueblo; ciudad"
 - explanation: 「まち」 significa “pueblo; ciudad”.
 - hint: Lección 4 · Vocabulario
@@ -954,7 +954,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pueblo; ciudad”
-- choices: ["晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)","町 (まち)"]
+- choices: ["週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)","町 (まち)"]
 - correct: "町 (まち)"
 - explanation: La opción correcta para “pueblo; ciudad” es 「町 (まち)」.
 - hint: Lección 4 · Vocabulario
@@ -964,7 +964,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「レストラン」?
-- choices: ["mañana","fin de semana","noche","restaurante"]
+- choices: ["fin de semana","mañana","restaurante","noche"]
 - correct: "restaurante"
 - explanation: 「レストラン」 significa “restaurante”.
 - hint: Lección 4 · Vocabulario
@@ -974,7 +974,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “restaurante”
-- choices: ["朝 (あさ)","レストラン","晩 (ばん)","週末 (しゅうまつ)"]
+- choices: ["朝 (あさ)","週末 (しゅうまつ)","レストラン","晩 (ばん)"]
 - correct: "レストラン"
 - explanation: La opción correcta para “restaurante” es 「レストラン」.
 - hint: Lección 4 · Vocabulario
@@ -984,7 +984,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いちじかん」?
-- choices: ["mañana","una hora","noche","fin de semana"]
+- choices: ["una hora","noche","fin de semana","mañana"]
 - correct: "una hora"
 - explanation: 「いちじかん」 significa “una hora”.
 - hint: Lección 4 · Vocabulario
@@ -994,7 +994,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “una hora”
-- choices: ["朝 (あさ)","晩 (ばん)","一時間 (いちじかん)","週末 (しゅうまつ)"]
+- choices: ["朝 (あさ)","一時間 (いちじかん)","週末 (しゅうまつ)","晩 (ばん)"]
 - correct: "一時間 (いちじかん)"
 - explanation: La opción correcta para “una hora” es 「一時間 (いちじかん)」.
 - hint: Lección 4 · Vocabulario
@@ -1004,7 +1004,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「げつようび」?
-- choices: ["mañana","noche","fin de semana","lunes"]
+- choices: ["lunes","fin de semana","noche","mañana"]
 - correct: "lunes"
 - explanation: 「げつようび」 significa “lunes”.
 - hint: Lección 4 · Vocabulario
@@ -1014,7 +1014,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “lunes”
-- choices: ["週末 (しゅうまつ)","朝 (あさ)","晩 (ばん)","月曜日 (げつようび)"]
+- choices: ["週末 (しゅうまつ)","月曜日 (げつようび)","晩 (ばん)","朝 (あさ)"]
 - correct: "月曜日 (げつようび)"
 - explanation: La opción correcta para “lunes” es 「月曜日 (げつようび)」.
 - hint: Lección 4 · Vocabulario
@@ -1024,7 +1024,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かようび」?
-- choices: ["fin de semana","noche","martes","mañana"]
+- choices: ["martes","noche","mañana","fin de semana"]
 - correct: "martes"
 - explanation: 「かようび」 significa “martes”.
 - hint: Lección 4 · Vocabulario
@@ -1034,7 +1034,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “martes”
-- choices: ["晩 (ばん)","火曜日 (かようび)","週末 (しゅうまつ)","朝 (あさ)"]
+- choices: ["週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)","火曜日 (かようび)"]
 - correct: "火曜日 (かようび)"
 - explanation: La opción correcta para “martes” es 「火曜日 (かようび)」.
 - hint: Lección 4 · Vocabulario
@@ -1044,7 +1044,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「すいようび」?
-- choices: ["noche","miércoles","mañana","fin de semana"]
+- choices: ["mañana","noche","fin de semana","miércoles"]
 - correct: "miércoles"
 - explanation: 「すいようび」 significa “miércoles”.
 - hint: Lección 4 · Vocabulario
@@ -1054,7 +1054,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “miércoles”
-- choices: ["週末 (しゅうまつ)","水曜日 (すいようび)","晩 (ばん)","朝 (あさ)"]
+- choices: ["水曜日 (すいようび)","週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)"]
 - correct: "水曜日 (すいようび)"
 - explanation: La opción correcta para “miércoles” es 「水曜日 (すいようび)」.
 - hint: Lección 4 · Vocabulario
@@ -1064,7 +1064,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「もくようび」?
-- choices: ["jueves","fin de semana","mañana","noche"]
+- choices: ["fin de semana","mañana","jueves","noche"]
 - correct: "jueves"
 - explanation: 「もくようび」 significa “jueves”.
 - hint: Lección 4 · Vocabulario
@@ -1074,7 +1074,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “jueves”
-- choices: ["木曜日 (もくようび)","朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)"]
+- choices: ["木曜日 (もくようび)","週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)"]
 - correct: "木曜日 (もくようび)"
 - explanation: La opción correcta para “jueves” es 「木曜日 (もくようび)」.
 - hint: Lección 4 · Vocabulario
@@ -1084,7 +1084,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きんようび」?
-- choices: ["noche","viernes","mañana","fin de semana"]
+- choices: ["fin de semana","viernes","noche","mañana"]
 - correct: "viernes"
 - explanation: 「きんようび」 significa “viernes”.
 - hint: Lección 4 · Vocabulario
@@ -1094,7 +1094,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “viernes”
-- choices: ["朝 (あさ)","金曜日 (きんようび)","週末 (しゅうまつ)","晩 (ばん)"]
+- choices: ["金曜日 (きんようび)","晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)"]
 - correct: "金曜日 (きんようび)"
 - explanation: La opción correcta para “viernes” es 「金曜日 (きんようび)」.
 - hint: Lección 4 · Vocabulario
@@ -1104,7 +1104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あう」?
-- choices: ["fin de semana","mañana","noche","conocer; ver (a una persona) (persona に)"]
+- choices: ["noche","conocer; ver (a una persona) (persona に)","fin de semana","mañana"]
 - correct: "conocer; ver (a una persona) (persona に)"
 - explanation: 「あう」 significa “conocer; ver (a una persona) (persona に)”.
 - hint: Lección 4 · Vocabulario
@@ -1114,7 +1114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “conocer; ver (a una persona) (persona に)”
-- choices: ["晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)","会う (あう)"]
+- choices: ["週末 (しゅうまつ)","会う (あう)","晩 (ばん)","朝 (あさ)"]
 - correct: "会う (あう)"
 - explanation: La opción correcta para “conocer; ver (a una persona) (persona に)” es 「会う (あう)」.
 - hint: Lección 4 · Vocabulario
@@ -1134,7 +1134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “comprar (～を)”
-- choices: ["晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)","買う (かう)"]
+- choices: ["晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)","買う (かう)"]
 - correct: "買う (かう)"
 - explanation: La opción correcta para “comprar (～を)” es 「買う (かう)」.
 - hint: Lección 4 · Vocabulario
@@ -1144,7 +1144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かく」?
-- choices: ["escribir (persona に cosa を)","mañana","noche","fin de semana"]
+- choices: ["mañana","escribir (persona に cosa を)","fin de semana","noche"]
 - correct: "escribir (persona に cosa を)"
 - explanation: 「かく」 significa “escribir (persona に cosa を)”.
 - hint: Lección 4 · Vocabulario
@@ -1154,7 +1154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “escribir (persona に cosa を)”
-- choices: ["晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)","書く (かく)"]
+- choices: ["朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)","書く (かく)"]
 - correct: "書く (かく)"
 - explanation: La opción correcta para “escribir (persona に cosa を)” es 「書く (かく)」.
 - hint: Lección 4 · Vocabulario
@@ -1164,7 +1164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「とる」?
-- choices: ["tomar (una foto) (～を)","noche","fin de semana","mañana"]
+- choices: ["fin de semana","mañana","tomar (una foto) (～を)","noche"]
 - correct: "tomar (una foto) (～を)"
 - explanation: 「とる」 significa “tomar (una foto) (～を)”.
 - hint: Lección 4 · Vocabulario
@@ -1174,7 +1174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tomar (una foto) (～を)”
-- choices: ["撮る (とる)","週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)"]
+- choices: ["朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)","撮る (とる)"]
 - correct: "撮る (とる)"
 - explanation: La opción correcta para “tomar (una foto) (～を)” es 「撮る (とる)」.
 - hint: Lección 4 · Vocabulario
@@ -1184,7 +1184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「まつ」?
-- choices: ["mañana","fin de semana","esperar (～を)","noche"]
+- choices: ["mañana","fin de semana","noche","esperar (～を)"]
 - correct: "esperar (～を)"
 - explanation: 「まつ」 significa “esperar (～を)”.
 - hint: Lección 4 · Vocabulario
@@ -1194,7 +1194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “esperar (～を)”
-- choices: ["週末 (しゅうまつ)","晩 (ばん)","待つ (まつ)","朝 (あさ)"]
+- choices: ["週末 (しゅうまつ)","朝 (あさ)","待つ (まつ)","晩 (ばん)"]
 - correct: "待つ (まつ)"
 - explanation: La opción correcta para “esperar (～を)” es 「待つ (まつ)」.
 - hint: Lección 4 · Vocabulario
@@ -1204,7 +1204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「わかる」?
-- choices: ["noche","entender (～が)","mañana","fin de semana"]
+- choices: ["entender (～が)","mañana","fin de semana","noche"]
 - correct: "entender (～が)"
 - explanation: 「わかる」 significa “entender (～が)”.
 - hint: Lección 4 · Vocabulario
@@ -1214,7 +1214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “entender (～が)”
-- choices: ["朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)","分かる (わかる)"]
+- choices: ["週末 (しゅうまつ)","朝 (あさ)","分かる (わかる)","晩 (ばん)"]
 - correct: "分かる (わかる)"
 - explanation: La opción correcta para “entender (～が)” es 「分かる (わかる)」.
 - hint: Lección 4 · Vocabulario
@@ -1224,7 +1224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ぐらい」?
-- choices: ["noche","alrededor de (medida aproximada)","mañana","fin de semana"]
+- choices: ["mañana","fin de semana","noche","alrededor de (medida aproximada)"]
 - correct: "alrededor de (medida aproximada)"
 - explanation: 「ぐらい」 significa “alrededor de (medida aproximada)”.
 - hint: Lección 4 · Vocabulario
@@ -1234,7 +1234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “alrededor de (medida aproximada)”
-- choices: ["朝 (あさ)","週末 (しゅうまつ)","ぐらい","晩 (ばん)"]
+- choices: ["ぐらい","晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)"]
 - correct: "ぐらい"
 - explanation: La opción correcta para “alrededor de (medida aproximada)” es 「ぐらい」.
 - hint: Lección 4 · Vocabulario
@@ -1244,7 +1244,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ごめんなさい」?
-- choices: ["Lo siento.; Perdón.","noche","fin de semana","mañana"]
+- choices: ["mañana","Lo siento.; Perdón.","noche","fin de semana"]
 - correct: "Lo siento.; Perdón."
 - explanation: 「ごめんなさい」 significa “Lo siento.; Perdón.”.
 - hint: Lección 4 · Vocabulario
@@ -1254,7 +1254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “Lo siento.; Perdón.”
-- choices: ["晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)","ごめんなさい"]
+- choices: ["週末 (しゅうまつ)","朝 (あさ)","ごめんなさい","晩 (ばん)"]
 - correct: "ごめんなさい"
 - explanation: La opción correcta para “Lo siento.; Perdón.” es 「ごめんなさい」.
 - hint: Lección 4 · Vocabulario
@@ -1264,7 +1264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「それから」?
-- choices: ["y luego","fin de semana","mañana","noche"]
+- choices: ["mañana","y luego","fin de semana","noche"]
 - correct: "y luego"
 - explanation: 「それから」 significa “y luego”.
 - hint: Lección 4 · Vocabulario
@@ -1274,7 +1274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “y luego”
-- choices: ["晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)","それから"]
+- choices: ["週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)","それから"]
 - correct: "それから"
 - explanation: La opción correcta para “y luego” es 「それから」.
 - hint: Lección 4 · Vocabulario
@@ -1284,7 +1284,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「だから」?
-- choices: ["así que; por lo tanto","fin de semana","noche","mañana"]
+- choices: ["fin de semana","mañana","noche","así que; por lo tanto"]
 - correct: "así que; por lo tanto"
 - explanation: 「だから」 significa “así que; por lo tanto”.
 - hint: Lección 4 · Vocabulario
@@ -1294,7 +1294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “así que; por lo tanto”
-- choices: ["だから","週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)"]
+- choices: ["だから","晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)"]
 - correct: "だから"
 - explanation: La opción correcta para “así que; por lo tanto” es 「だから」.
 - hint: Lección 4 · Vocabulario
@@ -1304,7 +1304,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「たくさん」?
-- choices: ["muchos; mucho","noche","mañana","fin de semana"]
+- choices: ["muchos; mucho","mañana","fin de semana","noche"]
 - correct: "muchos; mucho"
 - explanation: 「たくさん」 significa “muchos; mucho”.
 - hint: Lección 4 · Vocabulario
@@ -1314,7 +1314,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “muchos; mucho”
-- choices: ["たくさん","晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)"]
+- choices: ["週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)","たくさん"]
 - correct: "たくさん"
 - explanation: La opción correcta para “muchos; mucho” es 「たくさん」.
 - hint: Lección 4 · Vocabulario
@@ -1324,7 +1324,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「と」?
-- choices: ["junto con (una persona); y","fin de semana","mañana","noche"]
+- choices: ["noche","mañana","junto con (una persona); y","fin de semana"]
 - correct: "junto con (una persona); y"
 - explanation: 「と」 significa “junto con (una persona); y”.
 - hint: Lección 4 · Vocabulario
@@ -1334,7 +1334,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “junto con (una persona); y”
-- choices: ["晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)","と"]
+- choices: ["週末 (しゅうまつ)","朝 (あさ)","と","晩 (ばん)"]
 - correct: "と"
 - explanation: La opción correcta para “junto con (una persona); y” es 「と」.
 - hint: Lección 4 · Vocabulario
@@ -1344,7 +1344,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「どうして」?
-- choices: ["por qué","fin de semana","mañana","noche"]
+- choices: ["mañana","por qué","fin de semana","noche"]
 - correct: "por qué"
 - explanation: 「どうして」 significa “por qué”.
 - hint: Lección 4 · Vocabulario
@@ -1354,7 +1354,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “por qué”
-- choices: ["週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)","どうして"]
+- choices: ["どうして","週末 (しゅうまつ)","朝 (あさ)","晩 (ばん)"]
 - correct: "どうして"
 - explanation: La opción correcta para “por qué” es 「どうして」.
 - hint: Lección 4 · Vocabulario
@@ -1364,7 +1364,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ひとりで」?
-- choices: ["mañana","noche","solo","fin de semana"]
+- choices: ["fin de semana","noche","solo","mañana"]
 - correct: "solo"
 - explanation: 「ひとりで」 significa “solo”.
 - hint: Lección 4 · Vocabulario
@@ -1374,7 +1374,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “solo”
-- choices: ["一人で (ひとりで)","週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)"]
+- choices: ["週末 (しゅうまつ)","晩 (ばん)","一人で (ひとりで)","朝 (あさ)"]
 - correct: "一人で (ひとりで)"
 - explanation: La opción correcta para “solo” es 「一人で (ひとりで)」.
 - hint: Lección 4 · Vocabulario
@@ -1384,7 +1384,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「もしもし」?
-- choices: ["fin de semana","mañana","¿Aló?; ¿Bueno? (contestando el teléfono)","noche"]
+- choices: ["mañana","noche","¿Aló?; ¿Bueno? (contestando el teléfono)","fin de semana"]
 - correct: "¿Aló?; ¿Bueno? (contestando el teléfono)"
 - explanation: 「もしもし」 significa “¿Aló?; ¿Bueno? (contestando el teléfono)”.
 - hint: Lección 4 · Vocabulario
@@ -1394,7 +1394,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “¿Aló?; ¿Bueno? (contestando el teléfono)”
-- choices: ["もしもし","晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)"]
+- choices: ["もしもし","朝 (あさ)","晩 (ばん)","週末 (しゅうまつ)"]
 - correct: "もしもし"
 - explanation: La opción correcta para “¿Aló?; ¿Bueno? (contestando el teléfono)” es 「もしもし」.
 - hint: Lección 4 · Vocabulario
@@ -1404,7 +1404,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「みぎ」?
-- choices: ["noche","mañana","derecha (～の)","fin de semana"]
+- choices: ["fin de semana","noche","mañana","derecha (～の)"]
 - correct: "derecha (～の)"
 - explanation: 「みぎ」 significa “derecha (～の)”.
 - hint: Lección 4 · Vocabulario
@@ -1414,7 +1414,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “derecha (～の)”
-- choices: ["右 (みぎ)","晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)"]
+- choices: ["晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)","右 (みぎ)"]
 - correct: "右 (みぎ)"
 - explanation: La opción correcta para “derecha (～の)” es 「右 (みぎ)」.
 - hint: Lección 4 · Vocabulario
@@ -1424,7 +1424,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ひだり」?
-- choices: ["mañana","izquierda (～の)","fin de semana","noche"]
+- choices: ["fin de semana","mañana","noche","izquierda (～の)"]
 - correct: "izquierda (～の)"
 - explanation: 「ひだり」 significa “izquierda (～の)”.
 - hint: Lección 4 · Vocabulario
@@ -1434,7 +1434,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “izquierda (～の)”
-- choices: ["晩 (ばん)","左 (ひだり)","週末 (しゅうまつ)","朝 (あさ)"]
+- choices: ["左 (ひだり)","週末 (しゅうまつ)","朝 (あさ)","晩 (ばん)"]
 - correct: "左 (ひだり)"
 - explanation: La opción correcta para “izquierda (～の)” es 「左 (ひだり)」.
 - hint: Lección 4 · Vocabulario
@@ -1444,7 +1444,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「まえ」?
-- choices: ["mañana","noche","delante de (～の)","fin de semana"]
+- choices: ["noche","fin de semana","delante de (～の)","mañana"]
 - correct: "delante de (～の)"
 - explanation: 「まえ」 significa “delante de (～の)”.
 - hint: Lección 4 · Vocabulario
@@ -1454,7 +1454,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “delante de (～の)”
-- choices: ["晩 (ばん)","週末 (しゅうまつ)","前 (まえ)","朝 (あさ)"]
+- choices: ["週末 (しゅうまつ)","朝 (あさ)","晩 (ばん)","前 (まえ)"]
 - correct: "前 (まえ)"
 - explanation: La opción correcta para “delante de (～の)” es 「前 (まえ)」.
 - hint: Lección 4 · Vocabulario
@@ -1464,7 +1464,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「うしろ」?
-- choices: ["noche","atrás (～の)","fin de semana","mañana"]
+- choices: ["noche","mañana","fin de semana","atrás (～の)"]
 - correct: "atrás (～の)"
 - explanation: 「うしろ」 significa “atrás (～の)”.
 - hint: Lección 4 · Vocabulario
@@ -1474,7 +1474,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “atrás (～の)”
-- choices: ["後ろ (うしろ)","朝 (あさ)","晩 (ばん)","週末 (しゅうまつ)"]
+- choices: ["晩 (ばん)","週末 (しゅうまつ)","後ろ (うしろ)","朝 (あさ)"]
 - correct: "後ろ (うしろ)"
 - explanation: La opción correcta para “atrás (～の)” es 「後ろ (うしろ)」.
 - hint: Lección 4 · Vocabulario
@@ -1484,7 +1484,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「なか」?
-- choices: ["noche","adentro (～の)","mañana","fin de semana"]
+- choices: ["fin de semana","mañana","adentro (～の)","noche"]
 - correct: "adentro (～の)"
 - explanation: 「なか」 significa “adentro (～の)”.
 - hint: Lección 4 · Vocabulario
@@ -1494,7 +1494,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “adentro (～の)”
-- choices: ["晩 (ばん)","週末 (しゅうまつ)","朝 (あさ)","中 (なか)"]
+- choices: ["朝 (あさ)","週末 (しゅうまつ)","中 (なか)","晩 (ばん)"]
 - correct: "中 (なか)"
 - explanation: La opción correcta para “adentro (～の)” es 「中 (なか)」.
 - hint: Lección 4 · Vocabulario
@@ -1504,7 +1504,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「うえ」?
-- choices: ["sobre (～の)","fin de semana","noche","mañana"]
+- choices: ["noche","sobre (～の)","mañana","fin de semana"]
 - correct: "sobre (～の)"
 - explanation: 「うえ」 significa “sobre (～の)”.
 - hint: Lección 4 · Vocabulario
@@ -1514,7 +1514,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “sobre (～の)”
-- choices: ["晩 (ばん)","上 (うえ)","週末 (しゅうまつ)","朝 (あさ)"]
+- choices: ["上 (うえ)","朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)"]
 - correct: "上 (うえ)"
 - explanation: La opción correcta para “sobre (～の)” es 「上 (うえ)」.
 - hint: Lección 4 · Vocabulario
@@ -1524,7 +1524,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「した」?
-- choices: ["noche","fin de semana","bajo (～の)","mañana"]
+- choices: ["noche","mañana","bajo (～の)","fin de semana"]
 - correct: "bajo (～の)"
 - explanation: 「した」 significa “bajo (～の)”.
 - hint: Lección 4 · Vocabulario
@@ -1534,7 +1534,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “bajo (～の)”
-- choices: ["下 (した)","晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)"]
+- choices: ["週末 (しゅうまつ)","下 (した)","晩 (ばん)","朝 (あさ)"]
 - correct: "下 (した)"
 - explanation: La opción correcta para “bajo (～の)” es 「下 (した)」.
 - hint: Lección 4 · Vocabulario
@@ -1544,7 +1544,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ちかく」?
-- choices: ["noche","fin de semana","mañana","cerca; cercano (～の)"]
+- choices: ["fin de semana","cerca; cercano (～の)","noche","mañana"]
 - correct: "cerca; cercano (～の)"
 - explanation: 「ちかく」 significa “cerca; cercano (～の)”.
 - hint: Lección 4 · Vocabulario
@@ -1554,7 +1554,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cerca; cercano (～の)”
-- choices: ["朝 (あさ)","近く (ちかく)","晩 (ばん)","週末 (しゅうまつ)"]
+- choices: ["週末 (しゅうまつ)","朝 (あさ)","晩 (ばん)","近く (ちかく)"]
 - correct: "近く (ちかく)"
 - explanation: La opción correcta para “cerca; cercano (～の)” es 「近く (ちかく)」.
 - hint: Lección 4 · Vocabulario
@@ -1564,7 +1564,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「となり」?
-- choices: ["fin de semana","mañana","siguiente (～の)","noche"]
+- choices: ["noche","mañana","siguiente (～の)","fin de semana"]
 - correct: "siguiente (～の)"
 - explanation: 「となり」 significa “siguiente (～の)”.
 - hint: Lección 4 · Vocabulario
@@ -1574,7 +1574,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “siguiente (～の)”
-- choices: ["隣 (となり)","週末 (しゅうまつ)","晩 (ばん)","朝 (あさ)"]
+- choices: ["隣 (となり)","晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)"]
 - correct: "隣 (となり)"
 - explanation: La opción correcta para “siguiente (～の)” es 「隣 (となり)」.
 - hint: Lección 4 · Vocabulario
@@ -1584,7 +1584,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あいだ」?
-- choices: ["noche","fin de semana","entre (AとBの)","mañana"]
+- choices: ["noche","mañana","fin de semana","entre (AとBの)"]
 - correct: "entre (AとBの)"
 - explanation: 「あいだ」 significa “entre (AとBの)”.
 - hint: Lección 4 · Vocabulario
@@ -1594,7 +1594,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “entre (AとBの)”
-- choices: ["晩 (ばん)","間 (あいだ)","朝 (あさ)","週末 (しゅうまつ)"]
+- choices: ["晩 (ばん)","週末 (しゅうまつ)","間 (あいだ)","朝 (あさ)"]
 - correct: "間 (あいだ)"
 - explanation: La opción correcta para “entre (AとBの)” es 「間 (あいだ)」.
 - hint: Lección 4 · Vocabulario
@@ -1604,8 +1604,8 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. アルバイト","B. と","C. 金曜日 (きんようび)"]
-- choices.right: ["1. viernes","2. trabajo a tiempo parcial","3. junto con (una persona); y"]
+- choices.left: ["A. 一人で (ひとりで)","B. それから","C. 先月 (せんげつ)"]
+- choices.right: ["1. mes pasado","2. solo","3. y luego"]
 - correct: "A-2, B-3, C-1"
 - explanation: Relaciones correctas: A-2, B-3, C-1.
 - hint: Lección 4 · Relacionar
@@ -1615,8 +1615,8 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 今月 (こんげつ)","B. どうして","C. 火曜日 (かようび)"]
-- choices.right: ["1. este mes","2. por qué","3. martes"]
+- choices.left: ["A. 後ろ (うしろ)","B. 会う (あう)","C. もしもし"]
+- choices.right: ["1. atrás (～の)","2. conocer; ver (a una persona) (persona に)","3. ¿Aló?; ¿Bueno? (contestando el teléfono)"]
 - correct: "A-1, B-2, C-3"
 - explanation: Relaciones correctas: A-1, B-2, C-3.
 - hint: Lección 4 · Relacionar
@@ -1626,10 +1626,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 木曜日 (もくようび)","B. 会う (あう)","C. 猫 (ねこ)"]
-- choices.right: ["1. gato/a","2. conocer; ver (a una persona) (persona に)","3. jueves"]
-- correct: "A-3, B-2, C-1"
-- explanation: Relaciones correctas: A-3, B-2, C-1.
+- choices.left: ["A. 犬 (いぬ)","B. 本屋 (ほんや)","C. 来週 (らいしゅう)"]
+- choices.right: ["1. perro/a","2. la próxima semana","3. librería"]
+- correct: "A-1, B-3, C-2"
+- explanation: Relaciones correctas: A-1, B-3, C-2.
 - hint: Lección 4 · Relacionar
 
 ### exam-vocab-match-4-3
@@ -1637,10 +1637,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. かえる","B. 右 (みぎ)","C. 来週 (らいしゅう)"]
-- choices.right: ["1. derecha (～の)","2. volver","3. la próxima semana"]
-- correct: "A-2, B-1, C-3"
-- explanation: Relaciones correctas: A-2, B-1, C-3.
+- choices.left: ["A. もしもし","B. 買い物 (かいもの)","C. アルバイト"]
+- choices.right: ["1. ¿Aló?; ¿Bueno? (contestando el teléfono)","2. compras","3. trabajo a tiempo parcial"]
+- correct: "A-1, B-2, C-3"
+- explanation: Relaciones correctas: A-1, B-2, C-3.
 - hint: Lección 4 · Relacionar
 
 ## kanji
@@ -1650,7 +1650,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「日本」?
-- choices: ["に","にほん","いちじ","いち"]
+- choices: ["にほん","いち","いちじ","に"]
 - correct: "にほん"
 - explanation: 「日本」 se lee 「にほん」.
 - hint: Lección 4 · Kanji
@@ -1671,7 +1671,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「本」?
-- choices: ["ほん","いち","に","いちじ"]
+- choices: ["に","いちじ","ほん","いち"]
 - correct: "ほん"
 - explanation: 「本」 se lee 「ほん」.
 - hint: Lección 4 · Kanji
@@ -1692,7 +1692,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「日本人」?
-- choices: ["いち","にほんじん","に","いちじ"]
+- choices: ["に","にほんじん","いちじ","いち"]
 - correct: "にほんじん"
 - explanation: 「日本人」 se lee 「にほんじん」.
 - hint: Lección 4 · Kanji
@@ -1713,7 +1713,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「月曜日」?
-- choices: ["いちじ","げつようび","いち","に"]
+- choices: ["いち","に","げつようび","いちじ"]
 - correct: "げつようび"
 - explanation: 「月曜日」 se lee 「げつようび」.
 - hint: Lección 4 · Kanji
@@ -1734,7 +1734,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「火曜日」?
-- choices: ["いち","かようび","いちじ","に"]
+- choices: ["いちじ","に","いち","かようび"]
 - correct: "かようび"
 - explanation: 「火曜日」 se lee 「かようび」.
 - hint: Lección 4 · Kanji
@@ -1755,7 +1755,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「水曜日」?
-- choices: ["いち","すいようび","いちじ","に"]
+- choices: ["に","いち","いちじ","すいようび"]
 - correct: "すいようび"
 - explanation: 「水曜日」 se lee 「すいようび」.
 - hint: Lección 4 · Kanji
@@ -1776,7 +1776,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「木曜日」?
-- choices: ["いち","いちじ","もくようび","に"]
+- choices: ["もくようび","いちじ","いち","に"]
 - correct: "もくようび"
 - explanation: 「木曜日」 se lee 「もくようび」.
 - hint: Lección 4 · Kanji
@@ -1797,7 +1797,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「金曜日」?
-- choices: ["いち","いちじ","きんようび","に"]
+- choices: ["きんようび","いちじ","いち","に"]
 - correct: "きんようび"
 - explanation: 「金曜日」 se lee 「きんようび」.
 - hint: Lección 4 · Kanji
@@ -1818,7 +1818,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「土曜日」?
-- choices: ["いちじ","に","いち","どようび"]
+- choices: ["いち","に","いちじ","どようび"]
 - correct: "どようび"
 - explanation: 「土曜日」 se lee 「どようび」.
 - hint: Lección 4 · Kanji
@@ -1839,7 +1839,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「日曜日」?
-- choices: ["いちじ","いち","に","にちようび"]
+- choices: ["いち","にちようび","いちじ","に"]
 - correct: "にちようび"
 - explanation: 「日曜日」 se lee 「にちようび」.
 - hint: Lección 4 · Kanji
@@ -1860,7 +1860,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「上」?
-- choices: ["いちじ","に","うえ","いち"]
+- choices: ["いちじ","に","いち","うえ"]
 - correct: "うえ"
 - explanation: 「上」 se lee 「うえ」.
 - hint: Lección 4 · Kanji
@@ -1881,7 +1881,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「下」?
-- choices: ["した","いちじ","に","いち"]
+- choices: ["いち","した","に","いちじ"]
 - correct: "した"
 - explanation: 「下」 se lee 「した」.
 - hint: Lección 4 · Kanji
@@ -1902,7 +1902,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「中」?
-- choices: ["いち","いちじ","なか","に"]
+- choices: ["いちじ","なか","いち","に"]
 - correct: "なか"
 - explanation: 「中」 se lee 「なか」.
 - hint: Lección 4 · Kanji
@@ -1923,7 +1923,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「三時半」?
-- choices: ["に","さんじはん","いちじ","いち"]
+- choices: ["さんじはん","に","いち","いちじ"]
 - correct: "さんじはん"
 - explanation: 「三時半」 se lee 「さんじはん」.
 - hint: Lección 4 · Kanji
@@ -1946,7 +1946,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___パコです。
-- choices: ["に","を","は","で"]
+- choices: ["を","は","で","に"]
 - correct: "は"
 - explanation: 「は」marca tema.
 - hint: Lección 4 · Partículas
@@ -1967,7 +1967,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: マリアさん___せんせいです。
-- choices: ["を","が","で","は"]
+- choices: ["が","で","は","を"]
 - correct: "は"
 - explanation: Oración copulativa con tema 「は」.
 - hint: Lección 4 · Partículas
@@ -1988,7 +1988,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: これはだれ___ほんですか。
-- choices: ["で","を","に","の"]
+- choices: ["で","の","に","を"]
 - correct: "の"
 - explanation: Posesión con 「の」.
 - hint: Lección 4 · Partículas
@@ -2009,7 +2009,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___ともだちもにほんじんです。
-- choices: ["が","は","の","も"]
+- choices: ["の","は","が","も"]
 - correct: "の"
 - explanation: 「わたしのともだち」.
 - hint: Lección 4 · Partículas
@@ -2030,7 +2030,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: がっこう___いきます。
-- choices: ["に","で","は","を"]
+- choices: ["で","は","を","に"]
 - correct: "に"
 - explanation: Destino con 「に」.
 - hint: Lección 4 · Partículas
@@ -2051,7 +2051,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: としょかん___べんきょうします。
-- choices: ["に","で","を","が"]
+- choices: ["を","が","に","で"]
 - correct: "で"
 - explanation: Lugar de acción con 「で」.
 - hint: Lección 4 · Partículas
@@ -2072,7 +2072,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ほん___よみます。
-- choices: ["に","を","で","は"]
+- choices: ["は","を","に","で"]
 - correct: "を"
 - explanation: Objeto directo con 「を」.
 - hint: Lección 4 · Partículas
@@ -2093,7 +2093,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: 7じ___おきます。
-- choices: ["で","が","を","に"]
+- choices: ["に","を","が","で"]
 - correct: "に"
 - explanation: Hora específica con 「に」.
 - hint: Lección 4 · Partículas
@@ -2114,7 +2114,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: うち___かえりました。
-- choices: ["で","が","に","を"]
+- choices: ["が","で","に","を"]
 - correct: "に"
 - explanation: Destino final con 「に」.
 - hint: Lección 4 · Partículas
@@ -2147,7 +2147,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「おきる」 (levantarse)
-- choices: ["みて","おきて","いって","たべて"]
+- choices: ["おきて","みて","たべて","いって"]
 - correct: "おきて"
 - explanation: La forma て de 「おきる」 es 「おきて」.
 - hint: Lección 4 · Conjugación
@@ -2157,7 +2157,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「おきる」 (levantarse)
-- choices: ["おきた","たべた","いった","みた"]
+- choices: ["たべた","みた","おきた","いった"]
 - correct: "おきた"
 - explanation: El pasado corto de 「おきる」 es 「おきた」.
 - hint: Lección 4 · Conjugación
@@ -2177,7 +2177,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「ねる」 (dormir)
-- choices: ["いって","みて","ねて","たべて"]
+- choices: ["たべて","ねて","みて","いって"]
 - correct: "ねて"
 - explanation: La forma て de 「ねる」 es 「ねて」.
 - hint: Lección 4 · Conjugación
@@ -2187,7 +2187,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「ねる」 (dormir)
-- choices: ["みた","いった","ねた","たべた"]
+- choices: ["たべた","いった","ねた","みた"]
 - correct: "ねた"
 - explanation: El pasado corto de 「ねる」 es 「ねた」.
 - hint: Lección 4 · Conjugación
@@ -2207,7 +2207,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「かえる」 (volver)
-- choices: ["みて","たべて","かえって","いって"]
+- choices: ["かえって","いって","みて","たべて"]
 - correct: "かえって"
 - explanation: La forma て de 「かえる」 es 「かえって」.
 - hint: Lección 4 · Conjugación
@@ -2217,7 +2217,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「かえる」 (volver)
-- choices: ["かえった","いった","みた","たべた"]
+- choices: ["かえった","みた","いった","たべた"]
 - correct: "かえった"
 - explanation: El pasado corto de 「かえる」 es 「かえった」.
 - hint: Lección 4 · Conjugación
@@ -2237,7 +2237,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あびる」 (ducharse)
-- choices: ["あびて","いって","みて","たべて"]
+- choices: ["いって","みて","あびて","たべて"]
 - correct: "あびて"
 - explanation: La forma て de 「あびる」 es 「あびて」.
 - hint: Lección 4 · Conjugación
@@ -2247,7 +2247,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あびる」 (ducharse)
-- choices: ["みた","たべた","あびた","いった"]
+- choices: ["みた","あびた","たべた","いった"]
 - correct: "あびた"
 - explanation: El pasado corto de 「あびる」 es 「あびた」.
 - hint: Lección 4 · Conjugación
@@ -2269,7 +2269,7 @@
 - type: `reorder`
 - source: `lesson_scenarios_grammar`
 - prompt: Ordena la oración en pasado.
-- choices: ["えいがを","きのう","みました","ともだちと"]
+- choices: ["えいがを","みました","ともだちと","きのう"]
 - correct: "きのう ともだちと えいがを みました"
 - explanation: L4 trabaja el pasado formal de los verbos.
 - hint: Lección 4 · Pasado

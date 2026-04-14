@@ -24,7 +24,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「えき」?
-- choices: ["mapa","derecha","izquierda","estación"]
+- choices: ["mapa","izquierda","estación","derecha"]
 - correct: "estación"
 - explanation: 「えき」 significa “estación”.
 - hint: Lección 10 · Vocabulario
@@ -34,7 +34,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “estación”
-- choices: ["駅 (えき)","地図 (ちず)","右 (みぎ)","左 (ひだり)"]
+- choices: ["駅 (えき)","地図 (ちず)","左 (ひだり)","右 (みぎ)"]
 - correct: "駅 (えき)"
 - explanation: La opción correcta para “estación” es 「駅 (えき)」.
 - hint: Lección 10 · Vocabulario
@@ -44,7 +44,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ちず」?
-- choices: ["estación","derecha","mapa","izquierda"]
+- choices: ["mapa","izquierda","derecha","estación"]
 - correct: "mapa"
 - explanation: 「ちず」 significa “mapa”.
 - hint: Lección 10 · Vocabulario
@@ -54,7 +54,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “mapa”
-- choices: ["右 (みぎ)","地図 (ちず)","左 (ひだり)","駅 (えき)"]
+- choices: ["左 (ひだり)","右 (みぎ)","駅 (えき)","地図 (ちず)"]
 - correct: "地図 (ちず)"
 - explanation: La opción correcta para “mapa” es 「地図 (ちず)」.
 - hint: Lección 10 · Vocabulario
@@ -74,7 +74,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “derecha”
-- choices: ["地図 (ちず)","左 (ひだり)","駅 (えき)","右 (みぎ)"]
+- choices: ["地図 (ちず)","駅 (えき)","右 (みぎ)","左 (ひだり)"]
 - correct: "右 (みぎ)"
 - explanation: La opción correcta para “derecha” es 「右 (みぎ)」.
 - hint: Lección 10 · Vocabulario
@@ -84,7 +84,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ひだり」?
-- choices: ["mapa","estación","izquierda","derecha"]
+- choices: ["izquierda","mapa","estación","derecha"]
 - correct: "izquierda"
 - explanation: 「ひだり」 significa “izquierda”.
 - hint: Lección 10 · Vocabulario
@@ -94,7 +94,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “izquierda”
-- choices: ["駅 (えき)","地図 (ちず)","右 (みぎ)","左 (ひだり)"]
+- choices: ["地図 (ちず)","駅 (えき)","左 (ひだり)","右 (みぎ)"]
 - correct: "左 (ひだり)"
 - explanation: La opción correcta para “izquierda” es 「左 (ひだり)」.
 - hint: Lección 10 · Vocabulario
@@ -104,7 +104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ちかい」?
-- choices: ["cerca","mapa","derecha","estación"]
+- choices: ["mapa","derecha","cerca","estación"]
 - correct: "cerca"
 - explanation: 「ちかい」 significa “cerca”.
 - hint: Lección 10 · Vocabulario
@@ -114,7 +114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cerca”
-- choices: ["駅 (えき)","地図 (ちず)","近い (ちかい)","右 (みぎ)"]
+- choices: ["地図 (ちず)","右 (みぎ)","近い (ちかい)","駅 (えき)"]
 - correct: "近い (ちかい)"
 - explanation: La opción correcta para “cerca” es 「近い (ちかい)」.
 - hint: Lección 10 · Vocabulario
@@ -124,7 +124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かど」?
-- choices: ["mapa","esquina","derecha","estación"]
+- choices: ["estación","derecha","esquina","mapa"]
 - correct: "esquina"
 - explanation: 「かど」 significa “esquina”.
 - hint: Lección 10 · Vocabulario
@@ -134,7 +134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “esquina”
-- choices: ["角 (かど)","右 (みぎ)","駅 (えき)","地図 (ちず)"]
+- choices: ["右 (みぎ)","地図 (ちず)","駅 (えき)","角 (かど)"]
 - correct: "角 (かど)"
 - explanation: La opción correcta para “esquina” es 「角 (かど)」.
 - hint: Lección 10 · Vocabulario
@@ -144,7 +144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しんごう」?
-- choices: ["semáforo","derecha","mapa","estación"]
+- choices: ["mapa","derecha","estación","semáforo"]
 - correct: "semáforo"
 - explanation: 「しんごう」 significa “semáforo”.
 - hint: Lección 10 · Vocabulario
@@ -154,7 +154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “semáforo”
-- choices: ["信号 (しんごう)","駅 (えき)","右 (みぎ)","地図 (ちず)"]
+- choices: ["地図 (ちず)","右 (みぎ)","信号 (しんごう)","駅 (えき)"]
 - correct: "信号 (しんごう)"
 - explanation: La opción correcta para “semáforo” es 「信号 (しんごう)」.
 - hint: Lección 10 · Vocabulario
@@ -164,7 +164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ゆうびんきょく」?
-- choices: ["mapa","oficina postal","derecha","estación"]
+- choices: ["oficina postal","derecha","estación","mapa"]
 - correct: "oficina postal"
 - explanation: 「ゆうびんきょく」 significa “oficina postal”.
 - hint: Lección 10 · Vocabulario
@@ -174,7 +174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “oficina postal”
-- choices: ["郵便局 (ゆうびんきょく)","地図 (ちず)","駅 (えき)","右 (みぎ)"]
+- choices: ["郵便局 (ゆうびんきょく)","右 (みぎ)","地図 (ちず)","駅 (えき)"]
 - correct: "郵便局 (ゆうびんきょく)"
 - explanation: La opción correcta para “oficina postal” es 「郵便局 (ゆうびんきょく)」.
 - hint: Lección 10 · Vocabulario
@@ -184,7 +184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ぎんこう」?
-- choices: ["estación","mapa","derecha","banco"]
+- choices: ["derecha","banco","estación","mapa"]
 - correct: "banco"
 - explanation: 「ぎんこう」 significa “banco”.
 - hint: Lección 10 · Vocabulario
@@ -194,7 +194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “banco”
-- choices: ["地図 (ちず)","銀行 (ぎんこう)","駅 (えき)","右 (みぎ)"]
+- choices: ["地図 (ちず)","右 (みぎ)","駅 (えき)","銀行 (ぎんこう)"]
 - correct: "銀行 (ぎんこう)"
 - explanation: La opción correcta para “banco” es 「銀行 (ぎんこう)」.
 - hint: Lección 10 · Vocabulario
@@ -204,7 +204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「みち」?
-- choices: ["camino","estación","derecha","mapa"]
+- choices: ["camino","derecha","mapa","estación"]
 - correct: "camino"
 - explanation: 「みち」 significa “camino”.
 - hint: Lección 10 · Vocabulario
@@ -214,7 +214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “camino”
-- choices: ["右 (みぎ)","駅 (えき)","地図 (ちず)","道 (みち)"]
+- choices: ["道 (みち)","右 (みぎ)","駅 (えき)","地図 (ちず)"]
 - correct: "道 (みち)"
 - explanation: La opción correcta para “camino” es 「道 (みち)」.
 - hint: Lección 10 · Vocabulario
@@ -224,7 +224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「まっすぐ」?
-- choices: ["mapa","estación","derecha","derecho"]
+- choices: ["derecha","estación","mapa","derecho"]
 - correct: "derecho"
 - explanation: 「まっすぐ」 significa “derecho”.
 - hint: Lección 10 · Vocabulario
@@ -234,7 +234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “derecho”
-- choices: ["まっすぐ","地図 (ちず)","右 (みぎ)","駅 (えき)"]
+- choices: ["地図 (ちず)","駅 (えき)","右 (みぎ)","まっすぐ"]
 - correct: "まっすぐ"
 - explanation: La opción correcta para “derecho” es 「まっすぐ」.
 - hint: Lección 10 · Vocabulario
@@ -244,7 +244,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「とおい」?
-- choices: ["estación","derecha","lejos","mapa"]
+- choices: ["lejos","mapa","estación","derecha"]
 - correct: "lejos"
 - explanation: 「とおい」 significa “lejos”.
 - hint: Lección 10 · Vocabulario
@@ -254,7 +254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “lejos”
-- choices: ["駅 (えき)","地図 (ちず)","右 (みぎ)","遠い (とおい)"]
+- choices: ["地図 (ちず)","遠い (とおい)","右 (みぎ)","駅 (えき)"]
 - correct: "遠い (とおい)"
 - explanation: La opción correcta para “lejos” es 「遠い (とおい)」.
 - hint: Lección 10 · Vocabulario
@@ -264,7 +264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あう」?
-- choices: ["estación","derecha","mapa","encontrarse"]
+- choices: ["encontrarse","mapa","derecha","estación"]
 - correct: "encontrarse"
 - explanation: 「あう」 significa “encontrarse”.
 - hint: Lección 10 · Vocabulario
@@ -274,7 +274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “encontrarse”
-- choices: ["右 (みぎ)","駅 (えき)","地図 (ちず)","あう"]
+- choices: ["駅 (えき)","右 (みぎ)","地図 (ちず)","あう"]
 - correct: "あう"
 - explanation: La opción correcta para “encontrarse” es 「あう」.
 - hint: Lección 10 · Vocabulario
@@ -284,7 +284,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おしえる」?
-- choices: ["derecha","estación","enseñar","mapa"]
+- choices: ["mapa","enseñar","derecha","estación"]
 - correct: "enseñar"
 - explanation: 「おしえる」 significa “enseñar”.
 - hint: Lección 10 · Vocabulario
@@ -294,7 +294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “enseñar”
-- choices: ["地図 (ちず)","おしえる","駅 (えき)","右 (みぎ)"]
+- choices: ["地図 (ちず)","右 (みぎ)","おしえる","駅 (えき)"]
 - correct: "おしえる"
 - explanation: La opción correcta para “enseñar” es 「おしえる」.
 - hint: Lección 10 · Vocabulario
@@ -304,7 +304,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「とる」?
-- choices: ["derecha","mapa","estación","tomar"]
+- choices: ["tomar","mapa","estación","derecha"]
 - correct: "tomar"
 - explanation: 「とる」 significa “tomar”.
 - hint: Lección 10 · Vocabulario
@@ -314,7 +314,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tomar”
-- choices: ["右 (みぎ)","とる","駅 (えき)","地図 (ちず)"]
+- choices: ["地図 (ちず)","右 (みぎ)","とる","駅 (えき)"]
 - correct: "とる"
 - explanation: La opción correcta para “tomar” es 「とる」.
 - hint: Lección 10 · Vocabulario
@@ -324,7 +324,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ひろい」?
-- choices: ["amplio","derecha","estación","mapa"]
+- choices: ["derecha","amplio","mapa","estación"]
 - correct: "amplio"
 - explanation: 「ひろい」 significa “amplio”.
 - hint: Lección 10 · Vocabulario
@@ -334,7 +334,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “amplio”
-- choices: ["ひろい","地図 (ちず)","駅 (えき)","右 (みぎ)"]
+- choices: ["ひろい","駅 (えき)","右 (みぎ)","地図 (ちず)"]
 - correct: "ひろい"
 - explanation: La opción correcta para “amplio” es 「ひろい」.
 - hint: Lección 10 · Vocabulario
@@ -344,7 +344,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せまい」?
-- choices: ["mapa","estrecho","derecha","estación"]
+- choices: ["estación","mapa","derecha","estrecho"]
 - correct: "estrecho"
 - explanation: 「せまい」 significa “estrecho”.
 - hint: Lección 10 · Vocabulario
@@ -354,7 +354,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “estrecho”
-- choices: ["右 (みぎ)","せまい","駅 (えき)","地図 (ちず)"]
+- choices: ["せまい","右 (みぎ)","駅 (えき)","地図 (ちず)"]
 - correct: "せまい"
 - explanation: La opción correcta para “estrecho” es 「せまい」.
 - hint: Lección 10 · Vocabulario
@@ -364,7 +364,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きせつ」?
-- choices: ["derecha","estación","izquierda","mapa"]
+- choices: ["estación","mapa","derecha","izquierda"]
 - correct: "estación"
 - explanation: 「きせつ」 significa “estación”.
 - hint: Lección 10 · Vocabulario
@@ -374,7 +374,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “estación”
-- choices: ["駅 (えき)","右 (みぎ)","季節 (きせつ)","地図 (ちず)"]
+- choices: ["地図 (ちず)","駅 (えき)","季節 (きせつ)","右 (みぎ)"]
 - correct: "季節 (きせつ)"
 - explanation: La opción correcta para “estación” es 「季節 (きせつ)」.
 - hint: Lección 10 · Vocabulario
@@ -384,7 +384,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はる」?
-- choices: ["primavera","derecha","mapa","estación"]
+- choices: ["mapa","primavera","estación","derecha"]
 - correct: "primavera"
 - explanation: 「はる」 significa “primavera”.
 - hint: Lección 10 · Vocabulario
@@ -394,7 +394,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “primavera”
-- choices: ["駅 (えき)","地図 (ちず)","春 (はる)","右 (みぎ)"]
+- choices: ["駅 (えき)","右 (みぎ)","春 (はる)","地図 (ちず)"]
 - correct: "春 (はる)"
 - explanation: La opción correcta para “primavera” es 「春 (はる)」.
 - hint: Lección 10 · Vocabulario
@@ -404,7 +404,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あき」?
-- choices: ["otoño","estación","derecha","mapa"]
+- choices: ["estación","derecha","otoño","mapa"]
 - correct: "otoño"
 - explanation: 「あき」 significa “otoño”.
 - hint: Lección 10 · Vocabulario
@@ -414,7 +414,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “otoño”
-- choices: ["地図 (ちず)","秋 (あき)","右 (みぎ)","駅 (えき)"]
+- choices: ["右 (みぎ)","駅 (えき)","秋 (あき)","地図 (ちず)"]
 - correct: "秋 (あき)"
 - explanation: La opción correcta para “otoño” es 「秋 (あき)」.
 - hint: Lección 10 · Vocabulario
@@ -424,7 +424,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ぎゅうにゅう」?
-- choices: ["derecha","estación","mapa","leche"]
+- choices: ["estación","leche","mapa","derecha"]
 - correct: "leche"
 - explanation: 「ぎゅうにゅう」 significa “leche”.
 - hint: Lección 10 · Vocabulario
@@ -434,7 +434,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “leche”
-- choices: ["地図 (ちず)","駅 (えき)","右 (みぎ)","牛乳 (ぎゅうにゅう)"]
+- choices: ["右 (みぎ)","駅 (えき)","地図 (ちず)","牛乳 (ぎゅうにゅう)"]
 - correct: "牛乳 (ぎゅうにゅう)"
 - explanation: La opción correcta para “leche” es 「牛乳 (ぎゅうにゅう)」.
 - hint: Lección 10 · Vocabulario
@@ -444,7 +444,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ケーキ」?
-- choices: ["estación","pastel","mapa","derecha"]
+- choices: ["mapa","estación","pastel","derecha"]
 - correct: "pastel"
 - explanation: 「ケーキ」 significa “pastel”.
 - hint: Lección 10 · Vocabulario
@@ -454,7 +454,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pastel”
-- choices: ["地図 (ちず)","駅 (えき)","右 (みぎ)","ケーキ"]
+- choices: ["ケーキ","右 (みぎ)","地図 (ちず)","駅 (えき)"]
 - correct: "ケーキ"
 - explanation: La opción correcta para “pastel” es 「ケーキ」.
 - hint: Lección 10 · Vocabulario
@@ -464,7 +464,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「すし」?
-- choices: ["estación","derecha","mapa","sushi"]
+- choices: ["derecha","estación","sushi","mapa"]
 - correct: "sushi"
 - explanation: 「すし」 significa “sushi”.
 - hint: Lección 10 · Vocabulario
@@ -474,7 +474,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “sushi”
-- choices: ["すし","駅 (えき)","右 (みぎ)","地図 (ちず)"]
+- choices: ["駅 (えき)","すし","右 (みぎ)","地図 (ちず)"]
 - correct: "すし"
 - explanation: La opción correcta para “sushi” es 「すし」.
 - hint: Lección 10 · Vocabulario
@@ -484,7 +484,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「てんぷら」?
-- choices: ["derecha","tempura","estación","mapa"]
+- choices: ["estación","tempura","mapa","derecha"]
 - correct: "tempura"
 - explanation: 「てんぷら」 significa “tempura”.
 - hint: Lección 10 · Vocabulario
@@ -494,7 +494,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tempura”
-- choices: ["天ぷら (てんぷら)","駅 (えき)","地図 (ちず)","右 (みぎ)"]
+- choices: ["右 (みぎ)","天ぷら (てんぷら)","駅 (えき)","地図 (ちず)"]
 - correct: "天ぷら (てんぷら)"
 - explanation: La opción correcta para “tempura” es 「天ぷら (てんぷら)」.
 - hint: Lección 10 · Vocabulario
@@ -504,7 +504,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「りんご」?
-- choices: ["estación","mapa","manzana","derecha"]
+- choices: ["mapa","derecha","manzana","estación"]
 - correct: "manzana"
 - explanation: 「りんご」 significa “manzana”.
 - hint: Lección 10 · Vocabulario
@@ -514,7 +514,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “manzana”
-- choices: ["駅 (えき)","右 (みぎ)","地図 (ちず)","りんご"]
+- choices: ["地図 (ちず)","駅 (えき)","右 (みぎ)","りんご"]
 - correct: "りんご"
 - explanation: La opción correcta para “manzana” es 「りんご」.
 - hint: Lección 10 · Vocabulario
@@ -524,7 +524,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「りょうり」?
-- choices: ["estación","derecha","mapa","cocina (método); comida"]
+- choices: ["cocina (método); comida","estación","mapa","derecha"]
 - correct: "cocina (método); comida"
 - explanation: 「りょうり」 significa “cocina (método); comida”.
 - hint: Lección 10 · Vocabulario
@@ -534,7 +534,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cocina (método); comida”
-- choices: ["右 (みぎ)","料理 (りょうり)","駅 (えき)","地図 (ちず)"]
+- choices: ["料理 (りょうり)","地図 (ちず)","右 (みぎ)","駅 (えき)"]
 - correct: "料理 (りょうり)"
 - explanation: La opción correcta para “cocina (método); comida” es 「料理 (りょうり)」.
 - hint: Lección 10 · Vocabulario
@@ -544,7 +544,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「サッカー」?
-- choices: ["mapa","estación","fútbol","derecha"]
+- choices: ["estación","derecha","fútbol","mapa"]
 - correct: "fútbol"
 - explanation: 「サッカー」 significa “fútbol”.
 - hint: Lección 10 · Vocabulario
@@ -554,7 +554,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “fútbol”
-- choices: ["駅 (えき)","地図 (ちず)","サッカー","右 (みぎ)"]
+- choices: ["サッカー","地図 (ちず)","右 (みぎ)","駅 (えき)"]
 - correct: "サッカー"
 - explanation: La opción correcta para “fútbol” es 「サッカー」.
 - hint: Lección 10 · Vocabulario
@@ -564,7 +564,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「やきゅう」?
-- choices: ["béisbol","mapa","derecha","estación"]
+- choices: ["derecha","estación","mapa","béisbol"]
 - correct: "béisbol"
 - explanation: 「やきゅう」 significa “béisbol”.
 - hint: Lección 10 · Vocabulario
@@ -574,7 +574,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “béisbol”
-- choices: ["地図 (ちず)","駅 (えき)","右 (みぎ)","野球 (やきゅう)"]
+- choices: ["野球 (やきゅう)","右 (みぎ)","地図 (ちず)","駅 (えき)"]
 - correct: "野球 (やきゅう)"
 - explanation: La opción correcta para “béisbol” es 「野球 (やきゅう)」.
 - hint: Lección 10 · Vocabulario
@@ -584,7 +584,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いしゃ」?
-- choices: ["estación","derecha","doctor/ra","mapa"]
+- choices: ["estación","mapa","doctor/ra","derecha"]
 - correct: "doctor/ra"
 - explanation: 「いしゃ」 significa “doctor/ra”.
 - hint: Lección 10 · Vocabulario
@@ -594,7 +594,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “doctor/ra”
-- choices: ["駅 (えき)","医者 (いしゃ)","右 (みぎ)","地図 (ちず)"]
+- choices: ["地図 (ちず)","駅 (えき)","医者 (いしゃ)","右 (みぎ)"]
 - correct: "医者 (いしゃ)"
 - explanation: La opción correcta para “doctor/ra” es 「医者 (いしゃ)」.
 - hint: Lección 10 · Vocabulario
@@ -604,7 +604,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おかねもち」?
-- choices: ["persona rica; millonaria","mapa","derecha","estación"]
+- choices: ["derecha","persona rica; millonaria","estación","mapa"]
 - correct: "persona rica; millonaria"
 - explanation: 「おかねもち」 significa “persona rica; millonaria”.
 - hint: Lección 10 · Vocabulario
@@ -614,7 +614,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “persona rica; millonaria”
-- choices: ["右 (みぎ)","お金持ち (おかねもち)","駅 (えき)","地図 (ちず)"]
+- choices: ["地図 (ちず)","右 (みぎ)","駅 (えき)","お金持ち (おかねもち)"]
 - correct: "お金持ち (おかねもち)"
 - explanation: La opción correcta para “persona rica; millonaria” es 「お金持ち (おかねもち)」.
 - hint: Lección 10 · Vocabulario
@@ -624,7 +624,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ゆうめいじん」?
-- choices: ["estación","famoso (persona)","derecha","mapa"]
+- choices: ["estación","derecha","famoso (persona)","mapa"]
 - correct: "famoso (persona)"
 - explanation: 「ゆうめいじん」 significa “famoso (persona)”.
 - hint: Lección 10 · Vocabulario
@@ -634,7 +634,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “famoso (persona)”
-- choices: ["地図 (ちず)","有名人 (ゆうめいじん)","駅 (えき)","右 (みぎ)"]
+- choices: ["駅 (えき)","右 (みぎ)","有名人 (ゆうめいじん)","地図 (ちず)"]
 - correct: "有名人 (ゆうめいじん)"
 - explanation: La opción correcta para “famoso (persona)” es 「有名人 (ゆうめいじん)」.
 - hint: Lección 10 · Vocabulario
@@ -644,7 +644,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かお」?
-- choices: ["derecha","cara","mapa","estación"]
+- choices: ["cara","estación","mapa","derecha"]
 - correct: "cara"
 - explanation: 「かお」 significa “cara”.
 - hint: Lección 10 · Vocabulario
@@ -654,7 +654,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cara”
-- choices: ["地図 (ちず)","駅 (えき)","右 (みぎ)","顏 (かお)"]
+- choices: ["地図 (ちず)","顏 (かお)","右 (みぎ)","駅 (えき)"]
 - correct: "顏 (かお)"
 - explanation: La opción correcta para “cara” es 「顏 (かお)」.
 - hint: Lección 10 · Vocabulario
@@ -664,7 +664,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「としうえ」?
-- choices: ["alguien mayor","derecha","estación","mapa"]
+- choices: ["alguien mayor","estación","mapa","derecha"]
 - correct: "alguien mayor"
 - explanation: 「としうえ」 significa “alguien mayor”.
 - hint: Lección 10 · Vocabulario
@@ -674,7 +674,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “alguien mayor”
-- choices: ["右 (みぎ)","駅 (えき)","地図 (ちず)","年上 (としうえ)"]
+- choices: ["年上 (としうえ)","右 (みぎ)","駅 (えき)","地図 (ちず)"]
 - correct: "年上 (としうえ)"
 - explanation: La opción correcta para “alguien mayor” es 「年上 (としうえ)」.
 - hint: Lección 10 · Vocabulario
@@ -684,7 +684,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しんかんせん」?
-- choices: ["derecha","Shinkansen; \"tren bala\"","mapa","estación"]
+- choices: ["mapa","estación","Shinkansen; \"tren bala\"","derecha"]
 - correct: "Shinkansen; \"tren bala\""
 - explanation: 「しんかんせん」 significa “Shinkansen; "tren bala"”.
 - hint: Lección 10 · Vocabulario
@@ -694,7 +694,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “Shinkansen; "tren bala"”
-- choices: ["駅 (えき)","新幹線 (しんかんせん)","右 (みぎ)","地図 (ちず)"]
+- choices: ["右 (みぎ)","地図 (ちず)","駅 (えき)","新幹線 (しんかんせん)"]
 - correct: "新幹線 (しんかんせん)"
 - explanation: La opción correcta para “Shinkansen; "tren bala"” es 「新幹線 (しんかんせん)」.
 - hint: Lección 10 · Vocabulario
@@ -704,7 +704,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ちかてつ」?
-- choices: ["estación","metro","mapa","derecha"]
+- choices: ["estación","derecha","metro","mapa"]
 - correct: "metro"
 - explanation: 「ちかてつ」 significa “metro”.
 - hint: Lección 10 · Vocabulario
@@ -714,7 +714,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “metro”
-- choices: ["駅 (えき)","地下鉄 (ちかてつ)","右 (みぎ)","地図 (ちず)"]
+- choices: ["駅 (えき)","地下鉄 (ちかてつ)","地図 (ちず)","右 (みぎ)"]
 - correct: "地下鉄 (ちかてつ)"
 - explanation: La opción correcta para “metro” es 「地下鉄 (ちかてつ)」.
 - hint: Lección 10 · Vocabulario
@@ -724,7 +724,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ふね」?
-- choices: ["mapa","derecha","buque; barco","estación"]
+- choices: ["derecha","estación","mapa","buque; barco"]
 - correct: "buque; barco"
 - explanation: 「ふね」 significa “buque; barco”.
 - hint: Lección 10 · Vocabulario
@@ -734,7 +734,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “buque; barco”
-- choices: ["船 (ふね)","右 (みぎ)","駅 (えき)","地図 (ちず)"]
+- choices: ["駅 (えき)","船 (ふね)","地図 (ちず)","右 (みぎ)"]
 - correct: "船 (ふね)"
 - explanation: La opción correcta para “buque; barco” es 「船 (ふね)」.
 - hint: Lección 10 · Vocabulario
@@ -744,7 +744,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ひこうき」?
-- choices: ["estación","derecha","mapa","avión"]
+- choices: ["mapa","avión","estación","derecha"]
 - correct: "avión"
 - explanation: 「ひこうき」 significa “avión”.
 - hint: Lección 10 · Vocabulario
@@ -754,7 +754,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “avión”
-- choices: ["地図 (ちず)","駅 (えき)","飛行機 (ひこうき)","右 (みぎ)"]
+- choices: ["駅 (えき)","地図 (ちず)","飛行機 (ひこうき)","右 (みぎ)"]
 - correct: "飛行機 (ひこうき)"
 - explanation: La opción correcta para “avión” es 「飛行機 (ひこうき)」.
 - hint: Lección 10 · Vocabulario
@@ -764,7 +764,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「よやく」?
-- choices: ["reserva","mapa","estación","derecha"]
+- choices: ["derecha","estación","mapa","reserva"]
 - correct: "reserva"
 - explanation: 「よやく」 significa “reserva”.
 - hint: Lección 10 · Vocabulario
@@ -774,7 +774,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “reserva”
-- choices: ["右 (みぎ)","予約 (よやく)","地図 (ちず)","駅 (えき)"]
+- choices: ["右 (みぎ)","地図 (ちず)","駅 (えき)","予約 (よやく)"]
 - correct: "予約 (よやく)"
 - explanation: La opción correcta para “reserva” es 「予約 (よやく)」.
 - hint: Lección 10 · Vocabulario
@@ -794,7 +794,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tour”
-- choices: ["ツアー","右 (みぎ)","地図 (ちず)","駅 (えき)"]
+- choices: ["地図 (ちず)","右 (みぎ)","駅 (えき)","ツアー"]
 - correct: "ツアー"
 - explanation: La opción correcta para “tour” es 「ツアー」.
 - hint: Lección 10 · Vocabulario
@@ -804,7 +804,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「どうぶつえん」?
-- choices: ["estación","derecha","mapa","zoológico"]
+- choices: ["estación","mapa","zoológico","derecha"]
 - correct: "zoológico"
 - explanation: 「どうぶつえん」 significa “zoológico”.
 - hint: Lección 10 · Vocabulario
@@ -814,7 +814,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “zoológico”
-- choices: ["右 (みぎ)","駅 (えき)","動物園 (どうぶつえん)","地図 (ちず)"]
+- choices: ["地図 (ちず)","駅 (えき)","右 (みぎ)","動物園 (どうぶつえん)"]
 - correct: "動物園 (どうぶつえん)"
 - explanation: La opción correcta para “zoológico” es 「動物園 (どうぶつえん)」.
 - hint: Lección 10 · Vocabulario
@@ -824,7 +824,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「じかん」?
-- choices: ["tiempo","derecha","estación","mapa"]
+- choices: ["tiempo","mapa","estación","derecha"]
 - correct: "tiempo"
 - explanation: 「じかん」 significa “tiempo”.
 - hint: Lección 10 · Vocabulario
@@ -834,7 +834,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tiempo”
-- choices: ["時間 (じかん)","右 (みぎ)","駅 (えき)","地図 (ちず)"]
+- choices: ["駅 (えき)","地図 (ちず)","時間 (じかん)","右 (みぎ)"]
 - correct: "時間 (じかん)"
 - explanation: La opción correcta para “tiempo” es 「時間 (じかん)」.
 - hint: Lección 10 · Vocabulario
@@ -844,7 +844,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せかい」?
-- choices: ["mapa","derecha","mundo","estación"]
+- choices: ["derecha","mundo","estación","mapa"]
 - correct: "mundo"
 - explanation: 「せかい」 significa “mundo”.
 - hint: Lección 10 · Vocabulario
@@ -854,7 +854,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “mundo”
-- choices: ["右 (みぎ)","駅 (えき)","世界 (せかい)","地図 (ちず)"]
+- choices: ["地図 (ちず)","世界 (せかい)","駅 (えき)","右 (みぎ)"]
 - correct: "世界 (せかい)"
 - explanation: La opción correcta para “mundo” es 「世界 (せかい)」.
 - hint: Lección 10 · Vocabulario
@@ -864,7 +864,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「びよういん」?
-- choices: ["estación","mapa","salón de belleza","derecha"]
+- choices: ["mapa","salón de belleza","estación","derecha"]
 - correct: "salón de belleza"
 - explanation: 「びよういん」 significa “salón de belleza”.
 - hint: Lección 10 · Vocabulario
@@ -874,7 +874,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “salón de belleza”
-- choices: ["地図 (ちず)","駅 (えき)","右 (みぎ)","美容院 (びよういん)"]
+- choices: ["駅 (えき)","地図 (ちず)","美容院 (びよういん)","右 (みぎ)"]
 - correct: "美容院 (びよういん)"
 - explanation: La opción correcta para “salón de belleza” es 「美容院 (びよういん)」.
 - hint: Lección 10 · Vocabulario
@@ -884,7 +884,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「てぶくろ」?
-- choices: ["estación","derecha","mapa","guantes"]
+- choices: ["mapa","estación","derecha","guantes"]
 - correct: "guantes"
 - explanation: 「てぶくろ」 significa “guantes”.
 - hint: Lección 10 · Vocabulario
@@ -894,7 +894,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “guantes”
-- choices: ["地図 (ちず)","手袋 (てぶくろ)","駅 (えき)","右 (みぎ)"]
+- choices: ["手袋 (てぶくろ)","地図 (ちず)","駅 (えき)","右 (みぎ)"]
 - correct: "手袋 (てぶくろ)"
 - explanation: La opción correcta para “guantes” es 「手袋 (てぶくろ)」.
 - hint: Lección 10 · Vocabulario
@@ -904,7 +904,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せいかつ」?
-- choices: ["vida; vivir","mapa","estación","derecha"]
+- choices: ["vida; vivir","derecha","mapa","estación"]
 - correct: "vida; vivir"
 - explanation: 「せいかつ」 significa “vida; vivir”.
 - hint: Lección 10 · Vocabulario
@@ -914,7 +914,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “vida; vivir”
-- choices: ["駅 (えき)","生活 (せいかつ)","右 (みぎ)","地図 (ちず)"]
+- choices: ["駅 (えき)","地図 (ちず)","生活 (せいかつ)","右 (みぎ)"]
 - correct: "生活 (せいかつ)"
 - explanation: La opción correcta para “vida; vivir” es 「生活 (せいかつ)」.
 - hint: Lección 10 · Vocabulario
@@ -924,7 +924,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ことし」?
-- choices: ["este año","derecha","estación","mapa"]
+- choices: ["estación","mapa","este año","derecha"]
 - correct: "este año"
 - explanation: 「ことし」 significa “este año”.
 - hint: Lección 10 · Vocabulario
@@ -934,7 +934,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “este año”
-- choices: ["右 (みぎ)","駅 (えき)","今年 (ことし)","地図 (ちず)"]
+- choices: ["右 (みぎ)","駅 (えき)","地図 (ちず)","今年 (ことし)"]
 - correct: "今年 (ことし)"
 - explanation: La opción correcta para “este año” es 「今年 (ことし)」.
 - hint: Lección 10 · Vocabulario
@@ -954,7 +954,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cálido; tibio”
-- choices: ["駅 (えき)","右 (みぎ)","暖かい (あたたかい)","地図 (ちず)"]
+- choices: ["右 (みぎ)","暖かい (あたたかい)","地図 (ちず)","駅 (えき)"]
 - correct: "暖かい (あたたかい)"
 - explanation: La opción correcta para “cálido; tibio” es 「暖かい (あたたかい)」.
 - hint: Lección 10 · Vocabulario
@@ -964,7 +964,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「すずしい」?
-- choices: ["fresco (tiempo)","estación","derecha","mapa"]
+- choices: ["mapa","fresco (tiempo)","derecha","estación"]
 - correct: "fresco (tiempo)"
 - explanation: 「すずしい」 significa “fresco (tiempo)”.
 - hint: Lección 10 · Vocabulario
@@ -974,7 +974,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “fresco (tiempo)”
-- choices: ["涼しい (すずしい)","地図 (ちず)","駅 (えき)","右 (みぎ)"]
+- choices: ["右 (みぎ)","駅 (えき)","地図 (ちず)","涼しい (すずしい)"]
 - correct: "涼しい (すずしい)"
 - explanation: La opción correcta para “fresco (tiempo)” es 「涼しい (すずしい)」.
 - hint: Lección 10 · Vocabulario
@@ -984,7 +984,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「つめたい」?
-- choices: ["derecha","mapa","frío (cosas/personas)","estación"]
+- choices: ["frío (cosas/personas)","estación","mapa","derecha"]
 - correct: "frío (cosas/personas)"
 - explanation: 「つめたい」 significa “frío (cosas/personas)”.
 - hint: Lección 10 · Vocabulario
@@ -994,7 +994,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “frío (cosas/personas)”
-- choices: ["冷たい (つめたい)","駅 (えき)","地図 (ちず)","右 (みぎ)"]
+- choices: ["冷たい (つめたい)","右 (みぎ)","駅 (えき)","地図 (ちず)"]
 - correct: "冷たい (つめたい)"
 - explanation: La opción correcta para “frío (cosas/personas)” es 「冷たい (つめたい)」.
 - hint: Lección 10 · Vocabulario
@@ -1004,7 +1004,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おそい」?
-- choices: ["lento; tarde","estación","derecha","mapa"]
+- choices: ["derecha","estación","lento; tarde","mapa"]
 - correct: "lento; tarde"
 - explanation: 「おそい」 significa “lento; tarde”.
 - hint: Lección 10 · Vocabulario
@@ -1014,7 +1014,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “lento; tarde”
-- choices: ["駅 (えき)","地図 (ちず)","右 (みぎ)","遅い (おそい)"]
+- choices: ["遅い (おそい)","右 (みぎ)","駅 (えき)","地図 (ちず)"]
 - correct: "遅い (おそい)"
 - explanation: La opción correcta para “lento; tarde” es 「遅い (おそい)」.
 - hint: Lección 10 · Vocabulario
@@ -1024,7 +1024,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ねむい」?
-- choices: ["mapa","derecha","estación","somnolento"]
+- choices: ["somnolento","mapa","derecha","estación"]
 - correct: "somnolento"
 - explanation: 「ねむい」 significa “somnolento”.
 - hint: Lección 10 · Vocabulario
@@ -1034,7 +1034,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “somnolento”
-- choices: ["地図 (ちず)","駅 (えき)","眠い (ねむい)","右 (みぎ)"]
+- choices: ["駅 (えき)","右 (みぎ)","地図 (ちず)","眠い (ねむい)"]
 - correct: "眠い (ねむい)"
 - explanation: La opción correcta para “somnolento” es 「眠い (ねむい)」.
 - hint: Lección 10 · Vocabulario
@@ -1044,7 +1044,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かかる」?
-- choices: ["tardar (tiempo/dinero)","derecha","estación","mapa"]
+- choices: ["mapa","tardar (tiempo/dinero)","derecha","estación"]
 - correct: "tardar (tiempo/dinero)"
 - explanation: 「かかる」 significa “tardar (tiempo/dinero)”.
 - hint: Lección 10 · Vocabulario
@@ -1054,7 +1054,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tardar (tiempo/dinero)”
-- choices: ["駅 (えき)","右 (みぎ)","地図 (ちず)","掛かる (かかる)"]
+- choices: ["右 (みぎ)","駅 (えき)","地図 (ちず)","掛かる (かかる)"]
 - correct: "掛かる (かかる)"
 - explanation: La opción correcta para “tardar (tiempo/dinero)” es 「掛かる (かかる)」.
 - hint: Lección 10 · Vocabulario
@@ -1064,7 +1064,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「とまる」?
-- choices: ["estación","alojarse en","derecha","mapa"]
+- choices: ["mapa","alojarse en","estación","derecha"]
 - correct: "alojarse en"
 - explanation: 「とまる」 significa “alojarse en”.
 - hint: Lección 10 · Vocabulario
@@ -1074,7 +1074,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “alojarse en”
-- choices: ["駅 (えき)","地図 (ちず)","右 (みぎ)","泊まる (とまる)"]
+- choices: ["右 (みぎ)","地図 (ちず)","駅 (えき)","泊まる (とまる)"]
 - correct: "泊まる (とまる)"
 - explanation: La opción correcta para “alojarse en” es 「泊まる (とまる)」.
 - hint: Lección 10 · Vocabulario
@@ -1084,7 +1084,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「なる」?
-- choices: ["mapa","estación","derecha","llegar a ser"]
+- choices: ["estación","mapa","llegar a ser","derecha"]
 - correct: "llegar a ser"
 - explanation: 「なる」 significa “llegar a ser”.
 - hint: Lección 10 · Vocabulario
@@ -1094,7 +1094,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “llegar a ser”
-- choices: ["なる","駅 (えき)","地図 (ちず)","右 (みぎ)"]
+- choices: ["右 (みぎ)","なる","地図 (ちず)","駅 (えき)"]
 - correct: "なる"
 - explanation: La opción correcta para “llegar a ser” es 「なる」.
 - hint: Lección 10 · Vocabulario
@@ -1104,7 +1104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はらう」?
-- choices: ["pagar","derecha","estación","mapa"]
+- choices: ["estación","derecha","mapa","pagar"]
 - correct: "pagar"
 - explanation: 「はらう」 significa “pagar”.
 - hint: Lección 10 · Vocabulario
@@ -1114,7 +1114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pagar”
-- choices: ["駅 (えき)","払う (はらう)","右 (みぎ)","地図 (ちず)"]
+- choices: ["右 (みぎ)","駅 (えき)","払う (はらう)","地図 (ちず)"]
 - correct: "払う (はらう)"
 - explanation: La opción correcta para “pagar” es 「払う (はらう)」.
 - hint: Lección 10 · Vocabulario
@@ -1124,7 +1124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きめる」?
-- choices: ["estación","decidir","derecha","mapa"]
+- choices: ["mapa","decidir","derecha","estación"]
 - correct: "decidir"
 - explanation: 「きめる」 significa “decidir”.
 - hint: Lección 10 · Vocabulario
@@ -1134,7 +1134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “decidir”
-- choices: ["地図 (ちず)","駅 (えき)","決める (きめる)","右 (みぎ)"]
+- choices: ["右 (みぎ)","地図 (ちず)","決める (きめる)","駅 (えき)"]
 - correct: "決める (きめる)"
 - explanation: La opción correcta para “decidir” es 「決める (きめる)」.
 - hint: Lección 10 · Vocabulario
@@ -1144,7 +1144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「りょこうする」?
-- choices: ["estación","derecha","mapa","viajar"]
+- choices: ["estación","mapa","viajar","derecha"]
 - correct: "viajar"
 - explanation: 「りょこうする」 significa “viajar”.
 - hint: Lección 10 · Vocabulario
@@ -1154,7 +1154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “viajar”
-- choices: ["地図 (ちず)","旅行する (りょこうする)","駅 (えき)","右 (みぎ)"]
+- choices: ["駅 (えき)","右 (みぎ)","旅行する (りょこうする)","地図 (ちず)"]
 - correct: "旅行する (りょこうする)"
 - explanation: La opción correcta para “viajar” es 「旅行する (りょこうする)」.
 - hint: Lección 10 · Vocabulario
@@ -1164,7 +1164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「よやくする」?
-- choices: ["mapa","derecha","reservar","estación"]
+- choices: ["reservar","estación","derecha","mapa"]
 - correct: "reservar"
 - explanation: 「よやくする」 significa “reservar”.
 - hint: Lección 10 · Vocabulario
@@ -1174,7 +1174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “reservar”
-- choices: ["予約する (よやくする)","駅 (えき)","地図 (ちず)","右 (みぎ)"]
+- choices: ["駅 (えき)","予約する (よやくする)","右 (みぎ)","地図 (ちず)"]
 - correct: "予約する (よやくする)"
 - explanation: La opción correcta para “reservar” es 「予約する (よやくする)」.
 - hint: Lección 10 · Vocabulario
@@ -1184,7 +1184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「どこかへ」?
-- choices: ["derecha","a algún lugar","estación","mapa"]
+- choices: ["a algún lugar","mapa","estación","derecha"]
 - correct: "a algún lugar"
 - explanation: 「どこかへ」 significa “a algún lugar”.
 - hint: Lección 10 · Vocabulario
@@ -1194,7 +1194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “a algún lugar”
-- choices: ["駅 (えき)","どこかへ","地図 (ちず)","右 (みぎ)"]
+- choices: ["どこかへ","右 (みぎ)","駅 (えき)","地図 (ちず)"]
 - correct: "どこかへ"
 - explanation: La opción correcta para “a algún lugar” es 「どこかへ」.
 - hint: Lección 10 · Vocabulario
@@ -1204,7 +1204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～のほうが」?
-- choices: ["estación","...es más...","mapa","derecha"]
+- choices: ["...es más...","derecha","estación","mapa"]
 - correct: "...es más..."
 - explanation: 「～のほうが」 significa “...es más...”.
 - hint: Lección 10 · Vocabulario
@@ -1214,7 +1214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “...es más...”
-- choices: ["地図 (ちず)","右 (みぎ)","～のほうが","駅 (えき)"]
+- choices: ["右 (みぎ)","地図 (ちず)","駅 (えき)","～のほうが"]
 - correct: "～のほうが"
 - explanation: La opción correcta para “...es más...” es 「～のほうが」.
 - hint: Lección 10 · Vocabulario
@@ -1224,7 +1224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～の中で...が一番」?
-- choices: ["estación","entre..., ...es el más...","mapa","derecha"]
+- choices: ["mapa","derecha","entre..., ...es el más...","estación"]
 - correct: "entre..., ...es el más..."
 - explanation: 「～の中で...が一番」 significa “entre..., ...es el más...”.
 - hint: Lección 10 · Vocabulario
@@ -1234,7 +1234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “entre..., ...es el más...”
-- choices: ["右 (みぎ)","駅 (えき)","～の中で...が一番","地図 (ちず)"]
+- choices: ["地図 (ちず)","駅 (えき)","右 (みぎ)","～の中で...が一番"]
 - correct: "～の中で...が一番"
 - explanation: La opción correcta para “entre..., ...es el más...” es 「～の中で...が一番」.
 - hint: Lección 10 · Vocabulario
@@ -1254,7 +1254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “temprano; rápido”
-- choices: ["地図 (ちず)","早く/速く (はやく)","駅 (えき)","右 (みぎ)"]
+- choices: ["駅 (えき)","地図 (ちず)","右 (みぎ)","早く/速く (はやく)"]
 - correct: "早く/速く (はやく)"
 - explanation: La opción correcta para “temprano; rápido” es 「早く/速く (はやく)」.
 - hint: Lección 10 · Vocabulario
@@ -1264,10 +1264,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 動物園 (どうぶつえん)","B. 予約する (よやくする)","C. 涼しい (すずしい)"]
-- choices.right: ["1. zoológico","2. reservar","3. fresco (tiempo)"]
-- correct: "A-1, B-2, C-3"
-- explanation: Relaciones correctas: A-1, B-2, C-3.
+- choices.left: ["A. 秋 (あき)","B. とる","C. 旅行する (りょこうする)"]
+- choices.right: ["1. tomar","2. otoño","3. viajar"]
+- correct: "A-2, B-1, C-3"
+- explanation: Relaciones correctas: A-2, B-1, C-3.
 - hint: Lección 10 · Relacionar
 
 ### exam-vocab-match-10-1
@@ -1275,10 +1275,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 右 (みぎ)","B. 掛かる (かかる)","C. ～の中で...が一番"]
-- choices.right: ["1. tardar (tiempo/dinero)","2. entre..., ...es el más...","3. derecha"]
-- correct: "A-3, B-1, C-2"
-- explanation: Relaciones correctas: A-3, B-1, C-2.
+- choices.left: ["A. 牛乳 (ぎゅうにゅう)","B. 決める (きめる)","C. 春 (はる)"]
+- choices.right: ["1. leche","2. primavera","3. decidir"]
+- correct: "A-1, B-3, C-2"
+- explanation: Relaciones correctas: A-1, B-3, C-2.
 - hint: Lección 10 · Relacionar
 
 ### exam-vocab-match-10-2
@@ -1286,10 +1286,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. せまい","B. 地下鉄 (ちかてつ)","C. 払う (はらう)"]
-- choices.right: ["1. pagar","2. estrecho","3. metro"]
-- correct: "A-2, B-3, C-1"
-- explanation: Relaciones correctas: A-2, B-3, C-1.
+- choices.left: ["A. 天ぷら (てんぷら)","B. りんご","C. 有名人 (ゆうめいじん)"]
+- choices.right: ["1. tempura","2. famoso (persona)","3. manzana"]
+- correct: "A-1, B-3, C-2"
+- explanation: Relaciones correctas: A-1, B-3, C-2.
 - hint: Lección 10 · Relacionar
 
 ### exam-vocab-match-10-3
@@ -1297,10 +1297,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 年上 (としうえ)","B. 時間 (じかん)","C. 飛行機 (ひこうき)"]
-- choices.right: ["1. avión","2. alguien mayor","3. tiempo"]
-- correct: "A-2, B-3, C-1"
-- explanation: Relaciones correctas: A-2, B-3, C-1.
+- choices.left: ["A. 道 (みち)","B. 春 (はる)","C. 予約 (よやく)"]
+- choices.right: ["1. primavera","2. reserva","3. camino"]
+- correct: "A-3, B-1, C-2"
+- explanation: Relaciones correctas: A-3, B-1, C-2.
 - hint: Lección 10 · Relacionar
 
 ## kanji
@@ -1310,7 +1310,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「住む」?
-- choices: ["すむ","いち","に","いちじ"]
+- choices: ["に","いちじ","すむ","いち"]
 - correct: "すむ"
 - explanation: 「住む」 se lee 「すむ」.
 - hint: Lección 10 · Kanji
@@ -1331,7 +1331,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「お正月」?
-- choices: ["おしょうがつ","いち","いちじ","に"]
+- choices: ["おしょうがつ","いちじ","いち","に"]
 - correct: "おしょうがつ"
 - explanation: 「お正月」 se lee 「おしょうがつ」.
 - hint: Lección 10 · Kanji
@@ -1352,7 +1352,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「三年生」?
-- choices: ["いちじ","いち","さんねんせい","に"]
+- choices: ["いち","いちじ","に","さんねんせい"]
 - correct: "さんねんせい"
 - explanation: 「三年生」 se lee 「さんねんせい」.
 - hint: Lección 10 · Kanji
@@ -1373,7 +1373,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「売る」?
-- choices: ["に","いちじ","いち","うる"]
+- choices: ["いち","に","いちじ","うる"]
 - correct: "うる"
 - explanation: 「売る」 se lee 「うる」.
 - hint: Lección 10 · Kanji
@@ -1394,7 +1394,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「買う」?
-- choices: ["に","いちじ","かう","いち"]
+- choices: ["かう","に","いちじ","いち"]
 - correct: "かう"
 - explanation: 「買う」 se lee 「かう」.
 - hint: Lección 10 · Kanji
@@ -1415,7 +1415,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「町」?
-- choices: ["いちじ","まち","いち","に"]
+- choices: ["に","いちじ","いち","まち"]
 - correct: "まち"
 - explanation: 「町」 se lee 「まち」.
 - hint: Lección 10 · Kanji
@@ -1436,7 +1436,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「長い」?
-- choices: ["に","いちじ","ながい","いち"]
+- choices: ["いち","に","ながい","いちじ"]
 - correct: "ながい"
 - explanation: 「長い」 se lee 「ながい」.
 - hint: Lección 10 · Kanji
@@ -1457,7 +1457,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「道」?
-- choices: ["いち","いちじ","に","みち"]
+- choices: ["いち","みち","いちじ","に"]
 - correct: "みち"
 - explanation: 「道」 se lee 「みち」.
 - hint: Lección 10 · Kanji
@@ -1478,7 +1478,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「自分」?
-- choices: ["いちじ","に","いち","じぶん"]
+- choices: ["じぶん","いち","に","いちじ"]
 - correct: "じぶん"
 - explanation: 「自分」 se lee 「じぶん」.
 - hint: Lección 10 · Kanji
@@ -1499,7 +1499,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「夜」?
-- choices: ["に","いち","よる","いちじ"]
+- choices: ["よる","に","いちじ","いち"]
 - correct: "よる"
 - explanation: 「夜」 se lee 「よる」.
 - hint: Lección 10 · Kanji
@@ -1520,7 +1520,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「朝」?
-- choices: ["いち","に","いちじ","あさ"]
+- choices: ["いちじ","に","いち","あさ"]
 - correct: "あさ"
 - explanation: 「朝」 se lee 「あさ」.
 - hint: Lección 10 · Kanji
@@ -1541,7 +1541,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「持つ」?
-- choices: ["いちじ","に","もつ","いち"]
+- choices: ["いちじ","に","いち","もつ"]
 - correct: "もつ"
 - explanation: 「持つ」 se lee 「もつ」.
 - hint: Lección 10 · Kanji
@@ -1564,7 +1564,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___パコです。
-- choices: ["を","で","に","は"]
+- choices: ["で","は","を","に"]
 - correct: "は"
 - explanation: 「は」marca tema.
 - hint: Lección 10 · Partículas
@@ -1585,7 +1585,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: マリアさん___せんせいです。
-- choices: ["が","を","で","は"]
+- choices: ["が","は","で","を"]
 - correct: "は"
 - explanation: Oración copulativa con tema 「は」.
 - hint: Lección 10 · Partículas
@@ -1606,7 +1606,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: これはだれ___ほんですか。
-- choices: ["で","を","の","に"]
+- choices: ["を","で","に","の"]
 - correct: "の"
 - explanation: Posesión con 「の」.
 - hint: Lección 10 · Partículas
@@ -1627,7 +1627,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___ともだちもにほんじんです。
-- choices: ["も","は","が","の"]
+- choices: ["が","は","も","の"]
 - correct: "の"
 - explanation: 「わたしのともだち」.
 - hint: Lección 10 · Partículas
@@ -1648,7 +1648,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: がっこう___いきます。
-- choices: ["を","で","に","は"]
+- choices: ["で","を","は","に"]
 - correct: "に"
 - explanation: Destino con 「に」.
 - hint: Lección 10 · Partículas
@@ -1669,7 +1669,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: としょかん___べんきょうします。
-- choices: ["に","で","を","が"]
+- choices: ["が","で","を","に"]
 - correct: "で"
 - explanation: Lugar de acción con 「で」.
 - hint: Lección 10 · Partículas
@@ -1690,7 +1690,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ほん___よみます。
-- choices: ["は","を","に","で"]
+- choices: ["は","に","を","で"]
 - correct: "を"
 - explanation: Objeto directo con 「を」.
 - hint: Lección 10 · Partículas
@@ -1711,7 +1711,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: 7じ___おきます。
-- choices: ["が","で","に","を"]
+- choices: ["を","に","で","が"]
 - correct: "に"
 - explanation: Hora específica con 「に」.
 - hint: Lección 10 · Partículas
@@ -1732,7 +1732,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: うち___かえりました。
-- choices: ["に","が","で","を"]
+- choices: ["に","が","を","で"]
 - correct: "に"
 - explanation: Destino final con 「に」.
 - hint: Lección 10 · Partículas
@@ -1753,7 +1753,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ともだち___えいがをみました。
-- choices: ["を","に","が","と"]
+- choices: ["と","を","に","が"]
 - correct: "と"
 - explanation: Compañía con 「と」.
 - hint: Lección 10 · Partículas
@@ -1774,7 +1774,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ケーキ___すきです。
-- choices: ["が","に","を","で"]
+- choices: ["で","を","に","が"]
 - correct: "が"
 - explanation: Con 「すき」 se usa 「が」.
 - hint: Lección 10 · Partículas
@@ -1795,7 +1795,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: こうえん___しんぶんをよみます。
-- choices: ["が","を","で","に"]
+- choices: ["に","を","が","で"]
 - correct: "で"
 - explanation: Lugar de acción con 「で」.
 - hint: Lección 10 · Partículas
@@ -1816,7 +1816,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: にほん___りょうりはおいしいです。
-- choices: ["を","に","の","が"]
+- choices: ["が","を","の","に"]
 - correct: "の"
 - explanation: Modificador nominal con 「の」.
 - hint: Lección 10 · Partículas
@@ -1837,7 +1837,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: 8じ___10じ___べんきょうしました。
-- choices: ["から / まで","に / に","で / から","を / に"]
+- choices: ["で / から","に / に","から / まで","を / に"]
 - correct: "から / まで"
 - explanation: Rango temporal.
 - hint: Lección 10 · Partículas
@@ -1858,7 +1858,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: くすり___のみました。
-- choices: ["が","を","で","に"]
+- choices: ["で","を","に","が"]
 - correct: "を"
 - explanation: Objeto directo.
 - hint: Lección 10 · Partículas
@@ -1902,7 +1902,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「たべる」 (comer)
-- choices: ["いって","たべて","みて","きいて"]
+- choices: ["きいて","みて","いって","たべて"]
 - correct: "たべて"
 - explanation: La forma て de 「たべる」 es 「たべて」.
 - hint: Lección 10 · Conjugación
@@ -1912,7 +1912,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「たべる」 (comer)
-- choices: ["たべた","みた","いった","きいた"]
+- choices: ["きいた","たべた","いった","みた"]
 - correct: "たべた"
 - explanation: El pasado corto de 「たべる」 es 「たべた」.
 - hint: Lección 10 · Conjugación
@@ -1932,7 +1932,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「みる」 (ver)
-- choices: ["きいて","いって","みて","たべて"]
+- choices: ["たべて","きいて","いって","みて"]
 - correct: "みて"
 - explanation: La forma て de 「みる」 es 「みて」.
 - hint: Lección 10 · Conjugación
@@ -1942,7 +1942,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「みる」 (ver)
-- choices: ["きいた","いった","みた","たべた"]
+- choices: ["たべた","みた","きいた","いった"]
 - correct: "みた"
 - explanation: El pasado corto de 「みる」 es 「みた」.
 - hint: Lección 10 · Conjugación
@@ -1962,7 +1962,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「いく」 (ir)
-- choices: ["きいて","みて","たべて","いって"]
+- choices: ["たべて","いって","みて","きいて"]
 - correct: "いって"
 - explanation: La forma て de 「いく」 es 「いって」.
 - hint: Lección 10 · Conjugación
@@ -1972,7 +1972,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「いく」 (ir)
-- choices: ["いった","たべた","きいた","みた"]
+- choices: ["きいた","みた","いった","たべた"]
 - correct: "いった"
 - explanation: El pasado corto de 「いく」 es 「いった」.
 - hint: Lección 10 · Conjugación
@@ -1992,7 +1992,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「きく」 (escuchar)
-- choices: ["いって","たべて","きいて","みて"]
+- choices: ["きいて","たべて","いって","みて"]
 - correct: "きいて"
 - explanation: La forma て de 「きく」 es 「きいて」.
 - hint: Lección 10 · Conjugación
@@ -2002,7 +2002,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「きく」 (escuchar)
-- choices: ["たべた","きいた","いった","みた"]
+- choices: ["みた","たべた","いった","きいた"]
 - correct: "きいた"
 - explanation: El pasado corto de 「きく」 es 「きいた」.
 - hint: Lección 10 · Conjugación
@@ -2022,7 +2022,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「おきる」 (levantarse)
-- choices: ["いって","おきて","みて","たべて"]
+- choices: ["いって","たべて","おきて","みて"]
 - correct: "おきて"
 - explanation: La forma て de 「おきる」 es 「おきて」.
 - hint: Lección 10 · Conjugación
@@ -2032,7 +2032,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「おきる」 (levantarse)
-- choices: ["たべた","みた","おきた","いった"]
+- choices: ["おきた","たべた","みた","いった"]
 - correct: "おきた"
 - explanation: El pasado corto de 「おきる」 es 「おきた」.
 - hint: Lección 10 · Conjugación
@@ -2052,7 +2052,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「ねる」 (dormir)
-- choices: ["たべて","いって","みて","ねて"]
+- choices: ["ねて","みて","たべて","いって"]
 - correct: "ねて"
 - explanation: La forma て de 「ねる」 es 「ねて」.
 - hint: Lección 10 · Conjugación
@@ -2062,7 +2062,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「ねる」 (dormir)
-- choices: ["たべた","みた","いった","ねた"]
+- choices: ["みた","ねた","いった","たべた"]
 - correct: "ねた"
 - explanation: El pasado corto de 「ねる」 es 「ねた」.
 - hint: Lección 10 · Conjugación
@@ -2082,7 +2082,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「かえる」 (volver)
-- choices: ["かえって","たべて","みて","いって"]
+- choices: ["みて","たべて","いって","かえって"]
 - correct: "かえって"
 - explanation: La forma て de 「かえる」 es 「かえって」.
 - hint: Lección 10 · Conjugación
@@ -2112,7 +2112,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「よむ」 (leer)
-- choices: ["よんで","いって","たべて","みて"]
+- choices: ["いって","よんで","みて","たべて"]
 - correct: "よんで"
 - explanation: La forma て de 「よむ」 es 「よんで」.
 - hint: Lección 10 · Conjugación
@@ -2122,7 +2122,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「よむ」 (leer)
-- choices: ["よんだ","いった","たべた","みた"]
+- choices: ["みた","よんだ","たべた","いった"]
 - correct: "よんだ"
 - explanation: El pasado corto de 「よむ」 es 「よんだ」.
 - hint: Lección 10 · Conjugación
@@ -2142,7 +2142,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「かく」 (escribir)
-- choices: ["みて","かいて","いって","たべて"]
+- choices: ["みて","かいて","たべて","いって"]
 - correct: "かいて"
 - explanation: La forma て de 「かく」 es 「かいて」.
 - hint: Lección 10 · Conjugación
@@ -2152,7 +2152,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「かく」 (escribir)
-- choices: ["たべた","みた","かいた","いった"]
+- choices: ["かいた","たべた","いった","みた"]
 - correct: "かいた"
 - explanation: El pasado corto de 「かく」 es 「かいた」.
 - hint: Lección 10 · Conjugación
@@ -2172,7 +2172,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「かう」 (comprar)
-- choices: ["いって","かって","みて","たべて"]
+- choices: ["いって","たべて","みて","かって"]
 - correct: "かって"
 - explanation: La forma て de 「かう」 es 「かって」.
 - hint: Lección 10 · Conjugación
@@ -2182,7 +2182,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「かう」 (comprar)
-- choices: ["みた","いった","かった","たべた"]
+- choices: ["たべた","いった","かった","みた"]
 - correct: "かった"
 - explanation: El pasado corto de 「かう」 es 「かった」.
 - hint: Lección 10 · Conjugación
@@ -2202,7 +2202,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「のむ」 (beber)
-- choices: ["のんで","いって","みて","たべて"]
+- choices: ["みて","いって","たべて","のんで"]
 - correct: "のんで"
 - explanation: La forma て de 「のむ」 es 「のんで」.
 - hint: Lección 10 · Conjugación
@@ -2212,7 +2212,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「のむ」 (beber)
-- choices: ["のんだ","いった","たべた","みた"]
+- choices: ["のんだ","みた","いった","たべた"]
 - correct: "のんだ"
 - explanation: El pasado corto de 「のむ」 es 「のんだ」.
 - hint: Lección 10 · Conjugación
@@ -2232,7 +2232,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「する」 (hacer)
-- choices: ["して","みて","いって","たべて"]
+- choices: ["して","いって","たべて","みて"]
 - correct: "して"
 - explanation: La forma て de 「する」 es 「して」.
 - hint: Lección 10 · Conjugación
@@ -2242,7 +2242,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「する」 (hacer)
-- choices: ["いった","たべた","した","みた"]
+- choices: ["いった","した","たべた","みた"]
 - correct: "した"
 - explanation: El pasado corto de 「する」 es 「した」.
 - hint: Lección 10 · Conjugación
@@ -2262,7 +2262,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「くる」 (venir)
-- choices: ["きて","いって","たべて","みて"]
+- choices: ["たべて","きて","いって","みて"]
 - correct: "きて"
 - explanation: La forma て de 「くる」 es 「きて」.
 - hint: Lección 10 · Conjugación
@@ -2272,7 +2272,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「くる」 (venir)
-- choices: ["たべた","きた","みた","いった"]
+- choices: ["いった","きた","みた","たべた"]
 - correct: "きた"
 - explanation: El pasado corto de 「くる」 es 「きた」.
 - hint: Lección 10 · Conjugación
@@ -2292,7 +2292,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「およぐ」 (nadar)
-- choices: ["みて","たべて","いって","およいで"]
+- choices: ["いって","たべて","およいで","みて"]
 - correct: "およいで"
 - explanation: La forma て de 「およぐ」 es 「およいで」.
 - hint: Lección 10 · Conjugación
@@ -2302,7 +2302,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「およぐ」 (nadar)
-- choices: ["およいだ","たべた","いった","みた"]
+- choices: ["およいだ","いった","みた","たべた"]
 - correct: "およいだ"
 - explanation: El pasado corto de 「およぐ」 es 「およいだ」.
 - hint: Lección 10 · Conjugación
@@ -2322,7 +2322,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「まつ」 (esperar)
-- choices: ["みて","まって","いって","たべて"]
+- choices: ["いって","みて","たべて","まって"]
 - correct: "まって"
 - explanation: La forma て de 「まつ」 es 「まって」.
 - hint: Lección 10 · Conjugación
@@ -2332,7 +2332,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「まつ」 (esperar)
-- choices: ["まった","たべた","みた","いった"]
+- choices: ["たべた","まった","いった","みた"]
 - correct: "まった"
 - explanation: El pasado corto de 「まつ」 es 「まった」.
 - hint: Lección 10 · Conjugación
@@ -2352,7 +2352,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あう」 (encontrarse)
-- choices: ["たべて","いって","みて","あって"]
+- choices: ["たべて","あって","みて","いって"]
 - correct: "あって"
 - explanation: La forma て de 「あう」 es 「あって」.
 - hint: Lección 10 · Conjugación
@@ -2362,7 +2362,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あう」 (encontrarse)
-- choices: ["あった","いった","みた","たべた"]
+- choices: ["たべた","あった","みた","いった"]
 - correct: "あった"
 - explanation: El pasado corto de 「あう」 es 「あった」.
 - hint: Lección 10 · Conjugación
@@ -2382,7 +2382,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「はなす」 (hablar)
-- choices: ["はなして","みて","たべて","いって"]
+- choices: ["みて","たべて","いって","はなして"]
 - correct: "はなして"
 - explanation: La forma て de 「はなす」 es 「はなして」.
 - hint: Lección 10 · Conjugación
@@ -2392,7 +2392,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「はなす」 (hablar)
-- choices: ["はなした","みた","いった","たべた"]
+- choices: ["みた","いった","たべた","はなした"]
 - correct: "はなした"
 - explanation: El pasado corto de 「はなす」 es 「はなした」.
 - hint: Lección 10 · Conjugación
@@ -2412,7 +2412,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あびる」 (ducharse)
-- choices: ["たべて","いって","みて","あびて"]
+- choices: ["たべて","あびて","いって","みて"]
 - correct: "あびて"
 - explanation: La forma て de 「あびる」 es 「あびて」.
 - hint: Lección 10 · Conjugación
@@ -2422,7 +2422,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あびる」 (ducharse)
-- choices: ["あびた","いった","たべた","みた"]
+- choices: ["いった","あびた","みた","たべた"]
 - correct: "あびた"
 - explanation: El pasado corto de 「あびる」 es 「あびた」.
 - hint: Lección 10 · Conjugación
@@ -2442,7 +2442,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あそぶ」 (jugar)
-- choices: ["あそんで","たべて","みて","いって"]
+- choices: ["あそんで","みて","いって","たべて"]
 - correct: "あそんで"
 - explanation: La forma て de 「あそぶ」 es 「あそんで」.
 - hint: Lección 10 · Conjugación
@@ -2452,7 +2452,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あそぶ」 (jugar)
-- choices: ["みた","たべた","いった","あそんだ"]
+- choices: ["たべた","あそんだ","いった","みた"]
 - correct: "あそんだ"
 - explanation: El pasado corto de 「あそぶ」 es 「あそんだ」.
 - hint: Lección 10 · Conjugación
@@ -2472,7 +2472,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「つくる」 (hacer/crear)
-- choices: ["みて","いって","たべて","つくって"]
+- choices: ["つくって","いって","たべて","みて"]
 - correct: "つくって"
 - explanation: La forma て de 「つくる」 es 「つくって」.
 - hint: Lección 10 · Conjugación
@@ -2482,7 +2482,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「つくる」 (hacer/crear)
-- choices: ["みた","つくった","いった","たべた"]
+- choices: ["いった","つくった","たべた","みた"]
 - correct: "つくった"
 - explanation: El pasado corto de 「つくる」 es 「つくった」.
 - hint: Lección 10 · Conjugación
@@ -2502,7 +2502,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あげる」 (dar)
-- choices: ["あげて","みて","たべて","いって"]
+- choices: ["みて","あげて","たべて","いって"]
 - correct: "あげて"
 - explanation: La forma て de 「あげる」 es 「あげて」.
 - hint: Lección 10 · Conjugación
@@ -2512,7 +2512,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あげる」 (dar)
-- choices: ["あげた","みた","いった","たべた"]
+- choices: ["いった","あげた","みた","たべた"]
 - correct: "あげた"
 - explanation: El pasado corto de 「あげる」 es 「あげた」.
 - hint: Lección 10 · Conjugación
@@ -2532,7 +2532,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「もらう」 (recibir)
-- choices: ["いって","みて","もらって","たべて"]
+- choices: ["もらって","みて","いって","たべて"]
 - correct: "もらって"
 - explanation: La forma て de 「もらう」 es 「もらって」.
 - hint: Lección 10 · Conjugación
@@ -2542,7 +2542,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「もらう」 (recibir)
-- choices: ["みた","もらった","いった","たべた"]
+- choices: ["いった","もらった","たべた","みた"]
 - correct: "もらった"
 - explanation: El pasado corto de 「もらう」 es 「もらった」.
 - hint: Lección 10 · Conjugación
@@ -2562,7 +2562,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「なる」 (volverse)
-- choices: ["みて","なって","いって","たべて"]
+- choices: ["たべて","いって","なって","みて"]
 - correct: "なって"
 - explanation: La forma て de 「なる」 es 「なって」.
 - hint: Lección 10 · Conjugación
@@ -2572,7 +2572,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「なる」 (volverse)
-- choices: ["たべた","みた","いった","なった"]
+- choices: ["なった","いった","たべた","みた"]
 - correct: "なった"
 - explanation: El pasado corto de 「なる」 es 「なった」.
 - hint: Lección 10 · Conjugación
@@ -2592,7 +2592,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「つかう」 (usar)
-- choices: ["いって","みて","たべて","つかって"]
+- choices: ["たべて","みて","つかって","いって"]
 - correct: "つかって"
 - explanation: La forma て de 「つかう」 es 「つかって」.
 - hint: Lección 10 · Conjugación
@@ -2602,7 +2602,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「つかう」 (usar)
-- choices: ["つかった","いった","みた","たべた"]
+- choices: ["つかった","みた","たべた","いった"]
 - correct: "つかった"
 - explanation: El pasado corto de 「つかう」 es 「つかった」.
 - hint: Lección 10 · Conjugación
@@ -2622,7 +2622,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「やすむ」 (descansar)
-- choices: ["やすんで","いって","たべて","みて"]
+- choices: ["やすんで","たべて","いって","みて"]
 - correct: "やすんで"
 - explanation: La forma て de 「やすむ」 es 「やすんで」.
 - hint: Lección 10 · Conjugación
@@ -2632,7 +2632,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「やすむ」 (descansar)
-- choices: ["たべた","みた","いった","やすんだ"]
+- choices: ["みた","やすんだ","たべた","いった"]
 - correct: "やすんだ"
 - explanation: El pasado corto de 「やすむ」 es 「やすんだ」.
 - hint: Lección 10 · Conjugación
@@ -2652,7 +2652,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「おしえる」 (enseñar)
-- choices: ["いって","みて","たべて","おしえて"]
+- choices: ["たべて","いって","みて","おしえて"]
 - correct: "おしえて"
 - explanation: La forma て de 「おしえる」 es 「おしえて」.
 - hint: Lección 10 · Conjugación
@@ -2662,7 +2662,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「おしえる」 (enseñar)
-- choices: ["たべた","みた","おしえた","いった"]
+- choices: ["たべた","おしえた","みた","いった"]
 - correct: "おしえた"
 - explanation: El pasado corto de 「おしえる」 es 「おしえた」.
 - hint: Lección 10 · Conjugación
@@ -2682,7 +2682,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「とる」 (tomar)
-- choices: ["いって","みて","とって","たべて"]
+- choices: ["たべて","いって","みて","とって"]
 - correct: "とって"
 - explanation: La forma て de 「とる」 es 「とって」.
 - hint: Lección 10 · Conjugación
@@ -2692,7 +2692,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「とる」 (tomar)
-- choices: ["たべた","みた","とった","いった"]
+- choices: ["とった","たべた","いった","みた"]
 - correct: "とった"
 - explanation: El pasado corto de 「とる」 es 「とった」.
 - hint: Lección 10 · Conjugación
@@ -2712,7 +2712,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「とおい」 (lejano)
-- choices: ["やすくない","たかくない","しずかじゃない","とおくない"]
+- choices: ["やすくない","とおくない","しずかじゃない","たかくない"]
 - correct: "とおくない"
 - explanation: La forma negativa de 「とおい」 es 「とおくない」.
 - hint: Lección 10 · Conjugación
@@ -2722,7 +2722,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「ひろい」 (amplio)
-- choices: ["ひろくない","やすくない","たかくない","しずかじゃない"]
+- choices: ["しずかじゃない","ひろくない","たかくない","やすくない"]
 - correct: "ひろくない"
 - explanation: La forma negativa de 「ひろい」 es 「ひろくない」.
 - hint: Lección 10 · Conjugación
@@ -2732,7 +2732,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「せまい」 (estrecho)
-- choices: ["たかくない","やすくない","しずかじゃない","せまくない"]
+- choices: ["せまくない","たかくない","やすくない","しずかじゃない"]
 - correct: "せまくない"
 - explanation: La forma negativa de 「せまい」 es 「せまくない」.
 - hint: Lección 10 · Conjugación
@@ -2744,7 +2744,7 @@
 - type: `reorder`
 - source: `lesson_scenarios_grammar`
 - prompt: Ordena la comparación.
-- choices: ["の","えいご","より","ほうが","にほんご","むずかしいです"]
+- choices: ["にほんご","えいご","ほうが","むずかしいです","より","の"]
 - correct: "にほんご の ほうが えいご より むずかしいです"
 - explanation: El patrón es 「A のほうが B より ...」.
 - hint: Lección 10 · Comparaciones

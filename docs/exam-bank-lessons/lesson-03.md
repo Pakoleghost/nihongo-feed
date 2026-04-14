@@ -24,7 +24,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「えいが」?
-- choices: ["todos los días","biblioteca","película","música"]
+- choices: ["música","película","biblioteca","todos los días"]
 - correct: "película"
 - explanation: 「えいが」 significa “película”.
 - hint: Lección 3 · Vocabulario
@@ -34,7 +34,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “película”
-- choices: ["音楽 (おんがく)","図書館 (としょかん)","映画 (えいが)","毎日 (まいにち)"]
+- choices: ["映画 (えいが)","図書館 (としょかん)","毎日 (まいにち)","音楽 (おんがく)"]
 - correct: "映画 (えいが)"
 - explanation: La opción correcta para “película” es 「映画 (えいが)」.
 - hint: Lección 3 · Vocabulario
@@ -44,7 +44,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おんがく」?
-- choices: ["película","todos los días","biblioteca","música"]
+- choices: ["película","biblioteca","todos los días","música"]
 - correct: "música"
 - explanation: 「おんがく」 significa “música”.
 - hint: Lección 3 · Vocabulario
@@ -54,7 +54,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “música”
-- choices: ["図書館 (としょかん)","映画 (えいが)","音楽 (おんがく)","毎日 (まいにち)"]
+- choices: ["映画 (えいが)","音楽 (おんがく)","図書館 (としょかん)","毎日 (まいにち)"]
 - correct: "音楽 (おんがく)"
 - explanation: La opción correcta para “música” es 「音楽 (おんがく)」.
 - hint: Lección 3 · Vocabulario
@@ -64,7 +64,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「まいにち」?
-- choices: ["música","película","todos los días","biblioteca"]
+- choices: ["música","todos los días","biblioteca","película"]
 - correct: "todos los días"
 - explanation: 「まいにち」 significa “todos los días”.
 - hint: Lección 3 · Vocabulario
@@ -74,7 +74,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “todos los días”
-- choices: ["音楽 (おんがく)","図書館 (としょかん)","映画 (えいが)","毎日 (まいにち)"]
+- choices: ["毎日 (まいにち)","音楽 (おんがく)","図書館 (としょかん)","映画 (えいが)"]
 - correct: "毎日 (まいにち)"
 - explanation: La opción correcta para “todos los días” es 「毎日 (まいにち)」.
 - hint: Lección 3 · Vocabulario
@@ -84,7 +84,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「としょかん」?
-- choices: ["biblioteca","música","todos los días","película"]
+- choices: ["música","todos los días","película","biblioteca"]
 - correct: "biblioteca"
 - explanation: 「としょかん」 significa “biblioteca”.
 - hint: Lección 3 · Vocabulario
@@ -94,7 +94,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “biblioteca”
-- choices: ["音楽 (おんがく)","映画 (えいが)","図書館 (としょかん)","毎日 (まいにち)"]
+- choices: ["映画 (えいが)","音楽 (おんがく)","図書館 (としょかん)","毎日 (まいにち)"]
 - correct: "図書館 (としょかん)"
 - explanation: La opción correcta para “biblioteca” es 「図書館 (としょかん)」.
 - hint: Lección 3 · Vocabulario
@@ -104,7 +104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「なんじ」?
-- choices: ["todos los días","qué hora","película","música"]
+- choices: ["todos los días","película","música","qué hora"]
 - correct: "qué hora"
 - explanation: 「なんじ」 significa “qué hora”.
 - hint: Lección 3 · Vocabulario
@@ -114,7 +114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “qué hora”
-- choices: ["映画 (えいが)","音楽 (おんがく)","何時 (なんじ)","毎日 (まいにち)"]
+- choices: ["映画 (えいが)","毎日 (まいにち)","音楽 (おんがく)","何時 (なんじ)"]
 - correct: "何時 (なんじ)"
 - explanation: La opción correcta para “qué hora” es 「何時 (なんじ)」.
 - hint: Lección 3 · Vocabulario
@@ -124,7 +124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「げつようび」?
-- choices: ["música","película","todos los días","lunes"]
+- choices: ["película","todos los días","lunes","música"]
 - correct: "lunes"
 - explanation: 「げつようび」 significa “lunes”.
 - hint: Lección 3 · Vocabulario
@@ -134,7 +134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “lunes”
-- choices: ["映画 (えいが)","毎日 (まいにち)","月曜日 (げつようび)","音楽 (おんがく)"]
+- choices: ["音楽 (おんがく)","映画 (えいが)","月曜日 (げつようび)","毎日 (まいにち)"]
 - correct: "月曜日 (げつようび)"
 - explanation: La opción correcta para “lunes” es 「月曜日 (げつようび)」.
 - hint: Lección 3 · Vocabulario
@@ -144,7 +144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かようび」?
-- choices: ["todos los días","música","película","martes"]
+- choices: ["todos los días","película","martes","música"]
 - correct: "martes"
 - explanation: 「かようび」 significa “martes”.
 - hint: Lección 3 · Vocabulario
@@ -154,7 +154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “martes”
-- choices: ["火曜日 (かようび)","音楽 (おんがく)","映画 (えいが)","毎日 (まいにち)"]
+- choices: ["音楽 (おんがく)","毎日 (まいにち)","火曜日 (かようび)","映画 (えいが)"]
 - correct: "火曜日 (かようび)"
 - explanation: La opción correcta para “martes” es 「火曜日 (かようび)」.
 - hint: Lección 3 · Vocabulario
@@ -164,7 +164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ごぜん」?
-- choices: ["película","música","todos los días","a.m."]
+- choices: ["a.m.","todos los días","película","música"]
 - correct: "a.m."
 - explanation: 「ごぜん」 significa “a.m.”.
 - hint: Lección 3 · Vocabulario
@@ -174,7 +174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “a.m.”
-- choices: ["音楽 (おんがく)","毎日 (まいにち)","午前 (ごぜん)","映画 (えいが)"]
+- choices: ["毎日 (まいにち)","午前 (ごぜん)","音楽 (おんがく)","映画 (えいが)"]
 - correct: "午前 (ごぜん)"
 - explanation: La opción correcta para “a.m.” es 「午前 (ごぜん)」.
 - hint: Lección 3 · Vocabulario
@@ -184,7 +184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ごご」?
-- choices: ["todos los días","película","p.m.","música"]
+- choices: ["todos los días","música","p.m.","película"]
 - correct: "p.m."
 - explanation: 「ごご」 significa “p.m.”.
 - hint: Lección 3 · Vocabulario
@@ -194,7 +194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “p.m.”
-- choices: ["午後 (ごご)","毎日 (まいにち)","映画 (えいが)","音楽 (おんがく)"]
+- choices: ["毎日 (まいにち)","音楽 (おんがく)","映画 (えいが)","午後 (ごご)"]
 - correct: "午後 (ごご)"
 - explanation: La opción correcta para “p.m.” es 「午後 (ごご)」.
 - hint: Lección 3 · Vocabulario
@@ -204,7 +204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しゅう」?
-- choices: ["música","película","semana","todos los días"]
+- choices: ["semana","música","todos los días","película"]
 - correct: "semana"
 - explanation: 「しゅう」 significa “semana”.
 - hint: Lección 3 · Vocabulario
@@ -224,7 +224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あさごはん」?
-- choices: ["desayuno","película","todos los días","música"]
+- choices: ["desayuno","todos los días","música","película"]
 - correct: "desayuno"
 - explanation: 「あさごはん」 significa “desayuno”.
 - hint: Lección 3 · Vocabulario
@@ -234,7 +234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “desayuno”
-- choices: ["毎日 (まいにち)","映画 (えいが)","朝ご飯 (あさごはん)","音楽 (おんがく)"]
+- choices: ["毎日 (まいにち)","朝ご飯 (あさごはん)","映画 (えいが)","音楽 (おんがく)"]
 - correct: "朝ご飯 (あさごはん)"
 - explanation: La opción correcta para “desayuno” es 「朝ご飯 (あさごはん)」.
 - hint: Lección 3 · Vocabulario
@@ -244,7 +244,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ひるごはん」?
-- choices: ["película","música","comida","todos los días"]
+- choices: ["película","música","todos los días","comida"]
 - correct: "comida"
 - explanation: 「ひるごはん」 significa “comida”.
 - hint: Lección 3 · Vocabulario
@@ -254,7 +254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “comida”
-- choices: ["映画 (えいが)","音楽 (おんがく)","昼ご飯 (ひるごはん)","毎日 (まいにち)"]
+- choices: ["音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)","昼ご飯 (ひるごはん)"]
 - correct: "昼ご飯 (ひるごはん)"
 - explanation: La opción correcta para “comida” es 「昼ご飯 (ひるごはん)」.
 - hint: Lección 3 · Vocabulario
@@ -264,7 +264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ばんごはん」?
-- choices: ["música","cena","todos los días","película"]
+- choices: ["película","música","todos los días","cena"]
 - correct: "cena"
 - explanation: 「ばんごはん」 significa “cena”.
 - hint: Lección 3 · Vocabulario
@@ -274,7 +274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cena”
-- choices: ["映画 (えいが)","毎日 (まいにち)","晩ご飯 (ばんごはん)","音楽 (おんがく)"]
+- choices: ["毎日 (まいにち)","映画 (えいが)","音楽 (おんがく)","晩ご飯 (ばんごはん)"]
 - correct: "晩ご飯 (ばんごはん)"
 - explanation: La opción correcta para “cena” es 「晩ご飯 (ばんごはん)」.
 - hint: Lección 3 · Vocabulario
@@ -284,7 +284,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いま」?
-- choices: ["todos los días","música","ahora","película"]
+- choices: ["película","todos los días","música","ahora"]
 - correct: "ahora"
 - explanation: 「いま」 significa “ahora”.
 - hint: Lección 3 · Vocabulario
@@ -294,7 +294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ahora”
-- choices: ["毎日 (まいにち)","音楽 (おんがく)","映画 (えいが)","今 (いま)"]
+- choices: ["毎日 (まいにち)","音楽 (おんがく)","今 (いま)","映画 (えいが)"]
 - correct: "今 (いま)"
 - explanation: La opción correcta para “ahora” es 「今 (いま)」.
 - hint: Lección 3 · Vocabulario
@@ -304,7 +304,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はん」?
-- choices: ["música","película","media (hora)","todos los días"]
+- choices: ["todos los días","música","película","media (hora)"]
 - correct: "media (hora)"
 - explanation: 「はん」 significa “media (hora)”.
 - hint: Lección 3 · Vocabulario
@@ -314,7 +314,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “media (hora)”
-- choices: ["はん","毎日 (まいにち)","映画 (えいが)","音楽 (おんがく)"]
+- choices: ["毎日 (まいにち)","音楽 (おんがく)","はん","映画 (えいが)"]
 - correct: "はん"
 - explanation: La opción correcta para “media (hora)” es 「はん」.
 - hint: Lección 3 · Vocabulario
@@ -324,7 +324,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「まいあさ」?
-- choices: ["cada mañana","todos los días","película","música"]
+- choices: ["música","todos los días","cada mañana","película"]
 - correct: "cada mañana"
 - explanation: 「まいあさ」 significa “cada mañana”.
 - hint: Lección 3 · Vocabulario
@@ -334,7 +334,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cada mañana”
-- choices: ["映画 (えいが)","毎朝 (まいあさ)","音楽 (おんがく)","毎日 (まいにち)"]
+- choices: ["映画 (えいが)","毎朝 (まいあさ)","毎日 (まいにち)","音楽 (おんがく)"]
 - correct: "毎朝 (まいあさ)"
 - explanation: La opción correcta para “cada mañana” es 「毎朝 (まいあさ)」.
 - hint: Lección 3 · Vocabulario
@@ -344,7 +344,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「まいばん」?
-- choices: ["película","cada noche","todos los días","música"]
+- choices: ["música","todos los días","película","cada noche"]
 - correct: "cada noche"
 - explanation: 「まいばん」 significa “cada noche”.
 - hint: Lección 3 · Vocabulario
@@ -354,7 +354,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cada noche”
-- choices: ["毎日 (まいにち)","音楽 (おんがく)","映画 (えいが)","毎晩 (まいばん)"]
+- choices: ["音楽 (おんがく)","毎晩 (まいばん)","毎日 (まいにち)","映画 (えいが)"]
 - correct: "毎晩 (まいばん)"
 - explanation: La opción correcta para “cada noche” es 「毎晩 (まいばん)」.
 - hint: Lección 3 · Vocabulario
@@ -364,7 +364,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「まいしゅう」?
-- choices: ["todos los días","película","música","cada semana"]
+- choices: ["película","música","cada semana","todos los días"]
 - correct: "cada semana"
 - explanation: 「まいしゅう」 significa “cada semana”.
 - hint: Lección 3 · Vocabulario
@@ -384,7 +384,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「どようび」?
-- choices: ["película","todos los días","música","sábado"]
+- choices: ["música","todos los días","película","sábado"]
 - correct: "sábado"
 - explanation: 「どようび」 significa “sábado”.
 - hint: Lección 3 · Vocabulario
@@ -394,7 +394,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “sábado”
-- choices: ["音楽 (おんがく)","映画 (えいが)","毎日 (まいにち)","土曜日 (どようび)"]
+- choices: ["土曜日 (どようび)","映画 (えいが)","音楽 (おんがく)","毎日 (まいにち)"]
 - correct: "土曜日 (どようび)"
 - explanation: La opción correcta para “sábado” es 「土曜日 (どようび)」.
 - hint: Lección 3 · Vocabulario
@@ -404,7 +404,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「にちようび」?
-- choices: ["película","domingo","todos los días","música"]
+- choices: ["música","película","domingo","todos los días"]
 - correct: "domingo"
 - explanation: 「にちようび」 significa “domingo”.
 - hint: Lección 3 · Vocabulario
@@ -414,7 +414,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “domingo”
-- choices: ["音楽 (おんがく)","日曜日 (にちようび)","映画 (えいが)","毎日 (まいにち)"]
+- choices: ["音楽 (おんがく)","映画 (えいが)","毎日 (まいにち)","日曜日 (にちようび)"]
 - correct: "日曜日 (にちようび)"
 - explanation: La opción correcta para “domingo” es 「日曜日 (にちようび)」.
 - hint: Lección 3 · Vocabulario
@@ -424,7 +424,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ともだち」?
-- choices: ["música","película","amigo","todos los días"]
+- choices: ["todos los días","amigo","película","música"]
 - correct: "amigo"
 - explanation: 「ともだち」 significa “amigo”.
 - hint: Lección 3 · Vocabulario
@@ -434,7 +434,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “amigo”
-- choices: ["映画 (えいが)","毎日 (まいにち)","友達 (ともだち)","音楽 (おんがく)"]
+- choices: ["毎日 (まいにち)","音楽 (おんがく)","友達 (ともだち)","映画 (えいが)"]
 - correct: "友達 (ともだち)"
 - explanation: La opción correcta para “amigo” es 「友達 (ともだち)」.
 - hint: Lección 3 · Vocabulario
@@ -444,7 +444,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「うちにかえる」?
-- choices: ["película","todos los días","regresar a casa","música"]
+- choices: ["música","todos los días","regresar a casa","película"]
 - correct: "regresar a casa"
 - explanation: 「うちにかえる」 significa “regresar a casa”.
 - hint: Lección 3 · Vocabulario
@@ -454,7 +454,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “regresar a casa”
-- choices: ["音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)","家に帰る (うちにかえる)"]
+- choices: ["毎日 (まいにち)","映画 (えいが)","音楽 (おんがく)","家に帰る (うちにかえる)"]
 - correct: "家に帰る (うちにかえる)"
 - explanation: La opción correcta para “regresar a casa” es 「家に帰る (うちにかえる)」.
 - hint: Lección 3 · Vocabulario
@@ -464,7 +464,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「たべる」?
-- choices: ["música","película","todos los días","comer"]
+- choices: ["todos los días","comer","música","película"]
 - correct: "comer"
 - explanation: 「たべる」 significa “comer”.
 - hint: Lección 3 · Vocabulario
@@ -474,7 +474,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “comer”
-- choices: ["音楽 (おんがく)","たべる","映画 (えいが)","毎日 (まいにち)"]
+- choices: ["音楽 (おんがく)","毎日 (まいにち)","たべる","映画 (えいが)"]
 - correct: "たべる"
 - explanation: La opción correcta para “comer” es 「たべる」.
 - hint: Lección 3 · Vocabulario
@@ -484,7 +484,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「みる」?
-- choices: ["todos los días","música","ver","película"]
+- choices: ["ver","música","película","todos los días"]
 - correct: "ver"
 - explanation: 「みる」 significa “ver”.
 - hint: Lección 3 · Vocabulario
@@ -494,7 +494,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ver”
-- choices: ["音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)","みる"]
+- choices: ["映画 (えいが)","みる","毎日 (まいにち)","音楽 (おんがく)"]
 - correct: "みる"
 - explanation: La opción correcta para “ver” es 「みる」.
 - hint: Lección 3 · Vocabulario
@@ -504,7 +504,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いく」?
-- choices: ["película","música","ir","todos los días"]
+- choices: ["película","todos los días","ir","música"]
 - correct: "ir"
 - explanation: 「いく」 significa “ir”.
 - hint: Lección 3 · Vocabulario
@@ -514,7 +514,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ir”
-- choices: ["毎日 (まいにち)","いく","音楽 (おんがく)","映画 (えいが)"]
+- choices: ["いく","音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)"]
 - correct: "いく"
 - explanation: La opción correcta para “ir” es 「いく」.
 - hint: Lección 3 · Vocabulario
@@ -524,7 +524,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きく」?
-- choices: ["película","escuchar","todos los días","música"]
+- choices: ["todos los días","música","escuchar","película"]
 - correct: "escuchar"
 - explanation: 「きく」 significa “escuchar”.
 - hint: Lección 3 · Vocabulario
@@ -534,7 +534,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “escuchar”
-- choices: ["音楽 (おんがく)","きく","毎日 (まいにち)","映画 (えいが)"]
+- choices: ["毎日 (まいにち)","音楽 (おんがく)","きく","映画 (えいが)"]
 - correct: "きく"
 - explanation: La opción correcta para “escuchar” es 「きく」.
 - hint: Lección 3 · Vocabulario
@@ -544,7 +544,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はなす」?
-- choices: ["música","todos los días","hablar","película"]
+- choices: ["hablar","todos los días","música","película"]
 - correct: "hablar"
 - explanation: 「はなす」 significa “hablar”.
 - hint: Lección 3 · Vocabulario
@@ -554,7 +554,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hablar”
-- choices: ["映画 (えいが)","毎日 (まいにち)","はなす","音楽 (おんがく)"]
+- choices: ["毎日 (まいにち)","音楽 (おんがく)","はなす","映画 (えいが)"]
 - correct: "はなす"
 - explanation: La opción correcta para “hablar” es 「はなす」.
 - hint: Lección 3 · Vocabulario
@@ -564,7 +564,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ざっし」?
-- choices: ["música","revista","todos los días","película"]
+- choices: ["revista","película","todos los días","música"]
 - correct: "revista"
 - explanation: 「ざっし」 significa “revista”.
 - hint: Lección 3 · Vocabulario
@@ -574,7 +574,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “revista”
-- choices: ["映画 (えいが)","毎日 (まいにち)","雑誌 (ざっし)","音楽 (おんがく)"]
+- choices: ["毎日 (まいにち)","音楽 (おんがく)","映画 (えいが)","雑誌 (ざっし)"]
 - correct: "雑誌 (ざっし)"
 - explanation: La opción correcta para “revista” es 「雑誌 (ざっし)」.
 - hint: Lección 3 · Vocabulario
@@ -584,7 +584,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「スポーツ」?
-- choices: ["película","música","todos los días","deportes"]
+- choices: ["deportes","película","música","todos los días"]
 - correct: "deportes"
 - explanation: 「スポーツ」 significa “deportes”.
 - hint: Lección 3 · Vocabulario
@@ -594,7 +594,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “deportes”
-- choices: ["音楽 (おんがく)","映画 (えいが)","スポーツ","毎日 (まいにち)"]
+- choices: ["音楽 (おんがく)","スポーツ","映画 (えいが)","毎日 (まいにち)"]
 - correct: "スポーツ"
 - explanation: La opción correcta para “deportes” es 「スポーツ」.
 - hint: Lección 3 · Vocabulario
@@ -604,7 +604,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「デート」?
-- choices: ["todos los días","película","música","cita (romántica)"]
+- choices: ["película","todos los días","cita (romántica)","música"]
 - correct: "cita (romántica)"
 - explanation: 「デート」 significa “cita (romántica)”.
 - hint: Lección 3 · Vocabulario
@@ -614,7 +614,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cita (romántica)”
-- choices: ["デート","音楽 (おんがく)","映画 (えいが)","毎日 (まいにち)"]
+- choices: ["デート","音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)"]
 - correct: "デート"
 - explanation: La opción correcta para “cita (romántica)” es 「デート」.
 - hint: Lección 3 · Vocabulario
@@ -624,7 +624,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「テニス」?
-- choices: ["música","película","tenis","todos los días"]
+- choices: ["música","película","todos los días","tenis"]
 - correct: "tenis"
 - explanation: 「テニス」 significa “tenis”.
 - hint: Lección 3 · Vocabulario
@@ -634,7 +634,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tenis”
-- choices: ["テニス","毎日 (まいにち)","音楽 (おんがく)","映画 (えいが)"]
+- choices: ["毎日 (まいにち)","映画 (えいが)","音楽 (おんがく)","テニス"]
 - correct: "テニス"
 - explanation: La opción correcta para “tenis” es 「テニス」.
 - hint: Lección 3 · Vocabulario
@@ -644,7 +644,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「テレビ」?
-- choices: ["película","todos los días","música","TV"]
+- choices: ["película","TV","todos los días","música"]
 - correct: "TV"
 - explanation: 「テレビ」 significa “TV”.
 - hint: Lección 3 · Vocabulario
@@ -654,7 +654,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “TV”
-- choices: ["毎日 (まいにち)","音楽 (おんがく)","映画 (えいが)","テレビ"]
+- choices: ["テレビ","映画 (えいが)","音楽 (おんがく)","毎日 (まいにち)"]
 - correct: "テレビ"
 - explanation: La opción correcta para “TV” es 「テレビ」.
 - hint: Lección 3 · Vocabulario
@@ -664,7 +664,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「アイスクリーム」?
-- choices: ["película","música","todos los días","helado"]
+- choices: ["helado","todos los días","película","música"]
 - correct: "helado"
 - explanation: 「アイスクリーム」 significa “helado”.
 - hint: Lección 3 · Vocabulario
@@ -674,7 +674,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “helado”
-- choices: ["毎日 (まいにち)","アイスクリーム","音楽 (おんがく)","映画 (えいが)"]
+- choices: ["映画 (えいが)","毎日 (まいにち)","音楽 (おんがく)","アイスクリーム"]
 - correct: "アイスクリーム"
 - explanation: La opción correcta para “helado” es 「アイスクリーム」.
 - hint: Lección 3 · Vocabulario
@@ -684,7 +684,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ハンバーガー」?
-- choices: ["todos los días","música","hamburguesa","película"]
+- choices: ["hamburguesa","película","todos los días","música"]
 - correct: "hamburguesa"
 - explanation: 「ハンバーガー」 significa “hamburguesa”.
 - hint: Lección 3 · Vocabulario
@@ -694,7 +694,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hamburguesa”
-- choices: ["音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)","ハンバーガー"]
+- choices: ["映画 (えいが)","ハンバーガー","音楽 (おんがく)","毎日 (まいにち)"]
 - correct: "ハンバーガー"
 - explanation: La opción correcta para “hamburguesa” es 「ハンバーガー」.
 - hint: Lección 3 · Vocabulario
@@ -704,7 +704,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おさけ」?
-- choices: ["música","todos los días","sake; bebida alcohólica","película"]
+- choices: ["todos los días","película","sake; bebida alcohólica","música"]
 - correct: "sake; bebida alcohólica"
 - explanation: 「おさけ」 significa “sake; bebida alcohólica”.
 - hint: Lección 3 · Vocabulario
@@ -724,7 +724,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おちゃ」?
-- choices: ["música","té verde","película","todos los días"]
+- choices: ["música","película","té verde","todos los días"]
 - correct: "té verde"
 - explanation: 「おちゃ」 significa “té verde”.
 - hint: Lección 3 · Vocabulario
@@ -734,7 +734,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “té verde”
-- choices: ["音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)","お茶 (おちゃ)"]
+- choices: ["お茶 (おちゃ)","音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)"]
 - correct: "お茶 (おちゃ)"
 - explanation: La opción correcta para “té verde” es 「お茶 (おちゃ)」.
 - hint: Lección 3 · Vocabulario
@@ -744,7 +744,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「コーヒー」?
-- choices: ["café","película","música","todos los días"]
+- choices: ["película","todos los días","café","música"]
 - correct: "café"
 - explanation: 「コーヒー」 significa “café”.
 - hint: Lección 3 · Vocabulario
@@ -754,7 +754,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “café”
-- choices: ["音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)","コーヒー"]
+- choices: ["毎日 (まいにち)","コーヒー","音楽 (おんがく)","映画 (えいが)"]
 - correct: "コーヒー"
 - explanation: La opción correcta para “café” es 「コーヒー」.
 - hint: Lección 3 · Vocabulario
@@ -784,7 +784,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いえ」?
-- choices: ["película","música","todos los días","hogar; casa"]
+- choices: ["película","todos los días","música","hogar; casa"]
 - correct: "hogar; casa"
 - explanation: 「いえ」 significa “hogar; casa”.
 - hint: Lección 3 · Vocabulario
@@ -794,7 +794,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hogar; casa”
-- choices: ["音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)","家 (いえ)"]
+- choices: ["毎日 (まいにち)","映画 (えいが)","音楽 (おんがく)","家 (いえ)"]
 - correct: "家 (いえ)"
 - explanation: La opción correcta para “hogar; casa” es 「家 (いえ)」.
 - hint: Lección 3 · Vocabulario
@@ -804,7 +804,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「うち」?
-- choices: ["música","todos los días","hogar; casa; mi casa","película"]
+- choices: ["hogar; casa; mi casa","película","música","todos los días"]
 - correct: "hogar; casa; mi casa"
 - explanation: 「うち」 significa “hogar; casa; mi casa”.
 - hint: Lección 3 · Vocabulario
@@ -814,7 +814,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hogar; casa; mi casa”
-- choices: ["映画 (えいが)","家 (うち)","音楽 (おんがく)","毎日 (まいにち)"]
+- choices: ["音楽 (おんがく)","毎日 (まいにち)","家 (うち)","映画 (えいが)"]
 - correct: "家 (うち)"
 - explanation: La opción correcta para “hogar; casa; mi casa” es 「家 (うち)」.
 - hint: Lección 3 · Vocabulario
@@ -824,7 +824,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「がっこう」?
-- choices: ["película","música","escuela","todos los días"]
+- choices: ["todos los días","música","película","escuela"]
 - correct: "escuela"
 - explanation: 「がっこう」 significa “escuela”.
 - hint: Lección 3 · Vocabulario
@@ -834,7 +834,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “escuela”
-- choices: ["音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)","学校 (がっこう)"]
+- choices: ["学校 (がっこう)","毎日 (まいにち)","音楽 (おんがく)","映画 (えいが)"]
 - correct: "学校 (がっこう)"
 - explanation: La opción correcta para “escuela” es 「学校 (がっこう)」.
 - hint: Lección 3 · Vocabulario
@@ -844,7 +844,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「カフェ」?
-- choices: ["película","música","todos los días","cafetería"]
+- choices: ["música","película","cafetería","todos los días"]
 - correct: "cafetería"
 - explanation: 「カフェ」 significa “cafetería”.
 - hint: Lección 3 · Vocabulario
@@ -854,7 +854,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cafetería”
-- choices: ["音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)","カフェ"]
+- choices: ["音楽 (おんがく)","カフェ","映画 (えいが)","毎日 (まいにち)"]
 - correct: "カフェ"
 - explanation: La opción correcta para “cafetería” es 「カフェ」.
 - hint: Lección 3 · Vocabulario
@@ -864,7 +864,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あさ」?
-- choices: ["película","todos los días","mañana","música"]
+- choices: ["mañana","música","película","todos los días"]
 - correct: "mañana"
 - explanation: 「あさ」 significa “mañana”.
 - hint: Lección 3 · Vocabulario
@@ -874,7 +874,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “mañana”
-- choices: ["毎日 (まいにち)","映画 (えいが)","音楽 (おんがく)","朝 (あさ)"]
+- choices: ["毎日 (まいにち)","朝 (あさ)","映画 (えいが)","音楽 (おんがく)"]
 - correct: "朝 (あさ)"
 - explanation: La opción correcta para “mañana” es 「朝 (あさ)」.
 - hint: Lección 3 · Vocabulario
@@ -884,7 +884,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きょう」?
-- choices: ["todos los días","música","hoy","película"]
+- choices: ["todos los días","hoy","película","música"]
 - correct: "hoy"
 - explanation: 「きょう」 significa “hoy”.
 - hint: Lección 3 · Vocabulario
@@ -894,7 +894,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hoy”
-- choices: ["映画 (えいが)","今日 (きょう)","毎日 (まいにち)","音楽 (おんがく)"]
+- choices: ["音楽 (おんがく)","今日 (きょう)","映画 (えいが)","毎日 (まいにち)"]
 - correct: "今日 (きょう)"
 - explanation: La opción correcta para “hoy” es 「今日 (きょう)」.
 - hint: Lección 3 · Vocabulario
@@ -904,7 +904,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ごぜんちゅう」?
-- choices: ["todos los días","película","música","por la mañana"]
+- choices: ["película","todos los días","música","por la mañana"]
 - correct: "por la mañana"
 - explanation: 「ごぜんちゅう」 significa “por la mañana”.
 - hint: Lección 3 · Vocabulario
@@ -914,7 +914,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “por la mañana”
-- choices: ["映画 (えいが)","午前中 (ごぜんちゅう)","毎日 (まいにち)","音楽 (おんがく)"]
+- choices: ["音楽 (おんがく)","午前中 (ごぜんちゅう)","毎日 (まいにち)","映画 (えいが)"]
 - correct: "午前中 (ごぜんちゅう)"
 - explanation: La opción correcta para “por la mañana” es 「午前中 (ごぜんちゅう)」.
 - hint: Lección 3 · Vocabulario
@@ -924,7 +924,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「こんばん」?
-- choices: ["esta noche","todos los días","película","música"]
+- choices: ["película","música","esta noche","todos los días"]
 - correct: "esta noche"
 - explanation: 「こんばん」 significa “esta noche”.
 - hint: Lección 3 · Vocabulario
@@ -934,7 +934,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “esta noche”
-- choices: ["映画 (えいが)","毎日 (まいにち)","音楽 (おんがく)","今晩 (こんばん)"]
+- choices: ["音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)","今晩 (こんばん)"]
 - correct: "今晩 (こんばん)"
 - explanation: La opción correcta para “esta noche” es 「今晩 (こんばん)」.
 - hint: Lección 3 · Vocabulario
@@ -944,7 +944,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しゅうまつ」?
-- choices: ["música","fin de semana","película","todos los días"]
+- choices: ["música","película","todos los días","fin de semana"]
 - correct: "fin de semana"
 - explanation: 「しゅうまつ」 significa “fin de semana”.
 - hint: Lección 3 · Vocabulario
@@ -954,7 +954,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “fin de semana”
-- choices: ["映画 (えいが)","週末 (しゅうまつ)","毎日 (まいにち)","音楽 (おんがく)"]
+- choices: ["週末 (しゅうまつ)","音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)"]
 - correct: "週末 (しゅうまつ)"
 - explanation: La opción correcta para “fin de semana” es 「週末 (しゅうまつ)」.
 - hint: Lección 3 · Vocabulario
@@ -964,7 +964,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いつ」?
-- choices: ["película","música","todos los días","cuándo"]
+- choices: ["música","todos los días","cuándo","película"]
 - correct: "cuándo"
 - explanation: 「いつ」 significa “cuándo”.
 - hint: Lección 3 · Vocabulario
@@ -974,7 +974,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cuándo”
-- choices: ["いつ","音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)"]
+- choices: ["いつ","毎日 (まいにち)","音楽 (おんがく)","映画 (えいが)"]
 - correct: "いつ"
 - explanation: La opción correcta para “cuándo” es 「いつ」.
 - hint: Lección 3 · Vocabulario
@@ -984,7 +984,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かえる」?
-- choices: ["música","película","volver; regresar (destino に/へ)","todos los días"]
+- choices: ["volver; regresar (destino に/へ)","película","todos los días","música"]
 - correct: "volver; regresar (destino に/へ)"
 - explanation: 「かえる」 significa “volver; regresar (destino に/へ)”.
 - hint: Lección 3 · Vocabulario
@@ -994,7 +994,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “volver; regresar (destino に/へ)”
-- choices: ["音楽 (おんがく)","帰る (かえる)","毎日 (まいにち)","映画 (えいが)"]
+- choices: ["映画 (えいが)","音楽 (おんがく)","毎日 (まいにち)","帰る (かえる)"]
 - correct: "帰る (かえる)"
 - explanation: La opción correcta para “volver; regresar (destino に/へ)” es 「帰る (かえる)」.
 - hint: Lección 3 · Vocabulario
@@ -1004,7 +1004,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「のむ」?
-- choices: ["tomar; beber (～を)","música","película","todos los días"]
+- choices: ["película","tomar; beber (～を)","todos los días","música"]
 - correct: "tomar; beber (～を)"
 - explanation: 「のむ」 significa “tomar; beber (～を)”.
 - hint: Lección 3 · Vocabulario
@@ -1014,7 +1014,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tomar; beber (～を)”
-- choices: ["映画 (えいが)","毎日 (まいにち)","音楽 (おんがく)","飲む (のむ)"]
+- choices: ["音楽 (おんがく)","映画 (えいが)","飲む (のむ)","毎日 (まいにち)"]
 - correct: "飲む (のむ)"
 - explanation: La opción correcta para “tomar; beber (～を)” es 「飲む (のむ)」.
 - hint: Lección 3 · Vocabulario
@@ -1024,7 +1024,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「よむ」?
-- choices: ["leer (～を)","película","música","todos los días"]
+- choices: ["todos los días","película","leer (～を)","música"]
 - correct: "leer (～を)"
 - explanation: 「よむ」 significa “leer (～を)”.
 - hint: Lección 3 · Vocabulario
@@ -1034,7 +1034,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “leer (～を)”
-- choices: ["毎日 (まいにち)","読む (よむ)","映画 (えいが)","音楽 (おんがく)"]
+- choices: ["読む (よむ)","映画 (えいが)","音楽 (おんがく)","毎日 (まいにち)"]
 - correct: "読む (よむ)"
 - explanation: La opción correcta para “leer (～を)” es 「読む (よむ)」.
 - hint: Lección 3 · Vocabulario
@@ -1044,7 +1044,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おきる」?
-- choices: ["música","película","todos los días","levantarse"]
+- choices: ["película","levantarse","música","todos los días"]
 - correct: "levantarse"
 - explanation: 「おきる」 significa “levantarse”.
 - hint: Lección 3 · Vocabulario
@@ -1054,7 +1054,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “levantarse”
-- choices: ["起きる (おきる)","音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)"]
+- choices: ["映画 (えいが)","音楽 (おんがく)","起きる (おきる)","毎日 (まいにち)"]
 - correct: "起きる (おきる)"
 - explanation: La opción correcta para “levantarse” es 「起きる (おきる)」.
 - hint: Lección 3 · Vocabulario
@@ -1064,7 +1064,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ねる」?
-- choices: ["dormir; irse a dormir","música","todos los días","película"]
+- choices: ["película","todos los días","dormir; irse a dormir","música"]
 - correct: "dormir; irse a dormir"
 - explanation: 「ねる」 significa “dormir; irse a dormir”.
 - hint: Lección 3 · Vocabulario
@@ -1074,7 +1074,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “dormir; irse a dormir”
-- choices: ["毎日 (まいにち)","音楽 (おんがく)","寝る (ねる)","映画 (えいが)"]
+- choices: ["映画 (えいが)","毎日 (まいにち)","音楽 (おんがく)","寝る (ねる)"]
 - correct: "寝る (ねる)"
 - explanation: La opción correcta para “dormir; irse a dormir” es 「寝る (ねる)」.
 - hint: Lección 3 · Vocabulario
@@ -1084,7 +1084,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「くる」?
-- choices: ["venir (destino に/へ)","música","todos los días","película"]
+- choices: ["venir (destino に/へ)","todos los días","música","película"]
 - correct: "venir (destino に/へ)"
 - explanation: 「くる」 significa “venir (destino に/へ)”.
 - hint: Lección 3 · Vocabulario
@@ -1094,7 +1094,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “venir (destino に/へ)”
-- choices: ["来る (くる)","音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)"]
+- choices: ["音楽 (おんがく)","来る (くる)","毎日 (まいにち)","映画 (えいが)"]
 - correct: "来る (くる)"
 - explanation: La opción correcta para “venir (destino に/へ)” es 「来る (くる)」.
 - hint: Lección 3 · Vocabulario
@@ -1104,7 +1104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「する」?
-- choices: ["música","película","hacer (～を)","todos los días"]
+- choices: ["música","hacer (～を)","película","todos los días"]
 - correct: "hacer (～を)"
 - explanation: 「する」 significa “hacer (～を)”.
 - hint: Lección 3 · Vocabulario
@@ -1114,7 +1114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hacer (～を)”
-- choices: ["する","毎日 (まいにち)","映画 (えいが)","音楽 (おんがく)"]
+- choices: ["する","映画 (えいが)","毎日 (まいにち)","音楽 (おんがく)"]
 - correct: "する"
 - explanation: La opción correcta para “hacer (～を)” es 「する」.
 - hint: Lección 3 · Vocabulario
@@ -1124,7 +1124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「べんきょうする」?
-- choices: ["todos los días","música","estudiar (～を)","película"]
+- choices: ["música","todos los días","estudiar (～を)","película"]
 - correct: "estudiar (～を)"
 - explanation: 「べんきょうする」 significa “estudiar (～を)”.
 - hint: Lección 3 · Vocabulario
@@ -1144,7 +1144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いい」?
-- choices: ["todos los días","película","música","bueno"]
+- choices: ["todos los días","música","bueno","película"]
 - correct: "bueno"
 - explanation: 「いい」 significa “bueno”.
 - hint: Lección 3 · Vocabulario
@@ -1154,7 +1154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “bueno”
-- choices: ["映画 (えいが)","毎日 (まいにち)","音楽 (おんがく)","いい"]
+- choices: ["映画 (えいが)","音楽 (おんがく)","毎日 (まいにち)","いい"]
 - correct: "いい"
 - explanation: La opción correcta para “bueno” es 「いい」.
 - hint: Lección 3 · Vocabulario
@@ -1164,7 +1164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はやい」?
-- choices: ["temprano","película","música","todos los días"]
+- choices: ["música","temprano","todos los días","película"]
 - correct: "temprano"
 - explanation: 「はやい」 significa “temprano”.
 - hint: Lección 3 · Vocabulario
@@ -1174,7 +1174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “temprano”
-- choices: ["早い (はやい)","音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)"]
+- choices: ["映画 (えいが)","早い (はやい)","毎日 (まいにち)","音楽 (おんがく)"]
 - correct: "早い (はやい)"
 - explanation: La opción correcta para “temprano” es 「早い (はやい)」.
 - hint: Lección 3 · Vocabulario
@@ -1184,7 +1184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あまり」?
-- choices: ["+ negativo: no mucho; no tanto","música","película","todos los días"]
+- choices: ["película","todos los días","+ negativo: no mucho; no tanto","música"]
 - correct: "+ negativo: no mucho; no tanto"
 - explanation: 「あまり」 significa “+ negativo: no mucho; no tanto”.
 - hint: Lección 3 · Vocabulario
@@ -1194,7 +1194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “+ negativo: no mucho; no tanto”
-- choices: ["音楽 (おんがく)","映画 (えいが)","あまり","毎日 (まいにち)"]
+- choices: ["映画 (えいが)","音楽 (おんがく)","あまり","毎日 (まいにち)"]
 - correct: "あまり"
 - explanation: La opción correcta para “+ negativo: no mucho; no tanto” es 「あまり」.
 - hint: Lección 3 · Vocabulario
@@ -1214,7 +1214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “+ negativo: no, en absoluto”
-- choices: ["全然 (ぜんぜん)","毎日 (まいにち)","音楽 (おんがく)","映画 (えいが)"]
+- choices: ["音楽 (おんがく)","毎日 (まいにち)","全然 (ぜんぜん)","映画 (えいが)"]
 - correct: "全然 (ぜんぜん)"
 - explanation: La opción correcta para “+ negativo: no, en absoluto” es 「全然 (ぜんぜん)」.
 - hint: Lección 3 · Vocabulario
@@ -1224,7 +1224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「たいてい」?
-- choices: ["todos los días","película","música","normalmente"]
+- choices: ["todos los días","película","normalmente","música"]
 - correct: "normalmente"
 - explanation: 「たいてい」 significa “normalmente”.
 - hint: Lección 3 · Vocabulario
@@ -1234,7 +1234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “normalmente”
-- choices: ["たいてい","毎日 (まいにち)","映画 (えいが)","音楽 (おんがく)"]
+- choices: ["たいてい","映画 (えいが)","毎日 (まいにち)","音楽 (おんがく)"]
 - correct: "たいてい"
 - explanation: La opción correcta para “normalmente” es 「たいてい」.
 - hint: Lección 3 · Vocabulario
@@ -1244,7 +1244,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ちょっと」?
-- choices: ["todos los días","música","película","un poco"]
+- choices: ["película","todos los días","un poco","música"]
 - correct: "un poco"
 - explanation: 「ちょっと」 significa “un poco”.
 - hint: Lección 3 · Vocabulario
@@ -1264,7 +1264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ときどき」?
-- choices: ["todos los días","película","música","a veces"]
+- choices: ["a veces","música","película","todos los días"]
 - correct: "a veces"
 - explanation: 「ときどき」 significa “a veces”.
 - hint: Lección 3 · Vocabulario
@@ -1274,7 +1274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “a veces”
-- choices: ["音楽 (おんがく)","映画 (えいが)","時々 (ときどき)","毎日 (まいにち)"]
+- choices: ["時々 (ときどき)","毎日 (まいにち)","映画 (えいが)","音楽 (おんがく)"]
 - correct: "時々 (ときどき)"
 - explanation: La opción correcta para “a veces” es 「時々 (ときどき)」.
 - hint: Lección 3 · Vocabulario
@@ -1284,7 +1284,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「よく」?
-- choices: ["película","música","a menudo; mucho","todos los días"]
+- choices: ["música","todos los días","película","a menudo; mucho"]
 - correct: "a menudo; mucho"
 - explanation: 「よく」 significa “a menudo; mucho”.
 - hint: Lección 3 · Vocabulario
@@ -1294,7 +1294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “a menudo; mucho”
-- choices: ["よく","音楽 (おんがく)","映画 (えいが)","毎日 (まいにち)"]
+- choices: ["毎日 (まいにち)","映画 (えいが)","よく","音楽 (おんがく)"]
 - correct: "よく"
 - explanation: La opción correcta para “a menudo; mucho” es 「よく」.
 - hint: Lección 3 · Vocabulario
@@ -1304,7 +1304,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「そうですね」?
-- choices: ["Así es.; A ver.","música","película","todos los días"]
+- choices: ["todos los días","Así es.; A ver.","música","película"]
 - correct: "Así es.; A ver."
 - explanation: 「そうですね」 significa “Así es.; A ver.”.
 - hint: Lección 3 · Vocabulario
@@ -1314,7 +1314,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “Así es.; A ver.”
-- choices: ["毎日 (まいにち)","映画 (えいが)","そうですね","音楽 (おんがく)"]
+- choices: ["そうですね","映画 (えいが)","毎日 (まいにち)","音楽 (おんがく)"]
 - correct: "そうですね"
 - explanation: La opción correcta para “Así es.; A ver.” es 「そうですね」.
 - hint: Lección 3 · Vocabulario
@@ -1324,7 +1324,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「でも」?
-- choices: ["película","pero","música","todos los días"]
+- choices: ["pero","película","música","todos los días"]
 - correct: "pero"
 - explanation: 「でも」 significa “pero”.
 - hint: Lección 3 · Vocabulario
@@ -1334,7 +1334,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pero”
-- choices: ["でも","映画 (えいが)","音楽 (おんがく)","毎日 (まいにち)"]
+- choices: ["映画 (えいが)","音楽 (おんがく)","でも","毎日 (まいにち)"]
 - correct: "でも"
 - explanation: La opción correcta para “pero” es 「でも」.
 - hint: Lección 3 · Vocabulario
@@ -1344,7 +1344,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ええ」?
-- choices: ["película","sí","todos los días","música"]
+- choices: ["música","todos los días","sí","película"]
 - correct: "sí"
 - explanation: 「ええ」 significa “sí”.
 - hint: Lección 3 · Vocabulario
@@ -1354,7 +1354,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “sí”
-- choices: ["毎日 (まいにち)","ええ","映画 (えいが)","音楽 (おんがく)"]
+- choices: ["ええ","毎日 (まいにち)","映画 (えいが)","音楽 (おんがく)"]
 - correct: "ええ"
 - explanation: La opción correcta para “sí” es 「ええ」.
 - hint: Lección 3 · Vocabulario
@@ -1364,10 +1364,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 帰る (かえる)","B. 週 (しゅう)","C. はん"]
-- choices.right: ["1. media (hora)","2. volver; regresar (destino に/へ)","3. semana"]
-- correct: "A-2, B-3, C-1"
-- explanation: Relaciones correctas: A-2, B-3, C-1.
+- choices.left: ["A. みる","B. いい","C. たいてい"]
+- choices.right: ["1. bueno","2. normalmente","3. ver"]
+- correct: "A-3, B-1, C-2"
+- explanation: Relaciones correctas: A-3, B-1, C-2.
 - hint: Lección 3 · Relacionar
 
 ### exam-vocab-match-3-1
@@ -1375,10 +1375,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. はなす","B. ええ","C. あまり"]
-- choices.right: ["1. + negativo: no mucho; no tanto","2. hablar","3. sí"]
-- correct: "A-2, B-3, C-1"
-- explanation: Relaciones correctas: A-2, B-3, C-1.
+- choices.left: ["A. 図書館 (としょかん)","B. 来る (くる)","C. 水 (みず)"]
+- choices.right: ["1. biblioteca","2. venir (destino に/へ)","3. agua"]
+- correct: "A-1, B-2, C-3"
+- explanation: Relaciones correctas: A-1, B-2, C-3.
 - hint: Lección 3 · Relacionar
 
 ### exam-vocab-match-3-2
@@ -1386,10 +1386,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 午後 (ごご)","B. デート","C. 毎日 (まいにち)"]
-- choices.right: ["1. p.m.","2. todos los días","3. cita (romántica)"]
-- correct: "A-1, B-3, C-2"
-- explanation: Relaciones correctas: A-1, B-3, C-2.
+- choices.left: ["A. いく","B. 起きる (おきる)","C. 帰る (かえる)"]
+- choices.right: ["1. volver; regresar (destino に/へ)","2. ir","3. levantarse"]
+- correct: "A-2, B-3, C-1"
+- explanation: Relaciones correctas: A-2, B-3, C-1.
 - hint: Lección 3 · Relacionar
 
 ### exam-vocab-match-3-3
@@ -1397,10 +1397,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 寝る (ねる)","B. カフェ","C. 家 (いえ)"]
-- choices.right: ["1. hogar; casa","2. cafetería","3. dormir; irse a dormir"]
-- correct: "A-3, B-2, C-1"
-- explanation: Relaciones correctas: A-3, B-2, C-1.
+- choices.left: ["A. 家 (いえ)","B. 午前中 (ごぜんちゅう)","C. 晩ご飯 (ばんごはん)"]
+- choices.right: ["1. cena","2. hogar; casa","3. por la mañana"]
+- correct: "A-2, B-3, C-1"
+- explanation: Relaciones correctas: A-2, B-3, C-1.
 - hint: Lección 3 · Relacionar
 
 ## kanji
@@ -1410,7 +1410,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「一」?
-- choices: ["にじ","いち","に","いちじ"]
+- choices: ["いちじ","いち","にじ","に"]
 - correct: "いち"
 - explanation: 「一」 se lee 「いち」.
 - hint: Lección 3 · Kanji
@@ -1431,7 +1431,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「一時」?
-- choices: ["いちじ","にじ","いち","に"]
+- choices: ["いちじ","に","いち","にじ"]
 - correct: "いちじ"
 - explanation: 「一時」 se lee 「いちじ」.
 - hint: Lección 3 · Kanji
@@ -1452,7 +1452,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「二」?
-- choices: ["いちじ","にじ","に","いち"]
+- choices: ["いちじ","にじ","いち","に"]
 - correct: "に"
 - explanation: 「二」 se lee 「に」.
 - hint: Lección 3 · Kanji
@@ -1473,7 +1473,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「二時」?
-- choices: ["にじ","に","いちじ","いち"]
+- choices: ["に","いちじ","にじ","いち"]
 - correct: "にじ"
 - explanation: 「二時」 se lee 「にじ」.
 - hint: Lección 3 · Kanji
@@ -1494,7 +1494,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「三」?
-- choices: ["いち","に","いちじ","さん"]
+- choices: ["さん","に","いち","いちじ"]
 - correct: "さん"
 - explanation: 「三」 se lee 「さん」.
 - hint: Lección 3 · Kanji
@@ -1515,7 +1515,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「三時」?
-- choices: ["いち","に","さんじ","いちじ"]
+- choices: ["いち","いちじ","さんじ","に"]
 - correct: "さんじ"
 - explanation: 「三時」 se lee 「さんじ」.
 - hint: Lección 3 · Kanji
@@ -1536,7 +1536,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「四」?
-- choices: ["いち","に","よん","いちじ"]
+- choices: ["いちじ","に","よん","いち"]
 - correct: "よん"
 - explanation: 「四」 se lee 「よん」.
 - hint: Lección 3 · Kanji
@@ -1557,7 +1557,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「四時」?
-- choices: ["いち","いちじ","よじ","に"]
+- choices: ["に","いちじ","いち","よじ"]
 - correct: "よじ"
 - explanation: 「四時」 se lee 「よじ」.
 - hint: Lección 3 · Kanji
@@ -1599,7 +1599,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「五時」?
-- choices: ["に","いちじ","ごじ","いち"]
+- choices: ["ごじ","いち","いちじ","に"]
 - correct: "ごじ"
 - explanation: 「五時」 se lee 「ごじ」.
 - hint: Lección 3 · Kanji
@@ -1620,7 +1620,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「六」?
-- choices: ["に","いち","ろく","いちじ"]
+- choices: ["に","ろく","いち","いちじ"]
 - correct: "ろく"
 - explanation: 「六」 se lee 「ろく」.
 - hint: Lección 3 · Kanji
@@ -1641,7 +1641,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「六時」?
-- choices: ["ろくじ","いちじ","に","いち"]
+- choices: ["いち","ろくじ","に","いちじ"]
 - correct: "ろくじ"
 - explanation: 「六時」 se lee 「ろくじ」.
 - hint: Lección 3 · Kanji
@@ -1662,7 +1662,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「七」?
-- choices: ["なな","いち","いちじ","に"]
+- choices: ["なな","いちじ","いち","に"]
 - correct: "なな"
 - explanation: 「七」 se lee 「なな」.
 - hint: Lección 3 · Kanji
@@ -1683,7 +1683,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「七時」?
-- choices: ["しちじ","いちじ","に","いち"]
+- choices: ["しちじ","いち","に","いちじ"]
 - correct: "しちじ"
 - explanation: 「七時」 se lee 「しちじ」.
 - hint: Lección 3 · Kanji
@@ -1704,7 +1704,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「八」?
-- choices: ["いち","に","はち","いちじ"]
+- choices: ["はち","いちじ","に","いち"]
 - correct: "はち"
 - explanation: 「八」 se lee 「はち」.
 - hint: Lección 3 · Kanji
@@ -1725,7 +1725,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「八時」?
-- choices: ["はちじ","いち","いちじ","に"]
+- choices: ["に","いちじ","いち","はちじ"]
 - correct: "はちじ"
 - explanation: 「八時」 se lee 「はちじ」.
 - hint: Lección 3 · Kanji
@@ -1746,7 +1746,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「九」?
-- choices: ["いち","に","いちじ","きゅう"]
+- choices: ["いちじ","に","きゅう","いち"]
 - correct: "きゅう"
 - explanation: 「九」 se lee 「きゅう」.
 - hint: Lección 3 · Kanji
@@ -1788,7 +1788,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「十」?
-- choices: ["じゅう","いちじ","いち","に"]
+- choices: ["に","いちじ","じゅう","いち"]
 - correct: "じゅう"
 - explanation: 「十」 se lee 「じゅう」.
 - hint: Lección 3 · Kanji
@@ -1809,7 +1809,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「十時」?
-- choices: ["に","いち","じゅうじ","いちじ"]
+- choices: ["に","いちじ","いち","じゅうじ"]
 - correct: "じゅうじ"
 - explanation: 「十時」 se lee 「じゅうじ」.
 - hint: Lección 3 · Kanji
@@ -1830,7 +1830,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「百」?
-- choices: ["に","ひゃく","いち","いちじ"]
+- choices: ["に","ひゃく","いちじ","いち"]
 - correct: "ひゃく"
 - explanation: 「百」 se lee 「ひゃく」.
 - hint: Lección 3 · Kanji
@@ -1851,7 +1851,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「千」?
-- choices: ["いちじ","いち","せん","に"]
+- choices: ["に","いちじ","せん","いち"]
 - correct: "せん"
 - explanation: 「千」 se lee 「せん」.
 - hint: Lección 3 · Kanji
@@ -1872,7 +1872,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「一万」?
-- choices: ["いちまん","いち","に","いちじ"]
+- choices: ["いち","いちじ","いちまん","に"]
 - correct: "いちまん"
 - explanation: 「一万」 se lee 「いちまん」.
 - hint: Lección 3 · Kanji
@@ -1893,7 +1893,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「円」?
-- choices: ["いちじ","いち","に","えん"]
+- choices: ["に","いち","えん","いちじ"]
 - correct: "えん"
 - explanation: 「円」 se lee 「えん」.
 - hint: Lección 3 · Kanji
@@ -1916,7 +1916,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___パコです。
-- choices: ["で","は","を","に"]
+- choices: ["は","を","に","で"]
 - correct: "は"
 - explanation: 「は」marca tema.
 - hint: Lección 3 · Partículas
@@ -1937,7 +1937,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: マリアさん___せんせいです。
-- choices: ["を","が","は","で"]
+- choices: ["は","が","で","を"]
 - correct: "は"
 - explanation: Oración copulativa con tema 「は」.
 - hint: Lección 3 · Partículas
@@ -1958,7 +1958,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: これはだれ___ほんですか。
-- choices: ["に","で","の","を"]
+- choices: ["に","を","の","で"]
 - correct: "の"
 - explanation: Posesión con 「の」.
 - hint: Lección 3 · Partículas
@@ -1979,7 +1979,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___ともだちもにほんじんです。
-- choices: ["も","は","が","の"]
+- choices: ["の","も","が","は"]
 - correct: "の"
 - explanation: 「わたしのともだち」.
 - hint: Lección 3 · Partículas
@@ -2000,7 +2000,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: がっこう___いきます。
-- choices: ["は","で","に","を"]
+- choices: ["は","で","を","に"]
 - correct: "に"
 - explanation: Destino con 「に」.
 - hint: Lección 3 · Partículas
@@ -2021,7 +2021,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: としょかん___べんきょうします。
-- choices: ["に","を","で","が"]
+- choices: ["を","が","で","に"]
 - correct: "で"
 - explanation: Lugar de acción con 「で」.
 - hint: Lección 3 · Partículas
@@ -2042,7 +2042,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ほん___よみます。
-- choices: ["で","は","に","を"]
+- choices: ["で","は","を","に"]
 - correct: "を"
 - explanation: Objeto directo con 「を」.
 - hint: Lección 3 · Partículas
@@ -2095,7 +2095,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「たべる」 (comer)
-- choices: ["みた","たべた","きいた","いった"]
+- choices: ["いった","きいた","たべた","みた"]
 - correct: "たべた"
 - explanation: El pasado corto de 「たべる」 es 「たべた」.
 - hint: Lección 3 · Conjugación
@@ -2115,7 +2115,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「みる」 (ver)
-- choices: ["みて","きいて","たべて","いって"]
+- choices: ["きいて","みて","たべて","いって"]
 - correct: "みて"
 - explanation: La forma て de 「みる」 es 「みて」.
 - hint: Lección 3 · Conjugación
@@ -2125,7 +2125,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「みる」 (ver)
-- choices: ["たべた","きいた","みた","いった"]
+- choices: ["みた","いった","たべた","きいた"]
 - correct: "みた"
 - explanation: El pasado corto de 「みる」 es 「みた」.
 - hint: Lección 3 · Conjugación
@@ -2145,7 +2145,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「いく」 (ir)
-- choices: ["きいて","いって","みて","たべて"]
+- choices: ["たべて","いって","みて","きいて"]
 - correct: "いって"
 - explanation: La forma て de 「いく」 es 「いって」.
 - hint: Lección 3 · Conjugación
@@ -2155,7 +2155,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「いく」 (ir)
-- choices: ["みた","いった","たべた","きいた"]
+- choices: ["きいた","たべた","みた","いった"]
 - correct: "いった"
 - explanation: El pasado corto de 「いく」 es 「いった」.
 - hint: Lección 3 · Conjugación
@@ -2175,7 +2175,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「きく」 (escuchar)
-- choices: ["いって","きいて","たべて","みて"]
+- choices: ["いって","みて","きいて","たべて"]
 - correct: "きいて"
 - explanation: La forma て de 「きく」 es 「きいて」.
 - hint: Lección 3 · Conjugación
@@ -2185,7 +2185,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「きく」 (escuchar)
-- choices: ["みた","きいた","いった","たべた"]
+- choices: ["みた","たべた","いった","きいた"]
 - correct: "きいた"
 - explanation: El pasado corto de 「きく」 es 「きいた」.
 - hint: Lección 3 · Conjugación
@@ -2205,7 +2205,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「はなす」 (hablar)
-- choices: ["はなして","たべて","いって","みて"]
+- choices: ["たべて","いって","はなして","みて"]
 - correct: "はなして"
 - explanation: La forma て de 「はなす」 es 「はなして」.
 - hint: Lección 3 · Conjugación
@@ -2237,7 +2237,7 @@
 - type: `reorder`
 - source: `lesson_scenarios_grammar`
 - prompt: Ordena la oración sobre el plan de hoy.
-- choices: ["としょかんで","きょう","べんきょうします","にほんごを"]
+- choices: ["にほんごを","きょう","べんきょうします","としょかんで"]
 - correct: "きょう としょかんで にほんごを べんきょうします"
 - explanation: 「で」 marca el lugar donde se realiza la acción.
 - hint: Lección 3 · Rutina
