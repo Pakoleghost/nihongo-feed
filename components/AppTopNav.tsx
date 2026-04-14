@@ -8,9 +8,10 @@ import { supabase } from "@/lib/supabase";
 type AppTopNavProps = {
   primary?: "study" | "resources" | null;
   secondary?: "profile" | "write" | "admin" | null;
+  tone?: "default" | "study";
 };
 
-export default function AppTopNav({ primary = null, secondary = null }: AppTopNavProps) {
+export default function AppTopNav({ primary = null, secondary = null, tone = "default" }: AppTopNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -76,9 +77,9 @@ export default function AppTopNav({ primary = null, secondary = null }: AppTopNa
     `appNavLink${primary === key ? " active" : ""}`;
 
   return (
-    <div className="appTopNav">
+    <div className={`appTopNav${tone === "study" ? " studyTone" : ""}`}>
       <div className="ds-container appTopNavInner">
-        <div className="appTopNavBar ds-card">
+        <div className={`appTopNavBar${tone === "study" ? " studyTone" : " ds-card"}`}>
           <Link href="/study" className="appNavBrand" aria-label="Ir a Study">
             <span className="appNavMark" aria-hidden="true" />
             Nihongo

@@ -213,6 +213,10 @@ a:focus-visible {
   padding-top: var(--space-2);
 }
 
+.appTopNav.studyTone {
+  padding-top: 6px;
+}
+
 .appTopNavInner {
   position: relative;
 }
@@ -230,6 +234,14 @@ a:focus-visible {
   box-shadow: none;
 }
 
+.appTopNavBar.studyTone {
+  min-height: 48px;
+  padding: 4px 2px;
+  background: transparent;
+  border: 0;
+  backdrop-filter: none;
+}
+
 .appNavBrand {
   display: inline-flex;
   align-items: center;
@@ -240,6 +252,11 @@ a:focus-visible {
   line-height: 1;
   letter-spacing: -0.035em;
   color: var(--color-text);
+}
+
+.appTopNav.studyTone .appNavBrand {
+  font-size: 0.98rem;
+  letter-spacing: -0.03em;
 }
 
 .appNavMark {
@@ -276,6 +293,13 @@ a:focus-visible {
   cursor: pointer;
 }
 
+.appTopNav.studyTone .appNavLink,
+.appTopNav.studyTone .appMenuButton {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 0.82rem;
+}
+
 .appNavLink:hover,
 .appMenuButton:hover,
 .appMenuItem:hover {
@@ -307,6 +331,10 @@ a:focus-visible {
   gap: 4px;
 }
 
+.appTopNav.studyTone .appMenuPanel {
+  top: calc(100% + 6px);
+}
+
 .appMenuItem {
   width: 100%;
   justify-content: flex-start;
@@ -317,6 +345,11 @@ a:focus-visible {
   .appTopNavBar {
     min-height: 52px;
     padding: 7px 8px;
+  }
+
+  .appTopNavBar.studyTone {
+    min-height: 44px;
+    padding: 3px 0;
   }
 
   .appPrimaryNav {

@@ -3930,11 +3930,11 @@ function StudyContent() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--color-bg)", padding: "var(--page-padding)" }}>
       <div className="ds-container" style={{ display: "grid", gap: "var(--space-4)" }}>
-        <AppTopNav primary="study" />
+        <AppTopNav primary="study" tone="study" />
 
         {showHub ? (
-          <section style={{ display: "grid", gap: "var(--space-2)", padding: "var(--space-2) 0 var(--space-1)" }}>
-            <div style={{ fontSize: "clamp(48px, 12vw, 82px)", lineHeight: 0.9, letterSpacing: "-.075em", fontWeight: 900, color: "var(--color-text)" }}>
+          <section style={{ display: "grid", gap: "var(--space-2)", padding: "var(--space-3) 0 var(--space-2)" }}>
+            <div style={{ fontSize: "clamp(50px, 12vw, 86px)", lineHeight: 0.88, letterSpacing: "-.08em", fontWeight: 900, color: "var(--color-text)" }}>
               Study
             </div>
           </section>
@@ -3953,59 +3953,92 @@ function StudyContent() {
         )}
 
         {showHub && (
-          <section style={{ display: "grid", gap: "var(--space-2)", paddingBottom: "var(--space-4)" }}>
-            {toolCards.map((tool, index) => {
-              const depth = index % 2 === 0 ? 0 : 28;
-              const isAccent = tool.key === "kana" || tool.key === "exam";
-              return (
-                <Link
-                  key={tool.key}
-                  href={tool.href}
-                  style={{
-                    textDecoration: "none",
-                    color: "var(--color-text)",
-                    display: "grid",
-                    gap: "var(--space-2)",
-                    padding: "22px 0 22px 0",
-                    marginLeft: depth,
-                    borderBottom: "1px solid var(--color-border)",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "var(--space-3)" }}>
-                    <span
-                      style={{
-                        fontSize: tool.key === "kana" ? "clamp(32px, 8vw, 54px)" : "clamp(26px, 6vw, 40px)",
-                        lineHeight: 0.98,
-                        letterSpacing: tool.key === "kana" ? "-.065em" : "-.05em",
-                        fontWeight: 900,
-                        color: "var(--color-text)",
-                        textWrap: "balance",
-                      }}
-                    >
-                      {tool.title}
-                    </span>
-                    <span
-                      style={{
-                        flexShrink: 0,
-                        width: 34,
-                        height: 34,
-                        borderRadius: 999,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        background: isAccent ? "var(--color-highlight-soft)" : "var(--color-surface-muted)",
-                        color: isAccent ? "var(--color-accent-strong)" : "var(--color-text-muted)",
-                        fontSize: 16,
-                        fontWeight: 800,
-                        marginTop: 2,
-                      }}
-                    >
-                      ↗
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
+          <section style={{ display: "grid", gap: "var(--space-3)", paddingBottom: "var(--space-4)" }}>
+            <div
+              style={{
+                display: "grid",
+                gap: "var(--space-3)",
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                alignItems: "stretch",
+              }}
+            >
+              {toolCards.map((tool, index) => {
+                const isWide = tool.key === "kana" || tool.key === "sprint" || (tool.key === "dictionary" && toolCards.length % 2 === 1);
+                const isSoftAccent = tool.key === "flashcards" || tool.key === "dictionary";
+                const cardBackground =
+                  tool.key === "kana"
+                    ? "color-mix(in srgb, var(--color-surface) 76%, white)"
+                    : tool.key === "sprint"
+                      ? "color-mix(in srgb, var(--color-accent-soft) 58%, white)"
+                      : tool.key === "exam"
+                        ? "color-mix(in srgb, var(--color-highlight-soft) 58%, white)"
+                        : tool.key === "flashcards"
+                          ? "color-mix(in srgb, rgba(244, 162, 97, 0.12) 70%, white)"
+                          : "color-mix(in srgb, var(--color-surface-muted) 72%, white)";
+                const arrowBackground =
+                  tool.key === "exam" || tool.key === "kana"
+                    ? "var(--color-highlight-soft)"
+                    : tool.key === "sprint"
+                      ? "var(--color-accent-soft)"
+                      : "rgba(244, 162, 97, 0.16)";
+                const cardPadding = isWide ? "20px 18px 18px" : "18px 16px 16px";
+                const cardRadius = isWide ? 30 : 26;
+                const cardMinHeight = isWide ? 132 : 148;
+                return (
+                  <Link
+                    key={tool.key}
+                    href={tool.href}
+                    style={{
+                      textDecoration: "none",
+                      color: "var(--color-text)",
+                      display: "grid",
+                      gap: "var(--space-3)",
+                      alignContent: "space-between",
+                      minHeight: cardMinHeight,
+                      padding: cardPadding,
+                      borderRadius: cardRadius,
+                      background: cardBackground,
+                      boxShadow: isSoftAccent ? "0 10px 24px rgba(26, 26, 46, 0.04)" : "0 14px 28px rgba(26, 26, 46, 0.05)",
+                      gridColumn: isWide ? "1 / -1" : "auto",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-3)" }}>
+                      <span
+                        style={{
+                          fontSize: isWide ? "clamp(30px, 7vw, 42px)" : "clamp(24px, 5vw, 32px)",
+                          lineHeight: 0.98,
+                          letterSpacing: isWide ? "-.06em" : "-.05em",
+                          fontWeight: 900,
+                          color: "var(--color-text)",
+                          textWrap: "balance",
+                          maxWidth: isWide ? "70%" : "100%",
+                        }}
+                      >
+                        {tool.title}
+                      </span>
+                      <span
+                        style={{
+                          flexShrink: 0,
+                          width: isWide ? 38 : 34,
+                          height: isWide ? 38 : 34,
+                          borderRadius: 999,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: arrowBackground,
+                          color: tool.key === "kana" || tool.key === "exam" ? "var(--color-accent-strong)" : "var(--color-primary)",
+                          fontSize: 16,
+                          fontWeight: 800,
+                          marginTop: 2,
+                        }}
+                      >
+                        ↗
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </section>
         )}
 
