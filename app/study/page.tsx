@@ -2388,7 +2388,7 @@ function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, n
   const hasKanji = lesson >= 3;
   const hasConj = lesson >= 3;
 
-  const targets: Record<QuizCategory, number> = {
+  const targets: Record<Exclude<QuizCategory, "kana">, number> = {
     vocab: hasConj ? 5 : 6,
     kanji: hasKanji ? 2 : 0,
     particles: hasConj ? 3 : 4,
