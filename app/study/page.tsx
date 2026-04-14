@@ -1228,6 +1228,19 @@ const EXAM_VOCAB_EXCLUSIONS: Record<number, string[]> = {
   1: ["アジアけんきゅう", "せいぶつがく", "こくさいかんけい"],
 };
 
+const LESSON_ONE_CURATED_VOCAB = [
+  { kana: "がくせい", es: "estudiante", direction: "jp-es" },
+  { kana: "せんせい", es: "profesor", direction: "es-jp" },
+  { kana: "せんこう", es: "carrera/especialidad", direction: "jp-es" },
+  { kana: "わたし", es: "yo", direction: "es-jp" },
+  { kana: "だいがく", es: "universidad", direction: "jp-es" },
+  { kana: "だいがくせい", es: "estudiante universitario", direction: "es-jp" },
+  { kana: "にほんじん", es: "los japoneses", direction: "jp-es" },
+  { kana: "にほんご", es: "idioma japonés", direction: "es-jp" },
+  { kana: "なまえ", es: "nombre", direction: "jp-es" },
+  { kana: "ばんごう", es: "número", direction: "es-jp" },
+] as const;
+
 const PARTICLE_EXAM_BANK: Array<{
   id: string;
   minLesson: number;
@@ -2175,8 +2188,193 @@ function buildLessonScenarioQuestions(lesson: number): QuizQuestion[] {
   }
 }
 
+function buildLessonOneCuratedExamPool() {
+  const lesson = 1;
+  const lessonVocab = (ALL_GENKI_VOCAB_BY_LESSON[lesson] || []).filter((item) => isExamVocabEligible(lesson, item));
+  const allVocab = Object.values(ALL_GENKI_VOCAB_BY_LESSON).flat().filter((item) => isExamVocabEligible(lesson, item));
+  const meaningPool = Array.from(new Set(allVocab.map((item) => item.es).filter(Boolean)));
+  const jpPool = Array.from(
+    new Set(
+      allVocab
+        .map((item) => (item.kanji?.trim() ? `${item.kanji.trim()} (${item.kana})` : item.kana))
+        .filter(Boolean),
+    ),
+  );
+
+  const vocabQuestions = LESSON_ONE_CURATED_VOCAB.map((entry, index) => {
+    const item = lessonVocab.find((candidate) => candidate.kana === entry.kana);
+    if (!item) return null;
+    const jpForm = item.kanji?.trim() ? `${item.kanji.trim()} (${item.kana})` : item.kana;
+    if (entry.direction === "jp-es") {
+      const sameLessonMeanings = Array.from(
+        new Set(lessonVocab.map((candidate) => candidate.es).filter((value) => value && value !== item.es)),
+      );
+      return createLessonQuestion(lesson, `vocab:curated:es:${item.kana}:${index}`, {
+        category: "vocab",
+        type: "mcq",
+        prompt: `¿Qué significa 「${item.kana}」?`,
+        options: buildOptionSet(item.es, sameLessonMeanings, meaningPool),
+        correct: item.es,
+        hint: buildLessonHint(lesson, "Vocabulario"),
+        explanation: `「${item.kana}」 significa “${item.es}”.`,
+      });
+    }
+
+    const sameLessonJapanese = Array.from(
+      new Set(
+        lessonVocab
+          .map((candidate) => (candidate.kanji?.trim() ? `${candidate.kanji.trim()} (${candidate.kana})` : candidate.kana))
+          .filter((value) => value && value !== jpForm),
+      ),
+    );
+    return createLessonQuestion(lesson, `vocab:curated:jp:${item.kana}:${index}`, {
+      category: "vocab",
+      type: "mcq",
+      prompt: `Selecciona el japonés para: “${item.es}”`,
+      options: buildOptionSet(jpForm, sameLessonJapanese, jpPool),
+      correct: jpForm,
+      hint: buildLessonHint(lesson, "Vocabulario"),
+      explanation: `La opción correcta para “${item.es}” es 「${jpForm}」.`,
+    });
+  }).filter((question): question is QuizQuestion => Boolean(question));
+
+  const grammarCluster: QuizQuestion[] = [
+    createLessonQuestion(1, "grammar:curated:student-copula", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “I am a student”?",
+      options: [
+        "わたしはがくせいです。",
+        "わたしががくせいです。",
+        "わたしはがくせいじゃないです。",
+        "わたしをがくせいです。",
+      ],
+      correct: "わたしはがくせいです。",
+      hint: buildLessonHint(1, "Copulativa"),
+      explanation: "La estructura base en L1 es 「X は Y です」.",
+    }),
+    createLessonQuestion(1, "grammar:curated:teacher-question", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “Are you a teacher?”?",
+      options: [
+        "あなたはせんせいです。",
+        "あなたはせんせいですか。",
+        "あなたがせんせいですか。",
+        "あなたはせんせいじゃないですか。",
+      ],
+      correct: "あなたはせんせいですか。",
+      hint: buildLessonHint(1, "Pregunta con か"),
+      explanation: "En L1, la pregunta básica termina en 「か」.",
+    }),
+    createLessonQuestion(1, "grammar:curated:no-major", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “Japanese language major”?",
+      options: [
+        "にほんごはせんこうです。",
+        "せんこうのにほんごです。",
+        "にほんごのせんこうです。",
+        "にほんごをせんこうです。",
+      ],
+      correct: "にほんごのせんこうです。",
+      hint: buildLessonHint(1, "Noun 1 の Noun 2"),
+      explanation: "「N1 の N2」 conecta dos sustantivos: “especialidad de japonés”.",
+    }),
+    createLessonQuestion(1, "grammar:curated:negative-copula", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “Maria is not a teacher”?",
+      options: [
+        "マリアさんはせんせいです。",
+        "マリアさんはせんせいじゃないです。",
+        "マリアさんがせんせいじゃないです。",
+        "マリアさんのせんせいじゃないです。",
+      ],
+      correct: "マリアさんはせんせいじゃないです。",
+      hint: buildLessonHint(1, "Copulativa negativa"),
+      explanation: "La negativa nominal de L1 es 「じゃないです」.",
+    }),
+    createLessonQuestion(1, "grammar:curated:theme-particle", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "Completa la oración: わたし___がくせいです。",
+      options: ["は", "が", "を", "の"],
+      correct: "は",
+      hint: buildLessonHint(1, "Tema"),
+      explanation: "「は」 marca el tema en presentaciones básicas.",
+    }),
+    createLessonQuestion(1, "grammar:curated:name-question", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “What is your name?”?",
+      options: [
+        "なまえは なんですか。",
+        "なまえが なんですか。",
+        "あなたは なまえですか。",
+        "なまえを なんですか。",
+      ],
+      correct: "なまえは なんですか。",
+      hint: buildLessonHint(1, "Pregunta básica"),
+      explanation: "La estructura natural es 「なまえは なんですか」.",
+    }),
+    createLessonQuestion(1, "grammar:curated:major-question", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "Completa la pregunta: せんこうは ___ ですか。",
+      options: ["なん", "だれ", "どこ", "なんじ"],
+      correct: "なん",
+      hint: buildLessonHint(1, "Pregunta con なん"),
+      explanation: "Para preguntar “qué” en este contexto se usa 「なん」.",
+    }),
+    createLessonQuestion(1, "grammar:curated:number-ownership", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál expresión significa “my phone number”?",
+      options: [
+        "わたしは でんわばんごうです。",
+        "わたしの でんわばんごうです。",
+        "わたしを でんわばんごうです。",
+        "わたしが でんわばんごうです。",
+      ],
+      correct: "わたしの でんわばんごうです。",
+      hint: buildLessonHint(1, "Noun 1 の Noun 2"),
+      explanation: "La posesión se expresa con 「の」.",
+    }),
+  ];
+
+  const readingQuestions: QuizQuestion[] = [
+    createLessonQuestion(1, "reading:curated:self-intro", {
+      category: "reading",
+      type: "mcq",
+      prompt: "Lee la presentación.\n\nわたしは アナです。メキシコじんです。がくせいです。\nせんこうは にほんごです。\n\n¿Cuál opción es correcta?",
+      options: [
+        "Ana es profesora.",
+        "Ana es japonesa.",
+        "Ana es estudiante de japonés.",
+        "Ana estudia historia.",
+      ],
+      correct: "Ana es estudiante de japonés.",
+      hint: buildLessonHint(1, "Lectura corta"),
+      explanation: "El texto dice que Ana es estudiante y su especialidad es japonés.",
+    }),
+    createLessonQuestion(1, "reading:curated:mini-dialogue", {
+      category: "reading",
+      type: "mcq",
+      prompt: "Lee el diálogo.\n\nA: なまえは なんですか。\nB: たけしです。\nA: せんこうは なんですか。\nB: れきしです。\n\n¿Qué estudia Takeshi?",
+      options: ["japonés", "inglés", "historia", "literatura"],
+      correct: "historia",
+      hint: buildLessonHint(1, "Lectura corta"),
+      explanation: "B responde 「れきしです」 cuando le preguntan por su especialidad.",
+    }),
+  ];
+
+  return [...vocabQuestions, ...grammarCluster, ...readingQuestions];
+}
+
 function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
   const normalizedLesson = Math.max(1, Math.min(12, lesson));
+  if (normalizedLesson === 1) return buildLessonOneCuratedExamPool();
   const pool: QuizQuestion[] = [];
 
   const lessonVocab = (ALL_GENKI_VOCAB_BY_LESSON[normalizedLesson] || []).filter((item) => isExamVocabEligible(normalizedLesson, item));
@@ -2383,6 +2581,7 @@ function pickPrioritizedQuestions(
 }
 
 function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, number>, count: number, lesson: number) {
+  if (lesson === 1) return shuffle(pool).slice(0, count);
   const used = new Set<string>();
   const result: QuizQuestion[] = [];
   const hasKanji = lesson >= 3;

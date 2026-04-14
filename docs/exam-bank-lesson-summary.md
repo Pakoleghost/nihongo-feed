@@ -6,7 +6,7 @@
 ## Per-lesson counts
 | Lesson | Total | Vocab | Kanji | Particles | Conjugation | Grammar | Reading | MCQ | Text | Match | Reorder |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 | 138 | 128 | 0 | 5 | 0 | 3 | 2 | 129 | 3 | 4 | 2 |
+| 1 | 20 | 10 | 0 | 0 | 0 | 8 | 2 | 20 | 0 | 0 | 0 |
 | 2 | 132 | 118 | 0 | 9 | 0 | 3 | 2 | 122 | 5 | 4 | 1 |
 | 3 | 221 | 138 | 48 | 16 | 15 | 2 | 2 | 179 | 37 | 4 | 1 |
 | 4 | 226 | 162 | 28 | 19 | 12 | 3 | 2 | 193 | 28 | 4 | 1 |
@@ -20,7 +20,7 @@
 | 12 | 232 | 148 | 28 | 36 | 14 | 4 | 2 | 190 | 37 | 4 | 1 |
 
 ## Coverage gaps
-- Weak grammar coverage (<4 items): 1, 2, 3, 4, 5, 6, 7, 9
+- Weak grammar coverage (<4 items): 2, 3, 4, 5, 6, 7, 9
 - Weak reading coverage (<3 items): 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 
 ## Global observations
