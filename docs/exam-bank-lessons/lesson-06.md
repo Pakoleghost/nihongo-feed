@@ -1,0 +1,2652 @@
+# Lesson 6 Exam Bank Review
+
+- total questions: **259**
+- source file: `/Users/pako/nihongo-feed-safe/app/study/page.tsx`
+
+## Count by category
+- vocab: 150
+- kanji: 30
+- particles: 24
+- conjugation: 51
+- grammar: 2
+- reading: 2
+
+## Count by question type
+- mcq: 211
+- text: 43
+- match: 4
+- reorder: 1
+
+## vocab
+
+### exam-vocab-es-l6-0
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「たべもの」?
+- choices: ["comida","bebida","desayuno","cena"]
+- correct: "comida"
+- explanation: 「たべもの」 significa “comida”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-0
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “comida”
+- choices: ["晩ご飯 (ばんごはん)","食べ物 (たべもの)","飲み物 (のみもの)","朝ご飯 (あさごはん)"]
+- correct: "食べ物 (たべもの)"
+- explanation: La opción correcta para “comida” es 「食べ物 (たべもの)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-1
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「のみもの」?
+- choices: ["desayuno","cena","bebida","comida"]
+- correct: "bebida"
+- explanation: 「のみもの」 significa “bebida”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-1
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “bebida”
+- choices: ["朝ご飯 (あさごはん)","食べ物 (たべもの)","飲み物 (のみもの)","晩ご飯 (ばんごはん)"]
+- correct: "飲み物 (のみもの)"
+- explanation: La opción correcta para “bebida” es 「飲み物 (のみもの)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-2
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「あさごはん」?
+- choices: ["bebida","desayuno","cena","comida"]
+- correct: "desayuno"
+- explanation: 「あさごはん」 significa “desayuno”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-2
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “desayuno”
+- choices: ["晩ご飯 (ばんごはん)","飲み物 (のみもの)","朝ご飯 (あさごはん)","食べ物 (たべもの)"]
+- correct: "朝ご飯 (あさごはん)"
+- explanation: La opción correcta para “desayuno” es 「朝ご飯 (あさごはん)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-3
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「ばんごはん」?
+- choices: ["desayuno","cena","comida","bebida"]
+- correct: "cena"
+- explanation: 「ばんごはん」 significa “cena”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-3
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “cena”
+- choices: ["朝ご飯 (あさごはん)","飲み物 (のみもの)","食べ物 (たべもの)","晩ご飯 (ばんごはん)"]
+- correct: "晩ご飯 (ばんごはん)"
+- explanation: La opción correcta para “cena” es 「晩ご飯 (ばんごはん)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-4
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「みず」?
+- choices: ["comida","agua","desayuno","bebida"]
+- correct: "agua"
+- explanation: 「みず」 significa “agua”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-4
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “agua”
+- choices: ["飲み物 (のみもの)","水 (みず)","食べ物 (たべもの)","朝ご飯 (あさごはん)"]
+- correct: "水 (みず)"
+- explanation: La opción correcta para “agua” es 「水 (みず)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-5
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「さかな」?
+- choices: ["desayuno","pescado","bebida","comida"]
+- correct: "pescado"
+- explanation: 「さかな」 significa “pescado”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-5
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “pescado”
+- choices: ["食べ物 (たべもの)","朝ご飯 (あさごはん)","魚 (さかな)","飲み物 (のみもの)"]
+- correct: "魚 (さかな)"
+- explanation: La opción correcta para “pescado” es 「魚 (さかな)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-6
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「にく」?
+- choices: ["comida","desayuno","bebida","carne"]
+- correct: "carne"
+- explanation: 「にく」 significa “carne”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-6
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “carne”
+- choices: ["朝ご飯 (あさごはん)","肉 (にく)","飲み物 (のみもの)","食べ物 (たべもの)"]
+- correct: "肉 (にく)"
+- explanation: La opción correcta para “carne” es 「肉 (にく)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-7
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「やさい」?
+- choices: ["verduras","comida","desayuno","bebida"]
+- correct: "verduras"
+- explanation: 「やさい」 significa “verduras”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-7
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “verduras”
+- choices: ["食べ物 (たべもの)","野菜 (やさい)","朝ご飯 (あさごはん)","飲み物 (のみもの)"]
+- correct: "野菜 (やさい)"
+- explanation: La opción correcta para “verduras” es 「野菜 (やさい)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-8
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「くだもの」?
+- choices: ["desayuno","fruta","bebida","comida"]
+- correct: "fruta"
+- explanation: 「くだもの」 significa “fruta”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-8
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “fruta”
+- choices: ["食べ物 (たべもの)","飲み物 (のみもの)","朝ご飯 (あさごはん)","果物 (くだもの)"]
+- correct: "果物 (くだもの)"
+- explanation: La opción correcta para “fruta” es 「果物 (くだもの)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-9
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「ぎゅうにゅう」?
+- choices: ["leche","bebida","comida","desayuno"]
+- correct: "leche"
+- explanation: 「ぎゅうにゅう」 significa “leche”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-9
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “leche”
+- choices: ["食べ物 (たべもの)","牛乳 (ぎゅうにゅう)","飲み物 (のみもの)","朝ご飯 (あさごはん)"]
+- correct: "牛乳 (ぎゅうにゅう)"
+- explanation: La opción correcta para “leche” es 「牛乳 (ぎゅうにゅう)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-10
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「ハンバーガー」?
+- choices: ["hamburguesa","bebida","desayuno","comida"]
+- correct: "hamburguesa"
+- explanation: 「ハンバーガー」 significa “hamburguesa”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-10
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “hamburguesa”
+- choices: ["飲み物 (のみもの)","ハンバーガー","朝ご飯 (あさごはん)","食べ物 (たべもの)"]
+- correct: "ハンバーガー"
+- explanation: La opción correcta para “hamburguesa” es 「ハンバーガー」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-11
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「パスタ」?
+- choices: ["desayuno","comida","bebida","pasta"]
+- correct: "pasta"
+- explanation: 「パスタ」 significa “pasta”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-11
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “pasta”
+- choices: ["飲み物 (のみもの)","朝ご飯 (あさごはん)","パスタ","食べ物 (たべもの)"]
+- correct: "パスタ"
+- explanation: La opción correcta para “pasta” es 「パスタ」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-12
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「りんご」?
+- choices: ["manzana","desayuno","comida","bebida"]
+- correct: "manzana"
+- explanation: 「りんご」 significa “manzana”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-12
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “manzana”
+- choices: ["朝ご飯 (あさごはん)","飲み物 (のみもの)","食べ物 (たべもの)","りんご"]
+- correct: "りんご"
+- explanation: La opción correcta para “manzana” es 「りんご」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-13
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「たまご」?
+- choices: ["comida","bebida","desayuno","huevo"]
+- correct: "huevo"
+- explanation: 「たまご」 significa “huevo”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-13
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “huevo”
+- choices: ["卵 (たまご)","朝ご飯 (あさごはん)","飲み物 (のみもの)","食べ物 (たべもの)"]
+- correct: "卵 (たまご)"
+- explanation: La opción correcta para “huevo” es 「卵 (たまご)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-14
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「ぎゅうにく」?
+- choices: ["carne de res","bebida","comida","desayuno"]
+- correct: "carne de res"
+- explanation: 「ぎゅうにく」 significa “carne de res”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-14
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “carne de res”
+- choices: ["朝ご飯 (あさごはん)","飲み物 (のみもの)","食べ物 (たべもの)","牛肉 (ぎゅうにく)"]
+- correct: "牛肉 (ぎゅうにく)"
+- explanation: La opción correcta para “carne de res” es 「牛肉 (ぎゅうにく)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-15
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「ぶたにく」?
+- choices: ["carne de cerdo","comida","bebida","desayuno"]
+- correct: "carne de cerdo"
+- explanation: 「ぶたにく」 significa “carne de cerdo”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-15
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “carne de cerdo”
+- choices: ["朝ご飯 (あさごはん)","飲み物 (のみもの)","豚肉 (ぶたにく)","食べ物 (たべもの)"]
+- correct: "豚肉 (ぶたにく)"
+- explanation: La opción correcta para “carne de cerdo” es 「豚肉 (ぶたにく)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-16
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「おちゃ」?
+- choices: ["bebida","comida","té","desayuno"]
+- correct: "té"
+- explanation: 「おちゃ」 significa “té”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-16
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “té”
+- choices: ["食べ物 (たべもの)","お茶 (おちゃ)","朝ご飯 (あさごはん)","飲み物 (のみもの)"]
+- correct: "お茶 (おちゃ)"
+- explanation: La opción correcta para “té” es 「お茶 (おちゃ)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-17
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「こうちゃ」?
+- choices: ["comida","bebida","té negro","desayuno"]
+- correct: "té negro"
+- explanation: 「こうちゃ」 significa “té negro”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-17
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “té negro”
+- choices: ["紅茶 (こうちゃ)","朝ご飯 (あさごはん)","食べ物 (たべもの)","飲み物 (のみもの)"]
+- correct: "紅茶 (こうちゃ)"
+- explanation: La opción correcta para “té negro” es 「紅茶 (こうちゃ)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-18
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「まいにち」?
+- choices: ["bebida","comida","desayuno","todos los días"]
+- correct: "todos los días"
+- explanation: 「まいにち」 significa “todos los días”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-18
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “todos los días”
+- choices: ["飲み物 (のみもの)","食べ物 (たべもの)","朝ご飯 (あさごはん)","毎日 (まいにち)"]
+- correct: "毎日 (まいにち)"
+- explanation: La opción correcta para “todos los días” es 「毎日 (まいにち)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-19
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「ときどき」?
+- choices: ["comida","desayuno","a veces","bebida"]
+- correct: "a veces"
+- explanation: 「ときどき」 significa “a veces”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-19
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “a veces”
+- choices: ["食べ物 (たべもの)","朝ご飯 (あさごはん)","時々 (ときどき)","飲み物 (のみもの)"]
+- correct: "時々 (ときどき)"
+- explanation: La opción correcta para “a veces” es 「時々 (ときどき)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-20
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「かう」?
+- choices: ["bebida","desayuno","comprar","comida"]
+- correct: "comprar"
+- explanation: 「かう」 significa “comprar”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-20
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “comprar”
+- choices: ["かう","朝ご飯 (あさごはん)","食べ物 (たべもの)","飲み物 (のみもの)"]
+- correct: "かう"
+- explanation: La opción correcta para “comprar” es 「かう」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-21
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「のむ」?
+- choices: ["beber","bebida","desayuno","comida"]
+- correct: "beber"
+- explanation: 「のむ」 significa “beber”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-21
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “beber”
+- choices: ["のむ","食べ物 (たべもの)","飲み物 (のみもの)","朝ご飯 (あさごはん)"]
+- correct: "のむ"
+- explanation: La opción correcta para “beber” es 「のむ」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-22
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「つくる」?
+- choices: ["bebida","hacer/crear","comida","desayuno"]
+- correct: "hacer/crear"
+- explanation: 「つくる」 significa “hacer/crear”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-22
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “hacer/crear”
+- choices: ["飲み物 (のみもの)","朝ご飯 (あさごはん)","つくる","食べ物 (たべもの)"]
+- correct: "つくる"
+- explanation: La opción correcta para “hacer/crear” es 「つくる」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-23
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「おいしい」?
+- choices: ["bebida","desayuno","comida","delicioso"]
+- correct: "delicioso"
+- explanation: 「おいしい」 significa “delicioso”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-23
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “delicioso”
+- choices: ["おいしい","朝ご飯 (あさごはん)","食べ物 (たべもの)","飲み物 (のみもの)"]
+- correct: "おいしい"
+- explanation: La opción correcta para “delicioso” es 「おいしい」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-24
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「げんき」?
+- choices: ["saludable/animado","desayuno","comida","bebida"]
+- correct: "saludable/animado"
+- explanation: 「げんき」 significa “saludable/animado”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-24
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “saludable/animado”
+- choices: ["飲み物 (のみもの)","朝ご飯 (あさごはん)","食べ物 (たべもの)","げんき"]
+- correct: "げんき"
+- explanation: La opción correcta para “saludable/animado” es 「げんき」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-25
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「まずい」?
+- choices: ["comida","bebida","desayuno","malo (sabor)"]
+- correct: "malo (sabor)"
+- explanation: 「まずい」 significa “malo (sabor)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-25
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “malo (sabor)”
+- choices: ["朝ご飯 (あさごはん)","飲み物 (のみもの)","食べ物 (たべもの)","まずい"]
+- correct: "まずい"
+- explanation: La opción correcta para “malo (sabor)” es 「まずい」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-26
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「いそがしい」?
+- choices: ["bebida","desayuno","ocupado","comida"]
+- correct: "ocupado"
+- explanation: 「いそがしい」 significa “ocupado”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-26
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “ocupado”
+- choices: ["朝ご飯 (あさごはん)","いそがしい","飲み物 (のみもの)","食べ物 (たべもの)"]
+- correct: "いそがしい"
+- explanation: La opción correcta para “ocupado” es 「いそがしい」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-27
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「かんじ」?
+- choices: ["kanji; caracter chino","desayuno","comida","bebida"]
+- correct: "kanji; caracter chino"
+- explanation: 「かんじ」 significa “kanji; caracter chino”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-27
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “kanji; caracter chino”
+- choices: ["朝ご飯 (あさごはん)","漢字 (かんじ)","飲み物 (のみもの)","食べ物 (たべもの)"]
+- correct: "漢字 (かんじ)"
+- explanation: La opción correcta para “kanji; caracter chino” es 「漢字 (かんじ)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-28
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「きょうかしょ」?
+- choices: ["desayuno","comida","libro de texto","bebida"]
+- correct: "libro de texto"
+- explanation: 「きょうかしょ」 significa “libro de texto”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-28
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “libro de texto”
+- choices: ["朝ご飯 (あさごはん)","食べ物 (たべもの)","飲み物 (のみもの)","教科書 (きょうかしょ)"]
+- correct: "教科書 (きょうかしょ)"
+- explanation: La opción correcta para “libro de texto” es 「教科書 (きょうかしょ)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-29
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「ページ」?
+- choices: ["desayuno","comida","bebida","página"]
+- correct: "página"
+- explanation: 「ページ」 significa “página”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-29
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “página”
+- choices: ["朝ご飯 (あさごはん)","ページ","飲み物 (のみもの)","食べ物 (たべもの)"]
+- correct: "ページ"
+- explanation: La opción correcta para “página” es 「ページ」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-30
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「つぎ」?
+- choices: ["comida","bebida","siguiente","desayuno"]
+- correct: "siguiente"
+- explanation: 「つぎ」 significa “siguiente”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-30
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “siguiente”
+- choices: ["飲み物 (のみもの)","朝ご飯 (あさごはん)","食べ物 (たべもの)","次 (つぎ)"]
+- correct: "次 (つぎ)"
+- explanation: La opción correcta para “siguiente” es 「次 (つぎ)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-31
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「おかね」?
+- choices: ["dinero","desayuno","bebida","comida"]
+- correct: "dinero"
+- explanation: 「おかね」 significa “dinero”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-31
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “dinero”
+- choices: ["お金 (おかね)","朝ご飯 (あさごはん)","飲み物 (のみもの)","食べ物 (たべもの)"]
+- correct: "お金 (おかね)"
+- explanation: La opción correcta para “dinero” es 「お金 (おかね)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-32
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「にもつ」?
+- choices: ["bebida","comida","equipaje","desayuno"]
+- correct: "equipaje"
+- explanation: 「にもつ」 significa “equipaje”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-32
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “equipaje”
+- choices: ["食べ物 (たべもの)","荷物 (にもつ)","朝ご飯 (あさごはん)","飲み物 (のみもの)"]
+- correct: "荷物 (にもつ)"
+- explanation: La opción correcta para “equipaje” es 「荷物 (にもつ)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-33
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「パソコン」?
+- choices: ["desayuno","comida","bebida","computadora personal"]
+- correct: "computadora personal"
+- explanation: 「パソコン」 significa “computadora personal”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-33
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “computadora personal”
+- choices: ["食べ物 (たべもの)","パソコン","朝ご飯 (あさごはん)","飲み物 (のみもの)"]
+- correct: "パソコン"
+- explanation: La opción correcta para “computadora personal” es 「パソコン」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-34
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「シャワー」?
+- choices: ["ducha","bebida","comida","desayuno"]
+- correct: "ducha"
+- explanation: 「シャワー」 significa “ducha”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-34
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “ducha”
+- choices: ["朝ご飯 (あさごはん)","食べ物 (たべもの)","飲み物 (のみもの)","シャワー"]
+- correct: "シャワー"
+- explanation: La opción correcta para “ducha” es 「シャワー」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-35
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「エアコン」?
+- choices: ["comida","bebida","aire acondicionado","desayuno"]
+- correct: "aire acondicionado"
+- explanation: 「エアコン」 significa “aire acondicionado”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-35
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “aire acondicionado”
+- choices: ["飲み物 (のみもの)","朝ご飯 (あさごはん)","食べ物 (たべもの)","エアコン"]
+- correct: "エアコン"
+- explanation: La opción correcta para “aire acondicionado” es 「エアコン」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-36
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「でんき」?
+- choices: ["electricidad; luz","comida","desayuno","bebida"]
+- correct: "electricidad; luz"
+- explanation: 「でんき」 significa “electricidad; luz”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-36
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “electricidad; luz”
+- choices: ["飲み物 (のみもの)","朝ご飯 (あさごはん)","電気 (でんき)","食べ物 (たべもの)"]
+- correct: "電気 (でんき)"
+- explanation: La opción correcta para “electricidad; luz” es 「電気 (でんき)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-37
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「まど」?
+- choices: ["bebida","ventana","comida","desayuno"]
+- correct: "ventana"
+- explanation: 「まど」 significa “ventana”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-37
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “ventana”
+- choices: ["窓 (まど)","食べ物 (たべもの)","飲み物 (のみもの)","朝ご飯 (あさごはん)"]
+- correct: "窓 (まど)"
+- explanation: La opción correcta para “ventana” es 「窓 (まど)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-38
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「でんしゃ」?
+- choices: ["bebida","tren","comida","desayuno"]
+- correct: "tren"
+- explanation: 「でんしゃ」 significa “tren”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-38
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “tren”
+- choices: ["朝ご飯 (あさごはん)","食べ物 (たべもの)","電車 (でんしゃ)","飲み物 (のみもの)"]
+- correct: "電車 (でんしゃ)"
+- explanation: La opción correcta para “tren” es 「電車 (でんしゃ)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-39
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「くに」?
+- choices: ["bebida","desayuno","comida","país; lugar de origen"]
+- correct: "país; lugar de origen"
+- explanation: 「くに」 significa “país; lugar de origen”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-39
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “país; lugar de origen”
+- choices: ["飲み物 (のみもの)","食べ物 (たべもの)","朝ご飯 (あさごはん)","国 (くに)"]
+- correct: "国 (くに)"
+- explanation: La opción correcta para “país; lugar de origen” es 「国 (くに)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-40
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「こんしゅう」?
+- choices: ["comida","desayuno","esta semana","bebida"]
+- correct: "esta semana"
+- explanation: 「こんしゅう」 significa “esta semana”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-40
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “esta semana”
+- choices: ["飲み物 (のみもの)","今週 (こんしゅう)","朝ご飯 (あさごはん)","食べ物 (たべもの)"]
+- correct: "今週 (こんしゅう)"
+- explanation: La opción correcta para “esta semana” es 「今週 (こんしゅう)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-41
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「らいしゅう」?
+- choices: ["la próxima semana","bebida","desayuno","comida"]
+- correct: "la próxima semana"
+- explanation: 「らいしゅう」 significa “la próxima semana”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-41
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “la próxima semana”
+- choices: ["飲み物 (のみもの)","食べ物 (たべもの)","来週 (らいしゅう)","朝ご飯 (あさごはん)"]
+- correct: "来週 (らいしゅう)"
+- explanation: La opción correcta para “la próxima semana” es 「来週 (らいしゅう)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-42
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「らいねん」?
+- choices: ["bebida","desayuno","el próximo año","comida"]
+- correct: "el próximo año"
+- explanation: 「らいねん」 significa “el próximo año”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-42
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “el próximo año”
+- choices: ["来年 (らいねん)","朝ご飯 (あさごはん)","食べ物 (たべもの)","飲み物 (のみもの)"]
+- correct: "来年 (らいねん)"
+- explanation: La opción correcta para “el próximo año” es 「来年 (らいねん)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-43
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「よる」?
+- choices: ["comida","bebida","desayuno","noche"]
+- correct: "noche"
+- explanation: 「よる」 significa “noche”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-43
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “noche”
+- choices: ["夜 (よる)","食べ物 (たべもの)","朝ご飯 (あさごはん)","飲み物 (のみもの)"]
+- correct: "夜 (よる)"
+- explanation: La opción correcta para “noche” es 「夜 (よる)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-44
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「たいへん（な）」?
+- choices: ["desayuno","comida","difícil (situación)","bebida"]
+- correct: "difícil (situación)"
+- explanation: 「たいへん（な）」 significa “difícil (situación)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-44
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “difícil (situación)”
+- choices: ["朝ご飯 (あさごはん)","大変（な） (たいへん（な）)","飲み物 (のみもの)","食べ物 (たべもの)"]
+- correct: "大変（な） (たいへん（な）)"
+- explanation: La opción correcta para “difícil (situación)” es 「大変（な） (たいへん（な）)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-45
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「あそぶ」?
+- choices: ["desayuno","comida","bebida","jugar; pasar un rato agradable"]
+- correct: "jugar; pasar un rato agradable"
+- explanation: 「あそぶ」 significa “jugar; pasar un rato agradable”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-45
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “jugar; pasar un rato agradable”
+- choices: ["朝ご飯 (あさごはん)","遊ぶ (あそぶ)","食べ物 (たべもの)","飲み物 (のみもの)"]
+- correct: "遊ぶ (あそぶ)"
+- explanation: La opción correcta para “jugar; pasar un rato agradable” es 「遊ぶ (あそぶ)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-46
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「いそぐ」?
+- choices: ["desayuno","apresurarse","bebida","comida"]
+- correct: "apresurarse"
+- explanation: 「いそぐ」 significa “apresurarse”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-46
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “apresurarse”
+- choices: ["食べ物 (たべもの)","急ぐ (いそぐ)","朝ご飯 (あさごはん)","飲み物 (のみもの)"]
+- correct: "急ぐ (いそぐ)"
+- explanation: La opción correcta para “apresurarse” es 「急ぐ (いそぐ)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-47
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「かえす」?
+- choices: ["desayuno","bebida","comida","devolver (persona に cosa を)"]
+- correct: "devolver (persona に cosa を)"
+- explanation: 「かえす」 significa “devolver (persona に cosa を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-47
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “devolver (persona に cosa を)”
+- choices: ["朝ご飯 (あさごはん)","食べ物 (たべもの)","飲み物 (のみもの)","返す (かえす)"]
+- correct: "返す (かえす)"
+- explanation: La opción correcta para “devolver (persona に cosa を)” es 「返す (かえす)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-48
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「けす」?
+- choices: ["desayuno","apagar; borrar (～を)","comida","bebida"]
+- correct: "apagar; borrar (～を)"
+- explanation: 「けす」 significa “apagar; borrar (～を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-48
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “apagar; borrar (～を)”
+- choices: ["消す (けす)","食べ物 (たべもの)","朝ご飯 (あさごはん)","飲み物 (のみもの)"]
+- correct: "消す (けす)"
+- explanation: La opción correcta para “apagar; borrar (～を)” es 「消す (けす)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-49
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「しぬ」?
+- choices: ["comida","morir","desayuno","bebida"]
+- correct: "morir"
+- explanation: 「しぬ」 significa “morir”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-49
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “morir”
+- choices: ["食べ物 (たべもの)","飲み物 (のみもの)","朝ご飯 (あさごはん)","死ぬ (しぬ)"]
+- correct: "死ぬ (しぬ)"
+- explanation: La opción correcta para “morir” es 「死ぬ (しぬ)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-50
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「すわる」?
+- choices: ["desayuno","sentarse (asiento に)","comida","bebida"]
+- correct: "sentarse (asiento に)"
+- explanation: 「すわる」 significa “sentarse (asiento に)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-50
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “sentarse (asiento に)”
+- choices: ["朝ご飯 (あさごはん)","座る (すわる)","食べ物 (たべもの)","飲み物 (のみもの)"]
+- correct: "座る (すわる)"
+- explanation: La opción correcta para “sentarse (asiento に)” es 「座る (すわる)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-51
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「たつ」?
+- choices: ["comida","desayuno","ponerse de pie","bebida"]
+- correct: "ponerse de pie"
+- explanation: 「たつ」 significa “ponerse de pie”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-51
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “ponerse de pie”
+- choices: ["飲み物 (のみもの)","朝ご飯 (あさごはん)","食べ物 (たべもの)","立つ (たつ)"]
+- correct: "立つ (たつ)"
+- explanation: La opción correcta para “ponerse de pie” es 「立つ (たつ)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-52
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「たばこをすう」?
+- choices: ["desayuno","fumar","bebida","comida"]
+- correct: "fumar"
+- explanation: 「たばこをすう」 significa “fumar”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-52
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “fumar”
+- choices: ["朝ご飯 (あさごはん)","食べ物 (たべもの)","たばこを吸う (たばこをすう)","飲み物 (のみもの)"]
+- correct: "たばこを吸う (たばこをすう)"
+- explanation: La opción correcta para “fumar” es 「たばこを吸う (たばこをすう)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-53
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「つかう」?
+- choices: ["bebida","utilizar (～を)","desayuno","comida"]
+- correct: "utilizar (～を)"
+- explanation: 「つかう」 significa “utilizar (～を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-53
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “utilizar (～を)”
+- choices: ["朝ご飯 (あさごはん)","食べ物 (たべもの)","飲み物 (のみもの)","使う (つかう)"]
+- correct: "使う (つかう)"
+- explanation: La opción correcta para “utilizar (～を)” es 「使う (つかう)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-54
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「てつだう」?
+- choices: ["bebida","comida","desayuno","ayudar (persona/tarea を)"]
+- correct: "ayudar (persona/tarea を)"
+- explanation: 「てつだう」 significa “ayudar (persona/tarea を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-54
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “ayudar (persona/tarea を)”
+- choices: ["朝ご飯 (あさごはん)","食べ物 (たべもの)","飲み物 (のみもの)","手伝う (てつだう)"]
+- correct: "手伝う (てつだう)"
+- explanation: La opción correcta para “ayudar (persona/tarea を)” es 「手伝う (てつだう)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-55
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「はいる」?
+- choices: ["comida","desayuno","entrar (～に)","bebida"]
+- correct: "entrar (～に)"
+- explanation: 「はいる」 significa “entrar (～に)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-55
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “entrar (～に)”
+- choices: ["入る (はいる)","飲み物 (のみもの)","食べ物 (たべもの)","朝ご飯 (あさごはん)"]
+- correct: "入る (はいる)"
+- explanation: La opción correcta para “entrar (～に)” es 「入る (はいる)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-56
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「もつ」?
+- choices: ["desayuno","bebida","llevar; sostener (～を)","comida"]
+- correct: "llevar; sostener (～を)"
+- explanation: 「もつ」 significa “llevar; sostener (～を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-56
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “llevar; sostener (～を)”
+- choices: ["持つ (もつ)","飲み物 (のみもの)","食べ物 (たべもの)","朝ご飯 (あさごはん)"]
+- correct: "持つ (もつ)"
+- explanation: La opción correcta para “llevar; sostener (～を)” es 「持つ (もつ)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-57
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「あける」?
+- choices: ["desayuno","comida","bebida","abrir (algo) (～を)"]
+- correct: "abrir (algo) (～を)"
+- explanation: 「あける」 significa “abrir (algo) (～を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-57
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “abrir (algo) (～を)”
+- choices: ["開ける (あける)","食べ物 (たべもの)","飲み物 (のみもの)","朝ご飯 (あさごはん)"]
+- correct: "開ける (あける)"
+- explanation: La opción correcta para “abrir (algo) (～を)” es 「開ける (あける)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-58
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「しめる」?
+- choices: ["bebida","cerrar (algo) (～を)","comida","desayuno"]
+- correct: "cerrar (algo) (～を)"
+- explanation: 「しめる」 significa “cerrar (algo) (～を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-58
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “cerrar (algo) (～を)”
+- choices: ["食べ物 (たべもの)","閉める (しめる)","飲み物 (のみもの)","朝ご飯 (あさごはん)"]
+- correct: "閉める (しめる)"
+- explanation: La opción correcta para “cerrar (algo) (～を)” es 「閉める (しめる)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-59
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「おしえる」?
+- choices: ["desayuno","enseñar; instruir (persona に cosa を)","bebida","comida"]
+- correct: "enseñar; instruir (persona に cosa を)"
+- explanation: 「おしえる」 significa “enseñar; instruir (persona に cosa を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-59
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “enseñar; instruir (persona に cosa を)”
+- choices: ["朝ご飯 (あさごはん)","食べ物 (たべもの)","教える (おしえる)","飲み物 (のみもの)"]
+- correct: "教える (おしえる)"
+- explanation: La opción correcta para “enseñar; instruir (persona に cosa を)” es 「教える (おしえる)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-60
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「わすれる」?
+- choices: ["olvidar; dejar atrás (～を)","bebida","comida","desayuno"]
+- correct: "olvidar; dejar atrás (～を)"
+- explanation: 「わすれる」 significa “olvidar; dejar atrás (～を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-60
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “olvidar; dejar atrás (～を)”
+- choices: ["飲み物 (のみもの)","朝ご飯 (あさごはん)","忘れる (わすれる)","食べ物 (たべもの)"]
+- correct: "忘れる (わすれる)"
+- explanation: La opción correcta para “olvidar; dejar atrás (～を)” es 「忘れる (わすれる)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-61
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「おりる」?
+- choices: ["comida","bajarse (～を)","bebida","desayuno"]
+- correct: "bajarse (～を)"
+- explanation: 「おりる」 significa “bajarse (～を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-61
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “bajarse (～を)”
+- choices: ["降りる (おりる)","食べ物 (たべもの)","朝ご飯 (あさごはん)","飲み物 (のみもの)"]
+- correct: "降りる (おりる)"
+- explanation: La opción correcta para “bajarse (～を)” es 「降りる (おりる)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-62
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「かりる」?
+- choices: ["comida","bebida","pedir prestado (persona に cosa を)","desayuno"]
+- correct: "pedir prestado (persona に cosa を)"
+- explanation: 「かりる」 significa “pedir prestado (persona に cosa を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-62
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “pedir prestado (persona に cosa を)”
+- choices: ["朝ご飯 (あさごはん)","飲み物 (のみもの)","食べ物 (たべもの)","借りる (かりる)"]
+- correct: "借りる (かりる)"
+- explanation: La opción correcta para “pedir prestado (persona に cosa を)” es 「借りる (かりる)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-63
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「シャワーをあびる」?
+- choices: ["bebida","comida","desayuno","ducharse"]
+- correct: "ducharse"
+- explanation: 「シャワーをあびる」 significa “ducharse”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-63
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “ducharse”
+- choices: ["飲み物 (のみもの)","食べ物 (たべもの)","朝ご飯 (あさごはん)","シャワーをあびる"]
+- correct: "シャワーをあびる"
+- explanation: La opción correcta para “ducharse” es 「シャワーをあびる」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-64
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「つける」?
+- choices: ["comida","desayuno","bebida","encender (～を)"]
+- correct: "encender (～を)"
+- explanation: 「つける」 significa “encender (～を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-64
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “encender (～を)”
+- choices: ["食べ物 (たべもの)","飲み物 (のみもの)","つける","朝ご飯 (あさごはん)"]
+- correct: "つける"
+- explanation: La opción correcta para “encender (～を)” es 「つける」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-65
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「でんわをかける」?
+- choices: ["llamar (～に)","bebida","desayuno","comida"]
+- correct: "llamar (～に)"
+- explanation: 「でんわをかける」 significa “llamar (～に)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-65
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “llamar (～に)”
+- choices: ["飲み物 (のみもの)","朝ご飯 (あさごはん)","食べ物 (たべもの)","電話をかける (でんわをかける)"]
+- correct: "電話をかける (でんわをかける)"
+- explanation: La opción correcta para “llamar (～に)” es 「電話をかける (でんわをかける)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-66
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「つれてくる」?
+- choices: ["desayuno","traer (a una persona) (～を)","bebida","comida"]
+- correct: "traer (a una persona) (～を)"
+- explanation: 「つれてくる」 significa “traer (a una persona) (～を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-66
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “traer (a una persona) (～を)”
+- choices: ["食べ物 (たべもの)","飲み物 (のみもの)","連れてくる (つれてくる)","朝ご飯 (あさごはん)"]
+- correct: "連れてくる (つれてくる)"
+- explanation: La opción correcta para “traer (a una persona) (～を)” es 「連れてくる (つれてくる)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-67
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「もってくる」?
+- choices: ["bebida","traer (una cosa) (～を)","comida","desayuno"]
+- correct: "traer (una cosa) (～を)"
+- explanation: 「もってくる」 significa “traer (una cosa) (～を)”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-67
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “traer (una cosa) (～を)”
+- choices: ["朝ご飯 (あさごはん)","飲み物 (のみもの)","食べ物 (たべもの)","持ってくる (もってくる)"]
+- correct: "持ってくる (もってくる)"
+- explanation: La opción correcta para “traer (una cosa) (～を)” es 「持ってくる (もってくる)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-68
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「あとで」?
+- choices: ["bebida","desayuno","después","comida"]
+- correct: "después"
+- explanation: 「あとで」 significa “después”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-68
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “después”
+- choices: ["食べ物 (たべもの)","朝ご飯 (あさごはん)","後で (あとで)","飲み物 (のみもの)"]
+- correct: "後で (あとで)"
+- explanation: La opción correcta para “después” es 「後で (あとで)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-69
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「すぐ」?
+- choices: ["desayuno","bebida","comida","de inmediato"]
+- correct: "de inmediato"
+- explanation: 「すぐ」 significa “de inmediato”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-69
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “de inmediato”
+- choices: ["食べ物 (たべもの)","すぐ","朝ご飯 (あさごはん)","飲み物 (のみもの)"]
+- correct: "すぐ"
+- explanation: La opción correcta para “de inmediato” es 「すぐ」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-70
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「ゆっくり」?
+- choices: ["comida","bebida","desayuno","despacio; con calma; sin prisas"]
+- correct: "despacio; con calma; sin prisas"
+- explanation: 「ゆっくり」 significa “despacio; con calma; sin prisas”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-70
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “despacio; con calma; sin prisas”
+- choices: ["朝ご飯 (あさごはん)","ゆっくり","食べ物 (たべもの)","飲み物 (のみもの)"]
+- correct: "ゆっくり"
+- explanation: La opción correcta para “despacio; con calma; sin prisas” es 「ゆっくり」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-71
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「けっこうです」?
+- choices: ["bebida","comida","desayuno","Estaría bien.; No sería necesario."]
+- correct: "Estaría bien.; No sería necesario."
+- explanation: 「けっこうです」 significa “Estaría bien.; No sería necesario.”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-71
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “Estaría bien.; No sería necesario.”
+- choices: ["飲み物 (のみもの)","朝ご飯 (あさごはん)","食べ物 (たべもの)","結構です (けっこうです)"]
+- correct: "結構です (けっこうです)"
+- explanation: La opción correcta para “Estaría bien.; No sería necesario.” es 「結構です (けっこうです)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-es-l6-72
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: ¿Qué significa 「ほんとうですか」?
+- choices: ["¿De verdad?","comida","bebida","desayuno"]
+- correct: "¿De verdad?"
+- explanation: 「ほんとうですか」 significa “¿De verdad?”.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-jp-l6-72
+- category: `vocab`
+- type: `mcq`
+- source: `lesson_vocab_generated`
+- prompt: Selecciona el japonés para: “¿De verdad?”
+- choices: ["食べ物 (たべもの)","朝ご飯 (あさごはん)","本当ですか (ほんとうですか)","飲み物 (のみもの)"]
+- correct: "本当ですか (ほんとうですか)"
+- explanation: La opción correcta para “¿De verdad?” es 「本当ですか (ほんとうですか)」.
+- hint: Lección 6 · Vocabulario
+
+### exam-vocab-match-6-0
+- category: `vocab`
+- type: `match`
+- source: `lesson_vocab_matching`
+- prompt: Relaciona cada término japonés con su significado.
+- choices.left: ["A. 返す (かえす)","B. 次 (つぎ)","C. 電車 (でんしゃ)"]
+- choices.right: ["1. tren","2. siguiente","3. devolver (persona に cosa を)"]
+- correct: "A-3, B-2, C-1"
+- explanation: Relaciones correctas: A-3, B-2, C-1.
+- hint: Lección 6 · Relacionar
+
+### exam-vocab-match-6-1
+- category: `vocab`
+- type: `match`
+- source: `lesson_vocab_matching`
+- prompt: Relaciona cada término japonés con su significado.
+- choices.left: ["A. シャワー","B. 入る (はいる)","C. りんご"]
+- choices.right: ["1. ducha","2. manzana","3. entrar (～に)"]
+- correct: "A-1, B-3, C-2"
+- explanation: Relaciones correctas: A-1, B-3, C-2.
+- hint: Lección 6 · Relacionar
+
+### exam-vocab-match-6-2
+- category: `vocab`
+- type: `match`
+- source: `lesson_vocab_matching`
+- prompt: Relaciona cada término japonés con su significado.
+- choices.left: ["A. 座る (すわる)","B. 毎日 (まいにち)","C. ハンバーガー"]
+- choices.right: ["1. hamburguesa","2. todos los días","3. sentarse (asiento に)"]
+- correct: "A-3, B-2, C-1"
+- explanation: Relaciones correctas: A-3, B-2, C-1.
+- hint: Lección 6 · Relacionar
+
+### exam-vocab-match-6-3
+- category: `vocab`
+- type: `match`
+- source: `lesson_vocab_matching`
+- prompt: Relaciona cada término japonés con su significado.
+- choices.left: ["A. 借りる (かりる)","B. 晩ご飯 (ばんごはん)","C. いそがしい"]
+- choices.right: ["1. cena","2. pedir prestado (persona に cosa を)","3. ocupado"]
+- correct: "A-2, B-1, C-3"
+- explanation: Relaciones correctas: A-2, B-1, C-3.
+- hint: Lección 6 · Relacionar
+
+## kanji
+
+### exam-kanji-l6-0
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「東」?
+- choices: ["いち","に","いちじ","ひがし"]
+- correct: "ひがし"
+- explanation: 「東」 se lee 「ひがし」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-0
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「東」
+- choices: []
+- correct: "ひがし"
+- explanation: La lectura correcta es 「ひがし」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["ひがし"]
+
+### exam-kanji-l6-1
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「西」?
+- choices: ["にし","いち","に","いちじ"]
+- correct: "にし"
+- explanation: 「西」 se lee 「にし」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-1
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「西」
+- choices: []
+- correct: "にし"
+- explanation: La lectura correcta es 「にし」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["にし"]
+
+### exam-kanji-l6-2
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「南」?
+- choices: ["いち","みなみ","いちじ","に"]
+- correct: "みなみ"
+- explanation: 「南」 se lee 「みなみ」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-2
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「南」
+- choices: []
+- correct: "みなみ"
+- explanation: La lectura correcta es 「みなみ」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["みなみ"]
+
+### exam-kanji-l6-3
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「北」?
+- choices: ["きた","いちじ","に","いち"]
+- correct: "きた"
+- explanation: 「北」 se lee 「きた」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-3
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「北」
+- choices: []
+- correct: "きた"
+- explanation: La lectura correcta es 「きた」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["きた"]
+
+### exam-kanji-l6-4
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「出口」?
+- choices: ["に","いち","いちじ","でぐち"]
+- correct: "でぐち"
+- explanation: 「出口」 se lee 「でぐち」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-4
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「出口」
+- choices: []
+- correct: "でぐち"
+- explanation: La lectura correcta es 「でぐち」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["でぐち"]
+
+### exam-kanji-l6-5
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「出る」?
+- choices: ["いちじ","に","いち","でる"]
+- correct: "でる"
+- explanation: 「出る」 se lee 「でる」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-5
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「出る」
+- choices: []
+- correct: "でる"
+- explanation: La lectura correcta es 「でる」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["でる"]
+
+### exam-kanji-l6-6
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「右」?
+- choices: ["みぎ","に","いち","いちじ"]
+- correct: "みぎ"
+- explanation: 「右」 se lee 「みぎ」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-6
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「右」
+- choices: []
+- correct: "みぎ"
+- explanation: La lectura correcta es 「みぎ」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["みぎ"]
+
+### exam-kanji-l6-7
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「左」?
+- choices: ["いちじ","に","いち","ひだり"]
+- correct: "ひだり"
+- explanation: 「左」 se lee 「ひだり」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-7
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「左」
+- choices: []
+- correct: "ひだり"
+- explanation: La lectura correcta es 「ひだり」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["ひだり"]
+
+### exam-kanji-l6-8
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「五分」?
+- choices: ["ごふん","いちじ","に","いち"]
+- correct: "ごふん"
+- explanation: 「五分」 se lee 「ごふん」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-8
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「五分」
+- choices: []
+- correct: "ごふん"
+- explanation: La lectura correcta es 「ごふん」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["ごふん"]
+
+### exam-kanji-l6-9
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「先生」?
+- choices: ["いちじ","せんせい","に","いち"]
+- correct: "せんせい"
+- explanation: 「先生」 se lee 「せんせい」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-9
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「先生」
+- choices: []
+- correct: "せんせい"
+- explanation: La lectura correcta es 「せんせい」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["せんせい"]
+
+### exam-kanji-l6-10
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「学生」?
+- choices: ["がくせい","に","いちじ","いち"]
+- correct: "がくせい"
+- explanation: 「学生」 se lee 「がくせい」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-10
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「学生」
+- choices: []
+- correct: "がくせい"
+- explanation: La lectura correcta es 「がくせい」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["がくせい"]
+
+### exam-kanji-l6-11
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「大きい」?
+- choices: ["いち","いちじ","おおきい","に"]
+- correct: "おおきい"
+- explanation: 「大きい」 se lee 「おおきい」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-11
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「大きい」
+- choices: []
+- correct: "おおきい"
+- explanation: La lectura correcta es 「おおきい」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["おおきい"]
+
+### exam-kanji-l6-12
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「大学」?
+- choices: ["だいがく","に","いち","いちじ"]
+- correct: "だいがく"
+- explanation: 「大学」 se lee 「だいがく」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-12
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「大学」
+- choices: []
+- correct: "だいがく"
+- explanation: La lectura correcta es 「だいがく」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["だいがく"]
+
+### exam-kanji-l6-13
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「外国」?
+- choices: ["いちじ","に","がいこく","いち"]
+- correct: "がいこく"
+- explanation: 「外国」 se lee 「がいこく」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-13
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「外国」
+- choices: []
+- correct: "がいこく"
+- explanation: La lectura correcta es 「がいこく」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["がいこく"]
+
+### exam-kanji-l6-14
+- category: `kanji`
+- type: `mcq`
+- source: `lesson_kanji_generated`
+- prompt: ¿Cómo se lee 「中国」?
+- choices: ["いち","ちゅうごく","に","いちじ"]
+- correct: "ちゅうごく"
+- explanation: 「中国」 se lee 「ちゅうごく」.
+- hint: Lección 6 · Kanji
+
+### exam-kanji-text-l6-14
+- category: `kanji`
+- type: `text`
+- source: `lesson_kanji_generated`
+- prompt: Escribe en hiragana la lectura de 「中国」
+- choices: []
+- correct: "ちゅうごく"
+- explanation: La lectura correcta es 「ちゅうごく」.
+- hint: Lección 6 · Kanji
+- acceptedAnswers: ["ちゅうごく"]
+
+## particles
+
+### exam-particle-p-l1-1
+- category: `particles`
+- type: `mcq`
+- source: `particle_exam_bank`
+- prompt: わたし___パコです。
+- choices: ["は","に","を","で"]
+- correct: "は"
+- explanation: 「は」marca tema.
+- hint: Lección 6 · Partículas
+
+### exam-particle-text-p-l1-1
+- category: `particles`
+- type: `text`
+- source: `particle_exam_bank`
+- prompt: わたし___パコです。 / Escribe solo la partícula faltante.
+- choices: []
+- correct: "は"
+- explanation: 「は」marca tema.
+- hint: Lección 6 · Partículas
+- acceptedAnswers: ["は","は"]
+
+### exam-particle-p-l1-2
+- category: `particles`
+- type: `mcq`
+- source: `particle_exam_bank`
+- prompt: マリアさん___せんせいです。
+- choices: ["を","が","は","で"]
+- correct: "は"
+- explanation: Oración copulativa con tema 「は」.
+- hint: Lección 6 · Partículas
+
+### exam-particle-text-p-l1-2
+- category: `particles`
+- type: `text`
+- source: `particle_exam_bank`
+- prompt: マリアさん___せんせいです。 / Escribe solo la partícula faltante.
+- choices: []
+- correct: "は"
+- explanation: Oración copulativa con tema 「は」.
+- hint: Lección 6 · Partículas
+- acceptedAnswers: ["は","は"]
+
+### exam-particle-p-l2-1
+- category: `particles`
+- type: `mcq`
+- source: `particle_exam_bank`
+- prompt: これはだれ___ほんですか。
+- choices: ["を","に","で","の"]
+- correct: "の"
+- explanation: Posesión con 「の」.
+- hint: Lección 6 · Partículas
+
+### exam-particle-text-p-l2-1
+- category: `particles`
+- type: `text`
+- source: `particle_exam_bank`
+- prompt: これはだれ___ほんですか。 / Escribe solo la partícula faltante.
+- choices: []
+- correct: "の"
+- explanation: Posesión con 「の」.
+- hint: Lección 6 · Partículas
+- acceptedAnswers: ["の","の"]
+
+### exam-particle-p-l2-2
+- category: `particles`
+- type: `mcq`
+- source: `particle_exam_bank`
+- prompt: わたし___ともだちもにほんじんです。
+- choices: ["の","も","が","は"]
+- correct: "の"
+- explanation: 「わたしのともだち」.
+- hint: Lección 6 · Partículas
+
+### exam-particle-text-p-l2-2
+- category: `particles`
+- type: `text`
+- source: `particle_exam_bank`
+- prompt: わたし___ともだちもにほんじんです。 / Escribe solo la partícula faltante.
+- choices: []
+- correct: "の"
+- explanation: 「わたしのともだち」.
+- hint: Lección 6 · Partículas
+- acceptedAnswers: ["の","の"]
+
+### exam-particle-p-l3-1
+- category: `particles`
+- type: `mcq`
+- source: `particle_exam_bank`
+- prompt: がっこう___いきます。
+- choices: ["は","を","で","に"]
+- correct: "に"
+- explanation: Destino con 「に」.
+- hint: Lección 6 · Partículas
+
+### exam-particle-text-p-l3-1
+- category: `particles`
+- type: `text`
+- source: `particle_exam_bank`
+- prompt: がっこう___いきます。 / Escribe solo la partícula faltante.
+- choices: []
+- correct: "に"
+- explanation: Destino con 「に」.
+- hint: Lección 6 · Partículas
+- acceptedAnswers: ["に","に"]
+
+### exam-particle-p-l3-2
+- category: `particles`
+- type: `mcq`
+- source: `particle_exam_bank`
+- prompt: としょかん___べんきょうします。
+- choices: ["を","で","が","に"]
+- correct: "で"
+- explanation: Lugar de acción con 「で」.
+- hint: Lección 6 · Partículas
+
+### exam-particle-text-p-l3-2
+- category: `particles`
+- type: `text`
+- source: `particle_exam_bank`
+- prompt: としょかん___べんきょうします。 / Escribe solo la partícula faltante.
+- choices: []
+- correct: "で"
+- explanation: Lugar de acción con 「で」.
+- hint: Lección 6 · Partículas
+- acceptedAnswers: ["で","で"]
+
+### exam-particle-p-l3-3
+- category: `particles`
+- type: `mcq`
+- source: `particle_exam_bank`
+- prompt: ほん___よみます。
+- choices: ["を","は","に","で"]
+- correct: "を"
+- explanation: Objeto directo con 「を」.
+- hint: Lección 6 · Partículas
+
+### exam-particle-text-p-l3-3
+- category: `particles`
+- type: `text`
+- source: `particle_exam_bank`
+- prompt: ほん___よみます。 / Escribe solo la partícula faltante.
+- choices: []
+- correct: "を"
+- explanation: Objeto directo con 「を」.
+- hint: Lección 6 · Partículas
+- acceptedAnswers: ["を","を"]
+
+### exam-particle-p-l4-1
+- category: `particles`
+- type: `mcq`
+- source: `particle_exam_bank`
+- prompt: 7じ___おきます。
+- choices: ["が","を","で","に"]
+- correct: "に"
+- explanation: Hora específica con 「に」.
+- hint: Lección 6 · Partículas
+
+### exam-particle-text-p-l4-1
+- category: `particles`
+- type: `text`
+- source: `particle_exam_bank`
+- prompt: 7じ___おきます。 / Escribe solo la partícula faltante.
+- choices: []
+- correct: "に"
+- explanation: Hora específica con 「に」.
+- hint: Lección 6 · Partículas
+- acceptedAnswers: ["に","に"]
+
+### exam-particle-p-l4-2
+- category: `particles`
+- type: `mcq`
+- source: `particle_exam_bank`
+- prompt: うち___かえりました。
+- choices: ["に","を","が","で"]
+- correct: "に"
+- explanation: Destino final con 「に」.
+- hint: Lección 6 · Partículas
+
+### exam-particle-text-p-l4-2
+- category: `particles`
+- type: `text`
+- source: `particle_exam_bank`
+- prompt: うち___かえりました。 / Escribe solo la partícula faltante.
+- choices: []
+- correct: "に"
+- explanation: Destino final con 「に」.
+- hint: Lección 6 · Partículas
+- acceptedAnswers: ["に","に"]
+
+### exam-particle-p-l5-1
+- category: `particles`
+- type: `mcq`
+- source: `particle_exam_bank`
+- prompt: ともだち___えいがをみました。
+- choices: ["が","を","と","に"]
+- correct: "と"
+- explanation: Compañía con 「と」.
+- hint: Lección 6 · Partículas
+
+### exam-particle-text-p-l5-1
+- category: `particles`
+- type: `text`
+- source: `particle_exam_bank`
+- prompt: ともだち___えいがをみました。 / Escribe solo la partícula faltante.
+- choices: []
+- correct: "と"
+- explanation: Compañía con 「と」.
+- hint: Lección 6 · Partículas
+- acceptedAnswers: ["と","と"]
+
+### exam-particle-p-l5-2
+- category: `particles`
+- type: `mcq`
+- source: `particle_exam_bank`
+- prompt: ケーキ___すきです。
+- choices: ["に","が","で","を"]
+- correct: "が"
+- explanation: Con 「すき」 se usa 「が」.
+- hint: Lección 6 · Partículas
+
+### exam-particle-text-p-l5-2
+- category: `particles`
+- type: `text`
+- source: `particle_exam_bank`
+- prompt: ケーキ___すきです。 / Escribe solo la partícula faltante.
+- choices: []
+- correct: "が"
+- explanation: Con 「すき」 se usa 「が」.
+- hint: Lección 6 · Partículas
+- acceptedAnswers: ["が","が"]
+
+### exam-particle-p-l6-1
+- category: `particles`
+- type: `mcq`
+- source: `particle_exam_bank`
+- prompt: こうえん___しんぶんをよみます。
+- choices: ["を","で","に","が"]
+- correct: "で"
+- explanation: Lugar de acción con 「で」.
+- hint: Lección 6 · Partículas
+
+### exam-particle-text-p-l6-1
+- category: `particles`
+- type: `text`
+- source: `particle_exam_bank`
+- prompt: こうえん___しんぶんをよみます。 / Escribe solo la partícula faltante.
+- choices: []
+- correct: "で"
+- explanation: Lugar de acción con 「で」.
+- hint: Lección 6 · Partículas
+- acceptedAnswers: ["で","で"]
+
+## conjugation
+
+### exam-conj-te-たべる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「たべる」 (comer)
+- choices: ["きいて","たべて","いって","みて"]
+- correct: "たべて"
+- explanation: La forma て de 「たべる」 es 「たべて」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-たべる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「たべる」 (comer)
+- choices: ["みた","きいた","たべた","いった"]
+- correct: "たべた"
+- explanation: El pasado corto de 「たべる」 es 「たべた」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-たべる-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「たべる」 (comer)
+- choices: []
+- correct: "たべます"
+- explanation: La forma ます de 「たべる」 es 「たべます」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-みる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「みる」 (ver)
+- choices: ["たべて","きいて","いって","みて"]
+- correct: "みて"
+- explanation: La forma て de 「みる」 es 「みて」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-みる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「みる」 (ver)
+- choices: ["みた","たべた","きいた","いった"]
+- correct: "みた"
+- explanation: El pasado corto de 「みる」 es 「みた」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-みる-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「みる」 (ver)
+- choices: []
+- correct: "みます"
+- explanation: La forma ます de 「みる」 es 「みます」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-いく-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「いく」 (ir)
+- choices: ["いって","きいて","みて","たべて"]
+- correct: "いって"
+- explanation: La forma て de 「いく」 es 「いって」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-いく-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「いく」 (ir)
+- choices: ["たべた","いった","きいた","みた"]
+- correct: "いった"
+- explanation: El pasado corto de 「いく」 es 「いった」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-いく-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「いく」 (ir)
+- choices: []
+- correct: "いきます"
+- explanation: La forma ます de 「いく」 es 「いきます」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-きく-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「きく」 (escuchar)
+- choices: ["いって","みて","きいて","たべて"]
+- correct: "きいて"
+- explanation: La forma て de 「きく」 es 「きいて」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-きく-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「きく」 (escuchar)
+- choices: ["きいた","たべた","みた","いった"]
+- correct: "きいた"
+- explanation: El pasado corto de 「きく」 es 「きいた」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-きく-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「きく」 (escuchar)
+- choices: []
+- correct: "ききます"
+- explanation: La forma ます de 「きく」 es 「ききます」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-おきる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「おきる」 (levantarse)
+- choices: ["みて","おきて","いって","たべて"]
+- correct: "おきて"
+- explanation: La forma て de 「おきる」 es 「おきて」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-おきる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「おきる」 (levantarse)
+- choices: ["たべた","みた","おきた","いった"]
+- correct: "おきた"
+- explanation: El pasado corto de 「おきる」 es 「おきた」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-おきる-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「おきる」 (levantarse)
+- choices: []
+- correct: "おきます"
+- explanation: La forma ます de 「おきる」 es 「おきます」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-ねる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「ねる」 (dormir)
+- choices: ["たべて","ねて","みて","いって"]
+- correct: "ねて"
+- explanation: La forma て de 「ねる」 es 「ねて」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-ねる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「ねる」 (dormir)
+- choices: ["ねた","たべた","みた","いった"]
+- correct: "ねた"
+- explanation: El pasado corto de 「ねる」 es 「ねた」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-ねる-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「ねる」 (dormir)
+- choices: []
+- correct: "ねます"
+- explanation: La forma ます de 「ねる」 es 「ねます」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-かえる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「かえる」 (volver)
+- choices: ["たべて","かえって","いって","みて"]
+- correct: "かえって"
+- explanation: La forma て de 「かえる」 es 「かえって」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-かえる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「かえる」 (volver)
+- choices: ["かえった","いった","たべた","みた"]
+- correct: "かえった"
+- explanation: El pasado corto de 「かえる」 es 「かえった」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-かえる-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「かえる」 (volver)
+- choices: []
+- correct: "かえります"
+- explanation: La forma ます de 「かえる」 es 「かえります」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-よむ-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「よむ」 (leer)
+- choices: ["よんで","たべて","いって","みて"]
+- correct: "よんで"
+- explanation: La forma て de 「よむ」 es 「よんで」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-よむ-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「よむ」 (leer)
+- choices: ["たべた","いった","みた","よんだ"]
+- correct: "よんだ"
+- explanation: El pasado corto de 「よむ」 es 「よんだ」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-よむ-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「よむ」 (leer)
+- choices: []
+- correct: "よみます"
+- explanation: La forma ます de 「よむ」 es 「よみます」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-かく-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「かく」 (escribir)
+- choices: ["かいて","みて","いって","たべて"]
+- correct: "かいて"
+- explanation: La forma て de 「かく」 es 「かいて」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-かく-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「かく」 (escribir)
+- choices: ["いった","たべた","みた","かいた"]
+- correct: "かいた"
+- explanation: El pasado corto de 「かく」 es 「かいた」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-かく-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「かく」 (escribir)
+- choices: []
+- correct: "かきます"
+- explanation: La forma ます de 「かく」 es 「かきます」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-かう-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「かう」 (comprar)
+- choices: ["いって","みて","かって","たべて"]
+- correct: "かって"
+- explanation: La forma て de 「かう」 es 「かって」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-かう-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「かう」 (comprar)
+- choices: ["たべた","かった","いった","みた"]
+- correct: "かった"
+- explanation: El pasado corto de 「かう」 es 「かった」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-かう-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「かう」 (comprar)
+- choices: []
+- correct: "かいます"
+- explanation: La forma ます de 「かう」 es 「かいます」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-のむ-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「のむ」 (beber)
+- choices: ["のんで","いって","たべて","みて"]
+- correct: "のんで"
+- explanation: La forma て de 「のむ」 es 「のんで」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-のむ-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「のむ」 (beber)
+- choices: ["たべた","のんだ","みた","いった"]
+- correct: "のんだ"
+- explanation: El pasado corto de 「のむ」 es 「のんだ」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-のむ-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「のむ」 (beber)
+- choices: []
+- correct: "のみます"
+- explanation: La forma ます de 「のむ」 es 「のみます」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-はなす-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「はなす」 (hablar)
+- choices: ["みて","たべて","いって","はなして"]
+- correct: "はなして"
+- explanation: La forma て de 「はなす」 es 「はなして」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-はなす-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「はなす」 (hablar)
+- choices: ["はなした","いった","たべた","みた"]
+- correct: "はなした"
+- explanation: El pasado corto de 「はなす」 es 「はなした」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-はなす-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「はなす」 (hablar)
+- choices: []
+- correct: "はなします"
+- explanation: La forma ます de 「はなす」 es 「はなします」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-あびる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「あびる」 (ducharse)
+- choices: ["みて","いって","あびて","たべて"]
+- correct: "あびて"
+- explanation: La forma て de 「あびる」 es 「あびて」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-あびる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「あびる」 (ducharse)
+- choices: ["みた","たべた","あびた","いった"]
+- correct: "あびた"
+- explanation: El pasado corto de 「あびる」 es 「あびた」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-あびる-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「あびる」 (ducharse)
+- choices: []
+- correct: "あびます"
+- explanation: La forma ます de 「あびる」 es 「あびます」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-あそぶ-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「あそぶ」 (jugar)
+- choices: ["みて","いって","あそんで","たべて"]
+- correct: "あそんで"
+- explanation: La forma て de 「あそぶ」 es 「あそんで」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-あそぶ-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「あそぶ」 (jugar)
+- choices: ["たべた","いった","みた","あそんだ"]
+- correct: "あそんだ"
+- explanation: El pasado corto de 「あそぶ」 es 「あそんだ」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-あそぶ-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「あそぶ」 (jugar)
+- choices: []
+- correct: "あそびます"
+- explanation: La forma ます de 「あそぶ」 es 「あそびます」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-te-つくる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma て de 「つくる」 (hacer/crear)
+- choices: ["つくって","たべて","みて","いって"]
+- correct: "つくって"
+- explanation: La forma て de 「つくる」 es 「つくって」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-past-つくる-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Pasado corto de 「つくる」 (hacer/crear)
+- choices: ["たべた","いった","つくった","みた"]
+- correct: "つくった"
+- explanation: El pasado corto de 「つくる」 es 「つくった」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-masu-text-つくる-6
+- category: `conjugation`
+- type: `text`
+- source: `lesson_conjugation_generated`
+- prompt: Escribe la forma ます de 「つくる」 (hacer/crear)
+- choices: []
+- correct: "つくります"
+- explanation: La forma ます de 「つくる」 es 「つくります」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-adj-neg-おいしい-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma negativa de 「おいしい」 (delicioso)
+- choices: ["たかくない","おいしくない","しずかじゃない","やすくない"]
+- correct: "おいしくない"
+- explanation: La forma negativa de 「おいしい」 es 「おいしくない」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-adj-neg-げんき-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma negativa de 「げんき」 (saludable/animado)
+- choices: ["げんきじゃない","たかくない","やすくない","しずかじゃない"]
+- correct: "げんきじゃない"
+- explanation: La forma negativa de 「げんき」 es 「げんきじゃない」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-adj-neg-まずい-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma negativa de 「まずい」 (malo (sabor))
+- choices: ["まずくない","たかくない","しずかじゃない","やすくない"]
+- correct: "まずくない"
+- explanation: La forma negativa de 「まずい」 es 「まずくない」.
+- hint: Lección 6 · Conjugación
+
+### exam-conj-adj-neg-いそがしい-6
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_conjugation_generated`
+- prompt: Forma negativa de 「いそがしい」 (ocupado)
+- choices: ["しずかじゃない","たかくない","やすくない","いそがしくない"]
+- correct: "いそがしくない"
+- explanation: La forma negativa de 「いそがしい」 es 「いそがしくない」.
+- hint: Lección 6 · Conjugación
+
+### exam-grammar:mcq:error
+- category: `conjugation`
+- type: `mcq`
+- source: `lesson_scenarios_grammar`
+- prompt: ¿Cuál forma て está mal?
+- choices: ["よんで","かいて","たべて","みりて"]
+- correct: "みりて"
+- explanation: 「みる」 pasa a 「みて」, no a 「みりて」.
+- hint: Lección 6 · Forma て
+
+### exam-conjugation:text:te
+- category: `conjugation`
+- type: `text`
+- source: `lesson_scenarios_misc`
+- prompt: Escribe la forma て de 「よむ」.
+- choices: []
+- correct: "よんで"
+- explanation: 「よむ」 es verbo u y cambia a 「よんで」.
+- hint: Lección 6 · Forma て
+
+## grammar
+
+### exam-grammar:reorder:sequence
+- category: `grammar`
+- type: `reorder`
+- source: `lesson_scenarios_grammar`
+- prompt: Ordena la secuencia de acciones.
+- choices: ["いきます","あさごはんを","たべて","がっこうへ"]
+- correct: "あさごはんを たべて がっこうへ いきます"
+- explanation: La forma て enlaza acciones en secuencia.
+- hint: Lección 6 · Forma て
+- acceptedAnswers: ["あさごはんをたべてがっこうへいきます"]
+
+### exam-grammar:mcq:request
+- category: `grammar`
+- type: `mcq`
+- source: `lesson_scenarios_grammar`
+- prompt: ¿Cuál es la manera natural de decir “Por favor, come”?
+- choices: ["たべます","たべて","たべてください","たべました"]
+- correct: "たべてください"
+- explanation: La petición amable de L6 es 「〜てください」.
+- hint: Lección 6 · Peticiones
+
+## reading
+
+### exam-reading:life-1
+- category: `reading`
+- type: `mcq`
+- source: `lesson_scenarios_reading`
+- prompt: Lee el texto. / ロバートさんは まいあさ コーヒーを のんで、しんぶんを よみます。それから がっこうへ いきます。 /  / ¿Qué hace antes de ir a la escuela?
+- choices: ["Nada y cocina","Toma café y lee el periódico","Ve una película","Regresa a casa"]
+- correct: "Toma café y lee el periódico"
+- explanation: El texto enumera esas acciones antes de ir a la escuela.
+- hint: Lección 6 · Lectura corta
+
+### exam-reading:life-2
+- category: `reading`
+- type: `mcq`
+- source: `lesson_scenarios_reading`
+- prompt: Lee el diálogo. / A: ここで しゃしんを とっても いいですか。 / B: はい、いいです。 /  / ¿Qué permiso recibe A?
+- choices: ["Puede sacar fotos aquí","Puede comer aquí","Puede fumar aquí","Puede entrar al hospital"]
+- correct: "Puede sacar fotos aquí"
+- explanation: 「しゃしんを とっても いいですか」 pregunta por permiso para tomar fotos.
+- hint: Lección 6 · Lectura corta
