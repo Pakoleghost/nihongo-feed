@@ -19,7 +19,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「はれ」?
-- choices: ["lluvia","soleado","clima","nieve"]
+- choices: ["soleado","nieve","clima","lluvia"]
 - correct: "soleado"
 - explanation: 「はれ」 significa “soleado”.
 - hint: Lección 8 · Vocabulario
@@ -29,7 +29,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「あめ」?
-- choices: ["nieve","soleado","clima","lluvia"]
+- choices: ["nieve","lluvia","clima","soleado"]
 - correct: "lluvia"
 - explanation: 「あめ」 significa “lluvia”.
 - hint: Lección 8 · Vocabulario
@@ -39,7 +39,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「てんきよほう」?
-- choices: ["nieve","lluvia","soleado","pronóstico del tiempo"]
+- choices: ["pronóstico del tiempo","lluvia","soleado","nieve"]
 - correct: "pronóstico del tiempo"
 - explanation: 「てんきよほう」 significa “pronóstico del tiempo”.
 - hint: Lección 8 · Vocabulario
@@ -49,7 +49,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「きおん」?
-- choices: ["temperatura (clima)","nieve","lluvia","soleado"]
+- choices: ["lluvia","soleado","temperatura (clima)","nieve"]
 - correct: "temperatura (clima)"
 - explanation: 「きおん」 significa “temperatura (clima)”.
 - hint: Lección 8 · Vocabulario
@@ -59,7 +59,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “cámara”
-- choices: ["晴れ (はれ)","カメラ","雪 (ゆき)","雨 (あめ)"]
+- choices: ["雪 (ゆき)","晴れ (はれ)","カメラ","雨 (あめ)"]
 - correct: "カメラ"
 - explanation: La opción correcta para “cámara” es 「カメラ」.
 - hint: Lección 8 · Vocabulario
@@ -69,7 +69,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “barbacoa”
-- choices: ["雨 (あめ)","晴れ (はれ)","バーベキュー","雪 (ゆき)"]
+- choices: ["雪 (ゆき)","バーベキュー","晴れ (はれ)","雨 (あめ)"]
 - correct: "バーベキュー"
 - explanation: La opción correcta para “barbacoa” es 「バーベキュー」.
 - hint: Lección 8 · Vocabulario
@@ -79,7 +79,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “estancia con familia anfitriona”
-- choices: ["晴れ (はれ)","雨 (あめ)","ホームステイ","雪 (ゆき)"]
+- choices: ["ホームステイ","晴れ (はれ)","雨 (あめ)","雪 (ゆき)"]
 - correct: "ホームステイ"
 - explanation: La opción correcta para “estancia con familia anfitriona” es 「ホームステイ」.
 - hint: Lección 8 · Vocabulario
@@ -89,7 +89,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “España”
-- choices: ["雪 (ゆき)","雨 (あめ)","晴れ (はれ)","スペイン"]
+- choices: ["雨 (あめ)","スペイン","晴れ (はれ)","雪 (ゆき)"]
 - correct: "スペイン"
 - explanation: La opción correcta para “España” es 「スペイン」.
 - hint: Lección 8 · Vocabulario
@@ -101,7 +101,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「作る」?
-- choices: ["いち","いちじ","つくる","に"]
+- choices: ["つくる","いちじ","いち","に"]
 - correct: "つくる"
 - explanation: 「作る」 se lee 「つくる」.
 - hint: Lección 8 · Kanji
@@ -111,7 +111,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「思う」?
-- choices: ["に","いち","いちじ","おもう"]
+- choices: ["に","いち","おもう","いちじ"]
 - correct: "おもう"
 - explanation: 「思う」 se lee 「おもう」.
 - hint: Lección 8 · Kanji

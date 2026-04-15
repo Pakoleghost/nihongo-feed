@@ -19,7 +19,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「えいが」?
-- choices: ["película","biblioteca","todos los días","música"]
+- choices: ["todos los días","película","biblioteca","música"]
 - correct: "película"
 - explanation: 「えいが」 significa “película”.
 - hint: Lección 3 · Vocabulario
@@ -29,7 +29,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「おんがく」?
-- choices: ["película","biblioteca","todos los días","música"]
+- choices: ["película","música","todos los días","biblioteca"]
 - correct: "música"
 - explanation: 「おんがく」 significa “música”.
 - hint: Lección 3 · Vocabulario
@@ -39,7 +39,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「としょかん」?
-- choices: ["película","biblioteca","música","todos los días"]
+- choices: ["película","música","todos los días","biblioteca"]
 - correct: "biblioteca"
 - explanation: 「としょかん」 significa “biblioteca”.
 - hint: Lección 3 · Vocabulario
@@ -49,7 +49,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「なんじ」?
-- choices: ["qué hora","película","todos los días","música"]
+- choices: ["todos los días","música","qué hora","película"]
 - correct: "qué hora"
 - explanation: 「なんじ」 significa “qué hora”.
 - hint: Lección 3 · Vocabulario
@@ -59,7 +59,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “lunes”
-- choices: ["毎日 (まいにち)","映画 (えいが)","音楽 (おんがく)","月曜日 (げつようび)"]
+- choices: ["音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)","月曜日 (げつようび)"]
 - correct: "月曜日 (げつようび)"
 - explanation: La opción correcta para “lunes” es 「月曜日 (げつようび)」.
 - hint: Lección 3 · Vocabulario
@@ -69,7 +69,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “a.m.”
-- choices: ["音楽 (おんがく)","毎日 (まいにち)","映画 (えいが)","午前 (ごぜん)"]
+- choices: ["音楽 (おんがく)","映画 (えいが)","毎日 (まいにち)","午前 (ごぜん)"]
 - correct: "午前 (ごぜん)"
 - explanation: La opción correcta para “a.m.” es 「午前 (ごぜん)」.
 - hint: Lección 3 · Vocabulario
@@ -79,7 +79,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “p.m.”
-- choices: ["音楽 (おんがく)","映画 (えいが)","毎日 (まいにち)","午後 (ごご)"]
+- choices: ["午後 (ごご)","音楽 (おんがく)","映画 (えいが)","毎日 (まいにち)"]
 - correct: "午後 (ごご)"
 - explanation: La opción correcta para “p.m.” es 「午後 (ごご)」.
 - hint: Lección 3 · Vocabulario
@@ -89,7 +89,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “semana”
-- choices: ["映画 (えいが)","週 (しゅう)","音楽 (おんがく)","毎日 (まいにち)"]
+- choices: ["毎日 (まいにち)","音楽 (おんがく)","週 (しゅう)","映画 (えいが)"]
 - correct: "週 (しゅう)"
 - explanation: La opción correcta para “semana” es 「週 (しゅう)」.
 - hint: Lección 3 · Vocabulario
@@ -101,7 +101,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「一時」?
-- choices: ["に","いち","にじ","いちじ"]
+- choices: ["いち","にじ","に","いちじ"]
 - correct: "いちじ"
 - explanation: 「一時」 se lee 「いちじ」.
 - hint: Lección 3 · Kanji
@@ -111,7 +111,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「円」?
-- choices: ["いちじ","に","いち","えん"]
+- choices: ["いちじ","に","えん","いち"]
 - correct: "えん"
 - explanation: 「円」 se lee 「えん」.
 - hint: Lección 3 · Kanji
