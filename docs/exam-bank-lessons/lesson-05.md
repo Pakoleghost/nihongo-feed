@@ -19,7 +19,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「てんき」?
-- choices: ["juntos","tiempo (atmosférico)","mar","montaña"]
+- choices: ["juntos","montaña","mar","tiempo (atmosférico)"]
 - correct: "tiempo (atmosférico)"
 - explanation: 「てんき」 significa “tiempo (atmosférico)”.
 - hint: Lección 5 · Vocabulario
@@ -29,7 +29,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「りょこう」?
-- choices: ["viaje","mar","montaña","juntos"]
+- choices: ["mar","juntos","montaña","viaje"]
 - correct: "viaje"
 - explanation: 「りょこう」 significa “viaje”.
 - hint: Lección 5 · Vocabulario
@@ -49,7 +49,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「たべもの」?
-- choices: ["montaña","juntos","comida","mar"]
+- choices: ["juntos","montaña","mar","comida"]
 - correct: "comida"
 - explanation: 「たべもの」 significa “comida”.
 - hint: Lección 5 · Vocabulario
@@ -59,7 +59,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “bebida”
-- choices: ["海 (うみ)","山 (やま)","一緒に (いっしょに)","飲み物 (のみもの)"]
+- choices: ["海 (うみ)","飲み物 (のみもの)","山 (やま)","一緒に (いっしょに)"]
 - correct: "飲み物 (のみもの)"
 - explanation: La opción correcta para “bebida” es 「飲み物 (のみもの)」.
 - hint: Lección 5 · Vocabulario
@@ -69,7 +69,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “nuevo”
-- choices: ["一緒に (いっしょに)","海 (うみ)","山 (やま)","新しい (あたらしい)"]
+- choices: ["海 (うみ)","一緒に (いっしょに)","新しい (あたらしい)","山 (やま)"]
 - correct: "新しい (あたらしい)"
 - explanation: La opción correcta para “nuevo” es 「新しい (あたらしい)」.
 - hint: Lección 5 · Vocabulario
@@ -89,7 +89,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “divertido”
-- choices: ["山 (やま)","一緒に (いっしょに)","楽しい (たのしい)","海 (うみ)"]
+- choices: ["海 (うみ)","一緒に (いっしょに)","山 (やま)","楽しい (たのしい)"]
 - correct: "楽しい (たのしい)"
 - explanation: La opción correcta para “divertido” es 「楽しい (たのしい)」.
 - hint: Lección 5 · Vocabulario
@@ -101,7 +101,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「山」?
-- choices: ["やま","いちじ","いち","に"]
+- choices: ["に","いち","やま","いちじ"]
 - correct: "やま"
 - explanation: 「山」 se lee 「やま」.
 - hint: Lección 5 · Kanji
@@ -111,7 +111,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「天気」?
-- choices: ["てんき","に","いちじ","いち"]
+- choices: ["てんき","いちじ","に","いち"]
 - correct: "てんき"
 - explanation: 「天気」 se lee 「てんき」.
 - hint: Lección 5 · Kanji
