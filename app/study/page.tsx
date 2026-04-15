@@ -13,7 +13,7 @@ import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 type KanaPair = readonly [string, string];
 type QuizCount = 10 | 20 | 30;
 type QuizMode = "particles" | "conjugation" | "vocab" | "kanji";
-type ConjType = "te" | "past" | "masu" | "dictionary" | "adj-negative" | "adj-past";
+type ConjType = "te" | "past" | "masu" | "plain" | "adj-negative" | "adj-past";
 type VerbKind = "ru" | "u" | "irregular";
 type AdjKind = "i" | "na";
 type KanaMode = "hiragana" | "katakana" | "mixed";
@@ -182,7 +182,7 @@ const FLASHCARD_ROUTE_GROUPS = [
   { id: "route-bridge", title: "Consolidación", subtitle: "Lecciones altas para repasar antes de examen.", lessons: [9, 10, 11, 12], accent: "#E63946", surface: "rgba(230, 57, 70, 0.08)" },
 ] as const;
 
-type StudyView = "kana" | "flashcards" | "quiz" | "sprint" | "review" | "exam" | "dictionary";
+type StudyView = "kana" | "flashcards" | "quiz" | "sprint" | "exam";
 const EXAM_PASSING_PERCENT = 70;
 const EXAM_QUESTION_COUNT = 20;
 
@@ -217,20 +217,6 @@ type FlashLearnQuestion = {
   options: string[];
 };
 
-type ReviewRangeKey = "l1" | "l1_2" | "l3_4" | "l5_6" | "l7_8" | "l9_10" | "l11_12";
-
-type AdminDictionaryResult = {
-  id: string;
-  primary: string;
-  secondary: string;
-  kanji: string[];
-  readings: string[];
-  gloss: string[];
-  fallbackGloss: string[];
-  pos: string[];
-  common: boolean;
-};
-
 const EXAM_CATEGORY_LABELS: Record<QuizCategory, string> = {
   kana: "Kana",
   vocab: "Vocabulario",
@@ -240,17 +226,6 @@ const EXAM_CATEGORY_LABELS: Record<QuizCategory, string> = {
   grammar: "Gramática",
   reading: "Lectura",
 };
-
-const QUICK_REVIEW_COUNT = 12;
-const REVIEW_RANGES: Array<{ key: ReviewRangeKey; label: string; lessons: number[] }> = [
-  { key: "l1", label: "Lección 1", lessons: [1] },
-  { key: "l1_2", label: "Lecciones 1–2", lessons: [1, 2] },
-  { key: "l3_4", label: "Lecciones 3–4", lessons: [3, 4] },
-  { key: "l5_6", label: "Lecciones 5–6", lessons: [5, 6] },
-  { key: "l7_8", label: "Lecciones 7–8", lessons: [7, 8] },
-  { key: "l9_10", label: "Lecciones 9–10", lessons: [9, 10] },
-  { key: "l11_12", label: "Lecciones 11–12", lessons: [11, 12] },
-];
 
 const KANJI_FROM_URL: Record<number, Array<{ kanji: string; hira: string }>> = {
   3: [
@@ -891,6 +866,54 @@ function buildOptionSet(correct: string, wrongCandidates: string[], fallbackPool
   return shuffle([correct, ...wrong.slice(0, 3)]).slice(0, 4);
 }
 
+function buildFlashLearnOptions(
+  correct: string,
+  candidateBacks: string[],
+  recentDistractorHistory: string[],
+  previousDistractors: string[],
+  desiredCount = 4,
+) {
+  const maxDistractors = Math.max(1, desiredCount - 1);
+  const uniqueCandidates = Array.from(new Set(candidateBacks.filter((value) => value && value !== correct)));
+  if (uniqueCandidates.length === 0) return [correct];
+
+  const recentCounts = new Map<string, number>();
+  recentDistractorHistory.forEach((value) => {
+    recentCounts.set(value, (recentCounts.get(value) || 0) + 1);
+  });
+  const previousSet = new Set(previousDistractors);
+  const previousSignature = [...previousDistractors].sort().join("||");
+
+  const rankedCandidates = shuffle(uniqueCandidates)
+    .map((value) => ({
+      value,
+      recentHits: recentCounts.get(value) || 0,
+      usedLastCard: previousSet.has(value) ? 1 : 0,
+      lastSeenAt: recentDistractorHistory.lastIndexOf(value),
+    }))
+    .sort((a, b) => {
+      if (a.usedLastCard !== b.usedLastCard) return a.usedLastCard - b.usedLastCard;
+      if (a.recentHits !== b.recentHits) return a.recentHits - b.recentHits;
+      if (a.lastSeenAt !== b.lastSeenAt) return a.lastSeenAt - b.lastSeenAt;
+      return 0;
+    });
+
+  let distractors = rankedCandidates.slice(0, Math.min(maxDistractors, rankedCandidates.length)).map((entry) => entry.value);
+
+  if (
+    distractors.length === maxDistractors &&
+    previousDistractors.length === maxDistractors &&
+    [...distractors].sort().join("||") === previousSignature
+  ) {
+    const replacement = rankedCandidates.find((entry) => !distractors.includes(entry.value));
+    if (replacement) {
+      distractors = [...distractors.slice(1), replacement.value];
+    }
+  }
+
+  return shuffle([correct, ...distractors]).slice(0, Math.min(desiredCount, uniqueCandidates.length + 1));
+}
+
 function rankBadgeStyles(index: number) {
   if (index === 0) return { bg: "#f4c95d", border: "#e2b648", color: "#111114" };
   if (index === 1) return { bg: "#d7dce3", border: "#bdc4ce", color: "#111114" };
@@ -1107,7 +1130,7 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
     });
   }
 
-  if (types.includes("dictionary")) {
+  if (types.includes("plain")) {
     verbs.forEach((v) => {
       const correct = v.kana;
       const distractors = [
@@ -1118,7 +1141,7 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
       ];
       qs.push({
         id: `c-dict-${v.kana}`,
-        prompt: `${toMasu(v)} → forma diccionario`,
+        prompt: `${toMasu(v)} → forma base`,
         options: buildOptionSet(correct, distractors, allDict),
         correct,
       });
@@ -1163,24 +1186,6 @@ function buildConjugationQuestions(lessons: number[], types: ConjType[], count: 
 
   if (qs.length === 0) return [];
   return pickN(qs, count);
-}
-
-function buildKanaReviewQuestions(lessons: number[], count: number): QuizQuestion[] {
-  const highestLesson = Math.max(...lessons);
-  const kanaPool = highestLesson >= 2 ? [...HIRAGANA, ...KATAKANA] : HIRAGANA;
-  const selected = pickN(kanaPool, count);
-
-  return selected.map(([char, romaji], index) => {
-    const distractors = kanaPool.filter(([, reading]) => reading !== romaji).map(([, reading]) => reading);
-    return {
-      id: `review-kana-${char}-${index}`,
-      prompt: char,
-      options: buildOptionSet(romaji, distractors, kanaPool.map(([, reading]) => reading)),
-      correct: romaji,
-      category: "kana",
-      hint: "Kana",
-    };
-  });
 }
 
 function buildReorderTokens(parts: string[]): ReorderToken[] {
@@ -4978,85 +4983,13 @@ function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, n
   return shuffle(result).slice(0, count);
 }
 
-function buildQuickReviewGrammarQuestions(lessons: number[], count: number) {
-  const seen = new Set<string>();
-  const pool = shuffle(
-    lessons
-      .flatMap((lesson) => buildLessonExamQuestionPool(lesson))
-      .filter((question) => question.category === "particles" || question.category === "conjugation" || question.category === "grammar")
-      .filter((question) => {
-        const key = question.stableKey || question.id;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      }),
-  );
-
-  return pool.slice(0, count).map((question, index) => ({
-    ...question,
-    id: `review-${question.id}-${index}`,
-  }));
-}
-
-function buildQuickReviewQuestions(lessons: number[]) {
-  const highestLesson = Math.max(...lessons);
-  const counts = highestLesson >= 3
-    ? { kana: 2, vocab: 4, kanji: 2, grammar: 4 }
-    : { kana: 4, vocab: 4, kanji: 0, grammar: 4 };
-
-  const questions: QuizQuestion[] = [
-    ...buildKanaReviewQuestions(lessons, counts.kana),
-    ...buildVocabQuestions(lessons, counts.vocab).map((question, index) => ({
-      ...question,
-      id: `review-${question.id}-${index}`,
-      category: "vocab" as const,
-    })),
-    ...buildKanjiQuestions(lessons, counts.kanji).map((question, index) => ({
-      ...question,
-      id: `review-${question.id}-${index}`,
-      category: "kanji" as const,
-    })),
-    ...buildQuickReviewGrammarQuestions(lessons, counts.grammar),
-  ];
-
-  if (questions.length >= QUICK_REVIEW_COUNT) return shuffle(questions).slice(0, QUICK_REVIEW_COUNT);
-
-  const fallback = shuffle([
-    ...buildVocabQuestions(lessons, 6).map((question, index) => ({
-      ...question,
-      id: `review-fallback-v-${question.id}-${index}`,
-      category: "vocab" as const,
-    })),
-    ...buildQuickReviewGrammarQuestions(lessons, 6).map((question, index) => ({
-      ...question,
-      id: `review-fallback-g-${question.id}-${index}`,
-    })),
-    ...buildKanaReviewQuestions(lessons, 4).map((question, index) => ({
-      ...question,
-      id: `review-fallback-k-${question.id}-${index}`,
-    })),
-  ]);
-
-  const used = new Set(questions.map((question) => question.stableKey || `${question.prompt}::${question.correct}`));
-  fallback.forEach((question) => {
-    const key = question.stableKey || `${question.prompt}::${question.correct}`;
-    if (used.has(key) || questions.length >= QUICK_REVIEW_COUNT) return;
-    used.add(key);
-    questions.push(question);
-  });
-
-  return shuffle(questions).slice(0, QUICK_REVIEW_COUNT);
-}
-
 function resolveStudyView(searchParams: Pick<URLSearchParams, "get">): StudyView | null {
   const view = searchParams.get("view");
-  if (view === "kana" || view === "flashcards" || view === "sprint" || view === "review" || view === "exam" || view === "dictionary") return view;
+  if (view === "kana" || view === "flashcards" || view === "sprint" || view === "exam") return view;
   if (searchParams.get("kana") === "1") return "kana";
   if (searchParams.get("flashcards") === "1") return "flashcards";
   if (searchParams.get("sprint") === "1") return "sprint";
-  if (searchParams.get("review") === "1") return "review";
   if (searchParams.get("exam") === "1") return "exam";
-  if (searchParams.get("dictionary") === "1") return "dictionary";
   return null;
 }
 
@@ -5178,7 +5111,7 @@ function buildFlashcardSets() {
     id: "l5-adj-negative",
     lesson: 5,
     title: "Adjetivos · presente negativo",
-    description: "Diccionario → presente negativo (formal)",
+    description: "Forma base → presente negativo (formal)",
     items: L5_ADJECTIVES_FROM_URL.map((adj, index) => ({
       id: `l5-an-${index + 1}`,
       front: `${adj.display || adj.kana} (${adj.es})`,
@@ -5189,7 +5122,7 @@ function buildFlashcardSets() {
     id: "l5-adj-past",
     lesson: 5,
     title: "Adjetivos · pasado afirmativo",
-    description: "Diccionario → pasado afirmativo (formal)",
+    description: "Forma base → pasado afirmativo (formal)",
     items: L5_ADJECTIVES_FROM_URL.map((adj, index) => ({
       id: `l5-ap-${index + 1}`,
       front: `${adj.display || adj.kana} (${adj.es})`,
@@ -5200,7 +5133,7 @@ function buildFlashcardSets() {
     id: "l5-adj-past-negative",
     lesson: 5,
     title: "Adjetivos · pasado negativo",
-    description: "Diccionario → pasado negativo (formal)",
+    description: "Forma base → pasado negativo (formal)",
     items: L5_ADJECTIVES_FROM_URL.map((adj, index) => ({
       id: `l5-apn-${index + 1}`,
       front: `${adj.display || adj.kana} (${adj.es})`,
@@ -5277,8 +5210,6 @@ function StudyContent() {
   const [activeTab, setActiveTab] = useState<StudyView>("kana");
   const [userKey, setUserKey] = useState("anon");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [sessionToken, setSessionToken] = useState<string | null>(null);
 
   const [kanaSet, setKanaSet] = useState<KanaMode>("hiragana");
   const [kanaRunning, setKanaRunning] = useState(false);
@@ -5375,39 +5306,14 @@ function StudyContent() {
   const examCardRef = useRef<HTMLDivElement | null>(null);
   const examPersistedRef = useRef(false);
 
-  const [reviewRange, setReviewRange] = useState<ReviewRangeKey>("l1_2");
-  const [reviewQuestions, setReviewQuestions] = useState<QuizQuestion[]>([]);
-  const [reviewIndex, setReviewIndex] = useState(0);
-  const [reviewAnswers, setReviewAnswers] = useState<Record<string, string>>({});
-  const [reviewFinished, setReviewFinished] = useState(false);
-  const reviewCardRef = useRef<HTMLDivElement | null>(null);
-
-  const [dictionaryQuery, setDictionaryQuery] = useState("");
-  const [dictionaryResults, setDictionaryResults] = useState<AdminDictionaryResult[]>([]);
-  const [dictionaryLoading, setDictionaryLoading] = useState(false);
-  const [dictionaryFallback, setDictionaryFallback] = useState(false);
-  const [dictionaryError, setDictionaryError] = useState("");
-
   const flashFocusRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const boot = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      const { data: { session } } = await supabase.auth.getSession();
       const key = user?.id || "anon";
       setCurrentUserId(user?.id || null);
       setUserKey(key);
-      setSessionToken(session?.access_token || null);
-      if (user?.id) {
-        try {
-          const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
-          setIsAdmin(Boolean(profile?.is_admin));
-        } catch {
-          setIsAdmin(false);
-        }
-      } else {
-        setIsAdmin(false);
-      }
       try {
         const weekKey = getLocalWeekStart().toISOString().slice(0, 10);
         const rawBest = localStorage.getItem(`study-kana-best-map-${key}-${weekKey}`);
@@ -5475,45 +5381,11 @@ function StudyContent() {
 
   useEffect(() => {
     if (selectedView) {
-      setActiveTab(selectedView === "dictionary" && !isAdmin ? "kana" : selectedView);
+      setActiveTab(selectedView);
       return;
     }
     setActiveTab("kana");
-  }, [isAdmin, selectedView]);
-
-  useEffect(() => {
-    if (!isAdmin || activeTab !== "dictionary" || !sessionToken) return;
-    const controller = new AbortController();
-    const timer = window.setTimeout(async () => {
-      setDictionaryLoading(true);
-      setDictionaryError("");
-      try {
-        const response = await fetch(`/api/admin/dictionary?q=${encodeURIComponent(dictionaryQuery)}`, {
-          headers: { Authorization: `Bearer ${sessionToken}` },
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          const payload = await response.json().catch(() => ({}));
-          throw new Error(payload?.error || "No se pudo consultar el diccionario.");
-        }
-        const payload = await response.json();
-        setDictionaryResults(Array.isArray(payload?.results) ? payload.results : []);
-        setDictionaryFallback(Boolean(payload?.fallback));
-      } catch (error) {
-        if (controller.signal.aborted) return;
-        setDictionaryResults([]);
-        setDictionaryFallback(false);
-        setDictionaryError(error instanceof Error ? error.message : "No se pudo consultar el diccionario.");
-      } finally {
-        if (!controller.signal.aborted) setDictionaryLoading(false);
-      }
-    }, dictionaryQuery ? 220 : 0);
-
-    return () => {
-      controller.abort();
-      window.clearTimeout(timer);
-    };
-  }, [activeTab, dictionaryQuery, isAdmin, sessionToken]);
+  }, [selectedView]);
 
   useEffect(() => {
     if (!kanaRunning || kanaTime <= 0 || kanaCountdown !== null) return;
@@ -6001,18 +5873,31 @@ function StudyContent() {
   };
 
   const buildFlashLearnQuestions = (set: FlashcardSet, shuffledItems: FlashcardItem[]) => {
-    const fallbackPool = shuffledItems.map((item) => item.back);
     const picked = shuffledItems.slice(0, Math.min(20, shuffledItems.length));
-    return picked.map((item, index) => ({
-      id: `${set.id}-learn-${index + 1}`,
-      prompt: item.front,
-      correct: item.back,
-      options: buildOptionSet(
-        item.back,
-        shuffledItems.filter((candidate) => candidate.id !== item.id).map((candidate) => candidate.back),
-        fallbackPool,
-      ),
-    }));
+    const recentDistractorHistory: string[] = [];
+    let previousDistractors: string[] = [];
+    const recentWindowSize = 9;
+
+    return picked.map((item, index) => {
+      const distractorPool = shuffledItems
+        .filter((candidate) => candidate.id !== item.id)
+        .map((candidate) => candidate.back);
+      const options = buildFlashLearnOptions(item.back, distractorPool, recentDistractorHistory, previousDistractors);
+      const distractors = options.filter((option) => option !== item.back);
+
+      recentDistractorHistory.push(...distractors);
+      if (recentDistractorHistory.length > recentWindowSize) {
+        recentDistractorHistory.splice(0, recentDistractorHistory.length - recentWindowSize);
+      }
+      previousDistractors = [...distractors].sort();
+
+      return {
+        id: `${set.id}-learn-${index + 1}`,
+        prompt: item.front,
+        correct: item.back,
+        options,
+      };
+    });
   };
 
   const startFlashLearn = () => {
@@ -6109,40 +5994,17 @@ function StudyContent() {
   const vkLeaderboardForBucket = vkLeaderboard[vkBucket] || [];
   const showHub = !selectedView;
   const examCurrentQ = examQuestions[examIndex] || null;
-  const reviewRangeConfig = useMemo(() => REVIEW_RANGES.find((range) => range.key === reviewRange) || REVIEW_RANGES[0], [reviewRange]);
-  const reviewCurrentQ = reviewQuestions[reviewIndex] || null;
   const examProgressPct = examQuestions.length
     ? Math.round((((examFinished ? examQuestions.length : examIndex + 1)) / examQuestions.length) * 100)
     : 0;
-  const reviewProgressPct = reviewQuestions.length
-    ? Math.round(((reviewFinished ? reviewQuestions.length : reviewIndex + 1) / reviewQuestions.length) * 100)
-    : 0;
   const examCurrentKey = examCurrentQ ? (examCurrentQ.stableKey || examCurrentQ.id) : "";
   const examCurrentChoice = examCurrentQ ? (examAnswers[examCurrentKey] || null) : null;
-  const reviewCurrentKey = reviewCurrentQ ? (reviewCurrentQ.stableKey || reviewCurrentQ.id) : "";
-  const reviewCurrentChoice = reviewCurrentQ ? (reviewAnswers[reviewCurrentKey] || null) : null;
   const examScore = examQuestions.reduce((acc, question) => {
     const key = question.stableKey || question.id;
     return acc + (isExamQuestionCorrect(question, examAnswers[key]) ? 1 : 0);
   }, 0);
-  const reviewScore = reviewQuestions.reduce((acc, question) => {
-    const key = question.stableKey || question.id;
-    return acc + (isExamQuestionCorrect(question, reviewAnswers[key]) ? 1 : 0);
-  }, 0);
   const examPercent = examQuestions.length ? Math.round((examScore / examQuestions.length) * 100) : 0;
-  const reviewPercent = reviewQuestions.length ? Math.round((reviewScore / reviewQuestions.length) * 100) : 0;
   const examPassed = examPercent >= EXAM_PASSING_PERCENT;
-  const reviewCategoryBreakdown = Array.from(
-    reviewQuestions.reduce((map, question) => {
-      const key = question.stableKey || question.id;
-      const category = question.category || "general";
-      const bucket = map.get(category) || { category, correct: 0, total: 0 };
-      bucket.total += 1;
-      if (isExamQuestionCorrect(question, reviewAnswers[key])) bucket.correct += 1;
-      map.set(category, bucket);
-      return map;
-    }, new Map<string, { category: string; correct: number; total: number }>()),
-  ).map(([, value]) => value);
   const examWrongQuestions = examQuestions.filter((question) => {
     const key = question.stableKey || question.id;
     return !isExamQuestionCorrect(question, examAnswers[key]);
@@ -6164,13 +6026,9 @@ function StudyContent() {
       ? "Kana Sprint"
       : selectedView === "sprint"
         ? "Vocab Sprint"
-        : selectedView === "review"
-          ? "Repaso rápido"
         : selectedView === "exam"
-          ? "Exámenes"
-          : selectedView === "dictionary"
-            ? "Diccionario"
-            : "Flashcards"
+          ? "Repaso mixto"
+          : "Flashcards"
     : "Study";
   const sectionStyle: CSSProperties = {
     background: "var(--color-surface)",
@@ -6347,7 +6205,7 @@ function StudyContent() {
       let next = prev.filter((type) => {
         const isAdjType = type === "adj-negative" || type === "adj-past";
         if (isAdjType && !hasAdjInSelectedLessons) return false;
-        const isVerbType = type === "te" || type === "past" || type === "masu" || type === "dictionary";
+        const isVerbType = type === "te" || type === "past" || type === "masu" || type === "plain";
         if (isVerbType && !hasVerbInSelectedLessons) return false;
         return true;
       });
@@ -6377,12 +6235,6 @@ function StudyContent() {
     if (!examCardRef.current) return;
     examCardRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [activeTab, examIndex, examFinished]);
-
-  useEffect(() => {
-    if (activeTab !== "review") return;
-    if (!reviewCardRef.current) return;
-    reviewCardRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [activeTab, reviewIndex, reviewFinished]);
 
   useEffect(() => {
     if (!examFinished) return;
@@ -6530,65 +6382,6 @@ function StudyContent() {
     examPersistedRef.current = false;
   };
 
-  const startReview = () => {
-    const generated = buildQuickReviewQuestions(reviewRangeConfig.lessons);
-    if (generated.length < QUICK_REVIEW_COUNT) {
-      alert("No se pudo generar un repaso completo para ese rango.");
-      return;
-    }
-    setReviewQuestions(generated);
-    setReviewIndex(0);
-    setReviewAnswers({});
-    setReviewFinished(false);
-  };
-
-  const answerReview = (option: string) => {
-    if (!reviewCurrentQ || reviewFinished) return;
-    const key = reviewCurrentQ.stableKey || reviewCurrentQ.id;
-    setReviewAnswers((prev) => ({ ...prev, [key]: option }));
-  };
-
-  const appendReviewReorderToken = (tokenId: string) => {
-    if (!reviewCurrentQ || reviewCurrentQ.type !== "reorder") return;
-    const chosenIds = decodeReorderAnswer(reviewCurrentChoice || "");
-    if (chosenIds.includes(tokenId)) return;
-    answerReview(encodeReorderAnswer([...chosenIds, tokenId]));
-  };
-
-  const popReviewReorderToken = () => {
-    if (!reviewCurrentQ || reviewCurrentQ.type !== "reorder") return;
-    const chosenIds = decodeReorderAnswer(reviewCurrentChoice || "");
-    answerReview(encodeReorderAnswer(chosenIds.slice(0, -1)));
-  };
-
-  const clearReviewReorder = () => {
-    if (!reviewCurrentQ || reviewCurrentQ.type !== "reorder") return;
-    answerReview("");
-  };
-
-  const nextReviewQuestion = () => {
-    if (!reviewCurrentQ) return;
-    const hasAnswer = reviewCurrentQ.type === "text" || reviewCurrentQ.type === "reorder"
-      ? Boolean((reviewCurrentChoice || "").trim())
-      : Boolean(reviewCurrentChoice);
-    if (!hasAnswer) {
-      alert("Responde la pregunta para continuar.");
-      return;
-    }
-    if (reviewIndex >= reviewQuestions.length - 1) {
-      setReviewFinished(true);
-      return;
-    }
-    setReviewIndex((prev) => prev + 1);
-  };
-
-  const resetReview = () => {
-    setReviewQuestions([]);
-    setReviewAnswers({});
-    setReviewIndex(0);
-    setReviewFinished(false);
-  };
-
   const renderQuizConfigurator = (compact = false) => (
     <div style={{ marginTop: compact ? 0 : 10, display: "grid", gap: 10 }}>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -6629,7 +6422,7 @@ function StudyContent() {
               ["te", "Forma て", hasVerbInSelectedLessons],
               ["past", "Pasado corto", hasVerbInSelectedLessons],
               ["masu", "Forma ます", hasVerbInSelectedLessons],
-              ["dictionary", "Diccionario", hasVerbInSelectedLessons],
+              ["plain", "Forma base", hasVerbInSelectedLessons],
               ["adj-negative", "Adjetivo negativo", hasAdjInSelectedLessons],
               ["adj-past", "Adjetivo pasado", hasAdjInSelectedLessons],
             ] as [ConjType, string, boolean][])
@@ -6666,10 +6459,8 @@ function StudyContent() {
   const toolCards = [
     { key: "kana", href: "/study?view=kana", title: "Kana Sprint", accent: "var(--color-accent)", surface: "var(--color-accent-soft)" },
     { key: "sprint", href: "/study?view=sprint", title: "Vocab Sprint", accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
-    { key: "review", href: "/study?view=review", title: "Repaso rápido", accent: "var(--color-accent-strong)", surface: "color-mix(in srgb, var(--color-highlight-soft) 72%, white)" },
     { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", accent: "#F4A261", surface: "rgba(244, 162, 97, 0.12)" },
-    { key: "exam", href: "/study?view=exam", title: "Exámenes", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
-    ...(isAdmin ? [{ key: "dictionary", href: "/study?view=dictionary", title: "Diccionario", accent: "var(--color-primary)", surface: "rgba(26, 26, 46, 0.06)" }] : []),
+    { key: "exam", href: "/study?view=exam", title: "Repaso mixto", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
   ];
   const renderToolPill = (tool: { key: string; href: string; title: string; accent: string; surface: string }) => {
     const selected = activeTab === tool.key;
@@ -6739,9 +6530,9 @@ function StudyContent() {
                 alignItems: "stretch",
               }}
             >
-              {toolCards.map((tool, index) => {
-                const isWide = tool.key === "kana" || tool.key === "sprint" || (tool.key === "dictionary" && toolCards.length % 2 === 1);
-                const isSoftAccent = tool.key === "flashcards" || tool.key === "dictionary";
+              {toolCards.map((tool) => {
+                const isWide = tool.key === "kana" || tool.key === "sprint";
+                const isSoftAccent = tool.key === "flashcards";
                 const cardBackground =
                   tool.key === "kana"
                     ? "color-mix(in srgb, var(--color-surface) 76%, white)"
@@ -7041,212 +6832,6 @@ function StudyContent() {
                 </div>
               </div>
             </div>
-          </section>
-        )}
-
-        {!showHub && activeTab === "review" && (
-          <section style={sectionStyle}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Repaso rápido</h2>
-              <div style={pillGroupStyle}>
-                {REVIEW_RANGES.map((range) => (
-                  <button
-                    key={range.key}
-                    type="button"
-                    onClick={() => {
-                      setReviewRange(range.key);
-                      resetReview();
-                    }}
-                    style={{
-                      ...secondaryButtonStyle,
-                      border: 0,
-                      padding: "6px 10px",
-                      background: reviewRange === range.key ? "var(--color-accent)" : "transparent",
-                      color: reviewRange === range.key ? "var(--color-primary)" : "var(--color-text-muted)",
-                      fontWeight: 700,
-                      fontSize: 12,
-                    }}
-                  >
-                    {range.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {reviewQuestions.length === 0 && (
-              <div ref={reviewCardRef} style={{ ...mutedPanelStyle, marginTop: 14, display: "grid", gap: 12 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                  <div style={{ fontSize: "var(--text-h2)", fontWeight: 800, color: "var(--color-text)" }}>{reviewRangeConfig.label}</div>
-                  <div style={chipStyle}>{QUICK_REVIEW_COUNT} reactivos</div>
-                </div>
-                <button type="button" onClick={startReview} style={{ ...primaryButtonStyle, justifySelf: "start" }}>
-                  Empezar
-                </button>
-              </div>
-            )}
-
-            {reviewCurrentQ && !reviewFinished && (
-              <div ref={reviewCardRef} style={{ ...mutedPanelStyle, marginTop: 14 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                    {reviewIndex + 1} / {reviewQuestions.length}
-                  </div>
-                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                    {formatExamCategoryLabel(reviewCurrentQ.category)}
-                  </div>
-                </div>
-                <div style={{ ...progressTrackStyle, marginTop: 8 }}>
-                  <div style={{ height: "100%", width: `${reviewProgressPct}%`, background: "var(--color-accent)" }} />
-                </div>
-                <div style={{ marginTop: 8, fontSize: 20, fontWeight: 800, color: "var(--color-text)", whiteSpace: "pre-line", lineHeight: 1.45 }}>
-                  {reviewCurrentQ.prompt}
-                </div>
-                {reviewCurrentQ.hint && (
-                  <div style={{ marginTop: 4, color: "var(--color-text-muted)", fontSize: "var(--text-body-sm)" }}>
-                    {reviewCurrentQ.hint}
-                  </div>
-                )}
-
-                {reviewCurrentQ.type === "match" && reviewCurrentQ.matchLeft && reviewCurrentQ.matchRight && (
-                  <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
-                    <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))" }}>
-                      <div style={panelStyle}>
-                        <div style={sectionKickerStyle}>Columna A</div>
-                        <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
-                          {reviewCurrentQ.matchLeft.map((item) => <div key={item} style={{ fontSize: 14, color: "var(--color-text)" }}>{item}</div>)}
-                        </div>
-                      </div>
-                      <div style={panelStyle}>
-                        <div style={sectionKickerStyle}>Columna B</div>
-                        <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
-                          {reviewCurrentQ.matchRight.map((item) => <div key={item} style={{ fontSize: 14, color: "var(--color-text)" }}>{item}</div>)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {reviewCurrentQ.type === "reorder" ? (
-                  <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
-                    <div style={panelStyle}>
-                      <div style={sectionKickerStyle}>Tu oración</div>
-                      <div style={{ marginTop: 8, minHeight: 52, display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-                        {decodeReorderAnswer(reviewCurrentChoice || "").length > 0 ? (
-                          decodeReorderAnswer(reviewCurrentChoice || "").map((tokenId) => {
-                            const token = reviewCurrentQ.reorderTokens?.find((item) => item.id === tokenId);
-                            if (!token) return null;
-                            return (
-                              <span key={tokenId} style={chipStyle}>
-                                {token.label}
-                              </span>
-                            );
-                          })
-                        ) : (
-                          <span style={{ color: "#98a2b3", fontSize: 14 }}>Toca los bloques en orden.</span>
-                        )}
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      {(reviewCurrentQ.reorderTokens || []).map((token) => {
-                        const used = decodeReorderAnswer(reviewCurrentChoice || "").includes(token.id);
-                        return (
-                          <button
-                            key={token.id}
-                            type="button"
-                            disabled={used}
-                            onClick={() => appendReviewReorderToken(token.id)}
-                            style={{
-                              border: "1px solid var(--color-border)",
-                              borderRadius: 999,
-                              background: used ? "var(--color-surface-muted)" : "var(--color-surface)",
-                              color: used ? "var(--color-text-muted)" : "var(--color-text)",
-                              padding: "8px 12px",
-                              fontWeight: 700,
-                              cursor: used ? "not-allowed" : "pointer",
-                            }}
-                          >
-                            {token.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      <button type="button" onClick={popReviewReorderToken} style={secondaryButtonStyle}>Borrar último</button>
-                      <button type="button" onClick={clearReviewReorder} style={secondaryButtonStyle}>Limpiar</button>
-                    </div>
-                  </div>
-                ) : reviewCurrentQ.type === "text" ? (
-                  <div style={{ marginTop: 12 }}>
-                    <input
-                      value={reviewCurrentChoice || ""}
-                      onChange={(event) => answerReview(event.target.value)}
-                      placeholder="Escribe tu respuesta"
-                      style={{ width: "100%", border: "1px solid var(--color-border)", borderRadius: 14, padding: "12px 14px", fontSize: 16, fontWeight: 600, background: "var(--color-surface)", color: "var(--color-text)" }}
-                    />
-                  </div>
-                ) : (
-                  <div style={{ marginTop: 12, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
-                    {reviewCurrentQ.options.map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => answerReview(option)}
-                        style={{
-                          textAlign: "left",
-                          border: reviewCurrentChoice === option ? "1px solid var(--color-accent-strong)" : "1px solid var(--color-border)",
-                          borderRadius: 14,
-                          background: reviewCurrentChoice === option ? "var(--color-highlight-soft)" : "var(--color-surface)",
-                          color: "var(--color-text)",
-                          padding: "12px 14px",
-                          fontSize: 16,
-                          fontWeight: 700,
-                          cursor: "pointer",
-                        }}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <button type="button" onClick={nextReviewQuestion} style={secondaryButtonStyle}>
-                    {reviewIndex >= reviewQuestions.length - 1 ? "Terminar" : "Siguiente"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {reviewFinished && (
-              <div ref={reviewCardRef} style={{ ...mutedPanelStyle, marginTop: 14 }}>
-                <div style={sectionKickerStyle}>Resultado</div>
-                <div style={{ marginTop: 6, fontSize: 30, fontWeight: 800 }}>{reviewScore} / {reviewQuestions.length}</div>
-                <div style={{ marginTop: 6, color: "var(--color-text-muted)" }}>
-                  {reviewPercent}% de aciertos
-                </div>
-                <div style={{ marginTop: 12, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
-                  {reviewCategoryBreakdown.map((row) => {
-                    const pct = Math.round((row.correct / Math.max(1, row.total)) * 100);
-                    return (
-                      <div key={row.category} style={{ ...panelStyle, padding: 10 }}>
-                        <div style={sectionKickerStyle}>{formatExamCategoryLabel(row.category)}</div>
-                        <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "var(--color-text)" }}>{row.correct}/{row.total}</div>
-                        <div style={{ marginTop: 2, fontSize: 12, color: "var(--color-text-muted)" }}>{pct}%</div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <button type="button" onClick={startReview} style={primaryButtonStyle}>
-                    Repetir
-                  </button>
-                  <Link href="/study" style={{ ...secondaryButtonStyle, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
-                    Volver a Study
-                  </Link>
-                </div>
-              </div>
-            )}
           </section>
         )}
 
@@ -7692,83 +7277,10 @@ function StudyContent() {
           </section>
         )}
 
-        {!showHub && activeTab === "dictionary" && isAdmin && (
-          <section style={sectionStyle}>
-            <div style={{ display: "grid", gap: 12 }}>
-              <div style={{ ...panelStyle, display: "grid", gap: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start", flexWrap: "wrap" }}>
-                  <div>
-                    <div style={sectionKickerStyle}>Solo admin</div>
-                    <div style={{ marginTop: 4, fontSize: "var(--text-h2)", fontWeight: 900, color: "var(--color-text)" }}>Diccionario interno</div>
-                    <div style={{ marginTop: 4, fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", lineHeight: 1.5 }}>
-                      Busca en japonés, español o inglés. Si no hay coincidencia exacta, el sistema intenta darte resultados relacionados o entradas comunes.
-                    </div>
-                  </div>
-                  <div style={chipStyle}>
-                    {dictionaryResults.length} resultados
-                  </div>
-                </div>
-
-                <input
-                  value={dictionaryQuery}
-                  onChange={(event) => setDictionaryQuery(event.target.value)}
-                  placeholder="Busca palabra, lectura o significado..."
-                  style={{ border: "1px solid rgba(17,17,20,.12)", borderRadius: 14, background: "#fff", padding: "12px 14px", fontSize: 16, fontWeight: 600, color: "#111114" }}
-                />
-
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap", fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                  <span>{dictionaryLoading ? "Buscando..." : dictionaryFallback ? "Sin coincidencia exacta. Mostrando alternativas útiles." : "Coincidencias directas."}</span>
-                  <button type="button" onClick={() => setDictionaryQuery("")} style={secondaryButtonStyle}>
-                    Limpiar
-                  </button>
-                </div>
-                {dictionaryError && <div style={{ fontSize: 13, color: "#b42318", fontWeight: 700 }}>{dictionaryError}</div>}
-              </div>
-
-              <div style={{ display: "grid", gap: 10 }}>
-                {dictionaryResults.map((entry) => (
-                  <article key={entry.id} style={{ ...panelStyle, display: "grid", gap: 8 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start", flexWrap: "wrap" }}>
-                      <div>
-                        <div style={{ fontSize: 28, fontWeight: 900, color: "#111114", lineHeight: 1.05 }}>{entry.primary}</div>
-                        <div style={{ marginTop: 4, fontSize: 16, color: "#475467", fontWeight: 700 }}>{entry.secondary}</div>
-                      </div>
-                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                        {entry.common && <span style={chipStyle}>Common</span>}
-                        {entry.pos.map((tag) => (
-                          <span key={`${entry.id}-${tag}`} style={chipStyle}>
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    {(entry.kanji.length > 1 || entry.readings.length > 1) && (
-                      <div style={{ display: "grid", gap: 6 }}>
-                        {entry.kanji.length > 1 && <div style={{ fontSize: 13, color: "#667085" }}><strong style={{ color: "#111114" }}>Variantes:</strong> {entry.kanji.join(" ・ ")}</div>}
-                        {entry.readings.length > 1 && <div style={{ fontSize: 13, color: "#667085" }}><strong style={{ color: "#111114" }}>Lecturas:</strong> {entry.readings.join(" ・ ")}</div>}
-                      </div>
-                    )}
-                    <div style={{ display: "grid", gap: 6 }}>
-                      <div style={sectionKickerStyle}>Significado principal</div>
-                      <div style={{ fontSize: 15, color: "var(--color-text)", lineHeight: 1.6 }}>{entry.gloss.join(" · ")}</div>
-                    </div>
-                    {entry.fallbackGloss.length > 0 && (
-                      <div style={{ display: "grid", gap: 6 }}>
-                        <div style={sectionKickerStyle}>Fallback inglés</div>
-                        <div style={{ fontSize: 14, color: "var(--color-text-muted)", lineHeight: 1.55 }}>{entry.fallbackGloss.join(" · ")}</div>
-                      </div>
-                    )}
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
         {!showHub && activeTab === "exam" && (
           <section style={sectionStyle}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Examen por lección</h2>
+              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Repaso mixto</h2>
               <div style={{ display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
                 {LESSONS.map((lesson) => (
                   <button
