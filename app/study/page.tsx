@@ -1254,6 +1254,19 @@ const LESSON_TWO_CURATED_VOCAB = [
   { kana: "だれ", es: "quién", direction: "es-jp" },
 ] as const;
 
+const LESSON_FIVE_CURATED_VOCAB = [
+  { kana: "てんき", es: "tiempo (atmosférico)", direction: "jp-es" },
+  { kana: "りょこう", es: "viaje", direction: "jp-es" },
+  { kana: "うみ", es: "mar", direction: "jp-es" },
+  { kana: "たべもの", es: "comida", direction: "jp-es" },
+  { kana: "のみもの", es: "bebida", direction: "es-jp" },
+  { kana: "あたらしい", es: "nuevo", direction: "es-jp" },
+  { kana: "おもしろい", es: "interesante; divertido", direction: "es-jp" },
+  { kana: "たのしい", es: "divertido", direction: "es-jp" },
+] as const;
+
+const LESSON_FIVE_CURATED_KANJI = ["天気", "山"] as const;
+
 const PARTICLE_EXAM_BANK: Array<{
   id: string;
   minLesson: number;
@@ -2564,10 +2577,221 @@ function buildLessonTwoCuratedExamPool() {
   return [...vocabQuestions, ...grammarCluster, ...readingQuestions];
 }
 
+function buildLessonFiveCuratedExamPool() {
+  const lesson = 5;
+  const lessonVocab = (ALL_GENKI_VOCAB_BY_LESSON[lesson] || []).filter((item) => isExamVocabEligible(lesson, item));
+  const allVocab = Object.values(ALL_GENKI_VOCAB_BY_LESSON).flat().filter((item) => isExamVocabEligible(lesson, item));
+  const meaningPool = Array.from(new Set(allVocab.map((item) => item.es).filter(Boolean)));
+  const jpPool = Array.from(
+    new Set(
+      allVocab
+        .map((item) => (item.kanji?.trim() ? `${item.kanji.trim()} (${item.kana})` : item.kana))
+        .filter(Boolean),
+    ),
+  );
+
+  const vocabQuestions = LESSON_FIVE_CURATED_VOCAB.map((entry, index) => {
+    const item = lessonVocab.find((candidate) => candidate.kana === entry.kana);
+    if (!item) return null;
+    const jpForm = item.kanji?.trim() ? `${item.kanji.trim()} (${item.kana})` : item.kana;
+    if (entry.direction === "jp-es") {
+      const sameLessonMeanings = Array.from(
+        new Set(lessonVocab.map((candidate) => candidate.es).filter((value) => value && value !== item.es)),
+      );
+      return createLessonQuestion(lesson, `vocab:curated:es:${item.kana}:${index}`, {
+        category: "vocab",
+        type: "mcq",
+        prompt: `¿Qué significa 「${item.kana}」?`,
+        options: buildOptionSet(item.es, sameLessonMeanings, meaningPool),
+        correct: item.es,
+        hint: buildLessonHint(lesson, "Vocabulario"),
+        explanation: `「${item.kana}」 significa “${item.es}”.`,
+      });
+    }
+
+    const sameLessonJapanese = Array.from(
+      new Set(
+        lessonVocab
+          .map((candidate) => (candidate.kanji?.trim() ? `${candidate.kanji.trim()} (${candidate.kana})` : candidate.kana))
+          .filter((value) => value && value !== jpForm),
+      ),
+    );
+    return createLessonQuestion(lesson, `vocab:curated:jp:${item.kana}:${index}`, {
+      category: "vocab",
+      type: "mcq",
+      prompt: `Selecciona el japonés para: “${item.es}”`,
+      options: buildOptionSet(jpForm, sameLessonJapanese, jpPool),
+      correct: jpForm,
+      hint: buildLessonHint(lesson, "Vocabulario"),
+      explanation: `La opción correcta para “${item.es}” es 「${jpForm}」.`,
+    });
+  }).filter((question): question is QuizQuestion => Boolean(question));
+
+  const lessonKanji = (GENKI_KANJI_BY_LESSON[lesson] || []).filter((item) =>
+    LESSON_FIVE_CURATED_KANJI.includes(item.kanji as (typeof LESSON_FIVE_CURATED_KANJI)[number]),
+  );
+  const allKanjiReadings = Array.from(new Set(Object.values(GENKI_KANJI_BY_LESSON).flat().map((item) => item.hira).filter(Boolean)));
+  const kanjiQuestions = lessonKanji.map((item, index) =>
+    createLessonQuestion(lesson, `kanji:curated:${item.kanji}:${index}`, {
+      category: "kanji",
+      type: "mcq",
+      prompt: `¿Cómo se lee 「${item.kanji}」?`,
+      options: buildOptionSet(item.hira, allKanjiReadings.filter((reading) => reading !== item.hira), allKanjiReadings),
+      correct: item.hira,
+      hint: buildLessonHint(lesson, "Kanji"),
+      explanation: `「${item.kanji}」 se lee 「${item.hira}」.`,
+    }),
+  );
+
+  const grammarCluster: QuizQuestion[] = [
+    createLessonQuestion(5, "grammar:curated:adj-present", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “The weather is good”?",
+      options: [
+        "てんきは いいです。",
+        "てんきが いいじゃないです。",
+        "てんきは よかったです。",
+        "てんきは よくないです。",
+      ],
+      correct: "てんきは いいです。",
+      hint: buildLessonHint(5, "Adjetivos"),
+      explanation: "La forma afirmativa básica de いい es 「いいです」.",
+    }),
+    createLessonQuestion(5, "grammar:curated:adj-past", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “The movie was interesting”?",
+      options: [
+        "えいがは おもしろいです。",
+        "えいがは おもしろかったです。",
+        "えいがは おもしろくないです。",
+        "えいがは おもしろいでした。",
+      ],
+      correct: "えいがは おもしろかったです。",
+      hint: buildLessonHint(5, "Adjetivos en pasado"),
+      explanation: "Los adjetivos i forman el pasado con 「〜かったです」.",
+    }),
+    createLessonQuestion(5, "grammar:curated:na-negative", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “This town is not quiet”?",
+      options: [
+        "この まちは しずかです。",
+        "この まちは しずかかったです。",
+        "この まちは しずかじゃないです。",
+        "この まちは しずかくないです。",
+      ],
+      correct: "この まちは しずかじゃないです。",
+      hint: buildLessonHint(5, "Adjetivos na"),
+      explanation: "Los adjetivos na forman la negativa con 「じゃないです」.",
+    }),
+    createLessonQuestion(5, "grammar:curated:suki-ga", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "Completa la oración: えいが___すきです。",
+      options: ["は", "を", "が", "で"],
+      correct: "が",
+      hint: buildLessonHint(5, "好き / きらい"),
+      explanation: "Con 「すき」 y 「きらい」, Genki usa 「が」.",
+    }),
+    createLessonQuestion(5, "grammar:curated:donna", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál pregunta significa “What kind of food do you like?”?",
+      options: [
+        "どんな たべものが すきですか。",
+        "どこ たべものが すきですか。",
+        "だれの たべものが すきですか。",
+        "たべものは どれですか。",
+      ],
+      correct: "どんな たべものが すきですか。",
+      hint: buildLessonHint(5, "どんな"),
+      explanation: "「どんな + sustantivo」 pregunta “qué tipo de…”.",
+    }),
+    createLessonQuestion(5, "grammar:curated:mashou", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “Let's go to the sea”?",
+      options: [
+        "うみへ いきませんか。",
+        "うみへ いきましょう。",
+        "うみへ いきたいです。",
+        "うみへ いきました。",
+      ],
+      correct: "うみへ いきましょう。",
+      hint: buildLessonHint(5, "〜ましょう"),
+      explanation: "「〜ましょう」 expresa “vamos a…”.",
+    }),
+    createLessonQuestion(5, "grammar:curated:masenka", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “Won't you go together?”?",
+      options: [
+        "いっしょに いきましょう。",
+        "いっしょに いきますか。",
+        "いっしょに いきませんか。",
+        "いっしょに いきたいですか。",
+      ],
+      correct: "いっしょに いきませんか。",
+      hint: buildLessonHint(5, "〜ませんか"),
+      explanation: "「〜ませんか」 funciona como invitación suave.",
+    }),
+    createLessonQuestion(5, "grammar:curated:amari-negative", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “The ticket is not very cheap”?",
+      options: [
+        "チケットは とても やすいです。",
+        "チケットは あまり やすいです。",
+        "チケットは あまり やすくないです。",
+        "チケットは やすかったです。",
+      ],
+      correct: "チケットは あまり やすくないです。",
+      hint: buildLessonHint(5, "あまり + negativa"),
+      explanation: "Con 「あまり」, Genki usa normalmente una forma negativa.",
+    }),
+  ];
+
+  const readingQuestions: QuizQuestion[] = [
+    createLessonQuestion(5, "reading:curated:trip", {
+      category: "reading",
+      type: "mcq",
+      prompt: "Lee el texto.\n\nきのう おきなわへ いきました。うみは きれいでした。たべものも とても おいしかったです。\n\n¿Cuál opción resume mejor el texto?",
+      options: [
+        "El viaje fue aburrido y caro.",
+        "La playa era fea pero la comida buena.",
+        "El mar era bonito y la comida estaba rica.",
+        "No salió de casa.",
+      ],
+      correct: "El mar era bonito y la comida estaba rica.",
+      hint: buildLessonHint(5, "Lectura corta"),
+      explanation: "El texto dice 「うみは きれいでした」 y 「たべものも とても おいしかったです」.",
+    }),
+    createLessonQuestion(5, "reading:curated:invitation", {
+      category: "reading",
+      type: "mcq",
+      prompt: "Lee el diálogo.\n\nA: きょうは てんきが いいですね。\nB: そうですね。いっしょに やまへ いきませんか。\nA: いいですね。\n\n¿Qué propone B?",
+      options: [
+        "Estudiar en casa",
+        "Ir juntos a la montaña",
+        "Comer en un restaurante",
+        "Comprar boletos de avión",
+      ],
+      correct: "Ir juntos a la montaña",
+      hint: buildLessonHint(5, "Lectura corta"),
+      explanation: "B dice 「いっしょに やまへ いきませんか」.",
+    }),
+  ];
+
+  return [...vocabQuestions, ...kanjiQuestions, ...grammarCluster, ...readingQuestions];
+}
+
 function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
   const normalizedLesson = Math.max(1, Math.min(12, lesson));
   if (normalizedLesson === 1) return buildLessonOneCuratedExamPool();
   if (normalizedLesson === 2) return buildLessonTwoCuratedExamPool();
+  if (normalizedLesson === 5) return buildLessonFiveCuratedExamPool();
   const pool: QuizQuestion[] = [];
 
   const lessonVocab = (ALL_GENKI_VOCAB_BY_LESSON[normalizedLesson] || []).filter((item) => isExamVocabEligible(normalizedLesson, item));
@@ -2774,7 +2998,7 @@ function pickPrioritizedQuestions(
 }
 
 function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, number>, count: number, lesson: number) {
-  if (lesson === 1 || lesson === 2) return shuffle(pool).slice(0, count);
+  if (lesson === 1 || lesson === 2 || lesson === 5) return shuffle(pool).slice(0, count);
   const used = new Set<string>();
   const result: QuizQuestion[] = [];
   const hasKanji = lesson >= 3;

@@ -24,7 +24,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かぞく」?
-- choices: ["hermano menor","familia","hermana mayor","hermano mayor"]
+- choices: ["hermano mayor","familia","hermana mayor","hermano menor"]
 - correct: "familia"
 - explanation: 「かぞく」 significa “familia”.
 - hint: Lección 7 · Vocabulario
@@ -34,7 +34,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “familia”
-- choices: ["兄 (あに)","家族 (かぞく)","弟 (おとうと)","姉 (あね)"]
+- choices: ["弟 (おとうと)","家族 (かぞく)","兄 (あに)","姉 (あね)"]
 - correct: "家族 (かぞく)"
 - explanation: La opción correcta para “familia” es 「家族 (かぞく)」.
 - hint: Lección 7 · Vocabulario
@@ -44,7 +44,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あに」?
-- choices: ["hermano mayor","hermano menor","hermana mayor","familia"]
+- choices: ["familia","hermano menor","hermana mayor","hermano mayor"]
 - correct: "hermano mayor"
 - explanation: 「あに」 significa “hermano mayor”.
 - hint: Lección 7 · Vocabulario
@@ -54,7 +54,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hermano mayor”
-- choices: ["家族 (かぞく)","兄 (あに)","弟 (おとうと)","姉 (あね)"]
+- choices: ["家族 (かぞく)","弟 (おとうと)","兄 (あに)","姉 (あね)"]
 - correct: "兄 (あに)"
 - explanation: La opción correcta para “hermano mayor” es 「兄 (あに)」.
 - hint: Lección 7 · Vocabulario
@@ -64,7 +64,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あね」?
-- choices: ["hermana mayor","hermano mayor","familia","hermano menor"]
+- choices: ["hermano mayor","hermana mayor","familia","hermano menor"]
 - correct: "hermana mayor"
 - explanation: 「あね」 significa “hermana mayor”.
 - hint: Lección 7 · Vocabulario
@@ -74,7 +74,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hermana mayor”
-- choices: ["弟 (おとうと)","兄 (あに)","家族 (かぞく)","姉 (あね)"]
+- choices: ["兄 (あに)","家族 (かぞく)","弟 (おとうと)","姉 (あね)"]
 - correct: "姉 (あね)"
 - explanation: La opción correcta para “hermana mayor” es 「姉 (あね)」.
 - hint: Lección 7 · Vocabulario
@@ -84,7 +84,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おとうと」?
-- choices: ["hermano mayor","familia","hermano menor","hermana mayor"]
+- choices: ["hermano menor","familia","hermano mayor","hermana mayor"]
 - correct: "hermano menor"
 - explanation: 「おとうと」 significa “hermano menor”.
 - hint: Lección 7 · Vocabulario
@@ -94,7 +94,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hermano menor”
-- choices: ["家族 (かぞく)","姉 (あね)","弟 (おとうと)","兄 (あに)"]
+- choices: ["兄 (あに)","姉 (あね)","弟 (おとうと)","家族 (かぞく)"]
 - correct: "弟 (おとうと)"
 - explanation: La opción correcta para “hermano menor” es 「弟 (おとうと)」.
 - hint: Lección 7 · Vocabulario
@@ -104,7 +104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いもうと」?
-- choices: ["hermano mayor","hermana menor","hermana mayor","familia"]
+- choices: ["hermana mayor","hermana menor","familia","hermano mayor"]
 - correct: "hermana menor"
 - explanation: 「いもうと」 significa “hermana menor”.
 - hint: Lección 7 · Vocabulario
@@ -114,7 +114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hermana menor”
-- choices: ["家族 (かぞく)","妹 (いもうと)","兄 (あに)","姉 (あね)"]
+- choices: ["姉 (あね)","家族 (かぞく)","妹 (いもうと)","兄 (あに)"]
 - correct: "妹 (いもうと)"
 - explanation: La opción correcta para “hermana menor” es 「妹 (いもうと)」.
 - hint: Lección 7 · Vocabulario
@@ -124,7 +124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きょうだい」?
-- choices: ["familia","hermano mayor","hermanos","hermana mayor"]
+- choices: ["hermano mayor","familia","hermana mayor","hermanos"]
 - correct: "hermanos"
 - explanation: 「きょうだい」 significa “hermanos”.
 - hint: Lección 7 · Vocabulario
@@ -134,7 +134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hermanos”
-- choices: ["家族 (かぞく)","兄弟 (きょうだい)","兄 (あに)","姉 (あね)"]
+- choices: ["兄弟 (きょうだい)","家族 (かぞく)","兄 (あに)","姉 (あね)"]
 - correct: "兄弟 (きょうだい)"
 - explanation: La opción correcta para “hermanos” es 「兄弟 (きょうだい)」.
 - hint: Lección 7 · Vocabulario
@@ -144,7 +144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「りょうしん」?
-- choices: ["padres","hermana mayor","familia","hermano mayor"]
+- choices: ["hermano mayor","familia","hermana mayor","padres"]
 - correct: "padres"
 - explanation: 「りょうしん」 significa “padres”.
 - hint: Lección 7 · Vocabulario
@@ -154,7 +154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “padres”
-- choices: ["家族 (かぞく)","兄 (あに)","両親 (りょうしん)","姉 (あね)"]
+- choices: ["両親 (りょうしん)","家族 (かぞく)","兄 (あに)","姉 (あね)"]
 - correct: "両親 (りょうしん)"
 - explanation: La opción correcta para “padres” es 「両親 (りょうしん)」.
 - hint: Lección 7 · Vocabulario
@@ -164,7 +164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かいしゃいん」?
-- choices: ["hermano mayor","familia","empleado de empresa","hermana mayor"]
+- choices: ["hermana mayor","hermano mayor","familia","empleado de empresa"]
 - correct: "empleado de empresa"
 - explanation: 「かいしゃいん」 significa “empleado de empresa”.
 - hint: Lección 7 · Vocabulario
@@ -174,7 +174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “empleado de empresa”
-- choices: ["兄 (あに)","家族 (かぞく)","姉 (あね)","会社員 (かいしゃいん)"]
+- choices: ["姉 (あね)","会社員 (かいしゃいん)","兄 (あに)","家族 (かぞく)"]
 - correct: "会社員 (かいしゃいん)"
 - explanation: La opción correcta para “empleado de empresa” es 「会社員 (かいしゃいん)」.
 - hint: Lección 7 · Vocabulario
@@ -184,7 +184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しごと」?
-- choices: ["hermana mayor","hermano mayor","trabajo","familia"]
+- choices: ["hermana mayor","trabajo","hermano mayor","familia"]
 - correct: "trabajo"
 - explanation: 「しごと」 significa “trabajo”.
 - hint: Lección 7 · Vocabulario
@@ -194,7 +194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “trabajo”
-- choices: ["兄 (あに)","姉 (あね)","家族 (かぞく)","仕事 (しごと)"]
+- choices: ["家族 (かぞく)","仕事 (しごと)","姉 (あね)","兄 (あに)"]
 - correct: "仕事 (しごと)"
 - explanation: La opción correcta para “trabajo” es 「仕事 (しごと)」.
 - hint: Lección 7 · Vocabulario
@@ -204,7 +204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いえ」?
-- choices: ["familia","hermana mayor","hermano mayor","casa"]
+- choices: ["hermana mayor","hermano mayor","casa","familia"]
 - correct: "casa"
 - explanation: 「いえ」 significa “casa”.
 - hint: Lección 7 · Vocabulario
@@ -214,7 +214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “casa”
-- choices: ["姉 (あね)","家 (いえ)","家族 (かぞく)","兄 (あに)"]
+- choices: ["兄 (あに)","家族 (かぞく)","家 (いえ)","姉 (あね)"]
 - correct: "家 (いえ)"
 - explanation: La opción correcta para “casa” es 「家 (いえ)」.
 - hint: Lección 7 · Vocabulario
@@ -224,7 +224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はは」?
-- choices: ["hermana mayor","hermano mayor","madre","familia"]
+- choices: ["familia","madre","hermano mayor","hermana mayor"]
 - correct: "madre"
 - explanation: 「はは」 significa “madre”.
 - hint: Lección 7 · Vocabulario
@@ -234,7 +234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “madre”
-- choices: ["姉 (あね)","兄 (あに)","家族 (かぞく)","母 (はは)"]
+- choices: ["家族 (かぞく)","兄 (あに)","姉 (あね)","母 (はは)"]
 - correct: "母 (はは)"
 - explanation: La opción correcta para “madre” es 「母 (はは)」.
 - hint: Lección 7 · Vocabulario
@@ -244,7 +244,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ちち」?
-- choices: ["familia","hermano mayor","hermana mayor","padre"]
+- choices: ["hermano mayor","padre","hermana mayor","familia"]
 - correct: "padre"
 - explanation: 「ちち」 significa “padre”.
 - hint: Lección 7 · Vocabulario
@@ -254,7 +254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “padre”
-- choices: ["姉 (あね)","父 (ちち)","兄 (あに)","家族 (かぞく)"]
+- choices: ["父 (ちち)","兄 (あに)","家族 (かぞく)","姉 (あね)"]
 - correct: "父 (ちち)"
 - explanation: La opción correcta para “padre” es 「父 (ちち)」.
 - hint: Lección 7 · Vocabulario
@@ -264,7 +264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おにいさん」?
-- choices: ["hermano mayor (de otro)","familia","hermano mayor","hermana mayor"]
+- choices: ["familia","hermana mayor","hermano mayor","hermano mayor (de otro)"]
 - correct: "hermano mayor (de otro)"
 - explanation: 「おにいさん」 significa “hermano mayor (de otro)”.
 - hint: Lección 7 · Vocabulario
@@ -274,7 +274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hermano mayor (de otro)”
-- choices: ["兄 (あに)","おにいさん","家族 (かぞく)","姉 (あね)"]
+- choices: ["家族 (かぞく)","おにいさん","兄 (あに)","姉 (あね)"]
 - correct: "おにいさん"
 - explanation: La opción correcta para “hermano mayor (de otro)” es 「おにいさん」.
 - hint: Lección 7 · Vocabulario
@@ -284,7 +284,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おねえさん」?
-- choices: ["hermano mayor","hermana mayor","familia","hermana mayor (de otro)"]
+- choices: ["familia","hermana mayor","hermano mayor","hermana mayor (de otro)"]
 - correct: "hermana mayor (de otro)"
 - explanation: 「おねえさん」 significa “hermana mayor (de otro)”.
 - hint: Lección 7 · Vocabulario
@@ -294,7 +294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hermana mayor (de otro)”
-- choices: ["おねえさん","家族 (かぞく)","兄 (あに)","姉 (あね)"]
+- choices: ["家族 (かぞく)","おねえさん","姉 (あね)","兄 (あに)"]
 - correct: "おねえさん"
 - explanation: La opción correcta para “hermana mayor (de otro)” es 「おねえさん」.
 - hint: Lección 7 · Vocabulario
@@ -304,7 +304,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「けっこん」?
-- choices: ["hermana mayor","matrimonio","familia","hermano mayor"]
+- choices: ["matrimonio","familia","hermana mayor","hermano mayor"]
 - correct: "matrimonio"
 - explanation: 「けっこん」 significa “matrimonio”.
 - hint: Lección 7 · Vocabulario
@@ -314,7 +314,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “matrimonio”
-- choices: ["結婚 (けっこん)","兄 (あに)","家族 (かぞく)","姉 (あね)"]
+- choices: ["姉 (あね)","兄 (あに)","結婚 (けっこん)","家族 (かぞく)"]
 - correct: "結婚 (けっこん)"
 - explanation: La opción correcta para “matrimonio” es 「結婚 (けっこん)」.
 - hint: Lección 7 · Vocabulario
@@ -324,7 +324,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「こうこうせい」?
-- choices: ["hermana mayor","estudiante de prepa","familia","hermano mayor"]
+- choices: ["familia","estudiante de prepa","hermana mayor","hermano mayor"]
 - correct: "estudiante de prepa"
 - explanation: 「こうこうせい」 significa “estudiante de prepa”.
 - hint: Lección 7 · Vocabulario
@@ -334,7 +334,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “estudiante de prepa”
-- choices: ["家族 (かぞく)","高校生 (こうこうせい)","姉 (あね)","兄 (あに)"]
+- choices: ["高校生 (こうこうせい)","兄 (あに)","家族 (かぞく)","姉 (あね)"]
 - correct: "高校生 (こうこうせい)"
 - explanation: La opción correcta para “estudiante de prepa” es 「高校生 (こうこうせい)」.
 - hint: Lección 7 · Vocabulario
@@ -344,7 +344,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おかね」?
-- choices: ["familia","dinero","hermano mayor","hermana mayor"]
+- choices: ["familia","hermano mayor","hermana mayor","dinero"]
 - correct: "dinero"
 - explanation: 「おかね」 significa “dinero”.
 - hint: Lección 7 · Vocabulario
@@ -354,7 +354,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “dinero”
-- choices: ["兄 (あに)","姉 (あね)","お金 (おかね)","家族 (かぞく)"]
+- choices: ["兄 (あに)","お金 (おかね)","姉 (あね)","家族 (かぞく)"]
 - correct: "お金 (おかね)"
 - explanation: La opción correcta para “dinero” es 「お金 (おかね)」.
 - hint: Lección 7 · Vocabulario
@@ -364,7 +364,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「プレゼント」?
-- choices: ["hermana mayor","familia","hermano mayor","regalo"]
+- choices: ["hermano mayor","hermana mayor","familia","regalo"]
 - correct: "regalo"
 - explanation: 「プレゼント」 significa “regalo”.
 - hint: Lección 7 · Vocabulario
@@ -374,7 +374,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “regalo”
-- choices: ["兄 (あに)","プレゼント","姉 (あね)","家族 (かぞく)"]
+- choices: ["家族 (かぞく)","姉 (あね)","プレゼント","兄 (あに)"]
 - correct: "プレゼント"
 - explanation: La opción correcta para “regalo” es 「プレゼント」.
 - hint: Lección 7 · Vocabulario
@@ -384,7 +384,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「する」?
-- choices: ["familia","hermana mayor","hermano mayor","hacer"]
+- choices: ["hermano mayor","familia","hacer","hermana mayor"]
 - correct: "hacer"
 - explanation: 「する」 significa “hacer”.
 - hint: Lección 7 · Vocabulario
@@ -394,7 +394,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hacer”
-- choices: ["家族 (かぞく)","する","兄 (あに)","姉 (あね)"]
+- choices: ["する","家族 (かぞく)","兄 (あに)","姉 (あね)"]
 - correct: "する"
 - explanation: La opción correcta para “hacer” es 「する」.
 - hint: Lección 7 · Vocabulario
@@ -404,7 +404,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「くる」?
-- choices: ["venir","familia","hermana mayor","hermano mayor"]
+- choices: ["venir","hermano mayor","familia","hermana mayor"]
 - correct: "venir"
 - explanation: 「くる」 significa “venir”.
 - hint: Lección 7 · Vocabulario
@@ -414,7 +414,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “venir”
-- choices: ["くる","兄 (あに)","家族 (かぞく)","姉 (あね)"]
+- choices: ["姉 (あね)","くる","兄 (あに)","家族 (かぞく)"]
 - correct: "くる"
 - explanation: La opción correcta para “venir” es 「くる」.
 - hint: Lección 7 · Vocabulario
@@ -424,7 +424,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あげる」?
-- choices: ["dar","hermano mayor","familia","hermana mayor"]
+- choices: ["hermana mayor","familia","dar","hermano mayor"]
 - correct: "dar"
 - explanation: 「あげる」 significa “dar”.
 - hint: Lección 7 · Vocabulario
@@ -434,7 +434,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “dar”
-- choices: ["家族 (かぞく)","兄 (あに)","姉 (あね)","あげる"]
+- choices: ["姉 (あね)","兄 (あに)","家族 (かぞく)","あげる"]
 - correct: "あげる"
 - explanation: La opción correcta para “dar” es 「あげる」.
 - hint: Lección 7 · Vocabulario
@@ -444,7 +444,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「もらう」?
-- choices: ["recibir","hermano mayor","hermana mayor","familia"]
+- choices: ["recibir","hermana mayor","hermano mayor","familia"]
 - correct: "recibir"
 - explanation: 「もらう」 significa “recibir”.
 - hint: Lección 7 · Vocabulario
@@ -454,7 +454,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “recibir”
-- choices: ["姉 (あね)","もらう","家族 (かぞく)","兄 (あに)"]
+- choices: ["姉 (あね)","もらう","兄 (あに)","家族 (かぞく)"]
 - correct: "もらう"
 - explanation: La opción correcta para “recibir” es 「もらう」.
 - hint: Lección 7 · Vocabulario
@@ -464,7 +464,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おじいさん」?
-- choices: ["hermana mayor","abuelo; anciano","hermano mayor","familia"]
+- choices: ["hermana mayor","abuelo; anciano","familia","hermano mayor"]
 - correct: "abuelo; anciano"
 - explanation: 「おじいさん」 significa “abuelo; anciano”.
 - hint: Lección 7 · Vocabulario
@@ -474,7 +474,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “abuelo; anciano”
-- choices: ["家族 (かぞく)","おじいさん","姉 (あね)","兄 (あに)"]
+- choices: ["おじいさん","家族 (かぞく)","姉 (あね)","兄 (あに)"]
 - correct: "おじいさん"
 - explanation: La opción correcta para “abuelo; anciano” es 「おじいさん」.
 - hint: Lección 7 · Vocabulario
@@ -484,7 +484,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おばあさん」?
-- choices: ["familia","hermana mayor","hermano mayor","abuela; anciana"]
+- choices: ["hermana mayor","familia","hermano mayor","abuela; anciana"]
 - correct: "abuela; anciana"
 - explanation: 「おばあさん」 significa “abuela; anciana”.
 - hint: Lección 7 · Vocabulario
@@ -494,7 +494,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “abuela; anciana”
-- choices: ["姉 (あね)","おばあさん","兄 (あに)","家族 (かぞく)"]
+- choices: ["おばあさん","家族 (かぞく)","姉 (あね)","兄 (あに)"]
 - correct: "おばあさん"
 - explanation: La opción correcta para “abuela; anciana” es 「おばあさん」.
 - hint: Lección 7 · Vocabulario
@@ -504,7 +504,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おとこのひと」?
-- choices: ["familia","hermana mayor","hombre","hermano mayor"]
+- choices: ["hombre","familia","hermano mayor","hermana mayor"]
 - correct: "hombre"
 - explanation: 「おとこのひと」 significa “hombre”.
 - hint: Lección 7 · Vocabulario
@@ -514,7 +514,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hombre”
-- choices: ["姉 (あね)","兄 (あに)","家族 (かぞく)","男の人 (おとこのひと)"]
+- choices: ["男の人 (おとこのひと)","姉 (あね)","家族 (かぞく)","兄 (あに)"]
 - correct: "男の人 (おとこのひと)"
 - explanation: La opción correcta para “hombre” es 「男の人 (おとこのひと)」.
 - hint: Lección 7 · Vocabulario
@@ -524,7 +524,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おんなのひと」?
-- choices: ["familia","mujer","hermano mayor","hermana mayor"]
+- choices: ["hermana mayor","hermano mayor","mujer","familia"]
 - correct: "mujer"
 - explanation: 「おんなのひと」 significa “mujer”.
 - hint: Lección 7 · Vocabulario
@@ -534,7 +534,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “mujer”
-- choices: ["姉 (あね)","兄 (あに)","家族 (かぞく)","女の人 (おんなのひと)"]
+- choices: ["兄 (あに)","姉 (あね)","家族 (かぞく)","女の人 (おんなのひと)"]
 - correct: "女の人 (おんなのひと)"
 - explanation: La opción correcta para “mujer” es 「女の人 (おんなのひと)」.
 - hint: Lección 7 · Vocabulario
@@ -544,7 +544,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かいしゃ」?
-- choices: ["hermana mayor","familia","empresa","hermano mayor"]
+- choices: ["hermana mayor","empresa","familia","hermano mayor"]
 - correct: "empresa"
 - explanation: 「かいしゃ」 significa “empresa”.
 - hint: Lección 7 · Vocabulario
@@ -554,7 +554,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “empresa”
-- choices: ["会社 (かいしゃ)","姉 (あね)","家族 (かぞく)","兄 (あに)"]
+- choices: ["姉 (あね)","家族 (かぞく)","会社 (かいしゃ)","兄 (あに)"]
 - correct: "会社 (かいしゃ)"
 - explanation: La opción correcta para “empresa” es 「会社 (かいしゃ)」.
 - hint: Lección 7 · Vocabulario
@@ -564,7 +564,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しょくどう」?
-- choices: ["hermano mayor","hermana mayor","cafetería; comedores","familia"]
+- choices: ["hermana mayor","hermano mayor","cafetería; comedores","familia"]
 - correct: "cafetería; comedores"
 - explanation: 「しょくどう」 significa “cafetería; comedores”.
 - hint: Lección 7 · Vocabulario
@@ -574,7 +574,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cafetería; comedores”
-- choices: ["家族 (かぞく)","姉 (あね)","兄 (あに)","食堂 (しょくどう)"]
+- choices: ["兄 (あに)","食堂 (しょくどう)","家族 (かぞく)","姉 (あね)"]
 - correct: "食堂 (しょくどう)"
 - explanation: La opción correcta para “cafetería; comedores” es 「食堂 (しょくどう)」.
 - hint: Lección 7 · Vocabulario
@@ -584,7 +584,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「デパート」?
-- choices: ["grandes almacenes","familia","hermana mayor","hermano mayor"]
+- choices: ["grandes almacenes","hermana mayor","hermano mayor","familia"]
 - correct: "grandes almacenes"
 - explanation: 「デパート」 significa “grandes almacenes”.
 - hint: Lección 7 · Vocabulario
@@ -594,7 +594,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “grandes almacenes”
-- choices: ["兄 (あに)","デパート","姉 (あね)","家族 (かぞく)"]
+- choices: ["デパート","姉 (あね)","家族 (かぞく)","兄 (あに)"]
 - correct: "デパート"
 - explanation: La opción correcta para “grandes almacenes” es 「デパート」.
 - hint: Lección 7 · Vocabulario
@@ -604,7 +604,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かみ」?
-- choices: ["hermano mayor","pelo","familia","hermana mayor"]
+- choices: ["hermano mayor","familia","pelo","hermana mayor"]
 - correct: "pelo"
 - explanation: 「かみ」 significa “pelo”.
 - hint: Lección 7 · Vocabulario
@@ -614,7 +614,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pelo”
-- choices: ["家族 (かぞく)","姉 (あね)","髪 (かみ)","兄 (あに)"]
+- choices: ["家族 (かぞく)","兄 (あに)","姉 (あね)","髪 (かみ)"]
 - correct: "髪 (かみ)"
 - explanation: La opción correcta para “pelo” es 「髪 (かみ)」.
 - hint: Lección 7 · Vocabulario
@@ -624,7 +624,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「くち」?
-- choices: ["familia","hermana mayor","hermano mayor","boca"]
+- choices: ["hermana mayor","hermano mayor","familia","boca"]
 - correct: "boca"
 - explanation: 「くち」 significa “boca”.
 - hint: Lección 7 · Vocabulario
@@ -634,7 +634,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “boca”
-- choices: ["姉 (あね)","家族 (かぞく)","兄 (あに)","口 (くち)"]
+- choices: ["兄 (あに)","口 (くち)","姉 (あね)","家族 (かぞく)"]
 - correct: "口 (くち)"
 - explanation: La opción correcta para “boca” es 「口 (くち)」.
 - hint: Lección 7 · Vocabulario
@@ -644,7 +644,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「め」?
-- choices: ["hermano mayor","hermana mayor","ojo(s)","familia"]
+- choices: ["familia","hermana mayor","ojo(s)","hermano mayor"]
 - correct: "ojo(s)"
 - explanation: 「め」 significa “ojo(s)”.
 - hint: Lección 7 · Vocabulario
@@ -654,7 +654,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ojo(s)”
-- choices: ["兄 (あに)","家族 (かぞく)","目 (め)","姉 (あね)"]
+- choices: ["家族 (かぞく)","姉 (あね)","目 (め)","兄 (あに)"]
 - correct: "目 (め)"
 - explanation: La opción correcta para “ojo(s)” es 「目 (め)」.
 - hint: Lección 7 · Vocabulario
@@ -664,7 +664,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「めがね」?
-- choices: ["hermano mayor","familia","hermana mayor","lentes; gafas"]
+- choices: ["hermana mayor","familia","lentes; gafas","hermano mayor"]
 - correct: "lentes; gafas"
 - explanation: 「めがね」 significa “lentes; gafas”.
 - hint: Lección 7 · Vocabulario
@@ -674,7 +674,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “lentes; gafas”
-- choices: ["姉 (あね)","家族 (かぞく)","兄 (あに)","眼鏡 (めがね)"]
+- choices: ["姉 (あね)","兄 (あに)","眼鏡 (めがね)","家族 (かぞく)"]
 - correct: "眼鏡 (めがね)"
 - explanation: La opción correcta para “lentes; gafas” es 「眼鏡 (めがね)」.
 - hint: Lección 7 · Vocabulario
@@ -694,7 +694,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “canción”
-- choices: ["歌 (うた)","家族 (かぞく)","兄 (あに)","姉 (あね)"]
+- choices: ["家族 (かぞく)","姉 (あね)","兄 (あに)","歌 (うた)"]
 - correct: "歌 (うた)"
 - explanation: La opción correcta para “canción” es 「歌 (うた)」.
 - hint: Lección 7 · Vocabulario
@@ -724,7 +724,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「くるま」?
-- choices: ["hermana mayor","hermano mayor","familia","auto; coche; carro"]
+- choices: ["hermano mayor","auto; coche; carro","familia","hermana mayor"]
 - correct: "auto; coche; carro"
 - explanation: 「くるま」 significa “auto; coche; carro”.
 - hint: Lección 7 · Vocabulario
@@ -734,7 +734,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “auto; coche; carro”
-- choices: ["車 (くるま)","姉 (あね)","家族 (かぞく)","兄 (あに)"]
+- choices: ["車 (くるま)","家族 (かぞく)","兄 (あに)","姉 (あね)"]
 - correct: "車 (くるま)"
 - explanation: La opción correcta para “auto; coche; carro” es 「車 (くるま)」.
 - hint: Lección 7 · Vocabulario
@@ -744,7 +744,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ながい」?
-- choices: ["hermano mayor","largo","hermana mayor","familia"]
+- choices: ["hermana mayor","hermano mayor","largo","familia"]
 - correct: "largo"
 - explanation: 「ながい」 significa “largo”.
 - hint: Lección 7 · Vocabulario
@@ -754,7 +754,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “largo”
-- choices: ["長い (ながい)","兄 (あに)","家族 (かぞく)","姉 (あね)"]
+- choices: ["長い (ながい)","兄 (あに)","姉 (あね)","家族 (かぞく)"]
 - correct: "長い (ながい)"
 - explanation: La opción correcta para “largo” es 「長い (ながい)」.
 - hint: Lección 7 · Vocabulario
@@ -764,7 +764,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「みじかい」?
-- choices: ["corto (longitud)","familia","hermano mayor","hermana mayor"]
+- choices: ["familia","hermano mayor","corto (longitud)","hermana mayor"]
 - correct: "corto (longitud)"
 - explanation: 「みじかい」 significa “corto (longitud)”.
 - hint: Lección 7 · Vocabulario
@@ -774,7 +774,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “corto (longitud)”
-- choices: ["家族 (かぞく)","姉 (あね)","兄 (あに)","短い (みじかい)"]
+- choices: ["短い (みじかい)","家族 (かぞく)","姉 (あね)","兄 (あに)"]
 - correct: "短い (みじかい)"
 - explanation: La opción correcta para “corto (longitud)” es 「短い (みじかい)」.
 - hint: Lección 7 · Vocabulario
@@ -784,7 +784,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はやい」?
-- choices: ["hermano mayor","rápido","hermana mayor","familia"]
+- choices: ["hermano mayor","rápido","familia","hermana mayor"]
 - correct: "rápido"
 - explanation: 「はやい」 significa “rápido”.
 - hint: Lección 7 · Vocabulario
@@ -794,7 +794,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “rápido”
-- choices: ["家族 (かぞく)","速い (はやい)","兄 (あに)","姉 (あね)"]
+- choices: ["速い (はやい)","姉 (あね)","兄 (あに)","家族 (かぞく)"]
 - correct: "速い (はやい)"
 - explanation: La opción correcta para “rápido” es 「速い (はやい)」.
 - hint: Lección 7 · Vocabulario
@@ -804,7 +804,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せがたかい」?
-- choices: ["hermano mayor","alto (estatura)","familia","hermana mayor"]
+- choices: ["familia","hermana mayor","hermano mayor","alto (estatura)"]
 - correct: "alto (estatura)"
 - explanation: 「せがたかい」 significa “alto (estatura)”.
 - hint: Lección 7 · Vocabulario
@@ -814,7 +814,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “alto (estatura)”
-- choices: ["家族 (かぞく)","背が高い (せがたかい)","兄 (あに)","姉 (あね)"]
+- choices: ["兄 (あに)","家族 (かぞく)","背が高い (せがたかい)","姉 (あね)"]
 - correct: "背が高い (せがたかい)"
 - explanation: La opción correcta para “alto (estatura)” es 「背が高い (せがたかい)」.
 - hint: Lección 7 · Vocabulario
@@ -824,7 +824,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せがひくい」?
-- choices: ["hermano mayor","familia","hermana mayor","bajo (estatura)"]
+- choices: ["familia","bajo (estatura)","hermana mayor","hermano mayor"]
 - correct: "bajo (estatura)"
 - explanation: 「せがひくい」 significa “bajo (estatura)”.
 - hint: Lección 7 · Vocabulario
@@ -834,7 +834,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “bajo (estatura)”
-- choices: ["姉 (あね)","兄 (あに)","家族 (かぞく)","背が低い (せがひくい)"]
+- choices: ["兄 (あに)","姉 (あね)","背が低い (せがひくい)","家族 (かぞく)"]
 - correct: "背が低い (せがひくい)"
 - explanation: La opción correcta para “bajo (estatura)” es 「背が低い (せがひくい)」.
 - hint: Lección 7 · Vocabulario
@@ -844,7 +844,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あたまがいい」?
-- choices: ["brillante; inteligente; astuto","familia","hermano mayor","hermana mayor"]
+- choices: ["brillante; inteligente; astuto","familia","hermana mayor","hermano mayor"]
 - correct: "brillante; inteligente; astuto"
 - explanation: 「あたまがいい」 significa “brillante; inteligente; astuto”.
 - hint: Lección 7 · Vocabulario
@@ -854,7 +854,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “brillante; inteligente; astuto”
-- choices: ["兄 (あに)","家族 (かぞく)","頭がいい (あたまがいい)","姉 (あね)"]
+- choices: ["姉 (あね)","家族 (かぞく)","頭がいい (あたまがいい)","兄 (あに)"]
 - correct: "頭がいい (あたまがいい)"
 - explanation: La opción correcta para “brillante; inteligente; astuto” es 「頭がいい (あたまがいい)」.
 - hint: Lección 7 · Vocabulario
@@ -864,7 +864,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かわいい」?
-- choices: ["familia","hermano mayor","hermana mayor","lindo; tierno"]
+- choices: ["hermano mayor","lindo; tierno","hermana mayor","familia"]
 - correct: "lindo; tierno"
 - explanation: 「かわいい」 significa “lindo; tierno”.
 - hint: Lección 7 · Vocabulario
@@ -884,7 +884,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しんせつ（な）」?
-- choices: ["hermano mayor","hermana mayor","familia","amable"]
+- choices: ["hermana mayor","hermano mayor","familia","amable"]
 - correct: "amable"
 - explanation: 「しんせつ（な）」 significa “amable”.
 - hint: Lección 7 · Vocabulario
@@ -894,7 +894,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “amable”
-- choices: ["家族 (かぞく)","姉 (あね)","兄 (あに)","親切（な） (しんせつ（な）)"]
+- choices: ["親切（な） (しんせつ（な）)","兄 (あに)","家族 (かぞく)","姉 (あね)"]
 - correct: "親切（な） (しんせつ（な）)"
 - explanation: La opción correcta para “amable” es 「親切（な） (しんせつ（な）)」.
 - hint: Lección 7 · Vocabulario
@@ -904,7 +904,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「べんり（な）」?
-- choices: ["familia","hermana mayor","práctico","hermano mayor"]
+- choices: ["familia","práctico","hermano mayor","hermana mayor"]
 - correct: "práctico"
 - explanation: 「べんり（な）」 significa “práctico”.
 - hint: Lección 7 · Vocabulario
@@ -914,7 +914,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “práctico”
-- choices: ["家族 (かぞく)","姉 (あね)","兄 (あに)","便利（な） (べんり（な）)"]
+- choices: ["便利（な） (べんり（な）)","兄 (あに)","姉 (あね)","家族 (かぞく)"]
 - correct: "便利（な） (べんり（な）)"
 - explanation: La opción correcta para “práctico” es 「便利（な） (べんり（な）)」.
 - hint: Lección 7 · Vocabulario
@@ -924,7 +924,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「うたう」?
-- choices: ["familia","hermano mayor","hermana mayor","cantar (～を)"]
+- choices: ["hermana mayor","hermano mayor","familia","cantar (～を)"]
 - correct: "cantar (～を)"
 - explanation: 「うたう」 significa “cantar (～を)”.
 - hint: Lección 7 · Vocabulario
@@ -934,7 +934,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cantar (～を)”
-- choices: ["兄 (あに)","歌う (うたう)","姉 (あね)","家族 (かぞく)"]
+- choices: ["家族 (かぞく)","姉 (あね)","歌う (うたう)","兄 (あに)"]
 - correct: "歌う (うたう)"
 - explanation: La opción correcta para “cantar (～を)” es 「歌う (うたう)」.
 - hint: Lección 7 · Vocabulario
@@ -944,7 +944,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かぶる」?
-- choices: ["ponerse (un sombrero) (～を)","familia","hermana mayor","hermano mayor"]
+- choices: ["ponerse (un sombrero) (～を)","hermana mayor","familia","hermano mayor"]
 - correct: "ponerse (un sombrero) (～を)"
 - explanation: 「かぶる」 significa “ponerse (un sombrero) (～を)”.
 - hint: Lección 7 · Vocabulario
@@ -954,7 +954,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ponerse (un sombrero) (～を)”
-- choices: ["姉 (あね)","かぶる","家族 (かぞく)","兄 (あに)"]
+- choices: ["姉 (あね)","家族 (かぞく)","かぶる","兄 (あに)"]
 - correct: "かぶる"
 - explanation: La opción correcta para “ponerse (un sombrero) (～を)” es 「かぶる」.
 - hint: Lección 7 · Vocabulario
@@ -964,7 +964,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はく」?
-- choices: ["ponerse; llevar; usar (prendas bajo la cintura) (～を)","hermana mayor","hermano mayor","familia"]
+- choices: ["hermana mayor","familia","hermano mayor","ponerse; llevar; usar (prendas bajo la cintura) (～を)"]
 - correct: "ponerse; llevar; usar (prendas bajo la cintura) (～を)"
 - explanation: 「はく」 significa “ponerse; llevar; usar (prendas bajo la cintura) (～を)”.
 - hint: Lección 7 · Vocabulario
@@ -974,7 +974,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ponerse; llevar; usar (prendas bajo la cintura) (～を)”
-- choices: ["家族 (かぞく)","兄 (あに)","姉 (あね)","はく"]
+- choices: ["兄 (あに)","家族 (かぞく)","はく","姉 (あね)"]
 - correct: "はく"
 - explanation: La opción correcta para “ponerse; llevar; usar (prendas bajo la cintura) (～を)” es 「はく」.
 - hint: Lección 7 · Vocabulario
@@ -984,7 +984,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しる」?
-- choices: ["familia","conocer (～を)","hermano mayor","hermana mayor"]
+- choices: ["hermano mayor","familia","conocer (～を)","hermana mayor"]
 - correct: "conocer (～を)"
 - explanation: 「しる」 significa “conocer (～を)”.
 - hint: Lección 7 · Vocabulario
@@ -994,7 +994,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “conocer (～を)”
-- choices: ["兄 (あに)","姉 (あね)","知る (しる)","家族 (かぞく)"]
+- choices: ["姉 (あね)","兄 (あに)","家族 (かぞく)","知る (しる)"]
 - correct: "知る (しる)"
 - explanation: La opción correcta para “conocer (～を)” es 「知る (しる)」.
 - hint: Lección 7 · Vocabulario
@@ -1004,7 +1004,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しっています」?
-- choices: ["familia","hermana mayor","hermano mayor","lo sé"]
+- choices: ["lo sé","familia","hermano mayor","hermana mayor"]
 - correct: "lo sé"
 - explanation: 「しっています」 significa “lo sé”.
 - hint: Lección 7 · Vocabulario
@@ -1014,7 +1014,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “lo sé”
-- choices: ["知っています (しっています)","兄 (あに)","姉 (あね)","家族 (かぞく)"]
+- choices: ["姉 (あね)","家族 (かぞく)","兄 (あに)","知っています (しっています)"]
 - correct: "知っています (しっています)"
 - explanation: La opción correcta para “lo sé” es 「知っています (しっています)」.
 - hint: Lección 7 · Vocabulario
@@ -1024,7 +1024,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しりません」?
-- choices: ["no lo sé","familia","hermana mayor","hermano mayor"]
+- choices: ["familia","hermana mayor","no lo sé","hermano mayor"]
 - correct: "no lo sé"
 - explanation: 「しりません」 significa “no lo sé”.
 - hint: Lección 7 · Vocabulario
@@ -1044,7 +1044,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「すむ」?
-- choices: ["hermano mayor","vivir en (lugar に)","hermana mayor","familia"]
+- choices: ["hermana mayor","familia","vivir en (lugar に)","hermano mayor"]
 - correct: "vivir en (lugar に)"
 - explanation: 「すむ」 significa “vivir en (lugar に)”.
 - hint: Lección 7 · Vocabulario
@@ -1054,7 +1054,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “vivir en (lugar に)”
-- choices: ["兄 (あに)","姉 (あね)","住む (すむ)","家族 (かぞく)"]
+- choices: ["姉 (あね)","家族 (かぞく)","住む (すむ)","兄 (あに)"]
 - correct: "住む (すむ)"
 - explanation: La opción correcta para “vivir en (lugar に)” es 「住む (すむ)」.
 - hint: Lección 7 · Vocabulario
@@ -1064,7 +1064,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はたらく」?
-- choices: ["trabajar","hermano mayor","hermana mayor","familia"]
+- choices: ["hermana mayor","trabajar","familia","hermano mayor"]
 - correct: "trabajar"
 - explanation: 「はたらく」 significa “trabajar”.
 - hint: Lección 7 · Vocabulario
@@ -1074,7 +1074,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “trabajar”
-- choices: ["姉 (あね)","働く (はたらく)","家族 (かぞく)","兄 (あに)"]
+- choices: ["働く (はたらく)","家族 (かぞく)","姉 (あね)","兄 (あに)"]
 - correct: "働く (はたらく)"
 - explanation: La opción correcta para “trabajar” es 「働く (はたらく)」.
 - hint: Lección 7 · Vocabulario
@@ -1084,7 +1084,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ふとる」?
-- choices: ["hermano mayor","familia","hermana mayor","ganar peso"]
+- choices: ["ganar peso","hermana mayor","hermano mayor","familia"]
 - correct: "ganar peso"
 - explanation: 「ふとる」 significa “ganar peso”.
 - hint: Lección 7 · Vocabulario
@@ -1094,7 +1094,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ganar peso”
-- choices: ["太る (ふとる)","家族 (かぞく)","姉 (あね)","兄 (あに)"]
+- choices: ["太る (ふとる)","姉 (あね)","兄 (あに)","家族 (かぞく)"]
 - correct: "太る (ふとる)"
 - explanation: La opción correcta para “ganar peso” es 「太る (ふとる)」.
 - hint: Lección 7 · Vocabulario
@@ -1104,7 +1104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ふとっています」?
-- choices: ["familia","estar algo pasado de peso","hermana mayor","hermano mayor"]
+- choices: ["hermano mayor","hermana mayor","familia","estar algo pasado de peso"]
 - correct: "estar algo pasado de peso"
 - explanation: 「ふとっています」 significa “estar algo pasado de peso”.
 - hint: Lección 7 · Vocabulario
@@ -1114,7 +1114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “estar algo pasado de peso”
-- choices: ["兄 (あに)","姉 (あね)","太っています (ふとっています)","家族 (かぞく)"]
+- choices: ["家族 (かぞく)","姉 (あね)","兄 (あに)","太っています (ふとっています)"]
 - correct: "太っています (ふとっています)"
 - explanation: La opción correcta para “estar algo pasado de peso” es 「太っています (ふとっています)」.
 - hint: Lección 7 · Vocabulario
@@ -1124,7 +1124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かける」?
-- choices: ["familia","hermano mayor","hermana mayor","ponerse (lentes/gafas)"]
+- choices: ["hermana mayor","ponerse (lentes/gafas)","familia","hermano mayor"]
 - correct: "ponerse (lentes/gafas)"
 - explanation: 「かける」 significa “ponerse (lentes/gafas)”.
 - hint: Lección 7 · Vocabulario
@@ -1134,7 +1134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ponerse (lentes/gafas)”
-- choices: ["兄 (あに)","姉 (あね)","家族 (かぞく)","かける"]
+- choices: ["姉 (あね)","家族 (かぞく)","兄 (あに)","かける"]
 - correct: "かける"
 - explanation: La opción correcta para “ponerse (lentes/gafas)” es 「かける」.
 - hint: Lección 7 · Vocabulario
@@ -1164,7 +1164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「やせる」?
-- choices: ["familia","hermano mayor","perder peso","hermana mayor"]
+- choices: ["hermano mayor","perder peso","hermana mayor","familia"]
 - correct: "perder peso"
 - explanation: 「やせる」 significa “perder peso”.
 - hint: Lección 7 · Vocabulario
@@ -1174,7 +1174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “perder peso”
-- choices: ["やせる","家族 (かぞく)","姉 (あね)","兄 (あに)"]
+- choices: ["姉 (あね)","兄 (あに)","やせる","家族 (かぞく)"]
 - correct: "やせる"
 - explanation: La opción correcta para “perder peso” es 「やせる」.
 - hint: Lección 7 · Vocabulario
@@ -1184,7 +1184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「やせています」?
-- choices: ["hermano mayor","familia","ser delgado","hermana mayor"]
+- choices: ["hermana mayor","familia","ser delgado","hermano mayor"]
 - correct: "ser delgado"
 - explanation: 「やせています」 significa “ser delgado”.
 - hint: Lección 7 · Vocabulario
@@ -1194,7 +1194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ser delgado”
-- choices: ["家族 (かぞく)","やせています","兄 (あに)","姉 (あね)"]
+- choices: ["やせています","家族 (かぞく)","姉 (あね)","兄 (あに)"]
 - correct: "やせています"
 - explanation: La opción correcta para “ser delgado” es 「やせています」.
 - hint: Lección 7 · Vocabulario
@@ -1204,7 +1204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「けっこんする」?
-- choices: ["familia","hermana mayor","casarse (～と)","hermano mayor"]
+- choices: ["casarse (～と)","familia","hermana mayor","hermano mayor"]
 - correct: "casarse (～と)"
 - explanation: 「けっこんする」 significa “casarse (～と)”.
 - hint: Lección 7 · Vocabulario
@@ -1214,7 +1214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “casarse (～と)”
-- choices: ["結婚する (けっこんする)","兄 (あに)","家族 (かぞく)","姉 (あね)"]
+- choices: ["家族 (かぞく)","姉 (あね)","兄 (あに)","結婚する (けっこんする)"]
 - correct: "結婚する (けっこんする)"
 - explanation: La opción correcta para “casarse (～と)” es 「結婚する (けっこんする)」.
 - hint: Lección 7 · Vocabulario
@@ -1224,7 +1224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「でも」?
-- choices: ["familia","pero","hermano mayor","hermana mayor"]
+- choices: ["pero","familia","hermano mayor","hermana mayor"]
 - correct: "pero"
 - explanation: 「でも」 significa “pero”.
 - hint: Lección 7 · Vocabulario
@@ -1234,7 +1234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pero”
-- choices: ["でも","姉 (あね)","兄 (あに)","家族 (かぞく)"]
+- choices: ["でも","姉 (あね)","家族 (かぞく)","兄 (あに)"]
 - correct: "でも"
 - explanation: La opción correcta para “pero” es 「でも」.
 - hint: Lección 7 · Vocabulario
@@ -1244,7 +1244,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ひとり」?
-- choices: ["familia","hermano mayor","hermana mayor","una persona"]
+- choices: ["hermano mayor","hermana mayor","una persona","familia"]
 - correct: "una persona"
 - explanation: 「ひとり」 significa “una persona”.
 - hint: Lección 7 · Vocabulario
@@ -1254,7 +1254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “una persona”
-- choices: ["姉 (あね)","家族 (かぞく)","一人 (ひとり)","兄 (あに)"]
+- choices: ["一人 (ひとり)","兄 (あに)","姉 (あね)","家族 (かぞく)"]
 - correct: "一人 (ひとり)"
 - explanation: La opción correcta para “una persona” es 「一人 (ひとり)」.
 - hint: Lección 7 · Vocabulario
@@ -1264,7 +1264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ふたり」?
-- choices: ["familia","hermana mayor","hermano mayor","dos personas"]
+- choices: ["hermana mayor","familia","dos personas","hermano mayor"]
 - correct: "dos personas"
 - explanation: 「ふたり」 significa “dos personas”.
 - hint: Lección 7 · Vocabulario
@@ -1274,7 +1274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “dos personas”
-- choices: ["二人 (ふたり)","兄 (あに)","姉 (あね)","家族 (かぞく)"]
+- choices: ["家族 (かぞく)","兄 (あに)","二人 (ふたり)","姉 (あね)"]
 - correct: "二人 (ふたり)"
 - explanation: La opción correcta para “dos personas” es 「二人 (ふたり)」.
 - hint: Lección 7 · Vocabulario
@@ -1284,7 +1284,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「べつに」?
-- choices: ["hermano mayor","familia","hermana mayor","+ negativo: nada en especial"]
+- choices: ["hermana mayor","+ negativo: nada en especial","familia","hermano mayor"]
 - correct: "+ negativo: nada en especial"
 - explanation: 「べつに」 significa “+ negativo: nada en especial”.
 - hint: Lección 7 · Vocabulario
@@ -1294,7 +1294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “+ negativo: nada en especial”
-- choices: ["家族 (かぞく)","別に (べつに)","姉 (あね)","兄 (あに)"]
+- choices: ["家族 (かぞく)","兄 (あに)","姉 (あね)","別に (べつに)"]
 - correct: "別に (べつに)"
 - explanation: La opción correcta para “+ negativo: nada en especial” es 「別に (べつに)」.
 - hint: Lección 7 · Vocabulario
@@ -1304,7 +1304,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「もちろん」?
-- choices: ["hermano mayor","familia","por supuesto","hermana mayor"]
+- choices: ["hermano mayor","hermana mayor","por supuesto","familia"]
 - correct: "por supuesto"
 - explanation: 「もちろん」 significa “por supuesto”.
 - hint: Lección 7 · Vocabulario
@@ -1314,7 +1314,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “por supuesto”
-- choices: ["姉 (あね)","兄 (あに)","家族 (かぞく)","もちろん"]
+- choices: ["家族 (かぞく)","兄 (あに)","もちろん","姉 (あね)"]
 - correct: "もちろん"
 - explanation: La opción correcta para “por supuesto” es 「もちろん」.
 - hint: Lección 7 · Vocabulario
@@ -1324,7 +1324,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「よかったら」?
-- choices: ["si quieres","familia","hermano mayor","hermana mayor"]
+- choices: ["si quieres","hermana mayor","hermano mayor","familia"]
 - correct: "si quieres"
 - explanation: 「よかったら」 significa “si quieres”.
 - hint: Lección 7 · Vocabulario
@@ -1334,7 +1334,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “si quieres”
-- choices: ["兄 (あに)","よかったら","家族 (かぞく)","姉 (あね)"]
+- choices: ["よかったら","兄 (あに)","家族 (かぞく)","姉 (あね)"]
 - correct: "よかったら"
 - explanation: La opción correcta para “si quieres” es 「よかったら」.
 - hint: Lección 7 · Vocabulario
@@ -1344,10 +1344,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 働く (はたらく)","B. 便利（な） (べんり（な）)","C. 兄 (あに)"]
-- choices.right: ["1. trabajar","2. hermano mayor","3. práctico"]
-- correct: "A-1, B-3, C-2"
-- explanation: Relaciones correctas: A-1, B-3, C-2.
+- choices.left: ["A. 頭がいい (あたまがいい)","B. もちろん","C. 背が低い (せがひくい)"]
+- choices.right: ["1. brillante; inteligente; astuto","2. por supuesto","3. bajo (estatura)"]
+- correct: "A-1, B-2, C-3"
+- explanation: Relaciones correctas: A-1, B-2, C-3.
 - hint: Lección 7 · Relacionar
 
 ### exam-vocab-match-7-1
@@ -1355,10 +1355,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. する","B. 女の人 (おんなのひと)","C. 二人 (ふたり)"]
-- choices.right: ["1. mujer","2. dos personas","3. hacer"]
-- correct: "A-3, B-1, C-2"
-- explanation: Relaciones correctas: A-3, B-1, C-2.
+- choices.left: ["A. 母 (はは)","B. 知っています (しっています)","C. お金 (おかね)"]
+- choices.right: ["1. lo sé","2. madre","3. dinero"]
+- correct: "A-2, B-1, C-3"
+- explanation: Relaciones correctas: A-2, B-1, C-3.
 - hint: Lección 7 · Relacionar
 
 ### exam-vocab-match-7-2
@@ -1366,10 +1366,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 二人 (ふたり)","B. 兄弟 (きょうだい)","C. 便利（な） (べんり（な）)"]
-- choices.right: ["1. dos personas","2. práctico","3. hermanos"]
-- correct: "A-1, B-3, C-2"
-- explanation: Relaciones correctas: A-1, B-3, C-2.
+- choices.left: ["A. 太っています (ふとっています)","B. おじいさん","C. 妹 (いもうと)"]
+- choices.right: ["1. estar algo pasado de peso","2. abuelo; anciano","3. hermana menor"]
+- correct: "A-1, B-2, C-3"
+- explanation: Relaciones correctas: A-1, B-2, C-3.
 - hint: Lección 7 · Relacionar
 
 ### exam-vocab-match-7-3
@@ -1377,10 +1377,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 会社員 (かいしゃいん)","B. 髪 (かみ)","C. 着る (きる)"]
-- choices.right: ["1. empleado de empresa","2. pelo","3. ponerse; llevar; usar (prendas de cintura hacia arriba) (～を)"]
-- correct: "A-1, B-2, C-3"
-- explanation: Relaciones correctas: A-1, B-2, C-3.
+- choices.left: ["A. 速い (はやい)","B. 太る (ふとる)","C. 短い (みじかい)"]
+- choices.right: ["1. corto (longitud)","2. ganar peso","3. rápido"]
+- correct: "A-3, B-2, C-1"
+- explanation: Relaciones correctas: A-3, B-2, C-1.
 - hint: Lección 7 · Relacionar
 
 ## kanji
@@ -1390,7 +1390,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「東京」?
-- choices: ["いちじ","に","とうきょう","いち"]
+- choices: ["いちじ","に","いち","とうきょう"]
 - correct: "とうきょう"
 - explanation: 「東京」 se lee 「とうきょう」.
 - hint: Lección 7 · Kanji
@@ -1411,7 +1411,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「子ども」?
-- choices: ["いちじ","こども","に","いち"]
+- choices: ["いち","こども","いちじ","に"]
 - correct: "こども"
 - explanation: 「子ども」 se lee 「こども」.
 - hint: Lección 7 · Kanji
@@ -1432,7 +1432,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「小さい」?
-- choices: ["ちいさい","に","いち","いちじ"]
+- choices: ["ちいさい","いち","に","いちじ"]
 - correct: "ちいさい"
 - explanation: 「小さい」 se lee 「ちいさい」.
 - hint: Lección 7 · Kanji
@@ -1453,7 +1453,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「会う」?
-- choices: ["いち","いちじ","あう","に"]
+- choices: ["いち","に","いちじ","あう"]
 - correct: "あう"
 - explanation: 「会う」 se lee 「あう」.
 - hint: Lección 7 · Kanji
@@ -1474,7 +1474,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「会社」?
-- choices: ["いちじ","いち","に","かいしゃ"]
+- choices: ["に","いち","かいしゃ","いちじ"]
 - correct: "かいしゃ"
 - explanation: 「会社」 se lee 「かいしゃ」.
 - hint: Lección 7 · Kanji
@@ -1495,7 +1495,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「父」?
-- choices: ["に","いち","ちち","いちじ"]
+- choices: ["いちじ","に","ちち","いち"]
 - correct: "ちち"
 - explanation: 「父」 se lee 「ちち」.
 - hint: Lección 7 · Kanji
@@ -1516,7 +1516,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「母」?
-- choices: ["に","いち","はは","いちじ"]
+- choices: ["いちじ","に","いち","はは"]
 - correct: "はは"
 - explanation: 「母」 se lee 「はは」.
 - hint: Lección 7 · Kanji
@@ -1537,7 +1537,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「高い」?
-- choices: ["いちじ","たかい","いち","に"]
+- choices: ["たかい","いち","いちじ","に"]
 - correct: "たかい"
 - explanation: 「高い」 se lee 「たかい」.
 - hint: Lección 7 · Kanji
@@ -1558,7 +1558,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「学校」?
-- choices: ["いち","いちじ","がっこう","に"]
+- choices: ["いちじ","いち","がっこう","に"]
 - correct: "がっこう"
 - explanation: 「学校」 se lee 「がっこう」.
 - hint: Lección 7 · Kanji
@@ -1579,7 +1579,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「毎日」?
-- choices: ["いちじ","まいにち","に","いち"]
+- choices: ["に","いち","まいにち","いちじ"]
 - correct: "まいにち"
 - explanation: 「毎日」 se lee 「まいにち」.
 - hint: Lección 7 · Kanji
@@ -1600,7 +1600,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「日本語」?
-- choices: ["にほんご","に","いち","いちじ"]
+- choices: ["いちじ","にほんご","いち","に"]
 - correct: "にほんご"
 - explanation: 「日本語」 se lee 「にほんご」.
 - hint: Lección 7 · Kanji
@@ -1621,7 +1621,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「文学」?
-- choices: ["いち","に","いちじ","ぶんがく"]
+- choices: ["いち","いちじ","ぶんがく","に"]
 - correct: "ぶんがく"
 - explanation: 「文学」 se lee 「ぶんがく」.
 - hint: Lección 7 · Kanji
@@ -1642,7 +1642,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「帰る」?
-- choices: ["いち","かえる","に","いちじ"]
+- choices: ["に","かえる","いち","いちじ"]
 - correct: "かえる"
 - explanation: 「帰る」 se lee 「かえる」.
 - hint: Lección 7 · Kanji
@@ -1663,7 +1663,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「入る」?
-- choices: ["はいる","に","いちじ","いち"]
+- choices: ["いちじ","に","はいる","いち"]
 - correct: "はいる"
 - explanation: 「入る」 se lee 「はいる」.
 - hint: Lección 7 · Kanji
@@ -1686,7 +1686,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___パコです。
-- choices: ["に","は","で","を"]
+- choices: ["を","で","は","に"]
 - correct: "は"
 - explanation: 「は」marca tema.
 - hint: Lección 7 · Partículas
@@ -1707,7 +1707,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: マリアさん___せんせいです。
-- choices: ["が","で","は","を"]
+- choices: ["を","は","で","が"]
 - correct: "は"
 - explanation: Oración copulativa con tema 「は」.
 - hint: Lección 7 · Partículas
@@ -1728,7 +1728,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: これはだれ___ほんですか。
-- choices: ["で","の","に","を"]
+- choices: ["に","で","を","の"]
 - correct: "の"
 - explanation: Posesión con 「の」.
 - hint: Lección 7 · Partículas
@@ -1749,7 +1749,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___ともだちもにほんじんです。
-- choices: ["の","が","は","も"]
+- choices: ["が","の","は","も"]
 - correct: "の"
 - explanation: 「わたしのともだち」.
 - hint: Lección 7 · Partículas
@@ -1770,7 +1770,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: がっこう___いきます。
-- choices: ["は","に","を","で"]
+- choices: ["に","で","を","は"]
 - correct: "に"
 - explanation: Destino con 「に」.
 - hint: Lección 7 · Partículas
@@ -1791,7 +1791,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: としょかん___べんきょうします。
-- choices: ["を","が","で","に"]
+- choices: ["で","が","に","を"]
 - correct: "で"
 - explanation: Lugar de acción con 「で」.
 - hint: Lección 7 · Partículas
@@ -1833,7 +1833,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: 7じ___おきます。
-- choices: ["を","が","に","で"]
+- choices: ["に","が","で","を"]
 - correct: "に"
 - explanation: Hora específica con 「に」.
 - hint: Lección 7 · Partículas
@@ -1854,7 +1854,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: うち___かえりました。
-- choices: ["に","を","で","が"]
+- choices: ["で","が","を","に"]
 - correct: "に"
 - explanation: Destino final con 「に」.
 - hint: Lección 7 · Partículas
@@ -1875,7 +1875,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ともだち___えいがをみました。
-- choices: ["が","と","を","に"]
+- choices: ["が","を","に","と"]
 - correct: "と"
 - explanation: Compañía con 「と」.
 - hint: Lección 7 · Partículas
@@ -1896,7 +1896,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ケーキ___すきです。
-- choices: ["を","が","で","に"]
+- choices: ["を","に","で","が"]
 - correct: "が"
 - explanation: Con 「すき」 se usa 「が」.
 - hint: Lección 7 · Partículas
@@ -1938,7 +1938,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: にほん___りょうりはおいしいです。
-- choices: ["の","を","に","が"]
+- choices: ["に","を","の","が"]
 - correct: "の"
 - explanation: Modificador nominal con 「の」.
 - hint: Lección 7 · Partículas
@@ -1971,7 +1971,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「する」 (hacer)
-- choices: ["たべて","みて","いって","して"]
+- choices: ["たべて","いって","して","みて"]
 - correct: "して"
 - explanation: La forma て de 「する」 es 「して」.
 - hint: Lección 7 · Conjugación
@@ -1981,7 +1981,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「する」 (hacer)
-- choices: ["いった","たべた","した","みた"]
+- choices: ["いった","した","みた","たべた"]
 - correct: "した"
 - explanation: El pasado corto de 「する」 es 「した」.
 - hint: Lección 7 · Conjugación
@@ -2001,7 +2001,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「くる」 (venir)
-- choices: ["たべて","いって","きて","みて"]
+- choices: ["みて","いって","たべて","きて"]
 - correct: "きて"
 - explanation: La forma て de 「くる」 es 「きて」.
 - hint: Lección 7 · Conjugación
@@ -2011,7 +2011,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「くる」 (venir)
-- choices: ["きた","みた","たべた","いった"]
+- choices: ["みた","たべた","いった","きた"]
 - correct: "きた"
 - explanation: El pasado corto de 「くる」 es 「きた」.
 - hint: Lección 7 · Conjugación
@@ -2041,7 +2041,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あげる」 (dar)
-- choices: ["いった","みた","あげた","たべた"]
+- choices: ["あげた","たべた","みた","いった"]
 - correct: "あげた"
 - explanation: El pasado corto de 「あげる」 es 「あげた」.
 - hint: Lección 7 · Conjugación
@@ -2061,7 +2061,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「もらう」 (recibir)
-- choices: ["もらって","たべて","みて","いって"]
+- choices: ["もらって","みて","たべて","いって"]
 - correct: "もらって"
 - explanation: La forma て de 「もらう」 es 「もらって」.
 - hint: Lección 7 · Conjugación
@@ -2071,7 +2071,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「もらう」 (recibir)
-- choices: ["いった","たべた","もらった","みた"]
+- choices: ["みた","たべた","いった","もらった"]
 - correct: "もらった"
 - explanation: El pasado corto de 「もらう」 es 「もらった」.
 - hint: Lección 7 · Conjugación
@@ -2091,7 +2091,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「たかい」 (caro/alto)
-- choices: ["やすくない","たかくない","しずかじゃない","おいしくない"]
+- choices: ["たかくない","おいしくない","やすくない","しずかじゃない"]
 - correct: "たかくない"
 - explanation: La forma negativa de 「たかい」 es 「たかくない」.
 - hint: Lección 7 · Conjugación
@@ -2101,7 +2101,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「やすい」 (barato)
-- choices: ["やすくない","しずかじゃない","おいしくない","たかくない"]
+- choices: ["しずかじゃない","たかくない","おいしくない","やすくない"]
 - correct: "やすくない"
 - explanation: La forma negativa de 「やすい」 es 「やすくない」.
 - hint: Lección 7 · Conjugación
@@ -2111,7 +2111,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「しずか」 (tranquilo)
-- choices: ["たかくない","しずかじゃない","おいしくない","やすくない"]
+- choices: ["やすくない","おいしくない","しずかじゃない","たかくない"]
 - correct: "しずかじゃない"
 - explanation: La forma negativa de 「しずか」 es 「しずかじゃない」.
 - hint: Lección 7 · Conjugación
@@ -2121,7 +2121,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「おいしい」 (delicioso)
-- choices: ["たかくない","やすくない","しずかじゃない","おいしくない"]
+- choices: ["おいしくない","やすくない","しずかじゃない","たかくない"]
 - correct: "おいしくない"
 - explanation: La forma negativa de 「おいしい」 es 「おいしくない」.
 - hint: Lección 7 · Conjugación
@@ -2131,7 +2131,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「げんき」 (saludable/animado)
-- choices: ["しずかじゃない","たかくない","やすくない","げんきじゃない"]
+- choices: ["しずかじゃない","たかくない","げんきじゃない","やすくない"]
 - correct: "げんきじゃない"
 - explanation: La forma negativa de 「げんき」 es 「げんきじゃない」.
 - hint: Lección 7 · Conjugación
@@ -2141,7 +2141,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「おおきい」 (grande)
-- choices: ["たかくない","やすくない","おおきくない","しずかじゃない"]
+- choices: ["やすくない","たかくない","おおきくない","しずかじゃない"]
 - correct: "おおきくない"
 - explanation: La forma negativa de 「おおきい」 es 「おおきくない」.
 - hint: Lección 7 · Conjugación
@@ -2151,7 +2151,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「きれい」 (bonito/limpio)
-- choices: ["きれいじゃない","たかくない","しずかじゃない","やすくない"]
+- choices: ["やすくない","たかくない","きれいじゃない","しずかじゃない"]
 - correct: "きれいじゃない"
 - explanation: La forma negativa de 「きれい」 es 「きれいじゃない」.
 - hint: Lección 7 · Conjugación
@@ -2161,7 +2161,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「すき」 (gustar)
-- choices: ["すきじゃない","やすくない","しずかじゃない","たかくない"]
+- choices: ["すきじゃない","しずかじゃない","たかくない","やすくない"]
 - correct: "すきじゃない"
 - explanation: La forma negativa de 「すき」 es 「すきじゃない」.
 - hint: Lección 7 · Conjugación
@@ -2171,7 +2171,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「きらい」 (no gustar)
-- choices: ["たかくない","やすくない","きらいじゃない","しずかじゃない"]
+- choices: ["きらいじゃない","しずかじゃない","たかくない","やすくない"]
 - correct: "きらいじゃない"
 - explanation: La forma negativa de 「きらい」 es 「きらいじゃない」.
 - hint: Lección 7 · Conjugación
@@ -2181,7 +2181,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「にぎやか」 (animado)
-- choices: ["しずかじゃない","やすくない","たかくない","にぎやかじゃない"]
+- choices: ["しずかじゃない","たかくない","やすくない","にぎやかじゃない"]
 - correct: "にぎやかじゃない"
 - explanation: La forma negativa de 「にぎやか」 es 「にぎやかじゃない」.
 - hint: Lección 7 · Conjugación
@@ -2191,7 +2191,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「まずい」 (malo (sabor))
-- choices: ["たかくない","まずくない","しずかじゃない","やすくない"]
+- choices: ["たかくない","まずくない","やすくない","しずかじゃない"]
 - correct: "まずくない"
 - explanation: La forma negativa de 「まずい」 es 「まずくない」.
 - hint: Lección 7 · Conjugación
@@ -2201,7 +2201,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「いそがしい」 (ocupado)
-- choices: ["いそがしくない","たかくない","しずかじゃない","やすくない"]
+- choices: ["しずかじゃない","いそがしくない","たかくない","やすくない"]
 - correct: "いそがしくない"
 - explanation: La forma negativa de 「いそがしい」 es 「いそがしくない」.
 - hint: Lección 7 · Conjugación
@@ -2213,7 +2213,7 @@
 - type: `reorder`
 - source: `lesson_scenarios_grammar`
 - prompt: Ordena la oración sobre la familia.
-- choices: ["はたらいています","は","ちち","とうきょうで"]
+- choices: ["は","ちち","はたらいています","とうきょうで"]
 - correct: "ちち は とうきょうで はたらいています"
 - explanation: La oración describe a un familiar usando presente progresivo.
 - hint: Lección 7 · Familia
