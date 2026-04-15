@@ -18,7 +18,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「がくせい」?
-- choices: ["carrera/especialidad","profesor","Japón","estudiante"]
+- choices: ["profesor","Japón","carrera/especialidad","estudiante"]
 - correct: "estudiante"
 - explanation: 「がくせい」 significa “estudiante”.
 - hint: Lección 1 · Vocabulario
@@ -28,7 +28,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “profesor”
-- choices: ["専攻 (せんこう)","学生 (がくせい)","先生 (せんせい)","日本 (にほん)"]
+- choices: ["日本 (にほん)","専攻 (せんこう)","学生 (がくせい)","先生 (せんせい)"]
 - correct: "先生 (せんせい)"
 - explanation: La opción correcta para “profesor” es 「先生 (せんせい)」.
 - hint: Lección 1 · Vocabulario
@@ -48,7 +48,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “yo”
-- choices: ["日本 (にほん)","先生 (せんせい)","学生 (がくせい)","私 (わたし)"]
+- choices: ["日本 (にほん)","私 (わたし)","学生 (がくせい)","先生 (せんせい)"]
 - correct: "私 (わたし)"
 - explanation: La opción correcta para “yo” es 「私 (わたし)」.
 - hint: Lección 1 · Vocabulario
@@ -58,7 +58,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「だいがく」?
-- choices: ["estudiante","universidad","profesor","Japón"]
+- choices: ["estudiante","universidad","Japón","profesor"]
 - correct: "universidad"
 - explanation: 「だいがく」 significa “universidad”.
 - hint: Lección 1 · Vocabulario
@@ -68,7 +68,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “estudiante universitario”
-- choices: ["学生 (がくせい)","日本 (にほん)","大学生 (だいがくせい)","先生 (せんせい)"]
+- choices: ["日本 (にほん)","先生 (せんせい)","大学生 (だいがくせい)","学生 (がくせい)"]
 - correct: "大学生 (だいがくせい)"
 - explanation: La opción correcta para “estudiante universitario” es 「大学生 (だいがくせい)」.
 - hint: Lección 1 · Vocabulario
@@ -78,7 +78,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「にほんじん」?
-- choices: ["los japoneses","Japón","estudiante","profesor"]
+- choices: ["Japón","estudiante","profesor","los japoneses"]
 - correct: "los japoneses"
 - explanation: 「にほんじん」 significa “los japoneses”.
 - hint: Lección 1 · Vocabulario
@@ -98,7 +98,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「なまえ」?
-- choices: ["Japón","profesor","estudiante","nombre"]
+- choices: ["nombre","Japón","profesor","estudiante"]
 - correct: "nombre"
 - explanation: 「なまえ」 significa “nombre”.
 - hint: Lección 1 · Vocabulario
@@ -108,7 +108,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “número”
-- choices: ["先生 (せんせい)","番号 (ばんごう)","日本 (にほん)","学生 (がくせい)"]
+- choices: ["日本 (にほん)","先生 (せんせい)","番号 (ばんごう)","学生 (がくせい)"]
 - correct: "番号 (ばんごう)"
 - explanation: La opción correcta para “número” es 「番号 (ばんごう)」.
 - hint: Lección 1 · Vocabulario

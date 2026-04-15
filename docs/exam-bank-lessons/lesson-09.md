@@ -24,7 +24,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「びょういん」?
-- choices: ["medicina","trabajo","fiebre","hospital"]
+- choices: ["hospital","fiebre","trabajo","medicina"]
 - correct: "hospital"
 - explanation: 「びょういん」 significa “hospital”.
 - hint: Lección 9 · Vocabulario
@@ -34,7 +34,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hospital”
-- choices: ["熱 (ねつ)","仕事 (しごと)","薬 (くすり)","病院 (びょういん)"]
+- choices: ["熱 (ねつ)","病院 (びょういん)","薬 (くすり)","仕事 (しごと)"]
 - correct: "病院 (びょういん)"
 - explanation: La opción correcta para “hospital” es 「病院 (びょういん)」.
 - hint: Lección 9 · Vocabulario
@@ -44,7 +44,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「くすり」?
-- choices: ["hospital","trabajo","medicina","fiebre"]
+- choices: ["hospital","fiebre","trabajo","medicina"]
 - correct: "medicina"
 - explanation: 「くすり」 significa “medicina”.
 - hint: Lección 9 · Vocabulario
@@ -54,7 +54,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “medicina”
-- choices: ["病院 (びょういん)","熱 (ねつ)","薬 (くすり)","仕事 (しごと)"]
+- choices: ["病院 (びょういん)","仕事 (しごと)","薬 (くすり)","熱 (ねつ)"]
 - correct: "薬 (くすり)"
 - explanation: La opción correcta para “medicina” es 「薬 (くすり)」.
 - hint: Lección 9 · Vocabulario
@@ -64,7 +64,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ねつ」?
-- choices: ["hospital","fiebre","trabajo","medicina"]
+- choices: ["fiebre","hospital","trabajo","medicina"]
 - correct: "fiebre"
 - explanation: 「ねつ」 significa “fiebre”.
 - hint: Lección 9 · Vocabulario
@@ -74,7 +74,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “fiebre”
-- choices: ["仕事 (しごと)","薬 (くすり)","熱 (ねつ)","病院 (びょういん)"]
+- choices: ["熱 (ねつ)","仕事 (しごと)","病院 (びょういん)","薬 (くすり)"]
 - correct: "熱 (ねつ)"
 - explanation: La opción correcta para “fiebre” es 「熱 (ねつ)」.
 - hint: Lección 9 · Vocabulario
@@ -84,7 +84,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しごと」?
-- choices: ["hospital","trabajo","medicina","fiebre"]
+- choices: ["trabajo","fiebre","medicina","hospital"]
 - correct: "trabajo"
 - explanation: 「しごと」 significa “trabajo”.
 - hint: Lección 9 · Vocabulario
@@ -94,7 +94,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “trabajo”
-- choices: ["病院 (びょういん)","熱 (ねつ)","薬 (くすり)","仕事 (しごと)"]
+- choices: ["熱 (ねつ)","仕事 (しごと)","病院 (びょういん)","薬 (くすり)"]
 - correct: "仕事 (しごと)"
 - explanation: La opción correcta para “trabajo” es 「仕事 (しごと)」.
 - hint: Lección 9 · Vocabulario
@@ -104,7 +104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しんぱい」?
-- choices: ["medicina","hospital","preocupación","fiebre"]
+- choices: ["hospital","preocupación","medicina","fiebre"]
 - correct: "preocupación"
 - explanation: 「しんぱい」 significa “preocupación”.
 - hint: Lección 9 · Vocabulario
@@ -114,7 +114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “preocupación”
-- choices: ["薬 (くすり)","熱 (ねつ)","心配 (しんぱい)","病院 (びょういん)"]
+- choices: ["熱 (ねつ)","薬 (くすり)","病院 (びょういん)","心配 (しんぱい)"]
 - correct: "心配 (しんぱい)"
 - explanation: La opción correcta para “preocupación” es 「心配 (しんぱい)」.
 - hint: Lección 9 · Vocabulario
@@ -124,7 +124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かぜ」?
-- choices: ["fiebre","medicina","resfriado","hospital"]
+- choices: ["medicina","fiebre","resfriado","hospital"]
 - correct: "resfriado"
 - explanation: 「かぜ」 significa “resfriado”.
 - hint: Lección 9 · Vocabulario
@@ -134,7 +134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “resfriado”
-- choices: ["風邪 (かぜ)","薬 (くすり)","熱 (ねつ)","病院 (びょういん)"]
+- choices: ["風邪 (かぜ)","薬 (くすり)","病院 (びょういん)","熱 (ねつ)"]
 - correct: "風邪 (かぜ)"
 - explanation: La opción correcta para “resfriado” es 「風邪 (かぜ)」.
 - hint: Lección 9 · Vocabulario
@@ -144,7 +144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あたま」?
-- choices: ["cabeza","medicina","hospital","fiebre"]
+- choices: ["medicina","cabeza","hospital","fiebre"]
 - correct: "cabeza"
 - explanation: 「あたま」 significa “cabeza”.
 - hint: Lección 9 · Vocabulario
@@ -154,7 +154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cabeza”
-- choices: ["頭 (あたま)","熱 (ねつ)","薬 (くすり)","病院 (びょういん)"]
+- choices: ["熱 (ねつ)","病院 (びょういん)","薬 (くすり)","頭 (あたま)"]
 - correct: "頭 (あたま)"
 - explanation: La opción correcta para “cabeza” es 「頭 (あたま)」.
 - hint: Lección 9 · Vocabulario
@@ -164,7 +164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おなか」?
-- choices: ["medicina","fiebre","hospital","estómago"]
+- choices: ["medicina","hospital","fiebre","estómago"]
 - correct: "estómago"
 - explanation: 「おなか」 significa “estómago”.
 - hint: Lección 9 · Vocabulario
@@ -174,7 +174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “estómago”
-- choices: ["病院 (びょういん)","熱 (ねつ)","お腹 (おなか)","薬 (くすり)"]
+- choices: ["熱 (ねつ)","薬 (くすり)","病院 (びょういん)","お腹 (おなか)"]
 - correct: "お腹 (おなか)"
 - explanation: La opción correcta para “estómago” es 「お腹 (おなか)」.
 - hint: Lección 9 · Vocabulario
@@ -184,7 +184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いたい」?
-- choices: ["doloroso","fiebre","medicina","hospital"]
+- choices: ["doloroso","fiebre","hospital","medicina"]
 - correct: "doloroso"
 - explanation: 「いたい」 significa “doloroso”.
 - hint: Lección 9 · Vocabulario
@@ -194,7 +194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “doloroso”
-- choices: ["痛い (いたい)","熱 (ねつ)","薬 (くすり)","病院 (びょういん)"]
+- choices: ["病院 (びょういん)","薬 (くすり)","熱 (ねつ)","痛い (いたい)"]
 - correct: "痛い (いたい)"
 - explanation: La opción correcta para “doloroso” es 「痛い (いたい)」.
 - hint: Lección 9 · Vocabulario
@@ -204,7 +204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「やっきょく」?
-- choices: ["medicina","hospital","fiebre","farmacia"]
+- choices: ["farmacia","medicina","fiebre","hospital"]
 - correct: "farmacia"
 - explanation: 「やっきょく」 significa “farmacia”.
 - hint: Lección 9 · Vocabulario
@@ -214,7 +214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “farmacia”
-- choices: ["薬局 (やっきょく)","病院 (びょういん)","薬 (くすり)","熱 (ねつ)"]
+- choices: ["薬 (くすり)","病院 (びょういん)","薬局 (やっきょく)","熱 (ねつ)"]
 - correct: "薬局 (やっきょく)"
 - explanation: La opción correcta para “farmacia” es 「薬局 (やっきょく)」.
 - hint: Lección 9 · Vocabulario
@@ -224,7 +224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「びょうき」?
-- choices: ["hospital","fiebre","medicina","enfermedad"]
+- choices: ["fiebre","hospital","medicina","enfermedad"]
 - correct: "enfermedad"
 - explanation: 「びょうき」 significa “enfermedad”.
 - hint: Lección 9 · Vocabulario
@@ -234,7 +234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “enfermedad”
-- choices: ["薬 (くすり)","熱 (ねつ)","病院 (びょういん)","病気 (びょうき)"]
+- choices: ["病気 (びょうき)","病院 (びょういん)","薬 (くすり)","熱 (ねつ)"]
 - correct: "病気 (びょうき)"
 - explanation: La opción correcta para “enfermedad” es 「病気 (びょうき)」.
 - hint: Lección 9 · Vocabulario
@@ -244,7 +244,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「のど」?
-- choices: ["hospital","fiebre","garganta","medicina"]
+- choices: ["medicina","fiebre","hospital","garganta"]
 - correct: "garganta"
 - explanation: 「のど」 significa “garganta”.
 - hint: Lección 9 · Vocabulario
@@ -254,7 +254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “garganta”
-- choices: ["熱 (ねつ)","病院 (びょういん)","喉 (のど)","薬 (くすり)"]
+- choices: ["病院 (びょういん)","薬 (くすり)","喉 (のど)","熱 (ねつ)"]
 - correct: "喉 (のど)"
 - explanation: La opción correcta para “garganta” es 「喉 (のど)」.
 - hint: Lección 9 · Vocabulario
@@ -264,7 +264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「だいじょうぶ」?
-- choices: ["fiebre","hospital","medicina","estar bien"]
+- choices: ["hospital","medicina","estar bien","fiebre"]
 - correct: "estar bien"
 - explanation: 「だいじょうぶ」 significa “estar bien”.
 - hint: Lección 9 · Vocabulario
@@ -274,7 +274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “estar bien”
-- choices: ["病院 (びょういん)","熱 (ねつ)","薬 (くすり)","大丈夫 (だいじょうぶ)"]
+- choices: ["病院 (びょういん)","熱 (ねつ)","大丈夫 (だいじょうぶ)","薬 (くすり)"]
 - correct: "大丈夫 (だいじょうぶ)"
 - explanation: La opción correcta para “estar bien” es 「大丈夫 (だいじょうぶ)」.
 - hint: Lección 9 · Vocabulario
@@ -284,7 +284,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いそがしい」?
-- choices: ["fiebre","medicina","hospital","ocupado"]
+- choices: ["fiebre","ocupado","hospital","medicina"]
 - correct: "ocupado"
 - explanation: 「いそがしい」 significa “ocupado”.
 - hint: Lección 9 · Vocabulario
@@ -294,7 +294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ocupado”
-- choices: ["熱 (ねつ)","薬 (くすり)","病院 (びょういん)","忙しい (いそがしい)"]
+- choices: ["薬 (くすり)","熱 (ねつ)","忙しい (いそがしい)","病院 (びょういん)"]
 - correct: "忙しい (いそがしい)"
 - explanation: La opción correcta para “ocupado” es 「忙しい (いそがしい)」.
 - hint: Lección 9 · Vocabulario
@@ -304,7 +304,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「やすみ」?
-- choices: ["descanso","fiebre","hospital","medicina"]
+- choices: ["fiebre","hospital","medicina","descanso"]
 - correct: "descanso"
 - explanation: 「やすみ」 significa “descanso”.
 - hint: Lección 9 · Vocabulario
@@ -314,7 +314,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “descanso”
-- choices: ["熱 (ねつ)","薬 (くすり)","病院 (びょういん)","休み (やすみ)"]
+- choices: ["熱 (ねつ)","病院 (びょういん)","休み (やすみ)","薬 (くすり)"]
 - correct: "休み (やすみ)"
 - explanation: La opción correcta para “descanso” es 「休み (やすみ)」.
 - hint: Lección 9 · Vocabulario
@@ -324,7 +324,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「まつ」?
-- choices: ["fiebre","medicina","esperar","hospital"]
+- choices: ["esperar","medicina","fiebre","hospital"]
 - correct: "esperar"
 - explanation: 「まつ」 significa “esperar”.
 - hint: Lección 9 · Vocabulario
@@ -334,7 +334,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “esperar”
-- choices: ["まつ","病院 (びょういん)","熱 (ねつ)","薬 (くすり)"]
+- choices: ["薬 (くすり)","まつ","熱 (ねつ)","病院 (びょういん)"]
 - correct: "まつ"
 - explanation: La opción correcta para “esperar” es 「まつ」.
 - hint: Lección 9 · Vocabulario
@@ -344,7 +344,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「つかう」?
-- choices: ["usar","hospital","fiebre","medicina"]
+- choices: ["hospital","fiebre","medicina","usar"]
 - correct: "usar"
 - explanation: 「つかう」 significa “usar”.
 - hint: Lección 9 · Vocabulario
@@ -354,7 +354,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “usar”
-- choices: ["病院 (びょういん)","薬 (くすり)","つかう","熱 (ねつ)"]
+- choices: ["熱 (ねつ)","つかう","薬 (くすり)","病院 (びょういん)"]
 - correct: "つかう"
 - explanation: La opción correcta para “usar” es 「つかう」.
 - hint: Lección 9 · Vocabulario
@@ -364,7 +364,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「やすむ」?
-- choices: ["medicina","descansar","fiebre","hospital"]
+- choices: ["medicina","fiebre","hospital","descansar"]
 - correct: "descansar"
 - explanation: 「やすむ」 significa “descansar”.
 - hint: Lección 9 · Vocabulario
@@ -374,7 +374,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “descansar”
-- choices: ["熱 (ねつ)","薬 (くすり)","病院 (びょういん)","やすむ"]
+- choices: ["やすむ","病院 (びょういん)","薬 (くすり)","熱 (ねつ)"]
 - correct: "やすむ"
 - explanation: La opción correcta para “descansar” es 「やすむ」.
 - hint: Lección 9 · Vocabulario
@@ -384,7 +384,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「べんり」?
-- choices: ["hospital","medicina","conveniente","fiebre"]
+- choices: ["medicina","conveniente","fiebre","hospital"]
 - correct: "conveniente"
 - explanation: 「べんり」 significa “conveniente”.
 - hint: Lección 9 · Vocabulario
@@ -394,7 +394,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “conveniente”
-- choices: ["べんり","病院 (びょういん)","熱 (ねつ)","薬 (くすり)"]
+- choices: ["病院 (びょういん)","べんり","薬 (くすり)","熱 (ねつ)"]
 - correct: "べんり"
 - explanation: La opción correcta para “conveniente” es 「べんり」.
 - hint: Lección 9 · Vocabulario
@@ -404,7 +404,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「たいへん」?
-- choices: ["hospital","medicina","fiebre","difícil/duro"]
+- choices: ["fiebre","medicina","difícil/duro","hospital"]
 - correct: "difícil/duro"
 - explanation: 「たいへん」 significa “difícil/duro”.
 - hint: Lección 9 · Vocabulario
@@ -414,7 +414,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “difícil/duro”
-- choices: ["病院 (びょういん)","熱 (ねつ)","たいへん","薬 (くすり)"]
+- choices: ["病院 (びょういん)","薬 (くすり)","熱 (ねつ)","たいへん"]
 - correct: "たいへん"
 - explanation: La opción correcta para “difícil/duro” es 「たいへん」.
 - hint: Lección 9 · Vocabulario
@@ -424,7 +424,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「だいじょうぶ」?
-- choices: ["hospital","estar bien","medicina","fiebre"]
+- choices: ["hospital","estar bien","fiebre","medicina"]
 - correct: "estar bien"
 - explanation: 「だいじょうぶ」 significa “estar bien”.
 - hint: Lección 9 · Vocabulario
@@ -434,7 +434,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “estar bien”
-- choices: ["病院 (びょういん)","だいじょうぶ","熱 (ねつ)","薬 (くすり)"]
+- choices: ["薬 (くすり)","だいじょうぶ","病院 (びょういん)","熱 (ねつ)"]
 - correct: "だいじょうぶ"
 - explanation: La opción correcta para “estar bien” es 「だいじょうぶ」.
 - hint: Lección 9 · Vocabulario
@@ -454,7 +454,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “palabra; vocabulario”
-- choices: ["熱 (ねつ)","病院 (びょういん)","薬 (くすり)","単語 (たんご)"]
+- choices: ["薬 (くすり)","熱 (ねつ)","病院 (びょういん)","単語 (たんご)"]
 - correct: "単語 (たんご)"
 - explanation: La opción correcta para “palabra; vocabulario” es 「単語 (たんご)」.
 - hint: Lección 9 · Vocabulario
@@ -464,7 +464,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「さくぶん」?
-- choices: ["ensayo; composición","medicina","hospital","fiebre"]
+- choices: ["hospital","ensayo; composición","medicina","fiebre"]
 - correct: "ensayo; composición"
 - explanation: 「さくぶん」 significa “ensayo; composición”.
 - hint: Lección 9 · Vocabulario
@@ -474,7 +474,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ensayo; composición”
-- choices: ["病院 (びょういん)","作文 (さくぶん)","熱 (ねつ)","薬 (くすり)"]
+- choices: ["病院 (びょういん)","熱 (ねつ)","作文 (さくぶん)","薬 (くすり)"]
 - correct: "作文 (さくぶん)"
 - explanation: La opción correcta para “ensayo; composición” es 「作文 (さくぶん)」.
 - hint: Lección 9 · Vocabulario
@@ -484,7 +484,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しけん」?
-- choices: ["hospital","examen","medicina","fiebre"]
+- choices: ["examen","fiebre","medicina","hospital"]
 - correct: "examen"
 - explanation: 「しけん」 significa “examen”.
 - hint: Lección 9 · Vocabulario
@@ -494,7 +494,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “examen”
-- choices: ["病院 (びょういん)","試験 (しけん)","熱 (ねつ)","薬 (くすり)"]
+- choices: ["熱 (ねつ)","病院 (びょういん)","試験 (しけん)","薬 (くすり)"]
 - correct: "試験 (しけん)"
 - explanation: La opción correcta para “examen” es 「試験 (しけん)」.
 - hint: Lección 9 · Vocabulario
@@ -504,7 +504,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「てがみ」?
-- choices: ["medicina","fiebre","carta","hospital"]
+- choices: ["medicina","hospital","carta","fiebre"]
 - correct: "carta"
 - explanation: 「てがみ」 significa “carta”.
 - hint: Lección 9 · Vocabulario
@@ -514,7 +514,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “carta”
-- choices: ["病院 (びょういん)","薬 (くすり)","熱 (ねつ)","手紙 (てがみ)"]
+- choices: ["薬 (くすり)","病院 (びょういん)","手紙 (てがみ)","熱 (ねつ)"]
 - correct: "手紙 (てがみ)"
 - explanation: La opción correcta para “carta” es 「手紙 (てがみ)」.
 - hint: Lección 9 · Vocabulario
@@ -524,7 +524,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「メール」?
-- choices: ["fiebre","medicina","hospital","correo electrónico"]
+- choices: ["fiebre","correo electrónico","medicina","hospital"]
 - correct: "correo electrónico"
 - explanation: 「メール」 significa “correo electrónico”.
 - hint: Lección 9 · Vocabulario
@@ -534,7 +534,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “correo electrónico”
-- choices: ["メール","病院 (びょういん)","薬 (くすり)","熱 (ねつ)"]
+- choices: ["熱 (ねつ)","病院 (びょういん)","メール","薬 (くすり)"]
 - correct: "メール"
 - explanation: La opción correcta para “correo electrónico” es 「メール」.
 - hint: Lección 9 · Vocabulario
@@ -544,7 +544,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ギター」?
-- choices: ["fiebre","medicina","hospital","guitarra"]
+- choices: ["hospital","medicina","fiebre","guitarra"]
 - correct: "guitarra"
 - explanation: 「ギター」 significa “guitarra”.
 - hint: Lección 9 · Vocabulario
@@ -554,7 +554,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “guitarra”
-- choices: ["熱 (ねつ)","薬 (くすり)","ギター","病院 (びょういん)"]
+- choices: ["ギター","病院 (びょういん)","熱 (ねつ)","薬 (くすり)"]
 - correct: "ギター"
 - explanation: La opción correcta para “guitarra” es 「ギター」.
 - hint: Lección 9 · Vocabulario
@@ -564,7 +564,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ピアノ」?
-- choices: ["medicina","hospital","piano","fiebre"]
+- choices: ["fiebre","hospital","piano","medicina"]
 - correct: "piano"
 - explanation: 「ピアノ」 significa “piano”.
 - hint: Lección 9 · Vocabulario
@@ -574,7 +574,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “piano”
-- choices: ["薬 (くすり)","熱 (ねつ)","病院 (びょういん)","ピアノ"]
+- choices: ["熱 (ねつ)","薬 (くすり)","病院 (びょういん)","ピアノ"]
 - correct: "ピアノ"
 - explanation: La opción correcta para “piano” es 「ピアノ」.
 - hint: Lección 9 · Vocabulario
@@ -584,7 +584,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「コンサート」?
-- choices: ["medicina","fiebre","hospital","concierto"]
+- choices: ["medicina","hospital","concierto","fiebre"]
 - correct: "concierto"
 - explanation: 「コンサート」 significa “concierto”.
 - hint: Lección 9 · Vocabulario
@@ -594,7 +594,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “concierto”
-- choices: ["コンサート","熱 (ねつ)","薬 (くすり)","病院 (びょういん)"]
+- choices: ["熱 (ねつ)","薬 (くすり)","病院 (びょういん)","コンサート"]
 - correct: "コンサート"
 - explanation: La opción correcta para “concierto” es 「コンサート」.
 - hint: Lección 9 · Vocabulario
@@ -604,7 +604,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「チケット」?
-- choices: ["boleto","fiebre","medicina","hospital"]
+- choices: ["hospital","boleto","fiebre","medicina"]
 - correct: "boleto"
 - explanation: 「チケット」 significa “boleto”.
 - hint: Lección 9 · Vocabulario
@@ -614,7 +614,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “boleto”
-- choices: ["薬 (くすり)","チケット","病院 (びょういん)","熱 (ねつ)"]
+- choices: ["薬 (くすり)","病院 (びょういん)","チケット","熱 (ねつ)"]
 - correct: "チケット"
 - explanation: La opción correcta para “boleto” es 「チケット」.
 - hint: Lección 9 · Vocabulario
@@ -624,7 +624,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かぶき」?
-- choices: ["hospital","Kabuki; arte teatral tradicional japonés","medicina","fiebre"]
+- choices: ["hospital","medicina","fiebre","Kabuki; arte teatral tradicional japonés"]
 - correct: "Kabuki; arte teatral tradicional japonés"
 - explanation: 「かぶき」 significa “Kabuki; arte teatral tradicional japonés”.
 - hint: Lección 9 · Vocabulario
@@ -634,7 +634,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “Kabuki; arte teatral tradicional japonés”
-- choices: ["歌舞伎 (かぶき)","薬 (くすり)","熱 (ねつ)","病院 (びょういん)"]
+- choices: ["歌舞伎 (かぶき)","病院 (びょういん)","薬 (くすり)","熱 (ねつ)"]
 - correct: "歌舞伎 (かぶき)"
 - explanation: La opción correcta para “Kabuki; arte teatral tradicional japonés” es 「歌舞伎 (かぶき)」.
 - hint: Lección 9 · Vocabulario
@@ -644,7 +644,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「スキー」?
-- choices: ["hospital","medicina","fiebre","esquí"]
+- choices: ["medicina","hospital","fiebre","esquí"]
 - correct: "esquí"
 - explanation: 「スキー」 significa “esquí”.
 - hint: Lección 9 · Vocabulario
@@ -654,7 +654,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “esquí”
-- choices: ["熱 (ねつ)","病院 (びょういん)","スキー","薬 (くすり)"]
+- choices: ["薬 (くすり)","病院 (びょういん)","熱 (ねつ)","スキー"]
 - correct: "スキー"
 - explanation: La opción correcta para “esquí” es 「スキー」.
 - hint: Lección 9 · Vocabulario
@@ -664,7 +664,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おべんとう」?
-- choices: ["medicina","fiebre","hospital","caja de almuerzo"]
+- choices: ["hospital","fiebre","caja de almuerzo","medicina"]
 - correct: "caja de almuerzo"
 - explanation: 「おべんとう」 significa “caja de almuerzo”.
 - hint: Lección 9 · Vocabulario
@@ -674,7 +674,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “caja de almuerzo”
-- choices: ["病院 (びょういん)","お弁当 (おべんとう)","薬 (くすり)","熱 (ねつ)"]
+- choices: ["熱 (ねつ)","お弁当 (おべんとう)","薬 (くすり)","病院 (びょういん)"]
 - correct: "お弁当 (おべんとう)"
 - explanation: La opción correcta para “caja de almuerzo” es 「お弁当 (おべんとう)」.
 - hint: Lección 9 · Vocabulario
@@ -684,7 +684,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ピザ」?
-- choices: ["pizza","medicina","fiebre","hospital"]
+- choices: ["fiebre","medicina","pizza","hospital"]
 - correct: "pizza"
 - explanation: 「ピザ」 significa “pizza”.
 - hint: Lección 9 · Vocabulario
@@ -694,7 +694,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pizza”
-- choices: ["ピザ","熱 (ねつ)","病院 (びょういん)","薬 (くすり)"]
+- choices: ["薬 (くすり)","ピザ","病院 (びょういん)","熱 (ねつ)"]
 - correct: "ピザ"
 - explanation: La opción correcta para “pizza” es 「ピザ」.
 - hint: Lección 9 · Vocabulario
@@ -704,7 +704,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いいこ」?
-- choices: ["niño bueno","hospital","medicina","fiebre"]
+- choices: ["hospital","niño bueno","fiebre","medicina"]
 - correct: "niño bueno"
 - explanation: 「いいこ」 significa “niño bueno”.
 - hint: Lección 9 · Vocabulario
@@ -714,7 +714,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “niño bueno”
-- choices: ["いい子 (いいこ)","薬 (くすり)","病院 (びょういん)","熱 (ねつ)"]
+- choices: ["熱 (ねつ)","いい子 (いいこ)","病院 (びょういん)","薬 (くすり)"]
 - correct: "いい子 (いいこ)"
 - explanation: La opción correcta para “niño bueno” es 「いい子 (いいこ)」.
 - hint: Lección 9 · Vocabulario
@@ -724,7 +724,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いろ」?
-- choices: ["medicina","fiebre","color","hospital"]
+- choices: ["fiebre","medicina","hospital","color"]
 - correct: "color"
 - explanation: 「いろ」 significa “color”.
 - hint: Lección 9 · Vocabulario
@@ -734,7 +734,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “color”
-- choices: ["熱 (ねつ)","薬 (くすり)","病院 (びょういん)","色 (いろ)"]
+- choices: ["病院 (びょういん)","色 (いろ)","薬 (くすり)","熱 (ねつ)"]
 - correct: "色 (いろ)"
 - explanation: La opción correcta para “color” es 「色 (いろ)」.
 - hint: Lección 9 · Vocabulario
@@ -744,7 +744,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「こんど」?
-- choices: ["hospital","fiebre","medicina","futuro cercano"]
+- choices: ["medicina","hospital","fiebre","futuro cercano"]
 - correct: "futuro cercano"
 - explanation: 「こんど」 significa “futuro cercano”.
 - hint: Lección 9 · Vocabulario
@@ -754,7 +754,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “futuro cercano”
-- choices: ["熱 (ねつ)","薬 (くすり)","今度 (こんど)","病院 (びょういん)"]
+- choices: ["今度 (こんど)","熱 (ねつ)","病院 (びょういん)","薬 (くすり)"]
 - correct: "今度 (こんど)"
 - explanation: La opción correcta para “futuro cercano” es 「今度 (こんど)」.
 - hint: Lección 9 · Vocabulario
@@ -764,7 +764,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せんげつ」?
-- choices: ["medicina","hospital","fiebre","el mes pasado"]
+- choices: ["fiebre","el mes pasado","hospital","medicina"]
 - correct: "el mes pasado"
 - explanation: 「せんげつ」 significa “el mes pasado”.
 - hint: Lección 9 · Vocabulario
@@ -774,7 +774,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “el mes pasado”
-- choices: ["薬 (くすり)","熱 (ねつ)","病院 (びょういん)","先月 (せんげつ)"]
+- choices: ["病院 (びょういん)","先月 (せんげつ)","薬 (くすり)","熱 (ねつ)"]
 - correct: "先月 (せんげつ)"
 - explanation: La opción correcta para “el mes pasado” es 「先月 (せんげつ)」.
 - hint: Lección 9 · Vocabulario
@@ -784,7 +784,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きょねん」?
-- choices: ["fiebre","hospital","el año pasado","medicina"]
+- choices: ["medicina","fiebre","el año pasado","hospital"]
 - correct: "el año pasado"
 - explanation: 「きょねん」 significa “el año pasado”.
 - hint: Lección 9 · Vocabulario
@@ -794,7 +794,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “el año pasado”
-- choices: ["熱 (ねつ)","薬 (くすり)","病院 (びょういん)","去年 (きょねん)"]
+- choices: ["薬 (くすり)","熱 (ねつ)","病院 (びょういん)","去年 (きょねん)"]
 - correct: "去年 (きょねん)"
 - explanation: La opción correcta para “el año pasado” es 「去年 (きょねん)」.
 - hint: Lección 9 · Vocabulario
@@ -804,7 +804,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あおい」?
-- choices: ["azul","medicina","hospital","fiebre"]
+- choices: ["fiebre","medicina","hospital","azul"]
 - correct: "azul"
 - explanation: 「あおい」 significa “azul”.
 - hint: Lección 9 · Vocabulario
@@ -814,7 +814,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “azul”
-- choices: ["薬 (くすり)","病院 (びょういん)","青い (あおい)","熱 (ねつ)"]
+- choices: ["青い (あおい)","熱 (ねつ)","薬 (くすり)","病院 (びょういん)"]
 - correct: "青い (あおい)"
 - explanation: La opción correcta para “azul” es 「青い (あおい)」.
 - hint: Lección 9 · Vocabulario
@@ -824,7 +824,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あかい」?
-- choices: ["hospital","medicina","rojo","fiebre"]
+- choices: ["hospital","rojo","fiebre","medicina"]
 - correct: "rojo"
 - explanation: 「あかい」 significa “rojo”.
 - hint: Lección 9 · Vocabulario
@@ -834,7 +834,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “rojo”
-- choices: ["熱 (ねつ)","薬 (くすり)","赤い (あかい)","病院 (びょういん)"]
+- choices: ["病院 (びょういん)","赤い (あかい)","薬 (くすり)","熱 (ねつ)"]
 - correct: "赤い (あかい)"
 - explanation: La opción correcta para “rojo” es 「赤い (あかい)」.
 - hint: Lección 9 · Vocabulario
@@ -844,7 +844,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「くろい」?
-- choices: ["negro","hospital","fiebre","medicina"]
+- choices: ["medicina","hospital","negro","fiebre"]
 - correct: "negro"
 - explanation: 「くろい」 significa “negro”.
 - hint: Lección 9 · Vocabulario
@@ -854,7 +854,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “negro”
-- choices: ["黒い (くろい)","熱 (ねつ)","薬 (くすり)","病院 (びょういん)"]
+- choices: ["病院 (びょういん)","熱 (ねつ)","薬 (くすり)","黒い (くろい)"]
 - correct: "黒い (くろい)"
 - explanation: La opción correcta para “negro” es 「黒い (くろい)」.
 - hint: Lección 9 · Vocabulario
@@ -864,7 +864,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しろい」?
-- choices: ["fiebre","blanco","medicina","hospital"]
+- choices: ["hospital","blanco","fiebre","medicina"]
 - correct: "blanco"
 - explanation: 「しろい」 significa “blanco”.
 - hint: Lección 9 · Vocabulario
@@ -874,7 +874,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “blanco”
-- choices: ["病院 (びょういん)","熱 (ねつ)","白い (しろい)","薬 (くすり)"]
+- choices: ["白い (しろい)","病院 (びょういん)","熱 (ねつ)","薬 (くすり)"]
 - correct: "白い (しろい)"
 - explanation: La opción correcta para “blanco” es 「白い (しろい)」.
 - hint: Lección 9 · Vocabulario
@@ -884,7 +884,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「さびしい」?
-- choices: ["hospital","medicina","solitario","fiebre"]
+- choices: ["solitario","fiebre","hospital","medicina"]
 - correct: "solitario"
 - explanation: 「さびしい」 significa “solitario”.
 - hint: Lección 9 · Vocabulario
@@ -894,7 +894,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “solitario”
-- choices: ["薬 (くすり)","熱 (ねつ)","寂しい (さびしい)","病院 (びょういん)"]
+- choices: ["寂しい (さびしい)","薬 (くすり)","熱 (ねつ)","病院 (びょういん)"]
 - correct: "寂しい (さびしい)"
 - explanation: La opción correcta para “solitario” es 「寂しい (さびしい)」.
 - hint: Lección 9 · Vocabulario
@@ -904,7 +904,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「わかい」?
-- choices: ["medicina","joven","hospital","fiebre"]
+- choices: ["medicina","hospital","fiebre","joven"]
 - correct: "joven"
 - explanation: 「わかい」 significa “joven”.
 - hint: Lección 9 · Vocabulario
@@ -914,7 +914,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “joven”
-- choices: ["病院 (びょういん)","薬 (くすり)","熱 (ねつ)","若い (わかい)"]
+- choices: ["熱 (ねつ)","薬 (くすり)","病院 (びょういん)","若い (わかい)"]
 - correct: "若い (わかい)"
 - explanation: La opción correcta para “joven” es 「若い (わかい)」.
 - hint: Lección 9 · Vocabulario
@@ -924,7 +924,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いじわる(な)」?
-- choices: ["hospital","malicioso","fiebre","medicina"]
+- choices: ["malicioso","fiebre","medicina","hospital"]
 - correct: "malicioso"
 - explanation: 「いじわる(な)」 significa “malicioso”.
 - hint: Lección 9 · Vocabulario
@@ -934,7 +934,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “malicioso”
-- choices: ["病院 (びょういん)","熱 (ねつ)","薬 (くすり)","意地悪 (いじわる(な))"]
+- choices: ["熱 (ねつ)","病院 (びょういん)","薬 (くすり)","意地悪 (いじわる(な))"]
 - correct: "意地悪 (いじわる(な))"
 - explanation: La opción correcta para “malicioso” es 「意地悪 (いじわる(な))」.
 - hint: Lección 9 · Vocabulario
@@ -944,7 +944,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おどる」?
-- choices: ["fiebre","medicina","hospital","bailar"]
+- choices: ["hospital","medicina","fiebre","bailar"]
 - correct: "bailar"
 - explanation: 「おどる」 significa “bailar”.
 - hint: Lección 9 · Vocabulario
@@ -964,7 +964,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おわる」?
-- choices: ["medicina","hospital","(algo) termina","fiebre"]
+- choices: ["hospital","fiebre","medicina","(algo) termina"]
 - correct: "(algo) termina"
 - explanation: 「おわる」 significa “(algo) termina”.
 - hint: Lección 9 · Vocabulario
@@ -974,7 +974,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “(algo) termina”
-- choices: ["終わる (おわる)","薬 (くすり)","病院 (びょういん)","熱 (ねつ)"]
+- choices: ["熱 (ねつ)","終わる (おわる)","病院 (びょういん)","薬 (くすり)"]
 - correct: "終わる (おわる)"
 - explanation: La opción correcta para “(algo) termina” es 「終わる (おわる)」.
 - hint: Lección 9 · Vocabulario
@@ -984,7 +984,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「くすりをのむ」?
-- choices: ["tomar medicamentos","medicina","hospital","fiebre"]
+- choices: ["tomar medicamentos","fiebre","medicina","hospital"]
 - correct: "tomar medicamentos"
 - explanation: 「くすりをのむ」 significa “tomar medicamentos”.
 - hint: Lección 9 · Vocabulario
@@ -994,7 +994,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tomar medicamentos”
-- choices: ["薬 (くすり)","熱 (ねつ)","病院 (びょういん)","薬を飲む (くすりをのむ)"]
+- choices: ["薬 (くすり)","病院 (びょういん)","薬を飲む (くすりをのむ)","熱 (ねつ)"]
 - correct: "薬を飲む (くすりをのむ)"
 - explanation: La opción correcta para “tomar medicamentos” es 「薬を飲む (くすりをのむ)」.
 - hint: Lección 9 · Vocabulario
@@ -1004,7 +1004,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「にんきがある」?
-- choices: ["medicina","hospital","ser popular","fiebre"]
+- choices: ["hospital","ser popular","fiebre","medicina"]
 - correct: "ser popular"
 - explanation: 「にんきがある」 significa “ser popular”.
 - hint: Lección 9 · Vocabulario
@@ -1014,7 +1014,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ser popular”
-- choices: ["病院 (びょういん)","熱 (ねつ)","薬 (くすり)","人気がある (にんきがある)"]
+- choices: ["薬 (くすり)","人気がある (にんきがある)","熱 (ねつ)","病院 (びょういん)"]
 - correct: "人気がある (にんきがある)"
 - explanation: La opción correcta para “ser popular” es 「人気がある (にんきがある)」.
 - hint: Lección 9 · Vocabulario
@@ -1024,7 +1024,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はじまる」?
-- choices: ["hospital","(algo) comienza","fiebre","medicina"]
+- choices: ["fiebre","medicina","(algo) comienza","hospital"]
 - correct: "(algo) comienza"
 - explanation: 「はじまる」 significa “(algo) comienza”.
 - hint: Lección 9 · Vocabulario
@@ -1034,7 +1034,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “(algo) comienza”
-- choices: ["始まる (はじまる)","熱 (ねつ)","病院 (びょういん)","薬 (くすり)"]
+- choices: ["薬 (くすり)","始まる (はじまる)","病院 (びょういん)","熱 (ねつ)"]
 - correct: "始まる (はじまる)"
 - explanation: La opción correcta para “(algo) comienza” es 「始まる (はじまる)」.
 - hint: Lección 9 · Vocabulario
@@ -1044,7 +1044,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ひく」?
-- choices: ["tocar (un instrumento de cuerda o un piano)","fiebre","hospital","medicina"]
+- choices: ["medicina","fiebre","tocar (un instrumento de cuerda o un piano)","hospital"]
 - correct: "tocar (un instrumento de cuerda o un piano)"
 - explanation: 「ひく」 significa “tocar (un instrumento de cuerda o un piano)”.
 - hint: Lección 9 · Vocabulario
@@ -1054,7 +1054,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tocar (un instrumento de cuerda o un piano)”
-- choices: ["薬 (くすり)","弾く (ひく)","病院 (びょういん)","熱 (ねつ)"]
+- choices: ["薬 (くすり)","病院 (びょういん)","熱 (ねつ)","弾く (ひく)"]
 - correct: "弾く (ひく)"
 - explanation: La opción correcta para “tocar (un instrumento de cuerda o un piano)” es 「弾く (ひく)」.
 - hint: Lección 9 · Vocabulario
@@ -1064,7 +1064,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「もらう」?
-- choices: ["hospital","fiebre","obtener (de alguien)","medicina"]
+- choices: ["medicina","fiebre","obtener (de alguien)","hospital"]
 - correct: "obtener (de alguien)"
 - explanation: 「もらう」 significa “obtener (de alguien)”.
 - hint: Lección 9 · Vocabulario
@@ -1074,7 +1074,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “obtener (de alguien)”
-- choices: ["熱 (ねつ)","もらう","病院 (びょういん)","薬 (くすり)"]
+- choices: ["もらう","病院 (びょういん)","熱 (ねつ)","薬 (くすり)"]
 - correct: "もらう"
 - explanation: La opción correcta para “obtener (de alguien)” es 「もらう」.
 - hint: Lección 9 · Vocabulario
@@ -1084,7 +1084,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おぼえる」?
-- choices: ["memorizar","hospital","medicina","fiebre"]
+- choices: ["fiebre","hospital","memorizar","medicina"]
 - correct: "memorizar"
 - explanation: 「おぼえる」 significa “memorizar”.
 - hint: Lección 9 · Vocabulario
@@ -1094,7 +1094,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “memorizar”
-- choices: ["病院 (びょういん)","覚える (おぼえる)","薬 (くすり)","熱 (ねつ)"]
+- choices: ["熱 (ねつ)","薬 (くすり)","覚える (おぼえる)","病院 (びょういん)"]
 - correct: "覚える (おぼえる)"
 - explanation: La opción correcta para “memorizar” es 「覚える (おぼえる)」.
 - hint: Lección 9 · Vocabulario
@@ -1104,7 +1104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「でる」?
-- choices: ["fiebre","medicina","(1) aparecer; asistir; (2) salir","hospital"]
+- choices: ["(1) aparecer; asistir; (2) salir","fiebre","medicina","hospital"]
 - correct: "(1) aparecer; asistir; (2) salir"
 - explanation: 「でる」 significa “(1) aparecer; asistir; (2) salir”.
 - hint: Lección 9 · Vocabulario
@@ -1114,7 +1114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “(1) aparecer; asistir; (2) salir”
-- choices: ["病院 (びょういん)","熱 (ねつ)","出る (でる)","薬 (くすり)"]
+- choices: ["熱 (ねつ)","薬 (くすり)","出る (でる)","病院 (びょういん)"]
 - correct: "出る (でる)"
 - explanation: La opción correcta para “(1) aparecer; asistir; (2) salir” es 「出る (でる)」.
 - hint: Lección 9 · Vocabulario
@@ -1124,7 +1124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「うんどうする」?
-- choices: ["fiebre","entrenar","hospital","medicina"]
+- choices: ["medicina","fiebre","hospital","entrenar"]
 - correct: "entrenar"
 - explanation: 「うんどうする」 significa “entrenar”.
 - hint: Lección 9 · Vocabulario
@@ -1134,7 +1134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “entrenar”
-- choices: ["運動する (うんどうする)","熱 (ねつ)","病院 (びょういん)","薬 (くすり)"]
+- choices: ["病院 (びょういん)","薬 (くすり)","運動する (うんどうする)","熱 (ねつ)"]
 - correct: "運動する (うんどうする)"
 - explanation: La opción correcta para “entrenar” es 「運動する (うんどうする)」.
 - hint: Lección 9 · Vocabulario
@@ -1144,7 +1144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「さんぽする」?
-- choices: ["medicina","dar un paseo","hospital","fiebre"]
+- choices: ["fiebre","hospital","medicina","dar un paseo"]
 - correct: "dar un paseo"
 - explanation: 「さんぽする」 significa “dar un paseo”.
 - hint: Lección 9 · Vocabulario
@@ -1154,7 +1154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “dar un paseo”
-- choices: ["散歩する (さんぽする)","病院 (びょういん)","薬 (くすり)","熱 (ねつ)"]
+- choices: ["薬 (くすり)","散歩する (さんぽする)","病院 (びょういん)","熱 (ねつ)"]
 - correct: "散歩する (さんぽする)"
 - explanation: La opción correcta para “dar un paseo” es 「散歩する (さんぽする)」.
 - hint: Lección 9 · Vocabulario
@@ -1164,7 +1164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「そう」?
-- choices: ["medicina","hospital","fiebre","(creo que) sí"]
+- choices: ["(creo que) sí","fiebre","hospital","medicina"]
 - correct: "(creo que) sí"
 - explanation: 「そう」 significa “(creo que) sí”.
 - hint: Lección 9 · Vocabulario
@@ -1174,7 +1174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “(creo que) sí”
-- choices: ["そう","薬 (くすり)","熱 (ねつ)","病院 (びょういん)"]
+- choices: ["そう","薬 (くすり)","病院 (びょういん)","熱 (ねつ)"]
 - correct: "そう"
 - explanation: La opción correcta para “(creo que) sí” es 「そう」.
 - hint: Lección 9 · Vocabulario
@@ -1184,7 +1184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～から」?
-- choices: ["fiebre","hospital","desde ...","medicina"]
+- choices: ["hospital","fiebre","desde ...","medicina"]
 - correct: "desde ..."
 - explanation: 「～から」 significa “desde ...”.
 - hint: Lección 9 · Vocabulario
@@ -1194,7 +1194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “desde ...”
-- choices: ["病院 (びょういん)","薬 (くすり)","熱 (ねつ)","～から"]
+- choices: ["薬 (くすり)","病院 (びょういん)","～から","熱 (ねつ)"]
 - correct: "～から"
 - explanation: La opción correcta para “desde ...” es 「～から」.
 - hint: Lección 9 · Vocabulario
@@ -1204,7 +1204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～まで」?
-- choices: ["hospital","fiebre","medicina","hasta (lugar/tiempo)"]
+- choices: ["fiebre","hasta (lugar/tiempo)","hospital","medicina"]
 - correct: "hasta (lugar/tiempo)"
 - explanation: 「～まで」 significa “hasta (lugar/tiempo)”.
 - hint: Lección 9 · Vocabulario
@@ -1214,7 +1214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hasta (lugar/tiempo)”
-- choices: ["熱 (ねつ)","～まで","薬 (くすり)","病院 (びょういん)"]
+- choices: ["～まで","熱 (ねつ)","病院 (びょういん)","薬 (くすり)"]
 - correct: "～まで"
 - explanation: La opción correcta para “hasta (lugar/tiempo)” es 「～まで」.
 - hint: Lección 9 · Vocabulario
@@ -1224,7 +1224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ぜひ」?
-- choices: ["medicina","hospital","fiebre","a toda costa; sin falta"]
+- choices: ["medicina","fiebre","a toda costa; sin falta","hospital"]
 - correct: "a toda costa; sin falta"
 - explanation: 「ぜひ」 significa “a toda costa; sin falta”.
 - hint: Lección 9 · Vocabulario
@@ -1234,7 +1234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “a toda costa; sin falta”
-- choices: ["薬 (くすり)","熱 (ねつ)","病院 (びょういん)","是非 (ぜひ)"]
+- choices: ["病院 (びょういん)","是非 (ぜひ)","薬 (くすり)","熱 (ねつ)"]
 - correct: "是非 (ぜひ)"
 - explanation: La opción correcta para “a toda costa; sin falta” es 「是非 (ぜひ)」.
 - hint: Lección 9 · Vocabulario
@@ -1254,7 +1254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “por cierto; a propósito”
-- choices: ["ところで","病院 (びょういん)","熱 (ねつ)","薬 (くすり)"]
+- choices: ["熱 (ねつ)","薬 (くすり)","ところで","病院 (びょういん)"]
 - correct: "ところで"
 - explanation: La opción correcta para “por cierto; a propósito” es 「ところで」.
 - hint: Lección 9 · Vocabulario
@@ -1264,7 +1264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「みんな」?
-- choices: ["todos","fiebre","medicina","hospital"]
+- choices: ["fiebre","hospital","todos","medicina"]
 - correct: "todos"
 - explanation: 「みんな」 significa “todos”.
 - hint: Lección 9 · Vocabulario
@@ -1274,7 +1274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “todos”
-- choices: ["熱 (ねつ)","薬 (くすり)","病院 (びょういん)","みんな"]
+- choices: ["熱 (ねつ)","病院 (びょういん)","薬 (くすり)","みんな"]
 - correct: "みんな"
 - explanation: La opción correcta para “todos” es 「みんな」.
 - hint: Lección 9 · Vocabulario
@@ -1294,7 +1294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ya”
-- choices: ["病院 (びょういん)","熱 (ねつ)","薬 (くすり)","もう"]
+- choices: ["薬 (くすり)","病院 (びょういん)","もう","熱 (ねつ)"]
 - correct: "もう"
 - explanation: La opción correcta para “ya” es 「もう」.
 - hint: Lección 9 · Vocabulario
@@ -1304,7 +1304,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ひとつ」?
-- choices: ["hospital","fiebre","medicina","uno"]
+- choices: ["medicina","fiebre","hospital","uno"]
 - correct: "uno"
 - explanation: 「ひとつ」 significa “uno”.
 - hint: Lección 9 · Vocabulario
@@ -1314,7 +1314,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “uno”
-- choices: ["薬 (くすり)","病院 (びょういん)","熱 (ねつ)","一つ (ひとつ)"]
+- choices: ["薬 (くすり)","一つ (ひとつ)","病院 (びょういん)","熱 (ねつ)"]
 - correct: "一つ (ひとつ)"
 - explanation: La opción correcta para “uno” es 「一つ (ひとつ)」.
 - hint: Lección 9 · Vocabulario
@@ -1324,7 +1324,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ふたつ」?
-- choices: ["hospital","dos","fiebre","medicina"]
+- choices: ["hospital","fiebre","dos","medicina"]
 - correct: "dos"
 - explanation: 「ふたつ」 significa “dos”.
 - hint: Lección 9 · Vocabulario
@@ -1334,7 +1334,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “dos”
-- choices: ["二つ (ふたつ)","熱 (ねつ)","薬 (くすり)","病院 (びょういん)"]
+- choices: ["病院 (びょういん)","二つ (ふたつ)","熱 (ねつ)","薬 (くすり)"]
 - correct: "二つ (ふたつ)"
 - explanation: La opción correcta para “dos” es 「二つ (ふたつ)」.
 - hint: Lección 9 · Vocabulario
@@ -1344,7 +1344,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「みっつ」?
-- choices: ["tres","hospital","medicina","fiebre"]
+- choices: ["fiebre","hospital","medicina","tres"]
 - correct: "tres"
 - explanation: 「みっつ」 significa “tres”.
 - hint: Lección 9 · Vocabulario
@@ -1354,7 +1354,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tres”
-- choices: ["三つ (みっつ)","薬 (くすり)","熱 (ねつ)","病院 (びょういん)"]
+- choices: ["熱 (ねつ)","三つ (みっつ)","薬 (くすり)","病院 (びょういん)"]
 - correct: "三つ (みっつ)"
 - explanation: La opción correcta para “tres” es 「三つ (みっつ)」.
 - hint: Lección 9 · Vocabulario
@@ -1364,7 +1364,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「よっつ」?
-- choices: ["medicina","cuatro","hospital","fiebre"]
+- choices: ["hospital","medicina","cuatro","fiebre"]
 - correct: "cuatro"
 - explanation: 「よっつ」 significa “cuatro”.
 - hint: Lección 9 · Vocabulario
@@ -1374,7 +1374,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cuatro”
-- choices: ["薬 (くすり)","熱 (ねつ)","四つ (よっつ)","病院 (びょういん)"]
+- choices: ["薬 (くすり)","病院 (びょういん)","熱 (ねつ)","四つ (よっつ)"]
 - correct: "四つ (よっつ)"
 - explanation: La opción correcta para “cuatro” es 「四つ (よっつ)」.
 - hint: Lección 9 · Vocabulario
@@ -1384,7 +1384,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いつつ」?
-- choices: ["cinco","hospital","medicina","fiebre"]
+- choices: ["fiebre","cinco","medicina","hospital"]
 - correct: "cinco"
 - explanation: 「いつつ」 significa “cinco”.
 - hint: Lección 9 · Vocabulario
@@ -1394,7 +1394,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cinco”
-- choices: ["薬 (くすり)","熱 (ねつ)","病院 (びょういん)","五つ (いつつ)"]
+- choices: ["薬 (くすり)","熱 (ねつ)","五つ (いつつ)","病院 (びょういん)"]
 - correct: "五つ (いつつ)"
 - explanation: La opción correcta para “cinco” es 「五つ (いつつ)」.
 - hint: Lección 9 · Vocabulario
@@ -1404,7 +1404,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「むっつ」?
-- choices: ["medicina","hospital","fiebre","seis"]
+- choices: ["hospital","fiebre","seis","medicina"]
 - correct: "seis"
 - explanation: 「むっつ」 significa “seis”.
 - hint: Lección 9 · Vocabulario
@@ -1424,7 +1424,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ななつ」?
-- choices: ["hospital","siete","fiebre","medicina"]
+- choices: ["hospital","medicina","siete","fiebre"]
 - correct: "siete"
 - explanation: 「ななつ」 significa “siete”.
 - hint: Lección 9 · Vocabulario
@@ -1434,7 +1434,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “siete”
-- choices: ["病院 (びょういん)","七つ (ななつ)","熱 (ねつ)","薬 (くすり)"]
+- choices: ["熱 (ねつ)","薬 (くすり)","病院 (びょういん)","七つ (ななつ)"]
 - correct: "七つ (ななつ)"
 - explanation: La opción correcta para “siete” es 「七つ (ななつ)」.
 - hint: Lección 9 · Vocabulario
@@ -1444,7 +1444,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「やっつ」?
-- choices: ["medicina","ocho","fiebre","hospital"]
+- choices: ["ocho","fiebre","hospital","medicina"]
 - correct: "ocho"
 - explanation: 「やっつ」 significa “ocho”.
 - hint: Lección 9 · Vocabulario
@@ -1454,7 +1454,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ocho”
-- choices: ["八つ (やっつ)","薬 (くすり)","病院 (びょういん)","熱 (ねつ)"]
+- choices: ["薬 (くすり)","八つ (やっつ)","病院 (びょういん)","熱 (ねつ)"]
 - correct: "八つ (やっつ)"
 - explanation: La opción correcta para “ocho” es 「八つ (やっつ)」.
 - hint: Lección 9 · Vocabulario
@@ -1464,7 +1464,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ここのつ」?
-- choices: ["fiebre","hospital","medicina","nueve"]
+- choices: ["medicina","hospital","fiebre","nueve"]
 - correct: "nueve"
 - explanation: 「ここのつ」 significa “nueve”.
 - hint: Lección 9 · Vocabulario
@@ -1474,7 +1474,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “nueve”
-- choices: ["病院 (びょういん)","九つ (ここのつ)","薬 (くすり)","熱 (ねつ)"]
+- choices: ["九つ (ここのつ)","病院 (びょういん)","熱 (ねつ)","薬 (くすり)"]
 - correct: "九つ (ここのつ)"
 - explanation: La opción correcta para “nueve” es 「九つ (ここのつ)」.
 - hint: Lección 9 · Vocabulario
@@ -1484,7 +1484,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「とお」?
-- choices: ["diez","fiebre","hospital","medicina"]
+- choices: ["medicina","diez","fiebre","hospital"]
 - correct: "diez"
 - explanation: 「とお」 significa “diez”.
 - hint: Lección 9 · Vocabulario
@@ -1494,7 +1494,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “diez”
-- choices: ["病院 (びょういん)","とお","薬 (くすり)","熱 (ねつ)"]
+- choices: ["とお","薬 (くすり)","熱 (ねつ)","病院 (びょういん)"]
 - correct: "とお"
 - explanation: La opción correcta para “diez” es 「とお」.
 - hint: Lección 9 · Vocabulario
@@ -1504,10 +1504,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 白い (しろい)","B. だいじょうぶ","C. ギター"]
-- choices.right: ["1. estar bien","2. guitarra","3. blanco"]
-- correct: "A-3, B-1, C-2"
-- explanation: Relaciones correctas: A-3, B-1, C-2.
+- choices.left: ["A. 色 (いろ)","B. 青い (あおい)","C. 痛い (いたい)"]
+- choices.right: ["1. doloroso","2. azul","3. color"]
+- correct: "A-3, B-2, C-1"
+- explanation: Relaciones correctas: A-3, B-2, C-1.
 - hint: Lección 9 · Relacionar
 
 ### exam-vocab-match-9-1
@@ -1515,10 +1515,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. だいじょうぶ","B. 運動する (うんどうする)","C. 弾く (ひく)"]
-- choices.right: ["1. entrenar","2. estar bien","3. tocar (un instrumento de cuerda o un piano)"]
-- correct: "A-2, B-1, C-3"
-- explanation: Relaciones correctas: A-2, B-1, C-3.
+- choices.left: ["A. 病気 (びょうき)","B. 去年 (きょねん)","C. 散歩する (さんぽする)"]
+- choices.right: ["1. dar un paseo","2. el año pasado","3. enfermedad"]
+- correct: "A-3, B-2, C-1"
+- explanation: Relaciones correctas: A-3, B-2, C-1.
 - hint: Lección 9 · Relacionar
 
 ### exam-vocab-match-9-2
@@ -1526,10 +1526,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 喉 (のど)","B. 病院 (びょういん)","C. ピアノ"]
-- choices.right: ["1. piano","2. garganta","3. hospital"]
-- correct: "A-2, B-3, C-1"
-- explanation: Relaciones correctas: A-2, B-3, C-1.
+- choices.left: ["A. 三つ (みっつ)","B. 九つ (ここのつ)","C. メール"]
+- choices.right: ["1. tres","2. correo electrónico","3. nueve"]
+- correct: "A-1, B-3, C-2"
+- explanation: Relaciones correctas: A-1, B-3, C-2.
 - hint: Lección 9 · Relacionar
 
 ### exam-vocab-match-9-3
@@ -1537,10 +1537,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 青い (あおい)","B. ところで","C. たいへん"]
-- choices.right: ["1. por cierto; a propósito","2. difícil/duro","3. azul"]
-- correct: "A-3, B-1, C-2"
-- explanation: Relaciones correctas: A-3, B-1, C-2.
+- choices.left: ["A. チケット","B. コンサート","C. 薬 (くすり)"]
+- choices.right: ["1. medicina","2. concierto","3. boleto"]
+- correct: "A-3, B-2, C-1"
+- explanation: Relaciones correctas: A-3, B-2, C-1.
 - hint: Lección 9 · Relacionar
 
 ## kanji
@@ -1550,7 +1550,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「午前」?
-- choices: ["に","ごぜん","いち","いちじ"]
+- choices: ["ごぜん","いち","に","いちじ"]
 - correct: "ごぜん"
 - explanation: 「午前」 se lee 「ごぜん」.
 - hint: Lección 9 · Kanji
@@ -1571,7 +1571,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「午後」?
-- choices: ["いちじ","いち","ごご","に"]
+- choices: ["いち","いちじ","ごご","に"]
 - correct: "ごご"
 - explanation: 「午後」 se lee 「ごご」.
 - hint: Lección 9 · Kanji
@@ -1592,7 +1592,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「名前」?
-- choices: ["に","いち","なまえ","いちじ"]
+- choices: ["いちじ","に","なまえ","いち"]
 - correct: "なまえ"
 - explanation: 「名前」 se lee 「なまえ」.
 - hint: Lección 9 · Kanji
@@ -1613,7 +1613,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「白い」?
-- choices: ["いち","しろい","に","いちじ"]
+- choices: ["に","しろい","いちじ","いち"]
 - correct: "しろい"
 - explanation: 「白い」 se lee 「しろい」.
 - hint: Lección 9 · Kanji
@@ -1634,7 +1634,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「雨」?
-- choices: ["いちじ","いち","に","あめ"]
+- choices: ["に","いちじ","いち","あめ"]
 - correct: "あめ"
 - explanation: 「雨」 se lee 「あめ」.
 - hint: Lección 9 · Kanji
@@ -1655,7 +1655,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「書く」?
-- choices: ["いち","に","いちじ","かく"]
+- choices: ["に","いち","かく","いちじ"]
 - correct: "かく"
 - explanation: 「書く」 se lee 「かく」.
 - hint: Lección 9 · Kanji
@@ -1676,7 +1676,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「友だち」?
-- choices: ["いち","いちじ","ともだち","に"]
+- choices: ["いち","に","ともだち","いちじ"]
 - correct: "ともだち"
 - explanation: 「友だち」 se lee 「ともだち」.
 - hint: Lección 9 · Kanji
@@ -1697,7 +1697,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「時間」?
-- choices: ["じかん","に","いち","いちじ"]
+- choices: ["いち","じかん","に","いちじ"]
 - correct: "じかん"
 - explanation: 「時間」 se lee 「じかん」.
 - hint: Lección 9 · Kanji
@@ -1718,7 +1718,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「家」?
-- choices: ["いち","いえ","に","いちじ"]
+- choices: ["に","いちじ","いち","いえ"]
 - correct: "いえ"
 - explanation: 「家」 se lee 「いえ」.
 - hint: Lección 9 · Kanji
@@ -1739,7 +1739,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「少し」?
-- choices: ["いちじ","すこし","いち","に"]
+- choices: ["すこし","いちじ","に","いち"]
 - correct: "すこし"
 - explanation: 「少し」 se lee 「すこし」.
 - hint: Lección 9 · Kanji
@@ -1760,7 +1760,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「古い」?
-- choices: ["いちじ","いち","に","ふるい"]
+- choices: ["に","いちじ","いち","ふるい"]
 - correct: "ふるい"
 - explanation: 「古い」 se lee 「ふるい」.
 - hint: Lección 9 · Kanji
@@ -1781,7 +1781,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「知る」?
-- choices: ["に","いち","しる","いちじ"]
+- choices: ["しる","に","いちじ","いち"]
 - correct: "しる"
 - explanation: 「知る」 se lee 「しる」.
 - hint: Lección 9 · Kanji
@@ -1802,7 +1802,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「来る」?
-- choices: ["いち","いちじ","くる","に"]
+- choices: ["いち","いちじ","に","くる"]
 - correct: "くる"
 - explanation: 「来る」 se lee 「くる」.
 - hint: Lección 9 · Kanji
@@ -1825,7 +1825,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___パコです。
-- choices: ["に","を","で","は"]
+- choices: ["に","で","を","は"]
 - correct: "は"
 - explanation: 「は」marca tema.
 - hint: Lección 9 · Partículas
@@ -1846,7 +1846,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: マリアさん___せんせいです。
-- choices: ["は","を","で","が"]
+- choices: ["を","が","で","は"]
 - correct: "は"
 - explanation: Oración copulativa con tema 「は」.
 - hint: Lección 9 · Partículas
@@ -1867,7 +1867,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: これはだれ___ほんですか。
-- choices: ["の","で","を","に"]
+- choices: ["の","に","で","を"]
 - correct: "の"
 - explanation: Posesión con 「の」.
 - hint: Lección 9 · Partículas
@@ -1888,7 +1888,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___ともだちもにほんじんです。
-- choices: ["の","も","が","は"]
+- choices: ["が","も","は","の"]
 - correct: "の"
 - explanation: 「わたしのともだち」.
 - hint: Lección 9 · Partículas
@@ -1909,7 +1909,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: がっこう___いきます。
-- choices: ["は","で","に","を"]
+- choices: ["を","は","に","で"]
 - correct: "に"
 - explanation: Destino con 「に」.
 - hint: Lección 9 · Partículas
@@ -1930,7 +1930,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: としょかん___べんきょうします。
-- choices: ["を","が","で","に"]
+- choices: ["で","が","に","を"]
 - correct: "で"
 - explanation: Lugar de acción con 「で」.
 - hint: Lección 9 · Partículas
@@ -1951,7 +1951,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ほん___よみます。
-- choices: ["は","を","で","に"]
+- choices: ["で","は","に","を"]
 - correct: "を"
 - explanation: Objeto directo con 「を」.
 - hint: Lección 9 · Partículas
@@ -1972,7 +1972,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: 7じ___おきます。
-- choices: ["に","で","を","が"]
+- choices: ["が","で","を","に"]
 - correct: "に"
 - explanation: Hora específica con 「に」.
 - hint: Lección 9 · Partículas
@@ -1993,7 +1993,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: うち___かえりました。
-- choices: ["を","に","で","が"]
+- choices: ["が","に","で","を"]
 - correct: "に"
 - explanation: Destino final con 「に」.
 - hint: Lección 9 · Partículas
@@ -2014,7 +2014,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ともだち___えいがをみました。
-- choices: ["が","と","に","を"]
+- choices: ["を","が","に","と"]
 - correct: "と"
 - explanation: Compañía con 「と」.
 - hint: Lección 9 · Partículas
@@ -2035,7 +2035,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ケーキ___すきです。
-- choices: ["が","に","を","で"]
+- choices: ["に","を","が","で"]
 - correct: "が"
 - explanation: Con 「すき」 se usa 「が」.
 - hint: Lección 9 · Partículas
@@ -2056,7 +2056,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: こうえん___しんぶんをよみます。
-- choices: ["に","を","が","で"]
+- choices: ["で","に","を","が"]
 - correct: "で"
 - explanation: Lugar de acción con 「で」.
 - hint: Lección 9 · Partículas
@@ -2077,7 +2077,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: にほん___りょうりはおいしいです。
-- choices: ["に","が","を","の"]
+- choices: ["に","の","を","が"]
 - correct: "の"
 - explanation: Modificador nominal con 「の」.
 - hint: Lección 9 · Partículas
@@ -2098,7 +2098,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: 8じ___10じ___べんきょうしました。
-- choices: ["に / に","を / に","から / まで","で / から"]
+- choices: ["に / に","から / まで","で / から","を / に"]
 - correct: "から / まで"
 - explanation: Rango temporal.
 - hint: Lección 9 · Partículas
@@ -2119,7 +2119,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: くすり___のみました。
-- choices: ["に","を","で","が"]
+- choices: ["を","に","で","が"]
 - correct: "を"
 - explanation: Objeto directo.
 - hint: Lección 9 · Partículas
@@ -2142,7 +2142,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「たべる」 (comer)
-- choices: ["いって","みて","たべて","きいて"]
+- choices: ["いって","きいて","たべて","みて"]
 - correct: "たべて"
 - explanation: La forma て de 「たべる」 es 「たべて」.
 - hint: Lección 9 · Conjugación
@@ -2152,7 +2152,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「たべる」 (comer)
-- choices: ["いった","きいた","たべた","みた"]
+- choices: ["きいた","たべた","みた","いった"]
 - correct: "たべた"
 - explanation: El pasado corto de 「たべる」 es 「たべた」.
 - hint: Lección 9 · Conjugación
@@ -2172,7 +2172,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「みる」 (ver)
-- choices: ["たべて","きいて","みて","いって"]
+- choices: ["たべて","みて","きいて","いって"]
 - correct: "みて"
 - explanation: La forma て de 「みる」 es 「みて」.
 - hint: Lección 9 · Conjugación
@@ -2182,7 +2182,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「みる」 (ver)
-- choices: ["みた","いった","たべた","きいた"]
+- choices: ["たべた","いった","みた","きいた"]
 - correct: "みた"
 - explanation: El pasado corto de 「みる」 es 「みた」.
 - hint: Lección 9 · Conjugación
@@ -2202,7 +2202,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「いく」 (ir)
-- choices: ["たべて","いって","みて","きいて"]
+- choices: ["たべて","いって","きいて","みて"]
 - correct: "いって"
 - explanation: La forma て de 「いく」 es 「いって」.
 - hint: Lección 9 · Conjugación
@@ -2212,7 +2212,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「いく」 (ir)
-- choices: ["みた","たべた","きいた","いった"]
+- choices: ["きいた","いった","みた","たべた"]
 - correct: "いった"
 - explanation: El pasado corto de 「いく」 es 「いった」.
 - hint: Lección 9 · Conjugación
@@ -2232,7 +2232,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「きく」 (escuchar)
-- choices: ["きいて","みて","いって","たべて"]
+- choices: ["たべて","きいて","いって","みて"]
 - correct: "きいて"
 - explanation: La forma て de 「きく」 es 「きいて」.
 - hint: Lección 9 · Conjugación
@@ -2242,7 +2242,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「きく」 (escuchar)
-- choices: ["みた","たべた","いった","きいた"]
+- choices: ["いった","きいた","みた","たべた"]
 - correct: "きいた"
 - explanation: El pasado corto de 「きく」 es 「きいた」.
 - hint: Lección 9 · Conjugación
@@ -2262,7 +2262,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「おきる」 (levantarse)
-- choices: ["いって","たべて","みて","おきて"]
+- choices: ["みて","おきて","いって","たべて"]
 - correct: "おきて"
 - explanation: La forma て de 「おきる」 es 「おきて」.
 - hint: Lección 9 · Conjugación
@@ -2272,7 +2272,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「おきる」 (levantarse)
-- choices: ["おきた","たべた","みた","いった"]
+- choices: ["おきた","みた","たべた","いった"]
 - correct: "おきた"
 - explanation: El pasado corto de 「おきる」 es 「おきた」.
 - hint: Lección 9 · Conjugación
@@ -2292,7 +2292,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「ねる」 (dormir)
-- choices: ["いって","みて","ねて","たべて"]
+- choices: ["みて","いって","たべて","ねて"]
 - correct: "ねて"
 - explanation: La forma て de 「ねる」 es 「ねて」.
 - hint: Lección 9 · Conjugación
@@ -2302,7 +2302,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「ねる」 (dormir)
-- choices: ["たべた","いった","ねた","みた"]
+- choices: ["いった","みた","ねた","たべた"]
 - correct: "ねた"
 - explanation: El pasado corto de 「ねる」 es 「ねた」.
 - hint: Lección 9 · Conjugación
@@ -2322,7 +2322,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「かえる」 (volver)
-- choices: ["みて","かえって","いって","たべて"]
+- choices: ["みて","いって","かえって","たべて"]
 - correct: "かえって"
 - explanation: La forma て de 「かえる」 es 「かえって」.
 - hint: Lección 9 · Conjugación
@@ -2332,7 +2332,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「かえる」 (volver)
-- choices: ["いった","みた","たべた","かえった"]
+- choices: ["みた","たべた","いった","かえった"]
 - correct: "かえった"
 - explanation: El pasado corto de 「かえる」 es 「かえった」.
 - hint: Lección 9 · Conjugación
@@ -2352,7 +2352,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「よむ」 (leer)
-- choices: ["たべて","みて","いって","よんで"]
+- choices: ["みて","よんで","たべて","いって"]
 - correct: "よんで"
 - explanation: La forma て de 「よむ」 es 「よんで」.
 - hint: Lección 9 · Conjugación
@@ -2362,7 +2362,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「よむ」 (leer)
-- choices: ["みた","たべた","いった","よんだ"]
+- choices: ["たべた","みた","いった","よんだ"]
 - correct: "よんだ"
 - explanation: El pasado corto de 「よむ」 es 「よんだ」.
 - hint: Lección 9 · Conjugación
@@ -2382,7 +2382,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「かく」 (escribir)
-- choices: ["かいて","みて","いって","たべて"]
+- choices: ["みて","かいて","たべて","いって"]
 - correct: "かいて"
 - explanation: La forma て de 「かく」 es 「かいて」.
 - hint: Lección 9 · Conjugación
@@ -2392,7 +2392,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「かく」 (escribir)
-- choices: ["みた","いった","たべた","かいた"]
+- choices: ["かいた","たべた","いった","みた"]
 - correct: "かいた"
 - explanation: El pasado corto de 「かく」 es 「かいた」.
 - hint: Lección 9 · Conjugación
@@ -2412,7 +2412,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「かう」 (comprar)
-- choices: ["かって","たべて","みて","いって"]
+- choices: ["たべて","いって","かって","みて"]
 - correct: "かって"
 - explanation: La forma て de 「かう」 es 「かって」.
 - hint: Lección 9 · Conjugación
@@ -2422,7 +2422,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「かう」 (comprar)
-- choices: ["たべた","いった","みた","かった"]
+- choices: ["みた","たべた","かった","いった"]
 - correct: "かった"
 - explanation: El pasado corto de 「かう」 es 「かった」.
 - hint: Lección 9 · Conjugación
@@ -2442,7 +2442,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「のむ」 (beber)
-- choices: ["のんで","みて","いって","たべて"]
+- choices: ["のんで","いって","みて","たべて"]
 - correct: "のんで"
 - explanation: La forma て de 「のむ」 es 「のんで」.
 - hint: Lección 9 · Conjugación
@@ -2452,7 +2452,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「のむ」 (beber)
-- choices: ["みた","いった","のんだ","たべた"]
+- choices: ["たべた","みた","のんだ","いった"]
 - correct: "のんだ"
 - explanation: El pasado corto de 「のむ」 es 「のんだ」.
 - hint: Lección 9 · Conjugación
@@ -2472,7 +2472,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「する」 (hacer)
-- choices: ["みて","いって","たべて","して"]
+- choices: ["して","たべて","いって","みて"]
 - correct: "して"
 - explanation: La forma て de 「する」 es 「して」.
 - hint: Lección 9 · Conjugación
@@ -2482,7 +2482,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「する」 (hacer)
-- choices: ["たべた","みた","した","いった"]
+- choices: ["みた","した","たべた","いった"]
 - correct: "した"
 - explanation: El pasado corto de 「する」 es 「した」.
 - hint: Lección 9 · Conjugación
@@ -2502,7 +2502,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「くる」 (venir)
-- choices: ["みて","きて","たべて","いって"]
+- choices: ["みて","いって","きて","たべて"]
 - correct: "きて"
 - explanation: La forma て de 「くる」 es 「きて」.
 - hint: Lección 9 · Conjugación
@@ -2512,7 +2512,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「くる」 (venir)
-- choices: ["きた","みた","いった","たべた"]
+- choices: ["みた","きた","たべた","いった"]
 - correct: "きた"
 - explanation: El pasado corto de 「くる」 es 「きた」.
 - hint: Lección 9 · Conjugación
@@ -2532,7 +2532,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「およぐ」 (nadar)
-- choices: ["みて","たべて","いって","およいで"]
+- choices: ["いって","およいで","たべて","みて"]
 - correct: "およいで"
 - explanation: La forma て de 「およぐ」 es 「およいで」.
 - hint: Lección 9 · Conjugación
@@ -2542,7 +2542,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「およぐ」 (nadar)
-- choices: ["みた","およいだ","たべた","いった"]
+- choices: ["およいだ","いった","みた","たべた"]
 - correct: "およいだ"
 - explanation: El pasado corto de 「およぐ」 es 「およいだ」.
 - hint: Lección 9 · Conjugación
@@ -2562,7 +2562,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「まつ」 (esperar)
-- choices: ["みて","いって","まって","たべて"]
+- choices: ["たべて","みて","いって","まって"]
 - correct: "まって"
 - explanation: La forma て de 「まつ」 es 「まって」.
 - hint: Lección 9 · Conjugación
@@ -2572,7 +2572,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「まつ」 (esperar)
-- choices: ["まった","たべた","みた","いった"]
+- choices: ["まった","いった","たべた","みた"]
 - correct: "まった"
 - explanation: El pasado corto de 「まつ」 es 「まった」.
 - hint: Lección 9 · Conjugación
@@ -2592,7 +2592,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「はなす」 (hablar)
-- choices: ["たべて","はなして","いって","みて"]
+- choices: ["はなして","みて","いって","たべて"]
 - correct: "はなして"
 - explanation: La forma て de 「はなす」 es 「はなして」.
 - hint: Lección 9 · Conjugación
@@ -2602,7 +2602,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「はなす」 (hablar)
-- choices: ["はなした","たべた","みた","いった"]
+- choices: ["みた","たべた","はなした","いった"]
 - correct: "はなした"
 - explanation: El pasado corto de 「はなす」 es 「はなした」.
 - hint: Lección 9 · Conjugación
@@ -2622,7 +2622,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あびる」 (ducharse)
-- choices: ["たべて","みて","あびて","いって"]
+- choices: ["あびて","いって","たべて","みて"]
 - correct: "あびて"
 - explanation: La forma て de 「あびる」 es 「あびて」.
 - hint: Lección 9 · Conjugación
@@ -2632,7 +2632,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あびる」 (ducharse)
-- choices: ["たべた","みた","あびた","いった"]
+- choices: ["みた","あびた","たべた","いった"]
 - correct: "あびた"
 - explanation: El pasado corto de 「あびる」 es 「あびた」.
 - hint: Lección 9 · Conjugación
@@ -2652,7 +2652,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あそぶ」 (jugar)
-- choices: ["あそんで","たべて","みて","いって"]
+- choices: ["みて","たべて","あそんで","いって"]
 - correct: "あそんで"
 - explanation: La forma て de 「あそぶ」 es 「あそんで」.
 - hint: Lección 9 · Conjugación
@@ -2662,7 +2662,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あそぶ」 (jugar)
-- choices: ["みた","いった","あそんだ","たべた"]
+- choices: ["いった","あそんだ","みた","たべた"]
 - correct: "あそんだ"
 - explanation: El pasado corto de 「あそぶ」 es 「あそんだ」.
 - hint: Lección 9 · Conjugación
@@ -2682,7 +2682,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「つくる」 (hacer/crear)
-- choices: ["いって","みて","つくって","たべて"]
+- choices: ["いって","つくって","たべて","みて"]
 - correct: "つくって"
 - explanation: La forma て de 「つくる」 es 「つくって」.
 - hint: Lección 9 · Conjugación
@@ -2692,7 +2692,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「つくる」 (hacer/crear)
-- choices: ["みた","つくった","たべた","いった"]
+- choices: ["みた","たべた","つくった","いった"]
 - correct: "つくった"
 - explanation: El pasado corto de 「つくる」 es 「つくった」.
 - hint: Lección 9 · Conjugación
@@ -2712,7 +2712,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あげる」 (dar)
-- choices: ["いって","あげて","みて","たべて"]
+- choices: ["いって","みて","あげて","たべて"]
 - correct: "あげて"
 - explanation: La forma て de 「あげる」 es 「あげて」.
 - hint: Lección 9 · Conjugación
@@ -2722,7 +2722,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あげる」 (dar)
-- choices: ["あげた","たべた","みた","いった"]
+- choices: ["あげた","いった","たべた","みた"]
 - correct: "あげた"
 - explanation: El pasado corto de 「あげる」 es 「あげた」.
 - hint: Lección 9 · Conjugación
@@ -2742,7 +2742,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「もらう」 (recibir)
-- choices: ["もらって","たべて","みて","いって"]
+- choices: ["たべて","いって","みて","もらって"]
 - correct: "もらって"
 - explanation: La forma て de 「もらう」 es 「もらって」.
 - hint: Lección 9 · Conjugación
@@ -2752,7 +2752,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「もらう」 (recibir)
-- choices: ["たべた","いった","もらった","みた"]
+- choices: ["みた","もらった","いった","たべた"]
 - correct: "もらった"
 - explanation: El pasado corto de 「もらう」 es 「もらった」.
 - hint: Lección 9 · Conjugación
@@ -2772,7 +2772,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「なる」 (volverse)
-- choices: ["いって","なって","たべて","みて"]
+- choices: ["みて","たべて","いって","なって"]
 - correct: "なって"
 - explanation: La forma て de 「なる」 es 「なって」.
 - hint: Lección 9 · Conjugación
@@ -2782,7 +2782,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「なる」 (volverse)
-- choices: ["みた","いった","なった","たべた"]
+- choices: ["たべた","みた","いった","なった"]
 - correct: "なった"
 - explanation: El pasado corto de 「なる」 es 「なった」.
 - hint: Lección 9 · Conjugación
@@ -2812,7 +2812,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「つかう」 (usar)
-- choices: ["いった","つかった","みた","たべた"]
+- choices: ["いった","たべた","みた","つかった"]
 - correct: "つかった"
 - explanation: El pasado corto de 「つかう」 es 「つかった」.
 - hint: Lección 9 · Conjugación
@@ -2832,7 +2832,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「やすむ」 (descansar)
-- choices: ["やすんで","たべて","みて","いって"]
+- choices: ["みて","たべて","やすんで","いって"]
 - correct: "やすんで"
 - explanation: La forma て de 「やすむ」 es 「やすんで」.
 - hint: Lección 9 · Conjugación
@@ -2842,7 +2842,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「やすむ」 (descansar)
-- choices: ["みた","いった","やすんだ","たべた"]
+- choices: ["たべた","いった","みた","やすんだ"]
 - correct: "やすんだ"
 - explanation: El pasado corto de 「やすむ」 es 「やすんだ」.
 - hint: Lección 9 · Conjugación
@@ -2862,7 +2862,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「べんり」 (conveniente)
-- choices: ["やすくない","たかくない","しずかじゃない","べんりじゃない"]
+- choices: ["しずかじゃない","べんりじゃない","やすくない","たかくない"]
 - correct: "べんりじゃない"
 - explanation: La forma negativa de 「べんり」 es 「べんりじゃない」.
 - hint: Lección 9 · Conjugación
@@ -2872,7 +2872,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「たいへん」 (difícil/duro)
-- choices: ["やすくない","しずかじゃない","たいへんじゃない","たかくない"]
+- choices: ["たいへんじゃない","やすくない","しずかじゃない","たかくない"]
 - correct: "たいへんじゃない"
 - explanation: La forma negativa de 「たいへん」 es 「たいへんじゃない」.
 - hint: Lección 9 · Conjugación
@@ -2904,7 +2904,7 @@
 - type: `reorder`
 - source: `lesson_scenarios_grammar`
 - prompt: Ordena la oración con un modificador.
-- choices: ["えいが","きのう","みた","おもしろかったです","は"]
+- choices: ["おもしろかったです","みた","えいが","きのう","は"]
 - correct: "きのう みた えいが は おもしろかったです"
 - explanation: La cláusula corta 「きのうみた」 modifica a 「えいが」.
 - hint: Lección 9 · Modificadores

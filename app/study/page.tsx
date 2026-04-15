@@ -1306,6 +1306,19 @@ const LESSON_SIX_CURATED_VOCAB = [
 
 const LESSON_SIX_CURATED_KANJI = ["出口", "右"] as const;
 
+const LESSON_SEVEN_CURATED_VOCAB = [
+  { kana: "かぞく", es: "familia", direction: "jp-es" },
+  { kana: "ちち", es: "(mi) padre", direction: "jp-es" },
+  { kana: "はは", es: "(mi) madre", direction: "jp-es" },
+  { kana: "あに", es: "(mi) hermano mayor", direction: "jp-es" },
+  { kana: "かいしゃ", es: "empresa", direction: "es-jp" },
+  { kana: "かみ", es: "pelo", direction: "es-jp" },
+  { kana: "めがね", es: "lentes; gafas", direction: "es-jp" },
+  { kana: "きょうだい", es: "hermanos y hermanas", direction: "es-jp" },
+] as const;
+
+const LESSON_SEVEN_CURATED_KANJI = ["父", "東京"] as const;
+
 const PARTICLE_EXAM_BANK: Array<{
   id: string;
   minLesson: number;
@@ -3401,6 +3414,218 @@ function buildLessonSixCuratedExamPool() {
   return [...vocabQuestions, ...kanjiQuestions, ...grammarCluster, ...readingQuestions];
 }
 
+function buildLessonSevenCuratedExamPool() {
+  const lesson = 7;
+  const lessonVocab = (ALL_GENKI_VOCAB_BY_LESSON[lesson] || []).filter((item) => isExamVocabEligible(lesson, item));
+  const allVocab = Object.values(ALL_GENKI_VOCAB_BY_LESSON).flat().filter((item) => isExamVocabEligible(lesson, item));
+  const meaningPool = Array.from(new Set(allVocab.map((item) => item.es).filter(Boolean)));
+  const jpPool = Array.from(
+    new Set(
+      allVocab
+        .map((item) => (item.kanji?.trim() ? `${item.kanji.trim()} (${item.kana})` : item.kana))
+        .filter(Boolean),
+    ),
+  );
+
+  const vocabQuestions = LESSON_SEVEN_CURATED_VOCAB.map((entry, index) => {
+    const item = lessonVocab.find((candidate) => candidate.kana === entry.kana || candidate.kana === entry.es);
+    const fallbackItem = lessonVocab.find((candidate) => candidate.kana === entry.kana);
+    const resolved = item || fallbackItem;
+    if (!resolved) return null;
+    const jpForm = resolved.kanji?.trim() ? `${resolved.kanji.trim()} (${resolved.kana})` : resolved.kana;
+    if (entry.direction === "jp-es") {
+      const sameLessonMeanings = Array.from(
+        new Set(lessonVocab.map((candidate) => candidate.es).filter((value) => value && value !== resolved.es)),
+      );
+      return createLessonQuestion(lesson, `vocab:curated:es:${resolved.kana}:${index}`, {
+        category: "vocab",
+        type: "mcq",
+        prompt: `¿Qué significa 「${resolved.kana}」?`,
+        options: buildOptionSet(resolved.es, sameLessonMeanings, meaningPool),
+        correct: resolved.es,
+        hint: buildLessonHint(lesson, "Vocabulario"),
+        explanation: `「${resolved.kana}」 significa “${resolved.es}”.`,
+      });
+    }
+
+    const sameLessonJapanese = Array.from(
+      new Set(
+        lessonVocab
+          .map((candidate) => (candidate.kanji?.trim() ? `${candidate.kanji.trim()} (${candidate.kana})` : candidate.kana))
+          .filter((value) => value && value !== jpForm),
+      ),
+    );
+    return createLessonQuestion(lesson, `vocab:curated:jp:${resolved.kana}:${index}`, {
+      category: "vocab",
+      type: "mcq",
+      prompt: `Selecciona el japonés para: “${entry.es}”`,
+      options: buildOptionSet(jpForm, sameLessonJapanese, jpPool),
+      correct: jpForm,
+      hint: buildLessonHint(lesson, "Vocabulario"),
+      explanation: `La opción correcta para “${entry.es}” es 「${jpForm}」.`,
+    });
+  }).filter((question): question is QuizQuestion => Boolean(question));
+
+  const lessonKanji = (GENKI_KANJI_BY_LESSON[lesson] || []).filter((item) =>
+    LESSON_SEVEN_CURATED_KANJI.includes(item.kanji as (typeof LESSON_SEVEN_CURATED_KANJI)[number]),
+  );
+  const allKanjiReadings = Array.from(new Set(Object.values(GENKI_KANJI_BY_LESSON).flat().map((item) => item.hira).filter(Boolean)));
+  const kanjiQuestions = lessonKanji.map((item, index) =>
+    createLessonQuestion(lesson, `kanji:curated:${item.kanji}:${index}`, {
+      category: "kanji",
+      type: "mcq",
+      prompt: `¿Cómo se lee 「${item.kanji}」?`,
+      options: buildOptionSet(item.hira, allKanjiReadings.filter((reading) => reading !== item.hira), allKanjiReadings),
+      correct: item.hira,
+      hint: buildLessonHint(lesson, "Kanji"),
+      explanation: `「${item.kanji}」 se lee 「${item.hira}」.`,
+    }),
+  );
+
+  const grammarCluster: QuizQuestion[] = [
+    createLessonQuestion(7, "grammar:curated:family-term", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "Cuando hablas de tu propia madre, ¿qué palabra usa Genki?",
+      options: ["おかあさん", "はは", "おははさん", "かあさんさま"],
+      correct: "はは",
+      hint: buildLessonHint(7, "Términos familiares"),
+      explanation: "Para tu propia familia, Genki usa 「はは」 en vez de 「おかあさん」.",
+    }),
+    createLessonQuestion(7, "grammar:curated:father-working", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “My father works in Tokyo”?",
+      options: [
+        "ちちは とうきょうで はたらいています。",
+        "ちちは とうきょうに はたらいています。",
+        "ちちが とうきょうで はたらくです。",
+        "ちちは とうきょうを はたらいています。",
+      ],
+      correct: "ちちは とうきょうで はたらいています。",
+      hint: buildLessonHint(7, "〜ています"),
+      explanation: "L7 usa 「〜ています」 para acciones habituales como trabajar.",
+    }),
+    createLessonQuestion(7, "grammar:curated:wearing-glasses", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “My older brother wears glasses”?",
+      options: [
+        "あには めがねを かけています。",
+        "あには めがねを かけます。",
+        "あには めがねで かけています。",
+        "あには めがねが かけています。",
+      ],
+      correct: "あには めがねを かけています。",
+      hint: buildLessonHint(7, "Estado con 〜ています"),
+      explanation: "Con ropa y accesorios, 「〜ています」 describe el estado actual.",
+    }),
+    createLessonQuestion(7, "grammar:curated:description", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración describe a alguien de manera natural?",
+      options: [
+        "あねは せが たかいです。",
+        "あねは せが たかいじゃないです。",
+        "あねが せ は たかいです。",
+        "あねは せいぶつがくです。",
+      ],
+      correct: "あねは せが たかいです。",
+      hint: buildLessonHint(7, "Descripciones"),
+      explanation: "Para descripciones físicas, Genki usa patrones como 「せが たかい」.",
+    }),
+    createLessonQuestion(7, "grammar:curated:place-of-work", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "Completa con la partícula correcta: とうきょう___ はたらいています。",
+      options: ["で", "に", "を", "と"],
+      correct: "で",
+      hint: buildLessonHint(7, "Lugar de acción"),
+      explanation: "Trabajar es una acción; el lugar se marca con 「で」.",
+    }),
+    createLessonQuestion(7, "grammar:curated:nanimo", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “I don't eat anything in the morning”?",
+      options: [
+        "あさ なにも たべません。",
+        "あさ なにも たべます。",
+        "あさ なんでも たべません。",
+        "あさ なにをも たべません。",
+      ],
+      correct: "あさ なにも たべません。",
+      hint: buildLessonHint(7, "なにも + negativo"),
+      explanation: "「なにも」 se usa con forma negativa para decir “nada”.",
+    }),
+    createLessonQuestion(7, "grammar:curated:betsuni", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "A: しゅうまつ なにを しましたか。\nB: ___",
+      options: [
+        "もちろん しました。",
+        "べつに なにもしませんでした。",
+        "よかったら しました。",
+        "なにも しました。",
+      ],
+      correct: "べつに なにもしませんでした。",
+      hint: buildLessonHint(7, "べつに + negativo"),
+      explanation: "「べつに」 con negativo expresa “nada en especial”.",
+    }),
+    createLessonQuestion(7, "grammar:curated:error", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración tiene un error?",
+      options: [
+        "ははは とうきょうに すんでいます。",
+        "あには めがねを かけています。",
+        "わたしの ちちは かいしゃで はたらいています。",
+        "わたしは べつに なにもしませんでした。",
+      ],
+      correct: "ははは とうきょうに すんでいます。",
+      hint: buildLessonHint(7, "Lugar con すむ"),
+      explanation: "Con 「すむ」 el lugar va con 「に」, pero la forma natural aquí sería 「ははは とうきょうに すんでいます」 without issue? Actually that's grammatical; correction: use another faulty sentence.",
+    }),
+  ];
+
+  grammarCluster[7] = createLessonQuestion(7, "grammar:curated:error", {
+    category: "grammar",
+    type: "mcq",
+    prompt: "¿Cuál oración tiene un error?",
+    options: [
+      "ははは とうきょうに すんでいます。",
+      "あには めがねを かけています。",
+      "わたしの ちちは かいしゃで はたらいています。",
+      "あねは めがねで かけています。",
+    ],
+    correct: "あねは めがねで かけています。",
+    hint: buildLessonHint(7, "Uso de かけています"),
+    explanation: "Con gafas se dice 「めがねを かけています」, no 「めがねで」.",
+  });
+
+  const readingQuestions: QuizQuestion[] = [
+    createLessonQuestion(7, "reading:curated:family-profile", {
+      category: "reading",
+      type: "mcq",
+      prompt: "Lee la presentación.\n\nわたしの かぞくは よにんです。ちちは とうきょうで はたらいています。ははは うちに います。あには だいがくせいです。\n\n¿Quién trabaja en Tokio?",
+      options: ["La madre", "El padre", "El hermano", "Nadie"],
+      correct: "El padre",
+      hint: buildLessonHint(7, "Lectura corta"),
+      explanation: "El texto dice 「ちちは とうきょうで はたらいています」.",
+    }),
+    createLessonQuestion(7, "reading:curated:appearance-dialogue", {
+      category: "reading",
+      type: "mcq",
+      prompt: "Lee el diálogo.\n\nA: おねえさんは どんなひとですか。\nB: せが たかくて、めがねを かけています。\n\n¿Cómo es la hermana mayor?",
+      options: ["Es baja y no usa gafas", "Es alta y usa gafas", "Es estudiante de Tokio", "Está casada"],
+      correct: "Es alta y usa gafas",
+      hint: buildLessonHint(7, "Lectura corta"),
+      explanation: "B dice 「せが たかくて、めがねを かけています」.",
+    }),
+  ];
+
+  return [...vocabQuestions, ...kanjiQuestions, ...grammarCluster, ...readingQuestions];
+}
+
 function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
   const normalizedLesson = Math.max(1, Math.min(12, lesson));
   if (normalizedLesson === 1) return buildLessonOneCuratedExamPool();
@@ -3409,6 +3634,7 @@ function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
   if (normalizedLesson === 4) return buildLessonFourCuratedExamPool();
   if (normalizedLesson === 5) return buildLessonFiveCuratedExamPool();
   if (normalizedLesson === 6) return buildLessonSixCuratedExamPool();
+  if (normalizedLesson === 7) return buildLessonSevenCuratedExamPool();
   const pool: QuizQuestion[] = [];
 
   const lessonVocab = (ALL_GENKI_VOCAB_BY_LESSON[normalizedLesson] || []).filter((item) => isExamVocabEligible(normalizedLesson, item));
@@ -3615,7 +3841,7 @@ function pickPrioritizedQuestions(
 }
 
 function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, number>, count: number, lesson: number) {
-  if (lesson === 1 || lesson === 2 || lesson === 3 || lesson === 4 || lesson === 5 || lesson === 6) return shuffle(pool).slice(0, count);
+  if (lesson === 1 || lesson === 2 || lesson === 3 || lesson === 4 || lesson === 5 || lesson === 6 || lesson === 7) return shuffle(pool).slice(0, count);
   const used = new Set<string>();
   const result: QuizQuestion[] = [];
   const hasKanji = lesson >= 3;
