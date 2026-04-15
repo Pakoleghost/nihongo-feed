@@ -19,7 +19,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「たんご」?
-- choices: ["hospital","palabra; vocabulario","medicina","fiebre"]
+- choices: ["hospital","palabra; vocabulario","fiebre","medicina"]
 - correct: "palabra; vocabulario"
 - explanation: 「たんご」 significa “palabra; vocabulario”.
 - hint: Lección 9 · Vocabulario
@@ -29,7 +29,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「さくぶん」?
-- choices: ["fiebre","hospital","ensayo; composición","medicina"]
+- choices: ["ensayo; composición","hospital","medicina","fiebre"]
 - correct: "ensayo; composición"
 - explanation: 「さくぶん」 significa “ensayo; composición”.
 - hint: Lección 9 · Vocabulario
@@ -39,7 +39,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「しけん」?
-- choices: ["hospital","examen","fiebre","medicina"]
+- choices: ["fiebre","hospital","medicina","examen"]
 - correct: "examen"
 - explanation: 「しけん」 significa “examen”.
 - hint: Lección 9 · Vocabulario
@@ -49,7 +49,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「チケット」?
-- choices: ["hospital","fiebre","medicina","boleto"]
+- choices: ["boleto","medicina","hospital","fiebre"]
 - correct: "boleto"
 - explanation: 「チケット」 significa “boleto”.
 - hint: Lección 9 · Vocabulario
@@ -59,7 +59,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “kabuki”
-- choices: ["病院 (びょういん)","歌舞伎 (かぶき)","薬 (くすり)","熱 (ねつ)"]
+- choices: ["病院 (びょういん)","薬 (くすり)","歌舞伎 (かぶき)","熱 (ねつ)"]
 - correct: "歌舞伎 (かぶき)"
 - explanation: La opción correcta para “kabuki” es 「歌舞伎 (かぶき)」.
 - hint: Lección 9 · Vocabulario
@@ -69,7 +69,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “enfermedad”
-- choices: ["薬 (くすり)","熱 (ねつ)","病気 (びょうき)","病院 (びょういん)"]
+- choices: ["熱 (ねつ)","病院 (びょういん)","病気 (びょうき)","薬 (くすり)"]
 - correct: "病気 (びょうき)"
 - explanation: La opción correcta para “enfermedad” es 「病気 (びょうき)」.
 - hint: Lección 9 · Vocabulario
@@ -79,7 +79,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “el mes pasado”
-- choices: ["病院 (びょういん)","薬 (くすり)","熱 (ねつ)","先月 (せんげつ)"]
+- choices: ["先月 (せんげつ)","病院 (びょういん)","熱 (ねつ)","薬 (くすり)"]
 - correct: "先月 (せんげつ)"
 - explanation: La opción correcta para “el mes pasado” es 「先月 (せんげつ)」.
 - hint: Lección 9 · Vocabulario
@@ -89,7 +89,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “rojo”
-- choices: ["病院 (びょういん)","熱 (ねつ)","赤い (あかい)","薬 (くすり)"]
+- choices: ["赤い (あかい)","病院 (びょういん)","薬 (くすり)","熱 (ねつ)"]
 - correct: "赤い (あかい)"
 - explanation: La opción correcta para “rojo” es 「赤い (あかい)」.
 - hint: Lección 9 · Vocabulario
@@ -101,7 +101,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「白い」?
-- choices: ["に","いち","いちじ","しろい"]
+- choices: ["に","いちじ","いち","しろい"]
 - correct: "しろい"
 - explanation: 「白い」 se lee 「しろい」.
 - hint: Lección 9 · Kanji
@@ -111,7 +111,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「来る」?
-- choices: ["くる","いち","いちじ","に"]
+- choices: ["いち","いちじ","に","くる"]
 - correct: "くる"
 - explanation: 「来る」 se lee 「くる」.
 - hint: Lección 9 · Kanji

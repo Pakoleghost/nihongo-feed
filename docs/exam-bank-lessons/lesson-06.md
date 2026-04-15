@@ -19,7 +19,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「パソコン」?
-- choices: ["computadora personal","comida","desayuno","bebida"]
+- choices: ["bebida","desayuno","computadora personal","comida"]
 - correct: "computadora personal"
 - explanation: 「パソコン」 significa “computadora personal”.
 - hint: Lección 6 · Vocabulario
@@ -29,7 +29,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「でんき」?
-- choices: ["comida","desayuno","bebida","electricidad; luz"]
+- choices: ["desayuno","comida","electricidad; luz","bebida"]
 - correct: "electricidad; luz"
 - explanation: 「でんき」 significa “electricidad; luz”.
 - hint: Lección 6 · Vocabulario
@@ -39,7 +39,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「まど」?
-- choices: ["comida","desayuno","ventana","bebida"]
+- choices: ["desayuno","bebida","comida","ventana"]
 - correct: "ventana"
 - explanation: 「まど」 significa “ventana”.
 - hint: Lección 6 · Vocabulario
@@ -49,7 +49,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「でんしゃ」?
-- choices: ["desayuno","bebida","comida","tren"]
+- choices: ["bebida","tren","comida","desayuno"]
 - correct: "tren"
 - explanation: 「でんしゃ」 significa “tren”.
 - hint: Lección 6 · Vocabulario
@@ -59,7 +59,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “país; lugar de origen”
-- choices: ["朝ご飯 (あさごはん)","飲み物 (のみもの)","国 (くに)","食べ物 (たべもの)"]
+- choices: ["食べ物 (たべもの)","国 (くに)","朝ご飯 (あさごはん)","飲み物 (のみもの)"]
 - correct: "国 (くに)"
 - explanation: La opción correcta para “país; lugar de origen” es 「国 (くに)」.
 - hint: Lección 6 · Vocabulario
@@ -69,7 +69,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “esta semana”
-- choices: ["今週 (こんしゅう)","食べ物 (たべもの)","朝ご飯 (あさごはん)","飲み物 (のみもの)"]
+- choices: ["朝ご飯 (あさごはん)","食べ物 (たべもの)","飲み物 (のみもの)","今週 (こんしゅう)"]
 - correct: "今週 (こんしゅう)"
 - explanation: La opción correcta para “esta semana” es 「今週 (こんしゅう)」.
 - hint: Lección 6 · Vocabulario
@@ -79,7 +79,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “noche”
-- choices: ["食べ物 (たべもの)","夜 (よる)","飲み物 (のみもの)","朝ご飯 (あさごはん)"]
+- choices: ["朝ご飯 (あさごはん)","食べ物 (たべもの)","飲み物 (のみもの)","夜 (よる)"]
 - correct: "夜 (よる)"
 - explanation: La opción correcta para “noche” es 「夜 (よる)」.
 - hint: Lección 6 · Vocabulario
@@ -89,7 +89,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “equipaje”
-- choices: ["飲み物 (のみもの)","荷物 (にもつ)","朝ご飯 (あさごはん)","食べ物 (たべもの)"]
+- choices: ["食べ物 (たべもの)","荷物 (にもつ)","朝ご飯 (あさごはん)","飲み物 (のみもの)"]
 - correct: "荷物 (にもつ)"
 - explanation: La opción correcta para “equipaje” es 「荷物 (にもつ)」.
 - hint: Lección 6 · Vocabulario
@@ -101,7 +101,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「出口」?
-- choices: ["いち","いちじ","に","でぐち"]
+- choices: ["いち","に","でぐち","いちじ"]
 - correct: "でぐち"
 - explanation: 「出口」 se lee 「でぐち」.
 - hint: Lección 6 · Kanji
@@ -111,7 +111,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「右」?
-- choices: ["いちじ","に","みぎ","いち"]
+- choices: ["いち","みぎ","に","いちじ"]
 - correct: "みぎ"
 - explanation: 「右」 se lee 「みぎ」.
 - hint: Lección 6 · Kanji

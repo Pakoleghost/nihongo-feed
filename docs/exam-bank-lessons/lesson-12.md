@@ -24,7 +24,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ぶんか」?
-- choices: ["experiencia","esperanza","futuro","cultura"]
+- choices: ["experiencia","esperanza","cultura","futuro"]
 - correct: "cultura"
 - explanation: 「ぶんか」 significa “cultura”.
 - hint: Lección 12 · Vocabulario
@@ -34,7 +34,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cultura”
-- choices: ["希望 (きぼう)","文化 (ぶんか)","将来 (しょうらい)","経験 (けいけん)"]
+- choices: ["将来 (しょうらい)","経験 (けいけん)","希望 (きぼう)","文化 (ぶんか)"]
 - correct: "文化 (ぶんか)"
 - explanation: La opción correcta para “cultura” es 「文化 (ぶんか)」.
 - hint: Lección 12 · Vocabulario
@@ -44,7 +44,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「けいけん」?
-- choices: ["experiencia","cultura","esperanza","futuro"]
+- choices: ["futuro","cultura","esperanza","experiencia"]
 - correct: "experiencia"
 - explanation: 「けいけん」 significa “experiencia”.
 - hint: Lección 12 · Vocabulario
@@ -54,7 +54,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “experiencia”
-- choices: ["経験 (けいけん)","文化 (ぶんか)","希望 (きぼう)","将来 (しょうらい)"]
+- choices: ["希望 (きぼう)","将来 (しょうらい)","経験 (けいけん)","文化 (ぶんか)"]
 - correct: "経験 (けいけん)"
 - explanation: La opción correcta para “experiencia” es 「経験 (けいけん)」.
 - hint: Lección 12 · Vocabulario
@@ -64,7 +64,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しょうらい」?
-- choices: ["futuro","experiencia","cultura","esperanza"]
+- choices: ["experiencia","futuro","esperanza","cultura"]
 - correct: "futuro"
 - explanation: 「しょうらい」 significa “futuro”.
 - hint: Lección 12 · Vocabulario
@@ -74,7 +74,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “futuro”
-- choices: ["文化 (ぶんか)","希望 (きぼう)","将来 (しょうらい)","経験 (けいけん)"]
+- choices: ["文化 (ぶんか)","将来 (しょうらい)","希望 (きぼう)","経験 (けいけん)"]
 - correct: "将来 (しょうらい)"
 - explanation: La opción correcta para “futuro” es 「将来 (しょうらい)」.
 - hint: Lección 12 · Vocabulario
@@ -84,7 +84,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きぼう」?
-- choices: ["futuro","cultura","experiencia","esperanza"]
+- choices: ["esperanza","experiencia","cultura","futuro"]
 - correct: "esperanza"
 - explanation: 「きぼう」 significa “esperanza”.
 - hint: Lección 12 · Vocabulario
@@ -94,7 +94,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “esperanza”
-- choices: ["将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)","希望 (きぼう)"]
+- choices: ["経験 (けいけん)","将来 (しょうらい)","文化 (ぶんか)","希望 (きぼう)"]
 - correct: "希望 (きぼう)"
 - explanation: La opción correcta para “esperanza” es 「希望 (きぼう)」.
 - hint: Lección 12 · Vocabulario
@@ -104,7 +104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「じゅんび」?
-- choices: ["cultura","preparación","futuro","experiencia"]
+- choices: ["cultura","experiencia","futuro","preparación"]
 - correct: "preparación"
 - explanation: 「じゅんび」 significa “preparación”.
 - hint: Lección 12 · Vocabulario
@@ -114,7 +114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “preparación”
-- choices: ["文化 (ぶんか)","将来 (しょうらい)","経験 (けいけん)","準備 (じゅんび)"]
+- choices: ["準備 (じゅんび)","将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)"]
 - correct: "準備 (じゅんび)"
 - explanation: La opción correcta para “preparación” es 「準備 (じゅんび)」.
 - hint: Lección 12 · Vocabulario
@@ -124,7 +124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「れんしゅう」?
-- choices: ["futuro","práctica","experiencia","cultura"]
+- choices: ["cultura","futuro","experiencia","práctica"]
 - correct: "práctica"
 - explanation: 「れんしゅう」 significa “práctica”.
 - hint: Lección 12 · Vocabulario
@@ -134,7 +134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “práctica”
-- choices: ["将来 (しょうらい)","経験 (けいけん)","文化 (ぶんか)","練習 (れんしゅう)"]
+- choices: ["文化 (ぶんか)","将来 (しょうらい)","経験 (けいけん)","練習 (れんしゅう)"]
 - correct: "練習 (れんしゅう)"
 - explanation: La opción correcta para “práctica” es 「練習 (れんしゅう)」.
 - hint: Lección 12 · Vocabulario
@@ -144,7 +144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はっぴょう」?
-- choices: ["cultura","experiencia","futuro","presentación"]
+- choices: ["cultura","futuro","presentación","experiencia"]
 - correct: "presentación"
 - explanation: 「はっぴょう」 significa “presentación”.
 - hint: Lección 12 · Vocabulario
@@ -154,7 +154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “presentación”
-- choices: ["将来 (しょうらい)","発表 (はっぴょう)","経験 (けいけん)","文化 (ぶんか)"]
+- choices: ["将来 (しょうらい)","文化 (ぶんか)","発表 (はっぴょう)","経験 (けいけん)"]
 - correct: "発表 (はっぴょう)"
 - explanation: La opción correcta para “presentación” es 「発表 (はっぴょう)」.
 - hint: Lección 12 · Vocabulario
@@ -164,7 +164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いけん」?
-- choices: ["cultura","futuro","opinión","experiencia"]
+- choices: ["opinión","experiencia","futuro","cultura"]
 - correct: "opinión"
 - explanation: 「いけん」 significa “opinión”.
 - hint: Lección 12 · Vocabulario
@@ -174,7 +174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “opinión”
-- choices: ["意見 (いけん)","将来 (しょうらい)","経験 (けいけん)","文化 (ぶんか)"]
+- choices: ["経験 (けいけん)","将来 (しょうらい)","意見 (いけん)","文化 (ぶんか)"]
 - correct: "意見 (いけん)"
 - explanation: La opción correcta para “opinión” es 「意見 (いけん)」.
 - hint: Lección 12 · Vocabulario
@@ -184,7 +184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「もくひょう」?
-- choices: ["cultura","futuro","meta","experiencia"]
+- choices: ["experiencia","cultura","meta","futuro"]
 - correct: "meta"
 - explanation: 「もくひょう」 significa “meta”.
 - hint: Lección 12 · Vocabulario
@@ -194,7 +194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “meta”
-- choices: ["経験 (けいけん)","将来 (しょうらい)","目標 (もくひょう)","文化 (ぶんか)"]
+- choices: ["将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)","目標 (もくひょう)"]
 - correct: "目標 (もくひょう)"
 - explanation: La opción correcta para “meta” es 「目標 (もくひょう)」.
 - hint: Lección 12 · Vocabulario
@@ -204,7 +204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「けいかく」?
-- choices: ["experiencia","plan","futuro","cultura"]
+- choices: ["futuro","cultura","plan","experiencia"]
 - correct: "plan"
 - explanation: 「けいかく」 significa “plan”.
 - hint: Lección 12 · Vocabulario
@@ -214,7 +214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “plan”
-- choices: ["文化 (ぶんか)","経験 (けいけん)","将来 (しょうらい)","計画 (けいかく)"]
+- choices: ["将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)","計画 (けいかく)"]
 - correct: "計画 (けいかく)"
 - explanation: La opción correcta para “plan” es 「計画 (けいかく)」.
 - hint: Lección 12 · Vocabulario
@@ -224,7 +224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「やくそく」?
-- choices: ["futuro","experiencia","promesa","cultura"]
+- choices: ["experiencia","promesa","cultura","futuro"]
 - correct: "promesa"
 - explanation: 「やくそく」 significa “promesa”.
 - hint: Lección 12 · Vocabulario
@@ -234,7 +234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “promesa”
-- choices: ["将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)","約束 (やくそく)"]
+- choices: ["経験 (けいけん)","文化 (ぶんか)","将来 (しょうらい)","約束 (やくそく)"]
 - correct: "約束 (やくそく)"
 - explanation: La opción correcta para “promesa” es 「約束 (やくそく)」.
 - hint: Lección 12 · Vocabulario
@@ -244,7 +244,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ひつよう」?
-- choices: ["cultura","futuro","experiencia","necesario"]
+- choices: ["futuro","cultura","necesario","experiencia"]
 - correct: "necesario"
 - explanation: 「ひつよう」 significa “necesario”.
 - hint: Lección 12 · Vocabulario
@@ -254,7 +254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “necesario”
-- choices: ["必要 (ひつよう)","文化 (ぶんか)","将来 (しょうらい)","経験 (けいけん)"]
+- choices: ["経験 (けいけん)","将来 (しょうらい)","必要 (ひつよう)","文化 (ぶんか)"]
 - correct: "必要 (ひつよう)"
 - explanation: La opción correcta para “necesario” es 「必要 (ひつよう)」.
 - hint: Lección 12 · Vocabulario
@@ -264,7 +264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おぼえる」?
-- choices: ["memorizar","futuro","experiencia","cultura"]
+- choices: ["cultura","memorizar","experiencia","futuro"]
 - correct: "memorizar"
 - explanation: 「おぼえる」 significa “memorizar”.
 - hint: Lección 12 · Vocabulario
@@ -274,7 +274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “memorizar”
-- choices: ["将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)","おぼえる"]
+- choices: ["経験 (けいけん)","文化 (ぶんか)","おぼえる","将来 (しょうらい)"]
 - correct: "おぼえる"
 - explanation: La opción correcta para “memorizar” es 「おぼえる」.
 - hint: Lección 12 · Vocabulario
@@ -284,7 +284,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はじめる」?
-- choices: ["futuro","cultura","empezar","experiencia"]
+- choices: ["cultura","experiencia","futuro","empezar"]
 - correct: "empezar"
 - explanation: 「はじめる」 significa “empezar”.
 - hint: Lección 12 · Vocabulario
@@ -294,7 +294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “empezar”
-- choices: ["将来 (しょうらい)","経験 (けいけん)","はじめる","文化 (ぶんか)"]
+- choices: ["経験 (けいけん)","文化 (ぶんか)","将来 (しょうらい)","はじめる"]
 - correct: "はじめる"
 - explanation: La opción correcta para “empezar” es 「はじめる」.
 - hint: Lección 12 · Vocabulario
@@ -304,7 +304,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「みせる」?
-- choices: ["experiencia","futuro","cultura","mostrar"]
+- choices: ["futuro","mostrar","cultura","experiencia"]
 - correct: "mostrar"
 - explanation: 「みせる」 significa “mostrar”.
 - hint: Lección 12 · Vocabulario
@@ -314,7 +314,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “mostrar”
-- choices: ["文化 (ぶんか)","みせる","将来 (しょうらい)","経験 (けいけん)"]
+- choices: ["将来 (しょうらい)","みせる","文化 (ぶんか)","経験 (けいけん)"]
 - correct: "みせる"
 - explanation: La opción correcta para “mostrar” es 「みせる」.
 - hint: Lección 12 · Vocabulario
@@ -324,7 +324,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「つづける」?
-- choices: ["continuar","cultura","experiencia","futuro"]
+- choices: ["experiencia","cultura","futuro","continuar"]
 - correct: "continuar"
 - explanation: 「つづける」 significa “continuar”.
 - hint: Lección 12 · Vocabulario
@@ -334,7 +334,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “continuar”
-- choices: ["将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)","つづける"]
+- choices: ["つづける","経験 (けいけん)","将来 (しょうらい)","文化 (ぶんか)"]
 - correct: "つづける"
 - explanation: La opción correcta para “continuar” es 「つづける」.
 - hint: Lección 12 · Vocabulario
@@ -344,7 +344,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「うれしい」?
-- choices: ["experiencia","feliz","cultura","futuro"]
+- choices: ["futuro","feliz","experiencia","cultura"]
 - correct: "feliz"
 - explanation: 「うれしい」 significa “feliz”.
 - hint: Lección 12 · Vocabulario
@@ -354,7 +354,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “feliz”
-- choices: ["経験 (けいけん)","文化 (ぶんか)","うれしい","将来 (しょうらい)"]
+- choices: ["文化 (ぶんか)","将来 (しょうらい)","経験 (けいけん)","うれしい"]
 - correct: "うれしい"
 - explanation: La opción correcta para “feliz” es 「うれしい」.
 - hint: Lección 12 · Vocabulario
@@ -364,7 +364,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「じゅうよう」?
-- choices: ["futuro","importante","cultura","experiencia"]
+- choices: ["importante","futuro","cultura","experiencia"]
 - correct: "importante"
 - explanation: 「じゅうよう」 significa “importante”.
 - hint: Lección 12 · Vocabulario
@@ -374,7 +374,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “importante”
-- choices: ["経験 (けいけん)","将来 (しょうらい)","じゅうよう","文化 (ぶんか)"]
+- choices: ["将来 (しょうらい)","じゅうよう","文化 (ぶんか)","経験 (けいけん)"]
 - correct: "じゅうよう"
 - explanation: La opción correcta para “importante” es 「じゅうよう」.
 - hint: Lección 12 · Vocabulario
@@ -384,7 +384,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おなか」?
-- choices: ["experiencia","estómago","cultura","futuro"]
+- choices: ["futuro","cultura","estómago","experiencia"]
 - correct: "estómago"
 - explanation: 「おなか」 significa “estómago”.
 - hint: Lección 12 · Vocabulario
@@ -394,7 +394,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “estómago”
-- choices: ["経験 (けいけん)","おなか","将来 (しょうらい)","文化 (ぶんか)"]
+- choices: ["おなか","将来 (しょうらい)","経験 (けいけん)","文化 (ぶんか)"]
 - correct: "おなか"
 - explanation: La opción correcta para “estómago” es 「おなか」.
 - hint: Lección 12 · Vocabulario
@@ -404,7 +404,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あし」?
-- choices: ["pierna; pie","experiencia","futuro","cultura"]
+- choices: ["futuro","pierna; pie","cultura","experiencia"]
 - correct: "pierna; pie"
 - explanation: 「あし」 significa “pierna; pie”.
 - hint: Lección 12 · Vocabulario
@@ -414,7 +414,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pierna; pie”
-- choices: ["将来 (しょうらい)","足 (あし)","経験 (けいけん)","文化 (ぶんか)"]
+- choices: ["経験 (けいけん)","足 (あし)","将来 (しょうらい)","文化 (ぶんか)"]
 - correct: "足 (あし)"
 - explanation: La opción correcta para “pierna; pie” es 「足 (あし)」.
 - hint: Lección 12 · Vocabulario
@@ -424,7 +424,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「のど」?
-- choices: ["futuro","cultura","experiencia","garganta"]
+- choices: ["garganta","futuro","cultura","experiencia"]
 - correct: "garganta"
 - explanation: 「のど」 significa “garganta”.
 - hint: Lección 12 · Vocabulario
@@ -434,7 +434,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “garganta”
-- choices: ["経験 (けいけん)","喉 (のど)","文化 (ぶんか)","将来 (しょうらい)"]
+- choices: ["文化 (ぶんか)","経験 (けいけん)","喉 (のど)","将来 (しょうらい)"]
 - correct: "喉 (のど)"
 - explanation: La opción correcta para “garganta” es 「喉 (のど)」.
 - hint: Lección 12 · Vocabulario
@@ -444,7 +444,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「は」?
-- choices: ["dientes","cultura","futuro","experiencia"]
+- choices: ["dientes","futuro","cultura","experiencia"]
 - correct: "dientes"
 - explanation: 「は」 significa “dientes”.
 - hint: Lección 12 · Vocabulario
@@ -454,7 +454,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “dientes”
-- choices: ["文化 (ぶんか)","経験 (けいけん)","歯 (は)","将来 (しょうらい)"]
+- choices: ["文化 (ぶんか)","将来 (しょうらい)","経験 (けいけん)","歯 (は)"]
 - correct: "歯 (は)"
 - explanation: La opción correcta para “dientes” es 「歯 (は)」.
 - hint: Lección 12 · Vocabulario
@@ -464,7 +464,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「インフルエンザ」?
-- choices: ["gripe","futuro","experiencia","cultura"]
+- choices: ["experiencia","futuro","cultura","gripe"]
 - correct: "gripe"
 - explanation: 「インフルエンザ」 significa “gripe”.
 - hint: Lección 12 · Vocabulario
@@ -474,7 +474,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “gripe”
-- choices: ["将来 (しょうらい)","文化 (ぶんか)","インフルエンザ","経験 (けいけん)"]
+- choices: ["将来 (しょうらい)","経験 (けいけん)","インフルエンザ","文化 (ぶんか)"]
 - correct: "インフルエンザ"
 - explanation: La opción correcta para “gripe” es 「インフルエンザ」.
 - hint: Lección 12 · Vocabulario
@@ -484,7 +484,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かぜ」?
-- choices: ["experiencia","resfriado","futuro","cultura"]
+- choices: ["experiencia","futuro","resfriado","cultura"]
 - correct: "resfriado"
 - explanation: 「かぜ」 significa “resfriado”.
 - hint: Lección 12 · Vocabulario
@@ -494,7 +494,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “resfriado”
-- choices: ["経験 (けいけん)","将来 (しょうらい)","風邪 (かぜ)","文化 (ぶんか)"]
+- choices: ["経験 (けいけん)","将来 (しょうらい)","文化 (ぶんか)","風邪 (かぜ)"]
 - correct: "風邪 (かぜ)"
 - explanation: La opción correcta para “resfriado” es 「風邪 (かぜ)」.
 - hint: Lección 12 · Vocabulario
@@ -504,7 +504,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せき」?
-- choices: ["cultura","futuro","tos","experiencia"]
+- choices: ["futuro","experiencia","tos","cultura"]
 - correct: "tos"
 - explanation: 「せき」 significa “tos”.
 - hint: Lección 12 · Vocabulario
@@ -514,7 +514,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tos”
-- choices: ["文化 (ぶんか)","せき","経験 (けいけん)","将来 (しょうらい)"]
+- choices: ["せき","経験 (けいけん)","文化 (ぶんか)","将来 (しょうらい)"]
 - correct: "せき"
 - explanation: La opción correcta para “tos” es 「せき」.
 - hint: Lección 12 · Vocabulario
@@ -524,7 +524,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ふつかよい」?
-- choices: ["futuro","resaca","cultura","experiencia"]
+- choices: ["experiencia","futuro","cultura","resaca"]
 - correct: "resaca"
 - explanation: 「ふつかよい」 significa “resaca”.
 - hint: Lección 12 · Vocabulario
@@ -534,7 +534,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “resaca”
-- choices: ["文化 (ぶんか)","将来 (しょうらい)","二日酔い (ふつかよい)","経験 (けいけん)"]
+- choices: ["二日酔い (ふつかよい)","経験 (けいけん)","文化 (ぶんか)","将来 (しょうらい)"]
 - correct: "二日酔い (ふつかよい)"
 - explanation: La opción correcta para “resaca” es 「二日酔い (ふつかよい)」.
 - hint: Lección 12 · Vocabulario
@@ -544,7 +544,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ホームシック」?
-- choices: ["cultura","experiencia","futuro","morriña; nostalgia"]
+- choices: ["morriña; nostalgia","experiencia","futuro","cultura"]
 - correct: "morriña; nostalgia"
 - explanation: 「ホームシック」 significa “morriña; nostalgia”.
 - hint: Lección 12 · Vocabulario
@@ -554,7 +554,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “morriña; nostalgia”
-- choices: ["ホームシック","文化 (ぶんか)","経験 (けいけん)","将来 (しょうらい)"]
+- choices: ["ホームシック","将来 (しょうらい)","経験 (けいけん)","文化 (ぶんか)"]
 - correct: "ホームシック"
 - explanation: La opción correcta para “morriña; nostalgia” es 「ホームシック」.
 - hint: Lección 12 · Vocabulario
@@ -564,7 +564,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「アレルギー」?
-- choices: ["futuro","cultura","alergia","experiencia"]
+- choices: ["futuro","alergia","cultura","experiencia"]
 - correct: "alergia"
 - explanation: 「アレルギー」 significa “alergia”.
 - hint: Lección 12 · Vocabulario
@@ -574,7 +574,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “alergia”
-- choices: ["アレルギー","将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)"]
+- choices: ["経験 (けいけん)","アレルギー","将来 (しょうらい)","文化 (ぶんか)"]
 - correct: "アレルギー"
 - explanation: La opción correcta para “alergia” es 「アレルギー」.
 - hint: Lección 12 · Vocabulario
@@ -584,7 +584,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ジュース」?
-- choices: ["futuro","cultura","jugo; zumo","experiencia"]
+- choices: ["experiencia","futuro","jugo; zumo","cultura"]
 - correct: "jugo; zumo"
 - explanation: 「ジュース」 significa “jugo; zumo”.
 - hint: Lección 12 · Vocabulario
@@ -594,7 +594,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “jugo; zumo”
-- choices: ["ジュース","経験 (けいけん)","文化 (ぶんか)","将来 (しょうらい)"]
+- choices: ["ジュース","文化 (ぶんか)","経験 (けいけん)","将来 (しょうらい)"]
 - correct: "ジュース"
 - explanation: La opción correcta para “jugo; zumo” es 「ジュース」.
 - hint: Lección 12 · Vocabulario
@@ -614,7 +614,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “huevo”
-- choices: ["卵 (たまご)","将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)"]
+- choices: ["文化 (ぶんか)","経験 (けいけん)","卵 (たまご)","将来 (しょうらい)"]
 - correct: "卵 (たまご)"
 - explanation: La opción correcta para “huevo” es 「卵 (たまご)」.
 - hint: Lección 12 · Vocabulario
@@ -624,7 +624,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ふく」?
-- choices: ["futuro","experiencia","ropa","cultura"]
+- choices: ["experiencia","cultura","futuro","ropa"]
 - correct: "ropa"
 - explanation: 「ふく」 significa “ropa”.
 - hint: Lección 12 · Vocabulario
@@ -634,7 +634,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ropa”
-- choices: ["文化 (ぶんか)","服 (ふく)","経験 (けいけん)","将来 (しょうらい)"]
+- choices: ["将来 (しょうらい)","経験 (けいけん)","服 (ふく)","文化 (ぶんか)"]
 - correct: "服 (ふく)"
 - explanation: La opción correcta para “ropa” es 「服 (ふく)」.
 - hint: Lección 12 · Vocabulario
@@ -644,7 +644,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「もの」?
-- choices: ["futuro","cosa (objeto concreto)","cultura","experiencia"]
+- choices: ["cosa (objeto concreto)","futuro","cultura","experiencia"]
 - correct: "cosa (objeto concreto)"
 - explanation: 「もの」 significa “cosa (objeto concreto)”.
 - hint: Lección 12 · Vocabulario
@@ -654,7 +654,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cosa (objeto concreto)”
-- choices: ["物 (もの)","文化 (ぶんか)","経験 (けいけん)","将来 (しょうらい)"]
+- choices: ["将来 (しょうらい)","経験 (けいけん)","物 (もの)","文化 (ぶんか)"]
 - correct: "物 (もの)"
 - explanation: La opción correcta para “cosa (objeto concreto)” es 「物 (もの)」.
 - hint: Lección 12 · Vocabulario
@@ -664,7 +664,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「プレゼント」?
-- choices: ["experiencia","cultura","futuro","regalo"]
+- choices: ["experiencia","futuro","regalo","cultura"]
 - correct: "regalo"
 - explanation: 「プレゼント」 significa “regalo”.
 - hint: Lección 12 · Vocabulario
@@ -674,7 +674,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “regalo”
-- choices: ["将来 (しょうらい)","経験 (けいけん)","プレゼント","文化 (ぶんか)"]
+- choices: ["経験 (けいけん)","将来 (しょうらい)","プレゼント","文化 (ぶんか)"]
 - correct: "プレゼント"
 - explanation: La opción correcta para “regalo” es 「プレゼント」.
 - hint: Lección 12 · Vocabulario
@@ -684,7 +684,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きっぷ」?
-- choices: ["futuro","experiencia","ticket (de tren)","cultura"]
+- choices: ["futuro","cultura","ticket (de tren)","experiencia"]
 - correct: "ticket (de tren)"
 - explanation: 「きっぷ」 significa “ticket (de tren)”.
 - hint: Lección 12 · Vocabulario
@@ -694,7 +694,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ticket (de tren)”
-- choices: ["文化 (ぶんか)","将来 (しょうらい)","経験 (けいけん)","切符 (きっぷ)"]
+- choices: ["将来 (しょうらい)","文化 (ぶんか)","切符 (きっぷ)","経験 (けいけん)"]
 - correct: "切符 (きっぷ)"
 - explanation: La opción correcta para “ticket (de tren)” es 「切符 (きっぷ)」.
 - hint: Lección 12 · Vocabulario
@@ -704,7 +704,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～だい」?
-- choices: ["experiencia","futuro","cultura","tarifa; tasa"]
+- choices: ["futuro","tarifa; tasa","cultura","experiencia"]
 - correct: "tarifa; tasa"
 - explanation: 「～だい」 significa “tarifa; tasa”.
 - hint: Lección 12 · Vocabulario
@@ -714,7 +714,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tarifa; tasa”
-- choices: ["経験 (けいけん)","将来 (しょうらい)","～代 (～だい)","文化 (ぶんか)"]
+- choices: ["将来 (しょうらい)","～代 (～だい)","経験 (けいけん)","文化 (ぶんか)"]
 - correct: "～代 (～だい)"
 - explanation: La opción correcta para “tarifa; tasa” es 「～代 (～だい)」.
 - hint: Lección 12 · Vocabulario
@@ -724,7 +724,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ようじ」?
-- choices: ["experiencia","futuro","asuntos de los que ocuparse","cultura"]
+- choices: ["cultura","experiencia","asuntos de los que ocuparse","futuro"]
 - correct: "asuntos de los que ocuparse"
 - explanation: 「ようじ」 significa “asuntos de los que ocuparse”.
 - hint: Lección 12 · Vocabulario
@@ -734,7 +734,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “asuntos de los que ocuparse”
-- choices: ["将来 (しょうらい)","文化 (ぶんか)","用事 (ようじ)","経験 (けいけん)"]
+- choices: ["経験 (けいけん)","用事 (ようじ)","将来 (しょうらい)","文化 (ぶんか)"]
 - correct: "用事 (ようじ)"
 - explanation: La opción correcta para “asuntos de los que ocuparse” es 「用事 (ようじ)」.
 - hint: Lección 12 · Vocabulario
@@ -744,7 +744,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おてあらい」?
-- choices: ["experiencia","cultura","futuro","baño; aseo"]
+- choices: ["cultura","futuro","experiencia","baño; aseo"]
 - correct: "baño; aseo"
 - explanation: 「おてあらい」 significa “baño; aseo”.
 - hint: Lección 12 · Vocabulario
@@ -754,7 +754,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “baño; aseo”
-- choices: ["将来 (しょうらい)","経験 (けいけん)","文化 (ぶんか)","お手洗い (おてあらい)"]
+- choices: ["文化 (ぶんか)","将来 (しょうらい)","お手洗い (おてあらい)","経験 (けいけん)"]
 - correct: "お手洗い (おてあらい)"
 - explanation: La opción correcta para “baño; aseo” es 「お手洗い (おてあらい)」.
 - hint: Lección 12 · Vocabulario
@@ -764,7 +764,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しあい」?
-- choices: ["futuro","partido; juego","experiencia","cultura"]
+- choices: ["partido; juego","cultura","futuro","experiencia"]
 - correct: "partido; juego"
 - explanation: 「しあい」 significa “partido; juego”.
 - hint: Lección 12 · Vocabulario
@@ -774,7 +774,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “partido; juego”
-- choices: ["文化 (ぶんか)","試合 (しあい)","経験 (けいけん)","将来 (しょうらい)"]
+- choices: ["試合 (しあい)","将来 (しょうらい)","経験 (けいけん)","文化 (ぶんか)"]
 - correct: "試合 (しあい)"
 - explanation: La opción correcta para “partido; juego” es 「試合 (しあい)」.
 - hint: Lección 12 · Vocabulario
@@ -784,7 +784,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せいじ」?
-- choices: ["cultura","futuro","política","experiencia"]
+- choices: ["política","futuro","cultura","experiencia"]
 - correct: "política"
 - explanation: 「せいじ」 significa “política”.
 - hint: Lección 12 · Vocabulario
@@ -794,7 +794,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “política”
-- choices: ["将来 (しょうらい)","政治 (せいじ)","経験 (けいけん)","文化 (ぶんか)"]
+- choices: ["文化 (ぶんか)","政治 (せいじ)","経験 (けいけん)","将来 (しょうらい)"]
 - correct: "政治 (せいじ)"
 - explanation: La opción correcta para “política” es 「政治 (せいじ)」.
 - hint: Lección 12 · Vocabulario
@@ -804,7 +804,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せいせき」?
-- choices: ["experiencia","nota (examen)","cultura","futuro"]
+- choices: ["futuro","cultura","experiencia","nota (examen)"]
 - correct: "nota (examen)"
 - explanation: 「せいせき」 significa “nota (examen)”.
 - hint: Lección 12 · Vocabulario
@@ -814,7 +814,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “nota (examen)”
-- choices: ["文化 (ぶんか)","将来 (しょうらい)","成績 (せいせき)","経験 (けいけん)"]
+- choices: ["成績 (せいせき)","将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)"]
 - correct: "成績 (せいせき)"
 - explanation: La opción correcta para “nota (examen)” es 「成績 (せいせき)」.
 - hint: Lección 12 · Vocabulario
@@ -824,7 +824,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かのじょ」?
-- choices: ["cultura","ella; novia","futuro","experiencia"]
+- choices: ["experiencia","cultura","futuro","ella; novia"]
 - correct: "ella; novia"
 - explanation: 「かのじょ」 significa “ella; novia”.
 - hint: Lección 12 · Vocabulario
@@ -834,7 +834,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ella; novia”
-- choices: ["経験 (けいけん)","彼女 (かのじょ)","将来 (しょうらい)","文化 (ぶんか)"]
+- choices: ["経験 (けいけん)","彼女 (かのじょ)","文化 (ぶんか)","将来 (しょうらい)"]
 - correct: "彼女 (かのじょ)"
 - explanation: La opción correcta para “ella; novia” es 「彼女 (かのじょ)」.
 - hint: Lección 12 · Vocabulario
@@ -844,7 +844,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かれ」?
-- choices: ["experiencia","él; novio","futuro","cultura"]
+- choices: ["él; novio","experiencia","futuro","cultura"]
 - correct: "él; novio"
 - explanation: 「かれ」 significa “él; novio”.
 - hint: Lección 12 · Vocabulario
@@ -854,7 +854,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “él; novio”
-- choices: ["文化 (ぶんか)","彼 (かれ)","将来 (しょうらい)","経験 (けいけん)"]
+- choices: ["将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)","彼 (かれ)"]
 - correct: "彼 (かれ)"
 - explanation: La opción correcta para “él; novio” es 「彼 (かれ)」.
 - hint: Lección 12 · Vocabulario
@@ -864,7 +864,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かれし」?
-- choices: ["experiencia","cultura","futuro","novio"]
+- choices: ["cultura","novio","experiencia","futuro"]
 - correct: "novio"
 - explanation: 「かれし」 significa “novio”.
 - hint: Lección 12 · Vocabulario
@@ -874,7 +874,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “novio”
-- choices: ["将来 (しょうらい)","彼氏 (かれし)","経験 (けいけん)","文化 (ぶんか)"]
+- choices: ["経験 (けいけん)","文化 (ぶんか)","彼氏 (かれし)","将来 (しょうらい)"]
 - correct: "彼氏 (かれし)"
 - explanation: La opción correcta para “novio” es 「彼氏 (かれし)」.
 - hint: Lección 12 · Vocabulario
@@ -884,7 +884,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いみ」?
-- choices: ["significado","futuro","cultura","experiencia"]
+- choices: ["futuro","experiencia","cultura","significado"]
 - correct: "significado"
 - explanation: 「いみ」 significa “significado”.
 - hint: Lección 12 · Vocabulario
@@ -894,7 +894,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “significado”
-- choices: ["将来 (しょうらい)","意味 (いみ)","経験 (けいけん)","文化 (ぶんか)"]
+- choices: ["将来 (しょうらい)","経験 (けいけん)","文化 (ぶんか)","意味 (いみ)"]
 - correct: "意味 (いみ)"
 - explanation: La opción correcta para “significado” es 「意味 (いみ)」.
 - hint: Lección 12 · Vocabulario
@@ -904,7 +904,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せまい」?
-- choices: ["estrecho; no espacioso","cultura","futuro","experiencia"]
+- choices: ["experiencia","cultura","estrecho; no espacioso","futuro"]
 - correct: "estrecho; no espacioso"
 - explanation: 「せまい」 significa “estrecho; no espacioso”.
 - hint: Lección 12 · Vocabulario
@@ -914,7 +914,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “estrecho; no espacioso”
-- choices: ["将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)","狭い (せまい)"]
+- choices: ["経験 (けいけん)","文化 (ぶんか)","狭い (せまい)","将来 (しょうらい)"]
 - correct: "狭い (せまい)"
 - explanation: La opción correcta para “estrecho; no espacioso” es 「狭い (せまい)」.
 - hint: Lección 12 · Vocabulario
@@ -924,7 +924,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ひろい」?
-- choices: ["cultura","futuro","amplio; espacioso","experiencia"]
+- choices: ["futuro","cultura","amplio; espacioso","experiencia"]
 - correct: "amplio; espacioso"
 - explanation: 「ひろい」 significa “amplio; espacioso”.
 - hint: Lección 12 · Vocabulario
@@ -934,7 +934,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “amplio; espacioso”
-- choices: ["広い (ひろい)","将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)"]
+- choices: ["文化 (ぶんか)","将来 (しょうらい)","経験 (けいけん)","広い (ひろい)"]
 - correct: "広い (ひろい)"
 - explanation: La opción correcta para “amplio; espacioso” es 「広い (ひろい)」.
 - hint: Lección 12 · Vocabulario
@@ -944,7 +944,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「わるい」?
-- choices: ["futuro","experiencia","malo","cultura"]
+- choices: ["malo","experiencia","futuro","cultura"]
 - correct: "malo"
 - explanation: 「わるい」 significa “malo”.
 - hint: Lección 12 · Vocabulario
@@ -954,7 +954,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “malo”
-- choices: ["将来 (しょうらい)","経験 (けいけん)","文化 (ぶんか)","悪い (わるい)"]
+- choices: ["文化 (ぶんか)","将来 (しょうらい)","経験 (けいけん)","悪い (わるい)"]
 - correct: "悪い (わるい)"
 - explanation: La opción correcta para “malo” es 「悪い (わるい)」.
 - hint: Lección 12 · Vocabulario
@@ -964,7 +964,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いたい」?
-- choices: ["futuro","dolor; doloroso","cultura","experiencia"]
+- choices: ["experiencia","dolor; doloroso","cultura","futuro"]
 - correct: "dolor; doloroso"
 - explanation: 「いたい」 significa “dolor; doloroso”.
 - hint: Lección 12 · Vocabulario
@@ -974,7 +974,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “dolor; doloroso”
-- choices: ["将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)","痛い (いたい)"]
+- choices: ["痛い (いたい)","経験 (けいけん)","将来 (しょうらい)","文化 (ぶんか)"]
 - correct: "痛い (いたい)"
 - explanation: La opción correcta para “dolor; doloroso” es 「痛い (いたい)」.
 - hint: Lección 12 · Vocabulario
@@ -984,7 +984,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あまい」?
-- choices: ["dulce","futuro","experiencia","cultura"]
+- choices: ["experiencia","dulce","cultura","futuro"]
 - correct: "dulce"
 - explanation: 「あまい」 significa “dulce”.
 - hint: Lección 12 · Vocabulario
@@ -994,7 +994,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “dulce”
-- choices: ["将来 (しょうらい)","経験 (けいけん)","文化 (ぶんか)","甘い (あまい)"]
+- choices: ["経験 (けいけん)","将来 (しょうらい)","甘い (あまい)","文化 (ぶんか)"]
 - correct: "甘い (あまい)"
 - explanation: La opción correcta para “dulce” es 「甘い (あまい)」.
 - hint: Lección 12 · Vocabulario
@@ -1004,7 +1004,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おおい」?
-- choices: ["haber muchos ...","cultura","futuro","experiencia"]
+- choices: ["futuro","haber muchos ...","cultura","experiencia"]
 - correct: "haber muchos ..."
 - explanation: 「おおい」 significa “haber muchos ...”.
 - hint: Lección 12 · Vocabulario
@@ -1014,7 +1014,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “haber muchos ...”
-- choices: ["経験 (けいけん)","文化 (ぶんか)","将来 (しょうらい)","多い (おおい)"]
+- choices: ["文化 (ぶんか)","将来 (しょうらい)","経験 (けいけん)","多い (おおい)"]
 - correct: "多い (おおい)"
 - explanation: La opción correcta para “haber muchos ...” es 「多い (おおい)」.
 - hint: Lección 12 · Vocabulario
@@ -1024,7 +1024,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「すてき(な)」?
-- choices: ["futuro","experiencia","cultura","bonito"]
+- choices: ["futuro","cultura","bonito","experiencia"]
 - correct: "bonito"
 - explanation: 「すてき(な)」 significa “bonito”.
 - hint: Lección 12 · Vocabulario
@@ -1034,7 +1034,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “bonito”
-- choices: ["経験 (けいけん)","将来 (しょうらい)","素敵 (すてき(な))","文化 (ぶんか)"]
+- choices: ["経験 (けいけん)","文化 (ぶんか)","素敵 (すてき(な))","将来 (しょうらい)"]
 - correct: "素敵 (すてき(な))"
 - explanation: La opción correcta para “bonito” es 「素敵 (すてき(な))」.
 - hint: Lección 12 · Vocabulario
@@ -1044,7 +1044,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あるく」?
-- choices: ["futuro","cultura","caminar","experiencia"]
+- choices: ["caminar","experiencia","futuro","cultura"]
 - correct: "caminar"
 - explanation: 「あるく」 significa “caminar”.
 - hint: Lección 12 · Vocabulario
@@ -1054,7 +1054,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “caminar”
-- choices: ["歩く (あるく)","文化 (ぶんか)","経験 (けいけん)","将来 (しょうらい)"]
+- choices: ["経験 (けいけん)","将来 (しょうらい)","文化 (ぶんか)","歩く (あるく)"]
 - correct: "歩く (あるく)"
 - explanation: La opción correcta para “caminar” es 「歩く (あるく)」.
 - hint: Lección 12 · Vocabulario
@@ -1064,7 +1064,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かぜをひく」?
-- choices: ["cultura","futuro","resfriarse","experiencia"]
+- choices: ["cultura","resfriarse","futuro","experiencia"]
 - correct: "resfriarse"
 - explanation: 「かぜをひく」 significa “resfriarse”.
 - hint: Lección 12 · Vocabulario
@@ -1074,7 +1074,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “resfriarse”
-- choices: ["将来 (しょうらい)","経験 (けいけん)","風邪をひく (かぜをひく)","文化 (ぶんか)"]
+- choices: ["文化 (ぶんか)","経験 (けいけん)","将来 (しょうらい)","風邪をひく (かぜをひく)"]
 - correct: "風邪をひく (かぜをひく)"
 - explanation: La opción correcta para “resfriarse” es 「風邪をひく (かぜをひく)」.
 - hint: Lección 12 · Vocabulario
@@ -1094,7 +1094,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tener interés”
-- choices: ["文化 (ぶんか)","経験 (けいけん)","将来 (しょうらい)","興味がある (きょうみがある)"]
+- choices: ["興味がある (きょうみがある)","将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)"]
 - correct: "興味がある (きょうみがある)"
 - explanation: La opción correcta para “tener interés” es 「興味がある (きょうみがある)」.
 - hint: Lección 12 · Vocabulario
@@ -1104,7 +1104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「なくす」?
-- choices: ["perder algo","experiencia","futuro","cultura"]
+- choices: ["cultura","experiencia","perder algo","futuro"]
 - correct: "perder algo"
 - explanation: 「なくす」 significa “perder algo”.
 - hint: Lección 12 · Vocabulario
@@ -1114,7 +1114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “perder algo”
-- choices: ["なくす","将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)"]
+- choices: ["将来 (しょうらい)","経験 (けいけん)","なくす","文化 (ぶんか)"]
 - correct: "なくす"
 - explanation: La opción correcta para “perder algo” es 「なくす」.
 - hint: Lección 12 · Vocabulario
@@ -1124,7 +1124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ねつがある」?
-- choices: ["experiencia","tener fiebre","futuro","cultura"]
+- choices: ["tener fiebre","experiencia","cultura","futuro"]
 - correct: "tener fiebre"
 - explanation: 「ねつがある」 significa “tener fiebre”.
 - hint: Lección 12 · Vocabulario
@@ -1134,7 +1134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tener fiebre”
-- choices: ["将来 (しょうらい)","熱がある (ねつがある)","経験 (けいけん)","文化 (ぶんか)"]
+- choices: ["経験 (けいけん)","熱がある (ねつがある)","将来 (しょうらい)","文化 (ぶんか)"]
 - correct: "熱がある (ねつがある)"
 - explanation: La opción correcta para “tener fiebre” es 「熱がある (ねつがある)」.
 - hint: Lección 12 · Vocabulario
@@ -1144,7 +1144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「のどがかわく」?
-- choices: ["futuro","experiencia","cultura","tener sed"]
+- choices: ["cultura","experiencia","tener sed","futuro"]
 - correct: "tener sed"
 - explanation: 「のどがかわく」 significa “tener sed”.
 - hint: Lección 12 · Vocabulario
@@ -1154,7 +1154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tener sed”
-- choices: ["文化 (ぶんか)","喉が渇く (のどがかわく)","将来 (しょうらい)","経験 (けいけん)"]
+- choices: ["経験 (けいけん)","将来 (しょうらい)","文化 (ぶんか)","喉が渇く (のどがかわく)"]
 - correct: "喉が渇く (のどがかわく)"
 - explanation: La opción correcta para “tener sed” es 「喉が渇く (のどがかわく)」.
 - hint: Lección 12 · Vocabulario
@@ -1164,7 +1164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せきがでる」?
-- choices: ["tener tos","futuro","experiencia","cultura"]
+- choices: ["cultura","futuro","experiencia","tener tos"]
 - correct: "tener tos"
 - explanation: 「せきがでる」 significa “tener tos”.
 - hint: Lección 12 · Vocabulario
@@ -1174,7 +1174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tener tos”
-- choices: ["経験 (けいけん)","文化 (ぶんか)","咳が出る (せきがでる)","将来 (しょうらい)"]
+- choices: ["将来 (しょうらい)","咳が出る (せきがでる)","経験 (けいけん)","文化 (ぶんか)"]
 - correct: "咳が出る (せきがでる)"
 - explanation: La opción correcta para “tener tos” es 「咳が出る (せきがでる)」.
 - hint: Lección 12 · Vocabulario
@@ -1184,7 +1184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「わかれる」?
-- choices: ["cultura","separarse; romper","futuro","experiencia"]
+- choices: ["separarse; romper","futuro","cultura","experiencia"]
 - correct: "separarse; romper"
 - explanation: 「わかれる」 significa “separarse; romper”.
 - hint: Lección 12 · Vocabulario
@@ -1194,7 +1194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “separarse; romper”
-- choices: ["別れる (わかれる)","経験 (けいけん)","文化 (ぶんか)","将来 (しょうらい)"]
+- choices: ["別れる (わかれる)","文化 (ぶんか)","将来 (しょうらい)","経験 (けいけん)"]
 - correct: "別れる (わかれる)"
 - explanation: La opción correcta para “separarse; romper” es 「別れる (わかれる)」.
 - hint: Lección 12 · Vocabulario
@@ -1204,7 +1204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きんちょうする」?
-- choices: ["cultura","experiencia","ponerse nervioso","futuro"]
+- choices: ["cultura","ponerse nervioso","futuro","experiencia"]
 - correct: "ponerse nervioso"
 - explanation: 「きんちょうする」 significa “ponerse nervioso”.
 - hint: Lección 12 · Vocabulario
@@ -1214,7 +1214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ponerse nervioso”
-- choices: ["将来 (しょうらい)","文化 (ぶんか)","緊張する (きんちょうする)","経験 (けいけん)"]
+- choices: ["将来 (しょうらい)","緊張する (きんちょうする)","文化 (ぶんか)","経験 (けいけん)"]
 - correct: "緊張する (きんちょうする)"
 - explanation: La opción correcta para “ponerse nervioso” es 「緊張する (きんちょうする)」.
 - hint: Lección 12 · Vocabulario
@@ -1224,7 +1224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しんぱいする」?
-- choices: ["cultura","experiencia","preocuparse","futuro"]
+- choices: ["experiencia","cultura","futuro","preocuparse"]
 - correct: "preocuparse"
 - explanation: 「しんぱいする」 significa “preocuparse”.
 - hint: Lección 12 · Vocabulario
@@ -1234,7 +1234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “preocuparse”
-- choices: ["心配する (しんぱいする)","将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)"]
+- choices: ["文化 (ぶんか)","心配する (しんぱいする)","将来 (しょうらい)","経験 (けいけん)"]
 - correct: "心配する (しんぱいする)"
 - explanation: La opción correcta para “preocuparse” es 「心配する (しんぱいする)」.
 - hint: Lección 12 · Vocabulario
@@ -1244,7 +1244,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おだいじに」?
-- choices: ["cuídate (para alguien enfermo)","futuro","experiencia","cultura"]
+- choices: ["cuídate (para alguien enfermo)","cultura","experiencia","futuro"]
 - correct: "cuídate (para alguien enfermo)"
 - explanation: 「おだいじに」 significa “cuídate (para alguien enfermo)”.
 - hint: Lección 12 · Vocabulario
@@ -1254,7 +1254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cuídate (para alguien enfermo)”
-- choices: ["文化 (ぶんか)","おだいじに","経験 (けいけん)","将来 (しょうらい)"]
+- choices: ["おだいじに","文化 (ぶんか)","将来 (しょうらい)","経験 (けいけん)"]
 - correct: "おだいじに"
 - explanation: La opción correcta para “cuídate (para alguien enfermo)” es 「おだいじに」.
 - hint: Lección 12 · Vocabulario
@@ -1264,7 +1264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～かどうか」?
-- choices: ["si... o no","cultura","experiencia","futuro"]
+- choices: ["futuro","cultura","experiencia","si... o no"]
 - correct: "si... o no"
 - explanation: 「～かどうか」 significa “si... o no”.
 - hint: Lección 12 · Vocabulario
@@ -1274,7 +1274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “si... o no”
-- choices: ["経験 (けいけん)","～かどうか","将来 (しょうらい)","文化 (ぶんか)"]
+- choices: ["経験 (けいけん)","～かどうか","文化 (ぶんか)","将来 (しょうらい)"]
 - correct: "～かどうか"
 - explanation: La opción correcta para “si... o no” es 「～かどうか」.
 - hint: Lección 12 · Vocabulario
@@ -1284,7 +1284,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～ことがあります」?
-- choices: ["haber tenido la experiencia de...","futuro","experiencia","cultura"]
+- choices: ["experiencia","haber tenido la experiencia de...","futuro","cultura"]
 - correct: "haber tenido la experiencia de..."
 - explanation: 「～ことがあります」 significa “haber tenido la experiencia de...”.
 - hint: Lección 12 · Vocabulario
@@ -1294,7 +1294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “haber tenido la experiencia de...”
-- choices: ["経験 (けいけん)","文化 (ぶんか)","将来 (しょうらい)","～ことがあります"]
+- choices: ["文化 (ぶんか)","～ことがあります","経験 (けいけん)","将来 (しょうらい)"]
 - correct: "～ことがあります"
 - explanation: La opción correcta para “haber tenido la experiencia de...” es 「～ことがあります」.
 - hint: Lección 12 · Vocabulario
@@ -1304,7 +1304,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～し」?
-- choices: ["...y... (además)","experiencia","futuro","cultura"]
+- choices: ["experiencia","...y... (además)","cultura","futuro"]
 - correct: "...y... (además)"
 - explanation: 「～し」 significa “...y... (además)”.
 - hint: Lección 12 · Vocabulario
@@ -1314,7 +1314,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “...y... (además)”
-- choices: ["将来 (しょうらい)","～し","文化 (ぶんか)","経験 (けいけん)"]
+- choices: ["文化 (ぶんか)","～し","経験 (けいけん)","将来 (しょうらい)"]
 - correct: "～し"
 - explanation: La opción correcta para “...y... (además)” es 「～し」.
 - hint: Lección 12 · Vocabulario
@@ -1324,7 +1324,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～すぎます」?
-- choices: ["ser demasiado...","futuro","cultura","experiencia"]
+- choices: ["futuro","ser demasiado...","experiencia","cultura"]
 - correct: "ser demasiado..."
 - explanation: 「～すぎます」 significa “ser demasiado...”.
 - hint: Lección 12 · Vocabulario
@@ -1334,7 +1334,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ser demasiado...”
-- choices: ["将来 (しょうらい)","経験 (けいけん)","文化 (ぶんか)","～すぎます"]
+- choices: ["文化 (ぶんか)","～すぎます","経験 (けいけん)","将来 (しょうらい)"]
 - correct: "～すぎます"
 - explanation: La opción correcta para “ser demasiado...” es 「～すぎます」.
 - hint: Lección 12 · Vocabulario
@@ -1344,7 +1344,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～たほうがいいです」?
-- choices: ["sería mejor que...","experiencia","cultura","futuro"]
+- choices: ["sería mejor que...","futuro","cultura","experiencia"]
 - correct: "sería mejor que..."
 - explanation: 「～たほうがいいです」 significa “sería mejor que...”.
 - hint: Lección 12 · Vocabulario
@@ -1354,7 +1354,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “sería mejor que...”
-- choices: ["～たほうがいいです","文化 (ぶんか)","経験 (けいけん)","将来 (しょうらい)"]
+- choices: ["将来 (しょうらい)","～たほうがいいです","経験 (けいけん)","文化 (ぶんか)"]
 - correct: "～たほうがいいです"
 - explanation: La opción correcta para “sería mejor que...” es 「～たほうがいいです」.
 - hint: Lección 12 · Vocabulario
@@ -1364,7 +1364,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「たぶん」?
-- choices: ["probablemente","cultura","futuro","experiencia"]
+- choices: ["cultura","futuro","probablemente","experiencia"]
 - correct: "probablemente"
 - explanation: 「たぶん」 significa “probablemente”.
 - hint: Lección 12 · Vocabulario
@@ -1374,7 +1374,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “probablemente”
-- choices: ["将来 (しょうらい)","文化 (ぶんか)","経験 (けいけん)","多分 (たぶん)"]
+- choices: ["多分 (たぶん)","将来 (しょうらい)","経験 (けいけん)","文化 (ぶんか)"]
 - correct: "多分 (たぶん)"
 - explanation: La opción correcta para “probablemente” es 「多分 (たぶん)」.
 - hint: Lección 12 · Vocabulario
@@ -1384,7 +1384,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～でしょう」?
-- choices: ["probablemente; ¿verdad?","experiencia","cultura","futuro"]
+- choices: ["futuro","experiencia","cultura","probablemente; ¿verdad?"]
 - correct: "probablemente; ¿verdad?"
 - explanation: 「～でしょう」 significa “probablemente; ¿verdad?”.
 - hint: Lección 12 · Vocabulario
@@ -1394,7 +1394,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “probablemente; ¿verdad?”
-- choices: ["経験 (けいけん)","～でしょう","文化 (ぶんか)","将来 (しょうらい)"]
+- choices: ["将来 (しょうらい)","～でしょう","経験 (けいけん)","文化 (ぶんか)"]
 - correct: "～でしょう"
 - explanation: La opción correcta para “probablemente; ¿verdad?” es 「～でしょう」.
 - hint: Lección 12 · Vocabulario
@@ -1404,7 +1404,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～ので」?
-- choices: ["experiencia","cultura","futuro","porque..."]
+- choices: ["porque...","experiencia","cultura","futuro"]
 - correct: "porque..."
 - explanation: 「～ので」 significa “porque...”.
 - hint: Lección 12 · Vocabulario
@@ -1414,7 +1414,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “porque...”
-- choices: ["文化 (ぶんか)","経験 (けいけん)","～ので","将来 (しょうらい)"]
+- choices: ["将来 (しょうらい)","経験 (けいけん)","文化 (ぶんか)","～ので"]
 - correct: "～ので"
 - explanation: La opción correcta para “porque...” es 「～ので」.
 - hint: Lección 12 · Vocabulario
@@ -1424,7 +1424,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はじめて」?
-- choices: ["cultura","por primera vez","experiencia","futuro"]
+- choices: ["futuro","por primera vez","experiencia","cultura"]
 - correct: "por primera vez"
 - explanation: 「はじめて」 significa “por primera vez”.
 - hint: Lección 12 · Vocabulario
@@ -1434,7 +1434,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “por primera vez”
-- choices: ["初めて (はじめて)","文化 (ぶんか)","経験 (けいけん)","将来 (しょうらい)"]
+- choices: ["文化 (ぶんか)","経験 (けいけん)","初めて (はじめて)","将来 (しょうらい)"]
 - correct: "初めて (はじめて)"
 - explanation: La opción correcta para “por primera vez” es 「初めて (はじめて)」.
 - hint: Lección 12 · Vocabulario
@@ -1444,7 +1444,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「もうすぐ」?
-- choices: ["futuro","pronto; dentro de poco","cultura","experiencia"]
+- choices: ["experiencia","futuro","pronto; dentro de poco","cultura"]
 - correct: "pronto; dentro de poco"
 - explanation: 「もうすぐ」 significa “pronto; dentro de poco”.
 - hint: Lección 12 · Vocabulario
@@ -1454,7 +1454,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pronto; dentro de poco”
-- choices: ["文化 (ぶんか)","もうすぐ","経験 (けいけん)","将来 (しょうらい)"]
+- choices: ["文化 (ぶんか)","将来 (しょうらい)","経験 (けいけん)","もうすぐ"]
 - correct: "もうすぐ"
 - explanation: La opción correcta para “pronto; dentro de poco” es 「もうすぐ」.
 - hint: Lección 12 · Vocabulario
@@ -1464,10 +1464,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. じゅうよう","B. ジュース","C. 風邪 (かぜ)"]
-- choices.right: ["1. importante","2. resfriado","3. jugo; zumo"]
-- correct: "A-1, B-3, C-2"
-- explanation: Relaciones correctas: A-1, B-3, C-2.
+- choices.left: ["A. 卵 (たまご)","B. 痛い (いたい)","C. アレルギー"]
+- choices.right: ["1. huevo","2. dolor; doloroso","3. alergia"]
+- correct: "A-1, B-2, C-3"
+- explanation: Relaciones correctas: A-1, B-2, C-3.
 - hint: Lección 12 · Relacionar
 
 ### exam-vocab-match-12-1
@@ -1475,10 +1475,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 文化 (ぶんか)","B. アレルギー","C. 切符 (きっぷ)"]
-- choices.right: ["1. cultura","2. ticket (de tren)","3. alergia"]
-- correct: "A-1, B-3, C-2"
-- explanation: Relaciones correctas: A-1, B-3, C-2.
+- choices.left: ["A. ～でしょう","B. 彼 (かれ)","C. はじめる"]
+- choices.right: ["1. empezar","2. él; novio","3. probablemente; ¿verdad?"]
+- correct: "A-3, B-2, C-1"
+- explanation: Relaciones correctas: A-3, B-2, C-1.
 - hint: Lección 12 · Relacionar
 
 ### exam-vocab-match-12-2
@@ -1486,10 +1486,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. みせる","B. 計画 (けいかく)","C. 意見 (いけん)"]
-- choices.right: ["1. plan","2. mostrar","3. opinión"]
-- correct: "A-2, B-1, C-3"
-- explanation: Relaciones correctas: A-2, B-1, C-3.
+- choices.left: ["A. 心配する (しんぱいする)","B. 広い (ひろい)","C. ジュース"]
+- choices.right: ["1. jugo; zumo","2. amplio; espacioso","3. preocuparse"]
+- correct: "A-3, B-2, C-1"
+- explanation: Relaciones correctas: A-3, B-2, C-1.
 - hint: Lección 12 · Relacionar
 
 ### exam-vocab-match-12-3
@@ -1497,10 +1497,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 喉が渇く (のどがかわく)","B. なくす","C. 風邪 (かぜ)"]
-- choices.right: ["1. perder algo","2. resfriado","3. tener sed"]
-- correct: "A-3, B-1, C-2"
-- explanation: Relaciones correctas: A-3, B-1, C-2.
+- choices.left: ["A. 必要 (ひつよう)","B. 初めて (はじめて)","C. 狭い (せまい)"]
+- choices.right: ["1. estrecho; no espacioso","2. por primera vez","3. necesario"]
+- correct: "A-3, B-2, C-1"
+- explanation: Relaciones correctas: A-3, B-2, C-1.
 - hint: Lección 12 · Relacionar
 
 ## kanji
@@ -1510,7 +1510,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「昔」?
-- choices: ["いち","に","むかし","いちじ"]
+- choices: ["に","いちじ","いち","むかし"]
 - correct: "むかし"
 - explanation: 「昔」 se lee 「むかし」.
 - hint: Lección 12 · Kanji
@@ -1531,7 +1531,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「時々」?
-- choices: ["ときどき","いちじ","に","いち"]
+- choices: ["に","ときどき","いちじ","いち"]
 - correct: "ときどき"
 - explanation: 「時々」 se lee 「ときどき」.
 - hint: Lección 12 · Kanji
@@ -1552,7 +1552,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「神社」?
-- choices: ["に","じんじゃ","いち","いちじ"]
+- choices: ["いち","じんじゃ","に","いちじ"]
 - correct: "じんじゃ"
 - explanation: 「神社」 se lee 「じんじゃ」.
 - hint: Lección 12 · Kanji
@@ -1573,7 +1573,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「早い」?
-- choices: ["に","はやい","いちじ","いち"]
+- choices: ["いち","いちじ","に","はやい"]
 - correct: "はやい"
 - explanation: 「早い」 se lee 「はやい」.
 - hint: Lección 12 · Kanji
@@ -1594,7 +1594,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「起きる」?
-- choices: ["いち","いちじ","に","おきる"]
+- choices: ["いち","おきる","に","いちじ"]
 - correct: "おきる"
 - explanation: 「起きる」 se lee 「おきる」.
 - hint: Lección 12 · Kanji
@@ -1615,7 +1615,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「牛乳」?
-- choices: ["いちじ","いち","ぎゅうにゅう","に"]
+- choices: ["ぎゅうにゅう","いち","いちじ","に"]
 - correct: "ぎゅうにゅう"
 - explanation: 「牛乳」 se lee 「ぎゅうにゅう」.
 - hint: Lección 12 · Kanji
@@ -1636,7 +1636,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「使う」?
-- choices: ["いち","つかう","いちじ","に"]
+- choices: ["に","つかう","いちじ","いち"]
 - correct: "つかう"
 - explanation: 「使う」 se lee 「つかう」.
 - hint: Lección 12 · Kanji
@@ -1657,7 +1657,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「働く」?
-- choices: ["いち","いちじ","に","はたらく"]
+- choices: ["いちじ","はたらく","に","いち"]
 - correct: "はたらく"
 - explanation: 「働く」 se lee 「はたらく」.
 - hint: Lección 12 · Kanji
@@ -1678,7 +1678,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「連れて帰る」?
-- choices: ["いちじ","に","つれてかえる","いち"]
+- choices: ["いち","つれてかえる","に","いちじ"]
 - correct: "つれてかえる"
 - explanation: 「連れて帰る」 se lee 「つれてかえる」.
 - hint: Lección 12 · Kanji
@@ -1699,7 +1699,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「別れる」?
-- choices: ["いち","に","わかれる","いちじ"]
+- choices: ["わかれる","いちじ","に","いち"]
 - correct: "わかれる"
 - explanation: 「別れる」 se lee 「わかれる」.
 - hint: Lección 12 · Kanji
@@ -1720,7 +1720,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「一度」?
-- choices: ["いち","いちど","に","いちじ"]
+- choices: ["いちど","いちじ","に","いち"]
 - correct: "いちど"
 - explanation: 「一度」 se lee 「いちど」.
 - hint: Lección 12 · Kanji
@@ -1741,7 +1741,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「赤い」?
-- choices: ["いちじ","に","あかい","いち"]
+- choices: ["いちじ","に","いち","あかい"]
 - correct: "あかい"
 - explanation: 「赤い」 se lee 「あかい」.
 - hint: Lección 12 · Kanji
@@ -1762,7 +1762,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「青い」?
-- choices: ["いち","いちじ","あおい","に"]
+- choices: ["あおい","いち","に","いちじ"]
 - correct: "あおい"
 - explanation: 「青い」 se lee 「あおい」.
 - hint: Lección 12 · Kanji
@@ -1783,7 +1783,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「色」?
-- choices: ["に","いちじ","いち","いろ"]
+- choices: ["いちじ","に","いち","いろ"]
 - correct: "いろ"
 - explanation: 「色」 se lee 「いろ」.
 - hint: Lección 12 · Kanji
@@ -1827,7 +1827,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: マリアさん___せんせいです。
-- choices: ["が","は","で","を"]
+- choices: ["が","は","を","で"]
 - correct: "は"
 - explanation: Oración copulativa con tema 「は」.
 - hint: Lección 12 · Partículas
@@ -1848,7 +1848,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: これはだれ___ほんですか。
-- choices: ["で","を","の","に"]
+- choices: ["を","に","で","の"]
 - correct: "の"
 - explanation: Posesión con 「の」.
 - hint: Lección 12 · Partículas
@@ -1869,7 +1869,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___ともだちもにほんじんです。
-- choices: ["が","は","も","の"]
+- choices: ["も","が","は","の"]
 - correct: "の"
 - explanation: 「わたしのともだち」.
 - hint: Lección 12 · Partículas
@@ -1890,7 +1890,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: がっこう___いきます。
-- choices: ["は","に","で","を"]
+- choices: ["は","で","を","に"]
 - correct: "に"
 - explanation: Destino con 「に」.
 - hint: Lección 12 · Partículas
@@ -1911,7 +1911,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: としょかん___べんきょうします。
-- choices: ["で","が","に","を"]
+- choices: ["で","に","が","を"]
 - correct: "で"
 - explanation: Lugar de acción con 「で」.
 - hint: Lección 12 · Partículas
@@ -1932,7 +1932,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ほん___よみます。
-- choices: ["を","は","で","に"]
+- choices: ["で","を","は","に"]
 - correct: "を"
 - explanation: Objeto directo con 「を」.
 - hint: Lección 12 · Partículas
@@ -1953,7 +1953,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: 7じ___おきます。
-- choices: ["が","を","に","で"]
+- choices: ["が","に","で","を"]
 - correct: "に"
 - explanation: Hora específica con 「に」.
 - hint: Lección 12 · Partículas
@@ -1974,7 +1974,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: うち___かえりました。
-- choices: ["が","を","に","で"]
+- choices: ["で","を","が","に"]
 - correct: "に"
 - explanation: Destino final con 「に」.
 - hint: Lección 12 · Partículas
@@ -1995,7 +1995,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ともだち___えいがをみました。
-- choices: ["と","を","が","に"]
+- choices: ["を","に","が","と"]
 - correct: "と"
 - explanation: Compañía con 「と」.
 - hint: Lección 12 · Partículas
@@ -2016,7 +2016,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ケーキ___すきです。
-- choices: ["が","で","を","に"]
+- choices: ["が","を","に","で"]
 - correct: "が"
 - explanation: Con 「すき」 se usa 「が」.
 - hint: Lección 12 · Partículas
@@ -2037,7 +2037,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: こうえん___しんぶんをよみます。
-- choices: ["に","で","を","が"]
+- choices: ["を","が","で","に"]
 - correct: "で"
 - explanation: Lugar de acción con 「で」.
 - hint: Lección 12 · Partículas
@@ -2058,7 +2058,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: にほん___りょうりはおいしいです。
-- choices: ["が","を","に","の"]
+- choices: ["の","に","を","が"]
 - correct: "の"
 - explanation: Modificador nominal con 「の」.
 - hint: Lección 12 · Partículas
@@ -2079,7 +2079,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: 8じ___10じ___べんきょうしました。
-- choices: ["で / から","に / に","を / に","から / まで"]
+- choices: ["から / まで","を / に","に / に","で / から"]
 - correct: "から / まで"
 - explanation: Rango temporal.
 - hint: Lección 12 · Partículas
@@ -2100,7 +2100,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: くすり___のみました。
-- choices: ["が","に","を","で"]
+- choices: ["で","を","が","に"]
 - correct: "を"
 - explanation: Objeto directo.
 - hint: Lección 12 · Partículas
@@ -2121,7 +2121,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ひだり___まがってください。
-- choices: ["が","に","で","を"]
+- choices: ["を","に","で","が"]
 - correct: "に"
 - explanation: Dirección con 「に」.
 - hint: Lección 12 · Partículas
@@ -2142,7 +2142,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: せんせい___そうだんしました。
-- choices: ["が","で","に","を"]
+- choices: ["が","で","を","に"]
 - correct: "に"
 - explanation: Objetivo de consulta con 「に」.
 - hint: Lección 12 · Partículas
@@ -2163,7 +2163,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: にほんご___じょうずになりました。
-- choices: ["を","で","が","に"]
+- choices: ["で","に","を","が"]
 - correct: "が"
 - explanation: Con habilidad, normalmente 「が」.
 - hint: Lección 12 · Partículas
@@ -2186,7 +2186,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「おぼえる」 (memorizar)
-- choices: ["いって","おぼえて","みて","たべて"]
+- choices: ["たべて","いって","おぼえて","みて"]
 - correct: "おぼえて"
 - explanation: La forma て de 「おぼえる」 es 「おぼえて」.
 - hint: Lección 12 · Conjugación
@@ -2196,7 +2196,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「おぼえる」 (memorizar)
-- choices: ["いった","たべた","みた","おぼえた"]
+- choices: ["たべた","みた","おぼえた","いった"]
 - correct: "おぼえた"
 - explanation: El pasado corto de 「おぼえる」 es 「おぼえた」.
 - hint: Lección 12 · Conjugación
@@ -2216,7 +2216,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「はじめる」 (empezar)
-- choices: ["いって","たべて","はじめて","みて"]
+- choices: ["はじめて","いって","たべて","みて"]
 - correct: "はじめて"
 - explanation: La forma て de 「はじめる」 es 「はじめて」.
 - hint: Lección 12 · Conjugación
@@ -2226,7 +2226,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「はじめる」 (empezar)
-- choices: ["みた","はじめた","たべた","いった"]
+- choices: ["いった","たべた","はじめた","みた"]
 - correct: "はじめた"
 - explanation: El pasado corto de 「はじめる」 es 「はじめた」.
 - hint: Lección 12 · Conjugación
@@ -2246,7 +2246,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「みせる」 (mostrar)
-- choices: ["たべて","いって","みて","みせて"]
+- choices: ["いって","たべて","みて","みせて"]
 - correct: "みせて"
 - explanation: La forma て de 「みせる」 es 「みせて」.
 - hint: Lección 12 · Conjugación
@@ -2256,7 +2256,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「みせる」 (mostrar)
-- choices: ["いった","たべた","みせた","みた"]
+- choices: ["みせた","たべた","みた","いった"]
 - correct: "みせた"
 - explanation: El pasado corto de 「みせる」 es 「みせた」.
 - hint: Lección 12 · Conjugación
@@ -2276,7 +2276,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「つづける」 (continuar)
-- choices: ["いって","つづけて","たべて","みて"]
+- choices: ["いって","たべて","つづけて","みて"]
 - correct: "つづけて"
 - explanation: La forma て de 「つづける」 es 「つづけて」.
 - hint: Lección 12 · Conjugación
@@ -2286,7 +2286,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「つづける」 (continuar)
-- choices: ["たべた","つづけた","みた","いった"]
+- choices: ["みた","たべた","つづけた","いった"]
 - correct: "つづけた"
 - explanation: El pasado corto de 「つづける」 es 「つづけた」.
 - hint: Lección 12 · Conjugación
@@ -2306,7 +2306,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「うれしい」 (feliz)
-- choices: ["やすくない","しずかじゃない","たかくない","うれしくない"]
+- choices: ["うれしくない","たかくない","しずかじゃない","やすくない"]
 - correct: "うれしくない"
 - explanation: La forma negativa de 「うれしい」 es 「うれしくない」.
 - hint: Lección 12 · Conjugación
@@ -2316,7 +2316,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「じゅうよう」 (importante)
-- choices: ["じゅうようじゃない","しずかじゃない","たかくない","やすくない"]
+- choices: ["じゅうようじゃない","たかくない","しずかじゃない","やすくない"]
 - correct: "じゅうようじゃない"
 - explanation: La forma negativa de 「じゅうよう」 es 「じゅうようじゃない」.
 - hint: Lección 12 · Conjugación
@@ -2328,7 +2328,7 @@
 - type: `reorder`
 - source: `lesson_scenarios_grammar`
 - prompt: Ordena el consejo.
-- choices: ["ほうが","やすんだ","いいです","きょうは"]
+- choices: ["ほうが","きょうは","いいです","やすんだ"]
 - correct: "きょうは やすんだ ほうが いいです"
 - explanation: Para aconsejar, Genki usa 「〜たほうがいいです」.
 - hint: Lección 12 · Consejos

@@ -1358,6 +1358,19 @@ const LESSON_TEN_CURATED_VOCAB = [
 
 const LESSON_TEN_CURATED_KANJI = ["町", "道"] as const;
 
+const LESSON_ELEVEN_CURATED_VOCAB = [
+  { kana: "りょこう", es: "viaje", direction: "jp-es" },
+  { kana: "おんせん", es: "aguas termales", direction: "jp-es" },
+  { kana: "びじゅつかん", es: "museo de arte", direction: "jp-es" },
+  { kana: "ゆめ", es: "sueño", direction: "jp-es" },
+  { kana: "しょうらい", es: "futuro", direction: "es-jp" },
+  { kana: "じゅぎょう", es: "clase", direction: "es-jp" },
+  { kana: "りゅうがくする", es: "estudiar en el extranjero", direction: "es-jp" },
+  { kana: "キャンプ", es: "campamento", direction: "es-jp" },
+] as const;
+
+const LESSON_ELEVEN_CURATED_KANJI = ["旅行", "手紙"] as const;
+
 const PARTICLE_EXAM_BANK: Array<{
   id: string;
   minLesson: number;
@@ -4275,6 +4288,221 @@ function buildLessonTenCuratedExamPool() {
   return [...vocabQuestions, ...kanjiQuestions, ...grammarCluster, ...readingQuestions];
 }
 
+function buildLessonElevenCuratedExamPool() {
+  const lesson = 11;
+  const lessonVocab = (ALL_GENKI_VOCAB_BY_LESSON[lesson] || []).filter((item) => isExamVocabEligible(lesson, item));
+  const allVocab = Object.values(ALL_GENKI_VOCAB_BY_LESSON).flat().filter((item) => isExamVocabEligible(lesson, item));
+  const meaningPool = Array.from(new Set(allVocab.map((item) => item.es).filter(Boolean)));
+  const jpPool = Array.from(
+    new Set(
+      allVocab
+        .map((item) => (item.kanji?.trim() ? `${item.kanji.trim()} (${item.kana})` : item.kana))
+        .filter(Boolean),
+    ),
+  );
+
+  const vocabQuestions = LESSON_ELEVEN_CURATED_VOCAB.map((entry, index) => {
+    const resolved = lessonVocab.find((candidate) => candidate.kana === entry.kana);
+    if (!resolved) return null;
+    const jpForm = resolved.kanji?.trim() ? `${resolved.kanji.trim()} (${resolved.kana})` : resolved.kana;
+    if (entry.direction === "jp-es") {
+      const sameLessonMeanings = Array.from(
+        new Set(lessonVocab.map((candidate) => candidate.es).filter((value) => value && value !== resolved.es)),
+      );
+      return createLessonQuestion(lesson, `vocab:curated:es:${resolved.kana}:${index}`, {
+        category: "vocab",
+        type: "mcq",
+        prompt: `¿Qué significa 「${resolved.kana}」?`,
+        options: buildOptionSet(resolved.es, sameLessonMeanings, meaningPool),
+        correct: resolved.es,
+        hint: buildLessonHint(lesson, "Vocabulario"),
+        explanation: `「${resolved.kana}」 significa “${resolved.es}”.`,
+      });
+    }
+
+    const sameLessonJapanese = Array.from(
+      new Set(
+        lessonVocab
+          .map((candidate) => (candidate.kanji?.trim() ? `${candidate.kanji.trim()} (${candidate.kana})` : candidate.kana))
+          .filter((value) => value && value !== jpForm),
+      ),
+    );
+    return createLessonQuestion(lesson, `vocab:curated:jp:${resolved.kana}:${index}`, {
+      category: "vocab",
+      type: "mcq",
+      prompt: `Selecciona el japonés para: “${entry.es}”`,
+      options: buildOptionSet(jpForm, sameLessonJapanese, jpPool),
+      correct: jpForm,
+      hint: buildLessonHint(lesson, "Vocabulario"),
+      explanation: `La opción correcta para “${entry.es}” es 「${jpForm}」.`,
+    });
+  }).filter((question): question is QuizQuestion => Boolean(question));
+
+  const lessonKanji = (GENKI_KANJI_BY_LESSON[lesson] || []).filter((item) =>
+    LESSON_ELEVEN_CURATED_KANJI.includes(item.kanji as (typeof LESSON_ELEVEN_CURATED_KANJI)[number]),
+  );
+  const allKanjiReadings = Array.from(new Set(Object.values(GENKI_KANJI_BY_LESSON).flat().map((item) => item.hira).filter(Boolean)));
+  const kanjiQuestions = lessonKanji.map((item, index) =>
+    createLessonQuestion(lesson, `kanji:curated:${item.kanji}:${index}`, {
+      category: "kanji",
+      type: "mcq",
+      prompt: `¿Cómo se lee 「${item.kanji}」?`,
+      options: buildOptionSet(item.hira, allKanjiReadings.filter((reading) => reading !== item.hira), allKanjiReadings),
+      correct: item.hira,
+      hint: buildLessonHint(lesson, "Kanji"),
+      explanation: `「${item.kanji}」 se lee 「${item.hira}」.`,
+    }),
+  );
+
+  const grammarCluster: QuizQuestion[] = [
+    createLessonQuestion(11, "grammar:curated:want-go", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “I want to go to Kyoto”?",
+      options: [
+        "きょうとへ いきたいです。",
+        "きょうとへ いきますです。",
+        "きょうとへ いきたかったです。",
+        "きょうとへ いくたりします。",
+      ],
+      correct: "きょうとへ いきたいです。",
+      hint: buildLessonHint(11, "〜たい"),
+      explanation: "La forma de deseo se hace con la raíz de ます + 「たいです」.",
+    }),
+    createLessonQuestion(11, "grammar:curated:want-take-photos", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “I want to take pictures”?",
+      options: [
+        "しゃしんを とります。",
+        "しゃしんを とりたいです。",
+        "しゃしんを とったです。",
+        "しゃしんを とるたりします。",
+      ],
+      correct: "しゃしんを とりたいです。",
+      hint: buildLessonHint(11, "〜たい"),
+      explanation: "「とる」 pasa a 「とりたいです」.",
+    }),
+    createLessonQuestion(11, "grammar:curated:want-negative", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “I don't want to study”?",
+      options: [
+        "べんきょうしたいです。",
+        "べんきょうしたくないです。",
+        "べんきょうしませんです。",
+        "べんきょうしないたいです。",
+      ],
+      correct: "べんきょうしたくないです。",
+      hint: buildLessonHint(11, "〜たい negativo"),
+      explanation: "La negativa de 「〜たい」 se forma como un adjetivo i: 「〜たくないです」.",
+    }),
+    createLessonQuestion(11, "grammar:curated:question-want", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál pregunta significa “What do you want to do this weekend?”?",
+      options: [
+        "しゅうまつ なにを したいですか。",
+        "しゅうまつ なにを しますか。",
+        "しゅうまつ なにを したですか。",
+        "しゅうまつ なにを したりですか。",
+      ],
+      correct: "しゅうまつ なにを したいですか。",
+      hint: buildLessonHint(11, "Pregunta con 〜たい"),
+      explanation: "Para preguntar por deseos se usa 「なにを したいですか」.",
+    }),
+    createLessonQuestion(11, "grammar:curated:tari-list", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración expresa una lista no exhaustiva de actividades?",
+      options: [
+        "しゅうまつは ほんを よんだり えいがを みたり します。",
+        "しゅうまつは ほんを よんで えいがを みます。",
+        "しゅうまつは ほんを よむたり えいがを みるたり します。",
+        "しゅうまつは ほんを よみたい えいがを みたいです。",
+      ],
+      correct: "しゅうまつは ほんを よんだり えいがを みたり します。",
+      hint: buildLessonHint(11, "〜たり〜たりする"),
+      explanation: "Ese patrón expresa una lista representativa, no exhaustiva.",
+    }),
+    createLessonQuestion(11, "grammar:curated:tari-meaning", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “On the trip I want to see temples and take pictures, among other things”?",
+      options: [
+        "りょこうで おてらを みたり、しゃしんを とったり したいです。",
+        "りょこうで おてらを みて、しゃしんを とりたいです。",
+        "りょこうで おてらを みたい、しゃしんを とったり します。",
+        "りょこうで おてらを みたり、しゃしんを とります。",
+      ],
+      correct: "りょこうで おてらを みたり、しゃしんを とったり したいです。",
+      hint: buildLessonHint(11, "〜たり〜たりする"),
+      explanation: "La estructura 「〜たり〜たりしたいです」 combina deseo con lista no exhaustiva.",
+    }),
+    createLessonQuestion(11, "grammar:curated:future-dream", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “In the future I want to study abroad in Australia”?",
+      options: [
+        "しょうらい オーストラリアへ りゅうがくしたいです。",
+        "しょうらい オーストラリアへ りゅうがくします。",
+        "しょうらい オーストラリアへ りゅうがくしたりです。",
+        "しょうらい オーストラリアへ りゅうがくしてです。",
+      ],
+      correct: "しょうらい オーストラリアへ りゅうがくしたいです。",
+      hint: buildLessonHint(11, "〜たい"),
+      explanation: "La forma deseada con する-verbs es 「〜したいです」.",
+    }),
+    createLessonQuestion(11, "grammar:curated:error", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración tiene un error?",
+      options: [
+        "きょうとへ いきたいです。",
+        "しゅうまつは ほんを よんだり えいがを みたり します。",
+        "しゃしんを とるたいです。",
+        "おんせんに いきたくないです。",
+      ],
+      correct: "しゃしんを とるたいです。",
+      hint: buildLessonHint(11, "〜たい"),
+      explanation: "「〜たい」 se forma con la raíz de ます: 「とりたいです」, no 「とるたいです」.",
+    }),
+  ];
+
+  const readingQuestions: QuizQuestion[] = [
+    createLessonQuestion(11, "reading:curated:vacation-plan", {
+      category: "reading",
+      type: "mcq",
+      prompt: "Lee el texto.\n\nりょこうで おてらを みたり、しゃしんを とったり したいです。それから おんせんにも はいりたいです。\n\n¿Qué quiere hacer esta persona además de ver templos y tomar fotos?",
+      options: [
+        "Ir a clases",
+        "Entrar a un onsen",
+        "Comprar cerveza",
+        "Correr en el parque",
+      ],
+      correct: "Entrar a un onsen",
+      hint: buildLessonHint(11, "Lectura corta"),
+      explanation: "La última oración dice 「おんせんにも はいりたいです」.",
+    }),
+    createLessonQuestion(11, "reading:curated:weekend-dialogue", {
+      category: "reading",
+      type: "mcq",
+      prompt: "Lee el diálogo.\n\nA: しゅうまつ なにを したいですか。\nB: こうえんへ いって、さんぽしたいです。でも あとで ルームメイトと えいがも みたいです。\n\n¿Qué quiere hacer B después?",
+      options: [
+        "Ir al museo de arte",
+        "Ver una película con su roommate",
+        "Estudiar en casa",
+        "Subir una montaña",
+      ],
+      correct: "Ver una película con su roommate",
+      hint: buildLessonHint(11, "Lectura corta"),
+      explanation: "B dice 「あとで ルームメイトと えいがも みたいです」.",
+    }),
+  ];
+
+  return [...vocabQuestions, ...kanjiQuestions, ...grammarCluster, ...readingQuestions];
+}
+
 function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
   const normalizedLesson = Math.max(1, Math.min(12, lesson));
   if (normalizedLesson === 1) return buildLessonOneCuratedExamPool();
@@ -4287,6 +4515,7 @@ function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
   if (normalizedLesson === 8) return buildLessonEightCuratedExamPool();
   if (normalizedLesson === 9) return buildLessonNineCuratedExamPool();
   if (normalizedLesson === 10) return buildLessonTenCuratedExamPool();
+  if (normalizedLesson === 11) return buildLessonElevenCuratedExamPool();
   const pool: QuizQuestion[] = [];
 
   const lessonVocab = (ALL_GENKI_VOCAB_BY_LESSON[normalizedLesson] || []).filter((item) => isExamVocabEligible(normalizedLesson, item));
@@ -4493,7 +4722,7 @@ function pickPrioritizedQuestions(
 }
 
 function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, number>, count: number, lesson: number) {
-  if (lesson === 1 || lesson === 2 || lesson === 3 || lesson === 4 || lesson === 5 || lesson === 6 || lesson === 7 || lesson === 8 || lesson === 9 || lesson === 10) return shuffle(pool).slice(0, count);
+  if (lesson === 1 || lesson === 2 || lesson === 3 || lesson === 4 || lesson === 5 || lesson === 6 || lesson === 7 || lesson === 8 || lesson === 9 || lesson === 10 || lesson === 11) return shuffle(pool).slice(0, count);
   const used = new Set<string>();
   const result: QuizQuestion[] = [];
   const hasKanji = lesson >= 3;

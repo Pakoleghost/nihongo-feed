@@ -19,7 +19,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「しんかんせん」?
-- choices: ["mapa","derecha","Shinkansen; \"tren bala\"","estación"]
+- choices: ["Shinkansen; \"tren bala\"","estación","derecha","mapa"]
 - correct: "Shinkansen; \"tren bala\""
 - explanation: 「しんかんせん」 significa “Shinkansen; "tren bala"”.
 - hint: Lección 10 · Vocabulario
@@ -29,7 +29,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「ひこうき」?
-- choices: ["avión","estación","derecha","mapa"]
+- choices: ["mapa","estación","avión","derecha"]
 - correct: "avión"
 - explanation: 「ひこうき」 significa “avión”.
 - hint: Lección 10 · Vocabulario
@@ -39,7 +39,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「よやく」?
-- choices: ["estación","reserva","mapa","derecha"]
+- choices: ["mapa","estación","reserva","derecha"]
 - correct: "reserva"
 - explanation: 「よやく」 significa “reserva”.
 - hint: Lección 10 · Vocabulario
@@ -59,7 +59,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “sushi”
-- choices: ["すし","地図 (ちず)","駅 (えき)","右 (みぎ)"]
+- choices: ["地図 (ちず)","駅 (えき)","右 (みぎ)","すし"]
 - correct: "すし"
 - explanation: La opción correcta para “sushi” es 「すし」.
 - hint: Lección 10 · Vocabulario
@@ -69,7 +69,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “comida; cocina”
-- choices: ["地図 (ちず)","料理 (りょうり)","駅 (えき)","右 (みぎ)"]
+- choices: ["料理 (りょうり)","地図 (ちず)","駅 (えき)","右 (みぎ)"]
 - correct: "料理 (りょうり)"
 - explanation: La opción correcta para “comida; cocina” es 「料理 (りょうり)」.
 - hint: Lección 10 · Vocabulario
@@ -79,7 +79,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “metro”
-- choices: ["地下鉄 (ちかてつ)","地図 (ちず)","駅 (えき)","右 (みぎ)"]
+- choices: ["駅 (えき)","地図 (ちず)","地下鉄 (ちかてつ)","右 (みぎ)"]
 - correct: "地下鉄 (ちかてつ)"
 - explanation: La opción correcta para “metro” es 「地下鉄 (ちかてつ)」.
 - hint: Lección 10 · Vocabulario
@@ -89,7 +89,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “este año”
-- choices: ["右 (みぎ)","今年 (ことし)","駅 (えき)","地図 (ちず)"]
+- choices: ["右 (みぎ)","駅 (えき)","地図 (ちず)","今年 (ことし)"]
 - correct: "今年 (ことし)"
 - explanation: La opción correcta para “este año” es 「今年 (ことし)」.
 - hint: Lección 10 · Vocabulario
@@ -101,7 +101,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「町」?
-- choices: ["いち","いちじ","に","まち"]
+- choices: ["いちじ","まち","いち","に"]
 - correct: "まち"
 - explanation: 「町」 se lee 「まち」.
 - hint: Lección 10 · Kanji
@@ -111,7 +111,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「道」?
-- choices: ["いちじ","に","みち","いち"]
+- choices: ["に","いち","みち","いちじ"]
 - correct: "みち"
 - explanation: 「道」 se lee 「みち」.
 - hint: Lección 10 · Kanji
