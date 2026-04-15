@@ -1267,6 +1267,19 @@ const LESSON_THREE_CURATED_VOCAB = [
 
 const LESSON_THREE_CURATED_KANJI = ["一時", "円"] as const;
 
+const LESSON_FOUR_CURATED_VOCAB = [
+  { kana: "せんしゅう", es: "la semana pasada", direction: "jp-es" },
+  { kana: "きのう", es: "ayer", direction: "jp-es" },
+  { kana: "でんしゃ", es: "tren", direction: "jp-es" },
+  { kana: "しゃしん", es: "fotografía", direction: "jp-es" },
+  { kana: "アルバイト", es: "trabajo a tiempo parcial", direction: "es-jp" },
+  { kana: "ひとりで", es: "solo", direction: "es-jp" },
+  { kana: "どうして", es: "por qué", direction: "es-jp" },
+  { kana: "としょかん", es: "biblioteca", direction: "es-jp" },
+] as const;
+
+const LESSON_FOUR_CURATED_KANJI = ["月曜日", "三時半"] as const;
+
 const LESSON_FIVE_CURATED_VOCAB = [
   { kana: "てんき", es: "tiempo (atmosférico)", direction: "jp-es" },
   { kana: "りょこう", es: "viaje", direction: "jp-es" },
@@ -2783,6 +2796,201 @@ function buildLessonThreeCuratedExamPool() {
   return [...vocabQuestions, ...kanjiQuestions, ...grammarCluster, ...readingQuestions];
 }
 
+function buildLessonFourCuratedExamPool() {
+  const lesson = 4;
+  const lessonVocab = (ALL_GENKI_VOCAB_BY_LESSON[lesson] || []).filter((item) => isExamVocabEligible(lesson, item));
+  const allVocab = Object.values(ALL_GENKI_VOCAB_BY_LESSON).flat().filter((item) => isExamVocabEligible(lesson, item));
+  const meaningPool = Array.from(new Set(allVocab.map((item) => item.es).filter(Boolean)));
+  const jpPool = Array.from(
+    new Set(
+      allVocab
+        .map((item) => (item.kanji?.trim() ? `${item.kanji.trim()} (${item.kana})` : item.kana))
+        .filter(Boolean),
+    ),
+  );
+
+  const vocabQuestions = LESSON_FOUR_CURATED_VOCAB.map((entry, index) => {
+    const item = lessonVocab.find((candidate) => candidate.kana === entry.kana);
+    if (!item) return null;
+    const jpForm = item.kanji?.trim() ? `${item.kanji.trim()} (${item.kana})` : item.kana;
+    if (entry.direction === "jp-es") {
+      const sameLessonMeanings = Array.from(
+        new Set(lessonVocab.map((candidate) => candidate.es).filter((value) => value && value !== item.es)),
+      );
+      return createLessonQuestion(lesson, `vocab:curated:es:${item.kana}:${index}`, {
+        category: "vocab",
+        type: "mcq",
+        prompt: `¿Qué significa 「${item.kana}」?`,
+        options: buildOptionSet(item.es, sameLessonMeanings, meaningPool),
+        correct: item.es,
+        hint: buildLessonHint(lesson, "Vocabulario"),
+        explanation: `「${item.kana}」 significa “${item.es}”.`,
+      });
+    }
+
+    const sameLessonJapanese = Array.from(
+      new Set(
+        lessonVocab
+          .map((candidate) => (candidate.kanji?.trim() ? `${candidate.kanji.trim()} (${candidate.kana})` : candidate.kana))
+          .filter((value) => value && value !== jpForm),
+      ),
+    );
+    return createLessonQuestion(lesson, `vocab:curated:jp:${item.kana}:${index}`, {
+      category: "vocab",
+      type: "mcq",
+      prompt: `Selecciona el japonés para: “${item.es}”`,
+      options: buildOptionSet(jpForm, sameLessonJapanese, jpPool),
+      correct: jpForm,
+      hint: buildLessonHint(lesson, "Vocabulario"),
+      explanation: `La opción correcta para “${item.es}” es 「${jpForm}」.`,
+    });
+  }).filter((question): question is QuizQuestion => Boolean(question));
+
+  const lessonKanji = (GENKI_KANJI_BY_LESSON[lesson] || []).filter((item) =>
+    LESSON_FOUR_CURATED_KANJI.includes(item.kanji as (typeof LESSON_FOUR_CURATED_KANJI)[number]),
+  );
+  const allKanjiReadings = Array.from(new Set(Object.values(GENKI_KANJI_BY_LESSON).flat().map((item) => item.hira).filter(Boolean)));
+  const kanjiQuestions = lessonKanji.map((item, index) =>
+    createLessonQuestion(lesson, `kanji:curated:${item.kanji}:${index}`, {
+      category: "kanji",
+      type: "mcq",
+      prompt: `¿Cómo se lee 「${item.kanji}」?`,
+      options: buildOptionSet(item.hira, allKanjiReadings.filter((reading) => reading !== item.hira), allKanjiReadings),
+      correct: item.hira,
+      hint: buildLessonHint(lesson, "Kanji"),
+      explanation: `「${item.kanji}」 se lee 「${item.hira}」.`,
+    }),
+  );
+
+  const grammarCluster: QuizQuestion[] = [
+    createLessonQuestion(4, "grammar:curated:past-affirmative", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “I went to the library yesterday”?",
+      options: [
+        "きのう としょかんへ いきました。",
+        "きのう としょかんへ いきませんでした。",
+        "きのう としょかんで いきました。",
+        "きのう としょかんを いきました。",
+      ],
+      correct: "きのう としょかんへ いきました。",
+      hint: buildLessonHint(4, "Pasado"),
+      explanation: "La forma pasada afirmativa formal es 「〜ました」.",
+    }),
+    createLessonQuestion(4, "grammar:curated:past-negative", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “I did not go to the library”?",
+      options: [
+        "としょかんに いきました。",
+        "としょかんに いきません。",
+        "としょかんに いきませんでした。",
+        "としょかんで いきませんでした。",
+      ],
+      correct: "としょかんに いきませんでした。",
+      hint: buildLessonHint(4, "Pasado negativo"),
+      explanation: "La forma pasada negativa formal es 「〜ませんでした」.",
+    }),
+    createLessonQuestion(4, "grammar:curated:duration", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "Completa la oración de manera natural: にほんごを ___ べんきょうしました。",
+      options: ["いちじかん", "いちじかんに", "いちじかんで", "いちじかんを"],
+      correct: "いちじかん",
+      hint: buildLessonHint(4, "Duración"),
+      explanation: "La duración normalmente va sin partícula.",
+    }),
+    createLessonQuestion(4, "grammar:curated:with-person", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "Completa la oración: ともだち___ えいがを みました。",
+      options: ["に", "で", "と", "を"],
+      correct: "と",
+      hint: buildLessonHint(4, "Compañía"),
+      explanation: "Para “con alguien” se usa 「と」.",
+    }),
+    createLessonQuestion(4, "grammar:curated:alone", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “I went alone”?",
+      options: [
+        "ひとりで いきました。",
+        "ひとりと いきました。",
+        "ひとりに いきました。",
+        "ひとりを いきました。",
+      ],
+      correct: "ひとりで いきました。",
+      hint: buildLessonHint(4, "ひとりで"),
+      explanation: "「ひとりで」 expresa que alguien hace algo solo.",
+    }),
+    createLessonQuestion(4, "grammar:curated:kara", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “I went home because there was homework”?",
+      options: [
+        "しゅくだいが ありましたから、うちへ かえりました。",
+        "しゅくだいを ありましたから、うちへ かえりました。",
+        "しゅくだいが ありましたから、うちで かえりました。",
+        "しゅくだいが ありませんでしたから、うちへ かえりました。",
+      ],
+      correct: "しゅくだいが ありましたから、うちへ かえりました。",
+      hint: buildLessonHint(4, "Razón con から"),
+      explanation: "En L4, 「から」 conecta la razón con el resultado.",
+    }),
+    createLessonQuestion(4, "grammar:curated:why-response", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "A: どうして アルバイトを しませんでしたか。\nB: ___",
+      options: [
+        "いちじかん しました。",
+        "ひとりで しました。",
+        "テストが ありましたから。",
+        "ともだちと しましたか。",
+      ],
+      correct: "テストが ありましたから。",
+      hint: buildLessonHint(4, "どうして / から"),
+      explanation: "La respuesta natural a 「どうして」 suele usar 「から」 para dar la razón.",
+    }),
+    createLessonQuestion(4, "grammar:curated:error", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración tiene un error?",
+      options: [
+        "せんしゅう ともだちと あいました。",
+        "にほんごを いちじかん べんきょうしました。",
+        "きのう ひとりと うちへ かえりました。",
+        "でんしゃで まちへ いきました。",
+      ],
+      correct: "きのう ひとりと うちへ かえりました。",
+      hint: buildLessonHint(4, "Uso de ひとりで"),
+      explanation: "Cuando alguien hace algo solo, se usa 「ひとりで」, no 「ひとりと」.",
+    }),
+  ];
+
+  const readingQuestions: QuizQuestion[] = [
+    createLessonQuestion(4, "reading:curated:weekend-report", {
+      category: "reading",
+      type: "mcq",
+      prompt: "Lee el texto.\n\nせんしゅうの どようび、わたしは としょかんで いちじかん べんきょうしました。それから ともだちと レストランへ いきました。\n\n¿Qué hizo después de estudiar?",
+      options: ["Fue a casa", "Fue a un restaurante con un amigo", "Tomó el tren", "Sacó fotos"],
+      correct: "Fue a un restaurante con un amigo",
+      hint: buildLessonHint(4, "Lectura corta"),
+      explanation: "La segunda oración dice 「それから ともだちと レストランへ いきました」.",
+    }),
+    createLessonQuestion(4, "reading:curated:why-dialogue", {
+      category: "reading",
+      type: "mcq",
+      prompt: "Lee el diálogo.\n\nA: きのう どうして アルバイトを しませんでしたか。\nB: テストが ありましたから。\n\n¿Por qué no trabajó B ayer?",
+      options: ["Porque estaba en el parque", "Porque tenía un examen", "Porque tomó fotos", "Porque fue al hospital"],
+      correct: "Porque tenía un examen",
+      hint: buildLessonHint(4, "Lectura corta"),
+      explanation: "B responde 「テストが ありましたから」.",
+    }),
+  ];
+
+  return [...vocabQuestions, ...kanjiQuestions, ...grammarCluster, ...readingQuestions];
+}
+
 function buildLessonFiveCuratedExamPool() {
   const lesson = 5;
   const lessonVocab = (ALL_GENKI_VOCAB_BY_LESSON[lesson] || []).filter((item) => isExamVocabEligible(lesson, item));
@@ -3198,6 +3406,7 @@ function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
   if (normalizedLesson === 1) return buildLessonOneCuratedExamPool();
   if (normalizedLesson === 2) return buildLessonTwoCuratedExamPool();
   if (normalizedLesson === 3) return buildLessonThreeCuratedExamPool();
+  if (normalizedLesson === 4) return buildLessonFourCuratedExamPool();
   if (normalizedLesson === 5) return buildLessonFiveCuratedExamPool();
   if (normalizedLesson === 6) return buildLessonSixCuratedExamPool();
   const pool: QuizQuestion[] = [];
@@ -3406,7 +3615,7 @@ function pickPrioritizedQuestions(
 }
 
 function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, number>, count: number, lesson: number) {
-  if (lesson === 1 || lesson === 2 || lesson === 3 || lesson === 5 || lesson === 6) return shuffle(pool).slice(0, count);
+  if (lesson === 1 || lesson === 2 || lesson === 3 || lesson === 4 || lesson === 5 || lesson === 6) return shuffle(pool).slice(0, count);
   const used = new Set<string>();
   const result: QuizQuestion[] = [];
   const hasKanji = lesson >= 3;

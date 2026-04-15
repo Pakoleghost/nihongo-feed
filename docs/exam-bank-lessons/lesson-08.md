@@ -24,7 +24,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はれ」?
-- choices: ["nieve","clima","lluvia","soleado"]
+- choices: ["nieve","lluvia","soleado","clima"]
 - correct: "soleado"
 - explanation: 「はれ」 significa “soleado”.
 - hint: Lección 8 · Vocabulario
@@ -34,7 +34,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “soleado”
-- choices: ["天気 (てんき)","雨 (あめ)","雪 (ゆき)","晴れ (はれ)"]
+- choices: ["雨 (あめ)","雪 (ゆき)","天気 (てんき)","晴れ (はれ)"]
 - correct: "晴れ (はれ)"
 - explanation: La opción correcta para “soleado” es 「晴れ (はれ)」.
 - hint: Lección 8 · Vocabulario
@@ -44,7 +44,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あめ」?
-- choices: ["nieve","soleado","clima","lluvia"]
+- choices: ["lluvia","nieve","clima","soleado"]
 - correct: "lluvia"
 - explanation: 「あめ」 significa “lluvia”.
 - hint: Lección 8 · Vocabulario
@@ -54,7 +54,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “lluvia”
-- choices: ["晴れ (はれ)","雨 (あめ)","天気 (てんき)","雪 (ゆき)"]
+- choices: ["晴れ (はれ)","天気 (てんき)","雪 (ゆき)","雨 (あめ)"]
 - correct: "雨 (あめ)"
 - explanation: La opción correcta para “lluvia” es 「雨 (あめ)」.
 - hint: Lección 8 · Vocabulario
@@ -64,7 +64,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ゆき」?
-- choices: ["soleado","nieve","clima","lluvia"]
+- choices: ["soleado","clima","nieve","lluvia"]
 - correct: "nieve"
 - explanation: 「ゆき」 significa “nieve”.
 - hint: Lección 8 · Vocabulario
@@ -74,7 +74,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “nieve”
-- choices: ["雨 (あめ)","雪 (ゆき)","晴れ (はれ)","天気 (てんき)"]
+- choices: ["雪 (ゆき)","晴れ (はれ)","天気 (てんき)","雨 (あめ)"]
 - correct: "雪 (ゆき)"
 - explanation: La opción correcta para “nieve” es 「雪 (ゆき)」.
 - hint: Lección 8 · Vocabulario
@@ -84,7 +84,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「てんき」?
-- choices: ["soleado","clima","nieve","lluvia"]
+- choices: ["lluvia","soleado","nieve","clima"]
 - correct: "clima"
 - explanation: 「てんき」 significa “clima”.
 - hint: Lección 8 · Vocabulario
@@ -94,7 +94,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “clima”
-- choices: ["雪 (ゆき)","晴れ (はれ)","天気 (てんき)","雨 (あめ)"]
+- choices: ["晴れ (はれ)","雨 (あめ)","雪 (ゆき)","天気 (てんき)"]
 - correct: "天気 (てんき)"
 - explanation: La opción correcta para “clima” es 「天気 (てんき)」.
 - hint: Lección 8 · Vocabulario
@@ -104,7 +104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「なつ」?
-- choices: ["lluvia","soleado","verano","nieve"]
+- choices: ["soleado","lluvia","verano","nieve"]
 - correct: "verano"
 - explanation: 「なつ」 significa “verano”.
 - hint: Lección 8 · Vocabulario
@@ -114,7 +114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “verano”
-- choices: ["雪 (ゆき)","晴れ (はれ)","夏 (なつ)","雨 (あめ)"]
+- choices: ["雪 (ゆき)","晴れ (はれ)","雨 (あめ)","夏 (なつ)"]
 - correct: "夏 (なつ)"
 - explanation: La opción correcta para “verano” es 「夏 (なつ)」.
 - hint: Lección 8 · Vocabulario
@@ -124,7 +124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はる」?
-- choices: ["lluvia","nieve","soleado","primavera"]
+- choices: ["primavera","soleado","nieve","lluvia"]
 - correct: "primavera"
 - explanation: 「はる」 significa “primavera”.
 - hint: Lección 8 · Vocabulario
@@ -134,7 +134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “primavera”
-- choices: ["雪 (ゆき)","晴れ (はれ)","雨 (あめ)","春 (はる)"]
+- choices: ["雪 (ゆき)","雨 (あめ)","晴れ (はれ)","春 (はる)"]
 - correct: "春 (はる)"
 - explanation: La opción correcta para “primavera” es 「春 (はる)」.
 - hint: Lección 8 · Vocabulario
@@ -144,7 +144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あき」?
-- choices: ["nieve","otoño","soleado","lluvia"]
+- choices: ["nieve","lluvia","soleado","otoño"]
 - correct: "otoño"
 - explanation: 「あき」 significa “otoño”.
 - hint: Lección 8 · Vocabulario
@@ -164,7 +164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ふゆ」?
-- choices: ["soleado","invierno","nieve","lluvia"]
+- choices: ["nieve","soleado","lluvia","invierno"]
 - correct: "invierno"
 - explanation: 「ふゆ」 significa “invierno”.
 - hint: Lección 8 · Vocabulario
@@ -184,7 +184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あたたかい」?
-- choices: ["soleado","lluvia","templado","nieve"]
+- choices: ["templado","nieve","soleado","lluvia"]
 - correct: "templado"
 - explanation: 「あたたかい」 significa “templado”.
 - hint: Lección 8 · Vocabulario
@@ -204,7 +204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「すずしい」?
-- choices: ["lluvia","soleado","fresco","nieve"]
+- choices: ["nieve","lluvia","soleado","fresco"]
 - correct: "fresco"
 - explanation: 「すずしい」 significa “fresco”.
 - hint: Lección 8 · Vocabulario
@@ -214,7 +214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “fresco”
-- choices: ["涼しい (すずしい)","雨 (あめ)","雪 (ゆき)","晴れ (はれ)"]
+- choices: ["晴れ (はれ)","雨 (あめ)","涼しい (すずしい)","雪 (ゆき)"]
 - correct: "涼しい (すずしい)"
 - explanation: La opción correcta para “fresco” es 「涼しい (すずしい)」.
 - hint: Lección 8 · Vocabulario
@@ -224,7 +224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あつい」?
-- choices: ["soleado","lluvia","caluroso","nieve"]
+- choices: ["nieve","lluvia","caluroso","soleado"]
 - correct: "caluroso"
 - explanation: 「あつい」 significa “caluroso”.
 - hint: Lección 8 · Vocabulario
@@ -234,7 +234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “caluroso”
-- choices: ["雨 (あめ)","雪 (ゆき)","暑い (あつい)","晴れ (はれ)"]
+- choices: ["暑い (あつい)","雨 (あめ)","晴れ (はれ)","雪 (ゆき)"]
 - correct: "暑い (あつい)"
 - explanation: La opción correcta para “caluroso” es 「暑い (あつい)」.
 - hint: Lección 8 · Vocabulario
@@ -244,7 +244,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「さむい」?
-- choices: ["lluvia","soleado","nieve","frío"]
+- choices: ["nieve","lluvia","frío","soleado"]
 - correct: "frío"
 - explanation: 「さむい」 significa “frío”.
 - hint: Lección 8 · Vocabulario
@@ -254,7 +254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “frío”
-- choices: ["寒い (さむい)","雪 (ゆき)","雨 (あめ)","晴れ (はれ)"]
+- choices: ["晴れ (はれ)","雪 (ゆき)","雨 (あめ)","寒い (さむい)"]
 - correct: "寒い (さむい)"
 - explanation: La opción correcta para “frío” es 「寒い (さむい)」.
 - hint: Lección 8 · Vocabulario
@@ -264,7 +264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「くもり」?
-- choices: ["nublado","lluvia","soleado","nieve"]
+- choices: ["nublado","soleado","nieve","lluvia"]
 - correct: "nublado"
 - explanation: 「くもり」 significa “nublado”.
 - hint: Lección 8 · Vocabulario
@@ -274,7 +274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “nublado”
-- choices: ["曇り (くもり)","雪 (ゆき)","雨 (あめ)","晴れ (はれ)"]
+- choices: ["曇り (くもり)","晴れ (はれ)","雪 (ゆき)","雨 (あめ)"]
 - correct: "曇り (くもり)"
 - explanation: La opción correcta para “nublado” es 「曇り (くもり)」.
 - hint: Lección 8 · Vocabulario
@@ -284,7 +284,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「およぐ」?
-- choices: ["lluvia","soleado","nadar","nieve"]
+- choices: ["nadar","nieve","soleado","lluvia"]
 - correct: "nadar"
 - explanation: 「およぐ」 significa “nadar”.
 - hint: Lección 8 · Vocabulario
@@ -294,7 +294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “nadar”
-- choices: ["およぐ","雨 (あめ)","雪 (ゆき)","晴れ (はれ)"]
+- choices: ["雨 (あめ)","晴れ (はれ)","およぐ","雪 (ゆき)"]
 - correct: "およぐ"
 - explanation: La opción correcta para “nadar” es 「およぐ」.
 - hint: Lección 8 · Vocabulario
@@ -304,7 +304,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「なる」?
-- choices: ["nieve","volverse","soleado","lluvia"]
+- choices: ["volverse","soleado","nieve","lluvia"]
 - correct: "volverse"
 - explanation: 「なる」 significa “volverse”.
 - hint: Lección 8 · Vocabulario
@@ -314,7 +314,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “volverse”
-- choices: ["雨 (あめ)","晴れ (はれ)","なる","雪 (ゆき)"]
+- choices: ["雨 (あめ)","なる","晴れ (はれ)","雪 (ゆき)"]
 - correct: "なる"
 - explanation: La opción correcta para “volverse” es 「なる」.
 - hint: Lección 8 · Vocabulario
@@ -324,7 +324,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「てんきよほう」?
-- choices: ["soleado","lluvia","nieve","pronóstico del tiempo"]
+- choices: ["pronóstico del tiempo","soleado","nieve","lluvia"]
 - correct: "pronóstico del tiempo"
 - explanation: 「てんきよほう」 significa “pronóstico del tiempo”.
 - hint: Lección 8 · Vocabulario
@@ -334,7 +334,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pronóstico del tiempo”
-- choices: ["雪 (ゆき)","晴れ (はれ)","天気予報 (てんきよほう)","雨 (あめ)"]
+- choices: ["雨 (あめ)","雪 (ゆき)","天気予報 (てんきよほう)","晴れ (はれ)"]
 - correct: "天気予報 (てんきよほう)"
 - explanation: La opción correcta para “pronóstico del tiempo” es 「天気予報 (てんきよほう)」.
 - hint: Lección 8 · Vocabulario
@@ -344,7 +344,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きおん」?
-- choices: ["lluvia","temperatura (clima)","nieve","soleado"]
+- choices: ["lluvia","temperatura (clima)","soleado","nieve"]
 - correct: "temperatura (clima)"
 - explanation: 「きおん」 significa “temperatura (clima)”.
 - hint: Lección 8 · Vocabulario
@@ -354,7 +354,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “temperatura (clima)”
-- choices: ["雪 (ゆき)","雨 (あめ)","晴れ (はれ)","気温 (きおん)"]
+- choices: ["晴れ (はれ)","雪 (ゆき)","気温 (きおん)","雨 (あめ)"]
 - correct: "気温 (きおん)"
 - explanation: La opción correcta para “temperatura (clima)” es 「気温 (きおん)」.
 - hint: Lección 8 · Vocabulario
@@ -364,7 +364,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「けさ」?
-- choices: ["esta mañana","soleado","lluvia","nieve"]
+- choices: ["lluvia","soleado","nieve","esta mañana"]
 - correct: "esta mañana"
 - explanation: 「けさ」 significa “esta mañana”.
 - hint: Lección 8 · Vocabulario
@@ -374,7 +374,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “esta mañana”
-- choices: ["今朝 (けさ)","雨 (あめ)","雪 (ゆき)","晴れ (はれ)"]
+- choices: ["雨 (あめ)","晴れ (はれ)","雪 (ゆき)","今朝 (けさ)"]
 - correct: "今朝 (けさ)"
 - explanation: La opción correcta para “esta mañana” es 「今朝 (けさ)」.
 - hint: Lección 8 · Vocabulario
@@ -384,7 +384,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あさって」?
-- choices: ["soleado","pasado mañana","nieve","lluvia"]
+- choices: ["soleado","lluvia","pasado mañana","nieve"]
 - correct: "pasado mañana"
 - explanation: 「あさって」 significa “pasado mañana”.
 - hint: Lección 8 · Vocabulario
@@ -394,7 +394,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pasado mañana”
-- choices: ["晴れ (はれ)","雨 (あめ)","あさって","雪 (ゆき)"]
+- choices: ["晴れ (はれ)","雪 (ゆき)","雨 (あめ)","あさって"]
 - correct: "あさって"
 - explanation: La opción correcta para “pasado mañana” es 「あさって」.
 - hint: Lección 8 · Vocabulario
@@ -404,7 +404,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「まいしゅう」?
-- choices: ["todas las semanas","nieve","lluvia","soleado"]
+- choices: ["lluvia","nieve","soleado","todas las semanas"]
 - correct: "todas las semanas"
 - explanation: 「まいしゅう」 significa “todas las semanas”.
 - hint: Lección 8 · Vocabulario
@@ -414,7 +414,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “todas las semanas”
-- choices: ["雨 (あめ)","晴れ (はれ)","每週 (まいしゅう)","雪 (ゆき)"]
+- choices: ["晴れ (はれ)","雪 (ゆき)","雨 (あめ)","每週 (まいしゅう)"]
 - correct: "每週 (まいしゅう)"
 - explanation: La opción correcta para “todas las semanas” es 「每週 (まいしゅう)」.
 - hint: Lección 8 · Vocabulario
@@ -424,7 +424,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「こんげつ」?
-- choices: ["soleado","este mes","lluvia","nieve"]
+- choices: ["nieve","lluvia","este mes","soleado"]
 - correct: "este mes"
 - explanation: 「こんげつ」 significa “este mes”.
 - hint: Lección 8 · Vocabulario
@@ -434,7 +434,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “este mes”
-- choices: ["雪 (ゆき)","晴れ (はれ)","雨 (あめ)","今月 (こんげつ)"]
+- choices: ["晴れ (はれ)","雪 (ゆき)","雨 (あめ)","今月 (こんげつ)"]
 - correct: "今月 (こんげつ)"
 - explanation: La opción correcta para “este mes” es 「今月 (こんげつ)」.
 - hint: Lección 8 · Vocabulario
@@ -444,7 +444,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「らいげつ」?
-- choices: ["el próximo mes","nieve","soleado","lluvia"]
+- choices: ["el próximo mes","soleado","nieve","lluvia"]
 - correct: "el próximo mes"
 - explanation: 「らいげつ」 significa “el próximo mes”.
 - hint: Lección 8 · Vocabulario
@@ -454,7 +454,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “el próximo mes”
-- choices: ["雨 (あめ)","雪 (ゆき)","晴れ (はれ)","来月 (らいげつ)"]
+- choices: ["来月 (らいげつ)","晴れ (はれ)","雨 (あめ)","雪 (ゆき)"]
 - correct: "来月 (らいげつ)"
 - explanation: La opción correcta para “el próximo mes” es 「来月 (らいげつ)」.
 - hint: Lección 8 · Vocabulario
@@ -464,7 +464,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かいしゃいん」?
-- choices: ["lluvia","oficinista","nieve","soleado"]
+- choices: ["oficinista","soleado","lluvia","nieve"]
 - correct: "oficinista"
 - explanation: 「かいしゃいん」 significa “oficinista”.
 - hint: Lección 8 · Vocabulario
@@ -474,7 +474,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “oficinista”
-- choices: ["会社員 (かいしゃいん)","雪 (ゆき)","雨 (あめ)","晴れ (はれ)"]
+- choices: ["会社員 (かいしゃいん)","晴れ (はれ)","雨 (あめ)","雪 (ゆき)"]
 - correct: "会社員 (かいしゃいん)"
 - explanation: La opción correcta para “oficinista” es 「会社員 (かいしゃいん)」.
 - hint: Lección 8 · Vocabulario
@@ -484,7 +484,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しごと」?
-- choices: ["lluvia","soleado","nieve","trabajo; ocupación"]
+- choices: ["soleado","trabajo; ocupación","nieve","lluvia"]
 - correct: "trabajo; ocupación"
 - explanation: 「しごと」 significa “trabajo; ocupación”.
 - hint: Lección 8 · Vocabulario
@@ -494,7 +494,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “trabajo; ocupación”
-- choices: ["晴れ (はれ)","仕事 (しごと)","雪 (ゆき)","雨 (あめ)"]
+- choices: ["雨 (あめ)","仕事 (しごと)","雪 (ゆき)","晴れ (はれ)"]
 - correct: "仕事 (しごと)"
 - explanation: La opción correcta para “trabajo; ocupación” es 「仕事 (しごと)」.
 - hint: Lección 8 · Vocabulario
@@ -504,7 +504,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「カメラ」?
-- choices: ["soleado","nieve","cámara","lluvia"]
+- choices: ["cámara","lluvia","soleado","nieve"]
 - correct: "cámara"
 - explanation: 「カメラ」 significa “cámara”.
 - hint: Lección 8 · Vocabulario
@@ -514,7 +514,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cámara”
-- choices: ["カメラ","晴れ (はれ)","雨 (あめ)","雪 (ゆき)"]
+- choices: ["雪 (ゆき)","雨 (あめ)","晴れ (はれ)","カメラ"]
 - correct: "カメラ"
 - explanation: La opción correcta para “cámara” es 「カメラ」.
 - hint: Lección 8 · Vocabulario
@@ -524,7 +524,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「カラオケ」?
-- choices: ["lluvia","karaoke","nieve","soleado"]
+- choices: ["nieve","lluvia","soleado","karaoke"]
 - correct: "karaoke"
 - explanation: 「カラオケ」 significa “karaoke”.
 - hint: Lección 8 · Vocabulario
@@ -534,7 +534,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “karaoke”
-- choices: ["カラオケ","雨 (あめ)","晴れ (はれ)","雪 (ゆき)"]
+- choices: ["雨 (あめ)","雪 (ゆき)","晴れ (はれ)","カラオケ"]
 - correct: "カラオケ"
 - explanation: La opción correcta para “karaoke” es 「カラオケ」.
 - hint: Lección 8 · Vocabulario
@@ -544,7 +544,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ところ」?
-- choices: ["soleado","nieve","lluvia","lugar"]
+- choices: ["soleado","lluvia","lugar","nieve"]
 - correct: "lugar"
 - explanation: 「ところ」 significa “lugar”.
 - hint: Lección 8 · Vocabulario
@@ -554,7 +554,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “lugar”
-- choices: ["雪 (ゆき)","晴れ (はれ)","雨 (あめ)","所 (ところ)"]
+- choices: ["雪 (ゆき)","雨 (あめ)","晴れ (はれ)","所 (ところ)"]
 - correct: "所 (ところ)"
 - explanation: La opción correcta para “lugar” es 「所 (ところ)」.
 - hint: Lección 8 · Vocabulario
@@ -564,7 +564,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「トマト」?
-- choices: ["soleado","tomate","nieve","lluvia"]
+- choices: ["soleado","tomate","lluvia","nieve"]
 - correct: "tomate"
 - explanation: 「トマト」 significa “tomate”.
 - hint: Lección 8 · Vocabulario
@@ -574,7 +574,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tomate”
-- choices: ["雪 (ゆき)","雨 (あめ)","トマト","晴れ (はれ)"]
+- choices: ["晴れ (はれ)","雨 (あめ)","トマト","雪 (ゆき)"]
 - correct: "トマト"
 - explanation: La opción correcta para “tomate” es 「トマト」.
 - hint: Lección 8 · Vocabulario
@@ -584,7 +584,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はし」?
-- choices: ["lluvia","nieve","soleado","palillos"]
+- choices: ["soleado","palillos","lluvia","nieve"]
 - correct: "palillos"
 - explanation: 「はし」 significa “palillos”.
 - hint: Lección 8 · Vocabulario
@@ -594,7 +594,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “palillos”
-- choices: ["はし","雪 (ゆき)","雨 (あめ)","晴れ (はれ)"]
+- choices: ["はし","晴れ (はれ)","雪 (ゆき)","雨 (あめ)"]
 - correct: "はし"
 - explanation: La opción correcta para “palillos” es 「はし」.
 - hint: Lección 8 · Vocabulario
@@ -604,7 +604,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「パーティー」?
-- choices: ["lluvia","soleado","fiesta","nieve"]
+- choices: ["nieve","soleado","fiesta","lluvia"]
 - correct: "fiesta"
 - explanation: 「パーティー」 significa “fiesta”.
 - hint: Lección 8 · Vocabulario
@@ -614,7 +614,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “fiesta”
-- choices: ["パーティー","雨 (あめ)","雪 (ゆき)","晴れ (はれ)"]
+- choices: ["パーティー","雪 (ゆき)","晴れ (はれ)","雨 (あめ)"]
 - correct: "パーティー"
 - explanation: La opción correcta para “fiesta” es 「パーティー」.
 - hint: Lección 8 · Vocabulario
@@ -624,7 +624,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「バーベキュー」?
-- choices: ["barbacoa","soleado","nieve","lluvia"]
+- choices: ["barbacoa","nieve","soleado","lluvia"]
 - correct: "barbacoa"
 - explanation: 「バーベキュー」 significa “barbacoa”.
 - hint: Lección 8 · Vocabulario
@@ -634,7 +634,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “barbacoa”
-- choices: ["バーベキュー","雨 (あめ)","雪 (ゆき)","晴れ (はれ)"]
+- choices: ["雪 (ゆき)","雨 (あめ)","バーベキュー","晴れ (はれ)"]
 - correct: "バーベキュー"
 - explanation: La opción correcta para “barbacoa” es 「バーベキュー」.
 - hint: Lección 8 · Vocabulario
@@ -644,7 +644,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ホームステイ」?
-- choices: ["lluvia","soleado","nieve","estancia con una familia anfitriona"]
+- choices: ["estancia con una familia anfitriona","nieve","soleado","lluvia"]
 - correct: "estancia con una familia anfitriona"
 - explanation: 「ホームステイ」 significa “estancia con una familia anfitriona”.
 - hint: Lección 8 · Vocabulario
@@ -654,7 +654,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “estancia con una familia anfitriona”
-- choices: ["晴れ (はれ)","ホームステイ","雨 (あめ)","雪 (ゆき)"]
+- choices: ["雨 (あめ)","晴れ (はれ)","ホームステイ","雪 (ゆき)"]
 - correct: "ホームステイ"
 - explanation: La opción correcta para “estancia con una familia anfitriona” es 「ホームステイ」.
 - hint: Lección 8 · Vocabulario
@@ -664,7 +664,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おふろ」?
-- choices: ["soleado","nieve","baño","lluvia"]
+- choices: ["baño","lluvia","soleado","nieve"]
 - correct: "baño"
 - explanation: 「おふろ」 significa “baño”.
 - hint: Lección 8 · Vocabulario
@@ -674,7 +674,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “baño”
-- choices: ["晴れ (はれ)","お風呂 (おふろ)","雪 (ゆき)","雨 (あめ)"]
+- choices: ["晴れ (はれ)","雨 (あめ)","雪 (ゆき)","お風呂 (おふろ)"]
 - correct: "お風呂 (おふろ)"
 - explanation: La opción correcta para “baño” es 「お風呂 (おふろ)」.
 - hint: Lección 8 · Vocabulario
@@ -684,7 +684,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「スペイン」?
-- choices: ["soleado","España","nieve","lluvia"]
+- choices: ["nieve","España","soleado","lluvia"]
 - correct: "España"
 - explanation: 「スペイン」 significa “España”.
 - hint: Lección 8 · Vocabulario
@@ -704,7 +704,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「なにか」?
-- choices: ["nieve","soleado","lluvia","algo"]
+- choices: ["soleado","lluvia","nieve","algo"]
 - correct: "algo"
 - explanation: 「なにか」 significa “algo”.
 - hint: Lección 8 · Vocabulario
@@ -714,7 +714,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “algo”
-- choices: ["雪 (ゆき)","晴れ (はれ)","雨 (あめ)","何か (なにか)"]
+- choices: ["何か (なにか)","雨 (あめ)","晴れ (はれ)","雪 (ゆき)"]
 - correct: "何か (なにか)"
 - explanation: La opción correcta para “algo” es 「何か (なにか)」.
 - hint: Lección 8 · Vocabulario
@@ -724,7 +724,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「じょうず(な)」?
-- choices: ["nieve","hábil; bueno en...","soleado","lluvia"]
+- choices: ["lluvia","soleado","hábil; bueno en...","nieve"]
 - correct: "hábil; bueno en..."
 - explanation: 「じょうず(な)」 significa “hábil; bueno en...”.
 - hint: Lección 8 · Vocabulario
@@ -734,7 +734,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hábil; bueno en...”
-- choices: ["雨 (あめ)","上手 (じょうず(な))","雪 (ゆき)","晴れ (はれ)"]
+- choices: ["晴れ (はれ)","上手 (じょうず(な))","雪 (ゆき)","雨 (あめ)"]
 - correct: "上手 (じょうず(な))"
 - explanation: La opción correcta para “hábil; bueno en...” es 「上手 (じょうず(な))」.
 - hint: Lección 8 · Vocabulario
@@ -744,7 +744,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「へた(な)」?
-- choices: ["torpe; malo en...","soleado","lluvia","nieve"]
+- choices: ["soleado","lluvia","torpe; malo en...","nieve"]
 - correct: "torpe; malo en..."
 - explanation: 「へた(な)」 significa “torpe; malo en...”.
 - hint: Lección 8 · Vocabulario
@@ -754,7 +754,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “torpe; malo en...”
-- choices: ["雨 (あめ)","雪 (ゆき)","下手 (へた(な))","晴れ (はれ)"]
+- choices: ["雨 (あめ)","下手 (へた(な))","晴れ (はれ)","雪 (ゆき)"]
 - correct: "下手 (へた(な))"
 - explanation: La opción correcta para “torpe; malo en...” es 「下手 (へた(な))」.
 - hint: Lección 8 · Vocabulario
@@ -764,7 +764,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ゆうめい(な)」?
-- choices: ["famoso","lluvia","soleado","nieve"]
+- choices: ["lluvia","famoso","nieve","soleado"]
 - correct: "famoso"
 - explanation: 「ゆうめい(な)」 significa “famoso”.
 - hint: Lección 8 · Vocabulario
@@ -774,7 +774,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “famoso”
-- choices: ["晴れ (はれ)","雪 (ゆき)","雨 (あめ)","有名 (ゆうめい(な))"]
+- choices: ["雨 (あめ)","晴れ (はれ)","有名 (ゆうめい(な))","雪 (ゆき)"]
 - correct: "有名 (ゆうめい(な))"
 - explanation: La opción correcta para “famoso” es 「有名 (ゆうめい(な))」.
 - hint: Lección 8 · Vocabulario
@@ -784,7 +784,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あらう」?
-- choices: ["nieve","lavar","lluvia","soleado"]
+- choices: ["lluvia","lavar","nieve","soleado"]
 - correct: "lavar"
 - explanation: 「あらう」 significa “lavar”.
 - hint: Lección 8 · Vocabulario
@@ -794,7 +794,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “lavar”
-- choices: ["雪 (ゆき)","洗う (あらう)","晴れ (はれ)","雨 (あめ)"]
+- choices: ["晴れ (はれ)","雪 (ゆき)","洗う (あらう)","雨 (あめ)"]
 - correct: "洗う (あらう)"
 - explanation: La opción correcta para “lavar” es 「洗う (あらう)」.
 - hint: Lección 8 · Vocabulario
@@ -804,7 +804,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「いう」?
-- choices: ["lluvia","decir","soleado","nieve"]
+- choices: ["soleado","nieve","decir","lluvia"]
 - correct: "decir"
 - explanation: 「いう」 significa “decir”.
 - hint: Lección 8 · Vocabulario
@@ -814,7 +814,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “decir”
-- choices: ["言う (いう)","雪 (ゆき)","晴れ (はれ)","雨 (あめ)"]
+- choices: ["雪 (ゆき)","言う (いう)","晴れ (はれ)","雨 (あめ)"]
 - correct: "言う (いう)"
 - explanation: La opción correcta para “decir” es 「言う (いう)」.
 - hint: Lección 8 · Vocabulario
@@ -824,7 +824,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おそくなる」?
-- choices: ["lluvia","llegar tarde","soleado","nieve"]
+- choices: ["nieve","soleado","lluvia","llegar tarde"]
 - correct: "llegar tarde"
 - explanation: 「おそくなる」 significa “llegar tarde”.
 - hint: Lección 8 · Vocabulario
@@ -834,7 +834,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “llegar tarde”
-- choices: ["遅くなる (おそくなる)","雨 (あめ)","雪 (ゆき)","晴れ (はれ)"]
+- choices: ["晴れ (はれ)","遅くなる (おそくなる)","雪 (ゆき)","雨 (あめ)"]
 - correct: "遅くなる (おそくなる)"
 - explanation: La opción correcta para “llegar tarde” es 「遅くなる (おそくなる)」.
 - hint: Lección 8 · Vocabulario
@@ -844,7 +844,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おもう」?
-- choices: ["lluvia","nieve","soleado","pensar"]
+- choices: ["pensar","nieve","lluvia","soleado"]
 - correct: "pensar"
 - explanation: 「おもう」 significa “pensar”.
 - hint: Lección 8 · Vocabulario
@@ -864,7 +864,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「きる」?
-- choices: ["cortar","soleado","nieve","lluvia"]
+- choices: ["nieve","cortar","soleado","lluvia"]
 - correct: "cortar"
 - explanation: 「きる」 significa “cortar”.
 - hint: Lección 8 · Vocabulario
@@ -874,7 +874,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cortar”
-- choices: ["雨 (あめ)","切る (きる)","晴れ (はれ)","雪 (ゆき)"]
+- choices: ["切る (きる)","雪 (ゆき)","晴れ (はれ)","雨 (あめ)"]
 - correct: "切る (きる)"
 - explanation: La opción correcta para “cortar” es 「切る (きる)」.
 - hint: Lección 8 · Vocabulario
@@ -884,7 +884,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「つくる」?
-- choices: ["lluvia","soleado","hacer; producir","nieve"]
+- choices: ["lluvia","hacer; producir","soleado","nieve"]
 - correct: "hacer; producir"
 - explanation: 「つくる」 significa “hacer; producir”.
 - hint: Lección 8 · Vocabulario
@@ -904,7 +904,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「もっていく」?
-- choices: ["soleado","llevar (algo)","lluvia","nieve"]
+- choices: ["llevar (algo)","soleado","nieve","lluvia"]
 - correct: "llevar (algo)"
 - explanation: 「もっていく」 significa “llevar (algo)”.
 - hint: Lección 8 · Vocabulario
@@ -914,7 +914,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “llevar (algo)”
-- choices: ["雪 (ゆき)","雨 (あめ)","持っていく (もっていく)","晴れ (はれ)"]
+- choices: ["晴れ (はれ)","持っていく (もっていく)","雪 (ゆき)","雨 (あめ)"]
 - correct: "持っていく (もっていく)"
 - explanation: La opción correcta para “llevar (algo)” es 「持っていく (もっていく)」.
 - hint: Lección 8 · Vocabulario
@@ -924,7 +924,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「じろじろみる」?
-- choices: ["nieve","mirar fijamente","lluvia","soleado"]
+- choices: ["lluvia","mirar fijamente","soleado","nieve"]
 - correct: "mirar fijamente"
 - explanation: 「じろじろみる」 significa “mirar fijamente”.
 - hint: Lección 8 · Vocabulario
@@ -934,7 +934,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “mirar fijamente”
-- choices: ["雪 (ゆき)","雨 (あめ)","じろじろ見る (じろじろみる)","晴れ (はれ)"]
+- choices: ["晴れ (はれ)","じろじろ見る (じろじろみる)","雪 (ゆき)","雨 (あめ)"]
 - correct: "じろじろ見る (じろじろみる)"
 - explanation: La opción correcta para “mirar fijamente” es 「じろじろ見る (じろじろみる)」.
 - hint: Lección 8 · Vocabulario
@@ -944,7 +944,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「すてる」?
-- choices: ["lluvia","tirar; desechar","soleado","nieve"]
+- choices: ["soleado","nieve","tirar; desechar","lluvia"]
 - correct: "tirar; desechar"
 - explanation: 「すてる」 significa “tirar; desechar”.
 - hint: Lección 8 · Vocabulario
@@ -954,7 +954,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tirar; desechar”
-- choices: ["雨 (あめ)","晴れ (はれ)","雪 (ゆき)","捨てる (すてる)"]
+- choices: ["捨てる (すてる)","晴れ (はれ)","雪 (ゆき)","雨 (あめ)"]
 - correct: "捨てる (すてる)"
 - explanation: La opción correcta para “tirar; desechar” es 「捨てる (すてる)」.
 - hint: Lección 8 · Vocabulario
@@ -964,7 +964,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はじめる」?
-- choices: ["empezar","lluvia","nieve","soleado"]
+- choices: ["soleado","nieve","lluvia","empezar"]
 - correct: "empezar"
 - explanation: 「はじめる」 significa “empezar”.
 - hint: Lección 8 · Vocabulario
@@ -974,7 +974,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “empezar”
-- choices: ["始める (はじめる)","雪 (ゆき)","晴れ (はれ)","雨 (あめ)"]
+- choices: ["始める (はじめる)","雨 (あめ)","雪 (ゆき)","晴れ (はれ)"]
 - correct: "始める (はじめる)"
 - explanation: La opción correcta para “empezar” es 「始める (はじめる)」.
 - hint: Lección 8 · Vocabulario
@@ -984,7 +984,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「うんてんする」?
-- choices: ["soleado","conducir","lluvia","nieve"]
+- choices: ["lluvia","soleado","nieve","conducir"]
 - correct: "conducir"
 - explanation: 「うんてんする」 significa “conducir”.
 - hint: Lección 8 · Vocabulario
@@ -994,7 +994,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “conducir”
-- choices: ["運転する (うんてんする)","晴れ (はれ)","雪 (ゆき)","雨 (あめ)"]
+- choices: ["雨 (あめ)","晴れ (はれ)","運転する (うんてんする)","雪 (ゆき)"]
 - correct: "運転する (うんてんする)"
 - explanation: La opción correcta para “conducir” es 「運転する (うんてんする)」.
 - hint: Lección 8 · Vocabulario
@@ -1004,7 +1004,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せんたくする」?
-- choices: ["lluvia","nieve","soleado","lavar la ropa"]
+- choices: ["nieve","lavar la ropa","soleado","lluvia"]
 - correct: "lavar la ropa"
 - explanation: 「せんたくする」 significa “lavar la ropa”.
 - hint: Lección 8 · Vocabulario
@@ -1014,7 +1014,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “lavar la ropa”
-- choices: ["雨 (あめ)","洗濯する (せんたくする)","晴れ (はれ)","雪 (ゆき)"]
+- choices: ["雨 (あめ)","雪 (ゆき)","晴れ (はれ)","洗濯する (せんたくする)"]
 - correct: "洗濯する (せんたくする)"
 - explanation: La opción correcta para “lavar la ropa” es 「洗濯する (せんたくする)」.
 - hint: Lección 8 · Vocabulario
@@ -1024,7 +1024,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「そうじする」?
-- choices: ["limpiar","nieve","soleado","lluvia"]
+- choices: ["limpiar","lluvia","nieve","soleado"]
 - correct: "limpiar"
 - explanation: 「そうじする」 significa “limpiar”.
 - hint: Lección 8 · Vocabulario
@@ -1034,7 +1034,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “limpiar”
-- choices: ["雨 (あめ)","掃除する (そうじする)","雪 (ゆき)","晴れ (はれ)"]
+- choices: ["掃除する (そうじする)","晴れ (はれ)","雪 (ゆき)","雨 (あめ)"]
 - correct: "掃除する (そうじする)"
 - explanation: La opción correcta para “limpiar” es 「掃除する (そうじする)」.
 - hint: Lección 8 · Vocabulario
@@ -1044,7 +1044,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「りょうりする」?
-- choices: ["lluvia","nieve","soleado","cocinar"]
+- choices: ["cocinar","soleado","lluvia","nieve"]
 - correct: "cocinar"
 - explanation: 「りょうりする」 significa “cocinar”.
 - hint: Lección 8 · Vocabulario
@@ -1054,7 +1054,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cocinar”
-- choices: ["雨 (あめ)","料理する (りょうりする)","雪 (ゆき)","晴れ (はれ)"]
+- choices: ["雨 (あめ)","晴れ (はれ)","料理する (りょうりする)","雪 (ゆき)"]
 - correct: "料理する (りょうりする)"
 - explanation: La opción correcta para “cocinar” es 「料理する (りょうりする)」.
 - hint: Lección 8 · Vocabulario
@@ -1064,7 +1064,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～まで」?
-- choices: ["lluvia","hasta...","soleado","nieve"]
+- choices: ["soleado","lluvia","hasta...","nieve"]
 - correct: "hasta..."
 - explanation: 「～まで」 significa “hasta...”.
 - hint: Lección 8 · Vocabulario
@@ -1074,7 +1074,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “hasta...”
-- choices: ["雪 (ゆき)","雨 (あめ)","～まで","晴れ (はれ)"]
+- choices: ["～まで","雪 (ゆき)","晴れ (はれ)","雨 (あめ)"]
 - correct: "～まで"
 - explanation: La opción correcta para “hasta...” es 「～まで」.
 - hint: Lección 8 · Vocabulario
@@ -1084,7 +1084,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～ぐらい」?
-- choices: ["aproximadamente...","nieve","soleado","lluvia"]
+- choices: ["lluvia","soleado","nieve","aproximadamente..."]
 - correct: "aproximadamente..."
 - explanation: 「～ぐらい」 significa “aproximadamente...”.
 - hint: Lección 8 · Vocabulario
@@ -1094,7 +1094,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “aproximadamente...”
-- choices: ["雨 (あめ)","雪 (ゆき)","～ぐらい","晴れ (はれ)"]
+- choices: ["雨 (あめ)","雪 (ゆき)","晴れ (はれ)","～ぐらい"]
 - correct: "～ぐらい"
 - explanation: La opción correcta para “aproximadamente...” es 「～ぐらい」.
 - hint: Lección 8 · Vocabulario
@@ -1104,7 +1104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ごめんなさい」?
-- choices: ["lo siento","lluvia","soleado","nieve"]
+- choices: ["nieve","lo siento","soleado","lluvia"]
 - correct: "lo siento"
 - explanation: 「ごめんなさい」 significa “lo siento”.
 - hint: Lección 8 · Vocabulario
@@ -1114,7 +1114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “lo siento”
-- choices: ["晴れ (はれ)","雨 (あめ)","ごめんなさい","雪 (ゆき)"]
+- choices: ["ごめんなさい","晴れ (はれ)","雨 (あめ)","雪 (ゆき)"]
 - correct: "ごめんなさい"
 - explanation: La opción correcta para “lo siento” es 「ごめんなさい」.
 - hint: Lección 8 · Vocabulario
@@ -1124,7 +1124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「だから」?
-- choices: ["nieve","lluvia","por eso; por lo tanto","soleado"]
+- choices: ["por eso; por lo tanto","lluvia","soleado","nieve"]
 - correct: "por eso; por lo tanto"
 - explanation: 「だから」 significa “por eso; por lo tanto”.
 - hint: Lección 8 · Vocabulario
@@ -1134,7 +1134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “por eso; por lo tanto”
-- choices: ["雨 (あめ)","だから","雪 (ゆき)","晴れ (はれ)"]
+- choices: ["晴れ (はれ)","だから","雨 (あめ)","雪 (ゆき)"]
 - correct: "だから"
 - explanation: La opción correcta para “por eso; por lo tanto” es 「だから」.
 - hint: Lección 8 · Vocabulario
@@ -1144,7 +1144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「たくさん」?
-- choices: ["nieve","lluvia","mucho","soleado"]
+- choices: ["nieve","soleado","mucho","lluvia"]
 - correct: "mucho"
 - explanation: 「たくさん」 significa “mucho”.
 - hint: Lección 8 · Vocabulario
@@ -1154,7 +1154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “mucho”
-- choices: ["雪 (ゆき)","雨 (あめ)","晴れ (はれ)","たくさん"]
+- choices: ["たくさん","雪 (ゆき)","雨 (あめ)","晴れ (はれ)"]
 - correct: "たくさん"
 - explanation: La opción correcta para “mucho” es 「たくさん」.
 - hint: Lección 8 · Vocabulario
@@ -1164,7 +1164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～てから」?
-- choices: ["soleado","después de...","nieve","lluvia"]
+- choices: ["nieve","después de...","soleado","lluvia"]
 - correct: "después de..."
 - explanation: 「～てから」 significa “después de...”.
 - hint: Lección 8 · Vocabulario
@@ -1174,7 +1174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “después de...”
-- choices: ["～てから","晴れ (はれ)","雪 (ゆき)","雨 (あめ)"]
+- choices: ["～てから","雨 (あめ)","雪 (ゆき)","晴れ (はれ)"]
 - correct: "～てから"
 - explanation: La opción correcta para “después de...” es 「～てから」.
 - hint: Lección 8 · Vocabulario
@@ -1184,7 +1184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～てもいいです」?
-- choices: ["nieve","soleado","está bien...","lluvia"]
+- choices: ["nieve","lluvia","está bien...","soleado"]
 - correct: "está bien..."
 - explanation: 「～てもいいです」 significa “está bien...”.
 - hint: Lección 8 · Vocabulario
@@ -1194,7 +1194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “está bien...”
-- choices: ["雪 (ゆき)","晴れ (はれ)","～てもいいです","雨 (あめ)"]
+- choices: ["晴れ (はれ)","雨 (あめ)","～てもいいです","雪 (ゆき)"]
 - correct: "～てもいいです"
 - explanation: La opción correcta para “está bien...” es 「～てもいいです」.
 - hint: Lección 8 · Vocabulario
@@ -1204,7 +1204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「どうして」?
-- choices: ["nieve","lluvia","por qué","soleado"]
+- choices: ["por qué","nieve","soleado","lluvia"]
 - correct: "por qué"
 - explanation: 「どうして」 significa “por qué”.
 - hint: Lección 8 · Vocabulario
@@ -1214,7 +1214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “por qué”
-- choices: ["雪 (ゆき)","どうして","晴れ (はれ)","雨 (あめ)"]
+- choices: ["雪 (ゆき)","雨 (あめ)","どうして","晴れ (はれ)"]
 - correct: "どうして"
 - explanation: La opción correcta para “por qué” es 「どうして」.
 - hint: Lección 8 · Vocabulario
@@ -1224,7 +1224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ゆっくり」?
-- choices: ["soleado","nieve","lluvia","despacio; con calma"]
+- choices: ["despacio; con calma","lluvia","nieve","soleado"]
 - correct: "despacio; con calma"
 - explanation: 「ゆっくり」 significa “despacio; con calma”.
 - hint: Lección 8 · Vocabulario
@@ -1234,7 +1234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “despacio; con calma”
-- choices: ["雨 (あめ)","雪 (ゆき)","晴れ (はれ)","ゆっくり"]
+- choices: ["ゆっくり","晴れ (はれ)","雨 (あめ)","雪 (ゆき)"]
 - correct: "ゆっくり"
 - explanation: La opción correcta para “despacio; con calma” es 「ゆっくり」.
 - hint: Lección 8 · Vocabulario
@@ -1244,10 +1244,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 持っていく (もっていく)","B. 掃除する (そうじする)","C. 洗濯する (せんたくする)"]
-- choices.right: ["1. limpiar","2. lavar la ropa","3. llevar (algo)"]
-- correct: "A-3, B-1, C-2"
-- explanation: Relaciones correctas: A-3, B-1, C-2.
+- choices.left: ["A. スペイン","B. 春 (はる)","C. バーベキュー"]
+- choices.right: ["1. España","2. primavera","3. barbacoa"]
+- correct: "A-1, B-2, C-3"
+- explanation: Relaciones correctas: A-1, B-2, C-3.
 - hint: Lección 8 · Relacionar
 
 ### exam-vocab-match-8-1
@@ -1255,10 +1255,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 有名 (ゆうめい(な))","B. 遅くなる (おそくなる)","C. はし"]
-- choices.right: ["1. palillos","2. llegar tarde","3. famoso"]
-- correct: "A-3, B-2, C-1"
-- explanation: Relaciones correctas: A-3, B-2, C-1.
+- choices.left: ["A. およぐ","B. 上手 (じょうず(な))","C. 洗濯する (せんたくする)"]
+- choices.right: ["1. nadar","2. hábil; bueno en...","3. lavar la ropa"]
+- correct: "A-1, B-2, C-3"
+- explanation: Relaciones correctas: A-1, B-2, C-3.
 - hint: Lección 8 · Relacionar
 
 ### exam-vocab-match-8-2
@@ -1266,10 +1266,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 雪 (ゆき)","B. 言う (いう)","C. トマト"]
-- choices.right: ["1. decir","2. nieve","3. tomate"]
-- correct: "A-2, B-1, C-3"
-- explanation: Relaciones correctas: A-2, B-1, C-3.
+- choices.left: ["A. ～まで","B. どうして","C. 天気 (てんき)"]
+- choices.right: ["1. clima","2. por qué","3. hasta..."]
+- correct: "A-3, B-2, C-1"
+- explanation: Relaciones correctas: A-3, B-2, C-1.
 - hint: Lección 8 · Relacionar
 
 ### exam-vocab-match-8-3
@@ -1277,10 +1277,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 気温 (きおん)","B. 晴れ (はれ)","C. 下手 (へた(な))"]
-- choices.right: ["1. soleado","2. torpe; malo en...","3. temperatura (clima)"]
-- correct: "A-3, B-1, C-2"
-- explanation: Relaciones correctas: A-3, B-1, C-2.
+- choices.left: ["A. 作る (つくる)","B. 運転する (うんてんする)","C. だから"]
+- choices.right: ["1. conducir","2. hacer; producir","3. por eso; por lo tanto"]
+- correct: "A-2, B-1, C-3"
+- explanation: Relaciones correctas: A-2, B-1, C-3.
 - hint: Lección 8 · Relacionar
 
 ## kanji
@@ -1290,7 +1290,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「会社員」?
-- choices: ["かいしゃいん","いちじ","いち","に"]
+- choices: ["いち","かいしゃいん","いちじ","に"]
 - correct: "かいしゃいん"
 - explanation: 「会社員」 se lee 「かいしゃいん」.
 - hint: Lección 8 · Kanji
@@ -1311,7 +1311,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「新しい」?
-- choices: ["に","いち","いちじ","あたらしい"]
+- choices: ["に","いちじ","いち","あたらしい"]
 - correct: "あたらしい"
 - explanation: 「新しい」 se lee 「あたらしい」.
 - hint: Lección 8 · Kanji
@@ -1332,7 +1332,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「聞く」?
-- choices: ["に","きく","いち","いちじ"]
+- choices: ["いち","きく","に","いちじ"]
 - correct: "きく"
 - explanation: 「聞く」 se lee 「きく」.
 - hint: Lección 8 · Kanji
@@ -1353,7 +1353,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「作る」?
-- choices: ["いちじ","に","いち","つくる"]
+- choices: ["つくる","いち","に","いちじ"]
 - correct: "つくる"
 - explanation: 「作る」 se lee 「つくる」.
 - hint: Lección 8 · Kanji
@@ -1374,7 +1374,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「仕事」?
-- choices: ["しごと","いちじ","に","いち"]
+- choices: ["しごと","に","いちじ","いち"]
 - correct: "しごと"
 - explanation: 「仕事」 se lee 「しごと」.
 - hint: Lección 8 · Kanji
@@ -1395,7 +1395,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「電車」?
-- choices: ["いち","いちじ","でんしゃ","に"]
+- choices: ["いちじ","でんしゃ","に","いち"]
 - correct: "でんしゃ"
 - explanation: 「電車」 se lee 「でんしゃ」.
 - hint: Lección 8 · Kanji
@@ -1416,7 +1416,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「車」?
-- choices: ["いち","くるま","いちじ","に"]
+- choices: ["いちじ","くるま","いち","に"]
 - correct: "くるま"
 - explanation: 「車」 se lee 「くるま」.
 - hint: Lección 8 · Kanji
@@ -1437,7 +1437,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「休む」?
-- choices: ["いちじ","に","やすむ","いち"]
+- choices: ["に","いち","いちじ","やすむ"]
 - correct: "やすむ"
 - explanation: 「休む」 se lee 「やすむ」.
 - hint: Lección 8 · Kanji
@@ -1458,7 +1458,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「言う」?
-- choices: ["いちじ","いう","いち","に"]
+- choices: ["いちじ","いう","に","いち"]
 - correct: "いう"
 - explanation: 「言う」 se lee 「いう」.
 - hint: Lección 8 · Kanji
@@ -1479,7 +1479,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「読む」?
-- choices: ["に","いちじ","いち","よむ"]
+- choices: ["よむ","いち","いちじ","に"]
 - correct: "よむ"
 - explanation: 「読む」 se lee 「よむ」.
 - hint: Lección 8 · Kanji
@@ -1500,7 +1500,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「思う」?
-- choices: ["いちじ","おもう","に","いち"]
+- choices: ["おもう","に","いちじ","いち"]
 - correct: "おもう"
 - explanation: 「思う」 se lee 「おもう」.
 - hint: Lección 8 · Kanji
@@ -1521,7 +1521,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「次」?
-- choices: ["に","いち","いちじ","つぎ"]
+- choices: ["つぎ","いちじ","に","いち"]
 - correct: "つぎ"
 - explanation: 「次」 se lee 「つぎ」.
 - hint: Lección 8 · Kanji
@@ -1542,7 +1542,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「何」?
-- choices: ["いちじ","いち","なに","に"]
+- choices: ["なに","いち","いちじ","に"]
 - correct: "なに"
 - explanation: 「何」 se lee 「なに」.
 - hint: Lección 8 · Kanji
@@ -1565,7 +1565,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___パコです。
-- choices: ["に","を","は","で"]
+- choices: ["で","を","に","は"]
 - correct: "は"
 - explanation: 「は」marca tema.
 - hint: Lección 8 · Partículas
@@ -1586,7 +1586,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: マリアさん___せんせいです。
-- choices: ["が","で","は","を"]
+- choices: ["を","は","が","で"]
 - correct: "は"
 - explanation: Oración copulativa con tema 「は」.
 - hint: Lección 8 · Partículas
@@ -1607,7 +1607,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: これはだれ___ほんですか。
-- choices: ["に","を","で","の"]
+- choices: ["で","を","の","に"]
 - correct: "の"
 - explanation: Posesión con 「の」.
 - hint: Lección 8 · Partículas
@@ -1628,7 +1628,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___ともだちもにほんじんです。
-- choices: ["が","も","は","の"]
+- choices: ["の","が","は","も"]
 - correct: "の"
 - explanation: 「わたしのともだち」.
 - hint: Lección 8 · Partículas
@@ -1649,7 +1649,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: がっこう___いきます。
-- choices: ["に","は","を","で"]
+- choices: ["に","を","は","で"]
 - correct: "に"
 - explanation: Destino con 「に」.
 - hint: Lección 8 · Partículas
@@ -1670,7 +1670,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: としょかん___べんきょうします。
-- choices: ["で","に","が","を"]
+- choices: ["が","を","で","に"]
 - correct: "で"
 - explanation: Lugar de acción con 「で」.
 - hint: Lección 8 · Partículas
@@ -1691,7 +1691,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ほん___よみます。
-- choices: ["は","を","に","で"]
+- choices: ["に","を","で","は"]
 - correct: "を"
 - explanation: Objeto directo con 「を」.
 - hint: Lección 8 · Partículas
@@ -1712,7 +1712,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: 7じ___おきます。
-- choices: ["が","に","で","を"]
+- choices: ["で","を","が","に"]
 - correct: "に"
 - explanation: Hora específica con 「に」.
 - hint: Lección 8 · Partículas
@@ -1733,7 +1733,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: うち___かえりました。
-- choices: ["が","で","を","に"]
+- choices: ["に","が","を","で"]
 - correct: "に"
 - explanation: Destino final con 「に」.
 - hint: Lección 8 · Partículas
@@ -1754,7 +1754,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ともだち___えいがをみました。
-- choices: ["に","と","を","が"]
+- choices: ["が","に","と","を"]
 - correct: "と"
 - explanation: Compañía con 「と」.
 - hint: Lección 8 · Partículas
@@ -1775,7 +1775,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ケーキ___すきです。
-- choices: ["で","を","に","が"]
+- choices: ["を","で","が","に"]
 - correct: "が"
 - explanation: Con 「すき」 se usa 「が」.
 - hint: Lección 8 · Partículas
@@ -1796,7 +1796,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: こうえん___しんぶんをよみます。
-- choices: ["を","に","が","で"]
+- choices: ["が","で","を","に"]
 - correct: "で"
 - explanation: Lugar de acción con 「で」.
 - hint: Lección 8 · Partículas
@@ -1817,7 +1817,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: にほん___りょうりはおいしいです。
-- choices: ["が","の","に","を"]
+- choices: ["が","を","に","の"]
 - correct: "の"
 - explanation: Modificador nominal con 「の」.
 - hint: Lección 8 · Partículas
@@ -1838,7 +1838,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: 8じ___10じ___べんきょうしました。
-- choices: ["に / に","を / に","で / から","から / まで"]
+- choices: ["を / に","に / に","で / から","から / まで"]
 - correct: "から / まで"
 - explanation: Rango temporal.
 - hint: Lección 8 · Partículas
@@ -1861,7 +1861,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「たべる」 (comer)
-- choices: ["みて","きいて","いって","たべて"]
+- choices: ["みて","たべて","いって","きいて"]
 - correct: "たべて"
 - explanation: La forma て de 「たべる」 es 「たべて」.
 - hint: Lección 8 · Conjugación
@@ -1871,7 +1871,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「たべる」 (comer)
-- choices: ["たべた","きいた","みた","いった"]
+- choices: ["たべた","いった","みた","きいた"]
 - correct: "たべた"
 - explanation: El pasado corto de 「たべる」 es 「たべた」.
 - hint: Lección 8 · Conjugación
@@ -1891,7 +1891,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「みる」 (ver)
-- choices: ["いって","きいて","みて","たべて"]
+- choices: ["たべて","みて","きいて","いって"]
 - correct: "みて"
 - explanation: La forma て de 「みる」 es 「みて」.
 - hint: Lección 8 · Conjugación
@@ -1901,7 +1901,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「みる」 (ver)
-- choices: ["いった","きいた","たべた","みた"]
+- choices: ["きいた","いった","みた","たべた"]
 - correct: "みた"
 - explanation: El pasado corto de 「みる」 es 「みた」.
 - hint: Lección 8 · Conjugación
@@ -1921,7 +1921,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「いく」 (ir)
-- choices: ["たべて","いって","みて","きいて"]
+- choices: ["いって","みて","きいて","たべて"]
 - correct: "いって"
 - explanation: La forma て de 「いく」 es 「いって」.
 - hint: Lección 8 · Conjugación
@@ -1931,7 +1931,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「いく」 (ir)
-- choices: ["たべた","みた","いった","きいた"]
+- choices: ["みた","きいた","いった","たべた"]
 - correct: "いった"
 - explanation: El pasado corto de 「いく」 es 「いった」.
 - hint: Lección 8 · Conjugación
@@ -1951,7 +1951,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「きく」 (escuchar)
-- choices: ["いって","みて","たべて","きいて"]
+- choices: ["たべて","きいて","みて","いって"]
 - correct: "きいて"
 - explanation: La forma て de 「きく」 es 「きいて」.
 - hint: Lección 8 · Conjugación
@@ -1961,7 +1961,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「きく」 (escuchar)
-- choices: ["いった","みた","きいた","たべた"]
+- choices: ["いった","たべた","みた","きいた"]
 - correct: "きいた"
 - explanation: El pasado corto de 「きく」 es 「きいた」.
 - hint: Lección 8 · Conjugación
@@ -1981,7 +1981,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「おきる」 (levantarse)
-- choices: ["たべて","おきて","みて","いって"]
+- choices: ["たべて","おきて","いって","みて"]
 - correct: "おきて"
 - explanation: La forma て de 「おきる」 es 「おきて」.
 - hint: Lección 8 · Conjugación
@@ -1991,7 +1991,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「おきる」 (levantarse)
-- choices: ["たべた","おきた","いった","みた"]
+- choices: ["いった","たべた","みた","おきた"]
 - correct: "おきた"
 - explanation: El pasado corto de 「おきる」 es 「おきた」.
 - hint: Lección 8 · Conjugación
@@ -2011,7 +2011,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「ねる」 (dormir)
-- choices: ["みて","たべて","いって","ねて"]
+- choices: ["みて","いって","ねて","たべて"]
 - correct: "ねて"
 - explanation: La forma て de 「ねる」 es 「ねて」.
 - hint: Lección 8 · Conjugación
@@ -2021,7 +2021,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「ねる」 (dormir)
-- choices: ["いった","ねた","たべた","みた"]
+- choices: ["たべた","いった","ねた","みた"]
 - correct: "ねた"
 - explanation: El pasado corto de 「ねる」 es 「ねた」.
 - hint: Lección 8 · Conjugación
@@ -2041,7 +2041,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「かえる」 (volver)
-- choices: ["みて","たべて","かえって","いって"]
+- choices: ["たべて","かえって","みて","いって"]
 - correct: "かえって"
 - explanation: La forma て de 「かえる」 es 「かえって」.
 - hint: Lección 8 · Conjugación
@@ -2051,7 +2051,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「かえる」 (volver)
-- choices: ["いった","かえった","たべた","みた"]
+- choices: ["たべた","みた","いった","かえった"]
 - correct: "かえった"
 - explanation: El pasado corto de 「かえる」 es 「かえった」.
 - hint: Lección 8 · Conjugación
@@ -2071,7 +2071,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「よむ」 (leer)
-- choices: ["たべて","よんで","いって","みて"]
+- choices: ["みて","いって","よんで","たべて"]
 - correct: "よんで"
 - explanation: La forma て de 「よむ」 es 「よんで」.
 - hint: Lección 8 · Conjugación
@@ -2081,7 +2081,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「よむ」 (leer)
-- choices: ["よんだ","たべた","いった","みた"]
+- choices: ["よんだ","みた","たべた","いった"]
 - correct: "よんだ"
 - explanation: El pasado corto de 「よむ」 es 「よんだ」.
 - hint: Lección 8 · Conjugación
@@ -2101,7 +2101,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「かく」 (escribir)
-- choices: ["かいて","いって","みて","たべて"]
+- choices: ["みて","いって","かいて","たべて"]
 - correct: "かいて"
 - explanation: La forma て de 「かく」 es 「かいて」.
 - hint: Lección 8 · Conjugación
@@ -2111,7 +2111,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「かく」 (escribir)
-- choices: ["たべた","みた","いった","かいた"]
+- choices: ["みた","たべた","かいた","いった"]
 - correct: "かいた"
 - explanation: El pasado corto de 「かく」 es 「かいた」.
 - hint: Lección 8 · Conjugación
@@ -2131,7 +2131,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「かう」 (comprar)
-- choices: ["いって","たべて","みて","かって"]
+- choices: ["いって","たべて","かって","みて"]
 - correct: "かって"
 - explanation: La forma て de 「かう」 es 「かって」.
 - hint: Lección 8 · Conjugación
@@ -2141,7 +2141,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「かう」 (comprar)
-- choices: ["かった","みた","たべた","いった"]
+- choices: ["いった","かった","みた","たべた"]
 - correct: "かった"
 - explanation: El pasado corto de 「かう」 es 「かった」.
 - hint: Lección 8 · Conjugación
@@ -2161,7 +2161,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「のむ」 (beber)
-- choices: ["いって","たべて","みて","のんで"]
+- choices: ["のんで","みて","いって","たべて"]
 - correct: "のんで"
 - explanation: La forma て de 「のむ」 es 「のんで」.
 - hint: Lección 8 · Conjugación
@@ -2171,7 +2171,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「のむ」 (beber)
-- choices: ["みた","のんだ","いった","たべた"]
+- choices: ["いった","のんだ","たべた","みた"]
 - correct: "のんだ"
 - explanation: El pasado corto de 「のむ」 es 「のんだ」.
 - hint: Lección 8 · Conjugación
@@ -2191,7 +2191,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「する」 (hacer)
-- choices: ["たべて","して","いって","みて"]
+- choices: ["たべて","いって","みて","して"]
 - correct: "して"
 - explanation: La forma て de 「する」 es 「して」.
 - hint: Lección 8 · Conjugación
@@ -2201,7 +2201,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「する」 (hacer)
-- choices: ["みた","たべた","した","いった"]
+- choices: ["たべた","みた","いった","した"]
 - correct: "した"
 - explanation: El pasado corto de 「する」 es 「した」.
 - hint: Lección 8 · Conjugación
@@ -2221,7 +2221,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「くる」 (venir)
-- choices: ["いって","きて","みて","たべて"]
+- choices: ["きて","いって","たべて","みて"]
 - correct: "きて"
 - explanation: La forma て de 「くる」 es 「きて」.
 - hint: Lección 8 · Conjugación
@@ -2231,7 +2231,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「くる」 (venir)
-- choices: ["いった","きた","みた","たべた"]
+- choices: ["いった","きた","たべた","みた"]
 - correct: "きた"
 - explanation: El pasado corto de 「くる」 es 「きた」.
 - hint: Lección 8 · Conjugación
@@ -2251,7 +2251,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「およぐ」 (nadar)
-- choices: ["たべて","みて","いって","およいで"]
+- choices: ["およいで","たべて","いって","みて"]
 - correct: "およいで"
 - explanation: La forma て de 「およぐ」 es 「およいで」.
 - hint: Lección 8 · Conjugación
@@ -2261,7 +2261,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「およぐ」 (nadar)
-- choices: ["たべた","みた","およいだ","いった"]
+- choices: ["たべた","およいだ","いった","みた"]
 - correct: "およいだ"
 - explanation: El pasado corto de 「およぐ」 es 「およいだ」.
 - hint: Lección 8 · Conjugación
@@ -2281,7 +2281,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「はなす」 (hablar)
-- choices: ["いって","みて","はなして","たべて"]
+- choices: ["いって","はなして","みて","たべて"]
 - correct: "はなして"
 - explanation: La forma て de 「はなす」 es 「はなして」.
 - hint: Lección 8 · Conjugación
@@ -2291,7 +2291,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「はなす」 (hablar)
-- choices: ["いった","はなした","たべた","みた"]
+- choices: ["みた","たべた","はなした","いった"]
 - correct: "はなした"
 - explanation: El pasado corto de 「はなす」 es 「はなした」.
 - hint: Lección 8 · Conjugación
@@ -2311,7 +2311,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あびる」 (ducharse)
-- choices: ["たべて","あびて","いって","みて"]
+- choices: ["いって","たべて","みて","あびて"]
 - correct: "あびて"
 - explanation: La forma て de 「あびる」 es 「あびて」.
 - hint: Lección 8 · Conjugación
@@ -2321,7 +2321,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あびる」 (ducharse)
-- choices: ["あびた","みた","いった","たべた"]
+- choices: ["いった","あびた","たべた","みた"]
 - correct: "あびた"
 - explanation: El pasado corto de 「あびる」 es 「あびた」.
 - hint: Lección 8 · Conjugación
@@ -2341,7 +2341,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あそぶ」 (jugar)
-- choices: ["たべて","いって","あそんで","みて"]
+- choices: ["あそんで","たべて","みて","いって"]
 - correct: "あそんで"
 - explanation: La forma て de 「あそぶ」 es 「あそんで」.
 - hint: Lección 8 · Conjugación
@@ -2351,7 +2351,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あそぶ」 (jugar)
-- choices: ["たべた","あそんだ","いった","みた"]
+- choices: ["たべた","みた","あそんだ","いった"]
 - correct: "あそんだ"
 - explanation: El pasado corto de 「あそぶ」 es 「あそんだ」.
 - hint: Lección 8 · Conjugación
@@ -2371,7 +2371,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「つくる」 (hacer/crear)
-- choices: ["いって","みて","たべて","つくって"]
+- choices: ["たべて","いって","つくって","みて"]
 - correct: "つくって"
 - explanation: La forma て de 「つくる」 es 「つくって」.
 - hint: Lección 8 · Conjugación
@@ -2381,7 +2381,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「つくる」 (hacer/crear)
-- choices: ["たべた","みた","いった","つくった"]
+- choices: ["みた","つくった","いった","たべた"]
 - correct: "つくった"
 - explanation: El pasado corto de 「つくる」 es 「つくった」.
 - hint: Lección 8 · Conjugación
@@ -2401,7 +2401,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あげる」 (dar)
-- choices: ["あげて","いって","みて","たべて"]
+- choices: ["たべて","あげて","いって","みて"]
 - correct: "あげて"
 - explanation: La forma て de 「あげる」 es 「あげて」.
 - hint: Lección 8 · Conjugación
@@ -2411,7 +2411,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あげる」 (dar)
-- choices: ["たべた","いった","あげた","みた"]
+- choices: ["たべた","みた","いった","あげた"]
 - correct: "あげた"
 - explanation: El pasado corto de 「あげる」 es 「あげた」.
 - hint: Lección 8 · Conjugación
@@ -2431,7 +2431,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「もらう」 (recibir)
-- choices: ["いって","みて","もらって","たべて"]
+- choices: ["たべて","いって","みて","もらって"]
 - correct: "もらって"
 - explanation: La forma て de 「もらう」 es 「もらって」.
 - hint: Lección 8 · Conjugación
@@ -2441,7 +2441,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「もらう」 (recibir)
-- choices: ["もらった","たべた","みた","いった"]
+- choices: ["みた","もらった","いった","たべた"]
 - correct: "もらった"
 - explanation: El pasado corto de 「もらう」 es 「もらった」.
 - hint: Lección 8 · Conjugación
@@ -2461,7 +2461,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「なる」 (volverse)
-- choices: ["なって","たべて","みて","いって"]
+- choices: ["みて","いって","なって","たべて"]
 - correct: "なって"
 - explanation: La forma て de 「なる」 es 「なって」.
 - hint: Lección 8 · Conjugación
@@ -2471,7 +2471,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「なる」 (volverse)
-- choices: ["いった","なった","みた","たべた"]
+- choices: ["いった","たべた","みた","なった"]
 - correct: "なった"
 - explanation: El pasado corto de 「なる」 es 「なった」.
 - hint: Lección 8 · Conjugación
@@ -2501,7 +2501,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「さむい」 (frío)
-- choices: ["たかくない","さむくない","しずかじゃない","やすくない"]
+- choices: ["しずかじゃない","たかくない","やすくない","さむくない"]
 - correct: "さむくない"
 - explanation: La forma negativa de 「さむい」 es 「さむくない」.
 - hint: Lección 8 · Conjugación
@@ -2513,7 +2513,7 @@
 - type: `reorder`
 - source: `lesson_scenarios_grammar`
 - prompt: Ordena la pregunta casual.
-- choices: ["する","の","なにを","あした"]
+- choices: ["あした","する","なにを","の"]
 - correct: "あした なにを する の"
 - explanation: En contexto informal se usa la forma corta.
 - hint: Lección 8 · Forma corta
