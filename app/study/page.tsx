@@ -217,6 +217,17 @@ type FlashLearnQuestion = {
   options: string[];
 };
 
+type StudyActivityTool = "kana" | "sprint" | "flashcards" | "exam";
+
+type StudyActivityEntry = {
+  id: string;
+  tool: StudyActivityTool;
+  label: string;
+  href: string;
+  detail?: string;
+  occurredAt: string;
+};
+
 const EXAM_CATEGORY_LABELS: Record<QuizCategory, string> = {
   kana: "Kana",
   vocab: "Vocabulario",
@@ -5015,6 +5026,31 @@ function getCustomFlashDeckStorageKey(userKey: string) {
   return `study-custom-flash-decks-${userKey || "anon"}`;
 }
 
+function getStudyActivityStorageKey(userKey: string) {
+  return `study-activity-${userKey || "anon"}`;
+}
+
+function getStudyActivityLabel(tool: StudyActivityTool) {
+  if (tool === "kana") return "Kana Sprint";
+  if (tool === "sprint") return "Vocab + Kanji Sprint";
+  if (tool === "flashcards") return "Flashcards";
+  return "Repaso mixto";
+}
+
+function formatStudyActivityTime(iso: string) {
+  const value = new Date(iso);
+  if (Number.isNaN(value.getTime())) return "";
+  const now = new Date();
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+  const startOfTarget = new Date(value);
+  startOfTarget.setHours(0, 0, 0, 0);
+  const dayDiff = Math.round((startOfToday.getTime() - startOfTarget.getTime()) / 86_400_000);
+  if (dayDiff === 0) return "Hoy";
+  if (dayDiff === 1) return "Ayer";
+  return value.toLocaleDateString("es-MX", { weekday: "short" });
+}
+
 function buildCustomFlashDeckDescription(setCount: number, itemCount: number) {
   const setLabel = `${setCount} ${setCount === 1 ? "set" : "sets"}`;
   const itemLabel = `${itemCount} ${itemCount === 1 ? "tarjeta" : "tarjetas"}`;
@@ -5305,6 +5341,7 @@ function StudyContent() {
   const [examHistory, setExamHistory] = useState<ExamAttempt[]>([]);
   const examCardRef = useRef<HTMLDivElement | null>(null);
   const examPersistedRef = useRef(false);
+  const [studyActivity, setStudyActivity] = useState<StudyActivityEntry[]>([]);
 
   const flashFocusRef = useRef<HTMLDivElement | null>(null);
 
@@ -5348,6 +5385,24 @@ function StudyContent() {
             setExamHistory(parsedHistory.slice(0, 20));
           }
         }
+        const rawActivity = localStorage.getItem(getStudyActivityStorageKey(key));
+        if (rawActivity) {
+          const parsedActivity = JSON.parse(rawActivity);
+          if (Array.isArray(parsedActivity)) {
+            setStudyActivity(
+              parsedActivity.filter((entry): entry is StudyActivityEntry =>
+                Boolean(
+                  entry &&
+                  typeof entry.id === "string" &&
+                  typeof entry.tool === "string" &&
+                  typeof entry.label === "string" &&
+                  typeof entry.href === "string" &&
+                  typeof entry.occurredAt === "string",
+                ),
+              ).slice(0, 12),
+            );
+          }
+        }
       } catch {}
     };
     void boot();
@@ -5378,6 +5433,12 @@ function StudyContent() {
       localStorage.setItem(getCustomFlashDeckStorageKey(userKey), JSON.stringify(customFlashDecks));
     } catch {}
   }, [customFlashDecks, userKey]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(getStudyActivityStorageKey(userKey), JSON.stringify(studyActivity.slice(0, 12)));
+    } catch {}
+  }, [studyActivity, userKey]);
 
   useEffect(() => {
     if (selectedView) {
@@ -5622,6 +5683,7 @@ function StudyContent() {
 
   const startKana = () => {
     // Starting a new run cancels any current run without submitting partial scores.
+    recordStudyActivity("kana");
     setKanaRunning(false);
     setKanaTime(60);
     setKanaScore(0);
@@ -5675,6 +5737,7 @@ function StudyContent() {
 
   const startVkSprint = () => {
     // Starting a new run cancels any current run without submitting partial scores.
+    recordStudyActivity("sprint", vkBucketConfig.label);
     setVkRunning(false);
     setVkTime(60);
     setVkScore(0);
@@ -5695,6 +5758,16 @@ function StudyContent() {
       setVkPenalty(2);
     }
     createVkQuestion();
+  };
+
+  const recordStudyActivity = (tool: StudyActivityTool, detail?: string) => {
+    const occurredAt = new Date().toISOString();
+    const label = getStudyActivityLabel(tool);
+    const href = tool === "exam" ? "/study?view=exam" : `/study?view=${tool}`;
+    setStudyActivity((prev) => [
+      { id: `${tool}-${Date.now()}`, tool, label, href, detail, occurredAt },
+      ...prev,
+    ].slice(0, 12));
   };
 
   const flashLessons = useMemo(
@@ -5864,6 +5937,7 @@ function StudyContent() {
 
   const startFlashCards = () => {
     if (!activeFlashSet || activeFlashItems.length === 0) return;
+    recordStudyActivity("flashcards", activeFlashSet.title);
     const randomizedDeck = shuffle([...activeFlashItems]);
     setFlashCardsDeck(randomizedDeck);
     setFlashMode("cards");
@@ -5905,6 +5979,7 @@ function StudyContent() {
       alert("Este set necesita al menos 4 tarjetas para el modo Aprender.");
       return;
     }
+    recordStudyActivity("flashcards", activeFlashSet.title);
     const shuffledItems = shuffle([...activeFlashItems]);
     const questions = buildFlashLearnQuestions(activeFlashSet, shuffledItems);
     if (questions.length === 0) {
@@ -5993,6 +6068,30 @@ function StudyContent() {
   const activeConjTypes: ConjType[] = conjTypes.length > 0 ? [...conjTypes] : ["te"];
   const vkLeaderboardForBucket = vkLeaderboard[vkBucket] || [];
   const showHub = !selectedView;
+  const latestStudyActivity = studyActivity[0] || null;
+  const recentStudyActivity = studyActivity.slice(0, 3);
+  const weekStart = getLocalWeekStart();
+  const weeklyActivity = studyActivity.filter((entry) => {
+    const value = new Date(entry.occurredAt);
+    return !Number.isNaN(value.getTime()) && value >= weekStart;
+  });
+  const weeklyActiveDays = new Set(
+    weeklyActivity.map((entry) => {
+      const value = new Date(entry.occurredAt);
+      value.setHours(0, 0, 0, 0);
+      return value.toISOString().slice(0, 10);
+    }),
+  );
+  const weeklyProgressDays = Array.from({ length: 7 }, (_, index) => {
+    const value = new Date(weekStart);
+    value.setDate(weekStart.getDate() + index);
+    value.setHours(0, 0, 0, 0);
+    return {
+      key: value.toISOString().slice(0, 10),
+      label: value.toLocaleDateString("es-MX", { weekday: "narrow" }),
+      active: weeklyActiveDays.has(value.toISOString().slice(0, 10)),
+    };
+  });
   const examCurrentQ = examQuestions[examIndex] || null;
   const examProgressPct = examQuestions.length
     ? Math.round((((examFinished ? examQuestions.length : examIndex + 1)) / examQuestions.length) * 100)
@@ -6314,6 +6413,7 @@ function StudyContent() {
       alert("No hay suficientes preguntas para esta lección todavía.");
       return;
     }
+    recordStudyActivity("exam", `Lección ${examLesson}`);
 
     let seenMap: Record<string, number> = {};
     try {
@@ -6522,6 +6622,183 @@ function StudyContent() {
 
         {showHub && (
           <section style={{ display: "grid", gap: "var(--space-3)", paddingBottom: "var(--space-4)" }}>
+            <div style={{ display: "grid", gap: "var(--space-3)" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gap: "var(--space-3)",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                  alignItems: "stretch",
+                }}
+              >
+                <div
+                  style={{
+                    background: "color-mix(in srgb, var(--color-surface) 84%, white)",
+                    borderRadius: 26,
+                    padding: "18px 18px 16px",
+                    display: "grid",
+                    gap: 12,
+                    boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+                    <div style={sectionKickerStyle}>Continue</div>
+                    {latestStudyActivity && (
+                      <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
+                        {formatStudyActivityTime(latestStudyActivity.occurredAt)}
+                      </div>
+                    )}
+                  </div>
+
+                  {latestStudyActivity ? (
+                    <Link
+                      href={latestStudyActivity.href}
+                      style={{
+                        textDecoration: "none",
+                        color: "var(--color-text)",
+                        display: "grid",
+                        gap: 8,
+                        borderRadius: 22,
+                        background: "color-mix(in srgb, var(--color-highlight-soft) 56%, white)",
+                        padding: "16px 16px 14px",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+                        <div style={{ fontSize: "clamp(24px, 5vw, 32px)", lineHeight: 0.98, letterSpacing: "-.04em", fontWeight: 800 }}>
+                          {latestStudyActivity.label}
+                        </div>
+                        <span
+                          style={{
+                            width: 34,
+                            height: 34,
+                            borderRadius: 999,
+                            background: "rgba(230, 57, 70, 0.12)",
+                            color: "var(--color-accent-strong)",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 15,
+                            fontWeight: 800,
+                            flexShrink: 0,
+                          }}
+                        >
+                          ↗
+                        </span>
+                      </div>
+                      {latestStudyActivity.detail && (
+                        <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                          {latestStudyActivity.detail}
+                        </div>
+                      )}
+                    </Link>
+                  ) : (
+                    <div
+                      style={{
+                        borderRadius: 22,
+                        background: "color-mix(in srgb, var(--color-surface-muted) 72%, white)",
+                        padding: "16px 16px 14px",
+                        fontSize: "var(--text-body-sm)",
+                        color: "var(--color-text-muted)",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Nada todavía
+                    </div>
+                  )}
+                </div>
+
+                <div
+                  style={{
+                    background: "color-mix(in srgb, rgba(78, 205, 196, 0.12) 72%, white)",
+                    borderRadius: 26,
+                    padding: "18px 18px 16px",
+                    display: "grid",
+                    gap: 12,
+                    boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
+                  }}
+                >
+                  <div style={sectionKickerStyle}>Esta semana</div>
+                  <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+                    <div style={{ fontSize: 28, lineHeight: 1, fontWeight: 800, color: "var(--color-text)" }}>
+                      {weeklyActiveDays.size}
+                    </div>
+                    <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                      / 7
+                    </div>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 6 }}>
+                    {weeklyProgressDays.map((day) => (
+                      <div key={day.key} style={{ display: "grid", gap: 6, justifyItems: "center" }}>
+                        <div
+                          style={{
+                            width: "100%",
+                            minHeight: 18,
+                            borderRadius: 999,
+                            background: day.active ? "var(--color-accent)" : "rgba(26, 26, 46, 0.08)",
+                          }}
+                        />
+                        <div style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 700 }}>
+                          {day.label}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  background: "color-mix(in srgb, rgba(244, 162, 97, 0.11) 68%, white)",
+                  borderRadius: 26,
+                  padding: "16px 18px",
+                  display: "grid",
+                  gap: 10,
+                  boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
+                }}
+              >
+                <div style={sectionKickerStyle}>Recent activity</div>
+                {recentStudyActivity.length > 0 ? (
+                  <div style={{ display: "grid", gap: 8 }}>
+                    {recentStudyActivity.map((entry) => (
+                      <Link
+                        key={entry.id}
+                        href={entry.href}
+                        style={{
+                          textDecoration: "none",
+                          color: "var(--color-text)",
+                          display: "grid",
+                          gridTemplateColumns: "minmax(0, 1fr) auto",
+                          gap: 10,
+                          alignItems: "center",
+                          borderRadius: 18,
+                          background: "rgba(255,255,255,0.72)",
+                          padding: "12px 14px",
+                        }}
+                      >
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: "var(--text-body)", fontWeight: 800, color: "var(--color-text)" }}>
+                            {entry.label}
+                          </div>
+                          {entry.detail && (
+                            <div style={{ marginTop: 2, fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                              {entry.detail}
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
+                          {formatStudyActivityTime(entry.occurredAt)}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                    Sin actividad
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div
               style={{
                 display: "grid",
