@@ -2,7 +2,7 @@
 
 - Source file: `/Users/pako/nihongo-feed-safe/app/study/page.tsx`
 - Export file: `/Users/pako/nihongo-feed-safe/docs/exam-bank-review.json`
-- Total questions: **452**
+- Total questions: **240**
 
 ## By lesson
 | Lesson | Questions |
@@ -18,25 +18,20 @@
 | 9 | 20 |
 | 10 | 20 |
 | 11 | 20 |
-| 12 | 232 |
+| 12 | 20 |
 
 ## By category
 | Category | Questions |
 | --- | ---: |
-| conjugation | 14 |
-| grammar | 92 |
-| kanji | 46 |
-| particles | 36 |
+| grammar | 96 |
+| kanji | 20 |
 | reading | 24 |
-| vocab | 240 |
+| vocab | 100 |
 
 ## By question type
 | Type | Questions |
 | --- | ---: |
-| match | 4 |
-| mcq | 410 |
-| reorder | 1 |
-| text | 37 |
+| mcq | 240 |
 
 ## Notes
 - This export reflects the current generated exam pool, not only the 20-question runtime selection.

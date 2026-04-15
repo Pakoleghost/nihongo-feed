@@ -19,7 +19,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「かぞく」?
-- choices: ["familia","hermana mayor","hermano mayor","hermano menor"]
+- choices: ["hermano menor","hermano mayor","hermana mayor","familia"]
 - correct: "familia"
 - explanation: 「かぞく」 significa “familia”.
 - hint: Lección 7 · Vocabulario
@@ -39,7 +39,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「はは」?
-- choices: ["familia","hermana mayor","hermano mayor","madre"]
+- choices: ["hermano mayor","familia","madre","hermana mayor"]
 - correct: "madre"
 - explanation: 「はは」 significa “madre”.
 - hint: Lección 7 · Vocabulario
@@ -49,7 +49,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「あに」?
-- choices: ["hermana mayor","familia","hermano mayor","hermano menor"]
+- choices: ["familia","hermano menor","hermano mayor","hermana mayor"]
 - correct: "hermano mayor"
 - explanation: 「あに」 significa “hermano mayor”.
 - hint: Lección 7 · Vocabulario
@@ -59,7 +59,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “empresa”
-- choices: ["姉 (あね)","会社 (かいしゃ)","家族 (かぞく)","兄 (あに)"]
+- choices: ["兄 (あに)","家族 (かぞく)","会社 (かいしゃ)","姉 (あね)"]
 - correct: "会社 (かいしゃ)"
 - explanation: La opción correcta para “empresa” es 「会社 (かいしゃ)」.
 - hint: Lección 7 · Vocabulario
@@ -69,7 +69,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “pelo”
-- choices: ["兄 (あに)","家族 (かぞく)","髪 (かみ)","姉 (あね)"]
+- choices: ["姉 (あね)","髪 (かみ)","家族 (かぞく)","兄 (あに)"]
 - correct: "髪 (かみ)"
 - explanation: La opción correcta para “pelo” es 「髪 (かみ)」.
 - hint: Lección 7 · Vocabulario
@@ -79,7 +79,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “lentes; gafas”
-- choices: ["眼鏡 (めがね)","家族 (かぞく)","姉 (あね)","兄 (あに)"]
+- choices: ["姉 (あね)","眼鏡 (めがね)","家族 (かぞく)","兄 (あに)"]
 - correct: "眼鏡 (めがね)"
 - explanation: La opción correcta para “lentes; gafas” es 「眼鏡 (めがね)」.
 - hint: Lección 7 · Vocabulario
@@ -89,7 +89,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “hermanos y hermanas”
-- choices: ["兄 (あに)","姉 (あね)","兄弟 (きょうだい)","家族 (かぞく)"]
+- choices: ["姉 (あね)","兄 (あに)","兄弟 (きょうだい)","家族 (かぞく)"]
 - correct: "兄弟 (きょうだい)"
 - explanation: La opción correcta para “hermanos y hermanas” es 「兄弟 (きょうだい)」.
 - hint: Lección 7 · Vocabulario
@@ -111,7 +111,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「父」?
-- choices: ["いちじ","に","いち","ちち"]
+- choices: ["ちち","いち","に","いちじ"]
 - correct: "ちち"
 - explanation: 「父」 se lee 「ちち」.
 - hint: Lección 7 · Kanji

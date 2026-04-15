@@ -19,7 +19,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「りょこう」?
-- choices: ["parque","foto","viaje","recuerdo"]
+- choices: ["viaje","foto","parque","recuerdo"]
 - correct: "viaje"
 - explanation: 「りょこう」 significa “viaje”.
 - hint: Lección 11 · Vocabulario
@@ -29,7 +29,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「おんせん」?
-- choices: ["recuerdo","foto","spa; aguas termales","viaje"]
+- choices: ["viaje","recuerdo","foto","spa; aguas termales"]
 - correct: "spa; aguas termales"
 - explanation: 「おんせん」 significa “spa; aguas termales”.
 - hint: Lección 11 · Vocabulario
@@ -39,7 +39,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「びじゅつかん」?
-- choices: ["foto","recuerdo","viaje","museo de arte"]
+- choices: ["museo de arte","recuerdo","foto","viaje"]
 - correct: "museo de arte"
 - explanation: 「びじゅつかん」 significa “museo de arte”.
 - hint: Lección 11 · Vocabulario
@@ -49,7 +49,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「ゆめ」?
-- choices: ["foto","recuerdo","viaje","sueño"]
+- choices: ["sueño","foto","viaje","recuerdo"]
 - correct: "sueño"
 - explanation: 「ゆめ」 significa “sueño”.
 - hint: Lección 11 · Vocabulario
@@ -59,7 +59,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “futuro”
-- choices: ["将来 (しょうらい)","写真 (しゃしん)","思い出 (おもいで)","旅行 (りょこう)"]
+- choices: ["将来 (しょうらい)","思い出 (おもいで)","写真 (しゃしん)","旅行 (りょこう)"]
 - correct: "将来 (しょうらい)"
 - explanation: La opción correcta para “futuro” es 「将来 (しょうらい)」.
 - hint: Lección 11 · Vocabulario
@@ -69,7 +69,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “clase”
-- choices: ["授業 (じゅぎょう)","旅行 (りょこう)","思い出 (おもいで)","写真 (しゃしん)"]
+- choices: ["思い出 (おもいで)","写真 (しゃしん)","旅行 (りょこう)","授業 (じゅぎょう)"]
 - correct: "授業 (じゅぎょう)"
 - explanation: La opción correcta para “clase” es 「授業 (じゅぎょう)」.
 - hint: Lección 11 · Vocabulario
@@ -79,7 +79,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “estudiar en el extranjero”
-- choices: ["留学する (りゅうがくする)","旅行 (りょこう)","思い出 (おもいで)","写真 (しゃしん)"]
+- choices: ["留学する (りゅうがくする)","写真 (しゃしん)","思い出 (おもいで)","旅行 (りょこう)"]
 - correct: "留学する (りゅうがくする)"
 - explanation: La opción correcta para “estudiar en el extranjero” es 「留学する (りゅうがくする)」.
 - hint: Lección 11 · Vocabulario
@@ -89,7 +89,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “campamento”
-- choices: ["キャンプ","写真 (しゃしん)","思い出 (おもいで)","旅行 (りょこう)"]
+- choices: ["旅行 (りょこう)","キャンプ","写真 (しゃしん)","思い出 (おもいで)"]
 - correct: "キャンプ"
 - explanation: La opción correcta para “campamento” es 「キャンプ」.
 - hint: Lección 11 · Vocabulario
@@ -101,7 +101,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「手紙」?
-- choices: ["いちじ","に","いち","てがみ"]
+- choices: ["に","いち","てがみ","いちじ"]
 - correct: "てがみ"
 - explanation: 「手紙」 se lee 「てがみ」.
 - hint: Lección 11 · Kanji
@@ -111,7 +111,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「旅行」?
-- choices: ["いち","りょこう","いちじ","に"]
+- choices: ["いち","いちじ","に","りょこう"]
 - correct: "りょこう"
 - explanation: 「旅行」 se lee 「りょこう」.
 - hint: Lección 11 · Kanji

@@ -18,7 +18,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「これ」?
-- choices: ["reloj","libro","eso","esto"]
+- choices: ["esto","libro","reloj","eso"]
 - correct: "esto"
 - explanation: 「これ」 significa “esto”.
 - hint: Lección 2 · Vocabulario
@@ -28,7 +28,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “eso”
-- choices: ["時計 (とけい)","これ","本 (ほん)","それ"]
+- choices: ["時計 (とけい)","これ","それ","本 (ほん)"]
 - correct: "それ"
 - explanation: La opción correcta para “eso” es 「それ」.
 - hint: Lección 2 · Vocabulario
@@ -38,7 +38,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「どれ」?
-- choices: ["eso","esto","cuál","libro"]
+- choices: ["cuál","esto","eso","libro"]
 - correct: "cuál"
 - explanation: 「どれ」 significa “cuál”.
 - hint: Lección 2 · Vocabulario
@@ -48,7 +48,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “aquí”
-- choices: ["本 (ほん)","これ","ここ","それ"]
+- choices: ["本 (ほん)","それ","ここ","これ"]
 - correct: "ここ"
 - explanation: La opción correcta para “aquí” es 「ここ」.
 - hint: Lección 2 · Vocabulario
@@ -58,7 +58,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「そこ」?
-- choices: ["eso","ahí","esto","libro"]
+- choices: ["esto","eso","libro","ahí"]
 - correct: "ahí"
 - explanation: 「そこ」 significa “ahí”.
 - hint: Lección 2 · Vocabulario
@@ -78,7 +78,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「かばん」?
-- choices: ["bolsa/mochila","eso","libro","esto"]
+- choices: ["eso","esto","libro","bolsa/mochila"]
 - correct: "bolsa/mochila"
 - explanation: 「かばん」 significa “bolsa/mochila”.
 - hint: Lección 2 · Vocabulario
@@ -88,7 +88,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “reloj”
-- choices: ["これ","本 (ほん)","時計 (とけい)","それ"]
+- choices: ["時計 (とけい)","本 (ほん)","それ","これ"]
 - correct: "時計 (とけい)"
 - explanation: La opción correcta para “reloj” es 「時計 (とけい)」.
 - hint: Lección 2 · Vocabulario
@@ -98,7 +98,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「ほん」?
-- choices: ["libro","reloj","eso","esto"]
+- choices: ["libro","esto","reloj","eso"]
 - correct: "libro"
 - explanation: 「ほん」 significa “libro”.
 - hint: Lección 2 · Vocabulario
@@ -108,7 +108,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “quién”
-- choices: ["本 (ほん)","だれ","それ","これ"]
+- choices: ["これ","本 (ほん)","だれ","それ"]
 - correct: "だれ"
 - explanation: La opción correcta para “quién” es 「だれ」.
 - hint: Lección 2 · Vocabulario
