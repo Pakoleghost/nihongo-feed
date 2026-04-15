@@ -19,7 +19,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「せんしゅう」?
-- choices: ["mañana","noche","la semana pasada","fin de semana"]
+- choices: ["noche","mañana","la semana pasada","fin de semana"]
 - correct: "la semana pasada"
 - explanation: 「せんしゅう」 significa “la semana pasada”.
 - hint: Lección 4 · Vocabulario
@@ -29,7 +29,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「きのう」?
-- choices: ["ayer","mañana","noche","fin de semana"]
+- choices: ["ayer","noche","mañana","fin de semana"]
 - correct: "ayer"
 - explanation: 「きのう」 significa “ayer”.
 - hint: Lección 4 · Vocabulario
@@ -39,7 +39,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「でんしゃ」?
-- choices: ["fin de semana","tren","mañana","noche"]
+- choices: ["fin de semana","noche","mañana","tren"]
 - correct: "tren"
 - explanation: 「でんしゃ」 significa “tren”.
 - hint: Lección 4 · Vocabulario
@@ -49,7 +49,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「しゃしん」?
-- choices: ["imagen; fotografía","mañana","noche","fin de semana"]
+- choices: ["imagen; fotografía","noche","mañana","fin de semana"]
 - correct: "imagen; fotografía"
 - explanation: 「しゃしん」 significa “imagen; fotografía”.
 - hint: Lección 4 · Vocabulario
@@ -59,7 +59,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “trabajo a tiempo parcial”
-- choices: ["アルバイト","晩 (ばん)","朝 (あさ)","週末 (しゅうまつ)"]
+- choices: ["朝 (あさ)","晩 (ばん)","週末 (しゅうまつ)","アルバイト"]
 - correct: "アルバイト"
 - explanation: La opción correcta para “trabajo a tiempo parcial” es 「アルバイト」.
 - hint: Lección 4 · Vocabulario
@@ -79,7 +79,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “por qué”
-- choices: ["どうして","朝 (あさ)","晩 (ばん)","週末 (しゅうまつ)"]
+- choices: ["どうして","朝 (あさ)","週末 (しゅうまつ)","晩 (ばん)"]
 - correct: "どうして"
 - explanation: La opción correcta para “por qué” es 「どうして」.
 - hint: Lección 4 · Vocabulario
@@ -89,7 +89,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “biblioteca”
-- choices: ["晩 (ばん)","週末 (しゅうまつ)","図書館 (としょかん)","朝 (あさ)"]
+- choices: ["週末 (しゅうまつ)","図書館 (としょかん)","晩 (ばん)","朝 (あさ)"]
 - correct: "図書館 (としょかん)"
 - explanation: La opción correcta para “biblioteca” es 「図書館 (としょかん)」.
 - hint: Lección 4 · Vocabulario
@@ -101,7 +101,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「月曜日」?
-- choices: ["に","いち","いちじ","げつようび"]
+- choices: ["いちじ","いち","に","げつようび"]
 - correct: "げつようび"
 - explanation: 「月曜日」 se lee 「げつようび」.
 - hint: Lección 4 · Kanji
@@ -111,7 +111,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「三時半」?
-- choices: ["さんじはん","いち","いちじ","に"]
+- choices: ["いち","に","さんじはん","いちじ"]
 - correct: "さんじはん"
 - explanation: 「三時半」 se lee 「さんじはん」.
 - hint: Lección 4 · Kanji

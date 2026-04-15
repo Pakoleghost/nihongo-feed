@@ -1345,6 +1345,19 @@ const LESSON_NINE_CURATED_VOCAB = [
 
 const LESSON_NINE_CURATED_KANJI = ["来る", "白い"] as const;
 
+const LESSON_TEN_CURATED_VOCAB = [
+  { kana: "しんかんせん", es: "Shinkansen", direction: "jp-es" },
+  { kana: "ひこうき", es: "avión", direction: "jp-es" },
+  { kana: "よやく", es: "reserva", direction: "jp-es" },
+  { kana: "りょこうする", es: "viajar", direction: "jp-es" },
+  { kana: "すし", es: "sushi", direction: "es-jp" },
+  { kana: "りょうり", es: "comida; cocina", direction: "es-jp" },
+  { kana: "ちかてつ", es: "metro", direction: "es-jp" },
+  { kana: "ことし", es: "este año", direction: "es-jp" },
+] as const;
+
+const LESSON_TEN_CURATED_KANJI = ["町", "道"] as const;
+
 const PARTICLE_EXAM_BANK: Array<{
   id: string;
   minLesson: number;
@@ -4037,6 +4050,231 @@ function buildLessonNineCuratedExamPool() {
   return [...vocabQuestions, ...kanjiQuestions, ...grammarCluster, ...readingQuestions];
 }
 
+function buildLessonTenCuratedExamPool() {
+  const lesson = 10;
+  const lessonVocab = (ALL_GENKI_VOCAB_BY_LESSON[lesson] || []).filter((item) => isExamVocabEligible(lesson, item));
+  const allVocab = Object.values(ALL_GENKI_VOCAB_BY_LESSON).flat().filter((item) => isExamVocabEligible(lesson, item));
+  const meaningPool = Array.from(new Set(allVocab.map((item) => item.es).filter(Boolean)));
+  const jpPool = Array.from(
+    new Set(
+      allVocab
+        .map((item) => (item.kanji?.trim() ? `${item.kanji.trim()} (${item.kana})` : item.kana))
+        .filter(Boolean),
+    ),
+  );
+
+  const vocabQuestions = LESSON_TEN_CURATED_VOCAB.map((entry, index) => {
+    const resolved = lessonVocab.find((candidate) => candidate.kana === entry.kana);
+    if (!resolved) return null;
+    const jpForm = resolved.kanji?.trim() ? `${resolved.kanji.trim()} (${resolved.kana})` : resolved.kana;
+    if (entry.direction === "jp-es") {
+      const sameLessonMeanings = Array.from(
+        new Set(lessonVocab.map((candidate) => candidate.es).filter((value) => value && value !== resolved.es)),
+      );
+      return createLessonQuestion(lesson, `vocab:curated:es:${resolved.kana}:${index}`, {
+        category: "vocab",
+        type: "mcq",
+        prompt: `¿Qué significa 「${resolved.kana}」?`,
+        options: buildOptionSet(resolved.es, sameLessonMeanings, meaningPool),
+        correct: resolved.es,
+        hint: buildLessonHint(lesson, "Vocabulario"),
+        explanation: `「${resolved.kana}」 significa “${resolved.es}”.`,
+      });
+    }
+
+    const sameLessonJapanese = Array.from(
+      new Set(
+        lessonVocab
+          .map((candidate) => (candidate.kanji?.trim() ? `${candidate.kanji.trim()} (${candidate.kana})` : candidate.kana))
+          .filter((value) => value && value !== jpForm),
+      ),
+    );
+    return createLessonQuestion(lesson, `vocab:curated:jp:${resolved.kana}:${index}`, {
+      category: "vocab",
+      type: "mcq",
+      prompt: `Selecciona el japonés para: “${entry.es}”`,
+      options: buildOptionSet(jpForm, sameLessonJapanese, jpPool),
+      correct: jpForm,
+      hint: buildLessonHint(lesson, "Vocabulario"),
+      explanation: `La opción correcta para “${entry.es}” es 「${jpForm}」.`,
+    });
+  }).filter((question): question is QuizQuestion => Boolean(question));
+
+  const lessonKanji = (GENKI_KANJI_BY_LESSON[lesson] || []).filter((item) =>
+    LESSON_TEN_CURATED_KANJI.includes(item.kanji as (typeof LESSON_TEN_CURATED_KANJI)[number]),
+  );
+  const allKanjiReadings = Array.from(new Set(Object.values(GENKI_KANJI_BY_LESSON).flat().map((item) => item.hira).filter(Boolean)));
+  const kanjiQuestions = lessonKanji.map((item, index) =>
+    createLessonQuestion(lesson, `kanji:curated:${item.kanji}:${index}`, {
+      category: "kanji",
+      type: "mcq",
+      prompt: `¿Cómo se lee 「${item.kanji}」?`,
+      options: buildOptionSet(item.hira, allKanjiReadings.filter((reading) => reading !== item.hira), allKanjiReadings),
+      correct: item.hira,
+      hint: buildLessonHint(lesson, "Kanji"),
+      explanation: `「${item.kanji}」 se lee 「${item.hira}」.`,
+    }),
+  );
+
+  const grammarCluster: QuizQuestion[] = [
+    createLessonQuestion(10, "grammar:curated:comparison-basic", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "Elige la comparación natural.",
+      options: [
+        "きょうとのほうが とうきょうより しずかです。",
+        "きょうとより のほうが とうきょう しずかです。",
+        "きょうとは とうきょうのほうが しずかです。",
+        "きょうとのほうが より とうきょう しずかです。",
+      ],
+      correct: "きょうとのほうが とうきょうより しずかです。",
+      hint: buildLessonHint(10, "Comparaciones"),
+      explanation: "La estructura correcta es 「A のほうが B より ...」.",
+    }),
+    createLessonQuestion(10, "grammar:curated:which-more", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “Japanese is more difficult than English”?",
+      options: [
+        "にほんご のほうが えいごより むずかしいです。",
+        "えいご のほうが にほんごより むずかしいです。",
+        "にほんごが えいごより のほうが むずかしいです。",
+        "にほんごより えいご のほうが むずかしいです。",
+      ],
+      correct: "にほんご のほうが えいごより むずかしいです。",
+      hint: buildLessonHint(10, "Comparaciones"),
+      explanation: "「A のほうが B より ...」 compara dos elementos.",
+    }),
+    createLessonQuestion(10, "grammar:curated:question-dono", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál pregunta significa “Which one is more convenient, the train or the subway?”?",
+      options: [
+        "でんしゃと ちかてつと どちらが べんりですか。",
+        "でんしゃと ちかてつの どちらが べんりですか。",
+        "でんしゃと ちかてつは どれが べんりですか。",
+        "でんしゃが ちかてつより どちらですか。",
+      ],
+      correct: "でんしゃと ちかてつの どちらが べんりですか。",
+      hint: buildLessonHint(10, "どちら"),
+      explanation: "Para comparar dos opciones con una pregunta se usa 「A と B の どちらが ... ですか」.",
+    }),
+    createLessonQuestion(10, "grammar:curated:superlative", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Qué oración significa “Sushi is the most delicious”?",
+      options: [
+        "すしが いちばん おいしいです。",
+        "すしより おいしいです。",
+        "すしの ほうが おいしいです。",
+        "すしは もっと おいしいです。",
+      ],
+      correct: "すしが いちばん おいしいです。",
+      hint: buildLessonHint(10, "Superlativo"),
+      explanation: "Para “el más” Genki usa 「いちばん」.",
+    }),
+    createLessonQuestion(10, "grammar:curated:among-group", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “Among Japanese foods, tempura is the most famous”?",
+      options: [
+        "にほんの りょうりの なかで、てんぷらが いちばん ゆうめいです。",
+        "にほんの りょうりより てんぷらが ゆうめいです。",
+        "てんぷらの ほうが にほんの りょうりです。",
+        "にほんの りょうりの なかで、てんぷらより ゆうめいです。",
+      ],
+      correct: "にほんの りょうりの なかで、てんぷらが いちばん ゆうめいです。",
+      hint: buildLessonHint(10, "A の中で ... がいちばん"),
+      explanation: "Entre un grupo, Genki usa 「A の中で B がいちばん ...」.",
+    }),
+    createLessonQuestion(10, "grammar:curated:question-best", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál pregunta significa “What is the best season?”?",
+      options: [
+        "どの きせつが いちばん いいですか。",
+        "どの きせつより いいですか。",
+        "きせつの ほうが どれですか。",
+        "どちらの きせつが いいですか。",
+      ],
+      correct: "どの きせつが いちばん いいですか。",
+      hint: buildLessonHint(10, "Pregunta con いちばん"),
+      explanation: "Para preguntar por el mejor elemento del grupo se usa 「どの ... が いちばん ... ですか」.",
+    }),
+    createLessonQuestion(10, "grammar:curated:travel-cost", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración significa “The plane costs more than the shinkansen”?",
+      options: [
+        "ひこうきの ほうが しんかんせんより おかねが かかります。",
+        "しんかんせんの ほうが ひこうきより おかねが かかります。",
+        "ひこうきより しんかんせんの ほうが おかねが かかります。",
+        "ひこうきが しんかんせんより のほうが かかります。",
+      ],
+      correct: "ひこうきの ほうが しんかんせんより おかねが かかります。",
+      hint: buildLessonHint(10, "Comparaciones"),
+      explanation: "La comparación mantiene el patrón 「A のほうが B より ...」 también con verbos como 「かかる」.",
+    }),
+    createLessonQuestion(10, "grammar:curated:error", {
+      category: "grammar",
+      type: "mcq",
+      prompt: "¿Cuál oración tiene un error?",
+      options: [
+        "すしが いちばん おいしいです。",
+        "でんしゃの ほうが ちかてつより はやいです。",
+        "にほんごより えいご のほうが むずかしいです。",
+        "にほんの りょうりの なかで、すしが いちばん ゆうめいです。",
+      ],
+      correct: "にほんごより えいご のほうが むずかしいです。",
+      hint: buildLessonHint(10, "Comparaciones"),
+      explanation: "La oración está gramaticalmente válida, but to mark error choose malformed option? Need replacement.",
+    }),
+  ];
+
+  grammarCluster[7] = createLessonQuestion(10, "grammar:curated:error", {
+    category: "grammar",
+    type: "mcq",
+    prompt: "¿Cuál oración tiene un error?",
+    options: [
+      "すしが いちばん おいしいです。",
+      "でんしゃの ほうが ちかてつより はやいです。",
+      "にほんご のほうが より えいご むずかしいです。",
+      "にほんの りょうりの なかで、すしが いちばん ゆうめいです。",
+    ],
+    correct: "にほんご のほうが より えいご むずかしいです。",
+    hint: buildLessonHint(10, "Comparaciones"),
+    explanation: "La comparación correcta es 「A のほうが B より ...」.",
+  });
+
+  const readingQuestions: QuizQuestion[] = [
+    createLessonQuestion(10, "reading:curated:travel-plan", {
+      category: "reading",
+      type: "mcq",
+      prompt: "Lee el texto.\n\nふゆやすみに おおさかへ いきます。ひこうきより しんかんせんの ほうが はやいと おもいます。でも ひこうきの ほうが やすいです。\n\n¿Qué piensa la persona sobre el shinkansen?",
+      options: [
+        "Que es más barato que el avión",
+        "Que es más rápido que el avión",
+        "Que es más lento que el avión",
+        "Que no quiere tomarlo",
+      ],
+      correct: "Que es más rápido que el avión",
+      hint: buildLessonHint(10, "Lectura corta"),
+      explanation: "El texto dice 「ひこうきより しんかんせんの ほうが はやい」.",
+    }),
+    createLessonQuestion(10, "reading:curated:best-city", {
+      category: "reading",
+      type: "mcq",
+      prompt: "Lee el diálogo.\n\nA: にほんの まちの なかで、どこが いちばん にぎやかですか。\nB: とうきょうが いちばん にぎやかです。でも きょうとの ほうが きれいです。\n\n¿Cuál ciudad dice B que es la más animada?",
+      options: ["Kioto", "Osaka", "Tokio", "Sapporo"],
+      correct: "Tokio",
+      hint: buildLessonHint(10, "Lectura corta"),
+      explanation: "B responde 「とうきょうが いちばん にぎやかです」.",
+    }),
+  ];
+
+  return [...vocabQuestions, ...kanjiQuestions, ...grammarCluster, ...readingQuestions];
+}
+
 function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
   const normalizedLesson = Math.max(1, Math.min(12, lesson));
   if (normalizedLesson === 1) return buildLessonOneCuratedExamPool();
@@ -4048,6 +4286,7 @@ function buildLessonExamQuestionPool(lesson: number): QuizQuestion[] {
   if (normalizedLesson === 7) return buildLessonSevenCuratedExamPool();
   if (normalizedLesson === 8) return buildLessonEightCuratedExamPool();
   if (normalizedLesson === 9) return buildLessonNineCuratedExamPool();
+  if (normalizedLesson === 10) return buildLessonTenCuratedExamPool();
   const pool: QuizQuestion[] = [];
 
   const lessonVocab = (ALL_GENKI_VOCAB_BY_LESSON[normalizedLesson] || []).filter((item) => isExamVocabEligible(normalizedLesson, item));
@@ -4254,7 +4493,7 @@ function pickPrioritizedQuestions(
 }
 
 function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, number>, count: number, lesson: number) {
-  if (lesson === 1 || lesson === 2 || lesson === 3 || lesson === 4 || lesson === 5 || lesson === 6 || lesson === 7 || lesson === 8 || lesson === 9) return shuffle(pool).slice(0, count);
+  if (lesson === 1 || lesson === 2 || lesson === 3 || lesson === 4 || lesson === 5 || lesson === 6 || lesson === 7 || lesson === 8 || lesson === 9 || lesson === 10) return shuffle(pool).slice(0, count);
   const used = new Set<string>();
   const result: QuizQuestion[] = [];
   const hasKanji = lesson >= 3;
