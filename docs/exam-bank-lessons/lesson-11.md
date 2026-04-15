@@ -24,7 +24,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「りょこう」?
-- choices: ["parque","viaje","foto","recuerdo"]
+- choices: ["parque","viaje","recuerdo","foto"]
 - correct: "viaje"
 - explanation: 「りょこう」 significa “viaje”.
 - hint: Lección 11 · Vocabulario
@@ -34,7 +34,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “viaje”
-- choices: ["公園 (こうえん)","思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)"]
+- choices: ["公園 (こうえん)","写真 (しゃしん)","思い出 (おもいで)","旅行 (りょこう)"]
 - correct: "旅行 (りょこう)"
 - explanation: La opción correcta para “viaje” es 「旅行 (りょこう)」.
 - hint: Lección 11 · Vocabulario
@@ -44,7 +44,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しゃしん」?
-- choices: ["foto","recuerdo","parque","viaje"]
+- choices: ["recuerdo","foto","viaje","parque"]
 - correct: "foto"
 - explanation: 「しゃしん」 significa “foto”.
 - hint: Lección 11 · Vocabulario
@@ -54,7 +54,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “foto”
-- choices: ["公園 (こうえん)","思い出 (おもいで)","写真 (しゃしん)","旅行 (りょこう)"]
+- choices: ["公園 (こうえん)","思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)"]
 - correct: "写真 (しゃしん)"
 - explanation: La opción correcta para “foto” es 「写真 (しゃしん)」.
 - hint: Lección 11 · Vocabulario
@@ -64,7 +64,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おもいで」?
-- choices: ["parque","viaje","foto","recuerdo"]
+- choices: ["viaje","parque","foto","recuerdo"]
 - correct: "recuerdo"
 - explanation: 「おもいで」 significa “recuerdo”.
 - hint: Lección 11 · Vocabulario
@@ -74,7 +74,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “recuerdo”
-- choices: ["旅行 (りょこう)","写真 (しゃしん)","思い出 (おもいで)","公園 (こうえん)"]
+- choices: ["思い出 (おもいで)","公園 (こうえん)","旅行 (りょこう)","写真 (しゃしん)"]
 - correct: "思い出 (おもいで)"
 - explanation: La opción correcta para “recuerdo” es 「思い出 (おもいで)」.
 - hint: Lección 11 · Vocabulario
@@ -84,7 +84,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「こうえん」?
-- choices: ["parque","foto","recuerdo","viaje"]
+- choices: ["parque","viaje","recuerdo","foto"]
 - correct: "parque"
 - explanation: 「こうえん」 significa “parque”.
 - hint: Lección 11 · Vocabulario
@@ -94,7 +94,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “parque”
-- choices: ["写真 (しゃしん)","旅行 (りょこう)","公園 (こうえん)","思い出 (おもいで)"]
+- choices: ["公園 (こうえん)","写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)"]
 - correct: "公園 (こうえん)"
 - explanation: La opción correcta para “parque” es 「公園 (こうえん)」.
 - hint: Lección 11 · Vocabulario
@@ -104,7 +104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あんない」?
-- choices: ["guía","viaje","recuerdo","foto"]
+- choices: ["viaje","recuerdo","foto","guía"]
 - correct: "guía"
 - explanation: 「あんない」 significa “guía”.
 - hint: Lección 11 · Vocabulario
@@ -114,7 +114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “guía”
-- choices: ["案内 (あんない)","写真 (しゃしん)","思い出 (おもいで)","旅行 (りょこう)"]
+- choices: ["案内 (あんない)","思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)"]
 - correct: "案内 (あんない)"
 - explanation: La opción correcta para “guía” es 「案内 (あんない)」.
 - hint: Lección 11 · Vocabulario
@@ -124,7 +124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「よやく」?
-- choices: ["viaje","recuerdo","reserva","foto"]
+- choices: ["recuerdo","reserva","foto","viaje"]
 - correct: "reserva"
 - explanation: 「よやく」 significa “reserva”.
 - hint: Lección 11 · Vocabulario
@@ -134,7 +134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “reserva”
-- choices: ["予約 (よやく)","旅行 (りょこう)","写真 (しゃしん)","思い出 (おもいで)"]
+- choices: ["思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)","予約 (よやく)"]
 - correct: "予約 (よやく)"
 - explanation: La opción correcta para “reserva” es 「予約 (よやく)」.
 - hint: Lección 11 · Vocabulario
@@ -144,7 +144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あんないじょ」?
-- choices: ["recuerdo","información","viaje","foto"]
+- choices: ["viaje","foto","información","recuerdo"]
 - correct: "información"
 - explanation: 「あんないじょ」 significa “información”.
 - hint: Lección 11 · Vocabulario
@@ -154,7 +154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “información”
-- choices: ["思い出 (おもいで)","旅行 (りょこう)","案内所 (あんないじょ)","写真 (しゃしん)"]
+- choices: ["案内所 (あんないじょ)","写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)"]
 - correct: "案内所 (あんないじょ)"
 - explanation: La opción correcta para “información” es 「案内所 (あんないじょ)」.
 - hint: Lección 11 · Vocabulario
@@ -164,7 +164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「にもつ」?
-- choices: ["equipaje","viaje","foto","recuerdo"]
+- choices: ["recuerdo","viaje","foto","equipaje"]
 - correct: "equipaje"
 - explanation: 「にもつ」 significa “equipaje”.
 - hint: Lección 11 · Vocabulario
@@ -174,7 +174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “equipaje”
-- choices: ["旅行 (りょこう)","思い出 (おもいで)","写真 (しゃしん)","荷物 (にもつ)"]
+- choices: ["旅行 (りょこう)","荷物 (にもつ)","思い出 (おもいで)","写真 (しゃしん)"]
 - correct: "荷物 (にもつ)"
 - explanation: La opción correcta para “equipaje” es 「荷物 (にもつ)」.
 - hint: Lección 11 · Vocabulario
@@ -184,7 +184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かんこう」?
-- choices: ["recuerdo","turismo","viaje","foto"]
+- choices: ["turismo","foto","recuerdo","viaje"]
 - correct: "turismo"
 - explanation: 「かんこう」 significa “turismo”.
 - hint: Lección 11 · Vocabulario
@@ -194,7 +194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “turismo”
-- choices: ["旅行 (りょこう)","観光 (かんこう)","写真 (しゃしん)","思い出 (おもいで)"]
+- choices: ["写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)","観光 (かんこう)"]
 - correct: "観光 (かんこう)"
 - explanation: La opción correcta para “turismo” es 「観光 (かんこう)」.
 - hint: Lección 11 · Vocabulario
@@ -204,7 +204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「じんじゃ」?
-- choices: ["foto","santuario","viaje","recuerdo"]
+- choices: ["viaje","santuario","recuerdo","foto"]
 - correct: "santuario"
 - explanation: 「じんじゃ」 significa “santuario”.
 - hint: Lección 11 · Vocabulario
@@ -214,7 +214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “santuario”
-- choices: ["神社 (じんじゃ)","思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)"]
+- choices: ["神社 (じんじゃ)","写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)"]
 - correct: "神社 (じんじゃ)"
 - explanation: La opción correcta para “santuario” es 「神社 (じんじゃ)」.
 - hint: Lección 11 · Vocabulario
@@ -234,7 +234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “templo”
-- choices: ["旅行 (りょこう)","寺 (てら)","写真 (しゃしん)","思い出 (おもいで)"]
+- choices: ["旅行 (りょこう)","思い出 (おもいで)","写真 (しゃしん)","寺 (てら)"]
 - correct: "寺 (てら)"
 - explanation: La opción correcta para “templo” es 「寺 (てら)」.
 - hint: Lección 11 · Vocabulario
@@ -244,7 +244,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「けしき」?
-- choices: ["recuerdo","foto","viaje","paisaje"]
+- choices: ["viaje","foto","recuerdo","paisaje"]
 - correct: "paisaje"
 - explanation: 「けしき」 significa “paisaje”.
 - hint: Lección 11 · Vocabulario
@@ -254,7 +254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “paisaje”
-- choices: ["旅行 (りょこう)","写真 (しゃしん)","思い出 (おもいで)","景色 (けしき)"]
+- choices: ["写真 (しゃしん)","思い出 (おもいで)","景色 (けしき)","旅行 (りょこう)"]
 - correct: "景色 (けしき)"
 - explanation: La opción correcta para “paisaje” es 「景色 (けしき)」.
 - hint: Lección 11 · Vocabulario
@@ -264,7 +264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ゆうめい」?
-- choices: ["viaje","famoso","foto","recuerdo"]
+- choices: ["famoso","recuerdo","viaje","foto"]
 - correct: "famoso"
 - explanation: 「ゆうめい」 significa “famoso”.
 - hint: Lección 11 · Vocabulario
@@ -274,7 +274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “famoso”
-- choices: ["写真 (しゃしん)","有名 (ゆうめい)","旅行 (りょこう)","思い出 (おもいで)"]
+- choices: ["思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)","有名 (ゆうめい)"]
 - correct: "有名 (ゆうめい)"
 - explanation: La opción correcta para “famoso” es 「有名 (ゆうめい)」.
 - hint: Lección 11 · Vocabulario
@@ -284,7 +284,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「もっていく」?
-- choices: ["foto","viaje","recuerdo","llevar"]
+- choices: ["recuerdo","viaje","llevar","foto"]
 - correct: "llevar"
 - explanation: 「もっていく」 significa “llevar”.
 - hint: Lección 11 · Vocabulario
@@ -294,7 +294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “llevar”
-- choices: ["旅行 (りょこう)","もっていく","思い出 (おもいで)","写真 (しゃしん)"]
+- choices: ["思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)","もっていく"]
 - correct: "もっていく"
 - explanation: La opción correcta para “llevar” es 「もっていく」.
 - hint: Lección 11 · Vocabulario
@@ -304,7 +304,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「つれていく」?
-- choices: ["foto","recuerdo","llevar a alguien","viaje"]
+- choices: ["foto","llevar a alguien","recuerdo","viaje"]
 - correct: "llevar a alguien"
 - explanation: 「つれていく」 significa “llevar a alguien”.
 - hint: Lección 11 · Vocabulario
@@ -314,7 +314,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “llevar a alguien”
-- choices: ["思い出 (おもいで)","つれていく","旅行 (りょこう)","写真 (しゃしん)"]
+- choices: ["写真 (しゃしん)","つれていく","旅行 (りょこう)","思い出 (おもいで)"]
 - correct: "つれていく"
 - explanation: La opción correcta para “llevar a alguien” es 「つれていく」.
 - hint: Lección 11 · Vocabulario
@@ -324,7 +324,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おもしろい」?
-- choices: ["viaje","recuerdo","foto","interesante"]
+- choices: ["interesante","viaje","foto","recuerdo"]
 - correct: "interesante"
 - explanation: 「おもしろい」 significa “interesante”.
 - hint: Lección 11 · Vocabulario
@@ -334,7 +334,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “interesante”
-- choices: ["思い出 (おもいで)","旅行 (りょこう)","おもしろい","写真 (しゃしん)"]
+- choices: ["写真 (しゃしん)","思い出 (おもいで)","おもしろい","旅行 (りょこう)"]
 - correct: "おもしろい"
 - explanation: La opción correcta para “interesante” es 「おもしろい」.
 - hint: Lección 11 · Vocabulario
@@ -344,7 +344,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しんせつ」?
-- choices: ["viaje","recuerdo","amable","foto"]
+- choices: ["viaje","amable","foto","recuerdo"]
 - correct: "amable"
 - explanation: 「しんせつ」 significa “amable”.
 - hint: Lección 11 · Vocabulario
@@ -354,7 +354,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “amable”
-- choices: ["旅行 (りょこう)","しんせつ","思い出 (おもいで)","写真 (しゃしん)"]
+- choices: ["思い出 (おもいで)","しんせつ","旅行 (りょこう)","写真 (しゃしん)"]
 - correct: "しんせつ"
 - explanation: La opción correcta para “amable” es 「しんせつ」.
 - hint: Lección 11 · Vocabulario
@@ -374,7 +374,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “país extranjero”
-- choices: ["写真 (しゃしん)","思い出 (おもいで)","旅行 (りょこう)","外国 (がいこく)"]
+- choices: ["旅行 (りょこう)","外国 (がいこく)","写真 (しゃしん)","思い出 (おもいで)"]
 - correct: "外国 (がいこく)"
 - explanation: La opción correcta para “país extranjero” es 「外国 (がいこく)」.
 - hint: Lección 11 · Vocabulario
@@ -384,7 +384,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「オーストラリア」?
-- choices: ["viaje","Australia","foto","recuerdo"]
+- choices: ["foto","Australia","recuerdo","viaje"]
 - correct: "Australia"
 - explanation: 「オーストラリア」 significa “Australia”.
 - hint: Lección 11 · Vocabulario
@@ -394,7 +394,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “Australia”
-- choices: ["旅行 (りょこう)","写真 (しゃしん)","オーストラリア","思い出 (おもいで)"]
+- choices: ["オーストラリア","思い出 (おもいで)","写真 (しゃしん)","旅行 (りょこう)"]
 - correct: "オーストラリア"
 - explanation: La opción correcta para “Australia” es 「オーストラリア」.
 - hint: Lección 11 · Vocabulario
@@ -404,7 +404,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かわ」?
-- choices: ["recuerdo","viaje","foto","río"]
+- choices: ["foto","viaje","recuerdo","río"]
 - correct: "río"
 - explanation: 「かわ」 significa “río”.
 - hint: Lección 11 · Vocabulario
@@ -414,7 +414,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “río”
-- choices: ["思い出 (おもいで)","旅行 (りょこう)","川 (かわ)","写真 (しゃしん)"]
+- choices: ["川 (かわ)","旅行 (りょこう)","思い出 (おもいで)","写真 (しゃしん)"]
 - correct: "川 (かわ)"
 - explanation: La opción correcta para “río” es 「川 (かわ)」.
 - hint: Lección 11 · Vocabulario
@@ -424,7 +424,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おんせん」?
-- choices: ["viaje","recuerdo","foto","spa; aguas termales"]
+- choices: ["recuerdo","viaje","foto","spa; aguas termales"]
 - correct: "spa; aguas termales"
 - explanation: 「おんせん」 significa “spa; aguas termales”.
 - hint: Lección 11 · Vocabulario
@@ -434,7 +434,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “spa; aguas termales”
-- choices: ["写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)","温泉 (おんせん)"]
+- choices: ["思い出 (おもいで)","写真 (しゃしん)","旅行 (りょこう)","温泉 (おんせん)"]
 - correct: "温泉 (おんせん)"
 - explanation: La opción correcta para “spa; aguas termales” es 「温泉 (おんせん)」.
 - hint: Lección 11 · Vocabulario
@@ -444,7 +444,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「つり」?
-- choices: ["pesca","foto","viaje","recuerdo"]
+- choices: ["recuerdo","pesca","foto","viaje"]
 - correct: "pesca"
 - explanation: 「つり」 significa “pesca”.
 - hint: Lección 11 · Vocabulario
@@ -454,7 +454,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pesca”
-- choices: ["思い出 (おもいで)","つり","旅行 (りょこう)","写真 (しゃしん)"]
+- choices: ["旅行 (りょこう)","つり","写真 (しゃしん)","思い出 (おもいで)"]
 - correct: "つり"
 - explanation: La opción correcta para “pesca” es 「つり」.
 - hint: Lección 11 · Vocabulario
@@ -464,7 +464,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「みずうみ」?
-- choices: ["foto","viaje","lago","recuerdo"]
+- choices: ["viaje","lago","foto","recuerdo"]
 - correct: "lago"
 - explanation: 「みずうみ」 significa “lago”.
 - hint: Lección 11 · Vocabulario
@@ -474,7 +474,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “lago”
-- choices: ["写真 (しゃしん)","旅行 (りょこう)","湖 (みずうみ)","思い出 (おもいで)"]
+- choices: ["旅行 (りょこう)","湖 (みずうみ)","思い出 (おもいで)","写真 (しゃしん)"]
 - correct: "湖 (みずうみ)"
 - explanation: La opción correcta para “lago” es 「湖 (みずうみ)」.
 - hint: Lección 11 · Vocabulario
@@ -484,7 +484,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「やま」?
-- choices: ["foto","recuerdo","viaje","montaña"]
+- choices: ["viaje","montaña","foto","recuerdo"]
 - correct: "montaña"
 - explanation: 「やま」 significa “montaña”.
 - hint: Lección 11 · Vocabulario
@@ -494,7 +494,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “montaña”
-- choices: ["旅行 (りょこう)","写真 (しゃしん)","思い出 (おもいで)","山 (やま)"]
+- choices: ["思い出 (おもいで)","山 (やま)","旅行 (りょこう)","写真 (しゃしん)"]
 - correct: "山 (やま)"
 - explanation: La opción correcta para “montaña” es 「山 (やま)」.
 - hint: Lección 11 · Vocabulario
@@ -504,7 +504,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「キャンプ」?
-- choices: ["campamento","viaje","recuerdo","foto"]
+- choices: ["recuerdo","viaje","campamento","foto"]
 - correct: "campamento"
 - explanation: 「キャンプ」 significa “campamento”.
 - hint: Lección 11 · Vocabulario
@@ -514,7 +514,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “campamento”
-- choices: ["思い出 (おもいで)","写真 (しゃしん)","キャンプ","旅行 (りょこう)"]
+- choices: ["キャンプ","旅行 (りょこう)","写真 (しゃしん)","思い出 (おもいで)"]
 - correct: "キャンプ"
 - explanation: La opción correcta para “campamento” es 「キャンプ」.
 - hint: Lección 11 · Vocabulario
@@ -524,7 +524,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ドライブ」?
-- choices: ["viaje","paseo (en coche)","recuerdo","foto"]
+- choices: ["viaje","paseo (en coche)","foto","recuerdo"]
 - correct: "paseo (en coche)"
 - explanation: 「ドライブ」 significa “paseo (en coche)”.
 - hint: Lección 11 · Vocabulario
@@ -534,7 +534,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “paseo (en coche)”
-- choices: ["思い出 (おもいで)","旅行 (りょこう)","ドライブ","写真 (しゃしん)"]
+- choices: ["ドライブ","写真 (しゃしん)","思い出 (おもいで)","旅行 (りょこう)"]
 - correct: "ドライブ"
 - explanation: La opción correcta para “paseo (en coche)” es 「ドライブ」.
 - hint: Lección 11 · Vocabulario
@@ -554,7 +554,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “museo de arte”
-- choices: ["思い出 (おもいで)","写真 (しゃしん)","旅行 (りょこう)","美術館 (びじゅつかん)"]
+- choices: ["美術館 (びじゅつかん)","旅行 (りょこう)","写真 (しゃしん)","思い出 (おもいで)"]
 - correct: "美術館 (びじゅつかん)"
 - explanation: La opción correcta para “museo de arte” es 「美術館 (びじゅつかん)」.
 - hint: Lección 11 · Vocabulario
@@ -564,7 +564,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しゃちょう」?
-- choices: ["recuerdo","presidente de una empresa","foto","viaje"]
+- choices: ["viaje","presidente de una empresa","foto","recuerdo"]
 - correct: "presidente de una empresa"
 - explanation: 「しゃちょう」 significa “presidente de una empresa”.
 - hint: Lección 11 · Vocabulario
@@ -574,7 +574,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “presidente de una empresa”
-- choices: ["社長 (しゃちょう)","旅行 (りょこう)","思い出 (おもいで)","写真 (しゃしん)"]
+- choices: ["思い出 (おもいで)","写真 (しゃしん)","社長 (しゃちょう)","旅行 (りょこう)"]
 - correct: "社長 (しゃちょう)"
 - explanation: La opción correcta para “presidente de una empresa” es 「社長 (しゃちょう)」.
 - hint: Lección 11 · Vocabulario
@@ -584,7 +584,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かしゅ」?
-- choices: ["viaje","foto","cantante","recuerdo"]
+- choices: ["recuerdo","foto","cantante","viaje"]
 - correct: "cantante"
 - explanation: 「かしゅ」 significa “cantante”.
 - hint: Lección 11 · Vocabulario
@@ -594,7 +594,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cantante”
-- choices: ["歌手 (かしゅ)","思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)"]
+- choices: ["写真 (しゃしん)","歌手 (かしゅ)","思い出 (おもいで)","旅行 (りょこう)"]
 - correct: "歌手 (かしゅ)"
 - explanation: La opción correcta para “cantante” es 「歌手 (かしゅ)」.
 - hint: Lección 11 · Vocabulario
@@ -604,7 +604,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ルームメイト」?
-- choices: ["compañero de cuarto","foto","viaje","recuerdo"]
+- choices: ["recuerdo","viaje","foto","compañero de cuarto"]
 - correct: "compañero de cuarto"
 - explanation: 「ルームメイト」 significa “compañero de cuarto”.
 - hint: Lección 11 · Vocabulario
@@ -614,7 +614,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “compañero de cuarto”
-- choices: ["思い出 (おもいで)","ルームメイト","旅行 (りょこう)","写真 (しゃしん)"]
+- choices: ["旅行 (りょこう)","ルームメイト","写真 (しゃしん)","思い出 (おもいで)"]
 - correct: "ルームメイト"
 - explanation: La opción correcta para “compañero de cuarto” es 「ルームメイト」.
 - hint: Lección 11 · Vocabulario
@@ -624,7 +624,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ホストファミリー」?
-- choices: ["foto","recuerdo","viaje","familia anfitriona"]
+- choices: ["foto","viaje","familia anfitriona","recuerdo"]
 - correct: "familia anfitriona"
 - explanation: 「ホストファミリー」 significa “familia anfitriona”.
 - hint: Lección 11 · Vocabulario
@@ -634,7 +634,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “familia anfitriona”
-- choices: ["ホストファミリー","写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)"]
+- choices: ["思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)","ホストファミリー"]
 - correct: "ホストファミリー"
 - explanation: La opción correcta para “familia anfitriona” es 「ホストファミリー」.
 - hint: Lección 11 · Vocabulario
@@ -644,7 +644,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しょうらい」?
-- choices: ["viaje","futuro","foto","recuerdo"]
+- choices: ["futuro","recuerdo","foto","viaje"]
 - correct: "futuro"
 - explanation: 「しょうらい」 significa “futuro”.
 - hint: Lección 11 · Vocabulario
@@ -654,7 +654,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “futuro”
-- choices: ["旅行 (りょこう)","写真 (しゃしん)","将来 (しょうらい)","思い出 (おもいで)"]
+- choices: ["将来 (しょうらい)","写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)"]
 - correct: "将来 (しょうらい)"
 - explanation: La opción correcta para “futuro” es 「将来 (しょうらい)」.
 - hint: Lección 11 · Vocabulario
@@ -664,7 +664,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ゆめ」?
-- choices: ["recuerdo","viaje","sueño","foto"]
+- choices: ["viaje","recuerdo","sueño","foto"]
 - correct: "sueño"
 - explanation: 「ゆめ」 significa “sueño”.
 - hint: Lección 11 · Vocabulario
@@ -674,7 +674,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “sueño”
-- choices: ["思い出 (おもいで)","写真 (しゃしん)","旅行 (りょこう)","夢 (ゆめ)"]
+- choices: ["旅行 (りょこう)","夢 (ゆめ)","思い出 (おもいで)","写真 (しゃしん)"]
 - correct: "夢 (ゆめ)"
 - explanation: La opción correcta para “sueño” es 「夢 (ゆめ)」.
 - hint: Lección 11 · Vocabulario
@@ -684,7 +684,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おまつり」?
-- choices: ["viaje","foto","recuerdo","festival"]
+- choices: ["recuerdo","viaje","foto","festival"]
 - correct: "festival"
 - explanation: 「おまつり」 significa “festival”.
 - hint: Lección 11 · Vocabulario
@@ -694,7 +694,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “festival”
-- choices: ["思い出 (おもいで)","写真 (しゃしん)","お祭り (おまつり)","旅行 (りょこう)"]
+- choices: ["写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)","お祭り (おまつり)"]
 - correct: "お祭り (おまつり)"
 - explanation: La opción correcta para “festival” es 「お祭り (おまつり)」.
 - hint: Lección 11 · Vocabulario
@@ -704,7 +704,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おしょうがつ」?
-- choices: ["Año Nuevo","viaje","recuerdo","foto"]
+- choices: ["viaje","foto","recuerdo","Año Nuevo"]
 - correct: "Año Nuevo"
 - explanation: 「おしょうがつ」 significa “Año Nuevo”.
 - hint: Lección 11 · Vocabulario
@@ -714,7 +714,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “Año Nuevo”
-- choices: ["旅行 (りょこう)","思い出 (おもいで)","写真 (しゃしん)","お正月 (おしょうがつ)"]
+- choices: ["写真 (しゃしん)","お正月 (おしょうがつ)","旅行 (りょこう)","思い出 (おもいで)"]
 - correct: "お正月 (おしょうがつ)"
 - explanation: La opción correcta para “Año Nuevo” es 「お正月 (おしょうがつ)」.
 - hint: Lección 11 · Vocabulario
@@ -724,7 +724,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おかし」?
-- choices: ["foto","aperitivo; golosinas","recuerdo","viaje"]
+- choices: ["aperitivo; golosinas","viaje","recuerdo","foto"]
 - correct: "aperitivo; golosinas"
 - explanation: 「おかし」 significa “aperitivo; golosinas”.
 - hint: Lección 11 · Vocabulario
@@ -734,7 +734,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “aperitivo; golosinas”
-- choices: ["お菓子 (おかし)","写真 (しゃしん)","思い出 (おもいで)","旅行 (りょこう)"]
+- choices: ["旅行 (りょこう)","写真 (しゃしん)","お菓子 (おかし)","思い出 (おもいで)"]
 - correct: "お菓子 (おかし)"
 - explanation: La opción correcta para “aperitivo; golosinas” es 「お菓子 (おかし)」.
 - hint: Lección 11 · Vocabulario
@@ -754,7 +754,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cerveza”
-- choices: ["写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)","ビール"]
+- choices: ["ビール","旅行 (りょこう)","思い出 (おもいで)","写真 (しゃしん)"]
 - correct: "ビール"
 - explanation: La opción correcta para “cerveza” es 「ビール」.
 - hint: Lección 11 · Vocabulario
@@ -764,7 +764,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おもちゃ」?
-- choices: ["viaje","juguete","recuerdo","foto"]
+- choices: ["recuerdo","juguete","foto","viaje"]
 - correct: "juguete"
 - explanation: 「おもちゃ」 significa “juguete”.
 - hint: Lección 11 · Vocabulario
@@ -774,7 +774,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “juguete”
-- choices: ["写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)","おもちゃ"]
+- choices: ["旅行 (りょこう)","おもちゃ","写真 (しゃしん)","思い出 (おもいで)"]
 - correct: "おもちゃ"
 - explanation: La opción correcta para “juguete” es 「おもちゃ」.
 - hint: Lección 11 · Vocabulario
@@ -784,7 +784,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「こんがっき」?
-- choices: ["viaje","foto","este semestre","recuerdo"]
+- choices: ["viaje","este semestre","recuerdo","foto"]
 - correct: "este semestre"
 - explanation: 「こんがっき」 significa “este semestre”.
 - hint: Lección 11 · Vocabulario
@@ -794,7 +794,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “este semestre”
-- choices: ["思い出 (おもいで)","今学期 (こんがっき)","写真 (しゃしん)","旅行 (りょこう)"]
+- choices: ["旅行 (りょこう)","思い出 (おもいで)","写真 (しゃしん)","今学期 (こんがっき)"]
 - correct: "今学期 (こんがっき)"
 - explanation: La opción correcta para “este semestre” es 「今学期 (こんがっき)」.
 - hint: Lección 11 · Vocabulario
@@ -804,7 +804,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「らいがっき」?
-- choices: ["foto","viaje","recuerdo","el próximo semestre"]
+- choices: ["recuerdo","el próximo semestre","viaje","foto"]
 - correct: "el próximo semestre"
 - explanation: 「らいがっき」 significa “el próximo semestre”.
 - hint: Lección 11 · Vocabulario
@@ -814,7 +814,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “el próximo semestre”
-- choices: ["写真 (しゃしん)","来学期 (らいがっき)","旅行 (りょこう)","思い出 (おもいで)"]
+- choices: ["旅行 (りょこう)","思い出 (おもいで)","写真 (しゃしん)","来学期 (らいがっき)"]
 - correct: "来学期 (らいがっき)"
 - explanation: La opción correcta para “el próximo semestre” es 「来学期 (らいがっき)」.
 - hint: Lección 11 · Vocabulario
@@ -824,7 +824,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「じゅぎょう」?
-- choices: ["recuerdo","viaje","clase","foto"]
+- choices: ["foto","viaje","recuerdo","clase"]
 - correct: "clase"
 - explanation: 「じゅぎょう」 significa “clase”.
 - hint: Lección 11 · Vocabulario
@@ -834,7 +834,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “clase”
-- choices: ["写真 (しゃしん)","旅行 (りょこう)","授業 (じゅぎょう)","思い出 (おもいで)"]
+- choices: ["思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)","授業 (じゅぎょう)"]
 - correct: "授業 (じゅぎょう)"
 - explanation: La opción correcta para “clase” es 「授業 (じゅぎょう)」.
 - hint: Lección 11 · Vocabulario
@@ -844,7 +844,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「こちら」?
-- choices: ["foto","recuerdo","viaje","esta persona (cortés)"]
+- choices: ["recuerdo","esta persona (cortés)","foto","viaje"]
 - correct: "esta persona (cortés)"
 - explanation: 「こちら」 significa “esta persona (cortés)”.
 - hint: Lección 11 · Vocabulario
@@ -854,7 +854,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “esta persona (cortés)”
-- choices: ["写真 (しゃしん)","思い出 (おもいで)","こちら","旅行 (りょこう)"]
+- choices: ["思い出 (おもいで)","写真 (しゃしん)","旅行 (りょこう)","こちら"]
 - correct: "こちら"
 - explanation: La opción correcta para “esta persona (cortés)” es 「こちら」.
 - hint: Lección 11 · Vocabulario
@@ -864,7 +864,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「うそをつく」?
-- choices: ["foto","recuerdo","viaje","decir una mentira"]
+- choices: ["decir una mentira","foto","recuerdo","viaje"]
 - correct: "decir una mentira"
 - explanation: 「うそをつく」 significa “decir una mentira”.
 - hint: Lección 11 · Vocabulario
@@ -874,7 +874,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “decir una mentira”
-- choices: ["旅行 (りょこう)","うそをつく","写真 (しゃしん)","思い出 (おもいで)"]
+- choices: ["うそをつく","旅行 (りょこう)","写真 (しゃしん)","思い出 (おもいで)"]
 - correct: "うそをつく"
 - explanation: La opción correcta para “decir una mentira” es 「うそをつく」.
 - hint: Lección 11 · Vocabulario
@@ -884,7 +884,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「おなかがすく」?
-- choices: ["tener hambre","recuerdo","foto","viaje"]
+- choices: ["recuerdo","viaje","foto","tener hambre"]
 - correct: "tener hambre"
 - explanation: 「おなかがすく」 significa “tener hambre”.
 - hint: Lección 11 · Vocabulario
@@ -894,7 +894,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tener hambre”
-- choices: ["写真 (しゃしん)","思い出 (おもいで)","旅行 (りょこう)","おなかがすく"]
+- choices: ["写真 (しゃしん)","思い出 (おもいで)","おなかがすく","旅行 (りょこう)"]
 - correct: "おなかがすく"
 - explanation: La opción correcta para “tener hambre” es 「おなかがすく」.
 - hint: Lección 11 · Vocabulario
@@ -904,7 +904,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「かう」?
-- choices: ["tener (una mascota)","foto","recuerdo","viaje"]
+- choices: ["tener (una mascota)","recuerdo","viaje","foto"]
 - correct: "tener (una mascota)"
 - explanation: 「かう」 significa “tener (una mascota)”.
 - hint: Lección 11 · Vocabulario
@@ -914,7 +914,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “tener (una mascota)”
-- choices: ["旅行 (りょこう)","飼う (かう)","思い出 (おもいで)","写真 (しゃしん)"]
+- choices: ["写真 (しゃしん)","思い出 (おもいで)","旅行 (りょこう)","飼う (かう)"]
 - correct: "飼う (かう)"
 - explanation: La opción correcta para “tener (una mascota)” es 「飼う (かう)」.
 - hint: Lección 11 · Vocabulario
@@ -924,7 +924,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「サボる」?
-- choices: ["recuerdo","viaje","faltar a clases (sin permiso)","foto"]
+- choices: ["faltar a clases (sin permiso)","foto","viaje","recuerdo"]
 - correct: "faltar a clases (sin permiso)"
 - explanation: 「サボる」 significa “faltar a clases (sin permiso)”.
 - hint: Lección 11 · Vocabulario
@@ -934,7 +934,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “faltar a clases (sin permiso)”
-- choices: ["写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)","サボる"]
+- choices: ["サボる","写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)"]
 - correct: "サボる"
 - explanation: La opción correcta para “faltar a clases (sin permiso)” es 「サボる」.
 - hint: Lección 11 · Vocabulario
@@ -944,7 +944,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「とる」?
-- choices: ["tomar (una clase); obtener (una nota)","viaje","recuerdo","foto"]
+- choices: ["foto","recuerdo","tomar (una clase); obtener (una nota)","viaje"]
 - correct: "tomar (una clase); obtener (una nota)"
 - explanation: 「とる」 significa “tomar (una clase); obtener (una nota)”.
 - hint: Lección 11 · Vocabulario
@@ -964,7 +964,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ならう」?
-- choices: ["recuerdo","foto","aprender","viaje"]
+- choices: ["viaje","aprender","recuerdo","foto"]
 - correct: "aprender"
 - explanation: 「ならう」 significa “aprender”.
 - hint: Lección 11 · Vocabulario
@@ -974,7 +974,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “aprender”
-- choices: ["習う (ならう)","写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)"]
+- choices: ["写真 (しゃしん)","思い出 (おもいで)","習う (ならう)","旅行 (りょこう)"]
 - correct: "習う (ならう)"
 - explanation: La opción correcta para “aprender” es 「習う (ならう)」.
 - hint: Lección 11 · Vocabulario
@@ -984,7 +984,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「のぼる」?
-- choices: ["escalar","viaje","recuerdo","foto"]
+- choices: ["escalar","viaje","foto","recuerdo"]
 - correct: "escalar"
 - explanation: 「のぼる」 significa “escalar”.
 - hint: Lección 11 · Vocabulario
@@ -994,7 +994,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “escalar”
-- choices: ["旅行 (りょこう)","登る (のぼる)","思い出 (おもいで)","写真 (しゃしん)"]
+- choices: ["写真 (しゃしん)","旅行 (りょこう)","登る (のぼる)","思い出 (おもいで)"]
 - correct: "登る (のぼる)"
 - explanation: La opción correcta para “escalar” es 「登る (のぼる)」.
 - hint: Lección 11 · Vocabulario
@@ -1004,7 +1004,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「はしる」?
-- choices: ["recuerdo","foto","viaje","correr"]
+- choices: ["recuerdo","foto","correr","viaje"]
 - correct: "correr"
 - explanation: 「はしる」 significa “correr”.
 - hint: Lección 11 · Vocabulario
@@ -1014,7 +1014,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “correr”
-- choices: ["思い出 (おもいで)","写真 (しゃしん)","旅行 (りょこう)","走る (はしる)"]
+- choices: ["思い出 (おもいで)","走る (はしる)","写真 (しゃしん)","旅行 (りょこう)"]
 - correct: "走る (はしる)"
 - explanation: La opción correcta para “correr” es 「走る (はしる)」.
 - hint: Lección 11 · Vocabulario
@@ -1024,7 +1024,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「つかれる」?
-- choices: ["foto","viaje","cansarse","recuerdo"]
+- choices: ["cansarse","recuerdo","viaje","foto"]
 - correct: "cansarse"
 - explanation: 「つかれる」 significa “cansarse”.
 - hint: Lección 11 · Vocabulario
@@ -1034,7 +1034,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “cansarse”
-- choices: ["写真 (しゃしん)","旅行 (りょこう)","疲れる (つかれる)","思い出 (おもいで)"]
+- choices: ["疲れる (つかれる)","旅行 (りょこう)","思い出 (おもいで)","写真 (しゃしん)"]
 - correct: "疲れる (つかれる)"
 - explanation: La opción correcta para “cansarse” es 「疲れる (つかれる)」.
 - hint: Lección 11 · Vocabulario
@@ -1044,7 +1044,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「やめる」?
-- choices: ["viaje","foto","dejar; abandonar","recuerdo"]
+- choices: ["dejar; abandonar","viaje","foto","recuerdo"]
 - correct: "dejar; abandonar"
 - explanation: 「やめる」 significa “dejar; abandonar”.
 - hint: Lección 11 · Vocabulario
@@ -1054,7 +1054,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “dejar; abandonar”
-- choices: ["やめる","思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)"]
+- choices: ["思い出 (おもいで)","やめる","旅行 (りょこう)","写真 (しゃしん)"]
 - correct: "やめる"
 - explanation: La opción correcta para “dejar; abandonar” es 「やめる」.
 - hint: Lección 11 · Vocabulario
@@ -1064,7 +1064,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「けんかする」?
-- choices: ["recuerdo","pelear","foto","viaje"]
+- choices: ["pelear","viaje","foto","recuerdo"]
 - correct: "pelear"
 - explanation: 「けんかする」 significa “pelear”.
 - hint: Lección 11 · Vocabulario
@@ -1074,7 +1074,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “pelear”
-- choices: ["けんかする","写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)"]
+- choices: ["旅行 (りょこう)","けんかする","写真 (しゃしん)","思い出 (おもいで)"]
 - correct: "けんかする"
 - explanation: La opción correcta para “pelear” es 「けんかする」.
 - hint: Lección 11 · Vocabulario
@@ -1084,7 +1084,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「しょうかいする」?
-- choices: ["foto","viaje","presentar","recuerdo"]
+- choices: ["presentar","recuerdo","viaje","foto"]
 - correct: "presentar"
 - explanation: 「しょうかいする」 significa “presentar”.
 - hint: Lección 11 · Vocabulario
@@ -1094,7 +1094,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “presentar”
-- choices: ["旅行 (りょこう)","写真 (しゃしん)","思い出 (おもいで)","紹介する (しょうかいする)"]
+- choices: ["旅行 (りょこう)","思い出 (おもいで)","紹介する (しょうかいする)","写真 (しゃしん)"]
 - correct: "紹介する (しょうかいする)"
 - explanation: La opción correcta para “presentar” es 「紹介する (しょうかいする)」.
 - hint: Lección 11 · Vocabulario
@@ -1104,7 +1104,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ダイエットする」?
-- choices: ["recuerdo","foto","ponerse a dieta","viaje"]
+- choices: ["viaje","recuerdo","foto","ponerse a dieta"]
 - correct: "ponerse a dieta"
 - explanation: 「ダイエットする」 significa “ponerse a dieta”.
 - hint: Lección 11 · Vocabulario
@@ -1114,7 +1114,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “ponerse a dieta”
-- choices: ["写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)","ダイエットする"]
+- choices: ["ダイエットする","旅行 (りょこう)","写真 (しゃしん)","思い出 (おもいで)"]
 - correct: "ダイエットする"
 - explanation: La opción correcta para “ponerse a dieta” es 「ダイエットする」.
 - hint: Lección 11 · Vocabulario
@@ -1124,7 +1124,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ちこくする」?
-- choices: ["viaje","recuerdo","foto","llegar tarde"]
+- choices: ["foto","llegar tarde","recuerdo","viaje"]
 - correct: "llegar tarde"
 - explanation: 「ちこくする」 significa “llegar tarde”.
 - hint: Lección 11 · Vocabulario
@@ -1134,7 +1134,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “llegar tarde”
-- choices: ["写真 (しゃしん)","旅行 (りょこう)","遅刻する (ちこくする)","思い出 (おもいで)"]
+- choices: ["写真 (しゃしん)","遅刻する (ちこくする)","思い出 (おもいで)","旅行 (りょこう)"]
 - correct: "遅刻する (ちこくする)"
 - explanation: La opción correcta para “llegar tarde” es 「遅刻する (ちこくする)」.
 - hint: Lección 11 · Vocabulario
@@ -1144,7 +1144,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「りゅうがくする」?
-- choices: ["viaje","estudiar en el extranjero","recuerdo","foto"]
+- choices: ["recuerdo","estudiar en el extranjero","viaje","foto"]
 - correct: "estudiar en el extranjero"
 - explanation: 「りゅうがくする」 significa “estudiar en el extranjero”.
 - hint: Lección 11 · Vocabulario
@@ -1154,7 +1154,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “estudiar en el extranjero”
-- choices: ["旅行 (りょこう)","思い出 (おもいで)","留学する (りゅうがくする)","写真 (しゃしん)"]
+- choices: ["旅行 (りょこう)","留学する (りゅうがくする)","写真 (しゃしん)","思い出 (おもいで)"]
 - correct: "留学する (りゅうがくする)"
 - explanation: La opción correcta para “estudiar en el extranjero” es 「留学する (りゅうがくする)」.
 - hint: Lección 11 · Vocabulario
@@ -1164,7 +1164,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「あと」?
-- choices: ["viaje","después; más tarde","recuerdo","foto"]
+- choices: ["recuerdo","viaje","foto","después; más tarde"]
 - correct: "después; más tarde"
 - explanation: 「あと」 significa “después; más tarde”.
 - hint: Lección 11 · Vocabulario
@@ -1174,7 +1174,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “después; más tarde”
-- choices: ["写真 (しゃしん)","あと","思い出 (おもいで)","旅行 (りょこう)"]
+- choices: ["あと","思い出 (おもいで)","写真 (しゃしん)","旅行 (りょこう)"]
 - correct: "あと"
 - explanation: La opción correcta para “después; más tarde” es 「あと」.
 - hint: Lección 11 · Vocabulario
@@ -1184,7 +1184,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～ぐらい」?
-- choices: ["foto","aproximadamente...","recuerdo","viaje"]
+- choices: ["recuerdo","viaje","aproximadamente...","foto"]
 - correct: "aproximadamente..."
 - explanation: 「～ぐらい」 significa “aproximadamente...”.
 - hint: Lección 11 · Vocabulario
@@ -1194,7 +1194,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “aproximadamente...”
-- choices: ["～ぐらい","旅行 (りょこう)","写真 (しゃしん)","思い出 (おもいで)"]
+- choices: ["～ぐらい","写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)"]
 - correct: "～ぐらい"
 - explanation: La opción correcta para “aproximadamente...” es 「～ぐらい」.
 - hint: Lección 11 · Vocabulario
@@ -1204,7 +1204,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「ごめん」?
-- choices: ["recuerdo","foto","viaje","perdón (informal)"]
+- choices: ["foto","viaje","perdón (informal)","recuerdo"]
 - correct: "perdón (informal)"
 - explanation: 「ごめん」 significa “perdón (informal)”.
 - hint: Lección 11 · Vocabulario
@@ -1214,7 +1214,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “perdón (informal)”
-- choices: ["旅行 (りょこう)","写真 (しゃしん)","ごめん","思い出 (おもいで)"]
+- choices: ["思い出 (おもいで)","写真 (しゃしん)","ごめん","旅行 (りょこう)"]
 - correct: "ごめん"
 - explanation: La opción correcta para “perdón (informal)” es 「ごめん」.
 - hint: Lección 11 · Vocabulario
@@ -1224,7 +1224,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「せっかく」?
-- choices: ["con mucho esfuerzo; especialmente","recuerdo","viaje","foto"]
+- choices: ["viaje","con mucho esfuerzo; especialmente","recuerdo","foto"]
 - correct: "con mucho esfuerzo; especialmente"
 - explanation: 「せっかく」 significa “con mucho esfuerzo; especialmente”.
 - hint: Lección 11 · Vocabulario
@@ -1234,7 +1234,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “con mucho esfuerzo; especialmente”
-- choices: ["旅行 (りょこう)","せっかく","思い出 (おもいで)","写真 (しゃしん)"]
+- choices: ["写真 (しゃしん)","旅行 (りょこう)","思い出 (おもいで)","せっかく"]
 - correct: "せっかく"
 - explanation: La opción correcta para “con mucho esfuerzo; especialmente” es 「せっかく」.
 - hint: Lección 11 · Vocabulario
@@ -1244,7 +1244,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～だけ」?
-- choices: ["viaje","recuerdo","solo...","foto"]
+- choices: ["solo...","foto","viaje","recuerdo"]
 - correct: "solo..."
 - explanation: 「～だけ」 significa “solo...”.
 - hint: Lección 11 · Vocabulario
@@ -1254,7 +1254,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “solo...”
-- choices: ["写真 (しゃしん)","思い出 (おもいで)","旅行 (りょこう)","～だけ"]
+- choices: ["思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)","～だけ"]
 - correct: "～だけ"
 - explanation: La opción correcta para “solo...” es 「～だけ」.
 - hint: Lección 11 · Vocabulario
@@ -1264,7 +1264,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「まだ」?
-- choices: ["foto","recuerdo","todavía; aún no","viaje"]
+- choices: ["viaje","todavía; aún no","foto","recuerdo"]
 - correct: "todavía; aún no"
 - explanation: 「まだ」 significa “todavía; aún no”.
 - hint: Lección 11 · Vocabulario
@@ -1274,7 +1274,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “todavía; aún no”
-- choices: ["まだ","思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)"]
+- choices: ["旅行 (りょこう)","まだ","思い出 (おもいで)","写真 (しゃしん)"]
 - correct: "まだ"
 - explanation: La opción correcta para “todavía; aún no” es 「まだ」.
 - hint: Lección 11 · Vocabulario
@@ -1284,7 +1284,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: ¿Qué significa 「～までに」?
-- choices: ["foto","recuerdo","para (un tiempo determinado)","viaje"]
+- choices: ["para (un tiempo determinado)","foto","recuerdo","viaje"]
 - correct: "para (un tiempo determinado)"
 - explanation: 「～までに」 significa “para (un tiempo determinado)”.
 - hint: Lección 11 · Vocabulario
@@ -1294,7 +1294,7 @@
 - type: `mcq`
 - source: `lesson_vocab_generated`
 - prompt: Selecciona el japonés para: “para (un tiempo determinado)”
-- choices: ["写真 (しゃしん)","思い出 (おもいで)","～までに","旅行 (りょこう)"]
+- choices: ["～までに","思い出 (おもいで)","旅行 (りょこう)","写真 (しゃしん)"]
 - correct: "～までに"
 - explanation: La opción correcta para “para (un tiempo determinado)” es 「～までに」.
 - hint: Lección 11 · Vocabulario
@@ -1304,10 +1304,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 歌手 (かしゅ)","B. お菓子 (おかし)","C. 美術館 (びじゅつかん)"]
-- choices.right: ["1. museo de arte","2. aperitivo; golosinas","3. cantante"]
-- correct: "A-3, B-2, C-1"
-- explanation: Relaciones correctas: A-3, B-2, C-1.
+- choices.left: ["A. ホストファミリー","B. 予約 (よやく)","C. 川 (かわ)"]
+- choices.right: ["1. familia anfitriona","2. río","3. reserva"]
+- correct: "A-1, B-3, C-2"
+- explanation: Relaciones correctas: A-1, B-3, C-2.
 - hint: Lección 11 · Relacionar
 
 ### exam-vocab-match-11-1
@@ -1315,8 +1315,8 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 遅刻する (ちこくする)","B. 温泉 (おんせん)","C. こちら"]
-- choices.right: ["1. llegar tarde","2. spa; aguas termales","3. esta persona (cortés)"]
+- choices.left: ["A. ホストファミリー","B. 寺 (てら)","C. もっていく"]
+- choices.right: ["1. familia anfitriona","2. templo","3. llevar"]
 - correct: "A-1, B-2, C-3"
 - explanation: Relaciones correctas: A-1, B-2, C-3.
 - hint: Lección 11 · Relacionar
@@ -1326,10 +1326,10 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. 取る (とる)","B. 湖 (みずうみ)","C. ホストファミリー"]
-- choices.right: ["1. familia anfitriona","2. lago","3. tomar (una clase); obtener (una nota)"]
-- correct: "A-3, B-2, C-1"
-- explanation: Relaciones correctas: A-3, B-2, C-1.
+- choices.left: ["A. けんかする","B. 有名 (ゆうめい)","C. 神社 (じんじゃ)"]
+- choices.right: ["1. famoso","2. santuario","3. pelear"]
+- correct: "A-3, B-1, C-2"
+- explanation: Relaciones correctas: A-3, B-1, C-2.
 - hint: Lección 11 · Relacionar
 
 ### exam-vocab-match-11-3
@@ -1337,8 +1337,8 @@
 - type: `match`
 - source: `lesson_vocab_matching`
 - prompt: Relaciona cada término japonés con su significado.
-- choices.left: ["A. せっかく","B. 疲れる (つかれる)","C. 美術館 (びじゅつかん)"]
-- choices.right: ["1. cansarse","2. con mucho esfuerzo; especialmente","3. museo de arte"]
+- choices.left: ["A. 寺 (てら)","B. おもしろい","C. 有名 (ゆうめい)"]
+- choices.right: ["1. interesante","2. templo","3. famoso"]
 - correct: "A-2, B-1, C-3"
 - explanation: Relaciones correctas: A-2, B-1, C-3.
 - hint: Lección 11 · Relacionar
@@ -1350,7 +1350,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「手紙」?
-- choices: ["いちじ","てがみ","いち","に"]
+- choices: ["いちじ","いち","に","てがみ"]
 - correct: "てがみ"
 - explanation: 「手紙」 se lee 「てがみ」.
 - hint: Lección 11 · Kanji
@@ -1371,7 +1371,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「好きな」?
-- choices: ["いちじ","いち","すきな","に"]
+- choices: ["に","いち","いちじ","すきな"]
 - correct: "すきな"
 - explanation: 「好きな」 se lee 「すきな」.
 - hint: Lección 11 · Kanji
@@ -1392,7 +1392,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「近い」?
-- choices: ["に","ちかい","いちじ","いち"]
+- choices: ["いちじ","に","ちかい","いち"]
 - correct: "ちかい"
 - explanation: 「近い」 se lee 「ちかい」.
 - hint: Lección 11 · Kanji
@@ -1413,7 +1413,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「明るい」?
-- choices: ["あかるい","に","いちじ","いち"]
+- choices: ["いち","に","あかるい","いちじ"]
 - correct: "あかるい"
 - explanation: 「明るい」 se lee 「あかるい」.
 - hint: Lección 11 · Kanji
@@ -1434,7 +1434,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「病院」?
-- choices: ["いち","に","びょういん","いちじ"]
+- choices: ["びょういん","いち","に","いちじ"]
 - correct: "びょういん"
 - explanation: 「病院」 se lee 「びょういん」.
 - hint: Lección 11 · Kanji
@@ -1455,7 +1455,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「映画」?
-- choices: ["えいが","いち","に","いちじ"]
+- choices: ["いちじ","いち","えいが","に"]
 - correct: "えいが"
 - explanation: 「映画」 se lee 「えいが」.
 - hint: Lección 11 · Kanji
@@ -1476,7 +1476,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「歌う」?
-- choices: ["に","いちじ","いち","うたう"]
+- choices: ["いちじ","に","うたう","いち"]
 - correct: "うたう"
 - explanation: 「歌う」 se lee 「うたう」.
 - hint: Lección 11 · Kanji
@@ -1497,7 +1497,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「市役所」?
-- choices: ["いち","いちじ","に","しやくしょ"]
+- choices: ["いちじ","に","いち","しやくしょ"]
 - correct: "しやくしょ"
 - explanation: 「市役所」 se lee 「しやくしょ」.
 - hint: Lección 11 · Kanji
@@ -1518,7 +1518,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「所」?
-- choices: ["ところ","いちじ","いち","に"]
+- choices: ["に","いち","いちじ","ところ"]
 - correct: "ところ"
 - explanation: 「所」 se lee 「ところ」.
 - hint: Lección 11 · Kanji
@@ -1539,7 +1539,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「勉強する」?
-- choices: ["いちじ","に","べんきょうする","いち"]
+- choices: ["いち","いちじ","べんきょうする","に"]
 - correct: "べんきょうする"
 - explanation: 「勉強する」 se lee 「べんきょうする」.
 - hint: Lección 11 · Kanji
@@ -1560,7 +1560,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「有名な」?
-- choices: ["いち","いちじ","に","ゆうめいな"]
+- choices: ["いち","に","いちじ","ゆうめいな"]
 - correct: "ゆうめいな"
 - explanation: 「有名な」 se lee 「ゆうめいな」.
 - hint: Lección 11 · Kanji
@@ -1581,7 +1581,7 @@
 - type: `mcq`
 - source: `lesson_kanji_generated`
 - prompt: ¿Cómo se lee 「旅行」?
-- choices: ["いちじ","りょこう","に","いち"]
+- choices: ["いちじ","に","いち","りょこう"]
 - correct: "りょこう"
 - explanation: 「旅行」 se lee 「りょこう」.
 - hint: Lección 11 · Kanji
@@ -1625,7 +1625,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: マリアさん___せんせいです。
-- choices: ["は","が","を","で"]
+- choices: ["を","が","で","は"]
 - correct: "は"
 - explanation: Oración copulativa con tema 「は」.
 - hint: Lección 11 · Partículas
@@ -1646,7 +1646,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: これはだれ___ほんですか。
-- choices: ["の","に","で","を"]
+- choices: ["で","を","の","に"]
 - correct: "の"
 - explanation: Posesión con 「の」.
 - hint: Lección 11 · Partículas
@@ -1667,7 +1667,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: わたし___ともだちもにほんじんです。
-- choices: ["の","は","が","も"]
+- choices: ["が","は","の","も"]
 - correct: "の"
 - explanation: 「わたしのともだち」.
 - hint: Lección 11 · Partículas
@@ -1688,7 +1688,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: がっこう___いきます。
-- choices: ["は","を","に","で"]
+- choices: ["に","で","を","は"]
 - correct: "に"
 - explanation: Destino con 「に」.
 - hint: Lección 11 · Partículas
@@ -1709,7 +1709,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: としょかん___べんきょうします。
-- choices: ["に","で","を","が"]
+- choices: ["を","が","で","に"]
 - correct: "で"
 - explanation: Lugar de acción con 「で」.
 - hint: Lección 11 · Partículas
@@ -1730,7 +1730,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ほん___よみます。
-- choices: ["で","は","を","に"]
+- choices: ["を","は","に","で"]
 - correct: "を"
 - explanation: Objeto directo con 「を」.
 - hint: Lección 11 · Partículas
@@ -1751,7 +1751,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: 7じ___おきます。
-- choices: ["に","で","が","を"]
+- choices: ["が","で","に","を"]
 - correct: "に"
 - explanation: Hora específica con 「に」.
 - hint: Lección 11 · Partículas
@@ -1772,7 +1772,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: うち___かえりました。
-- choices: ["に","が","を","で"]
+- choices: ["に","で","を","が"]
 - correct: "に"
 - explanation: Destino final con 「に」.
 - hint: Lección 11 · Partículas
@@ -1793,7 +1793,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ともだち___えいがをみました。
-- choices: ["が","と","に","を"]
+- choices: ["に","を","と","が"]
 - correct: "と"
 - explanation: Compañía con 「と」.
 - hint: Lección 11 · Partículas
@@ -1814,7 +1814,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ケーキ___すきです。
-- choices: ["で","を","に","が"]
+- choices: ["を","が","に","で"]
 - correct: "が"
 - explanation: Con 「すき」 se usa 「が」.
 - hint: Lección 11 · Partículas
@@ -1835,7 +1835,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: こうえん___しんぶんをよみます。
-- choices: ["で","を","に","が"]
+- choices: ["で","に","を","が"]
 - correct: "で"
 - explanation: Lugar de acción con 「で」.
 - hint: Lección 11 · Partículas
@@ -1856,7 +1856,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: にほん___りょうりはおいしいです。
-- choices: ["を","に","の","が"]
+- choices: ["の","を","が","に"]
 - correct: "の"
 - explanation: Modificador nominal con 「の」.
 - hint: Lección 11 · Partículas
@@ -1877,7 +1877,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: 8じ___10じ___べんきょうしました。
-- choices: ["で / から","を / に","から / まで","に / に"]
+- choices: ["から / まで","を / に","で / から","に / に"]
 - correct: "から / まで"
 - explanation: Rango temporal.
 - hint: Lección 11 · Partículas
@@ -1898,7 +1898,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: くすり___のみました。
-- choices: ["に","で","を","が"]
+- choices: ["で","を","に","が"]
 - correct: "を"
 - explanation: Objeto directo.
 - hint: Lección 11 · Partículas
@@ -1919,7 +1919,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: ひだり___まがってください。
-- choices: ["を","に","が","で"]
+- choices: ["が","に","で","を"]
 - correct: "に"
 - explanation: Dirección con 「に」.
 - hint: Lección 11 · Partículas
@@ -1940,7 +1940,7 @@
 - type: `mcq`
 - source: `particle_exam_bank`
 - prompt: せんせい___そうだんしました。
-- choices: ["で","を","に","が"]
+- choices: ["が","を","に","で"]
 - correct: "に"
 - explanation: Objetivo de consulta con 「に」.
 - hint: Lección 11 · Partículas
@@ -1963,7 +1963,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「たべる」 (comer)
-- choices: ["いって","みて","たべて","きいて"]
+- choices: ["みて","いって","たべて","きいて"]
 - correct: "たべて"
 - explanation: La forma て de 「たべる」 es 「たべて」.
 - hint: Lección 11 · Conjugación
@@ -1973,7 +1973,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「たべる」 (comer)
-- choices: ["いった","きいた","たべた","みた"]
+- choices: ["きいた","たべた","いった","みた"]
 - correct: "たべた"
 - explanation: El pasado corto de 「たべる」 es 「たべた」.
 - hint: Lección 11 · Conjugación
@@ -1993,7 +1993,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「みる」 (ver)
-- choices: ["いって","たべて","きいて","みて"]
+- choices: ["たべて","きいて","みて","いって"]
 - correct: "みて"
 - explanation: La forma て de 「みる」 es 「みて」.
 - hint: Lección 11 · Conjugación
@@ -2003,7 +2003,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「みる」 (ver)
-- choices: ["たべた","いった","みた","きいた"]
+- choices: ["みた","きいた","いった","たべた"]
 - correct: "みた"
 - explanation: El pasado corto de 「みる」 es 「みた」.
 - hint: Lección 11 · Conjugación
@@ -2023,7 +2023,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「いく」 (ir)
-- choices: ["きいて","たべて","みて","いって"]
+- choices: ["たべて","きいて","いって","みて"]
 - correct: "いって"
 - explanation: La forma て de 「いく」 es 「いって」.
 - hint: Lección 11 · Conjugación
@@ -2033,7 +2033,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「いく」 (ir)
-- choices: ["たべた","いった","みた","きいた"]
+- choices: ["たべた","いった","きいた","みた"]
 - correct: "いった"
 - explanation: El pasado corto de 「いく」 es 「いった」.
 - hint: Lección 11 · Conjugación
@@ -2053,7 +2053,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「きく」 (escuchar)
-- choices: ["たべて","きいて","いって","みて"]
+- choices: ["きいて","いって","みて","たべて"]
 - correct: "きいて"
 - explanation: La forma て de 「きく」 es 「きいて」.
 - hint: Lección 11 · Conjugación
@@ -2063,7 +2063,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「きく」 (escuchar)
-- choices: ["みた","たべた","いった","きいた"]
+- choices: ["きいた","いった","みた","たべた"]
 - correct: "きいた"
 - explanation: El pasado corto de 「きく」 es 「きいた」.
 - hint: Lección 11 · Conjugación
@@ -2083,7 +2083,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「おきる」 (levantarse)
-- choices: ["みて","おきて","たべて","いって"]
+- choices: ["たべて","みて","おきて","いって"]
 - correct: "おきて"
 - explanation: La forma て de 「おきる」 es 「おきて」.
 - hint: Lección 11 · Conjugación
@@ -2093,7 +2093,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「おきる」 (levantarse)
-- choices: ["みた","たべた","おきた","いった"]
+- choices: ["たべた","おきた","みた","いった"]
 - correct: "おきた"
 - explanation: El pasado corto de 「おきる」 es 「おきた」.
 - hint: Lección 11 · Conjugación
@@ -2113,7 +2113,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「ねる」 (dormir)
-- choices: ["ねて","たべて","いって","みて"]
+- choices: ["ねて","みて","いって","たべて"]
 - correct: "ねて"
 - explanation: La forma て de 「ねる」 es 「ねて」.
 - hint: Lección 11 · Conjugación
@@ -2123,7 +2123,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「ねる」 (dormir)
-- choices: ["ねた","いった","みた","たべた"]
+- choices: ["たべた","みた","ねた","いった"]
 - correct: "ねた"
 - explanation: El pasado corto de 「ねる」 es 「ねた」.
 - hint: Lección 11 · Conjugación
@@ -2143,7 +2143,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「かえる」 (volver)
-- choices: ["かえって","みて","いって","たべて"]
+- choices: ["かえって","たべて","みて","いって"]
 - correct: "かえって"
 - explanation: La forma て de 「かえる」 es 「かえって」.
 - hint: Lección 11 · Conjugación
@@ -2153,7 +2153,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「かえる」 (volver)
-- choices: ["かえった","みた","たべた","いった"]
+- choices: ["たべた","みた","いった","かえった"]
 - correct: "かえった"
 - explanation: El pasado corto de 「かえる」 es 「かえった」.
 - hint: Lección 11 · Conjugación
@@ -2173,7 +2173,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「よむ」 (leer)
-- choices: ["みて","いって","たべて","よんで"]
+- choices: ["よんで","たべて","いって","みて"]
 - correct: "よんで"
 - explanation: La forma て de 「よむ」 es 「よんで」.
 - hint: Lección 11 · Conjugación
@@ -2183,7 +2183,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「よむ」 (leer)
-- choices: ["みた","たべた","よんだ","いった"]
+- choices: ["いった","たべた","みた","よんだ"]
 - correct: "よんだ"
 - explanation: El pasado corto de 「よむ」 es 「よんだ」.
 - hint: Lección 11 · Conjugación
@@ -2203,7 +2203,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「かく」 (escribir)
-- choices: ["みて","いって","かいて","たべて"]
+- choices: ["いって","たべて","かいて","みて"]
 - correct: "かいて"
 - explanation: La forma て de 「かく」 es 「かいて」.
 - hint: Lección 11 · Conjugación
@@ -2213,7 +2213,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「かく」 (escribir)
-- choices: ["みた","かいた","いった","たべた"]
+- choices: ["たべた","いった","みた","かいた"]
 - correct: "かいた"
 - explanation: El pasado corto de 「かく」 es 「かいた」.
 - hint: Lección 11 · Conjugación
@@ -2233,7 +2233,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「かう」 (comprar)
-- choices: ["たべて","かって","いって","みて"]
+- choices: ["かって","たべて","みて","いって"]
 - correct: "かって"
 - explanation: La forma て de 「かう」 es 「かって」.
 - hint: Lección 11 · Conjugación
@@ -2243,7 +2243,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「かう」 (comprar)
-- choices: ["みた","たべた","かった","いった"]
+- choices: ["いった","かった","たべた","みた"]
 - correct: "かった"
 - explanation: El pasado corto de 「かう」 es 「かった」.
 - hint: Lección 11 · Conjugación
@@ -2263,7 +2263,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「のむ」 (beber)
-- choices: ["みて","のんで","いって","たべて"]
+- choices: ["のんで","みて","いって","たべて"]
 - correct: "のんで"
 - explanation: La forma て de 「のむ」 es 「のんで」.
 - hint: Lección 11 · Conjugación
@@ -2273,7 +2273,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「のむ」 (beber)
-- choices: ["のんだ","たべた","いった","みた"]
+- choices: ["いった","たべた","みた","のんだ"]
 - correct: "のんだ"
 - explanation: El pasado corto de 「のむ」 es 「のんだ」.
 - hint: Lección 11 · Conjugación
@@ -2293,7 +2293,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「する」 (hacer)
-- choices: ["たべて","いって","して","みて"]
+- choices: ["して","いって","たべて","みて"]
 - correct: "して"
 - explanation: La forma て de 「する」 es 「して」.
 - hint: Lección 11 · Conjugación
@@ -2303,7 +2303,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「する」 (hacer)
-- choices: ["みた","いった","たべた","した"]
+- choices: ["した","みた","いった","たべた"]
 - correct: "した"
 - explanation: El pasado corto de 「する」 es 「した」.
 - hint: Lección 11 · Conjugación
@@ -2323,7 +2323,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「くる」 (venir)
-- choices: ["いって","みて","きて","たべて"]
+- choices: ["きて","たべて","いって","みて"]
 - correct: "きて"
 - explanation: La forma て de 「くる」 es 「きて」.
 - hint: Lección 11 · Conjugación
@@ -2333,7 +2333,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「くる」 (venir)
-- choices: ["みた","たべた","いった","きた"]
+- choices: ["たべた","きた","いった","みた"]
 - correct: "きた"
 - explanation: El pasado corto de 「くる」 es 「きた」.
 - hint: Lección 11 · Conjugación
@@ -2353,7 +2353,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「およぐ」 (nadar)
-- choices: ["およいで","いって","みて","たべて"]
+- choices: ["たべて","みて","およいで","いって"]
 - correct: "およいで"
 - explanation: La forma て de 「およぐ」 es 「およいで」.
 - hint: Lección 11 · Conjugación
@@ -2363,7 +2363,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「およぐ」 (nadar)
-- choices: ["たべた","みた","いった","およいだ"]
+- choices: ["たべた","およいだ","いった","みた"]
 - correct: "およいだ"
 - explanation: El pasado corto de 「およぐ」 es 「およいだ」.
 - hint: Lección 11 · Conjugación
@@ -2383,7 +2383,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「まつ」 (esperar)
-- choices: ["まって","みて","たべて","いって"]
+- choices: ["みて","いって","たべて","まって"]
 - correct: "まって"
 - explanation: La forma て de 「まつ」 es 「まって」.
 - hint: Lección 11 · Conjugación
@@ -2393,7 +2393,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「まつ」 (esperar)
-- choices: ["まった","みた","いった","たべた"]
+- choices: ["たべた","いった","みた","まった"]
 - correct: "まった"
 - explanation: El pasado corto de 「まつ」 es 「まった」.
 - hint: Lección 11 · Conjugación
@@ -2413,7 +2413,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あう」 (encontrarse)
-- choices: ["みて","たべて","いって","あって"]
+- choices: ["みて","いって","あって","たべて"]
 - correct: "あって"
 - explanation: La forma て de 「あう」 es 「あって」.
 - hint: Lección 11 · Conjugación
@@ -2423,7 +2423,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あう」 (encontrarse)
-- choices: ["たべた","いった","あった","みた"]
+- choices: ["みた","いった","あった","たべた"]
 - correct: "あった"
 - explanation: El pasado corto de 「あう」 es 「あった」.
 - hint: Lección 11 · Conjugación
@@ -2443,7 +2443,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「もっていく」 (llevar)
-- choices: ["もっていいて","いって","たべて","みて"]
+- choices: ["たべて","いって","もっていいて","みて"]
 - correct: "もっていいて"
 - explanation: La forma て de 「もっていく」 es 「もっていいて」.
 - hint: Lección 11 · Conjugación
@@ -2453,7 +2453,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「もっていく」 (llevar)
-- choices: ["みた","たべた","いった","もっていいた"]
+- choices: ["みた","いった","もっていいた","たべた"]
 - correct: "もっていいた"
 - explanation: El pasado corto de 「もっていく」 es 「もっていいた」.
 - hint: Lección 11 · Conjugación
@@ -2473,7 +2473,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「はなす」 (hablar)
-- choices: ["みて","たべて","いって","はなして"]
+- choices: ["はなして","みて","たべて","いって"]
 - correct: "はなして"
 - explanation: La forma て de 「はなす」 es 「はなして」.
 - hint: Lección 11 · Conjugación
@@ -2483,7 +2483,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「はなす」 (hablar)
-- choices: ["みた","たべた","いった","はなした"]
+- choices: ["いった","はなした","みた","たべた"]
 - correct: "はなした"
 - explanation: El pasado corto de 「はなす」 es 「はなした」.
 - hint: Lección 11 · Conjugación
@@ -2503,7 +2503,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あびる」 (ducharse)
-- choices: ["いって","たべて","あびて","みて"]
+- choices: ["みて","あびて","いって","たべて"]
 - correct: "あびて"
 - explanation: La forma て de 「あびる」 es 「あびて」.
 - hint: Lección 11 · Conjugación
@@ -2513,7 +2513,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あびる」 (ducharse)
-- choices: ["みた","たべた","あびた","いった"]
+- choices: ["みた","あびた","たべた","いった"]
 - correct: "あびた"
 - explanation: El pasado corto de 「あびる」 es 「あびた」.
 - hint: Lección 11 · Conjugación
@@ -2533,7 +2533,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あそぶ」 (jugar)
-- choices: ["あそんで","いって","みて","たべて"]
+- choices: ["いって","たべて","みて","あそんで"]
 - correct: "あそんで"
 - explanation: La forma て de 「あそぶ」 es 「あそんで」.
 - hint: Lección 11 · Conjugación
@@ -2543,7 +2543,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あそぶ」 (jugar)
-- choices: ["たべた","みた","あそんだ","いった"]
+- choices: ["みた","いった","たべた","あそんだ"]
 - correct: "あそんだ"
 - explanation: El pasado corto de 「あそぶ」 es 「あそんだ」.
 - hint: Lección 11 · Conjugación
@@ -2563,7 +2563,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「つくる」 (hacer/crear)
-- choices: ["いって","たべて","つくって","みて"]
+- choices: ["いって","つくって","たべて","みて"]
 - correct: "つくって"
 - explanation: La forma て de 「つくる」 es 「つくって」.
 - hint: Lección 11 · Conjugación
@@ -2573,7 +2573,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「つくる」 (hacer/crear)
-- choices: ["みた","いった","つくった","たべた"]
+- choices: ["つくった","いった","たべた","みた"]
 - correct: "つくった"
 - explanation: El pasado corto de 「つくる」 es 「つくった」.
 - hint: Lección 11 · Conjugación
@@ -2593,7 +2593,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「あげる」 (dar)
-- choices: ["あげて","たべて","みて","いって"]
+- choices: ["たべて","いって","あげて","みて"]
 - correct: "あげて"
 - explanation: La forma て de 「あげる」 es 「あげて」.
 - hint: Lección 11 · Conjugación
@@ -2603,7 +2603,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「あげる」 (dar)
-- choices: ["あげた","いった","たべた","みた"]
+- choices: ["いった","みた","たべた","あげた"]
 - correct: "あげた"
 - explanation: El pasado corto de 「あげる」 es 「あげた」.
 - hint: Lección 11 · Conjugación
@@ -2623,7 +2623,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「もらう」 (recibir)
-- choices: ["たべて","みて","いって","もらって"]
+- choices: ["たべて","いって","みて","もらって"]
 - correct: "もらって"
 - explanation: La forma て de 「もらう」 es 「もらって」.
 - hint: Lección 11 · Conjugación
@@ -2633,7 +2633,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「もらう」 (recibir)
-- choices: ["いった","たべた","みた","もらった"]
+- choices: ["もらった","いった","たべた","みた"]
 - correct: "もらった"
 - explanation: El pasado corto de 「もらう」 es 「もらった」.
 - hint: Lección 11 · Conjugación
@@ -2653,7 +2653,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「なる」 (volverse)
-- choices: ["みて","いって","なって","たべて"]
+- choices: ["たべて","なって","いって","みて"]
 - correct: "なって"
 - explanation: La forma て de 「なる」 es 「なって」.
 - hint: Lección 11 · Conjugación
@@ -2663,7 +2663,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「なる」 (volverse)
-- choices: ["みた","いった","なった","たべた"]
+- choices: ["たべた","みた","なった","いった"]
 - correct: "なった"
 - explanation: El pasado corto de 「なる」 es 「なった」.
 - hint: Lección 11 · Conjugación
@@ -2683,7 +2683,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「つかう」 (usar)
-- choices: ["いって","つかって","たべて","みて"]
+- choices: ["たべて","みて","いって","つかって"]
 - correct: "つかって"
 - explanation: La forma て de 「つかう」 es 「つかって」.
 - hint: Lección 11 · Conjugación
@@ -2693,7 +2693,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「つかう」 (usar)
-- choices: ["たべた","いった","つかった","みた"]
+- choices: ["つかった","たべた","みた","いった"]
 - correct: "つかった"
 - explanation: El pasado corto de 「つかう」 es 「つかった」.
 - hint: Lección 11 · Conjugación
@@ -2713,7 +2713,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「やすむ」 (descansar)
-- choices: ["たべて","やすんで","いって","みて"]
+- choices: ["たべて","いって","やすんで","みて"]
 - correct: "やすんで"
 - explanation: La forma て de 「やすむ」 es 「やすんで」.
 - hint: Lección 11 · Conjugación
@@ -2723,7 +2723,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「やすむ」 (descansar)
-- choices: ["たべた","いった","みた","やすんだ"]
+- choices: ["みた","いった","たべた","やすんだ"]
 - correct: "やすんだ"
 - explanation: El pasado corto de 「やすむ」 es 「やすんだ」.
 - hint: Lección 11 · Conjugación
@@ -2743,7 +2743,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「おしえる」 (enseñar)
-- choices: ["おしえて","いって","みて","たべて"]
+- choices: ["いって","おしえて","たべて","みて"]
 - correct: "おしえて"
 - explanation: La forma て de 「おしえる」 es 「おしえて」.
 - hint: Lección 11 · Conjugación
@@ -2753,7 +2753,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「おしえる」 (enseñar)
-- choices: ["おしえた","いった","たべた","みた"]
+- choices: ["いった","おしえた","みた","たべた"]
 - correct: "おしえた"
 - explanation: El pasado corto de 「おしえる」 es 「おしえた」.
 - hint: Lección 11 · Conjugación
@@ -2773,7 +2773,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「とる」 (tomar)
-- choices: ["たべて","とって","みて","いって"]
+- choices: ["たべて","いって","とって","みて"]
 - correct: "とって"
 - explanation: La forma て de 「とる」 es 「とって」.
 - hint: Lección 11 · Conjugación
@@ -2783,7 +2783,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「とる」 (tomar)
-- choices: ["たべた","いった","とった","みた"]
+- choices: ["とった","いった","みた","たべた"]
 - correct: "とった"
 - explanation: El pasado corto de 「とる」 es 「とった」.
 - hint: Lección 11 · Conjugación
@@ -2803,7 +2803,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma て de 「つれていく」 (llevar a alguien)
-- choices: ["たべて","つれていいて","いって","みて"]
+- choices: ["みて","たべて","つれていいて","いって"]
 - correct: "つれていいて"
 - explanation: La forma て de 「つれていく」 es 「つれていいて」.
 - hint: Lección 11 · Conjugación
@@ -2813,7 +2813,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Pasado corto de 「つれていく」 (llevar a alguien)
-- choices: ["たべた","つれていいた","いった","みた"]
+- choices: ["みた","つれていいた","いった","たべた"]
 - correct: "つれていいた"
 - explanation: El pasado corto de 「つれていく」 es 「つれていいた」.
 - hint: Lección 11 · Conjugación
@@ -2833,7 +2833,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「ゆうめい」 (famoso)
-- choices: ["たかくない","しずかじゃない","やすくない","ゆうめいじゃない"]
+- choices: ["しずかじゃない","たかくない","やすくない","ゆうめいじゃない"]
 - correct: "ゆうめいじゃない"
 - explanation: La forma negativa de 「ゆうめい」 es 「ゆうめいじゃない」.
 - hint: Lección 11 · Conjugación
@@ -2843,7 +2843,7 @@
 - type: `mcq`
 - source: `lesson_conjugation_generated`
 - prompt: Forma negativa de 「おもしろい」 (interesante)
-- choices: ["たかくない","やすくない","おもしろくない","しずかじゃない"]
+- choices: ["おもしろくない","やすくない","しずかじゃない","たかくない"]
 - correct: "おもしろくない"
 - explanation: La forma negativa de 「おもしろい」 es 「おもしろくない」.
 - hint: Lección 11 · Conjugación
@@ -2876,7 +2876,7 @@
 - type: `reorder`
 - source: `lesson_scenarios_grammar`
 - prompt: Ordena la oración con 「〜たり〜たりする」.
-- choices: ["よんだり","えいがを","しゅうまつは","ほんを","みたり","します"]
+- choices: ["ほんを","します","よんだり","しゅうまつは","えいがを","みたり"]
 - correct: "しゅうまつは ほんを よんだり えいがを みたり します"
 - explanation: Ese patrón expresa una lista no exhaustiva de actividades.
 - hint: Lección 11 · 〜たり〜たりする

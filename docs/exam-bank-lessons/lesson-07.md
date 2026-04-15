@@ -19,7 +19,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「かぞく」?
-- choices: ["hermano mayor","familia","hermana mayor","hermano menor"]
+- choices: ["hermano mayor","hermana mayor","familia","hermano menor"]
 - correct: "familia"
 - explanation: 「かぞく」 significa “familia”.
 - hint: Lección 7 · Vocabulario
@@ -29,7 +29,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「ちち」?
-- choices: ["hermano mayor","padre","hermana mayor","familia"]
+- choices: ["hermana mayor","padre","familia","hermano mayor"]
 - correct: "padre"
 - explanation: 「ちち」 significa “padre”.
 - hint: Lección 7 · Vocabulario
@@ -39,7 +39,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「はは」?
-- choices: ["hermano mayor","familia","hermana mayor","madre"]
+- choices: ["familia","madre","hermano mayor","hermana mayor"]
 - correct: "madre"
 - explanation: 「はは」 significa “madre”.
 - hint: Lección 7 · Vocabulario
@@ -49,7 +49,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Qué significa 「あに」?
-- choices: ["hermano menor","hermana mayor","hermano mayor","familia"]
+- choices: ["familia","hermano menor","hermano mayor","hermana mayor"]
 - correct: "hermano mayor"
 - explanation: 「あに」 significa “hermano mayor”.
 - hint: Lección 7 · Vocabulario
@@ -59,7 +59,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “empresa”
-- choices: ["会社 (かいしゃ)","姉 (あね)","兄 (あに)","家族 (かぞく)"]
+- choices: ["会社 (かいしゃ)","兄 (あに)","家族 (かぞく)","姉 (あね)"]
 - correct: "会社 (かいしゃ)"
 - explanation: La opción correcta para “empresa” es 「会社 (かいしゃ)」.
 - hint: Lección 7 · Vocabulario
@@ -69,7 +69,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “pelo”
-- choices: ["兄 (あに)","姉 (あね)","髪 (かみ)","家族 (かぞく)"]
+- choices: ["髪 (かみ)","姉 (あね)","家族 (かぞく)","兄 (あに)"]
 - correct: "髪 (かみ)"
 - explanation: La opción correcta para “pelo” es 「髪 (かみ)」.
 - hint: Lección 7 · Vocabulario
@@ -79,7 +79,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “lentes; gafas”
-- choices: ["家族 (かぞく)","兄 (あに)","眼鏡 (めがね)","姉 (あね)"]
+- choices: ["兄 (あに)","姉 (あね)","家族 (かぞく)","眼鏡 (めがね)"]
 - correct: "眼鏡 (めがね)"
 - explanation: La opción correcta para “lentes; gafas” es 「眼鏡 (めがね)」.
 - hint: Lección 7 · Vocabulario
@@ -89,7 +89,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: Selecciona el japonés para: “hermanos y hermanas”
-- choices: ["兄弟 (きょうだい)","姉 (あね)","家族 (かぞく)","兄 (あに)"]
+- choices: ["兄 (あに)","家族 (かぞく)","兄弟 (きょうだい)","姉 (あね)"]
 - correct: "兄弟 (きょうだい)"
 - explanation: La opción correcta para “hermanos y hermanas” es 「兄弟 (きょうだい)」.
 - hint: Lección 7 · Vocabulario
@@ -101,7 +101,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「東京」?
-- choices: ["いち","いちじ","とうきょう","に"]
+- choices: ["とうきょう","いちじ","に","いち"]
 - correct: "とうきょう"
 - explanation: 「東京」 se lee 「とうきょう」.
 - hint: Lección 7 · Kanji
@@ -111,7 +111,7 @@
 - type: `mcq`
 - source: `lesson_scenarios_misc`
 - prompt: ¿Cómo se lee 「父」?
-- choices: ["いちじ","いち","ちち","に"]
+- choices: ["ちち","いちじ","に","いち"]
 - correct: "ちち"
 - explanation: 「父」 se lee 「ちち」.
 - hint: Lección 7 · Kanji
