@@ -51,6 +51,11 @@ type KanaSession = {
   questions: KanaSessionQuestion[];
 };
 
+type AnswerFeedback = {
+  status: "correct" | "wrong";
+  answer: string;
+};
+
 function shuffle<T>(items: T[]) {
   const next = [...items];
   for (let index = next.length - 1; index > 0; index -= 1) {
@@ -193,7 +198,11 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
   const [romajiValue, setRomajiValue] = useState("");
   const [romajiFeedback, setRomajiFeedback] = useState<null | { correct: boolean; answer: string }>(null);
   const [multipleChoiceAnswer, setMultipleChoiceAnswer] = useState<string | null>(null);
+  const [answerFeedback, setAnswerFeedback] = useState<AnswerFeedback | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [streakPulse, setStreakPulse] = useState(0);
   const romajiInputRef = useRef<HTMLInputElement | null>(null);
+  const advanceTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     setProgress(loadKanaProgress(userKey));
@@ -220,6 +229,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
 
   const sessionFinished = Boolean(session) && sessionIndex >= (session?.questions.length || 0);
   const currentQuestion = session?.questions[sessionIndex] || null;
+  const progressPercent = session?.questions.length ? Math.round((Math.min(sessionIndex + 1, session.questions.length) / session.questions.length) * 100) : 0;
 
   useEffect(() => {
     if (currentQuestion?.mode !== "romaji_input" || sessionFinished) return;
@@ -271,9 +281,14 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
   };
 
   const moveToNext = () => {
+    if (advanceTimerRef.current) {
+      window.clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
     setMultipleChoiceAnswer(null);
     setRomajiValue("");
     setRomajiFeedback(null);
+    setAnswerFeedback(null);
     setSessionIndex((value) => value + 1);
   };
 
@@ -281,7 +296,16 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
     setMultipleChoiceAnswer(null);
     setRomajiValue("");
     setRomajiFeedback(null);
+    setAnswerFeedback(null);
   }, [sessionIndex, currentQuestion?.mode, currentQuestion?.item.id]);
+
+  useEffect(() => {
+    return () => {
+      if (advanceTimerRef.current) {
+        window.clearTimeout(advanceTimerRef.current);
+      }
+    };
+  }, []);
 
   const closeSession = () => {
     setSheetVisible(false);
@@ -292,6 +316,8 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
       setMultipleChoiceAnswer(null);
       setRomajiValue("");
       setRomajiFeedback(null);
+      setAnswerFeedback(null);
+      setStreak(0);
     }, 220);
   };
 
@@ -324,6 +350,8 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
     setMultipleChoiceAnswer(null);
     setRomajiValue("");
     setRomajiFeedback(null);
+    setAnswerFeedback(null);
+    setStreak(0);
     setSetupError(null);
     onRecordActivity?.(
       `${practiceScripts.map((value) => (value === "hiragana" ? "Hiragana" : "Katakana")).join(" + ")} · ${practiceSets
@@ -362,6 +390,12 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
   );
 
   const activeQuestionLabel = currentQuestion ? getKanaSetLabel(currentQuestion.item) : "";
+  const stageFeedbackTone =
+    answerFeedback?.status === "correct"
+      ? "0 0 0 1px rgba(78,205,196,.35), 0 18px 34px rgba(78,205,196,.16)"
+      : answerFeedback?.status === "wrong"
+        ? "0 0 0 1px rgba(230,57,70,.22), 0 18px 34px rgba(230,57,70,.1)"
+        : "0 18px 34px rgba(26,26,46,.04)";
   return (
     <div style={{ display: "grid", gap: "var(--space-3)" }}>
       {screen === "home" && (
@@ -591,16 +625,67 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                 </button>
               </div>
 
+              {!sessionFinished && (
+                <div style={{ display: "grid", gap: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 800 }}>
+                      {Math.min(sessionIndex + 1, session?.questions.length || 0)} / {session?.questions.length || 0}
+                    </div>
+                    {streak > 0 ? (
+                      <div
+                        key={streakPulse}
+                        style={{
+                          borderRadius: 999,
+                          padding: "7px 11px",
+                          background: "color-mix(in srgb, var(--color-accent-soft) 74%, white)",
+                          color: "var(--color-text)",
+                          fontSize: "var(--text-body-sm)",
+                          fontWeight: 800,
+                          animation: "kanaStreakPop 320ms ease",
+                        }}
+                      >
+                        {streak} en racha
+                      </div>
+                    ) : null}
+                  </div>
+                  <div style={{ height: 10, borderRadius: 999, background: "color-mix(in srgb, var(--color-accent-soft) 72%, white)", overflow: "hidden" }}>
+                    <div
+                      style={{
+                        height: "100%",
+                        width: `${progressPercent}%`,
+                        background: "linear-gradient(90deg, #4ECDC4 0%, #E63946 100%)",
+                        transition: "width 220ms ease",
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
               {!sessionFinished && currentQuestion && (
                 <div key={`${currentQuestion.item.id}-${sessionIndex}`} style={{ display: "grid", gap: "var(--space-4)", animation: "kanaPracticeStepIn 180ms ease" }}>
-                  <div style={{ display: "grid", gap: 8, justifyItems: "center", textAlign: "center" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: 10,
+                      justifyItems: "center",
+                      textAlign: "center",
+                      minHeight: currentQuestion.mode === "handwriting" ? 188 : 220,
+                      alignContent: "center",
+                      padding: "14px 12px",
+                      borderRadius: 32,
+                      background: "color-mix(in srgb, var(--color-surface) 82%, white)",
+                      boxShadow: stageFeedbackTone,
+                      position: "relative",
+                      overflow: "hidden",
+                    }}
+                  >
                     <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
                       {activeQuestionLabel}
                     </div>
                     <div
                       style={{
-                        fontSize: currentQuestion.mode === "handwriting" ? "clamp(22px, 7vw, 34px)" : "clamp(56px, 20vw, 92px)",
-                        lineHeight: 1,
+                        fontSize: currentQuestion.mode === "handwriting" ? "clamp(28px, 8vw, 42px)" : "clamp(88px, 30vw, 144px)",
+                        lineHeight: 0.95,
                         letterSpacing: "-.05em",
                         fontWeight: 800,
                         color: "var(--color-text)",
@@ -608,38 +693,93 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                     >
                       {currentQuestion.mode === "handwriting" ? currentQuestion.item.romaji : currentQuestion.item.kana}
                     </div>
+                    {answerFeedback?.status === "correct" && (
+                      <>
+                        <div
+                          style={{
+                            position: "absolute",
+                            inset: "18% 22%",
+                            borderRadius: 999,
+                            border: "2px solid rgba(78,205,196,.22)",
+                            animation: "kanaSuccessPulse 520ms ease-out",
+                            pointerEvents: "none",
+                          }}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: 18,
+                            right: 18,
+                            width: 34,
+                            height: 34,
+                            borderRadius: 999,
+                            display: "grid",
+                            placeItems: "center",
+                            background: "rgba(78,205,196,.18)",
+                            color: "#1A1A2E",
+                            fontWeight: 900,
+                            fontSize: 18,
+                            animation: "kanaCheckBurst 420ms ease-out",
+                          }}
+                        >
+                          ✓
+                        </div>
+                        <div className="kanaSuccessDots" aria-hidden="true">
+                          <span />
+                          <span />
+                          <span />
+                          <span />
+                        </div>
+                      </>
+                    )}
                   </div>
 
-                    {currentQuestion.mode === "multiple_choice" && currentQuestion.options && (
+                  {currentQuestion.mode === "multiple_choice" && currentQuestion.options && (
                     <div style={{ display: "grid", gap: 12 }}>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
                         {currentQuestion.options.map((option) => {
                           const isChosen = multipleChoiceAnswer === option;
                           const isCorrect = option === currentQuestion.item.romaji;
-                          const showAnswer = Boolean(multipleChoiceAnswer);
+                          const showAnswer = Boolean(answerFeedback);
                           return (
                             <button
                               key={option}
                               type="button"
                               disabled={showAnswer}
                               onClick={() => {
+                                if (answerFeedback) return;
+                                const correct = option === currentQuestion.item.romaji;
                                 setMultipleChoiceAnswer(option);
-                                recordResult(currentQuestion.item, option === currentQuestion.item.romaji ? "correct" : "wrong");
+                                setAnswerFeedback({ status: correct ? "correct" : "wrong", answer: currentQuestion.item.romaji });
+                                recordResult(currentQuestion.item, correct ? "correct" : "wrong");
+                                if (correct) {
+                                  setStreak((value) => {
+                                    const next = value + 1;
+                                    setStreakPulse(next);
+                                    return next;
+                                  });
+                                  advanceTimerRef.current = window.setTimeout(() => {
+                                    moveToNext();
+                                  }, 650);
+                                } else {
+                                  setStreak(0);
+                                }
                               }}
                               style={{
-                                minHeight: 82,
-                                borderRadius: 22,
-                                border: "1px solid var(--color-border)",
+                                minHeight: 128,
+                                borderRadius: 28,
+                                border: "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
                                 background:
                                   showAnswer && isCorrect
-                                    ? "var(--color-accent-soft)"
+                                    ? "color-mix(in srgb, var(--color-accent-soft) 76%, white)"
                                     : showAnswer && isChosen && !isCorrect
-                                      ? "var(--color-highlight-soft)"
+                                      ? "color-mix(in srgb, var(--color-highlight-soft) 76%, white)"
                                       : "color-mix(in srgb, var(--color-surface) 82%, white)",
                                 color: "var(--color-text)",
-                                fontSize: 22,
-                                fontWeight: 700,
+                                fontSize: 28,
+                                fontWeight: 800,
                                 cursor: showAnswer ? "default" : "pointer",
+                                boxShadow: showAnswer && isCorrect ? "0 12px 26px rgba(78,205,196,.14)" : "0 10px 22px rgba(26,26,46,.04)",
                               }}
                             >
                               {option}
@@ -647,14 +787,22 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                           );
                         })}
                       </div>
-                      {multipleChoiceAnswer && (
+                      {answerFeedback && (
                         <div style={{ display: "grid", gap: 10, justifyItems: "center", textAlign: "center" }}>
-                          <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                            {multipleChoiceAnswer === currentQuestion.item.romaji ? "Correcto" : `Respuesta: ${currentQuestion.item.romaji}`}
+                          <div
+                            style={{
+                              fontSize: "var(--text-body)",
+                              color: answerFeedback.status === "correct" ? "#117964" : "var(--color-text-muted)",
+                              fontWeight: 800,
+                            }}
+                          >
+                            {answerFeedback.status === "correct" ? "Correcto" : `Respuesta: ${currentQuestion.item.romaji}`}
                           </div>
-                          <button type="button" onClick={moveToNext} className="ds-btn">
-                            {sessionIndex >= session.questions.length - 1 ? "Ver resumen" : "Siguiente"}
-                          </button>
+                          {answerFeedback.status === "wrong" ? (
+                            <button type="button" onClick={moveToNext} className="ds-btn">
+                              {sessionIndex >= session.questions.length - 1 ? "Ver resumen" : "Siguiente"}
+                            </button>
+                          ) : null}
                         </div>
                       )}
                     </div>
@@ -676,10 +824,23 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                           if (event.key === "Enter" && !romajiFeedback) {
                             const correct = isKanaAnswerCorrect(currentQuestion.item, romajiValue);
                             setRomajiFeedback({ correct, answer: currentQuestion.item.romaji });
+                            setAnswerFeedback({ status: correct ? "correct" : "wrong", answer: currentQuestion.item.romaji });
                             recordResult(currentQuestion.item, correct ? "correct" : "wrong");
+                            if (correct) {
+                              setStreak((value) => {
+                                const next = value + 1;
+                                setStreakPulse(next);
+                                return next;
+                              });
+                              advanceTimerRef.current = window.setTimeout(() => {
+                                moveToNext();
+                              }, 650);
+                            } else {
+                              setStreak(0);
+                            }
                           }
                         }}
-                        style={{ maxWidth: 320, textAlign: "center", fontSize: 24, fontWeight: 700 }}
+                        style={{ width: "100%", maxWidth: 340, textAlign: "center", fontSize: 30, fontWeight: 800, minHeight: 64, borderRadius: 20, border: "1px solid var(--color-border)", background: "color-mix(in srgb, var(--color-surface) 90%, white)" }}
                       />
                       <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
                         <button
@@ -687,7 +848,20 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                           onClick={() => {
                             const correct = isKanaAnswerCorrect(currentQuestion.item, romajiValue);
                             setRomajiFeedback({ correct, answer: currentQuestion.item.romaji });
+                            setAnswerFeedback({ status: correct ? "correct" : "wrong", answer: currentQuestion.item.romaji });
                             recordResult(currentQuestion.item, correct ? "correct" : "wrong");
+                            if (correct) {
+                              setStreak((value) => {
+                                const next = value + 1;
+                                setStreakPulse(next);
+                                return next;
+                              });
+                              advanceTimerRef.current = window.setTimeout(() => {
+                                moveToNext();
+                              }, 650);
+                            } else {
+                              setStreak(0);
+                            }
                           }}
                           disabled={Boolean(romajiFeedback) || normalizeRomaji(romajiValue).length === 0}
                           className="ds-btn"
@@ -701,7 +875,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                         )}
                       </div>
                       {romajiFeedback && (
-                        <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700, textAlign: "center" }}>
+                        <div style={{ fontSize: "var(--text-body)", color: romajiFeedback.correct ? "#117964" : "var(--color-text-muted)", fontWeight: 800, textAlign: "center" }}>
                           {romajiFeedback.correct ? "Correcto" : `Respuesta correcta: ${romajiFeedback.answer}`}
                         </div>
                       )}
@@ -718,7 +892,21 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                         targetKana={currentQuestion.item.kana}
                         onRated={(rating: KanaHandwritingRating, score) => {
                           recordResult(currentQuestion.item, rating, { recognitionScore: score });
-                          moveToNext();
+                          if (rating === "correct") {
+                            setAnswerFeedback({ status: "correct", answer: currentQuestion.item.kana });
+                            setStreak((value) => {
+                              const next = value + 1;
+                              setStreakPulse(next);
+                              return next;
+                            });
+                            advanceTimerRef.current = window.setTimeout(() => {
+                              moveToNext();
+                            }, 520);
+                          } else {
+                            setAnswerFeedback({ status: "wrong", answer: currentQuestion.item.kana });
+                            setStreak(0);
+                            moveToNext();
+                          }
                         }}
                       />
                     </div>
@@ -794,6 +982,85 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
           to {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+        @keyframes kanaSuccessPulse {
+          from {
+            opacity: 0.85;
+            transform: scale(0.82);
+          }
+          to {
+            opacity: 0;
+            transform: scale(1.2);
+          }
+        }
+        @keyframes kanaCheckBurst {
+          0% {
+            opacity: 0;
+            transform: scale(0.6);
+          }
+          55% {
+            opacity: 1;
+            transform: scale(1.12);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        @keyframes kanaStreakPop {
+          0% {
+            transform: translateY(3px) scale(0.96);
+            opacity: 0.5;
+          }
+          100% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+          }
+        }
+        .kanaSuccessDots {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+        .kanaSuccessDots span {
+          position: absolute;
+          width: 8px;
+          height: 8px;
+          border-radius: 999px;
+          background: rgba(78, 205, 196, 0.85);
+          animation: kanaDotBurst 420ms ease-out forwards;
+        }
+        .kanaSuccessDots span:nth-child(1) {
+          top: 22%;
+          left: 24%;
+        }
+        .kanaSuccessDots span:nth-child(2) {
+          top: 18%;
+          right: 24%;
+          background: rgba(244, 162, 97, 0.88);
+        }
+        .kanaSuccessDots span:nth-child(3) {
+          bottom: 24%;
+          left: 28%;
+          background: rgba(69, 123, 157, 0.82);
+        }
+        .kanaSuccessDots span:nth-child(4) {
+          bottom: 20%;
+          right: 28%;
+        }
+        @keyframes kanaDotBurst {
+          from {
+            opacity: 0;
+            transform: scale(0.4);
+          }
+          30% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          to {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.9);
           }
         }
       `}</style>
