@@ -5600,12 +5600,13 @@ function StudyContent() {
 
   const vkBucketConfig = useMemo(() => VK_BUCKETS.find((bucket) => bucket.key === vkBucket) || VK_BUCKETS[0], [vkBucket]);
   const vkVocabPool = useMemo(() => {
-    const pool: Array<{ id: string; jp: string; es: string }> = [];
+    const pool: Array<{ id: string; lesson: number; jp: string; es: string }> = [];
     for (const lesson of vkBucketConfig.lessons) {
       const rows = GENKI_VOCAB_BY_LESSON[lesson] || [];
       rows.forEach((item, index) => {
         pool.push({
           id: `l${lesson}-v-${index}`,
+          lesson,
           // Vocab sprint siempre pregunta significado desde hiragana.
           // La lectura/kanji se evalúa únicamente con el pool de kanji.
           jp: item.hira,
@@ -5617,13 +5618,14 @@ function StudyContent() {
   }, [vkBucketConfig]);
 
   const vkKanjiPool = useMemo(() => {
-    const pool: Array<{ id: string; kanji: string; hira: string }> = [];
+    const pool: Array<{ id: string; lesson: number; kanji: string; hira: string }> = [];
     for (const lesson of vkBucketConfig.lessons) {
       if (lesson < 3) continue;
       const rows = GENKI_KANJI_BY_LESSON[lesson] || [];
       rows.forEach((item, index) => {
         pool.push({
           id: `l${lesson}-k-${index}`,
+          lesson,
           kanji: item.kanji,
           hira: item.hira,
         });
