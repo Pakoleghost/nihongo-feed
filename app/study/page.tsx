@@ -230,6 +230,8 @@ type StudyActivityEntry = {
   occurredAt: string;
 };
 
+type FlashDeckBuilderKind = "vocab" | "kanji" | "hiragana" | "katakana";
+
 const EXAM_CATEGORY_LABELS: Record<QuizCategory, string> = {
   kana: "Kana",
   vocab: "Vocabulario",
@@ -239,6 +241,13 @@ const EXAM_CATEGORY_LABELS: Record<QuizCategory, string> = {
   grammar: "Gramática",
   reading: "Lectura",
 };
+
+const FLASH_DECK_KIND_OPTIONS: Array<{ key: FlashDeckBuilderKind; label: string }> = [
+  { key: "vocab", label: "Vocabulario" },
+  { key: "kanji", label: "Kanji" },
+  { key: "hiragana", label: "Hiragana" },
+  { key: "katakana", label: "Katakana" },
+];
 
 const KANJI_FROM_URL: Record<number, Array<{ kanji: string; hira: string }>> = {
   3: [
@@ -5323,7 +5332,7 @@ function StudyContent() {
   const [flashDeckBuilderOpen, setFlashDeckBuilderOpen] = useState(false);
   const [flashDeckEditingId, setFlashDeckEditingId] = useState<string | null>(null);
   const [flashDeckName, setFlashDeckName] = useState("");
-  const [flashDeckSelectedSetIds, setFlashDeckSelectedSetIds] = useState<string[]>([]);
+  const [flashDeckBuilderKinds, setFlashDeckBuilderKinds] = useState<FlashDeckBuilderKind[]>([]);
 
   const [quizMode, setQuizMode] = useState<QuizMode>("particles");
   const [quizCount, setQuizCount] = useState<QuizCount>(10);
@@ -5703,6 +5712,14 @@ function StudyContent() {
     createKanaQuestion();
   };
 
+  const closeKanaSession = () => {
+    setKanaRunning(false);
+    setKanaCountdown(null);
+    setKanaPenalty(0);
+    setKanaTime(60);
+    setKanaScore(0);
+  };
+
   const answerKana = (choice: string) => {
     if (!kanaRunning || kanaPenalty > 0 || kanaCountdown !== null || kanaTime <= 0) return;
     kanaAnswersCountRef.current += 1;
@@ -5755,6 +5772,14 @@ function StudyContent() {
     vkRoundStartedAtRef.current = null;
     vkRoundSubmittedRef.current = false;
     createVkQuestion();
+  };
+
+  const closeVkSession = () => {
+    setVkRunning(false);
+    setVkCountdown(null);
+    setVkPenalty(0);
+    setVkTime(60);
+    setVkScore(0);
   };
 
   const answerVk = (choice: string) => {
@@ -5829,19 +5854,32 @@ function StudyContent() {
   const flashDeckBuilderPreviewItems = useMemo(
     () =>
       dedupeFlashItems(
-        flashDeckSelectedSetIds.flatMap((setId) => FLASHCARD_SETS.find((set) => set.id === setId)?.items || []),
+        FLASHCARD_SETS
+          .filter((set) => {
+            const normalizedTitle = set.title.toLowerCase();
+            return flashDeckBuilderKinds.some((kind) => {
+              if (kind === "vocab") return normalizedTitle === "vocabulario";
+              if (kind === "kanji") return normalizedTitle === "kanji";
+              if (kind === "hiragana") return normalizedTitle === "hiragana";
+              return normalizedTitle === "katakana";
+            });
+          })
+          .flatMap((set) => set.items),
       ),
-    [flashDeckSelectedSetIds],
+    [flashDeckBuilderKinds],
   );
-  const flashDeckBuilderSetOptions = useMemo(
+  const flashDeckBuilderSelectedSetIds = useMemo(
     () =>
-      flashSetsByLesson.flatMap((entry) =>
-        entry.sets.map((set) => ({
-          key: set.id,
-          label: `L${entry.lesson} ${set.title}`,
-        })),
-      ),
-    [flashSetsByLesson],
+      FLASHCARD_SETS.filter((set) => {
+        const normalizedTitle = set.title.toLowerCase();
+        return flashDeckBuilderKinds.some((kind) => {
+          if (kind === "vocab") return normalizedTitle === "vocabulario";
+          if (kind === "kanji") return normalizedTitle === "kanji";
+          if (kind === "hiragana") return normalizedTitle === "hiragana";
+          return normalizedTitle === "katakana";
+        });
+      }).map((set) => set.id),
+    [flashDeckBuilderKinds],
   );
   const officialFlashLessons = useMemo(
     () =>
@@ -5879,21 +5917,34 @@ function StudyContent() {
     setFlashDeckBuilderOpen(true);
     setFlashDeckEditingId(deck?.id || null);
     setFlashDeckName(deck?.name || "");
-    setFlashDeckSelectedSetIds(deck?.setIds || []);
+    setFlashDeckBuilderKinds(
+      FLASH_DECK_KIND_OPTIONS
+        .filter((option) =>
+          (deck?.setIds || []).some((setId) => {
+            const set = FLASHCARD_SETS.find((entry) => entry.id === setId);
+            const normalizedTitle = set?.title.toLowerCase() || "";
+            if (option.key === "vocab") return normalizedTitle === "vocabulario";
+            if (option.key === "kanji") return normalizedTitle === "kanji";
+            if (option.key === "hiragana") return normalizedTitle === "hiragana";
+            return normalizedTitle === "katakana";
+          }),
+        )
+        .map((option) => option.key),
+    );
   };
 
   const closeCustomFlashDeckBuilder = () => {
     setFlashDeckBuilderOpen(false);
     setFlashDeckEditingId(null);
     setFlashDeckName("");
-    setFlashDeckSelectedSetIds([]);
+    setFlashDeckBuilderKinds([]);
   };
 
-  const toggleCustomFlashSetSelection = (setId: string) => {
-    setFlashDeckSelectedSetIds((prev) => (
-      prev.includes(setId)
-        ? prev.filter((id) => id !== setId)
-        : [...prev, setId]
+  const toggleCustomFlashSetSelection = (kind: FlashDeckBuilderKind) => {
+    setFlashDeckBuilderKinds((prev) => (
+      prev.includes(kind)
+        ? prev.filter((id) => id !== kind)
+        : [...prev, kind]
     ));
   };
 
@@ -5903,8 +5954,8 @@ function StudyContent() {
       alert("Ponle nombre a tu deck.");
       return;
     }
-    if (flashDeckSelectedSetIds.length === 0) {
-      alert("Selecciona al menos un set para armar el deck.");
+    if (flashDeckBuilderSelectedSetIds.length === 0) {
+      alert("Selecciona al menos un bloque para armar el deck.");
       return;
     }
     const nowIso = new Date().toISOString();
@@ -5912,7 +5963,7 @@ function StudyContent() {
       if (flashDeckEditingId) {
         return prev.map((deck) => (
           deck.id === flashDeckEditingId
-            ? { ...deck, name: trimmedName, setIds: [...flashDeckSelectedSetIds], updatedAt: nowIso }
+            ? { ...deck, name: trimmedName, setIds: [...flashDeckBuilderSelectedSetIds], updatedAt: nowIso }
             : deck
         ));
       }
@@ -5920,7 +5971,7 @@ function StudyContent() {
         {
           id: `custom-${Date.now()}`,
           name: trimmedName,
-          setIds: [...flashDeckSelectedSetIds],
+          setIds: [...flashDeckBuilderSelectedSetIds],
           updatedAt: nowIso,
         },
         ...prev,
@@ -6104,6 +6155,8 @@ function StudyContent() {
   });
   const examCurrentQ = examQuestions[examIndex] || null;
   const examSessionOpen = examQuestions.length > 0;
+  const kanaSessionOpen = kanaCountdown !== null || kanaRunning || (kanaTime > 0 && kanaTime < 60);
+  const vkSessionOpen = vkCountdown !== null || vkRunning || (vkTime > 0 && vkTime < 60);
   const examProgressPct = examQuestions.length
     ? Math.round((((examFinished ? examQuestions.length : examIndex + 1)) / examQuestions.length) * 100)
     : 0;
@@ -6229,10 +6282,10 @@ function StudyContent() {
     border: "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
     borderRadius: 22,
     background: "color-mix(in srgb, var(--color-surface) 88%, white)",
-    padding: "16px 16px 14px",
+    padding: "12px 12px 11px",
     cursor: "pointer",
     display: "grid",
-    gap: 10,
+    gap: 8,
   };
 
   useEffect(() => {
@@ -6443,6 +6496,15 @@ function StudyContent() {
       document.body.style.overflow = previousOverflow;
     };
   }, [examSessionOpen]);
+
+  useEffect(() => {
+    if (!flashDeckBuilderOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [flashDeckBuilderOpen]);
 
   useEffect(() => {
     return () => {
@@ -6657,13 +6719,13 @@ function StudyContent() {
   );
 
   const toolCards = [
-    { key: "learnkana", href: "/study?view=learnkana", title: "Aprender Kana", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
-    { key: "kana", href: "/study?view=kana", title: "Kana Sprint", accent: "var(--color-accent)", surface: "var(--color-accent-soft)" },
-    { key: "sprint", href: "/study?view=sprint", title: "Vocab + Kanji Sprint", accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
-    { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", accent: "#F4A261", surface: "rgba(244, 162, 97, 0.12)" },
-    { key: "exam", href: "/study?view=exam", title: "Repaso mixto", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
+    { key: "learnkana", href: "/study?view=learnkana", title: "Aprender Kana", jp: "かな", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
+    { key: "kana", href: "/study?view=kana", title: "Kana Sprint", jp: "かな", accent: "var(--color-accent)", surface: "var(--color-accent-soft)" },
+    { key: "sprint", href: "/study?view=sprint", title: "Vocab + Kanji", jp: "語彙", accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
+    { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", jp: "単語", accent: "#F4A261", surface: "rgba(244, 162, 97, 0.12)" },
+    { key: "exam", href: "/study?view=exam", title: "Repaso mixto", jp: "復習", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
   ];
-  const renderToolPill = (tool: { key: string; href: string; title: string; accent: string; surface: string }) => {
+  const renderToolPill = (tool: { key: string; href: string; title: string; jp: string; accent: string; surface: string }) => {
     const selected = activeTab === tool.key;
     return (
       <Link
@@ -6723,7 +6785,10 @@ function StudyContent() {
         <AppTopNav primary="study" tone="study" />
 
         {showHub ? (
-          <section style={{ display: "grid", gap: "var(--space-2)", padding: "calc(var(--space-5) + 4px) 0 var(--space-2)", scrollMarginTop: sectionScrollMarginTop }}>
+          <section style={{ display: "grid", gap: "var(--space-1)", padding: "calc(var(--space-5) + 4px) 0 var(--space-2)", scrollMarginTop: sectionScrollMarginTop }}>
+            <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".12em", textTransform: "uppercase" }}>
+              学習
+            </div>
             <div style={{ fontSize: "clamp(48px, 11vw, 82px)", lineHeight: 0.9, letterSpacing: "-.065em", fontWeight: 800, color: "var(--color-text)" }}>
               Study
             </div>
@@ -6768,17 +6833,17 @@ function StudyContent() {
                 style={{
                   display: "grid",
                   gap: "var(--space-2)",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
                   alignItems: "stretch",
                 }}
               >
                 <div
                   style={{
                     background: "color-mix(in srgb, var(--color-surface) 84%, white)",
-                    borderRadius: 26,
-                    padding: "14px 16px",
+                    borderRadius: 24,
+                    padding: "12px 14px",
                     display: "grid",
-                    gap: 10,
+                    gap: 8,
                     boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
                   }}
                 >
@@ -6798,14 +6863,14 @@ function StudyContent() {
                         textDecoration: "none",
                         color: "var(--color-text)",
                         display: "grid",
-                        gap: 6,
-                        borderRadius: 20,
+                        gap: 4,
+                        borderRadius: 18,
                         background: "color-mix(in srgb, var(--color-highlight-soft) 56%, white)",
-                        padding: "12px 14px",
+                        padding: "10px 12px",
                       }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
-                        <div style={{ fontSize: "clamp(22px, 4.6vw, 28px)", lineHeight: 0.98, letterSpacing: "-.04em", fontWeight: 800 }}>
+                        <div style={{ fontSize: "clamp(20px, 4.4vw, 24px)", lineHeight: 0.98, letterSpacing: "-.04em", fontWeight: 800 }}>
                           {latestStudyActivity.label}
                         </div>
                         <span
@@ -6851,16 +6916,16 @@ function StudyContent() {
                 <div
                   style={{
                     background: "color-mix(in srgb, rgba(78, 205, 196, 0.12) 72%, white)",
-                    borderRadius: 26,
-                    padding: "14px 16px",
+                    borderRadius: 24,
+                    padding: "12px 14px",
                     display: "grid",
-                    gap: 8,
+                    gap: 6,
                     boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
                     <div style={sectionKickerStyle}>Esta semana</div>
-                    <div style={{ fontSize: 28, lineHeight: 1, fontWeight: 800, color: "var(--color-text)" }}>
+                    <div style={{ fontSize: 24, lineHeight: 1, fontWeight: 800, color: "var(--color-text)" }}>
                       {weeklyActiveDays.size}
                     </div>
                   </div>
@@ -6870,7 +6935,7 @@ function StudyContent() {
                         <div
                           style={{
                             width: "100%",
-                            minHeight: 12,
+                            minHeight: 10,
                             borderRadius: 999,
                             background: day.active ? "var(--color-accent)" : "rgba(26, 26, 46, 0.08)",
                           }}
@@ -6888,16 +6953,16 @@ function StudyContent() {
                 <div
                   style={{
                     background: "color-mix(in srgb, rgba(244, 162, 97, 0.11) 68%, white)",
-                    borderRadius: 26,
-                    padding: "12px 16px",
+                    borderRadius: 24,
+                    padding: "10px 14px",
                     display: "grid",
-                    gap: 8,
+                    gap: 6,
                     boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
                   }}
                 >
                   <div style={sectionKickerStyle}>Recent activity</div>
                   <div style={{ display: "grid", gap: 6 }}>
-                    {recentStudyActivity.map((entry) => (
+                    {recentStudyActivity.slice(0, 2).map((entry) => (
                       <Link
                         key={entry.id}
                         href={entry.href}
@@ -6908,9 +6973,9 @@ function StudyContent() {
                           gridTemplateColumns: "minmax(0, 1fr) auto",
                           gap: 8,
                           alignItems: "center",
-                          borderRadius: 16,
+                          borderRadius: 14,
                           background: "rgba(255,255,255,0.72)",
-                          padding: "10px 12px",
+                          padding: "8px 10px",
                         }}
                       >
                         <div style={{ minWidth: 0 }}>
@@ -6936,13 +7001,12 @@ function StudyContent() {
             <div
               style={{
                 display: "grid",
-                gap: "var(--space-2)",
+                gap: 10,
                 gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
                 alignItems: "stretch",
               }}
             >
               {toolCards.map((tool) => {
-                const isWide = tool.key === "learnkana" || tool.key === "sprint";
                 const isSoftAccent = tool.key === "flashcards";
                 const cardBackground =
                   tool.key === "learnkana"
@@ -6962,9 +7026,9 @@ function StudyContent() {
                     : tool.key === "sprint"
                       ? "var(--color-accent-soft)"
                       : "rgba(244, 162, 97, 0.16)";
-                const cardPadding = isWide ? "16px 16px 14px" : "14px 14px 13px";
-                const cardRadius = isWide ? 30 : 26;
-                const cardMinHeight = isWide ? 108 : 120;
+                const cardPadding = "12px 12px 11px";
+                const cardRadius = 24;
+                const cardMinHeight = 96;
                 return (
                   <Link
                     key={tool.key}
@@ -6973,35 +7037,39 @@ function StudyContent() {
                       textDecoration: "none",
                       color: "var(--color-text)",
                       display: "grid",
-                      gap: "var(--space-2)",
+                      gap: 8,
                       alignContent: "space-between",
                       minHeight: cardMinHeight,
                       padding: cardPadding,
                       borderRadius: cardRadius,
                       background: cardBackground,
                       boxShadow: isSoftAccent ? "0 10px 24px rgba(26, 26, 46, 0.04)" : "0 14px 28px rgba(26, 26, 46, 0.05)",
-                      gridColumn: isWide ? "1 / -1" : "auto",
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-2)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                      <div style={{ display: "grid", gap: 6, minWidth: 0 }}>
                     <span
                       style={{
-                        fontSize: isWide ? "clamp(26px, 6.2vw, 36px)" : "clamp(21px, 4.6vw, 28px)",
-                        lineHeight: 1,
-                        letterSpacing: isWide ? "-.04em" : "-.03em",
-                        fontWeight: isWide ? 800 : 700,
+                        fontSize: "clamp(18px, 4vw, 22px)",
+                        lineHeight: 1.02,
+                        letterSpacing: "-.03em",
+                        fontWeight: 800,
                         color: "var(--color-text)",
-                        textWrap: "balance",
-                        maxWidth: isWide ? "70%" : "100%",
+                        textWrap: "pretty",
+                        maxWidth: "100%",
                         }}
                       >
                         {tool.title}
                       </span>
+                      <span style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
+                        {tool.jp}
+                      </span>
+                      </div>
                       <span
                         style={{
                           flexShrink: 0,
-                          width: isWide ? 34 : 30,
-                          height: isWide ? 34 : 30,
+                          width: 28,
+                          height: 28,
                           borderRadius: 999,
                           display: "inline-flex",
                           alignItems: "center",
@@ -7010,7 +7078,7 @@ function StudyContent() {
                           color: tool.key === "learnkana" || tool.key === "kana" || tool.key === "exam" ? "var(--color-accent-strong)" : "var(--color-primary)",
                           fontSize: 14,
                           fontWeight: 800,
-                          marginTop: 2,
+                          marginTop: 0,
                         }}
                       >
                         ↗
@@ -7024,13 +7092,13 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "learnkana" && (
-          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop }}>
+          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop, animation: "studyViewIn 220ms ease" }}>
             <AprenderKanaModule userKey={userKey} onRecordActivity={(detail) => recordStudyActivity("learnkana", detail)} />
           </section>
         )}
 
         {!showHub && activeTab === "kana" && (
-          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop }}>
+          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop, animation: "studyViewIn 220ms ease" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Kana Sprint</h2>
               <div style={{ minWidth: 0, flex: "1 1 280px" }}>
@@ -7048,114 +7116,19 @@ function StudyContent() {
                 />
               </div>
             </div>
-            <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-              Reinicio semanal en <span style={{ color: "var(--color-text)" }}>{weeklyResetLabel || "..."}</span>
-            </div>
-            <div style={progressTrackStyle}>
-              <div style={{ height: "100%", width: `${kanaTimePct}%`, background: "var(--color-accent)" }} />
-            </div>
-            <div style={{ marginTop: 12, display: "grid", gap: 12, gridTemplateColumns: "minmax(0,1fr)", alignItems: "start" }}>
-              <div style={panelStyle}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <div style={{ color: "var(--color-text-muted)", fontWeight: 700, fontSize: "var(--text-body-sm)" }}>Tiempo: {kanaTime}s · Score: {kanaScore} · Mejor semanal: {kanaBestByMode[kanaSet] || 0}</div>
-                  <button
-                    type="button"
-                    onClick={startKana}
-                    style={primaryButtonStyle}
-                  >
-                    Iniciar Sprint
-                  </button>
-                </div>
-                <div style={{ display: "grid", placeItems: "center", margin: "22px 0 18px", minHeight: 118 }}>
-                  {kanaCountdown !== null ? (
-                    <div style={{ fontSize: 70, fontWeight: 900, lineHeight: 1, color: "#111114" }}>{kanaCountdown > 0 ? kanaCountdown : "GO!"}</div>
-                  ) : (
-                    <div style={{ fontSize: 88, fontWeight: 900, lineHeight: 1, color: "#111114" }}>{kanaQuestion.char}</div>
-                  )}
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 10 }}>
-                  {kanaQuestion.options.map((op) => (
-                    <button
-                      key={op}
-                      type="button"
-                      onClick={() => answerKana(op)}
-                      disabled={!kanaRunning || kanaCountdown !== null || kanaPenalty > 0 || kanaTime <= 0}
-                      style={{
-                        border: "1px solid rgba(17,17,20,.1)",
-                        borderRadius: 14,
-                        background: "#fff",
-                        padding: "14px 14px",
-                        fontSize: 24,
-                        fontWeight: 800,
-                        cursor: kanaRunning && kanaCountdown === null && kanaPenalty === 0 && kanaTime > 0 ? "pointer" : "not-allowed",
-                        opacity: kanaRunning && kanaCountdown === null && kanaPenalty === 0 && kanaTime > 0 ? 1 : .55,
-                      }}
-                    >
-                      {op}
-                    </button>
-                  ))}
-                </div>
-                {kanaPenalty > 0 && (
-                  <div style={{ marginTop: 12, color: "#b42318", fontWeight: 800, fontSize: 13 }}>
-                    Penalización: espera {kanaPenalty}s antes de responder.
-                  </div>
-                )}
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
+              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                Mejor semanal: <span style={{ color: "var(--color-text)" }}>{kanaBestByMode[kanaSet] || 0}</span> · Reinicio en <span style={{ color: "var(--color-text)" }}>{weeklyResetLabel || "..."}</span>
               </div>
-
-              <div style={panelStyle}>
-                <div style={sectionKickerStyle}>Leaderboard Kana</div>
-                {leaderboardUnavailable && (
-                  <p style={{ margin: "8px 0 0", fontSize: 12, color: "#b42318" }}>Leaderboard temporalmente no disponible.</p>
-                )}
-                <div style={{ marginTop: 10, display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))" }}>
-                  {(["hiragana", "katakana", "mixed"] as KanaMode[]).map((mode) => (
-                    <div key={mode} style={{ border: "1px solid rgba(17,17,20,.08)", borderRadius: 12, padding: 10, background: "#fbfbfc" }}>
-                      <div style={{ fontSize: 12, fontWeight: 800, color: "#111114", marginBottom: 8, textTransform: "capitalize" }}>{mode}</div>
-                      <div style={{ display: "grid", gap: 6 }}>
-                        {(kanaLeaderboard[mode] || []).map((row, index) => (
-                          <div key={`${mode}-${row.user_id}-${index}`} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 13 }}>
-                            <span style={{ color: "#344054", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                              {index < 3 ? (
-                                <span
-                                  style={{
-                                    minWidth: 20,
-                                    height: 20,
-                                    borderRadius: 999,
-                                    border: `1px solid ${rankBadgeStyles(index).border}`,
-                                    background: rankBadgeStyles(index).bg,
-                                    color: rankBadgeStyles(index).color,
-                                    fontSize: 11,
-                                    fontWeight: 800,
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    padding: "0 5px",
-                                  }}
-                                >
-                                  {index + 1}
-                                </span>
-                              ) : (
-                                <span style={{ fontSize: 11, color: "#6b7280", fontWeight: 800 }}>#{index + 1}</span>
-                              )}
-                              {row.profiles?.username || row.profiles?.full_name || "usuario"}
-                            </span>
-                            <strong style={{ color: "#111114" }}>{row.best_score}</strong>
-                          </div>
-                        ))}
-                        {(kanaLeaderboard[mode] || []).length === 0 && (
-                          <div style={{ color: "#98a2b3", fontSize: 12 }}>Sin puntajes todavía.</div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <button type="button" onClick={startKana} style={primaryButtonStyle}>
+                Iniciar Sprint
+              </button>
             </div>
           </section>
         )}
 
         {!showHub && activeTab === "sprint" && (
-          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop }}>
+          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop, animation: "studyViewIn 220ms ease" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Vocab + Kanji Sprint</h2>
               <div style={{ minWidth: 0, flex: "1 1 320px" }}>
@@ -7169,100 +7142,111 @@ function StudyContent() {
                 />
               </div>
             </div>
-            <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-              Reinicio mensual en <span style={{ color: "var(--color-text)" }}>{vkResetLabel || "..."}</span>
-            </div>
-            <div style={progressTrackStyle}>
-              <div style={{ height: "100%", width: `${vkTimePct}%`, background: "var(--color-accent-strong)" }} />
-            </div>
-
-            <div style={{ marginTop: 12, display: "grid", gap: 12 }}>
-              <div style={panelStyle}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <div style={{ color: "var(--color-text-muted)", fontWeight: 700, fontSize: "var(--text-body-sm)" }}>Tiempo: {vkTime}s · Score: {vkScore} · Mejor mensual: {vkBestByBucket[vkBucket] || 0}</div>
-                  <button
-                    type="button"
-                    onClick={startVkSprint}
-                    style={primaryButtonStyle}
-                  >
-                    Iniciar Sprint
-                  </button>
-                </div>
-                <div style={{ display: "grid", placeItems: "center", margin: "18px 0 14px", minHeight: 96 }}>
-                  {vkCountdown !== null ? (
-                    <div style={{ fontSize: 64, fontWeight: 900, lineHeight: 1, color: "#111114" }}>{vkCountdown > 0 ? vkCountdown : "GO!"}</div>
-                  ) : (
-                    <div style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: 12, color: "#667085", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>{vkQuestion.hint}</div>
-                      <div style={{ marginTop: 8, fontSize: 44, fontWeight: 900, lineHeight: 1.2, color: "#111114", wordBreak: "break-word" }}>{vkQuestion.prompt}</div>
-                    </div>
-                  )}
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 10 }}>
-                  {vkQuestion.options.map((option) => (
-                    <button
-                      key={`${vkQuestion.prompt}-${option}`}
-                      type="button"
-                      onClick={() => answerVk(option)}
-                      disabled={!vkRunning || vkCountdown !== null || vkPenalty > 0 || vkTime <= 0}
-                      style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 12, background: "#fff", padding: "12px 12px", fontSize: 16, fontWeight: 700, cursor: vkRunning && vkCountdown === null && vkPenalty === 0 && vkTime > 0 ? "pointer" : "not-allowed", opacity: vkRunning && vkCountdown === null && vkPenalty === 0 && vkTime > 0 ? 1 : .55 }}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-                {vkPenalty > 0 && (
-                  <div style={{ marginTop: 12, color: "#b42318", fontWeight: 800, fontSize: 13 }}>
-                    Penalización: espera {vkPenalty}s antes de responder.
-                  </div>
-                )}
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
+              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                Mejor mensual: <span style={{ color: "var(--color-text)" }}>{vkBestByBucket[vkBucket] || 0}</span> · Reinicio en <span style={{ color: "var(--color-text)" }}>{vkResetLabel || "..."}</span>
               </div>
-
-              <div style={panelStyle}>
-                <div style={sectionKickerStyle}>Leaderboard Vocab + Kanji · {vkBucketConfig.label}</div>
-                {vkLeaderboardUnavailable && (
-                  <p style={{ margin: "8px 0 0", fontSize: 12, color: "#b42318" }}>Leaderboard temporalmente no disponible.</p>
-                )}
-                <div style={{ marginTop: 10, display: "grid", gap: 6 }}>
-                  {vkLeaderboardForBucket.map((row, index) => (
-                    <div key={`${vkBucket}-${row.user_id}-${index}`} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 13 }}>
-                      <span style={{ color: "#344054", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                        {index < 3 ? (
-                          <span
-                            style={{
-                              minWidth: 20,
-                              height: 20,
-                              borderRadius: 999,
-                              border: `1px solid ${rankBadgeStyles(index).border}`,
-                              background: rankBadgeStyles(index).bg,
-                              color: rankBadgeStyles(index).color,
-                              fontSize: 11,
-                              fontWeight: 800,
-                              display: "inline-flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              padding: "0 5px",
-                            }}
-                          >
-                            {index + 1}
-                          </span>
-                        ) : (
-                          <span style={{ fontSize: 11, color: "#6b7280", fontWeight: 800 }}>#{index + 1}</span>
-                        )}
-                        {row.profiles?.username || row.profiles?.full_name || "usuario"}
-                      </span>
-                      <strong style={{ color: "#111114" }}>{row.best_score}</strong>
-                    </div>
-                  ))}
-                  {vkLeaderboardForBucket.length === 0 && <div style={{ color: "#98a2b3", fontSize: 12 }}>Sin puntajes todavía.</div>}
-                </div>
-              </div>
+              <button type="button" onClick={startVkSprint} style={primaryButtonStyle}>
+                Iniciar Sprint
+              </button>
             </div>
           </section>
         )}
 
+        <PracticeShell
+          open={!showHub && activeTab === "kana" && kanaSessionOpen}
+          visible={kanaSessionOpen}
+          title="Kana Sprint"
+          subtitle={`${kanaSet === "mixed" ? "Mixto" : kanaSet === "hiragana" ? "Hiragana" : "Katakana"} · ${kanaTime}s · ${kanaScore} pts`}
+          onClose={closeKanaSession}
+        >
+          <div style={{ display: "grid", gap: "var(--space-4)" }}>
+            <PracticeStageCard
+              label={kanaCountdown !== null ? "Preparado" : "Kana"}
+              value={
+                <div style={{ fontSize: kanaCountdown !== null ? "clamp(56px, 18vw, 84px)" : "clamp(110px, 34vw, 168px)", lineHeight: 0.92, letterSpacing: "-.05em", fontWeight: 800, color: "var(--color-text)" }}>
+                  {kanaCountdown !== null ? (kanaCountdown > 0 ? kanaCountdown : "GO!") : kanaQuestion.char}
+                </div>
+              }
+            />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 10 }}>
+              {kanaQuestion.options.map((op) => (
+                <button
+                  key={op}
+                  type="button"
+                  onClick={() => answerKana(op)}
+                  disabled={!kanaRunning || kanaCountdown !== null || kanaPenalty > 0 || kanaTime <= 0}
+                  style={{
+                    border: "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
+                    borderRadius: 24,
+                    background: "color-mix(in srgb, var(--color-surface) 82%, white)",
+                    padding: "18px 14px",
+                    fontSize: 26,
+                    fontWeight: 800,
+                    cursor: kanaRunning && kanaCountdown === null && kanaPenalty === 0 && kanaTime > 0 ? "pointer" : "not-allowed",
+                    opacity: kanaRunning && kanaCountdown === null && kanaPenalty === 0 && kanaTime > 0 ? 1 : .55,
+                  }}
+                >
+                  {op}
+                </button>
+              ))}
+            </div>
+            {kanaPenalty > 0 ? (
+              <div style={{ textAlign: "center", color: "#b42318", fontWeight: 800, fontSize: 13 }}>
+                Penalización: espera {kanaPenalty}s
+              </div>
+            ) : null}
+          </div>
+        </PracticeShell>
+
+        <PracticeShell
+          open={!showHub && activeTab === "sprint" && vkSessionOpen}
+          visible={vkSessionOpen}
+          title="Vocab + Kanji Sprint"
+          subtitle={`${vkBucketConfig.label} · ${vkTime}s · ${vkScore} pts`}
+          onClose={closeVkSession}
+        >
+          <div style={{ display: "grid", gap: "var(--space-4)" }}>
+            <PracticeStageCard
+              label={vkCountdown !== null ? "Preparado" : vkQuestion.hint}
+              value={
+                <div style={{ fontSize: vkCountdown !== null ? "clamp(56px, 18vw, 84px)" : "clamp(42px, 10vw, 56px)", lineHeight: 1.08, letterSpacing: "-.04em", fontWeight: 800, color: "var(--color-text)", wordBreak: "break-word" }}>
+                  {vkCountdown !== null ? (vkCountdown > 0 ? vkCountdown : "GO!") : vkQuestion.prompt}
+                </div>
+              }
+            />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 10 }}>
+              {vkQuestion.options.map((option) => (
+                <button
+                  key={`${vkQuestion.prompt}-${option}`}
+                  type="button"
+                  onClick={() => answerVk(option)}
+                  disabled={!vkRunning || vkCountdown !== null || vkPenalty > 0 || vkTime <= 0}
+                  style={{
+                    border: "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
+                    borderRadius: 24,
+                    background: "color-mix(in srgb, var(--color-surface) 82%, white)",
+                    padding: "18px 14px",
+                    fontSize: 18,
+                    fontWeight: 800,
+                    cursor: vkRunning && vkCountdown === null && vkPenalty === 0 && vkTime > 0 ? "pointer" : "not-allowed",
+                    opacity: vkRunning && vkCountdown === null && vkPenalty === 0 && vkTime > 0 ? 1 : .55,
+                  }}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+            {vkPenalty > 0 ? (
+              <div style={{ textAlign: "center", color: "#b42318", fontWeight: 800, fontSize: 13 }}>
+                Penalización: espera {vkPenalty}s
+              </div>
+            ) : null}
+          </div>
+        </PracticeShell>
+
         {!showHub && activeTab === "flashcards" && (
-          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop }}>
+          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop, animation: "studyViewIn 220ms ease" }}>
             {(flashLessonFolder !== null || Boolean(activeFlashSet?.isCustom)) && (
               <div style={{ marginBottom: 10 }}>
                 <button
@@ -7672,7 +7656,7 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "exam" && (
-          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop }}>
+          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop, animation: "studyViewIn 220ms ease" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Repaso mixto</h2>
               <div style={{ minWidth: 0, flex: "1 1 320px" }}>
@@ -8002,6 +7986,8 @@ function StudyContent() {
                 background: "color-mix(in srgb, var(--color-surface) 90%, white)",
                 border: "1px solid var(--color-border)",
                 boxShadow: "0 20px 40px rgba(26,26,46,.1)",
+                maxHeight: "min(78dvh, 640px)",
+                overflowY: "auto",
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -8019,18 +8005,18 @@ function StudyContent() {
               />
 
               <StudySelectorGroup
-                options={flashDeckBuilderSetOptions}
-                values={flashDeckSelectedSetIds}
+                options={FLASH_DECK_KIND_OPTIONS}
+                values={flashDeckBuilderKinds}
                 multiple
                 onToggle={toggleCustomFlashSetSelection}
                 layout="grid"
                 compact
-                minItemWidth={132}
+                minItemWidth={128}
               />
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                  {flashDeckSelectedSetIds.length} sets · {flashDeckBuilderPreviewItems.length} tarjetas
+                  {flashDeckBuilderKinds.length} bloques · {flashDeckBuilderPreviewItems.length} tarjetas
                 </div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <button type="button" onClick={closeCustomFlashDeckBuilder} style={secondaryButtonStyle}>
@@ -8044,6 +8030,18 @@ function StudyContent() {
             </div>
           </div>
         )}
+        <style jsx>{`
+          @keyframes studyViewIn {
+            from {
+              opacity: 0;
+              transform: translateY(8px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}</style>
       </div>
     </div>
   );
