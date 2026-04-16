@@ -7292,7 +7292,7 @@ function StudyContent() {
 
                   <StudySelectorGroup
                     options={flashRoutes.map((route) => ({ key: route.id, label: route.title, tone: route.surface }))}
-                    value={flashRouteId}
+                    value={flashRouteId ?? undefined}
                     onSelect={(value) => setFlashRouteId(value)}
                     layout="row"
                     compact
