@@ -569,13 +569,17 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
             </div>
 
             <StudySelectorGroup
-              options={KANA_PRACTICE_MODE_OPTIONS.map((option) => ({ key: option.key, label: option.label }))}
+              options={[
+                { key: "multiple_choice", label: "Opciones" },
+                { key: "romaji_input", label: "Romaji" },
+                { key: "handwriting", label: "Manual" },
+              ]}
               values={practiceModes}
               multiple
               onToggle={togglePracticeMode}
-              layout="row"
+              layout="grid"
               compact
-              minItemWidth={128}
+              minItemWidth={96}
             />
 
             <button
@@ -594,13 +598,36 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
             >
               <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                 <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 800 }}>Kana seleccionados</div>
-                <div style={{ fontSize: "var(--text-body)", fontWeight: 800 }}>{selectedKanaCount}</div>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ fontSize: "var(--text-body)", fontWeight: 800 }}>{selectedKanaCount}</div>
+                  <div
+                    style={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: 999,
+                      display: "grid",
+                      placeItems: "center",
+                      background: "color-mix(in srgb, var(--color-highlight-soft) 64%, white)",
+                      color: "var(--color-accent-strong)",
+                      fontSize: 14,
+                      fontWeight: 800,
+                    }}
+                    aria-hidden="true"
+                  >
+                    ↗
+                  </div>
+                </div>
               </div>
               <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text)", fontWeight: 700 }}>
                 {selectedScriptSummary || "Ninguno"}
               </div>
-              <div style={{ fontSize: 12, color: "var(--color-text-muted)", lineHeight: 1.35 }}>
-                {selectedSetSummary || "Toca para elegir"}
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <div style={{ fontSize: 12, color: "var(--color-text-muted)", lineHeight: 1.35 }}>
+                  {selectedSetSummary || "Toca para elegir"}
+                </div>
+                <div style={{ fontSize: 12, color: "var(--color-accent-strong)", fontWeight: 800 }}>
+                  Editar
+                </div>
               </div>
             </button>
 
