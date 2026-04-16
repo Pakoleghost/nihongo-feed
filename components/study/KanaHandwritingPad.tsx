@@ -130,7 +130,7 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
   const [activeStroke, setActiveStroke] = useState<StrokePoint[]>([]);
   const [reviewMode, setReviewMode] = useState(false);
   const [recognition, setRecognition] = useState<RecognitionResult>({ score: 0, status: "empty" });
-  const [canvasHeight, setCanvasHeight] = useState(220);
+  const [canvasHeight, setCanvasHeight] = useState(188);
 
   useEffect(() => {
     setStrokes([]);
@@ -155,7 +155,7 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
   useEffect(() => {
     const updateHeight = () => {
       if (typeof window === "undefined") return;
-      setCanvasHeight(window.innerWidth < 420 ? 196 : 220);
+      setCanvasHeight(window.innerWidth < 420 ? 160 : 188);
     };
     updateHeight();
     window.addEventListener("resize", updateHeight);
@@ -236,15 +236,15 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
   }, [activeStroke, reviewMode, targetKana]);
 
   return (
-    <div style={{ display: "grid", gap: 12 }}>
+    <div style={{ display: "grid", gap: 10, width: "100%" }}>
       <div
         style={{
-          borderRadius: 24,
+          borderRadius: 22,
           background: "color-mix(in srgb, var(--color-surface) 84%, white)",
-          padding: 14,
+          padding: 12,
           border: "1px solid var(--color-border)",
           display: "grid",
-          gap: 10,
+          gap: 8,
         }}
       >
         <canvas
@@ -253,7 +253,7 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
           style={{
             width: "100%",
             height: canvasHeight,
-            borderRadius: 18,
+            borderRadius: 16,
             background: "#FFFDFC",
             touchAction: "none",
             display: "block",
@@ -262,7 +262,7 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
         />
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <div style={{ fontSize: 13, color: "var(--color-text-muted)", fontWeight: 700 }}>
+          <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
             {recognition.status === "confident"
               ? "✓ Se parece bien"
               : recognition.status === "empty"
@@ -290,23 +290,23 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
 
       {reviewMode && (
         <div
-          style={{
-            borderRadius: 24,
+        style={{
+            borderRadius: 22,
             background: "color-mix(in srgb, var(--color-surface-muted) 70%, white)",
             border: "1px solid var(--color-border)",
-            padding: 14,
+            padding: 12,
             display: "grid",
-            gap: 12,
+            gap: 10,
           }}
         >
           <div style={{ display: "grid", gap: 4 }}>
             <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em" }}>
               Objetivo
             </div>
-            <div style={{ fontSize: 42, lineHeight: 1, fontWeight: 800, color: "var(--color-text)" }}>{targetKana}</div>
+            <div style={{ fontSize: 34, lineHeight: 1, fontWeight: 800, color: "var(--color-text)" }}>{targetKana}</div>
           </div>
 
-          <div style={{ fontSize: 13, color: "var(--color-text-muted)", fontWeight: 700 }}>
+          <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
             {recognition.status === "confident"
               ? `Reconocimiento aproximado: ${Math.round(recognition.score * 100)}%`
               : "La app no está segura. Usa tu criterio para evaluarte."}

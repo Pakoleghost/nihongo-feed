@@ -8,6 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import AppTopNav from "@/components/AppTopNav";
 import AprenderKanaModule from "@/components/study/AprenderKanaModule";
+import PracticeShell, { PracticeStageCard } from "@/components/study/PracticeShell";
 import StudySelectorGroup from "@/components/study/StudySelectorGroup";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
@@ -87,6 +88,12 @@ type ExamAttempt = {
   passed: boolean;
   createdAt: string;
   categoryBreakdown: Array<{ category: string; correct: number; total: number }>;
+};
+
+type PracticeFeedbackState = {
+  status: "correct" | "wrong";
+  answer: string;
+  explanation?: string;
 };
 
 function getLocalWeekStart(date = new Date()) {
@@ -5334,9 +5341,14 @@ function StudyContent() {
   const [examIndex, setExamIndex] = useState(0);
   const [examAnswers, setExamAnswers] = useState<Record<string, string>>({});
   const [examFinished, setExamFinished] = useState(false);
+  const [examFeedback, setExamFeedback] = useState<PracticeFeedbackState | null>(null);
+  const [examStreak, setExamStreak] = useState(0);
+  const [examStreakPulse, setExamStreakPulse] = useState(0);
+  const [examSheetVisible, setExamSheetVisible] = useState(false);
   const [examHistory, setExamHistory] = useState<ExamAttempt[]>([]);
   const examCardRef = useRef<HTMLDivElement | null>(null);
   const examPersistedRef = useRef(false);
+  const examAdvanceTimerRef = useRef<number | null>(null);
   const [studyActivity, setStudyActivity] = useState<StudyActivityEntry[]>([]);
 
   const flashFocusRef = useRef<HTMLDivElement | null>(null);
@@ -6081,6 +6093,7 @@ function StudyContent() {
     };
   });
   const examCurrentQ = examQuestions[examIndex] || null;
+  const examSessionOpen = examQuestions.length > 0;
   const examProgressPct = examQuestions.length
     ? Math.round((((examFinished ? examQuestions.length : examIndex + 1)) / examQuestions.length) * 100)
     : 0;
@@ -6406,6 +6419,27 @@ function StudyContent() {
     };
   }, [isFlashFocusMode]);
 
+  useEffect(() => {
+    if (!examSessionOpen) return;
+    const timer = window.setTimeout(() => setExamSheetVisible(true), 18);
+    return () => window.clearTimeout(timer);
+  }, [examSessionOpen]);
+
+  useEffect(() => {
+    if (!examSessionOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [examSessionOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (examAdvanceTimerRef.current) window.clearTimeout(examAdvanceTimerRef.current);
+    };
+  }, []);
+
   const nextQuiz = () => {
     if (!currentQ) return;
     if (quizIndex >= quizQuestions.length - 1) {
@@ -6440,6 +6474,8 @@ function StudyContent() {
     setExamIndex(0);
     setExamAnswers({});
     setExamFinished(false);
+    setExamFeedback(null);
+    setExamStreak(0);
     examPersistedRef.current = false;
   };
 
@@ -6447,6 +6483,43 @@ function StudyContent() {
     if (!examCurrentQ || examFinished) return;
     const key = examCurrentQ.stableKey || examCurrentQ.id;
     setExamAnswers((prev) => ({ ...prev, [key]: option }));
+  };
+
+  const advanceExamQuestion = () => {
+    if (examAdvanceTimerRef.current) {
+      window.clearTimeout(examAdvanceTimerRef.current);
+      examAdvanceTimerRef.current = null;
+    }
+    setExamFeedback(null);
+    if (examIndex >= examQuestions.length - 1) {
+      setExamFinished(true);
+      return;
+    }
+    setExamIndex((prev) => prev + 1);
+  };
+
+  const finalizeExamAnswer = (answerValue: string) => {
+    if (!examCurrentQ || examFinished || examFeedback) return;
+    const key = examCurrentQ.stableKey || examCurrentQ.id;
+    const correct = isExamQuestionCorrect(examCurrentQ, answerValue);
+    setExamAnswers((prev) => ({ ...prev, [key]: answerValue }));
+    setExamFeedback({
+      status: correct ? "correct" : "wrong",
+      answer: examCurrentQ.correct,
+      explanation: examCurrentQ.explanation,
+    });
+    if (correct) {
+      setExamStreak((value) => {
+        const next = value + 1;
+        setExamStreakPulse(next);
+        return next;
+      });
+      examAdvanceTimerRef.current = window.setTimeout(() => {
+        advanceExamQuestion();
+      }, 680);
+    } else {
+      setExamStreak(0);
+    }
   };
 
   const appendExamReorderToken = (tokenId: string) => {
@@ -6476,19 +6549,33 @@ function StudyContent() {
       alert("Responde la pregunta para continuar.");
       return;
     }
-    if (examIndex >= examQuestions.length - 1) {
-      setExamFinished(true);
+    if (!examFeedback) {
+      finalizeExamAnswer(examCurrentChoice || "");
       return;
     }
-    setExamIndex((prev) => prev + 1);
+    advanceExamQuestion();
   };
 
   const resetExam = () => {
+    if (examAdvanceTimerRef.current) {
+      window.clearTimeout(examAdvanceTimerRef.current);
+      examAdvanceTimerRef.current = null;
+    }
+    setExamSheetVisible(false);
     setExamQuestions([]);
     setExamAnswers({});
     setExamIndex(0);
     setExamFinished(false);
+    setExamFeedback(null);
+    setExamStreak(0);
     examPersistedRef.current = false;
+  };
+
+  const closeExamSession = () => {
+    setExamSheetVisible(false);
+    window.setTimeout(() => {
+      resetExam();
+    }, 220);
   };
 
   const renderQuizConfigurator = (compact = false) => (
@@ -7650,7 +7737,6 @@ function StudyContent() {
 
             {examQuestions.length === 0 && (
               <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14, scrollMarginTop: sectionScrollMarginTop }}>
-                <div style={sectionKickerStyle}>Configuración</div>
                 <div style={{ marginTop: 6, fontSize: "var(--text-h2)", fontWeight: 800 }}>Repaso L{examLesson}</div>
                 <button
                   type="button"
@@ -7659,192 +7745,6 @@ function StudyContent() {
                 >
                   Iniciar repaso
                 </button>
-              </div>
-            )}
-
-            {examCurrentQ && !examFinished && (
-              <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14, scrollMarginTop: sectionScrollMarginTop }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>Pregunta {examIndex + 1} / {examQuestions.length}</div>
-                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>Lección {examLesson} · {formatExamCategoryLabel(examCurrentQ.category)}</div>
-                </div>
-                <div style={{ ...progressTrackStyle, marginTop: 8 }}>
-                  <div style={{ height: "100%", width: `${examProgressPct}%`, background: "var(--color-accent)" }} />
-                </div>
-                <div style={{ marginTop: 8, fontSize: 20, fontWeight: 800, color: "var(--color-text)", whiteSpace: "pre-line", lineHeight: 1.45 }}>{examCurrentQ.prompt}</div>
-                {examCurrentQ.hint && <div style={{ marginTop: 4, color: "var(--color-text-muted)", fontSize: "var(--text-body-sm)" }}>{examCurrentQ.hint}</div>}
-                {examCurrentQ.type === "match" && examCurrentQ.matchLeft && examCurrentQ.matchRight && (
-                  <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
-                    <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))" }}>
-                      <div style={panelStyle}>
-                        <div style={sectionKickerStyle}>Columna A</div>
-                        <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
-                          {examCurrentQ.matchLeft.map((item) => <div key={item} style={{ fontSize: 14, color: "var(--color-text)" }}>{item}</div>)}
-                        </div>
-                      </div>
-                      <div style={panelStyle}>
-                        <div style={sectionKickerStyle}>Columna B</div>
-                        <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
-                          {examCurrentQ.matchRight.map((item) => <div key={item} style={{ fontSize: 14, color: "var(--color-text)" }}>{item}</div>)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {examCurrentQ.type === "reorder" ? (
-                  <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
-                    <div style={panelStyle}>
-                      <div style={sectionKickerStyle}>Tu oración</div>
-                      <div style={{ marginTop: 8, minHeight: 52, display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-                        {decodeReorderAnswer(examCurrentChoice || "").length > 0 ? (
-                          decodeReorderAnswer(examCurrentChoice || "").map((tokenId) => {
-                            const token = examCurrentQ.reorderTokens?.find((item) => item.id === tokenId);
-                            if (!token) return null;
-                            return (
-                              <span key={tokenId} style={chipStyle}>
-                                {token.label}
-                              </span>
-                            );
-                          })
-                        ) : (
-                          <span style={{ color: "#98a2b3", fontSize: 14 }}>Toca los bloques en el orden correcto.</span>
-                        )}
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      {(examCurrentQ.reorderTokens || []).map((token) => {
-                        const used = decodeReorderAnswer(examCurrentChoice || "").includes(token.id);
-                        return (
-                          <button
-                            key={token.id}
-                            type="button"
-                            disabled={used}
-                            onClick={() => appendExamReorderToken(token.id)}
-                            style={{
-                              border: used ? "1px solid var(--color-border)" : "1px solid var(--color-border)",
-                              borderRadius: 999,
-                              background: used ? "var(--color-surface-muted)" : "var(--color-surface)",
-                              color: used ? "var(--color-text-muted)" : "var(--color-text)",
-                              padding: "8px 12px",
-                              fontWeight: 700,
-                              cursor: used ? "not-allowed" : "pointer",
-                            }}
-                          >
-                            {token.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      <button type="button" onClick={popExamReorderToken} style={secondaryButtonStyle}>
-                        Borrar último
-                      </button>
-                      <button type="button" onClick={clearExamReorder} style={secondaryButtonStyle}>
-                        Limpiar
-                      </button>
-                    </div>
-                  </div>
-                ) : examCurrentQ.type === "text" ? (
-                  <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
-                    <input
-                      value={examCurrentChoice || ""}
-                      onChange={(event) => answerExam(event.target.value)}
-                      placeholder="Escribe tu respuesta aquí"
-                      style={{ border: "1px solid var(--color-border)", borderRadius: 12, background: "var(--color-surface)", padding: "10px 12px", fontSize: 16, fontWeight: 600, color: "var(--color-text)" }}
-                    />
-                  </div>
-                ) : (
-                  <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
-                    {examCurrentQ.options.map((op) => {
-                      const isSelected = examCurrentChoice === op;
-                      return (
-                        <button
-                          key={op}
-                          type="button"
-                          onClick={() => answerExam(op)}
-                          style={{
-                            textAlign: "left",
-                            border: isSelected ? "1px solid var(--color-border-strong)" : "1px solid var(--color-border)",
-                            borderRadius: 10,
-                            background: isSelected ? "var(--color-surface-muted)" : "var(--color-surface)",
-                            color: "var(--color-text)",
-                            padding: "8px 10px",
-                            fontSize: 14,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                          }}
-                        >
-                          {op}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-                <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <button
-                    type="button"
-                    onClick={nextExamQuestion}
-                    style={secondaryButtonStyle}
-                  >
-                    {examIndex >= examQuestions.length - 1 ? "Terminar y ver feedback" : "Siguiente"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {examFinished && (
-              <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14, scrollMarginTop: sectionScrollMarginTop }}>
-                <div style={sectionKickerStyle}>Resultado final</div>
-                <div style={{ marginTop: 6, fontSize: 30, fontWeight: 800 }}>{examScore} / {examQuestions.length}</div>
-                <div style={{ marginTop: 6, color: "var(--color-text-muted)" }}>
-                  {examPercent}% de aciertos · {examPassed ? "Aprobado" : "No aprobado"} (mínimo {EXAM_PASSING_PERCENT}%)
-                </div>
-                <div style={{ marginTop: 12, display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
-                  {examCategoryBreakdown.map((row) => {
-                    const pct = Math.round((row.correct / Math.max(1, row.total)) * 100);
-                    return (
-                      <div key={row.category} style={{ ...panelStyle, padding: 10 }}>
-                        <div style={sectionKickerStyle}>{formatExamCategoryLabel(row.category)}</div>
-                        <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "var(--color-text)" }}>{row.correct}/{row.total}</div>
-                        <div style={{ marginTop: 2, fontSize: 12, color: "var(--color-text-muted)" }}>{pct}%</div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <button type="button" onClick={startExam} style={primaryButtonStyle}>
-                    Repetir repaso L{examLesson}
-                  </button>
-                  <button type="button" onClick={resetExam} style={secondaryButtonStyle}>
-                    Cambiar lección
-                  </button>
-                </div>
-
-                <div style={{ marginTop: 14, borderTop: "1px dashed rgba(17,17,20,.1)", paddingTop: 12 }}>
-                  <div style={sectionKickerStyle}>
-                    Feedback de errores
-                  </div>
-                  {examWrongQuestions.length === 0 ? (
-                    <p style={{ marginTop: 8, color: "var(--color-text)", fontWeight: 700 }}>Excelente. No hubo errores en este intento.</p>
-                  ) : (
-                    <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
-                      {examWrongQuestions.slice(0, 10).map((question, index) => {
-                        const key = question.stableKey || question.id;
-                        const chosen = formatExamAnswer(question, examAnswers[key]);
-                        const correct = question.correct;
-                        return (
-                          <div key={`${key}-${index}`} style={{ ...panelStyle, padding: 10 }}>
-                            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--color-text)", whiteSpace: "pre-line" }}>{question.prompt}</div>
-                            <div style={{ marginTop: 4, fontSize: 12, color: "var(--color-text-muted)" }}>Tu respuesta: {chosen}</div>
-                            <div style={{ marginTop: 2, fontSize: 12, color: "var(--color-text)" }}>Correcta: {correct}</div>
-                            {question.explanation && <div style={{ marginTop: 4, fontSize: 12, color: "var(--color-text-muted)" }}>{question.explanation}</div>}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
               </div>
             )}
 
@@ -7868,6 +7768,260 @@ function StudyContent() {
             </div>
           </section>
         )}
+
+        <PracticeShell
+          open={!showHub && activeTab === "exam" && examSessionOpen}
+          visible={examSheetVisible}
+          title="Repaso mixto"
+          subtitle={
+            examFinished
+              ? `Lección ${examLesson} · Resumen`
+              : `Lección ${examLesson} · ${formatExamCategoryLabel(examCurrentQ?.category)}`
+          }
+          current={examFinished ? undefined : examIndex + 1}
+          total={examFinished ? undefined : examQuestions.length}
+          streak={examFinished ? 0 : examStreak}
+          streakPulseKey={examStreakPulse}
+          onClose={closeExamSession}
+        >
+          {examCurrentQ && !examFinished ? (
+            <div style={{ display: "grid", gap: "var(--space-4)" }}>
+              <PracticeStageCard
+                label={formatExamCategoryLabel(examCurrentQ.category)}
+                feedback={examFeedback?.status || null}
+                value={
+                  <div style={{ fontSize: "clamp(24px, 6vw, 34px)", fontWeight: 800, color: "var(--color-text)", whiteSpace: "pre-line", lineHeight: 1.3 }}>
+                    {examCurrentQ.prompt}
+                  </div>
+                }
+              >
+                {examCurrentQ.hint ? (
+                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                    {examCurrentQ.hint}
+                  </div>
+                ) : null}
+              </PracticeStageCard>
+
+              {examCurrentQ.type === "match" && examCurrentQ.matchLeft && examCurrentQ.matchRight ? (
+                <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))" }}>
+                  <div style={{ ...panelStyle, padding: 12 }}>
+                    <div style={sectionKickerStyle}>A</div>
+                    <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
+                      {examCurrentQ.matchLeft.map((item) => <div key={item} style={{ fontSize: 14, color: "var(--color-text)" }}>{item}</div>)}
+                    </div>
+                  </div>
+                  <div style={{ ...panelStyle, padding: 12 }}>
+                    <div style={sectionKickerStyle}>B</div>
+                    <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
+                      {examCurrentQ.matchRight.map((item) => <div key={item} style={{ fontSize: 14, color: "var(--color-text)" }}>{item}</div>)}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {examCurrentQ.type === "reorder" ? (
+                <div style={{ display: "grid", gap: 10 }}>
+                  <div style={{ ...panelStyle, padding: 12 }}>
+                    <div style={sectionKickerStyle}>Tu oración</div>
+                    <div style={{ marginTop: 8, minHeight: 52, display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                      {decodeReorderAnswer(examCurrentChoice || "").length > 0 ? (
+                        decodeReorderAnswer(examCurrentChoice || "").map((tokenId) => {
+                          const token = examCurrentQ.reorderTokens?.find((item) => item.id === tokenId);
+                          if (!token) return null;
+                          return <span key={tokenId} style={chipStyle}>{token.label}</span>;
+                        })
+                      ) : (
+                        <span style={{ color: "#98a2b3", fontSize: 14 }}>Ordena los bloques.</span>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {(examCurrentQ.reorderTokens || []).map((token) => {
+                      const used = decodeReorderAnswer(examCurrentChoice || "").includes(token.id);
+                      return (
+                        <button
+                          key={token.id}
+                          type="button"
+                          disabled={used || Boolean(examFeedback)}
+                          onClick={() => appendExamReorderToken(token.id)}
+                          style={{
+                            border: "1px solid var(--color-border)",
+                            borderRadius: 999,
+                            background: used ? "var(--color-surface-muted)" : "var(--color-surface)",
+                            color: used ? "var(--color-text-muted)" : "var(--color-text)",
+                            padding: "8px 12px",
+                            fontWeight: 700,
+                            cursor: used || examFeedback ? "not-allowed" : "pointer",
+                          }}
+                        >
+                          {token.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {!examFeedback ? (
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <button type="button" onClick={popExamReorderToken} style={secondaryButtonStyle}>Borrar último</button>
+                      <button type="button" onClick={clearExamReorder} style={secondaryButtonStyle}>Limpiar</button>
+                    </div>
+                  ) : null}
+                </div>
+              ) : examCurrentQ.type === "text" ? (
+                <div style={{ display: "grid", gap: 10 }}>
+                  <input
+                    value={examCurrentChoice || ""}
+                    onChange={(event) => answerExam(event.target.value)}
+                    placeholder="Escribe tu respuesta"
+                    style={{ border: "1px solid var(--color-border)", borderRadius: 18, background: "var(--color-surface)", padding: "14px 16px", fontSize: 18, fontWeight: 700, color: "var(--color-text)" }}
+                  />
+                </div>
+              ) : (
+                <div style={{ display: "grid", gap: 10 }}>
+                  {examCurrentQ.options.map((op) => {
+                    const isSelected = examCurrentChoice === op;
+                    const isCorrect = op === examCurrentQ.correct;
+                    const showResult = Boolean(examFeedback);
+                    return (
+                      <button
+                        key={op}
+                        type="button"
+                        onClick={() => {
+                          if (showResult) return;
+                          finalizeExamAnswer(op);
+                        }}
+                        disabled={showResult}
+                        style={{
+                          textAlign: "left",
+                          border: "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
+                          borderRadius: 22,
+                          background:
+                            showResult && isCorrect
+                              ? "color-mix(in srgb, var(--color-accent-soft) 76%, white)"
+                              : showResult && isSelected && !isCorrect
+                                ? "color-mix(in srgb, var(--color-highlight-soft) 76%, white)"
+                                : "color-mix(in srgb, var(--color-surface) 82%, white)",
+                          color: "var(--color-text)",
+                          padding: "16px 18px",
+                          fontSize: 17,
+                          fontWeight: 700,
+                          cursor: showResult ? "default" : "pointer",
+                        }}
+                      >
+                        {op}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {examFeedback ? (
+                <div style={{ display: "grid", gap: 10, justifyItems: "center", textAlign: "center" }}>
+                  <div style={{ fontSize: "var(--text-body)", color: examFeedback.status === "correct" ? "#117964" : "var(--color-text)", fontWeight: 800 }}>
+                    {examFeedback.status === "correct" ? "Correcto" : `Respuesta: ${examFeedback.answer}`}
+                  </div>
+                  {examFeedback.explanation ? (
+                    <div style={{ maxWidth: 520, fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                      {examFeedback.explanation}
+                    </div>
+                  ) : null}
+                  {examFeedback.status === "wrong" || examCurrentQ.type === "text" || examCurrentQ.type === "reorder" ? (
+                    <button type="button" onClick={nextExamQuestion} className="ds-btn">
+                      {examIndex >= examQuestions.length - 1 ? "Ver resumen" : "Siguiente"}
+                    </button>
+                  ) : null}
+                </div>
+              ) : examCurrentQ.type === "text" || examCurrentQ.type === "reorder" ? (
+                <button type="button" onClick={nextExamQuestion} className="ds-btn">
+                  Comprobar
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+
+          {examFinished ? (
+            <div style={{ display: "grid", gap: "var(--space-3)" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gap: 14,
+                  padding: "18px 18px 16px",
+                  borderRadius: 30,
+                  background: "color-mix(in srgb, var(--color-surface) 86%, white)",
+                  boxShadow: "0 18px 34px rgba(26,26,46,.05)",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "end", flexWrap: "wrap" }}>
+                  <div style={{ display: "grid", gap: 6 }}>
+                    <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
+                      Resultado
+                    </div>
+                    <div style={{ fontSize: "clamp(38px, 12vw, 62px)", lineHeight: 0.92, letterSpacing: "-.05em", fontWeight: 800, color: "var(--color-text)" }}>
+                      {examScore} / {examQuestions.length}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                    {examPercent}% · {examPassed ? "Aprobado" : "No aprobado"}
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))" }}>
+                  {examCategoryBreakdown.map((row) => {
+                    const pct = Math.round((row.correct / Math.max(1, row.total)) * 100);
+                    return (
+                      <div key={row.category} style={{ ...panelStyle, padding: 12 }}>
+                        <div style={sectionKickerStyle}>{formatExamCategoryLabel(row.category)}</div>
+                        <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "var(--color-text)" }}>{row.correct}/{row.total}</div>
+                        <div style={{ marginTop: 2, fontSize: 12, color: "var(--color-text-muted)" }}>{pct}%</div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gap: 8,
+                    padding: "12px 14px",
+                    borderRadius: 22,
+                    background: "color-mix(in srgb, var(--color-highlight-soft) 52%, white)",
+                  }}
+                >
+                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
+                    Errores
+                  </div>
+                  {examWrongQuestions.length === 0 ? (
+                    <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text)", fontWeight: 700 }}>Excelente. No hubo errores.</div>
+                  ) : (
+                    <div style={{ display: "grid", gap: 8 }}>
+                      {examWrongQuestions.slice(0, 6).map((question, index) => {
+                        const key = question.stableKey || question.id;
+                        return (
+                          <div key={`${key}-${index}`} style={{ ...panelStyle, padding: 10 }}>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--color-text)", whiteSpace: "pre-line" }}>{question.prompt}</div>
+                            <div style={{ marginTop: 4, fontSize: 12, color: "var(--color-text-muted)" }}>
+                              Tu respuesta: {formatExamAnswer(question, examAnswers[key])}
+                            </div>
+                            <div style={{ marginTop: 2, fontSize: 12, color: "var(--color-text)" }}>Correcta: {question.correct}</div>
+                            {question.explanation ? <div style={{ marginTop: 4, fontSize: 12, color: "var(--color-text-muted)" }}>{question.explanation}</div> : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gap: 8 }}>
+                <button type="button" onClick={startExam} className="ds-btn">
+                  Repetir repaso L{examLesson}
+                </button>
+                <button type="button" onClick={closeExamSession} className="ds-btn-secondary">
+                  Cambiar lección
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </PracticeShell>
       </div>
     </div>
   );

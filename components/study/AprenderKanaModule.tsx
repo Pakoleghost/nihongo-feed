@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import KanaHandwritingPad, { type KanaHandwritingRating } from "@/components/study/KanaHandwritingPad";
+import PracticeShell, { PracticeStageCard } from "@/components/study/PracticeShell";
 import StudySelectorGroup from "@/components/study/StudySelectorGroup";
 import {
   KANA_ITEMS,
@@ -417,12 +418,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
   );
 
   const activeQuestionLabel = currentQuestion ? getKanaSetLabel(currentQuestion.item) : "";
-  const stageFeedbackTone =
-    answerFeedback?.status === "correct"
-      ? "0 0 0 1px rgba(78,205,196,.35), 0 18px 34px rgba(78,205,196,.16)"
-      : answerFeedback?.status === "wrong"
-        ? "0 0 0 1px rgba(230,57,70,.22), 0 18px 34px rgba(230,57,70,.1)"
-        : "0 18px 34px rgba(26,26,46,.04)";
   return (
     <div style={{ display: "grid", gap: "var(--space-3)" }}>
       {screen === "home" && (
@@ -753,145 +748,37 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
         </div>
       )}
 
-      {session && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 90,
-            background: "rgba(255, 248, 231, 0.94)",
-            backdropFilter: "blur(10px)",
-            transform: sheetVisible ? "translateY(0)" : "translateY(100%)",
-            opacity: sheetVisible ? 1 : 0,
-            transition: "transform 240ms ease, opacity 220ms ease",
-            display: "grid",
-            overscrollBehavior: "contain",
-          }}
-        >
-          <div style={{ minHeight: "100vh", overflowY: "auto", padding: "16px", display: "grid", alignContent: "start" }}>
-            <div className="ds-container" style={{ display: "grid", gap: "var(--space-4)", paddingBottom: "calc(var(--space-8) + env(safe-area-inset-bottom))" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap", paddingTop: "max(var(--space-2), env(safe-area-inset-top))" }}>
-                <div style={{ display: "grid", gap: 4 }}>
-                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
-                    Aprender Kana
-                  </div>
-                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                    {sessionFinished ? "Resumen" : `Pregunta ${Math.min(sessionIndex + 1, session.questions.length)} / ${session.questions.length}`}
-                  </div>
-                </div>
-                <button type="button" onClick={closeSession} className="ds-btn-ghost">
-                  Cerrar
-                </button>
-              </div>
-
-              {!sessionFinished && (
-                <div style={{ display: "grid", gap: 10 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                    <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 800 }}>
-                      {Math.min(sessionIndex + 1, session?.questions.length || 0)} / {session?.questions.length || 0}
-                    </div>
-                    {streak > 0 ? (
+      <PracticeShell
+        open={Boolean(session)}
+        visible={sheetVisible}
+        title="Aprender Kana"
+        subtitle={sessionFinished ? "Resumen" : `Pregunta ${Math.min(sessionIndex + 1, session?.questions.length || 0)} / ${session?.questions.length || 0}`}
+        current={sessionFinished ? undefined : Math.min(sessionIndex + 1, session?.questions.length || 0)}
+        total={sessionFinished ? undefined : session?.questions.length || 0}
+        streak={sessionFinished ? 0 : streak}
+        streakPulseKey={streakPulse}
+        onClose={closeSession}
+      >
+        {!sessionFinished && currentQuestion ? (
+                <div key={`${currentQuestion.item.id}-${sessionIndex}`} style={{ display: "grid", gap: "var(--space-4)", animation: "kanaPracticeStepIn 180ms ease" }}>
+                  <PracticeStageCard
+                    label={activeQuestionLabel}
+                    compact={currentQuestion.mode === "handwriting"}
+                    feedback={answerFeedback?.status || null}
+                    value={
                       <div
-                        key={streakPulse}
                         style={{
-                          borderRadius: 999,
-                          padding: "7px 11px",
-                          background: "color-mix(in srgb, var(--color-accent-soft) 74%, white)",
-                          color: "var(--color-text)",
-                          fontSize: "var(--text-body-sm)",
+                          fontSize: currentQuestion.mode === "handwriting" ? "clamp(28px, 8vw, 42px)" : "clamp(96px, 32vw, 154px)",
+                          lineHeight: 0.92,
+                          letterSpacing: "-.05em",
                           fontWeight: 800,
-                          animation: "kanaStreakPop 320ms ease",
+                          color: "var(--color-text)",
                         }}
                       >
-                        {streak} en racha
+                        {currentQuestion.mode === "handwriting" ? currentQuestion.item.romaji : currentQuestion.item.kana}
                       </div>
-                    ) : null}
-                  </div>
-                  <div style={{ height: 10, borderRadius: 999, background: "color-mix(in srgb, var(--color-accent-soft) 72%, white)", overflow: "hidden" }}>
-                    <div
-                      style={{
-                        height: "100%",
-                        width: `${progressPercent}%`,
-                        background: "linear-gradient(90deg, #4ECDC4 0%, #E63946 100%)",
-                        transition: "width 220ms ease",
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {!sessionFinished && currentQuestion && (
-                <div key={`${currentQuestion.item.id}-${sessionIndex}`} style={{ display: "grid", gap: "var(--space-4)", animation: "kanaPracticeStepIn 180ms ease" }}>
-                  <div
-                    style={{
-                      display: "grid",
-                      gap: 10,
-                      justifyItems: "center",
-                      textAlign: "center",
-                      minHeight: currentQuestion.mode === "handwriting" ? 188 : 220,
-                      alignContent: "center",
-                      padding: "14px 12px",
-                      borderRadius: 32,
-                      background: "color-mix(in srgb, var(--color-surface) 82%, white)",
-                      boxShadow: stageFeedbackTone,
-                      position: "relative",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
-                      {activeQuestionLabel}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: currentQuestion.mode === "handwriting" ? "clamp(28px, 8vw, 42px)" : "clamp(88px, 30vw, 144px)",
-                        lineHeight: 0.95,
-                        letterSpacing: "-.05em",
-                        fontWeight: 800,
-                        color: "var(--color-text)",
-                      }}
-                    >
-                      {currentQuestion.mode === "handwriting" ? currentQuestion.item.romaji : currentQuestion.item.kana}
-                    </div>
-                    {answerFeedback?.status === "correct" && (
-                      <>
-                        <div
-                          style={{
-                            position: "absolute",
-                            inset: "18% 22%",
-                            borderRadius: 999,
-                            border: "2px solid rgba(78,205,196,.22)",
-                            animation: "kanaSuccessPulse 520ms ease-out",
-                            pointerEvents: "none",
-                          }}
-                        />
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: 18,
-                            right: 18,
-                            width: 34,
-                            height: 34,
-                            borderRadius: 999,
-                            display: "grid",
-                            placeItems: "center",
-                            background: "rgba(78,205,196,.18)",
-                            color: "#1A1A2E",
-                            fontWeight: 900,
-                            fontSize: 18,
-                            animation: "kanaCheckBurst 420ms ease-out",
-                          }}
-                        >
-                          ✓
-                        </div>
-                        <div className="kanaSuccessDots" aria-hidden="true">
-                          <span />
-                          <span />
-                          <span />
-                          <span />
-                        </div>
-                      </>
-                    )}
-                  </div>
+                    }
+                  />
 
                   {currentQuestion.mode === "multiple_choice" && currentQuestion.options && (
                     <div style={{ display: "grid", gap: 12 }}>
@@ -1043,9 +930,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
 
                   {currentQuestion.mode === "handwriting" && (
                     <div style={{ display: "grid", gap: 10, justifyItems: "center", textAlign: "center" }}>
-                      <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                        Traza el kana correspondiente y luego evalúate
-                      </div>
                       <KanaHandwritingPad
                         key={`${currentQuestion.item.id}-${sessionIndex}`}
                         targetKana={currentQuestion.item.kana}
@@ -1060,77 +944,110 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                             });
                             advanceTimerRef.current = window.setTimeout(() => {
                               moveToNext();
-                            }, 520);
+                            }, 620);
                           } else {
-                            setAnswerFeedback({ status: "wrong", answer: currentQuestion.item.kana });
+                            setAnswerFeedback({ status: rating === "almost" ? "correct" : "wrong", answer: currentQuestion.item.kana });
                             setStreak(0);
-                            moveToNext();
                           }
                         }}
                       />
+                      {answerFeedback && answerFeedback.status === "wrong" ? (
+                        <button type="button" onClick={moveToNext} className="ds-btn">
+                          {sessionIndex >= session.questions.length - 1 ? "Ver resumen" : "Siguiente"}
+                        </button>
+                      ) : null}
                     </div>
                   )}
                 </div>
-              )}
+              ) : null}
 
-              {sessionFinished && (
-                <div style={{ display: "grid", gap: "var(--space-4)" }}>
-                  <div style={{ display: "grid", gap: 8 }}>
-                    <div style={{ fontSize: "clamp(34px, 10vw, 52px)", lineHeight: 0.95, letterSpacing: "-.05em", fontWeight: 800, color: "var(--color-text)" }}>
-                      {summary.correct}
-                    </div>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      <div style={subtlePillStyle}>✓ {summary.correct}</div>
-                      <div style={subtlePillStyle}>～ {summary.almost}</div>
-                      <div style={subtlePillStyle}>✕ {summary.wrong}</div>
-                    </div>
+        {sessionFinished ? (
+          <div style={{ display: "grid", gap: "var(--space-3)" }}>
+            <div
+              style={{
+                display: "grid",
+                gap: 14,
+                padding: "18px 18px 16px",
+                borderRadius: 30,
+                background: "color-mix(in srgb, var(--color-surface) 86%, white)",
+                boxShadow: "0 18px 34px rgba(26,26,46,.05)",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "end", flexWrap: "wrap" }}>
+                <div style={{ display: "grid", gap: 6 }}>
+                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
+                    Resultado
                   </div>
+                  <div style={{ fontSize: "clamp(38px, 12vw, 62px)", lineHeight: 0.92, letterSpacing: "-.05em", fontWeight: 800, color: "var(--color-text)" }}>
+                    {summary.correct} / {session?.questions.length || 0}
+                  </div>
+                </div>
+                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                  {Math.round((summary.correct / Math.max(1, session?.questions.length || 1)) * 100)}%
+                </div>
+              </div>
 
-                  {hardestSessionKana.length > 0 && (
-                    <div style={{ display: "grid", gap: 8 }}>
-                      <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
-                        Hardest kana
-                      </div>
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        {hardestSessionKana.map((item) => (
-                          <div key={item.id} style={subtlePillStyle}>
-                            {item.kana} · {item.romaji}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+                <div style={{ ...subtlePillStyle, textAlign: "center" }}>✓ {summary.correct}</div>
+                <div style={{ ...subtlePillStyle, textAlign: "center" }}>～ {summary.almost}</div>
+                <div style={{ ...subtlePillStyle, textAlign: "center" }}>✕ {summary.wrong}</div>
+              </div>
 
+              <div
+                style={{
+                  display: "grid",
+                  gap: 8,
+                  padding: "12px 14px",
+                  borderRadius: 22,
+                  background: "color-mix(in srgb, var(--color-highlight-soft) 52%, white)",
+                }}
+              >
+                <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
+                  Hardest kana
+                </div>
+                {hardestSessionKana.length > 0 ? (
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {repeatCandidates.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => startSession(repeatCandidates.slice(0, Math.min(repeatCandidates.length, 20)))}
-                        className="ds-btn"
-                      >
-                        Practicar falladas
-                      </button>
-                    )}
-                    <button type="button" onClick={() => startSession()} className="ds-btn-secondary">
-                      Otra sesión
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        closeSession();
-                        setScreen("home");
-                      }}
-                      className="ds-btn-ghost"
-                    >
-                      Volver a Aprender Kana
-                    </button>
+                    {hardestSessionKana.map((item) => (
+                      <div key={item.id} style={subtlePillStyle}>
+                        {item.kana} · {item.romaji}
+                      </div>
+                    ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                    Nada problemático en esta sesión.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gap: 8 }}>
+              {repeatCandidates.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => startSession(repeatCandidates.slice(0, Math.min(repeatCandidates.length, 20)))}
+                  className="ds-btn"
+                >
+                  Practicar falladas
+                </button>
+              ) : null}
+              <button type="button" onClick={() => startSession()} className="ds-btn-secondary">
+                Otra sesión
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  closeSession();
+                  setScreen("home");
+                }}
+                className="ds-btn-ghost"
+              >
+                Volver a Aprender Kana
+              </button>
             </div>
           </div>
-        </div>
-      )}
+        ) : null}
+      </PracticeShell>
 
       <style jsx>{`
         @keyframes kanaPracticeStepIn {
@@ -1141,85 +1058,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
           to {
             opacity: 1;
             transform: translateY(0);
-          }
-        }
-        @keyframes kanaSuccessPulse {
-          from {
-            opacity: 0.85;
-            transform: scale(0.82);
-          }
-          to {
-            opacity: 0;
-            transform: scale(1.2);
-          }
-        }
-        @keyframes kanaCheckBurst {
-          0% {
-            opacity: 0;
-            transform: scale(0.6);
-          }
-          55% {
-            opacity: 1;
-            transform: scale(1.12);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        @keyframes kanaStreakPop {
-          0% {
-            transform: translateY(3px) scale(0.96);
-            opacity: 0.5;
-          }
-          100% {
-            transform: translateY(0) scale(1);
-            opacity: 1;
-          }
-        }
-        .kanaSuccessDots {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-        }
-        .kanaSuccessDots span {
-          position: absolute;
-          width: 8px;
-          height: 8px;
-          border-radius: 999px;
-          background: rgba(78, 205, 196, 0.85);
-          animation: kanaDotBurst 420ms ease-out forwards;
-        }
-        .kanaSuccessDots span:nth-child(1) {
-          top: 22%;
-          left: 24%;
-        }
-        .kanaSuccessDots span:nth-child(2) {
-          top: 18%;
-          right: 24%;
-          background: rgba(244, 162, 97, 0.88);
-        }
-        .kanaSuccessDots span:nth-child(3) {
-          bottom: 24%;
-          left: 28%;
-          background: rgba(69, 123, 157, 0.82);
-        }
-        .kanaSuccessDots span:nth-child(4) {
-          bottom: 20%;
-          right: 28%;
-        }
-        @keyframes kanaDotBurst {
-          from {
-            opacity: 0;
-            transform: scale(0.4);
-          }
-          30% {
-            opacity: 1;
-            transform: scale(1);
-          }
-          to {
-            opacity: 0;
-            transform: translateY(-10px) scale(0.9);
           }
         }
       `}</style>
