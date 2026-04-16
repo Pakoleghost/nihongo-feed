@@ -5929,7 +5929,6 @@ function StudyContent() {
   };
 
   const focusFlashArea = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
     window.setTimeout(() => {
       flashFocusRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 80);
@@ -6124,11 +6123,12 @@ function StudyContent() {
     ? selectedView === "kana"
       ? "Kana Sprint"
       : selectedView === "sprint"
-        ? "Vocab Sprint"
+        ? "Vocab + Kanji Sprint"
         : selectedView === "exam"
           ? "Repaso mixto"
           : "Flashcards"
     : "Study";
+  const sectionScrollMarginTop = "calc(var(--app-sticky-offset) + var(--space-4))";
   const sectionStyle: CSSProperties = {
     background: "var(--color-surface)",
     border: "1px solid var(--color-border)",
@@ -6601,13 +6601,13 @@ function StudyContent() {
         <AppTopNav primary="study" tone="study" />
 
         {showHub ? (
-          <section style={{ display: "grid", gap: "var(--space-2)", padding: "var(--space-3) 0 var(--space-2)" }}>
+          <section style={{ display: "grid", gap: "var(--space-2)", padding: "var(--space-4) 0 var(--space-2)", scrollMarginTop: sectionScrollMarginTop }}>
             <div style={{ fontSize: "clamp(48px, 11vw, 82px)", lineHeight: 0.9, letterSpacing: "-.065em", fontWeight: 800, color: "var(--color-text)" }}>
               Study
             </div>
           </section>
         ) : (
-          <section style={{ ...sectionStyle, gap: "var(--space-2)", padding: "var(--space-4) var(--space-5)" }}>
+          <section style={{ ...sectionStyle, gap: "var(--space-2)", padding: "var(--space-4) var(--space-5)", scrollMarginTop: sectionScrollMarginTop }}>
             <div style={{ fontSize: "var(--text-h1)", lineHeight: 0.98, letterSpacing: "-.04em", fontWeight: 800, color: "var(--color-text)" }}>
               {pageTitle}
             </div>
@@ -6615,19 +6615,19 @@ function StudyContent() {
         )}
 
         {!showHub && (
-          <section style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap" }}>
+          <section style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap", scrollMarginTop: sectionScrollMarginTop }}>
             {toolCards.map(renderToolPill)}
           </section>
         )}
 
         {showHub && (
-          <section style={{ display: "grid", gap: "var(--space-3)", paddingBottom: "var(--space-4)" }}>
-            <div style={{ display: "grid", gap: "var(--space-3)" }}>
+          <section style={{ display: "grid", gap: "var(--space-2)", paddingBottom: "var(--space-4)" }}>
+            <div style={{ display: "grid", gap: "var(--space-2)" }}>
               <div
                 style={{
                   display: "grid",
-                  gap: "var(--space-3)",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                  gap: "var(--space-2)",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
                   alignItems: "stretch",
                 }}
               >
@@ -6635,9 +6635,9 @@ function StudyContent() {
                   style={{
                     background: "color-mix(in srgb, var(--color-surface) 84%, white)",
                     borderRadius: 26,
-                    padding: "18px 18px 16px",
+                    padding: "14px 16px",
                     display: "grid",
-                    gap: 12,
+                    gap: 10,
                     boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
                   }}
                 >
@@ -6657,20 +6657,20 @@ function StudyContent() {
                         textDecoration: "none",
                         color: "var(--color-text)",
                         display: "grid",
-                        gap: 8,
-                        borderRadius: 22,
+                        gap: 6,
+                        borderRadius: 20,
                         background: "color-mix(in srgb, var(--color-highlight-soft) 56%, white)",
-                        padding: "16px 16px 14px",
+                        padding: "12px 14px",
                       }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
-                        <div style={{ fontSize: "clamp(24px, 5vw, 32px)", lineHeight: 0.98, letterSpacing: "-.04em", fontWeight: 800 }}>
+                        <div style={{ fontSize: "clamp(22px, 4.6vw, 28px)", lineHeight: 0.98, letterSpacing: "-.04em", fontWeight: 800 }}>
                           {latestStudyActivity.label}
                         </div>
                         <span
                           style={{
-                            width: 34,
-                            height: 34,
+                            width: 30,
+                            height: 30,
                             borderRadius: 999,
                             background: "rgba(230, 57, 70, 0.12)",
                             color: "var(--color-accent-strong)",
@@ -6691,12 +6691,12 @@ function StudyContent() {
                         </div>
                       )}
                     </Link>
-                  ) : (
-                    <div
-                      style={{
-                        borderRadius: 22,
+                    ) : (
+                      <div
+                        style={{
+                        borderRadius: 20,
                         background: "color-mix(in srgb, var(--color-surface-muted) 72%, white)",
-                        padding: "16px 16px 14px",
+                        padding: "10px 14px",
                         fontSize: "var(--text-body-sm)",
                         color: "var(--color-text-muted)",
                         fontWeight: 700,
@@ -6711,33 +6711,30 @@ function StudyContent() {
                   style={{
                     background: "color-mix(in srgb, rgba(78, 205, 196, 0.12) 72%, white)",
                     borderRadius: 26,
-                    padding: "18px 18px 16px",
+                    padding: "14px 16px",
                     display: "grid",
-                    gap: 12,
+                    gap: 8,
                     boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
                   }}
                 >
-                  <div style={sectionKickerStyle}>Esta semana</div>
-                  <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                    <div style={sectionKickerStyle}>Esta semana</div>
                     <div style={{ fontSize: 28, lineHeight: 1, fontWeight: 800, color: "var(--color-text)" }}>
                       {weeklyActiveDays.size}
                     </div>
-                    <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                      / 7
-                    </div>
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 6 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 4 }}>
                     {weeklyProgressDays.map((day) => (
-                      <div key={day.key} style={{ display: "grid", gap: 6, justifyItems: "center" }}>
+                      <div key={day.key} style={{ display: "grid", gap: 4, justifyItems: "center" }}>
                         <div
                           style={{
                             width: "100%",
-                            minHeight: 18,
+                            minHeight: 12,
                             borderRadius: 999,
                             background: day.active ? "var(--color-accent)" : "rgba(26, 26, 46, 0.08)",
                           }}
                         />
-                        <div style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 700 }}>
+                        <div style={{ fontSize: 10, color: "var(--color-text-muted)", fontWeight: 700 }}>
                           {day.label}
                         </div>
                       </div>
@@ -6746,19 +6743,19 @@ function StudyContent() {
                 </div>
               </div>
 
-              <div
-                style={{
-                  background: "color-mix(in srgb, rgba(244, 162, 97, 0.11) 68%, white)",
-                  borderRadius: 26,
-                  padding: "16px 18px",
-                  display: "grid",
-                  gap: 10,
-                  boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
-                }}
-              >
-                <div style={sectionKickerStyle}>Recent activity</div>
-                {recentStudyActivity.length > 0 ? (
-                  <div style={{ display: "grid", gap: 8 }}>
+              {recentStudyActivity.length > 0 && (
+                <div
+                  style={{
+                    background: "color-mix(in srgb, rgba(244, 162, 97, 0.11) 68%, white)",
+                    borderRadius: 26,
+                    padding: "12px 16px",
+                    display: "grid",
+                    gap: 8,
+                    boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
+                  }}
+                >
+                  <div style={sectionKickerStyle}>Recent activity</div>
+                  <div style={{ display: "grid", gap: 6 }}>
                     {recentStudyActivity.map((entry) => (
                       <Link
                         key={entry.id}
@@ -6768,11 +6765,11 @@ function StudyContent() {
                           color: "var(--color-text)",
                           display: "grid",
                           gridTemplateColumns: "minmax(0, 1fr) auto",
-                          gap: 10,
+                          gap: 8,
                           alignItems: "center",
-                          borderRadius: 18,
+                          borderRadius: 16,
                           background: "rgba(255,255,255,0.72)",
-                          padding: "12px 14px",
+                          padding: "10px 12px",
                         }}
                       >
                         <div style={{ minWidth: 0 }}>
@@ -6791,18 +6788,14 @@ function StudyContent() {
                       </Link>
                     ))}
                   </div>
-                ) : (
-                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                    Sin actividad
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             <div
               style={{
                 display: "grid",
-                gap: "var(--space-3)",
+                gap: "var(--space-2)",
                 gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
                 alignItems: "stretch",
               }}
@@ -6826,9 +6819,9 @@ function StudyContent() {
                     : tool.key === "sprint"
                       ? "var(--color-accent-soft)"
                       : "rgba(244, 162, 97, 0.16)";
-                const cardPadding = isWide ? "20px 18px 18px" : "18px 16px 16px";
+                const cardPadding = isWide ? "16px 16px 14px" : "14px 14px 13px";
                 const cardRadius = isWide ? 30 : 26;
-                const cardMinHeight = isWide ? 132 : 148;
+                const cardMinHeight = isWide ? 108 : 120;
                 return (
                   <Link
                     key={tool.key}
@@ -6837,7 +6830,7 @@ function StudyContent() {
                       textDecoration: "none",
                       color: "var(--color-text)",
                       display: "grid",
-                      gap: "var(--space-3)",
+                      gap: "var(--space-2)",
                       alignContent: "space-between",
                       minHeight: cardMinHeight,
                       padding: cardPadding,
@@ -6847,10 +6840,10 @@ function StudyContent() {
                       gridColumn: isWide ? "1 / -1" : "auto",
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-3)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-2)" }}>
                     <span
                       style={{
-                        fontSize: isWide ? "clamp(28px, 6.8vw, 40px)" : "clamp(23px, 4.8vw, 30px)",
+                        fontSize: isWide ? "clamp(26px, 6.2vw, 36px)" : "clamp(21px, 4.6vw, 28px)",
                         lineHeight: 1,
                         letterSpacing: isWide ? "-.04em" : "-.03em",
                         fontWeight: isWide ? 800 : 700,
@@ -6864,15 +6857,15 @@ function StudyContent() {
                       <span
                         style={{
                           flexShrink: 0,
-                          width: isWide ? 38 : 34,
-                          height: isWide ? 38 : 34,
+                          width: isWide ? 34 : 30,
+                          height: isWide ? 34 : 30,
                           borderRadius: 999,
                           display: "inline-flex",
                           alignItems: "center",
                           justifyContent: "center",
                           background: arrowBackground,
                           color: tool.key === "kana" || tool.key === "exam" ? "var(--color-accent-strong)" : "var(--color-primary)",
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: 800,
                           marginTop: 2,
                         }}
@@ -6888,7 +6881,7 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "kana" && (
-          <section style={sectionStyle}>
+          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Kana Sprint</h2>
               <div style={pillGroupStyle}>
@@ -7004,7 +6997,7 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "sprint" && (
-          <section style={sectionStyle}>
+          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Vocab + Kanji Sprint</h2>
               <div style={{ ...pillGroupStyle, gap: 4 }}>
@@ -7113,7 +7106,7 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "flashcards" && (
-          <section style={sectionStyle}>
+          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop }}>
             {(flashLessonFolder !== null || Boolean(activeFlashSet?.isCustom)) && (
               <div style={{ marginBottom: 10 }}>
                 <button
@@ -7346,7 +7339,7 @@ function StudyContent() {
                         padding: "max(12px,env(safe-area-inset-top)) 12px 12px",
                         overflowY: "auto",
                       }
-                    : { marginTop: 10, display: "grid", gap: 12 }
+                    : { marginTop: 10, display: "grid", gap: 12, scrollMarginTop: sectionScrollMarginTop }
                 }
               >
                 <div
@@ -7555,7 +7548,7 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "exam" && (
-          <section style={sectionStyle}>
+          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Repaso mixto</h2>
               <div style={{ display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
@@ -7587,7 +7580,7 @@ function StudyContent() {
             </p>
 
             {examQuestions.length === 0 && (
-              <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14 }}>
+              <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14, scrollMarginTop: sectionScrollMarginTop }}>
                 <div style={sectionKickerStyle}>Configuración</div>
                 <div style={{ marginTop: 6, fontSize: "var(--text-h2)", fontWeight: 800 }}>Examen L{examLesson}</div>
                 <p style={{ marginTop: 8, color: "var(--color-text-muted)", fontSize: "var(--text-body-sm)", lineHeight: 1.5 }}>
@@ -7604,7 +7597,7 @@ function StudyContent() {
             )}
 
             {examCurrentQ && !examFinished && (
-              <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14 }}>
+              <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14, scrollMarginTop: sectionScrollMarginTop }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                   <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>Pregunta {examIndex + 1} / {examQuestions.length}</div>
                   <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>Lección {examLesson} · {formatExamCategoryLabel(examCurrentQ.category)}</div>
@@ -7734,7 +7727,7 @@ function StudyContent() {
             )}
 
             {examFinished && (
-              <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14 }}>
+              <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14, scrollMarginTop: sectionScrollMarginTop }}>
                 <div style={sectionKickerStyle}>Resultado final</div>
                 <div style={{ marginTop: 6, fontSize: 30, fontWeight: 800 }}>{examScore} / {examQuestions.length}</div>
                 <div style={{ marginTop: 6, color: "var(--color-text-muted)" }}>

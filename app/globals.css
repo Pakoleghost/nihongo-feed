@@ -47,6 +47,7 @@
   --shadow-raised: 0 16px 32px rgba(26, 26, 46, 0.08);
   --container-max: 760px;
   --page-padding: 16px;
+  --app-sticky-offset: 104px;
 
   /* legacy aliases kept for old pages */
   --bg: var(--color-bg);
@@ -61,6 +62,10 @@
 * { box-sizing: border-box; }
 
 html, body { height: 100%; }
+
+html {
+  scroll-padding-top: var(--app-sticky-offset);
+}
 
 body{
   margin: 0;
@@ -215,6 +220,9 @@ a:focus-visible {
 
 .appTopNav.studyTone {
   padding-top: 6px;
+  padding-bottom: 2px;
+  background: color-mix(in srgb, var(--color-bg) 94%, white);
+  backdrop-filter: blur(12px);
 }
 
 .appTopNavInner {
@@ -237,9 +245,9 @@ a:focus-visible {
 .appTopNavBar.studyTone {
   min-height: 48px;
   padding: 4px 2px;
-  background: transparent;
-  border: 0;
-  backdrop-filter: none;
+  background: color-mix(in srgb, var(--color-bg) 90%, white);
+  border: 1px solid color-mix(in srgb, var(--color-border) 82%, white);
+  backdrop-filter: blur(10px);
 }
 
 .appNavBrand {
