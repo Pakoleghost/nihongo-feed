@@ -246,6 +246,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
 
   const sessionFinished = Boolean(session) && sessionIndex >= (session?.questions.length || 0);
   const currentQuestion = session?.questions[sessionIndex] || null;
+  const sessionQuestionCount = session?.questions.length || 0;
   const progressPercent = session?.questions.length ? Math.round((Math.min(sessionIndex + 1, session.questions.length) / session.questions.length) * 100) : 0;
 
   useEffect(() => {
@@ -873,7 +874,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                           </div>
                           {answerFeedback.status === "wrong" ? (
                             <button type="button" onClick={moveToNext} className="ds-btn">
-                              {sessionIndex >= session.questions.length - 1 ? "Ver resumen" : "Siguiente"}
+                              {sessionIndex >= sessionQuestionCount - 1 ? "Ver resumen" : "Siguiente"}
                             </button>
                           ) : null}
                         </div>
@@ -943,7 +944,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                         </button>
                         {romajiFeedback && (
                           <button type="button" onClick={moveToNext} className="ds-btn-secondary">
-                            {sessionIndex >= session.questions.length - 1 ? "Ver resumen" : "Siguiente"}
+                            {sessionIndex >= sessionQuestionCount - 1 ? "Ver resumen" : "Siguiente"}
                           </button>
                         )}
                       </div>
@@ -980,7 +981,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                       />
                       {answerFeedback && answerFeedback.status === "wrong" ? (
                         <button type="button" onClick={moveToNext} className="ds-btn">
-                          {sessionIndex >= session.questions.length - 1 ? "Ver resumen" : "Siguiente"}
+                          {sessionIndex >= sessionQuestionCount - 1 ? "Ver resumen" : "Siguiente"}
                         </button>
                       ) : null}
                     </div>
