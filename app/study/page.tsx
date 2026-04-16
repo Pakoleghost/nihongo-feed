@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import AppTopNav from "@/components/AppTopNav";
+import AprenderKanaModule from "@/components/study/AprenderKanaModule";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 
@@ -182,7 +183,7 @@ const FLASHCARD_ROUTE_GROUPS = [
   { id: "route-bridge", title: "Consolidación", subtitle: "Lecciones altas para repasar antes de examen.", lessons: [9, 10, 11, 12], accent: "#E63946", surface: "rgba(230, 57, 70, 0.08)" },
 ] as const;
 
-type StudyView = "kana" | "flashcards" | "quiz" | "sprint" | "exam";
+type StudyView = "learnkana" | "kana" | "flashcards" | "quiz" | "sprint" | "exam";
 const EXAM_PASSING_PERCENT = 70;
 const EXAM_QUESTION_COUNT = 20;
 
@@ -217,7 +218,7 @@ type FlashLearnQuestion = {
   options: string[];
 };
 
-type StudyActivityTool = "kana" | "sprint" | "flashcards" | "exam";
+type StudyActivityTool = "learnkana" | "kana" | "sprint" | "flashcards" | "exam";
 
 type StudyActivityEntry = {
   id: string;
@@ -4996,7 +4997,8 @@ function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, n
 
 function resolveStudyView(searchParams: Pick<URLSearchParams, "get">): StudyView | null {
   const view = searchParams.get("view");
-  if (view === "kana" || view === "flashcards" || view === "sprint" || view === "exam") return view;
+  if (view === "learnkana" || view === "kana" || view === "flashcards" || view === "sprint" || view === "exam") return view;
+  if (searchParams.get("learnkana") === "1") return "learnkana";
   if (searchParams.get("kana") === "1") return "kana";
   if (searchParams.get("flashcards") === "1") return "flashcards";
   if (searchParams.get("sprint") === "1") return "sprint";
@@ -5031,6 +5033,7 @@ function getStudyActivityStorageKey(userKey: string) {
 }
 
 function getStudyActivityLabel(tool: StudyActivityTool) {
+  if (tool === "learnkana") return "Aprender Kana";
   if (tool === "kana") return "Kana Sprint";
   if (tool === "sprint") return "Vocab + Kanji Sprint";
   if (tool === "flashcards") return "Flashcards";
@@ -6120,7 +6123,9 @@ function StudyContent() {
   ).map(([, value]) => value);
 
   const pageTitle = selectedView
-    ? selectedView === "kana"
+    ? selectedView === "learnkana"
+      ? "Aprender Kana"
+      : selectedView === "kana"
       ? "Kana Sprint"
       : selectedView === "sprint"
         ? "Vocab + Kanji Sprint"
@@ -6557,8 +6562,9 @@ function StudyContent() {
   );
 
   const toolCards = [
+    { key: "learnkana", href: "/study?view=learnkana", title: "Aprender Kana", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
     { key: "kana", href: "/study?view=kana", title: "Kana Sprint", accent: "var(--color-accent)", surface: "var(--color-accent-soft)" },
-    { key: "sprint", href: "/study?view=sprint", title: "Vocab Sprint", accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
+    { key: "sprint", href: "/study?view=sprint", title: "Vocab + Kanji Sprint", accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
     { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", accent: "#F4A261", surface: "rgba(244, 162, 97, 0.12)" },
     { key: "exam", href: "/study?view=exam", title: "Repaso mixto", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
   ];
@@ -6801,10 +6807,12 @@ function StudyContent() {
               }}
             >
               {toolCards.map((tool) => {
-                const isWide = tool.key === "kana" || tool.key === "sprint";
+                const isWide = tool.key === "learnkana" || tool.key === "sprint";
                 const isSoftAccent = tool.key === "flashcards";
                 const cardBackground =
-                  tool.key === "kana"
+                  tool.key === "learnkana"
+                    ? "color-mix(in srgb, var(--color-highlight-soft) 44%, white)"
+                    : tool.key === "kana"
                     ? "color-mix(in srgb, var(--color-surface) 76%, white)"
                     : tool.key === "sprint"
                       ? "color-mix(in srgb, var(--color-accent-soft) 58%, white)"
@@ -6814,7 +6822,7 @@ function StudyContent() {
                           ? "color-mix(in srgb, rgba(244, 162, 97, 0.12) 70%, white)"
                           : "color-mix(in srgb, var(--color-surface-muted) 72%, white)";
                 const arrowBackground =
-                  tool.key === "exam" || tool.key === "kana"
+                  tool.key === "learnkana" || tool.key === "exam" || tool.key === "kana"
                     ? "var(--color-highlight-soft)"
                     : tool.key === "sprint"
                       ? "var(--color-accent-soft)"
@@ -6864,7 +6872,7 @@ function StudyContent() {
                           alignItems: "center",
                           justifyContent: "center",
                           background: arrowBackground,
-                          color: tool.key === "kana" || tool.key === "exam" ? "var(--color-accent-strong)" : "var(--color-primary)",
+                          color: tool.key === "learnkana" || tool.key === "kana" || tool.key === "exam" ? "var(--color-accent-strong)" : "var(--color-primary)",
                           fontSize: 14,
                           fontWeight: 800,
                           marginTop: 2,
@@ -6877,6 +6885,12 @@ function StudyContent() {
                 );
               })}
             </div>
+          </section>
+        )}
+
+        {!showHub && activeTab === "learnkana" && (
+          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop }}>
+            <AprenderKanaModule userKey={userKey} onRecordActivity={(detail) => recordStudyActivity("learnkana", detail)} />
           </section>
         )}
 
