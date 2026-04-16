@@ -245,8 +245,6 @@ type StudyActivityEntry = {
   occurredAt: string;
 };
 
-type FlashDeckBuilderKind = "vocab" | "kanji" | "hiragana" | "katakana";
-
 const EXAM_CATEGORY_LABELS: Record<QuizCategory, string> = {
   kana: "Kana",
   vocab: "Vocabulario",
@@ -256,13 +254,6 @@ const EXAM_CATEGORY_LABELS: Record<QuizCategory, string> = {
   grammar: "Gramática",
   reading: "Lectura",
 };
-
-const FLASH_DECK_KIND_OPTIONS: Array<{ key: FlashDeckBuilderKind; label: string }> = [
-  { key: "vocab", label: "Vocabulario" },
-  { key: "kanji", label: "Kanji" },
-  { key: "hiragana", label: "Hiragana" },
-  { key: "katakana", label: "Katakana" },
-];
 
 const KANJI_FROM_URL: Record<number, Array<{ kanji: string; hira: string }>> = {
   3: [
@@ -5352,7 +5343,7 @@ function StudyContent() {
   const [flashDeckBuilderOpen, setFlashDeckBuilderOpen] = useState(false);
   const [flashDeckEditingId, setFlashDeckEditingId] = useState<string | null>(null);
   const [flashDeckName, setFlashDeckName] = useState("");
-  const [flashDeckBuilderKinds, setFlashDeckBuilderKinds] = useState<FlashDeckBuilderKind[]>([]);
+  const [flashDeckBuilderSetIds, setFlashDeckBuilderSetIds] = useState<string[]>([]);
 
   const [quizMode, setQuizMode] = useState<QuizMode>("particles");
   const [quizCount, setQuizCount] = useState<QuizCount>(10);
@@ -5956,32 +5947,35 @@ function StudyContent() {
   const flashDeckBuilderPreviewItems = useMemo(
     () =>
       dedupeFlashItems(
-        FLASHCARD_SETS
-          .filter((set) => {
-            const normalizedTitle = set.title.toLowerCase();
-            return flashDeckBuilderKinds.some((kind) => {
-              if (kind === "vocab") return normalizedTitle === "vocabulario";
-              if (kind === "kanji") return normalizedTitle === "kanji";
-              if (kind === "hiragana") return normalizedTitle === "hiragana";
-              return normalizedTitle === "katakana";
-            });
-          })
-          .flatMap((set) => set.items),
+        FLASHCARD_SETS.filter((set) => flashDeckBuilderSetIds.includes(set.id)).flatMap((set) => set.items),
       ),
-    [flashDeckBuilderKinds],
+    [flashDeckBuilderSetIds],
   );
-  const flashDeckBuilderSelectedSetIds = useMemo(
+  const flashDeckBuilderSelectedSetIds = flashDeckBuilderSetIds;
+  const flashDeckBuilderVocabOptions = useMemo(
     () =>
-      FLASHCARD_SETS.filter((set) => {
-        const normalizedTitle = set.title.toLowerCase();
-        return flashDeckBuilderKinds.some((kind) => {
-          if (kind === "vocab") return normalizedTitle === "vocabulario";
-          if (kind === "kanji") return normalizedTitle === "kanji";
-          if (kind === "hiragana") return normalizedTitle === "hiragana";
-          return normalizedTitle === "katakana";
-        });
-      }).map((set) => set.id),
-    [flashDeckBuilderKinds],
+      flashLessons
+        .map((lesson) => FLASHCARD_SETS.find((set) => set.id === `l${lesson}-vocab`))
+        .filter((set): set is FlashcardSet => Boolean(set))
+        .map((set) => ({
+          key: set.id,
+          label: `L${set.lesson}`,
+          tone: "color-mix(in srgb, rgba(244, 162, 97, 0.18) 76%, white)",
+        })),
+    [flashLessons],
+  );
+  const flashDeckBuilderKanjiOptions = useMemo(
+    () =>
+      flashLessons
+        .filter((lesson) => lesson >= 3)
+        .map((lesson) => FLASHCARD_SETS.find((set) => set.id === `l${lesson}-kanji`))
+        .filter((set): set is FlashcardSet => Boolean(set))
+        .map((set) => ({
+          key: set.id,
+          label: `L${set.lesson}`,
+          tone: "var(--color-highlight-soft)",
+        })),
+    [flashLessons],
   );
   const officialFlashLessons = useMemo(
     () =>
@@ -6020,34 +6014,21 @@ function StudyContent() {
     setFlashDeckBuilderOpen(true);
     setFlashDeckEditingId(deck?.id || null);
     setFlashDeckName(deck?.name || "");
-    setFlashDeckBuilderKinds(
-      FLASH_DECK_KIND_OPTIONS
-        .filter((option) =>
-          (deck?.setIds || []).some((setId) => {
-            const set = FLASHCARD_SETS.find((entry) => entry.id === setId);
-            const normalizedTitle = set?.title.toLowerCase() || "";
-            if (option.key === "vocab") return normalizedTitle === "vocabulario";
-            if (option.key === "kanji") return normalizedTitle === "kanji";
-            if (option.key === "hiragana") return normalizedTitle === "hiragana";
-            return normalizedTitle === "katakana";
-          }),
-        )
-        .map((option) => option.key),
-    );
+    setFlashDeckBuilderSetIds(deck?.setIds || []);
   };
 
   const closeCustomFlashDeckBuilder = () => {
     setFlashDeckBuilderOpen(false);
     setFlashDeckEditingId(null);
     setFlashDeckName("");
-    setFlashDeckBuilderKinds([]);
+    setFlashDeckBuilderSetIds([]);
   };
 
-  const toggleCustomFlashSetSelection = (kind: FlashDeckBuilderKind) => {
-    setFlashDeckBuilderKinds((prev) => (
-      prev.includes(kind)
-        ? prev.filter((id) => id !== kind)
-        : [...prev, kind]
+  const toggleCustomFlashSetSelection = (setId: string) => {
+    setFlashDeckBuilderSetIds((prev) => (
+      prev.includes(setId)
+        ? prev.filter((id) => id !== setId)
+        : [...prev, setId]
     ));
   };
 
@@ -8167,25 +8148,56 @@ function StudyContent() {
                 style={{ border: "1px solid rgba(17,17,20,.12)", borderRadius: 16, background: "#fff", padding: "12px 14px", fontSize: 16, fontWeight: 700, color: "#111114" }}
               />
 
-              <StudySelectorGroup
-                options={FLASH_DECK_KIND_OPTIONS}
-                values={flashDeckBuilderKinds}
-                multiple
-                onToggle={toggleCustomFlashSetSelection}
-                layout="grid"
-                compact
-                minItemWidth={128}
-              />
+              <div style={{ display: "grid", gap: 12 }}>
+                <div style={{ display: "grid", gap: 8 }}>
+                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 800 }}>
+                    Vocabulario
+                  </div>
+                  <StudySelectorGroup
+                    options={flashDeckBuilderVocabOptions}
+                    values={flashDeckBuilderSetIds.filter((setId) => setId.endsWith("-vocab"))}
+                    multiple
+                    onToggle={toggleCustomFlashSetSelection}
+                    layout="grid"
+                    compact
+                    minItemWidth={72}
+                  />
+                </div>
+
+                <div style={{ display: "grid", gap: 8 }}>
+                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 800 }}>
+                    Kanji
+                  </div>
+                  <StudySelectorGroup
+                    options={flashDeckBuilderKanjiOptions}
+                    values={flashDeckBuilderSetIds.filter((setId) => setId.endsWith("-kanji"))}
+                    multiple
+                    onToggle={toggleCustomFlashSetSelection}
+                    layout="grid"
+                    compact
+                    minItemWidth={72}
+                  />
+                </div>
+              </div>
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                  {flashDeckBuilderKinds.length} bloques · {flashDeckBuilderPreviewItems.length} tarjetas
+                  {flashDeckBuilderSetIds.length} bloques · {flashDeckBuilderPreviewItems.length} tarjetas
                 </div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <button type="button" onClick={closeCustomFlashDeckBuilder} style={secondaryButtonStyle}>
                     Cancelar
                   </button>
-                  <button type="button" onClick={saveCustomFlashDeck} style={primaryButtonStyle}>
+                  <button
+                    type="button"
+                    onClick={saveCustomFlashDeck}
+                    disabled={flashDeckName.trim().length === 0 || flashDeckBuilderSelectedSetIds.length === 0}
+                    style={{
+                      ...primaryButtonStyle,
+                      opacity: flashDeckName.trim().length === 0 || flashDeckBuilderSelectedSetIds.length === 0 ? 0.5 : 1,
+                      cursor: flashDeckName.trim().length === 0 || flashDeckBuilderSelectedSetIds.length === 0 ? "not-allowed" : "pointer",
+                    }}
+                  >
                     {flashDeckEditingId ? "Guardar" : "Crear"}
                   </button>
                 </div>
