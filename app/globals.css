@@ -47,7 +47,7 @@
   --shadow-raised: 0 16px 32px rgba(26, 26, 46, 0.08);
   --container-max: 760px;
   --page-padding: 16px;
-  --app-sticky-offset: 104px;
+  --app-sticky-offset: 76px;
 
   /* legacy aliases kept for old pages */
   --bg: var(--color-bg);
@@ -219,10 +219,9 @@ a:focus-visible {
 }
 
 .appTopNav.studyTone {
-  padding-top: 6px;
-  padding-bottom: 2px;
-  background: color-mix(in srgb, var(--color-bg) 94%, white);
-  backdrop-filter: blur(12px);
+  padding-top: 8px;
+  padding-bottom: 0;
+  background: color-mix(in srgb, var(--color-bg) 96%, white);
 }
 
 .appTopNavInner {
@@ -243,11 +242,12 @@ a:focus-visible {
 }
 
 .appTopNavBar.studyTone {
-  min-height: 48px;
-  padding: 4px 2px;
-  background: color-mix(in srgb, var(--color-bg) 90%, white);
-  border: 1px solid color-mix(in srgb, var(--color-border) 82%, white);
-  backdrop-filter: blur(10px);
+  min-height: 40px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .appNavBrand {
@@ -265,7 +265,7 @@ a:focus-visible {
 .appTopNav.studyTone .appNavBrand {
   font-family: var(--font-study), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
     "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
-  font-size: 0.98rem;
+  font-size: 0.94rem;
   letter-spacing: -0.03em;
 }
 
@@ -307,10 +307,28 @@ a:focus-visible {
 .appTopNav.studyTone .appMenuButton {
   font-family: var(--font-study), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
     "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
-  min-height: 32px;
-  padding: 0 10px;
-  font-size: 0.82rem;
+  min-height: 30px;
+  padding: 0 9px;
+  font-size: 0.8rem;
   font-weight: 700;
+  border: 0;
+}
+
+.appTopNav.studyTone .appNavLink:not(.active),
+.appTopNav.studyTone .appMenuButton:not(.active) {
+  color: color-mix(in srgb, var(--color-text) 76%, transparent);
+}
+
+.appTopNav.studyTone .appNavLink:hover,
+.appTopNav.studyTone .appMenuButton:hover {
+  background: rgba(26, 26, 46, 0.05);
+}
+
+.appTopNav.studyTone .appNavLink.active,
+.appTopNav.studyTone .appMenuButton.active {
+  background: rgba(230, 57, 70, 0.12);
+  border-color: transparent;
+  color: var(--color-accent-strong);
 }
 
 .appNavLink:hover,
@@ -361,8 +379,8 @@ a:focus-visible {
   }
 
   .appTopNavBar.studyTone {
-    min-height: 44px;
-    padding: 3px 0;
+    min-height: 38px;
+    padding: 0;
   }
 
   .appPrimaryNav {
@@ -378,6 +396,10 @@ a:focus-visible {
 
   .appNavBrand {
     font-size: 0.98rem;
+  }
+
+  .appTopNav.studyTone {
+    padding-top: 6px;
   }
 }
 
