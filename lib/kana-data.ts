@@ -19,6 +19,14 @@ export type KanaItem = {
   alternatives?: string[];
 };
 
+export type KanaTableCell = KanaItem | null;
+export type KanaTableSection = {
+  key: string;
+  label: string;
+  columns: number;
+  rows: KanaTableCell[][];
+};
+
 type KanaSeed = readonly [kana: string, romaji: string];
 
 const HIRAGANA_BASIC: KanaSeed[] = [
@@ -178,6 +186,17 @@ export function filterKanaItemsForPractice(setKey: KanaPracticeSetKey) {
   });
 }
 
+export function filterKanaItemsForSelection(
+  script: KanaScript,
+  set: "basic" | "dakuten" | "handakuten" | "yoon" | "mixed",
+) {
+  return KANA_ITEMS.filter((item) => {
+    if (item.script !== script) return false;
+    if (set === "mixed") return true;
+    return item.set === set;
+  });
+}
+
 export function getKanaSetLabel(item: KanaItem) {
   if (item.set === "basic") return item.script === "hiragana" ? "Hiragana" : "Katakana";
   if (item.set === "yoon") return "Combinación";
@@ -187,4 +206,103 @@ export function getKanaSetLabel(item: KanaItem) {
 export function getKanaPracticeDetail(setKey: KanaPracticeSetKey) {
   const option = KANA_PRACTICE_SET_OPTIONS.find((entry) => entry.key === setKey);
   return option?.label || "Kana";
+}
+
+const BASIC_ROW_TEMPLATES = [
+  ["a", "i", "u", "e", "o"],
+  ["ka", "ki", "ku", "ke", "ko"],
+  ["sa", "shi", "su", "se", "so"],
+  ["ta", "chi", "tsu", "te", "to"],
+  ["na", "ni", "nu", "ne", "no"],
+  ["ha", "hi", "fu", "he", "ho"],
+  ["ma", "mi", "mu", "me", "mo"],
+  ["ya", null, "yu", null, "yo"],
+  ["ra", "ri", "ru", "re", "ro"],
+  ["wa", null, null, null, "wo"],
+  [null, null, "n", null, null],
+] as const;
+
+const DAKUTEN_ROW_TEMPLATES = [
+  ["ga", "gi", "gu", "ge", "go"],
+  ["za", "ji", "zu", "ze", "zo"],
+  ["da", "ji", "zu", "de", "do"],
+  ["ba", "bi", "bu", "be", "bo"],
+] as const;
+
+const HANDAKUTEN_ROW_TEMPLATES = [
+  ["pa", "pi", "pu", "pe", "po"],
+] as const;
+
+const YOON_ROW_TEMPLATES = [
+  ["kya", "kyu", "kyo"],
+  ["sha", "shu", "sho"],
+  ["cha", "chu", "cho"],
+  ["nya", "nyu", "nyo"],
+  ["hya", "hyu", "hyo"],
+  ["mya", "myu", "myo"],
+  ["rya", "ryu", "ryo"],
+  ["gya", "gyu", "gyo"],
+  ["ja", "ju", "jo"],
+  ["bya", "byu", "byo"],
+  ["pya", "pyu", "pyo"],
+] as const;
+
+function buildKanaLookup(script: KanaScript) {
+  return KANA_ITEMS.filter((item) => item.script === script).reduce<Record<string, KanaItem>>((map, item) => {
+    map[`${item.set}:${item.romaji}`] = item;
+    return map;
+  }, {});
+}
+
+function resolveTemplateRows(
+  script: KanaScript,
+  set: KanaSet,
+  templates: ReadonlyArray<ReadonlyArray<string | null>>,
+) {
+  const lookup = buildKanaLookup(script);
+  return templates.map((row) =>
+    row.map((romaji) => (romaji ? lookup[`${set}:${romaji}`] || null : null)),
+  );
+}
+
+export function getKanaTableSections(script: KanaScript, filter: KanaTableFilter): KanaTableSection[] {
+  const sections: KanaTableSection[] = [];
+
+  if (filter === "basic" || filter === "mixed") {
+    sections.push({
+      key: "basic",
+      label: "Basic",
+      columns: 5,
+      rows: resolveTemplateRows(script, "basic", BASIC_ROW_TEMPLATES),
+    });
+  }
+
+  if (filter === "dakuten" || filter === "mixed") {
+    sections.push({
+      key: "dakuten",
+      label: "Dakuten",
+      columns: 5,
+      rows: resolveTemplateRows(script, "dakuten", DAKUTEN_ROW_TEMPLATES),
+    });
+  }
+
+  if (filter === "handakuten" || filter === "mixed") {
+    sections.push({
+      key: "handakuten",
+      label: "Handakuten",
+      columns: 5,
+      rows: resolveTemplateRows(script, "handakuten", HANDAKUTEN_ROW_TEMPLATES),
+    });
+  }
+
+  if (filter === "yoon" || filter === "mixed") {
+    sections.push({
+      key: "yoon",
+      label: "Yōon",
+      columns: 3,
+      rows: resolveTemplateRows(script, "yoon", YOON_ROW_TEMPLATES),
+    });
+  }
+
+  return sections;
 }

@@ -6576,20 +6576,41 @@ function StudyContent() {
         href={tool.href}
         style={{
           textDecoration: "none",
-          minHeight: 40,
-          padding: "0 14px",
-          borderRadius: "var(--radius-pill)",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: selected ? tool.surface : "var(--color-surface)",
-          border: selected ? `1px solid ${tool.accent}` : "1px solid var(--color-border)",
-          color: selected ? "var(--color-text)" : "var(--color-text)",
-          fontSize: "var(--text-body-sm)",
-          fontWeight: 800,
+          minWidth: 118,
+          maxWidth: 160,
+          minHeight: 72,
+          padding: "12px 14px",
+          borderRadius: 22,
+          display: "grid",
+          alignContent: "space-between",
+          gap: 8,
+          background: selected ? tool.surface : "color-mix(in srgb, var(--color-surface) 82%, white)",
+          border: selected ? "1px solid transparent" : "1px solid var(--color-border)",
+          color: "var(--color-text)",
+          boxShadow: selected ? "0 0 0 1px color-mix(in srgb, var(--color-bg) 70%, transparent)" : "none",
+          scrollSnapAlign: "start",
+          flex: "0 0 auto",
         }}
       >
-        {tool.title}
+        <div
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: 999,
+            background: selected ? tool.accent : "color-mix(in srgb, var(--color-border) 80%, white)",
+          }}
+        />
+        <div
+          style={{
+            fontSize: "var(--text-body-sm)",
+            fontWeight: 800,
+            lineHeight: 1.1,
+            letterSpacing: "-0.02em",
+            textWrap: "balance",
+          }}
+        >
+          {tool.title}
+        </div>
       </Link>
     );
   };
@@ -6621,8 +6642,27 @@ function StudyContent() {
         )}
 
         {!showHub && (
-          <section style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap", scrollMarginTop: sectionScrollMarginTop }}>
+          <section
+            style={{
+              display: "grid",
+              gap: 10,
+              scrollMarginTop: sectionScrollMarginTop,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                gap: 10,
+                overflowX: "auto",
+                paddingBottom: 2,
+                scrollSnapType: "x proximity",
+                WebkitOverflowScrolling: "touch",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
             {toolCards.map(renderToolPill)}
+            </div>
           </section>
         )}
 

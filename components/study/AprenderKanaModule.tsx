@@ -6,19 +6,14 @@ import KanaHandwritingPad, { type KanaHandwritingRating } from "@/components/stu
 import {
   KANA_ITEMS,
   KANA_PRACTICE_MODE_OPTIONS,
-  KANA_PRACTICE_SET_OPTIONS,
   KANA_QUESTION_COUNT_OPTIONS,
-  KANA_TABLE_FILTERS,
-  filterKanaItemsForPractice,
-  filterKanaItemsForTable,
-  getKanaPracticeDetail,
+  getKanaTableSections,
+  filterKanaItemsForSelection,
   getKanaSetLabel,
   type KanaItem,
   type KanaPracticeMode,
-  type KanaPracticeSetKey,
   type KanaQuestionCount,
   type KanaScript,
-  type KanaTableFilter,
 } from "@/lib/kana-data";
 import {
   applyKanaRating,
@@ -48,7 +43,7 @@ type KanaSessionResult = {
 };
 
 type KanaSession = {
-  setKey: KanaPracticeSetKey;
+  setKey: string;
   mode: KanaPracticeMode;
   count: KanaQuestionCount;
   questions: KanaSessionQuestion[];
@@ -115,21 +110,28 @@ function buildMultipleChoiceQuestions(items: KanaItem[], fallbackPool: KanaItem[
   });
 }
 
-function buildSession(setKey: KanaPracticeSetKey, mode: KanaPracticeMode, count: KanaQuestionCount, progress: KanaProgressMap) {
-  const baseItems = filterKanaItemsForPractice(setKey);
+function buildSession(
+  script: KanaScript,
+  set: "basic" | "dakuten" | "handakuten" | "yoon" | "mixed",
+  mode: KanaPracticeMode,
+  count: KanaQuestionCount,
+  progress: KanaProgressMap,
+) {
+  const baseItems = filterKanaItemsForSelection(script, set);
   const items = buildKanaSessionItems(baseItems, progress, count);
   const questions =
     mode === "multiple_choice"
       ? buildMultipleChoiceQuestions(items, baseItems)
       : items.map((item) => ({ item }));
-  return { setKey, mode, count, questions };
+  return { setKey: `${script}:${set}`, mode, count, questions };
 }
 
 export default function AprenderKanaModule({ userKey, onRecordActivity }: AprenderKanaModuleProps) {
   const [screen, setScreen] = useState<"home" | "table" | "setup">("home");
   const [tableScript, setTableScript] = useState<KanaScript>("hiragana");
-  const [tableFilter, setTableFilter] = useState<KanaTableFilter>("basic");
-  const [practiceSetKey, setPracticeSetKey] = useState<KanaPracticeSetKey>("hiragana_basic");
+  const [tableFilter, setTableFilter] = useState<"basic" | "dakuten" | "handakuten" | "yoon" | "mixed">("basic");
+  const [practiceScript, setPracticeScript] = useState<"hiragana" | "katakana">("hiragana");
+  const [practiceSet, setPracticeSet] = useState<"basic" | "dakuten" | "handakuten" | "yoon" | "mixed">("basic");
   const [practiceMode, setPracticeMode] = useState<KanaPracticeMode>("multiple_choice");
   const [questionCount, setQuestionCount] = useState<KanaQuestionCount>(20);
   const [progress, setProgress] = useState<KanaProgressMap>({});
@@ -174,8 +176,12 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
   }, [session?.mode, sessionFinished, sessionIndex]);
 
   const allKanaSummary = useMemo(() => getKanaProgressSummary(KANA_ITEMS, progress), [progress]);
-  const tableItems = useMemo(() => filterKanaItemsForTable(tableScript, tableFilter), [tableFilter, tableScript]);
+  const tableSections = useMemo(() => getKanaTableSections(tableScript, tableFilter), [tableFilter, tableScript]);
   const currentQuestion = session?.questions[sessionIndex] || null;
+  const practicePool = useMemo(
+    () => filterKanaItemsForSelection(practiceScript, practiceSet),
+    [practiceScript, practiceSet],
+  );
 
   const subtlePillStyle: CSSProperties = {
     borderRadius: 999,
@@ -186,6 +192,61 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
     fontSize: "var(--text-body-sm)",
     fontWeight: 700,
   };
+
+  const selectorSectionStyle: CSSProperties = {
+    display: "grid",
+    gap: "var(--space-2)",
+    padding: "14px 14px 12px",
+    borderRadius: 24,
+    background: "color-mix(in srgb, var(--color-surface) 84%, white)",
+    border: "1px solid var(--color-border)",
+  };
+
+  const selectorGridStyle: CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(112px, 1fr))",
+    gap: 8,
+  };
+
+  const renderSelectorGroup = <T extends string>(
+    label: string,
+    options: Array<{ key: T; label: string; tone?: string }>,
+    selected: T,
+    onSelect: (value: T) => void,
+  ) => (
+    <div style={selectorSectionStyle}>
+      <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
+        {label}
+      </div>
+      <div style={selectorGridStyle}>
+        {options.map((option) => {
+          const active = option.key === selected;
+          return (
+            <button
+              key={option.key}
+              type="button"
+              onClick={() => onSelect(option.key)}
+              style={{
+                minHeight: 56,
+                borderRadius: 18,
+                border: active ? "1px solid transparent" : "1px solid var(--color-border)",
+                background: active
+                  ? option.tone || "color-mix(in srgb, var(--color-highlight-soft) 72%, white)"
+                  : "color-mix(in srgb, var(--color-surface) 76%, white)",
+                color: active ? "var(--color-text)" : "var(--color-text-muted)",
+                fontSize: "var(--text-body-sm)",
+                fontWeight: 800,
+                padding: "10px 12px",
+                textAlign: "left",
+              }}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 
   const recordResult = (item: KanaItem, rating: KanaRating, extra?: { recognitionScore?: number }) => {
     setProgress((previous) => applyKanaRating(previous, item, rating));
@@ -202,11 +263,11 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
     setSessionIndex((value) => value + 1);
   };
 
-  const finishOrAdvance = () => {
-    if (!session) return;
-    if (sessionIndex >= session.questions.length - 1) return;
-    moveToNext();
-  };
+  useEffect(() => {
+    setMultipleChoiceAnswer(null);
+    setRomajiValue("");
+    setRomajiFeedback(null);
+  }, [sessionIndex, session?.mode, currentQuestion?.item.id]);
 
   const closeSession = () => {
     setSheetVisible(false);
@@ -223,15 +284,15 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
   const startSession = (overrideItems?: KanaItem[]) => {
     const nextSession = overrideItems
       ? {
-          setKey: practiceSetKey,
+          setKey: `${practiceScript}:${practiceSet}`,
           mode: practiceMode,
           count: overrideItems.length as KanaQuestionCount,
           questions:
             practiceMode === "multiple_choice"
-              ? buildMultipleChoiceQuestions(overrideItems, filterKanaItemsForPractice(practiceSetKey))
+              ? buildMultipleChoiceQuestions(overrideItems, practicePool)
               : overrideItems.map((item) => ({ item })),
         }
-      : buildSession(practiceSetKey, practiceMode, questionCount, progress);
+      : buildSession(practiceScript, practiceSet, practiceMode, questionCount, progress);
 
     setSession(nextSession);
     setSessionIndex(0);
@@ -239,7 +300,19 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
     setMultipleChoiceAnswer(null);
     setRomajiValue("");
     setRomajiFeedback(null);
-    onRecordActivity?.(getKanaPracticeDetail(practiceSetKey));
+    onRecordActivity?.(
+      `${practiceScript === "hiragana" ? "Hiragana" : "Katakana"} · ${
+        practiceSet === "basic"
+          ? "Basic"
+          : practiceSet === "dakuten"
+            ? "Dakuten"
+            : practiceSet === "handakuten"
+              ? "Handakuten"
+              : practiceSet === "yoon"
+                ? "Yōon"
+                : "Mixed"
+      }`,
+    );
   };
 
   const hardestSessionKana = useMemo(() => {
@@ -349,11 +422,17 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
           </div>
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {KANA_TABLE_FILTERS.map((filter) => (
+            {[
+              { key: "basic", label: "Basic" },
+              { key: "dakuten", label: "Dakuten" },
+              { key: "handakuten", label: "Handakuten" },
+              { key: "yoon", label: "Yōon" },
+              { key: "mixed", label: "Mixed" },
+            ].map((filter) => (
               <button
                 key={filter.key}
                 type="button"
-                onClick={() => setTableFilter(filter.key)}
+                onClick={() => setTableFilter(filter.key as typeof tableFilter)}
                 className={tableFilter === filter.key ? "ds-btn" : "ds-btn-secondary"}
               >
                 {filter.label}
@@ -361,28 +440,41 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
             ))}
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(84px, 1fr))",
-              gap: 10,
-            }}
-          >
-            {tableItems.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  borderRadius: 20,
-                  border: "1px solid var(--color-border)",
-                  background: "color-mix(in srgb, var(--color-surface) 84%, white)",
-                  padding: "14px 10px 12px",
-                  display: "grid",
-                  gap: 4,
-                  justifyItems: "center",
-                }}
-              >
-                <div style={{ fontSize: 32, lineHeight: 1, fontWeight: 800, color: "var(--color-text)" }}>{item.kana}</div>
-                <div style={{ fontSize: 13, color: "var(--color-text-muted)", fontWeight: 700 }}>{item.romaji}</div>
+          <div style={{ display: "grid", gap: "var(--space-3)" }}>
+            {tableSections.map((section) => (
+              <div key={section.key} style={{ display: "grid", gap: 10 }}>
+                {tableFilter === "mixed" && (
+                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
+                    {section.label}
+                  </div>
+                )}
+                <div style={{ display: "grid", gap: 8 }}>
+                  {section.rows.map((row, rowIndex) => (
+                    <div key={`${section.key}-${rowIndex}`} style={{ display: "grid", gridTemplateColumns: `repeat(${section.columns}, minmax(0, 1fr))`, gap: 8 }}>
+                      {row.map((item, cellIndex) =>
+                        item ? (
+                          <div
+                            key={item.id}
+                            style={{
+                              borderRadius: 18,
+                              background: "color-mix(in srgb, var(--color-surface) 84%, white)",
+                              padding: "12px 6px 10px",
+                              display: "grid",
+                              gap: 4,
+                              justifyItems: "center",
+                              minHeight: 74,
+                            }}
+                          >
+                            <div style={{ fontSize: section.columns === 5 ? 28 : 26, lineHeight: 1, fontWeight: 800, color: "var(--color-text)" }}>{item.kana}</div>
+                            <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>{item.romaji}</div>
+                          </div>
+                        ) : (
+                          <div key={`${section.key}-blank-${rowIndex}-${cellIndex}`} aria-hidden="true" />
+                        ),
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -398,59 +490,42 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
             </button>
           </div>
 
-          <div style={{ display: "grid", gap: "var(--space-2)" }}>
-            <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
-              Kana set
-            </div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {KANA_PRACTICE_SET_OPTIONS.map((option) => (
-                <button
-                  key={option.key}
-                  type="button"
-                  onClick={() => setPracticeSetKey(option.key)}
-                  className={practiceSetKey === option.key ? "ds-btn" : "ds-btn-secondary"}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          {renderSelectorGroup(
+            "Script",
+            [
+              { key: "hiragana", label: "Hiragana", tone: "color-mix(in srgb, var(--color-accent-soft) 72%, white)" },
+              { key: "katakana", label: "Katakana", tone: "color-mix(in srgb, rgba(69, 123, 157, 0.14) 70%, white)" },
+            ],
+            practiceScript,
+            setPracticeScript,
+          )}
 
-          <div style={{ display: "grid", gap: "var(--space-2)" }}>
-            <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
-              Practice mode
-            </div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {KANA_PRACTICE_MODE_OPTIONS.map((option) => (
-                <button
-                  key={option.key}
-                  type="button"
-                  onClick={() => setPracticeMode(option.key)}
-                  className={practiceMode === option.key ? "ds-btn" : "ds-btn-secondary"}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          {renderSelectorGroup(
+            "Set",
+            [
+              { key: "basic", label: "Basic" },
+              { key: "dakuten", label: "Dakuten" },
+              { key: "handakuten", label: "Handakuten" },
+              { key: "yoon", label: "Yōon" },
+              { key: "mixed", label: "Mixed" },
+            ],
+            practiceSet,
+            setPracticeSet,
+          )}
 
-          <div style={{ display: "grid", gap: "var(--space-2)" }}>
-            <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
-              Questions
-            </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              {KANA_QUESTION_COUNT_OPTIONS.map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setQuestionCount(value)}
-                  className={questionCount === value ? "ds-btn" : "ds-btn-secondary"}
-                >
-                  {value}
-                </button>
-              ))}
-            </div>
-          </div>
+          {renderSelectorGroup(
+            "Mode",
+            KANA_PRACTICE_MODE_OPTIONS.map((option) => ({ key: option.key, label: option.label })),
+            practiceMode,
+            setPracticeMode,
+          )}
+
+          {renderSelectorGroup(
+            "Questions",
+            KANA_QUESTION_COUNT_OPTIONS.map((value) => ({ key: String(value) as "10" | "20" | "30", label: String(value) })),
+            String(questionCount) as "10" | "20" | "30",
+            (value) => setQuestionCount(Number(value) as KanaQuestionCount),
+          )}
 
           <button type="button" onClick={() => startSession()} className="ds-btn" style={{ justifySelf: "start" }}>
             Start
@@ -491,7 +566,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
 
               {!sessionFinished && currentQuestion && (
                 <div key={`${currentQuestion.item.id}-${sessionIndex}`} style={{ display: "grid", gap: "var(--space-4)", animation: "kanaPracticeStepIn 180ms ease" }}>
-                  <div style={{ display: "grid", gap: 8 }}>
+                  <div style={{ display: "grid", gap: 8, justifyItems: "center", textAlign: "center" }}>
                     <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
                       {activeQuestionLabel}
                     </div>
@@ -546,11 +621,11 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                         })}
                       </div>
                       {multipleChoiceAnswer && (
-                        <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                        <div style={{ display: "grid", gap: 10, justifyItems: "center", textAlign: "center" }}>
                           <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
                             {multipleChoiceAnswer === currentQuestion.item.romaji ? "Correcto" : `Respuesta: ${currentQuestion.item.romaji}`}
                           </div>
-                          <button type="button" onClick={() => setSessionIndex((value) => value + 1)} className="ds-btn">
+                          <button type="button" onClick={moveToNext} className="ds-btn">
                             {sessionIndex >= session.questions.length - 1 ? "Ver resumen" : "Siguiente"}
                           </button>
                         </div>
@@ -559,7 +634,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                   )}
 
                   {session.mode === "romaji_input" && (
-                    <div style={{ display: "grid", gap: 12 }}>
+                    <div style={{ display: "grid", gap: 12, justifyItems: "center" }}>
                       <input
                         ref={romajiInputRef}
                         value={romajiValue}
@@ -577,8 +652,9 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                             recordResult(currentQuestion.item, correct ? "correct" : "wrong");
                           }
                         }}
+                        style={{ maxWidth: 320, textAlign: "center", fontSize: 24, fontWeight: 700 }}
                       />
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                      <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
                         <button
                           type="button"
                           onClick={() => {
@@ -592,13 +668,13 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                           Submit
                         </button>
                         {romajiFeedback && (
-                          <button type="button" onClick={() => setSessionIndex((value) => value + 1)} className="ds-btn-secondary">
+                          <button type="button" onClick={moveToNext} className="ds-btn-secondary">
                             {sessionIndex >= session.questions.length - 1 ? "Ver resumen" : "Siguiente"}
                           </button>
                         )}
                       </div>
                       {romajiFeedback && (
-                        <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                        <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700, textAlign: "center" }}>
                           {romajiFeedback.correct ? "Correcto" : `Respuesta correcta: ${romajiFeedback.answer}`}
                         </div>
                       )}
@@ -606,15 +682,16 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                   )}
 
                   {session.mode === "handwriting" && (
-                    <div style={{ display: "grid", gap: 10 }}>
+                    <div style={{ display: "grid", gap: 10, justifyItems: "center", textAlign: "center" }}>
                       <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
                         Traza el kana correspondiente y luego evalúate
                       </div>
                       <KanaHandwritingPad
+                        key={`${currentQuestion.item.id}-${sessionIndex}`}
                         targetKana={currentQuestion.item.kana}
                         onRated={(rating: KanaHandwritingRating, score) => {
                           recordResult(currentQuestion.item, rating, { recognitionScore: score });
-                          setSessionIndex((value) => value + 1);
+                          moveToNext();
                         }}
                       />
                     </div>
