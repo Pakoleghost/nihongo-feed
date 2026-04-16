@@ -56,6 +56,23 @@ type AnswerFeedback = {
   answer: string;
 };
 
+type KanaSelectableSet = "basic" | "dakuten" | "handakuten" | "yoon";
+type KanaScopeKey = `${KanaScript}:${KanaSelectableSet}`;
+
+const KANA_SCOPE_ROWS: Array<{ set: KanaSelectableSet; label: string }> = [
+  { set: "basic", label: "Basic" },
+  { set: "dakuten", label: "Dakuten" },
+  { set: "handakuten", label: "Handakuten" },
+  { set: "yoon", label: "Yōon" },
+];
+
+const KANA_SCOPE_LABELS: Record<KanaSelectableSet, string> = {
+  basic: "Basic",
+  dakuten: "Dakuten",
+  handakuten: "Handakuten",
+  yoon: "Yōon",
+};
+
 function shuffle<T>(items: T[]) {
   const next = [...items];
   for (let index = next.length - 1; index > 0; index -= 1) {
@@ -126,12 +143,12 @@ function uniqueKanaItems(items: KanaItem[]) {
   });
 }
 
-function collectPracticeItems(
-  scripts: KanaScript[],
-  sets: Array<"basic" | "dakuten" | "handakuten" | "yoon">,
-) {
+function collectPracticeItems(scopeKeys: KanaScopeKey[]) {
   return uniqueKanaItems(
-    scripts.flatMap((script) => sets.flatMap((set) => filterKanaItemsForSelection(script, set))),
+    scopeKeys.flatMap((scopeKey) => {
+      const [script, set] = scopeKey.split(":") as [KanaScript, KanaSelectableSet];
+      return filterKanaItemsForSelection(script, set);
+    }),
   );
 }
 
@@ -169,27 +186,26 @@ function buildQuestionsForItems(items: KanaItem[], fallbackPool: KanaItem[], mod
 }
 
 function buildSession(
-  scripts: KanaScript[],
-  sets: Array<"basic" | "dakuten" | "handakuten" | "yoon">,
+  scopeKeys: KanaScopeKey[],
   modes: KanaPracticeMode[],
   count: KanaQuestionCount,
   progress: KanaProgressMap,
 ) {
-  const baseItems = collectPracticeItems(scripts, sets);
+  const baseItems = collectPracticeItems(scopeKeys);
   const items = buildKanaSessionItems(baseItems, progress, count);
   const questions = buildQuestionsForItems(items, baseItems, modes);
-  return { setKey: `${scripts.join("+")}:${sets.join("+")}`, modes, count, questions };
+  return { setKey: scopeKeys.join("+"), modes, count, questions };
 }
 
 export default function AprenderKanaModule({ userKey, onRecordActivity }: AprenderKanaModuleProps) {
   const [screen, setScreen] = useState<"home" | "table" | "setup">("home");
   const [tableScript, setTableScript] = useState<KanaScript>("hiragana");
   const [tableFilter, setTableFilter] = useState<"basic" | "dakuten" | "handakuten" | "yoon" | "mixed">("basic");
-  const [practiceScripts, setPracticeScripts] = useState<KanaScript[]>(["hiragana"]);
-  const [practiceSets, setPracticeSets] = useState<Array<"basic" | "dakuten" | "handakuten" | "yoon">>(["basic"]);
+  const [selectedScopeKeys, setSelectedScopeKeys] = useState<KanaScopeKey[]>(["hiragana:basic"]);
   const [practiceModes, setPracticeModes] = useState<KanaPracticeMode[]>(["multiple_choice"]);
   const [questionCount, setQuestionCount] = useState<KanaQuestionCount>(20);
   const [setupError, setSetupError] = useState<string | null>(null);
+  const [scopeModalOpen, setScopeModalOpen] = useState(false);
   const [progress, setProgress] = useState<KanaProgressMap>({});
   const [session, setSession] = useState<KanaSession | null>(null);
   const [sessionIndex, setSessionIndex] = useState(0);
@@ -239,7 +255,27 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
 
   const allKanaSummary = useMemo(() => getKanaProgressSummary(KANA_ITEMS, progress), [progress]);
   const tableSections = useMemo(() => getKanaTableSections(tableScript, tableFilter), [tableFilter, tableScript]);
-  const practicePool = useMemo(() => collectPracticeItems(practiceScripts, practiceSets), [practiceScripts, practiceSets]);
+  const practicePool = useMemo(() => collectPracticeItems(selectedScopeKeys), [selectedScopeKeys]);
+
+  const selectedScopeDetails = useMemo(
+    () =>
+      selectedScopeKeys.map((scopeKey) => {
+        const [script, set] = scopeKey.split(":") as [KanaScript, KanaSelectableSet];
+        const items = filterKanaItemsForSelection(script, set);
+        return {
+          key: scopeKey,
+          script,
+          set,
+          count: items.length,
+        };
+      }),
+    [selectedScopeKeys],
+  );
+  const selectedKanaCount = selectedScopeDetails.reduce((sum, entry) => sum + entry.count, 0);
+  const selectedScriptSummary = Array.from(new Set(selectedScopeDetails.map((entry) => (entry.script === "hiragana" ? "Hiragana" : "Katakana")))).join(" · ");
+  const selectedSetSummary = selectedScopeDetails
+    .map((entry) => `${entry.script === "hiragana" ? "H" : "K"} ${KANA_SCOPE_LABELS[entry.set]}`)
+    .join(", ");
 
   const subtlePillStyle: CSSProperties = {
     borderRadius: 999,
@@ -251,16 +287,9 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
     fontWeight: 700,
   };
 
-  const togglePracticeScript = (value: KanaScript) => {
-    setPracticeScripts((previous) =>
-      previous.includes(value) ? previous.filter((entry) => entry !== value) : [...previous, value],
-    );
-    setSetupError(null);
-  };
-
-  const togglePracticeSet = (value: "basic" | "dakuten" | "handakuten" | "yoon") => {
-    setPracticeSets((previous) =>
-      previous.includes(value) ? previous.filter((entry) => entry !== value) : [...previous, value],
+  const toggleScopeKey = (scopeKey: KanaScopeKey) => {
+    setSelectedScopeKeys((previous) =>
+      previous.includes(scopeKey) ? previous.filter((entry) => entry !== scopeKey) : [...previous, scopeKey],
     );
     setSetupError(null);
   };
@@ -322,7 +351,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
   };
 
   const startSession = (overrideItems?: KanaItem[]) => {
-    if (practiceScripts.length === 0 || practiceSets.length === 0) {
+    if (selectedScopeKeys.length === 0) {
       setSetupError("Selecciona al menos un bloque de kana.");
       return;
     }
@@ -337,12 +366,12 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
 
     const nextSession = overrideItems
       ? {
-          setKey: `${practiceScripts.join("+")}:${practiceSets.join("+")}`,
+          setKey: selectedScopeKeys.join("+"),
           modes: practiceModes,
           count: overrideItems.length as KanaQuestionCount,
           questions: buildQuestionsForItems(uniqueKanaItems(overrideItems), practicePool, practiceModes),
         }
-      : buildSession(practiceScripts, practiceSets, practiceModes, questionCount, progress);
+      : buildSession(selectedScopeKeys, practiceModes, questionCount, progress);
 
     setSession(nextSession);
     setSessionIndex(0);
@@ -354,9 +383,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
     setStreak(0);
     setSetupError(null);
     onRecordActivity?.(
-      `${practiceScripts.map((value) => (value === "hiragana" ? "Hiragana" : "Katakana")).join(" + ")} · ${practiceSets
-        .map((value) => (value === "basic" ? "Basic" : value === "dakuten" ? "Dakuten" : value === "handakuten" ? "Handakuten" : "Yōon"))
-        .join(" + ")}`,
+      `${selectedScriptSummary || "Kana"} · ${selectedSetSummary || "Basic"}`,
     );
   };
 
@@ -530,67 +557,199 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
       )}
 
       {screen === "setup" && (
-        <div style={{ display: "grid", gap: "var(--space-3)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-            <div style={{ fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>Practice</div>
-            <button type="button" onClick={() => setScreen("home")} className="ds-btn-ghost">
-              Volver
+        <div
+          style={{
+            display: "grid",
+            gap: "var(--space-3)",
+            minHeight: "min(100dvh - 160px, 720px)",
+            alignContent: "space-between",
+          }}
+        >
+          <div style={{ display: "grid", gap: "var(--space-3)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              <div style={{ fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>Practice</div>
+              <button type="button" onClick={() => setScreen("home")} className="ds-btn-ghost">
+                Volver
+              </button>
+            </div>
+
+            <StudySelectorGroup
+              options={KANA_PRACTICE_MODE_OPTIONS.map((option) => ({ key: option.key, label: option.label }))}
+              values={practiceModes}
+              multiple
+              onToggle={togglePracticeMode}
+              layout="row"
+              compact
+              minItemWidth={128}
+            />
+
+            <button
+              type="button"
+              onClick={() => setScopeModalOpen(true)}
+              style={{
+                display: "grid",
+                gap: 6,
+                textAlign: "left",
+                border: "1px solid var(--color-border)",
+                borderRadius: 24,
+                background: "color-mix(in srgb, var(--color-surface) 86%, white)",
+                padding: "14px 16px",
+                color: "var(--color-text)",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 800 }}>Kana seleccionados</div>
+                <div style={{ fontSize: "var(--text-body)", fontWeight: 800 }}>{selectedKanaCount}</div>
+              </div>
+              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text)", fontWeight: 700 }}>
+                {selectedScriptSummary || "Ninguno"}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--color-text-muted)", lineHeight: 1.35 }}>
+                {selectedSetSummary || "Toca para elegir"}
+              </div>
             </button>
+
+            <StudySelectorGroup
+              options={KANA_QUESTION_COUNT_OPTIONS.map((value) => ({ key: String(value) as "10" | "20" | "30", label: String(value) }))}
+              value={String(questionCount) as "10" | "20" | "30"}
+              onSelect={(value) => setQuestionCount(Number(value) as KanaQuestionCount)}
+              layout="row"
+              minItemWidth={82}
+              compact
+            />
+
+            {setupError ? (
+              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-accent-strong)", fontWeight: 700 }}>
+                {setupError}
+              </div>
+            ) : null}
           </div>
 
-          <StudySelectorGroup
-            label="Script"
-            options={[
-              { key: "hiragana", label: "Hiragana", tone: "color-mix(in srgb, var(--color-accent-soft) 72%, white)" },
-              { key: "katakana", label: "Katakana", tone: "color-mix(in srgb, rgba(69, 123, 157, 0.14) 70%, white)" },
-            ]}
-            values={practiceScripts}
-            multiple
-            onToggle={togglePracticeScript}
-            minItemWidth={118}
-          />
-
-          <StudySelectorGroup
-            label="Sets"
-            options={[
-              { key: "basic", label: "Basic" },
-              { key: "dakuten", label: "Dakuten" },
-              { key: "handakuten", label: "Handakuten" },
-              { key: "yoon", label: "Yōon" },
-            ]}
-            values={practiceSets}
-            multiple
-            onToggle={togglePracticeSet}
-            minItemWidth={112}
-          />
-
-          <StudySelectorGroup
-            label="Modo"
-            options={KANA_PRACTICE_MODE_OPTIONS.map((option) => ({ key: option.key, label: option.label }))}
-            values={practiceModes}
-            multiple
-            onToggle={togglePracticeMode}
-            minItemWidth={150}
-          />
-
-          <StudySelectorGroup
-            label="Preguntas"
-            options={KANA_QUESTION_COUNT_OPTIONS.map((value) => ({ key: String(value) as "10" | "20" | "30", label: String(value) }))}
-            value={String(questionCount) as "10" | "20" | "30"}
-            onSelect={(value) => setQuestionCount(Number(value) as KanaQuestionCount)}
-            minItemWidth={96}
-            compact
-          />
-
-          {setupError ? (
-            <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-accent-strong)", fontWeight: 700 }}>
-              {setupError}
+          <div
+            style={{
+              display: "grid",
+              gap: 10,
+              padding: "14px 16px calc(14px + env(safe-area-inset-bottom))",
+              borderRadius: 26,
+              background: "color-mix(in srgb, var(--color-surface) 86%, white)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                {practiceModes.length > 0 ? `${practiceModes.length} modo${practiceModes.length > 1 ? "s" : ""}` : "Sin modo"}
+              </div>
+              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text)", fontWeight: 800 }}>
+                {questionCount} preguntas
+              </div>
             </div>
-          ) : null}
+            <button
+              type="button"
+              onClick={() => startSession()}
+              disabled={selectedScopeKeys.length === 0 || practiceModes.length === 0}
+              className="ds-btn"
+              style={{
+                width: "100%",
+                minHeight: 54,
+                opacity: selectedScopeKeys.length === 0 || practiceModes.length === 0 ? 0.5 : 1,
+                cursor: selectedScopeKeys.length === 0 || practiceModes.length === 0 ? "not-allowed" : "pointer",
+              }}
+            >
+              Start
+            </button>
+          </div>
+        </div>
+      )}
 
-          <button type="button" onClick={() => startSession()} className="ds-btn" style={{ justifySelf: "start" }}>
-            Start
-          </button>
+      {scopeModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 95,
+            background: "rgba(26, 26, 46, 0.18)",
+            backdropFilter: "blur(10px)",
+            display: "grid",
+            alignItems: "end",
+            padding: "12px",
+          }}
+        >
+          <div
+            style={{
+              width: "min(100%, 560px)",
+              margin: "0 auto",
+              display: "grid",
+              gap: 14,
+              padding: "16px 16px calc(16px + env(safe-area-inset-bottom))",
+              borderRadius: 30,
+              background: "color-mix(in srgb, var(--color-surface) 90%, white)",
+              border: "1px solid var(--color-border)",
+              boxShadow: "0 20px 40px rgba(26,26,46,.1)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: "var(--color-text)" }}>Kana</div>
+              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                {selectedKanaCount}
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "112px repeat(2, minmax(0, 1fr))",
+                gap: 8,
+                alignItems: "center",
+              }}
+            >
+              <div />
+              <div style={{ textAlign: "center", fontSize: "var(--text-body-sm)", fontWeight: 800, color: "var(--color-text)" }}>Hiragana</div>
+              <div style={{ textAlign: "center", fontSize: "var(--text-body-sm)", fontWeight: 800, color: "var(--color-text)" }}>Katakana</div>
+
+              {KANA_SCOPE_ROWS.map((row) => (
+                <div key={row.set} style={{ display: "contents" }}>
+                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>{row.label}</div>
+                  {(["hiragana", "katakana"] as KanaScript[]).map((script) => {
+                    const key = `${script}:${row.set}` as KanaScopeKey;
+                    const selected = selectedScopeKeys.includes(key);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => toggleScopeKey(key)}
+                        style={{
+                          minHeight: 54,
+                          borderRadius: 18,
+                          border: selected ? "1px solid transparent" : "1px solid var(--color-border)",
+                          background: selected
+                            ? script === "hiragana"
+                              ? "color-mix(in srgb, var(--color-accent-soft) 74%, white)"
+                              : "color-mix(in srgb, rgba(69, 123, 157, 0.14) 72%, white)"
+                            : "color-mix(in srgb, var(--color-surface) 82%, white)",
+                          color: "var(--color-text)",
+                          fontSize: "var(--text-body)",
+                          fontWeight: 800,
+                          display: "grid",
+                          placeItems: "center",
+                        }}
+                      >
+                        {selected ? "✓" : ""}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setScopeModalOpen(false)}
+              className="ds-btn"
+              style={{ width: "100%", minHeight: 54 }}
+            >
+              OK
+            </button>
+          </div>
         </div>
       )}
 
