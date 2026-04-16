@@ -6117,7 +6117,7 @@ function StudyContent() {
     const recentWindowSize = 9;
 
     return picked.map((item, index) => {
-      const distractorPool = shuffledItems
+      const distractorPool = orderedItems
         .filter((candidate) => candidate.id !== item.id)
         .map((candidate) => candidate.back);
       const options = buildFlashLearnOptions(item.back, distractorPool, recentDistractorHistory, previousDistractors);
