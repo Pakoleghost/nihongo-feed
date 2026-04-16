@@ -165,6 +165,8 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
     };
   }, [session]);
 
+  const sessionFinished = Boolean(session) && sessionIndex >= (session?.questions.length || 0);
+
   useEffect(() => {
     if (session?.mode !== "romaji_input" || sessionFinished) return;
     const timer = window.setTimeout(() => romajiInputRef.current?.focus(), 80);
@@ -270,8 +272,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
   );
 
   const activeQuestionLabel = currentQuestion ? getKanaSetLabel(currentQuestion.item) : "";
-  const sessionFinished = Boolean(session) && sessionIndex >= (session?.questions.length || 0);
-
   return (
     <div style={{ display: "grid", gap: "var(--space-3)" }}>
       {screen === "home" && (
