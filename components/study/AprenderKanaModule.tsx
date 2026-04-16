@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import KanaHandwritingPad, { type KanaHandwritingRating } from "@/components/study/KanaHandwritingPad";
 import {
   KANA_ITEMS,
@@ -74,12 +74,12 @@ function isKanaAnswerCorrect(item: KanaItem, rawValue: string) {
   return accepted.has(answer);
 }
 
-function buildMultipleChoiceQuestions(items: KanaItem[]) {
+function buildMultipleChoiceQuestions(items: KanaItem[], fallbackPool: KanaItem[] = items) {
   const recentDistractors: string[] = [];
   let previousSet = new Set<string>();
 
   return items.map((item) => {
-    const pool = items
+    const pool = [...items, ...fallbackPool]
       .filter((candidate) => candidate.id !== item.id && candidate.romaji !== item.romaji)
       .map((candidate) => candidate.romaji);
     const uniquePool = Array.from(new Set(pool));
@@ -106,7 +106,7 @@ function buildMultipleChoiceQuestions(items: KanaItem[]) {
       });
     }
 
-    const options = shuffle([item.romaji, ...selected.slice(0, 3)]);
+    const options = shuffle([item.romaji, ...selected.slice(0, 3)]).slice(0, Math.min(4, selected.length + 1));
     previousSet = new Set(selected.slice(0, 3));
     recentDistractors.push(...selected.slice(0, 3));
     if (recentDistractors.length > 9) recentDistractors.splice(0, recentDistractors.length - 9);
@@ -120,7 +120,7 @@ function buildSession(setKey: KanaPracticeSetKey, mode: KanaPracticeMode, count:
   const items = buildKanaSessionItems(baseItems, progress, count);
   const questions =
     mode === "multiple_choice"
-      ? buildMultipleChoiceQuestions(items)
+      ? buildMultipleChoiceQuestions(items, baseItems)
       : items.map((item) => ({ item }));
   return { setKey, mode, count, questions };
 }
@@ -140,6 +140,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
   const [romajiValue, setRomajiValue] = useState("");
   const [romajiFeedback, setRomajiFeedback] = useState<null | { correct: boolean; answer: string }>(null);
   const [multipleChoiceAnswer, setMultipleChoiceAnswer] = useState<string | null>(null);
+  const romajiInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setProgress(loadKanaProgress(userKey));
@@ -154,6 +155,21 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
     const timer = window.setTimeout(() => setSheetVisible(true), 18);
     return () => window.clearTimeout(timer);
   }, [session]);
+
+  useEffect(() => {
+    if (!session) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [session]);
+
+  useEffect(() => {
+    if (session?.mode !== "romaji_input" || sessionFinished) return;
+    const timer = window.setTimeout(() => romajiInputRef.current?.focus(), 80);
+    return () => window.clearTimeout(timer);
+  }, [session?.mode, sessionFinished, sessionIndex]);
 
   const allKanaSummary = useMemo(() => getKanaProgressSummary(KANA_ITEMS, progress), [progress]);
   const tableItems = useMemo(() => filterKanaItemsForTable(tableScript, tableFilter), [tableFilter, tableScript]);
@@ -210,7 +226,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
           count: overrideItems.length as KanaQuestionCount,
           questions:
             practiceMode === "multiple_choice"
-              ? buildMultipleChoiceQuestions(overrideItems)
+              ? buildMultipleChoiceQuestions(overrideItems, filterKanaItemsForPractice(practiceSetKey))
               : overrideItems.map((item) => ({ item })),
         }
       : buildSession(practiceSetKey, practiceMode, questionCount, progress);
@@ -348,7 +364,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(82px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(84px, 1fr))",
               gap: 10,
             }}
           >
@@ -359,7 +375,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                   borderRadius: 20,
                   border: "1px solid var(--color-border)",
                   background: "color-mix(in srgb, var(--color-surface) 84%, white)",
-                  padding: "12px 10px",
+                  padding: "14px 10px 12px",
                   display: "grid",
                   gap: 4,
                   justifyItems: "center",
@@ -454,6 +470,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
             opacity: sheetVisible ? 1 : 0,
             transition: "transform 240ms ease, opacity 220ms ease",
             display: "grid",
+            overscrollBehavior: "contain",
           }}
         >
           <div style={{ minHeight: "100vh", overflowY: "auto", padding: "16px", display: "grid", alignContent: "start" }}>
@@ -508,7 +525,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                                 recordResult(currentQuestion.item, option === currentQuestion.item.romaji ? "correct" : "wrong");
                               }}
                               style={{
-                                minHeight: 72,
+                                minHeight: 82,
                                 borderRadius: 22,
                                 border: "1px solid var(--color-border)",
                                 background:
@@ -544,12 +561,15 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                   {session.mode === "romaji_input" && (
                     <div style={{ display: "grid", gap: 12 }}>
                       <input
+                        ref={romajiInputRef}
                         value={romajiValue}
                         onChange={(event) => setRomajiValue(event.target.value)}
                         placeholder="romaji"
                         autoCapitalize="off"
                         autoCorrect="off"
                         spellCheck={false}
+                        inputMode="latin"
+                        enterKeyHint="done"
                         onKeyDown={(event) => {
                           if (event.key === "Enter" && !romajiFeedback) {
                             const correct = isKanaAnswerCorrect(currentQuestion.item, romajiValue);
@@ -588,7 +608,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                   {session.mode === "handwriting" && (
                     <div style={{ display: "grid", gap: 10 }}>
                       <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                        Traza el kana correspondiente
+                        Traza el kana correspondiente y luego evalúate
                       </div>
                       <KanaHandwritingPad
                         targetKana={currentQuestion.item.kana}

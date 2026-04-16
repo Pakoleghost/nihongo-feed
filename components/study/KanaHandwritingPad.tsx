@@ -130,6 +130,7 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
   const [activeStroke, setActiveStroke] = useState<StrokePoint[]>([]);
   const [reviewMode, setReviewMode] = useState(false);
   const [recognition, setRecognition] = useState<RecognitionResult>({ score: 0, status: "empty" });
+  const [canvasHeight, setCanvasHeight] = useState(220);
 
   useEffect(() => {
     setStrokes([]);
@@ -143,12 +144,22 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
     if (!canvas) return;
 
     canvas.width = 300;
-    canvas.height = 240;
+    canvas.height = canvasHeight;
     canvas.style.width = "100%";
-    canvas.style.height = "240px";
+    canvas.style.height = `${canvasHeight}px`;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     renderStrokes(ctx, []);
+  }, [canvasHeight]);
+
+  useEffect(() => {
+    const updateHeight = () => {
+      if (typeof window === "undefined") return;
+      setCanvasHeight(window.innerWidth < 420 ? 196 : 220);
+    };
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
   }, []);
 
   useEffect(() => {
@@ -241,10 +252,12 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
           aria-label="Área de escritura manual"
           style={{
             width: "100%",
-            height: 240,
+            height: canvasHeight,
             borderRadius: 18,
             background: "#FFFDFC",
             touchAction: "none",
+            display: "block",
+            overscrollBehavior: "contain",
           }}
         />
 
@@ -297,6 +310,10 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
             {recognition.status === "confident"
               ? `Reconocimiento aproximado: ${Math.round(recognition.score * 100)}%`
               : "La app no está segura. Usa tu criterio para evaluarte."}
+          </div>
+
+          <div style={{ fontSize: 14, color: "var(--color-text)", fontWeight: 800 }}>
+            ¿Lo hiciste bien?
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
