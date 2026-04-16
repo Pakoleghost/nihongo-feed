@@ -6130,7 +6130,15 @@ function StudyContent() {
   const vkLeaderboardForBucket = vkLeaderboard[vkBucket] || [];
   const showHub = !selectedView;
   const latestStudyActivity = studyActivity[0] || null;
-  const recentStudyActivity = studyActivity.slice(0, 3);
+  const recentStudyActivity = useMemo(() => {
+    const seen = new Set<string>();
+    return studyActivity.filter((entry) => {
+      const key = `${entry.tool}:${entry.href}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [studyActivity]);
   const weekStart = getLocalWeekStart();
   const weeklyActivity = studyActivity.filter((entry) => {
     const value = new Date(entry.occurredAt);
@@ -6271,21 +6279,21 @@ function StudyContent() {
   };
   const flashSectionStyle: CSSProperties = {
     display: "grid",
-    gap: "var(--space-3)",
-    padding: "clamp(16px, 4vw, 22px)",
-    borderRadius: 28,
-    background: "color-mix(in srgb, var(--color-surface) 84%, white)",
-    border: "1px solid var(--color-border)",
+    gap: "10px",
+    padding: "0",
+    borderRadius: 0,
+    background: "transparent",
+    border: "0",
   };
   const flashDeckCardStyle: CSSProperties = {
     textAlign: "left",
     border: "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
-    borderRadius: 22,
+    borderRadius: 20,
     background: "color-mix(in srgb, var(--color-surface) 88%, white)",
-    padding: "12px 12px 11px",
+    padding: "10px 10px 9px",
     cursor: "pointer",
     display: "grid",
-    gap: 8,
+    gap: 6,
   };
 
   useEffect(() => {
@@ -6719,13 +6727,13 @@ function StudyContent() {
   );
 
   const toolCards = [
-    { key: "learnkana", href: "/study?view=learnkana", title: "Aprender Kana", jp: "かな", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
-    { key: "kana", href: "/study?view=kana", title: "Kana Sprint", jp: "かな", accent: "var(--color-accent)", surface: "var(--color-accent-soft)" },
-    { key: "sprint", href: "/study?view=sprint", title: "Vocab + Kanji", jp: "語彙", accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
-    { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", jp: "単語", accent: "#F4A261", surface: "rgba(244, 162, 97, 0.12)" },
-    { key: "exam", href: "/study?view=exam", title: "Repaso mixto", jp: "復習", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
+    { key: "learnkana", href: "/study?view=learnkana", title: "Aprender Kana", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
+    { key: "kana", href: "/study?view=kana", title: "Kana Sprint", accent: "var(--color-accent)", surface: "var(--color-accent-soft)" },
+    { key: "sprint", href: "/study?view=sprint", title: "Vocab + Kanji", accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
+    { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", accent: "#F4A261", surface: "rgba(244, 162, 97, 0.12)" },
+    { key: "exam", href: "/study?view=exam", title: "Repaso mixto", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
   ];
-  const renderToolPill = (tool: { key: string; href: string; title: string; jp: string; accent: string; surface: string }) => {
+  const renderToolPill = (tool: { key: string; href: string; title: string; accent: string; surface: string }) => {
     const selected = activeTab === tool.key;
     return (
       <Link
@@ -6786,9 +6794,6 @@ function StudyContent() {
 
         {showHub ? (
           <section style={{ display: "grid", gap: "var(--space-1)", padding: "calc(var(--space-5) + 4px) 0 var(--space-2)", scrollMarginTop: sectionScrollMarginTop }}>
-            <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".12em", textTransform: "uppercase" }}>
-              学習
-            </div>
             <div style={{ fontSize: "clamp(48px, 11vw, 82px)", lineHeight: 0.9, letterSpacing: "-.065em", fontWeight: 800, color: "var(--color-text)" }}>
               Study
             </div>
@@ -6848,7 +6853,7 @@ function StudyContent() {
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-                    <div style={sectionKickerStyle}>Continue</div>
+                    <div style={sectionKickerStyle}>Seguir</div>
                     {latestStudyActivity && (
                       <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
                         {formatStudyActivityTime(latestStudyActivity.occurredAt)}
@@ -6866,7 +6871,7 @@ function StudyContent() {
                         gap: 4,
                         borderRadius: 18,
                         background: "color-mix(in srgb, var(--color-highlight-soft) 56%, white)",
-                        padding: "10px 12px",
+                        padding: "9px 11px",
                       }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
@@ -6902,7 +6907,7 @@ function StudyContent() {
                         style={{
                         borderRadius: 20,
                         background: "color-mix(in srgb, var(--color-surface-muted) 72%, white)",
-                        padding: "10px 14px",
+                        padding: "9px 12px",
                         fontSize: "var(--text-body-sm)",
                         color: "var(--color-text-muted)",
                         fontWeight: 700,
@@ -6917,7 +6922,7 @@ function StudyContent() {
                   style={{
                     background: "color-mix(in srgb, rgba(78, 205, 196, 0.12) 72%, white)",
                     borderRadius: 24,
-                    padding: "12px 14px",
+                    padding: "10px 12px",
                     display: "grid",
                     gap: 6,
                     boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
@@ -6949,18 +6954,18 @@ function StudyContent() {
                 </div>
               </div>
 
-              {recentStudyActivity.length > 0 && (
+              {recentStudyActivity.length > 1 && (
                 <div
                   style={{
                     background: "color-mix(in srgb, rgba(244, 162, 97, 0.11) 68%, white)",
                     borderRadius: 24,
-                    padding: "10px 14px",
+                    padding: "9px 12px",
                     display: "grid",
                     gap: 6,
                     boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
                   }}
                 >
-                  <div style={sectionKickerStyle}>Recent activity</div>
+                  <div style={sectionKickerStyle}>Actividad reciente</div>
                   <div style={{ display: "grid", gap: 6 }}>
                     {recentStudyActivity.slice(0, 2).map((entry) => (
                       <Link
@@ -6975,7 +6980,7 @@ function StudyContent() {
                           alignItems: "center",
                           borderRadius: 14,
                           background: "rgba(255,255,255,0.72)",
-                          padding: "8px 10px",
+                          padding: "7px 9px",
                         }}
                       >
                         <div style={{ minWidth: 0 }}>
@@ -7026,9 +7031,9 @@ function StudyContent() {
                     : tool.key === "sprint"
                       ? "var(--color-accent-soft)"
                       : "rgba(244, 162, 97, 0.16)";
-                const cardPadding = "12px 12px 11px";
+                const cardPadding = "11px 11px 10px";
                 const cardRadius = 24;
-                const cardMinHeight = 96;
+                const cardMinHeight = 88;
                 return (
                   <Link
                     key={tool.key}
@@ -7047,22 +7052,19 @@ function StudyContent() {
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                      <div style={{ display: "grid", gap: 6, minWidth: 0 }}>
+                      <div style={{ display: "grid", gap: 2, minWidth: 0 }}>
                     <span
                       style={{
-                        fontSize: "clamp(18px, 4vw, 22px)",
-                        lineHeight: 1.02,
+                        fontSize: "clamp(17px, 3.8vw, 21px)",
+                        lineHeight: 1.06,
                         letterSpacing: "-.03em",
                         fontWeight: 800,
                         color: "var(--color-text)",
-                        textWrap: "pretty",
+                        textWrap: "balance",
                         maxWidth: "100%",
                         }}
                       >
                         {tool.title}
-                      </span>
-                      <span style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
-                        {tool.jp}
                       </span>
                       </div>
                       <span
@@ -7266,11 +7268,7 @@ function StudyContent() {
             {flashLessonFolder === null && flashSetId === null && (
               <div style={{ display: "grid", gap: 14 }}>
                 <div style={flashSectionStyle}>
-                  <div style={{ display: "grid", gap: 6 }}>
-                    <div style={{ fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>Oficiales</div>
-                  </div>
-
-                  <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
+                  <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
                     {officialFlashLessons.map((entry) => (
                         <button
                           key={`folder-${entry.lesson}`}
@@ -7279,18 +7277,18 @@ function StudyContent() {
                           style={flashDeckCardStyle}
                         >
                           <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
-                            <div style={{ fontSize: 20, fontWeight: 800, color: "var(--color-text)" }}>Lección {entry.lesson}</div>
+                            <div style={{ fontSize: 17, fontWeight: 800, color: "var(--color-text)" }}>Lección {entry.lesson}</div>
                             <span
                               style={{
-                                width: 28,
-                                height: 28,
+                                width: 24,
+                                height: 24,
                                 borderRadius: 999,
                                 display: "inline-flex",
                                 alignItems: "center",
                                 justifyContent: "center",
                                 background: "color-mix(in srgb, var(--color-highlight-soft) 70%, white)",
                                 color: "var(--color-accent-strong)",
-                                fontSize: 14,
+                                fontSize: 12,
                                 fontWeight: 800,
                                 flexShrink: 0,
                               }}
@@ -7304,7 +7302,8 @@ function StudyContent() {
                                 key={`folder-preview-${set.id}`}
                                 style={{
                                   ...chipStyle,
-                                  padding: "5px 9px",
+                                  padding: "4px 8px",
+                                  fontSize: 10,
                                   background: "color-mix(in srgb, var(--color-accent-soft) 72%, white)",
                                 }}
                               >
@@ -7312,7 +7311,7 @@ function StudyContent() {
                               </span>
                             ))}
                           </div>
-                          <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                          <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
                             {entry.setCount} sets
                           </div>
                         </button>
@@ -7349,9 +7348,9 @@ function StudyContent() {
                           key={set.id}
                           style={{
                             display: "grid",
-                            gap: 10,
-                            padding: "14px 16px",
-                            borderRadius: 22,
+                            gap: 8,
+                            padding: "10px 12px",
+                            borderRadius: 18,
                             background: "color-mix(in srgb, var(--color-surface) 82%, white)",
                             border: "1px solid var(--color-border)",
                           }}
@@ -7362,10 +7361,10 @@ function StudyContent() {
                             style={{ display: "block", width: "100%", textAlign: "left", border: 0, background: "transparent", padding: 0, cursor: "pointer" }}
                           >
                             <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                              <div style={{ fontSize: 18, fontWeight: 800, color: "var(--color-text)" }}>{set.title}</div>
-                              <div style={chipStyle}>{set.items.length} tarjetas</div>
+                              <div style={{ fontSize: 16, fontWeight: 800, color: "var(--color-text)" }}>{set.title}</div>
+                              <div style={{ ...chipStyle, padding: "4px 8px", fontSize: 10 }}>{set.items.length} tarjetas</div>
                             </div>
-                            <div style={{ marginTop: 4, fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", lineHeight: 1.4 }}>{set.description}</div>
+                            <div style={{ marginTop: 2, fontSize: 12, color: "var(--color-text-muted)", lineHeight: 1.35 }}>{set.description}</div>
                           </button>
                           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                             <button type="button" onClick={() => openCustomFlashDeckBuilder(customFlashDecks.find((deck) => deck.id === set.id))} style={secondaryButtonStyle}>
@@ -7381,10 +7380,10 @@ function StudyContent() {
                   ) : (
                     <div
                       style={{
-                        fontSize: "var(--text-body-sm)",
+                        fontSize: 12,
                         color: "var(--color-text-muted)",
                         fontWeight: 700,
-                        padding: "6px 2px 0",
+                        padding: "2px 2px 0",
                       }}
                     >
                       Aún no tienes decks personalizados.
@@ -7396,7 +7395,7 @@ function StudyContent() {
             )}
 
             {flashLessonFolder !== null && flashSetId === null && (
-              <div style={{ marginTop: 10, display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
+              <div style={{ marginTop: 10, display: "grid", gap: 8, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
                 {flashSetsInLesson.map((set) => (
                   <button
                     key={set.id}
@@ -7405,18 +7404,18 @@ function StudyContent() {
                     style={flashDeckCardStyle}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
-                      <div style={{ fontSize: 18, fontWeight: 800 }}>{set.title}</div>
+                      <div style={{ fontSize: 16, fontWeight: 800 }}>{set.title}</div>
                       <span
                         style={{
-                          width: 28,
-                          height: 28,
+                          width: 24,
+                          height: 24,
                           borderRadius: 999,
                           display: "inline-flex",
                           alignItems: "center",
                           justifyContent: "center",
                           background: "color-mix(in srgb, var(--color-accent-soft) 68%, white)",
                           color: "var(--color-primary)",
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: 800,
                           flexShrink: 0,
                         }}
@@ -7424,8 +7423,8 @@ function StudyContent() {
                         ↗
                       </span>
                     </div>
-                    <div style={{ fontSize: 13, color: "#667085", lineHeight: 1.4 }}>{set.description}</div>
-                    <div style={{ fontSize: 12, color: "#344054", fontWeight: 700 }}>{set.items.length} tarjetas</div>
+                    <div style={{ fontSize: 12, color: "#667085", lineHeight: 1.35 }}>{set.description}</div>
+                    <div style={{ fontSize: 11, color: "#344054", fontWeight: 700 }}>{set.items.length} tarjetas</div>
                   </button>
                 ))}
               </div>

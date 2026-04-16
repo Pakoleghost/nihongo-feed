@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import AppTopNav from "@/components/AppTopNav";
@@ -64,6 +63,15 @@ function fileLabelFromUrl(url?: string | null): string {
     return pathname.split("/").pop() || "Archivo";
   } catch {
     return url.split("/").pop() || "Archivo";
+  }
+}
+
+function domainLabelFromUrl(url?: string | null): string {
+  if (!url) return "Enlace";
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "Enlace";
   }
 }
 
@@ -320,13 +328,12 @@ export default function ResourcesPage() {
           <header className="pageHeader">
             <div className="pageHeaderMain">
               <div>
-                <div className="eyebrow">Recursos</div>
                 <h1 className="title">Biblioteca</h1>
               </div>
             </div>
             <div className="pageHeaderActions">
               {isAdmin && (
-                <button type="button" onClick={() => startCreateInFolder(selectedFolder)} className="primaryBtn">
+                <button type="button" onClick={() => startCreateInFolder(selectedFolder)} className="secondaryBtn">
                   + Nuevo recurso
                 </button>
               )}
@@ -339,18 +346,12 @@ export default function ResourcesPage() {
             <section className="contentPanel">
               <div className="contentHero">
                 <div className="contentHeroMain">
-                  <div className="eyebrow">Carpeta actual</div>
                   <h2>{selectedFolder}</h2>
-                  <p>
-                    {resourcesInFolder.length === 0
-                      ? "No hay contenido en esta carpeta todavía."
-                      : `${resourcesInFolder.length} elemento${resourcesInFolder.length === 1 ? "" : "s"} disponible${resourcesInFolder.length === 1 ? "" : "s"}.`}
-                  </p>
                 </div>
                 <div className="contentHeroMeta">
-                  <span className="countPill">{resourcesInFolder.length} items</span>
+                  <span className="countPill">{resourcesInFolder.length} recursos</span>
                   {isAdmin && (
-                    <button type="button" onClick={() => startCreateInFolder(selectedFolder)} className="primaryBtn">
+                    <button type="button" onClick={() => startCreateInFolder(selectedFolder)} className="secondaryBtn">
                       + Nuevo recurso
                     </button>
                   )}
@@ -474,7 +475,9 @@ export default function ResourcesPage() {
                           <div className="resourceText">
                             <div className="resourceTitleRow">
                               <strong>{resource.title}</strong>
-                              <span className="typeTag quietTag">{kind}</span>
+                              <span className="typeTag quietTag">
+                                {kind === "link" ? domainLabelFromUrl(resource.url) : kind === "file" ? "Archivo" : "Nota"}
+                              </span>
                             </div>
                             <p>
                               {kind === "note"
@@ -571,9 +574,6 @@ export default function ResourcesPage() {
                 })}
               </div>
 
-              <p className="panelHint">
-                Las carpetas vacías se guardan localmente hasta que agregues contenido.
-              </p>
             </aside>
           </div>
         </div>
@@ -594,6 +594,7 @@ export default function ResourcesPage() {
           justify-content: space-between;
           align-items: center;
           gap: var(--space-3);
+          padding: 4px 0 2px;
         }
         .pageHeaderMain {
           display: flex;
@@ -612,18 +613,11 @@ export default function ResourcesPage() {
           flex-shrink: 0;
           font-weight: 700;
         }
-        .eyebrow {
-          font-size: var(--text-label);
-          letter-spacing: .08em;
-          text-transform: uppercase;
-          color: var(--color-accent-strong);
-          font-weight: 800;
-        }
         .title {
-          margin: 4px 0 0;
-          font-size: var(--text-h2);
-          line-height: 1;
-          letter-spacing: -.04em;
+          margin: 0;
+          font-size: clamp(2.6rem, 8vw, 4.8rem);
+          line-height: 0.92;
+          letter-spacing: -.06em;
           color: var(--color-text);
         }
         .pageHeaderActions {
@@ -635,7 +629,7 @@ export default function ResourcesPage() {
         }
         .primaryBtn, .secondaryBtn {
           border-radius: var(--radius-pill);
-          padding: 10px 14px;
+          padding: 9px 13px;
           font-size: var(--text-body-sm);
           font-weight: 800;
           cursor: pointer;
@@ -664,18 +658,17 @@ export default function ResourcesPage() {
         .layoutGrid {
           display: grid;
           grid-template-columns: minmax(0, 1fr);
-          gap: var(--space-4);
+          gap: 14px;
         }
         .foldersPanel, .contentPanel {
-          background: var(--color-surface);
+          background: color-mix(in srgb, var(--color-surface) 88%, white);
           border: 1px solid var(--color-border);
-          border-radius: var(--radius-lg);
-          box-shadow: var(--shadow-card);
-          padding: var(--space-4);
+          border-radius: 28px;
+          box-shadow: 0 18px 34px rgba(26, 26, 46, 0.05);
+          padding: 16px;
         }
         .foldersPanel {
-          background: color-mix(in srgb, var(--color-surface-muted) 46%, white);
-          box-shadow: none;
+          background: color-mix(in srgb, var(--color-surface-muted) 64%, white);
         }
         .panelHead {
           display: flex;
@@ -696,32 +689,23 @@ export default function ResourcesPage() {
         }
         .contentHero {
           display: flex;
-          align-items: flex-end;
+          align-items: center;
           justify-content: space-between;
           gap: var(--space-3);
-          margin-bottom: var(--space-4);
-          padding-bottom: var(--space-3);
-          border-bottom: 1px solid var(--color-border);
+          margin-bottom: 12px;
           flex-wrap: wrap;
         }
         .contentHeroMain {
           display: grid;
-          gap: 6px;
+          gap: 2px;
           min-width: 0;
         }
         .contentHeroMain h2 {
           margin: 0;
-          font-size: clamp(2rem, 5vw, 3rem);
-          line-height: .96;
+          font-size: clamp(2.1rem, 6vw, 3.3rem);
+          line-height: .94;
           letter-spacing: -.06em;
           color: var(--color-text);
-        }
-        .contentHeroMain p {
-          margin: 0;
-          color: var(--color-text-muted);
-          font-size: var(--text-body-sm);
-          line-height: 1.55;
-          max-width: 420px;
         }
         .contentHeroMeta {
           display: flex;
@@ -766,20 +750,27 @@ export default function ResourcesPage() {
           color: var(--color-primary);
         }
         .folderList {
-          display: grid;
+          display: flex;
           gap: 8px;
+          overflow-x: auto;
+          padding-bottom: 2px;
+          scrollbar-width: none;
+        }
+        .folderList::-webkit-scrollbar {
+          display: none;
         }
         .folderBtn {
           border: 1px solid var(--color-border);
           background: var(--color-surface);
-          border-radius: var(--radius-md);
-          padding: 10px 12px;
+          border-radius: 999px;
+          padding: 9px 12px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: var(--space-2);
           cursor: pointer;
           text-align: left;
+          flex: 0 0 auto;
         }
         .folderBtn.active {
           background: color-mix(in srgb, var(--color-accent-soft) 60%, white);
@@ -807,18 +798,12 @@ export default function ResourcesPage() {
           padding: 3px 8px;
           font-weight: 800;
         }
-        .panelHint {
-          margin: var(--space-3) 2px 0;
-          color: var(--color-text-muted);
-          font-size: var(--text-label);
-          line-height: 1.4;
-        }
         .composerCard {
           border: 1px solid var(--color-border);
-          border-radius: var(--radius-md);
-          background: color-mix(in srgb, var(--color-accent-soft) 55%, white);
-          padding: var(--space-4);
-          margin-bottom: var(--space-4);
+          border-radius: 22px;
+          background: color-mix(in srgb, var(--color-accent-soft) 48%, white);
+          padding: 14px;
+          margin-bottom: 14px;
         }
         .composerHeader {
           display: flex;
@@ -918,12 +903,12 @@ export default function ResourcesPage() {
         }
         .emptyBox {
           border: 1px dashed var(--color-border);
-          border-radius: var(--radius-md);
-          padding: 24px 16px;
+          border-radius: 20px;
+          padding: 18px 14px;
           text-align: center;
           color: var(--color-text-muted);
           background: var(--color-surface-muted);
-          font-size: var(--text-body);
+          font-size: var(--text-body-sm);
         }
         .emptyBox p { margin: 0 0 10px; }
         .resourceList {
@@ -932,15 +917,15 @@ export default function ResourcesPage() {
         }
         .resourceRow {
           border: 1px solid var(--color-border);
-          border-radius: var(--radius-md);
-          background: var(--color-surface);
-          padding: 10px;
+          border-radius: 20px;
+          background: color-mix(in srgb, var(--color-surface) 86%, white);
+          padding: 10px 12px;
           display: grid;
-          gap: 10px;
+          gap: 8px;
         }
         .resourceRow.selected {
           border-color: var(--color-border-strong);
-          background: var(--color-surface-muted);
+          background: color-mix(in srgb, var(--color-highlight-soft) 54%, white);
         }
         .resourceMain {
           display: flex;
@@ -949,9 +934,9 @@ export default function ResourcesPage() {
           min-width: 0;
         }
         .resourceIcon {
-          width: 34px;
-          height: 34px;
-          border-radius: var(--radius-md);
+          width: 32px;
+          height: 32px;
+          border-radius: 12px;
           display: grid;
           place-items: center;
           background: var(--color-surface-muted);
@@ -968,7 +953,7 @@ export default function ResourcesPage() {
         }
         .resourceTitleRow strong {
           color: var(--color-text);
-          font-size: var(--text-body);
+          font-size: 15px;
           line-height: 1.3;
         }
         .typeTag {
@@ -1026,14 +1011,6 @@ export default function ResourcesPage() {
         }
 
         @media (min-width: 1024px) {
-          .layoutGrid {
-            grid-template-columns: minmax(0, 1fr) 260px;
-            align-items: start;
-          }
-          .foldersPanel {
-            position: sticky;
-            top: 16px;
-          }
           .composerGrid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }

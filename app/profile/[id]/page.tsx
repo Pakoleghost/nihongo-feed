@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { getContentParts } from "@/lib/content-utils";
 import AppTopNav from "@/components/AppTopNav";
 
 function AvatarPlaceholder({ size = 44 }: { size?: number }) {
@@ -17,26 +16,12 @@ function AvatarPlaceholder({ size = 44 }: { size?: number }) {
   );
 }
 
-function formatDate(value?: string) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  const now = Date.now();
-  const diffH = Math.floor((now - date.getTime()) / (1000 * 60 * 60));
-  const diffD = Math.floor(diffH / 24);
-  if (diffH < 1) return "ahora";
-  if (diffH < 24) return `${diffH}h`;
-  if (diffD < 7) return `${diffD}d`;
-  return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
-}
-
 export default function StudentProfilePage() {
   const { id } = useParams();
   const profileId = String(id ?? "");
 
   const [profile, setProfile] = useState<any>(null);
   const [myId, setMyId] = useState<string | null>(null);
-  const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -46,13 +31,8 @@ export default function StudentProfilePage() {
     } = await supabase.auth.getUser();
     setMyId(user?.id || null);
 
-    const [{ data: target }, { data: userPosts }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", profileId).single(),
-      supabase.from("posts").select("*").eq("user_id", profileId).order("created_at", { ascending: false }),
-    ]);
-
+    const { data: target } = await supabase.from("profiles").select("*").eq("id", profileId).single();
     setProfile(target || null);
-    setPosts(userPosts || []);
     setLoading(false);
   }, [profileId]);
 
@@ -61,11 +41,6 @@ export default function StudentProfilePage() {
   }, [fetchData]);
 
   const isMe = myId === profileId;
-
-  const portfolioPosts = useMemo(
-    () => posts.filter((p) => p.type === "post" && !p.parent_assignment_id),
-    [posts],
-  );
 
   if (loading || !profile) {
     return <div style={{ padding: "110px 16px", textAlign: "center", color: "var(--color-text-muted)" }}>Cargando perfil…</div>;
@@ -76,35 +51,29 @@ export default function StudentProfilePage() {
       <div className="profileShell ds-container">
         <AppTopNav secondary={isMe ? "profile" : null} />
 
-        <header className="profileTop">
-          <div className="profileTopMain">
-            <div className="topCopy">
+        <section className="profileCard">
+          <div className="profileHeader">
+            <div>
               <div className="eyebrow">Perfil</div>
               <h1>{profile.full_name || profile.username || "Usuario"}</h1>
             </div>
-          </div>
-          <div className="topActions">
-            {isMe && <Link href="/profile/edit" className="ghostPill">Editar</Link>}
-          </div>
-        </header>
-
-        <section className="profileCard">
-          <div className="profileIdentity">
             {isMe ? (
-              <Link href="/profile/edit" className="avatarWrap" aria-label="Cambiar foto">
-                {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="avatarImg" /> : <AvatarPlaceholder size={88} />}
+              <Link href="/profile/edit" className="ghostPill">
+                Editar perfil
               </Link>
-            ) : (
-              <div className="avatarWrap">
-                {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="avatarImg" /> : <AvatarPlaceholder size={88} />}
-              </div>
-            )}
+            ) : null}
+          </div>
+
+          <div className="identityRow">
+            <div className="avatarWrap" aria-hidden="true">
+              {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="avatarImg" /> : <AvatarPlaceholder size={84} />}
+            </div>
 
             <div className="identityCopy">
               <p className="handle">@{profile.username || "sin-username"}</p>
-              <div className="metaLine">
-                {profile.group_name && <span>{profile.group_name}</span>}
-                {profile.is_admin && <span>Sensei</span>}
+              <div className="metaStack">
+                <span>{profile.is_admin ? "Sensei" : "Alumno"}</span>
+                <span>{profile.group_name || "Sin grupo"}</span>
               </div>
               {profile.bio ? <p className="bio">{profile.bio}</p> : null}
             </div>
@@ -112,60 +81,18 @@ export default function StudentProfilePage() {
 
           <div className="statsStrip">
             <div className="statCell">
-              <span>Entradas</span>
-              <strong>{portfolioPosts.length}</strong>
+              <span>Rol</span>
+              <strong>{profile.is_admin ? "Sensei" : "Alumno"}</strong>
             </div>
             <div className="statCell">
               <span>Grupo</span>
               <strong>{profile.group_name || "—"}</strong>
             </div>
             <div className="statCell">
-              <span>Rol</span>
-              <strong>{profile.is_admin ? "Sensei" : "Alumno"}</strong>
+              <span>Usuario</span>
+              <strong>@{profile.username || "—"}</strong>
             </div>
           </div>
-        </section>
-
-        <section className="archiveCard">
-          <div className="archiveHead">
-            <div>
-              <div className="eyebrow">Archivo</div>
-              <h2>Entradas</h2>
-            </div>
-            <span className="countPill">{portfolioPosts.length}</span>
-          </div>
-
-          {portfolioPosts.length === 0 ? (
-            <div className="emptyState">Todavía no hay publicaciones aquí.</div>
-          ) : (
-            <div className="postList">
-              {portfolioPosts.map((post) => {
-                const { title, preview } = getContentParts(post.content || "");
-                return (
-                  <article key={post.id} className="postRow">
-                    <div className="postBody">
-                      <div className="postMeta">
-                        <span>{formatDate(post.created_at)}</span>
-                      </div>
-                      <Link href={`/post/${post.id}`} className="postTitle">
-                        {title || "Sin título"}
-                      </Link>
-                      {preview && <p className="postPreview">{preview}</p>}
-                    </div>
-                    {post.image_url ? (
-                      <Link href={`/post/${post.id}`} className="postThumb" aria-label="Abrir post">
-                        <img src={post.image_url} alt="" />
-                      </Link>
-                    ) : (
-                      <div className="postThumb placeholderThumb" aria-hidden="true">
-                        <span>Post</span>
-                      </div>
-                    )}
-                  </article>
-                );
-              })}
-            </div>
-          )}
         </section>
       </div>
 
@@ -179,40 +106,37 @@ export default function StudentProfilePage() {
           display: grid;
           gap: var(--space-4);
         }
-        .profileTop {
+        .profileCard {
+          display: grid;
+          gap: var(--space-4);
+          padding: clamp(18px, 4vw, 26px);
+          border-radius: 30px;
+          background: color-mix(in srgb, var(--color-surface) 88%, white);
+          border: 1px solid var(--color-border);
+          box-shadow: 0 18px 34px rgba(26, 26, 46, 0.05);
+        }
+        .profileHeader {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
           gap: var(--space-3);
           flex-wrap: wrap;
-          padding: var(--space-2) 0;
         }
-        .profileTopMain {
-          display: flex;
-          align-items: center;
-          gap: var(--space-3);
-          min-width: 0;
+        .eyebrow {
+          font-size: var(--text-label);
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--color-text-muted);
+          font-weight: 800;
         }
-        .topCopy {
-          display: grid;
-          gap: 2px;
-          min-width: 0;
-        }
-        .topCopy h1 {
-          margin: 0;
-          font-size: var(--text-h1);
-          line-height: 0.98;
-          letter-spacing: -0.04em;
+        .profileHeader h1 {
+          margin: 4px 0 0;
+          font-size: clamp(2.4rem, 7vw, 4.6rem);
+          line-height: 0.92;
+          letter-spacing: -0.06em;
           color: var(--color-text);
-          overflow-wrap: anywhere;
         }
-        .topActions {
-          display: flex;
-          gap: var(--space-2);
-          flex-wrap: wrap;
-        }
-        .ghostPill,
-        .primaryPill {
+        .ghostPill {
           min-height: 40px;
           padding: 0 14px;
           border-radius: var(--radius-pill);
@@ -222,46 +146,25 @@ export default function StudentProfilePage() {
           text-decoration: none;
           font-size: var(--text-body-sm);
           font-weight: 700;
-        }
-        .ghostPill {
           border: 1px solid var(--color-border);
-          background: var(--color-surface);
+          background: color-mix(in srgb, var(--color-surface) 82%, white);
           color: var(--color-text);
         }
-        .primaryPill {
-          border: 1px solid transparent;
-          color: #fff;
-          background: var(--color-primary);
-        }
-        .profileCard,
-        .archiveCard {
-          background: var(--color-surface);
-          border: 1px solid var(--color-border);
-          border-radius: var(--radius-lg);
-          box-shadow: var(--shadow-card);
-        }
-        .profileCard {
-          padding: var(--space-5);
+        .identityRow {
           display: grid;
-          gap: var(--space-4);
-        }
-        .profileIdentity {
-          display: grid;
-          grid-template-columns: 72px minmax(0, 1fr);
+          grid-template-columns: 84px minmax(0, 1fr);
           gap: var(--space-4);
           align-items: center;
         }
         .avatarWrap {
-          width: 72px;
-          height: 72px;
+          width: 84px;
+          height: 84px;
           border-radius: 999px;
           overflow: hidden;
-          flex-shrink: 0;
           border: 1px solid var(--color-border);
           background: var(--color-surface-muted);
           display: grid;
           place-items: center;
-          text-decoration: none;
         }
         .avatarImg {
           display: block;
@@ -269,73 +172,46 @@ export default function StudentProfilePage() {
           height: 100%;
           object-fit: cover;
         }
-        .identityCopy {
-          min-width: 0;
-        }
-        .eyebrow {
-          font-size: var(--text-label);
-          font-weight: 800;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: var(--color-accent-strong);
-        }
-        .archiveHead h2 {
-          margin: 2px 0 0;
-          color: var(--color-text);
-          letter-spacing: -0.02em;
-          overflow-wrap: anywhere;
-        }
         .handle {
           margin: 0;
-          color: var(--color-text);
           font-size: var(--text-body-lg);
-          font-weight: 600;
-          overflow-wrap: anywhere;
+          font-weight: 700;
+          color: var(--color-text);
         }
-        .metaLine {
-          margin-top: var(--space-2);
+        .metaStack {
+          margin-top: 10px;
           display: flex;
-          gap: var(--space-2);
+          gap: 8px;
           flex-wrap: wrap;
-          color: var(--color-text-muted);
-          font-size: var(--text-body-sm);
-          font-weight: 600;
         }
-        .metaLine span {
-          display: inline-flex;
-          align-items: center;
-          min-height: 28px;
+        .metaStack span {
+          min-height: 30px;
           padding: 0 10px;
           border-radius: var(--radius-pill);
-          background: var(--color-accent-soft);
-          border: 1px solid color-mix(in srgb, var(--color-accent) 32%, var(--color-border));
+          background: color-mix(in srgb, var(--color-highlight-soft) 56%, white);
+          color: var(--color-text);
+          display: inline-flex;
+          align-items: center;
+          font-size: var(--text-body-sm);
+          font-weight: 700;
         }
         .bio {
-          margin: var(--space-3) 0 0;
-          max-width: 60ch;
-          font-size: var(--text-body);
-          line-height: 1.65;
-          color: var(--color-text);
-          overflow-wrap: anywhere;
-        }
-        .muted {
+          margin: 12px 0 0;
           color: var(--color-text-muted);
+          font-size: var(--text-body);
+          line-height: 1.6;
+          max-width: 56ch;
         }
         .statsStrip {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: var(--space-3);
+          gap: 10px;
         }
         .statCell {
           min-width: 0;
-          padding: var(--space-4);
-          border-radius: var(--radius-md);
-          background: var(--color-surface-muted);
-          border: 1px solid var(--color-border);
-        }
-        .statCell:first-child {
-          background: color-mix(in srgb, var(--color-accent-soft) 55%, white);
-          border-color: color-mix(in srgb, var(--color-accent) 36%, var(--color-border));
+          padding: 12px 14px;
+          border-radius: 20px;
+          background: color-mix(in srgb, var(--color-surface-muted) 78%, white);
         }
         .statCell span {
           display: block;
@@ -347,172 +223,34 @@ export default function StudentProfilePage() {
         }
         .statCell strong {
           display: block;
-          margin-top: var(--space-2);
+          margin-top: 6px;
           color: var(--color-text);
           font-size: var(--text-body-lg);
-          line-height: 1.2;
+          line-height: 1.25;
           overflow-wrap: anywhere;
-        }
-        .archiveCard {
-          padding: var(--space-5);
-        }
-        .archiveHead {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: var(--space-3);
-          margin-bottom: var(--space-4);
-          flex-wrap: wrap;
-        }
-        .archiveHead h2 {
-          font-size: var(--text-h2);
-          line-height: 1.08;
-        }
-        .countPill {
-          min-height: 32px;
-          padding: 0 12px;
-          border-radius: var(--radius-pill);
-          border: 1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
-          background: var(--color-accent-soft);
-          color: var(--color-primary);
-          font-size: var(--text-body-sm);
-          font-weight: 700;
-          display: inline-flex;
-          align-items: center;
-        }
-        .emptyState {
-          padding: var(--space-6) var(--space-4);
-          border: 1px dashed var(--color-border-strong);
-          border-radius: var(--radius-md);
-          text-align: center;
-          color: var(--color-text-muted);
-          font-size: var(--text-body);
-          background: var(--color-surface-muted);
-        }
-        .postList {
-          display: grid;
-          gap: var(--space-3);
-        }
-        .postRow {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) 72px;
-          gap: var(--space-3);
-          align-items: center;
-          padding: var(--space-4);
-          border-radius: var(--radius-md);
-          border: 1px solid var(--color-border);
-          background: var(--color-surface);
-        }
-        .postRow:hover {
-          border-color: color-mix(in srgb, var(--color-accent) 28%, var(--color-border));
-          background: color-mix(in srgb, var(--color-accent-soft) 26%, white);
-        }
-        .postBody {
-          min-width: 0;
-        }
-        .postMeta {
-          display: flex;
-          gap: var(--space-2);
-          flex-wrap: wrap;
-          align-items: center;
-          margin-bottom: 6px;
-          color: var(--color-text-muted);
-          font-size: var(--text-body-sm);
-          font-weight: 600;
-        }
-        .postTitle {
-          display: block;
-          color: var(--color-text);
-          text-decoration: none;
-          font-size: var(--text-body-lg);
-          line-height: 1.3;
-          font-weight: 700;
-          letter-spacing: -0.01em;
-          overflow-wrap: anywhere;
-        }
-        .postPreview {
-          margin: 6px 0 0;
-          color: var(--color-text-muted);
-          font-size: var(--text-body);
-          line-height: 1.55;
-          overflow-wrap: anywhere;
-        }
-        .postThumb {
-          width: 72px;
-          height: 72px;
-          border-radius: var(--radius-md);
-          overflow: hidden;
-          background: var(--color-surface-muted);
-          border: 1px solid var(--color-border);
-          flex-shrink: 0;
-        }
-        .postThumb img {
-          display: block;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-        .placeholderThumb {
-          display: grid;
-          place-items: center;
-        }
-        .placeholderThumb span {
-          font-size: var(--text-label);
-          font-weight: 800;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          color: var(--color-text-muted);
         }
         @media (max-width: 720px) {
-          .profileCard {
-            padding: var(--space-4);
-          }
-          .profileIdentity {
-            grid-template-columns: 64px minmax(0, 1fr);
+          .identityRow {
+            grid-template-columns: 72px minmax(0, 1fr);
             gap: var(--space-3);
-          }
-          .avatarWrap {
-            width: 64px;
-            height: 64px;
-          }
-          .statsStrip {
-            grid-template-columns: 1fr;
-          }
-          .statCell {
-            padding: var(--space-3);
-          }
-          .archiveCard {
-            padding: var(--space-4);
-          }
-          .postRow {
-            grid-template-columns: minmax(0, 1fr) 72px;
-            gap: var(--space-3);
-            padding: var(--space-3);
-          }
-        }
-        @media (max-width: 520px) {
-          .profileTop {
-            align-items: flex-start;
-          }
-          .topActions {
-            width: 100%;
-          }
-          .topActions > :global(*) {
-            flex: 1 1 auto;
-          }
-          .profileIdentity {
-            grid-template-columns: minmax(0, 1fr);
-            align-items: start;
           }
           .avatarWrap {
             width: 72px;
             height: 72px;
           }
-          .archiveHead {
+          .statsStrip {
+            grid-template-columns: 1fr;
+          }
+        }
+        @media (max-width: 520px) {
+          .profileHeader {
             align-items: stretch;
           }
-          .countPill {
-            width: fit-content;
+          .identityRow {
+            grid-template-columns: minmax(0, 1fr);
+          }
+          .ghostPill {
+            width: 100%;
           }
         }
       `}</style>

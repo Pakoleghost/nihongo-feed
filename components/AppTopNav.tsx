@@ -56,7 +56,6 @@ export default function AppTopNav({ primary = null, secondary = null, tone = "de
       items.push({ key: "profile", label: "Profile", href: `/profile/${userId}` });
     }
     if (isAdmin) {
-      items.push({ key: "write", label: "Write", href: "/write" });
       items.push({ key: "admin", label: "Admin", href: "/admin/groups" });
     }
     items.push({
