@@ -31,6 +31,7 @@ import { recordStudyResultToStorage } from "@/lib/study-srs";
 type AprenderKanaModuleProps = {
   userKey: string;
   onRecordActivity?: (detail?: string) => void;
+  initialMode?: "learn" | null;
 };
 
 type KanaSessionQuestion = {
@@ -199,8 +200,42 @@ function buildSession(
   return { setKey: scopeKeys.join("+"), modes, count, questions };
 }
 
-export default function AprenderKanaModule({ userKey, onRecordActivity }: AprenderKanaModuleProps) {
-  const [screen, setScreen] = useState<"home" | "table" | "setup">("home");
+function isDueReview(nextReview?: string | null) {
+  if (!nextReview) return true;
+  return new Date(nextReview).getTime() <= Date.now();
+}
+
+function buildLearnSession(progress: KanaProgressMap) {
+  const basicHiragana = filterKanaItemsForSelection("hiragana", "basic");
+  const due = KANA_ITEMS.filter((item) => {
+    const entry = progress[item.id];
+    return entry && isDueReview(entry.nextReview);
+  });
+  const difficult = KANA_ITEMS.filter((item) => progress[item.id]?.difficult);
+  const almostKnown = KANA_ITEMS.filter((item) => (progress[item.id]?.timesAlmost || 0) > 0);
+
+  let learnPool = uniqueKanaItems([...due, ...difficult, ...almostKnown]);
+  if (learnPool.length === 0) {
+    learnPool = basicHiragana.slice(0, 5);
+  }
+
+  if (learnPool.length < 8) {
+    const additions = basicHiragana.filter((item) => !learnPool.some((entry) => entry.id === item.id));
+    learnPool = uniqueKanaItems([...learnPool, ...additions.slice(0, 8 - learnPool.length)]);
+  }
+
+  const items = buildKanaSessionItems(learnPool, progress, Math.min(10, Math.max(5, learnPool.length)));
+  const questions = buildQuestionsForItems(items, learnPool, ["multiple_choice"]);
+  return {
+    setKey: "learn",
+    modes: ["multiple_choice"] as KanaPracticeMode[],
+    count: 10 as KanaQuestionCount,
+    questions,
+  };
+}
+
+export default function AprenderKanaModule({ userKey, onRecordActivity, initialMode = null }: AprenderKanaModuleProps) {
+  const [screen, setScreen] = useState<"home" | "table" | "learn" | "setup">("home");
   const [tableScript, setTableScript] = useState<KanaScript>("hiragana");
   const [tableFilter, setTableFilter] = useState<"basic" | "dakuten" | "handakuten" | "yoon" | "mixed">("basic");
   const [selectedScopeKeys, setSelectedScopeKeys] = useState<KanaScopeKey[]>(["hiragana:basic"]);
@@ -221,6 +256,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
   const [streakPulse, setStreakPulse] = useState(0);
   const romajiInputRef = useRef<HTMLInputElement | null>(null);
   const advanceTimerRef = useRef<number | null>(null);
+  const autoStartedLearnRef = useRef(false);
 
   useEffect(() => {
     setProgress(loadKanaProgress(userKey));
@@ -259,6 +295,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
   const allKanaSummary = useMemo(() => getKanaProgressSummary(KANA_ITEMS, progress), [progress]);
   const tableSections = useMemo(() => getKanaTableSections(tableScript, tableFilter), [tableFilter, tableScript]);
   const practicePool = useMemo(() => collectPracticeItems(selectedScopeKeys), [selectedScopeKeys]);
+  const basicHiragana = useMemo(() => filterKanaItemsForSelection("hiragana", "basic"), []);
 
   const selectedScopeDetails = useMemo(
     () =>
@@ -279,6 +316,27 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
   const selectedSetSummary = selectedScopeDetails
     .map((entry) => `${entry.script === "hiragana" ? "H" : "K"} ${KANA_SCOPE_LABELS[entry.set]}`)
     .join(", ");
+  const learnReadyItems = useMemo(() => {
+    const dueItems = KANA_ITEMS.filter((item) => {
+      const entry = progress[item.id];
+      return entry && isDueReview(entry.nextReview);
+    });
+    const difficultItems = KANA_ITEMS.filter((item) => progress[item.id]?.difficult);
+    const almostItems = KANA_ITEMS.filter((item) => (progress[item.id]?.timesAlmost || 0) > 0);
+    const base = uniqueKanaItems([...dueItems, ...difficultItems, ...almostItems]);
+    if (base.length > 0) return base;
+    return basicHiragana.slice(0, 5);
+  }, [basicHiragana, progress]);
+  const learnSummary = useMemo(() => {
+    const due = KANA_ITEMS.filter((item) => {
+      const entry = progress[item.id];
+      return entry && isDueReview(entry.nextReview);
+    }).length;
+    const difficult = KANA_ITEMS.filter((item) => progress[item.id]?.difficult).length;
+    const almost = KANA_ITEMS.filter((item) => (progress[item.id]?.timesAlmost || 0) > 0).length;
+    const fresh = basicHiragana.filter((item) => !progress[item.id]).length;
+    return { due, difficult, almost, fresh };
+  }, [basicHiragana, progress]);
 
   const subtlePillStyle: CSSProperties = {
     borderRadius: 999,
@@ -360,6 +418,19 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
     }, 220);
   };
 
+  const openSession = (nextSession: KanaSession, activityLabel: string) => {
+    setSession(nextSession);
+    setSessionIndex(0);
+    setSessionResults([]);
+    setMultipleChoiceAnswer(null);
+    setRomajiValue("");
+    setRomajiFeedback(null);
+    setAnswerFeedback(null);
+    setStreak(0);
+    setSetupError(null);
+    onRecordActivity?.(activityLabel);
+  };
+
   const startSession = (overrideItems?: KanaItem[]) => {
     if (selectedScopeKeys.length === 0) {
       setSetupError("Selecciona al menos un bloque de kana.");
@@ -383,19 +454,18 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
         }
       : buildSession(selectedScopeKeys, practiceModes, questionCount, progress);
 
-    setSession(nextSession);
-    setSessionIndex(0);
-    setSessionResults([]);
-    setMultipleChoiceAnswer(null);
-    setRomajiValue("");
-    setRomajiFeedback(null);
-    setAnswerFeedback(null);
-    setStreak(0);
-    setSetupError(null);
-    onRecordActivity?.(
-      `${selectedScriptSummary || "Kana"} · ${selectedSetSummary || "Basic"}`,
-    );
+    openSession(nextSession, `${selectedScriptSummary || "Kana"} · ${selectedSetSummary || "Basic"}`);
   };
+
+  const startLearnSession = () => {
+    openSession(buildLearnSession(progress), "Learn");
+  };
+
+  useEffect(() => {
+    if (initialMode !== "learn" || autoStartedLearnRef.current || session) return;
+    autoStartedLearnRef.current = true;
+    startLearnSession();
+  }, [initialMode, progress, session]);
 
   const hardestSessionKana = useMemo(() => {
     const buckets = new Map<string, { item: KanaItem; weight: number }>();
@@ -439,7 +509,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
             </div>
           )}
 
-          <div style={{ display: "grid", gap: "var(--space-2)", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+          <div style={{ display: "grid", gap: "var(--space-2)", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))" }}>
             <button
               type="button"
               onClick={() => setScreen("table")}
@@ -462,10 +532,10 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
 
             <button
               type="button"
-              onClick={() => setScreen("setup")}
+              onClick={() => setScreen("learn")}
               style={{
                 border: "1px solid transparent",
-                background: "color-mix(in srgb, var(--color-highlight-soft) 62%, white)",
+                background: "color-mix(in srgb, var(--color-highlight-soft) 66%, white)",
                 borderRadius: 28,
                 padding: "18px 18px 16px",
                 textAlign: "left",
@@ -474,10 +544,107 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                 color: "var(--color-text)",
               }}
             >
-              <div style={{ fontSize: "clamp(24px, 5vw, 30px)", lineHeight: 1, fontWeight: 800 }}>Practice</div>
+              <div style={{ fontSize: "clamp(24px, 5vw, 30px)", lineHeight: 1, fontWeight: 800 }}>Learn</div>
               <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                Opción múltiple · Romaji · Escritura manual
+                Guiado · progresivo
               </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setScreen("setup")}
+              style={{
+                border: "1px solid var(--color-border)",
+                background: "color-mix(in srgb, var(--color-surface-muted) 74%, white)",
+                borderRadius: 28,
+                padding: "18px 18px 16px",
+                textAlign: "left",
+                display: "grid",
+                gap: 10,
+                color: "var(--color-text)",
+              }}
+            >
+              <div style={{ fontSize: "clamp(24px, 5vw, 30px)", lineHeight: 1, fontWeight: 800 }}>Custom Practice</div>
+              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                Scripts · modos · preguntas
+              </div>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {screen === "learn" && (
+        <div
+          style={{
+            display: "grid",
+            gap: "var(--space-3)",
+            minHeight: "min(100dvh - 160px, 680px)",
+            alignContent: "space-between",
+          }}
+        >
+          <div style={{ display: "grid", gap: "var(--space-3)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <div style={{ display: "grid", gap: 4 }}>
+                <div style={{ fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>Learn</div>
+                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                  Repasa primero lo pendiente y añade kana nuevos sin saturarte.
+                </div>
+              </div>
+              <button type="button" onClick={() => setScreen("home")} className="ds-btn-ghost">
+                Volver
+              </button>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gap: 12,
+                padding: "18px 18px 16px",
+                borderRadius: 28,
+                border: "1px solid var(--color-border)",
+                background: "color-mix(in srgb, var(--color-surface) 88%, white)",
+                boxShadow: "0 18px 30px rgba(26, 26, 46, 0.05)",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline", flexWrap: "wrap" }}>
+                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 800 }}>
+                  Sesión guiada
+                </div>
+                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text)", fontWeight: 800 }}>
+                  {Math.min(10, Math.max(5, learnReadyItems.length))} preguntas
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {learnSummary.due > 0 ? <div style={subtlePillStyle}>{learnSummary.due} pendientes</div> : null}
+                {learnSummary.difficult > 0 ? <div style={subtlePillStyle}>{learnSummary.difficult} difíciles</div> : null}
+                {learnSummary.almost > 0 ? <div style={subtlePillStyle}>{learnSummary.almost} por fijar</div> : null}
+                {learnSummary.due === 0 && learnSummary.difficult === 0 && (
+                  <div style={subtlePillStyle}>{Math.min(5, learnSummary.fresh)} nuevos</div>
+                )}
+              </div>
+              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", lineHeight: 1.45 }}>
+                {learnSummary.due > 0 || learnSummary.difficult > 0
+                  ? "Esta sesión va a priorizar lo que ya necesita repaso antes de meter kana nuevos."
+                  : "Si todavía no tienes progreso, Learn empieza con hiragana básico y lo amplía poco a poco."}
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gap: 8,
+              padding: "14px 16px calc(14px + env(safe-area-inset-bottom))",
+              borderRadius: 26,
+              background: "color-mix(in srgb, var(--color-surface) 86%, white)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
+            <button type="button" onClick={startLearnSession} className="ds-btn" style={{ width: "100%", minHeight: 54 }}>
+              Empezar Learn
+            </button>
+            <button type="button" onClick={() => setScreen("setup")} className="ds-btn-ghost">
+              Abrir práctica personalizada
             </button>
           </div>
         </div>

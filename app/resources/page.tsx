@@ -331,13 +331,6 @@ export default function ResourcesPage() {
                 <h1 className="title">Biblioteca</h1>
               </div>
             </div>
-            <div className="pageHeaderActions">
-              {isAdmin && (
-                <button type="button" onClick={() => startCreateInFolder(selectedFolder)} className="secondaryBtn">
-                  + Nuevo recurso
-                </button>
-              )}
-            </div>
           </header>
 
           {errorMsg && <div className="errorBox">{errorMsg}</div>}
@@ -537,7 +530,7 @@ export default function ResourcesPage() {
               <div className="panelHead compact">
                 <div>
                   <div className="eyebrow">Carpetas</div>
-                  <h2>Biblioteca</h2>
+                  <h2>Selector</h2>
                 </div>
                 <span className="countPill">{folders.length}</span>
               </div>
@@ -587,14 +580,14 @@ export default function ResourcesPage() {
         }
         .resourcesShell {
           display: grid;
-          gap: var(--space-4);
+          gap: var(--space-3);
         }
         .pageHeader {
           display: flex;
           justify-content: space-between;
           align-items: center;
           gap: var(--space-3);
-          padding: 4px 0 2px;
+          padding: 2px 0 0;
         }
         .pageHeaderMain {
           display: flex;
@@ -615,17 +608,10 @@ export default function ResourcesPage() {
         }
         .title {
           margin: 0;
-          font-size: clamp(2.6rem, 8vw, 4.8rem);
-          line-height: 0.92;
+          font-size: clamp(2.4rem, 7.4vw, 4.2rem);
+          line-height: 0.94;
           letter-spacing: -.06em;
           color: var(--color-text);
-        }
-        .pageHeaderActions {
-          display: flex;
-          gap: var(--space-2);
-          align-items: center;
-          flex-wrap: wrap;
-          justify-content: flex-end;
         }
         .primaryBtn, .secondaryBtn {
           border-radius: var(--radius-pill);
@@ -658,17 +644,17 @@ export default function ResourcesPage() {
         .layoutGrid {
           display: grid;
           grid-template-columns: minmax(0, 1fr);
-          gap: 14px;
+          gap: 12px;
         }
         .foldersPanel, .contentPanel {
-          background: color-mix(in srgb, var(--color-surface) 88%, white);
-          border: 1px solid var(--color-border);
-          border-radius: 28px;
-          box-shadow: 0 18px 34px rgba(26, 26, 46, 0.05);
-          padding: 16px;
+          background: color-mix(in srgb, var(--color-surface) 90%, white);
+          border: 1px solid color-mix(in srgb, var(--color-border) 86%, white);
+          border-radius: 26px;
+          box-shadow: 0 16px 28px rgba(26, 26, 46, 0.05);
+          padding: 14px;
         }
         .foldersPanel {
-          background: color-mix(in srgb, var(--color-surface-muted) 64%, white);
+          background: color-mix(in srgb, var(--color-surface-muted) 78%, white);
         }
         .panelHead {
           display: flex;
@@ -692,7 +678,7 @@ export default function ResourcesPage() {
           align-items: center;
           justify-content: space-between;
           gap: var(--space-3);
-          margin-bottom: 12px;
+          margin-bottom: 10px;
           flex-wrap: wrap;
         }
         .contentHeroMain {
@@ -702,7 +688,7 @@ export default function ResourcesPage() {
         }
         .contentHeroMain h2 {
           margin: 0;
-          font-size: clamp(2.1rem, 6vw, 3.3rem);
+          font-size: clamp(2rem, 5.7vw, 3.05rem);
           line-height: .94;
           letter-spacing: -.06em;
           color: var(--color-text);
@@ -717,7 +703,7 @@ export default function ResourcesPage() {
         .countPill {
           border-radius: var(--radius-pill);
           border: 1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
-          background: var(--color-accent-soft);
+          background: color-mix(in srgb, var(--color-accent-soft) 82%, white);
           color: var(--color-primary);
           font-size: var(--text-label);
           font-weight: 800;
@@ -750,31 +736,25 @@ export default function ResourcesPage() {
           color: var(--color-primary);
         }
         .folderList {
-          display: flex;
+          display: grid;
           gap: 8px;
-          overflow-x: auto;
-          padding-bottom: 2px;
-          scrollbar-width: none;
-        }
-        .folderList::-webkit-scrollbar {
-          display: none;
         }
         .folderBtn {
           border: 1px solid var(--color-border);
-          background: var(--color-surface);
-          border-radius: 999px;
-          padding: 9px 12px;
+          background: color-mix(in srgb, var(--color-surface) 86%, white);
+          border-radius: 18px;
+          padding: 10px 12px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: var(--space-2);
           cursor: pointer;
           text-align: left;
-          flex: 0 0 auto;
         }
         .folderBtn.active {
-          background: color-mix(in srgb, var(--color-accent-soft) 60%, white);
+          background: color-mix(in srgb, var(--color-accent-soft) 76%, white);
           border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+          box-shadow: 0 10px 18px rgba(26, 26, 46, 0.05);
         }
         .folderBtnLabel {
           display: inline-flex;
@@ -913,19 +893,20 @@ export default function ResourcesPage() {
         .emptyBox p { margin: 0 0 10px; }
         .resourceList {
           display: grid;
-          gap: var(--space-2);
+          gap: 10px;
         }
         .resourceRow {
-          border: 1px solid var(--color-border);
-          border-radius: 20px;
-          background: color-mix(in srgb, var(--color-surface) 86%, white);
-          padding: 10px 12px;
+          border: 1px solid color-mix(in srgb, var(--color-border) 86%, white);
+          border-radius: 22px;
+          background: color-mix(in srgb, var(--color-surface) 90%, white);
+          padding: 11px 12px;
           display: grid;
           gap: 8px;
+          box-shadow: 0 12px 22px rgba(26, 26, 46, 0.04);
         }
         .resourceRow.selected {
           border-color: var(--color-border-strong);
-          background: color-mix(in srgb, var(--color-highlight-soft) 54%, white);
+          background: color-mix(in srgb, var(--color-highlight-soft) 60%, white);
         }
         .resourceMain {
           display: flex;
@@ -939,8 +920,8 @@ export default function ResourcesPage() {
           border-radius: 12px;
           display: grid;
           place-items: center;
-          background: var(--color-surface-muted);
-          color: var(--color-text-muted);
+          background: color-mix(in srgb, var(--color-accent-soft) 68%, white);
+          color: var(--color-primary);
           border: 1px solid var(--color-border);
           flex-shrink: 0;
         }
@@ -953,7 +934,7 @@ export default function ResourcesPage() {
         }
         .resourceTitleRow strong {
           color: var(--color-text);
-          font-size: 15px;
+          font-size: 16px;
           line-height: 1.3;
         }
         .typeTag {
@@ -976,10 +957,11 @@ export default function ResourcesPage() {
           margin: 5px 0 0;
           color: var(--color-text-muted);
           font-size: var(--text-body-sm);
-          line-height: 1.45;
+          line-height: 1.42;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
           overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
         }
         .resourceActions {
           display: flex;
@@ -1011,6 +993,10 @@ export default function ResourcesPage() {
         }
 
         @media (min-width: 1024px) {
+          .layoutGrid {
+            grid-template-columns: minmax(0, 1.25fr) minmax(260px, .75fr);
+            align-items: start;
+          }
           .composerGrid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }

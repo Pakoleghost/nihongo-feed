@@ -6280,7 +6280,10 @@ function StudyContent() {
     [studyDueSummary],
   );
   const primaryReviewTool = (Object.entries(homeDueByTool).sort((a, b) => b[1] - a[1])[0]?.[0] as StudyHomeToolKey | undefined) || "learnkana";
-  const reviewHref = `/study?view=${primaryReviewTool === "exam" ? "exam" : primaryReviewTool}`;
+  const reviewHref =
+    primaryReviewTool === "learnkana"
+      ? "/study?view=learnkana&learn=1"
+      : `/study?view=${primaryReviewTool === "exam" ? "exam" : primaryReviewTool}`;
   const weekStart = getLocalWeekStart();
   const weeklyActivity = studyActivity.filter((entry) => {
     const value = new Date(entry.occurredAt);
@@ -6430,12 +6433,14 @@ function StudyContent() {
   const flashDeckCardStyle: CSSProperties = {
     textAlign: "left",
     border: "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
-    borderRadius: 20,
-    background: "color-mix(in srgb, var(--color-surface) 88%, white)",
-    padding: "10px 10px 9px",
+    borderRadius: 18,
+    background: "color-mix(in srgb, var(--color-surface) 90%, white)",
+    padding: "10px 10px 8px",
     cursor: "pointer",
     display: "grid",
-    gap: 6,
+    gap: 4,
+    minHeight: 64,
+    boxShadow: "0 12px 22px rgba(26, 26, 46, 0.04)",
   };
 
   useEffect(() => {
@@ -7128,18 +7133,19 @@ function StudyContent() {
                     style={{
                       textDecoration: "none",
                       color: "var(--color-text)",
-                      background: "color-mix(in srgb, rgba(244, 162, 97, 0.18) 72%, white)",
+                      background: "color-mix(in srgb, rgba(244, 162, 97, 0.24) 76%, white)",
+                      border: "1px solid color-mix(in srgb, rgba(244, 162, 97, 0.34) 74%, var(--color-border))",
                       borderRadius: 24,
                       padding: "10px 12px",
                       display: "grid",
                       gap: 6,
-                      boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
+                      boxShadow: "0 14px 26px rgba(26, 26, 46, 0.05)",
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
                       <div style={sectionKickerStyle}>Repasar pendientes</div>
                       <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
-                        Repasar ↗
+                        {primaryReviewTool === "learnkana" ? "Abrir Learn ↗" : "Repasar ↗"}
                       </div>
                     </div>
                     <div style={{ fontSize: "clamp(22px, 5vw, 28px)", lineHeight: 1, fontWeight: 800, letterSpacing: "-.04em" }}>
@@ -7171,16 +7177,16 @@ function StudyContent() {
                     : 0;
                 const cardBackground =
                   tool.key === "learnkana"
-                    ? "color-mix(in srgb, var(--color-highlight-soft) 44%, white)"
+                    ? "color-mix(in srgb, var(--color-highlight-soft) 56%, white)"
                     : tool.key === "kana"
-                    ? "color-mix(in srgb, var(--color-surface) 76%, white)"
+                    ? "color-mix(in srgb, var(--color-surface) 84%, white)"
                     : tool.key === "sprint"
-                      ? "color-mix(in srgb, var(--color-accent-soft) 58%, white)"
+                      ? "color-mix(in srgb, var(--color-accent-soft) 66%, white)"
                       : tool.key === "exam"
-                        ? "color-mix(in srgb, var(--color-highlight-soft) 58%, white)"
+                        ? "color-mix(in srgb, var(--color-highlight-soft) 64%, white)"
                         : tool.key === "flashcards"
-                          ? "color-mix(in srgb, rgba(244, 162, 97, 0.12) 70%, white)"
-                          : "color-mix(in srgb, var(--color-surface-muted) 72%, white)";
+                          ? "color-mix(in srgb, rgba(244, 162, 97, 0.2) 76%, white)"
+                          : "color-mix(in srgb, var(--color-surface-muted) 80%, white)";
                 const arrowBackground =
                   tool.key === "learnkana" || tool.key === "exam" || tool.key === "kana"
                     ? "var(--color-highlight-soft)"
@@ -7204,7 +7210,8 @@ function StudyContent() {
                       padding: cardPadding,
                       borderRadius: cardRadius,
                       background: cardBackground,
-                      boxShadow: isSoftAccent ? "0 10px 24px rgba(26, 26, 46, 0.04)" : "0 14px 28px rgba(26, 26, 46, 0.05)",
+                      border: "1px solid color-mix(in srgb, var(--color-border) 84%, white)",
+                      boxShadow: isSoftAccent ? "0 12px 24px rgba(26, 26, 46, 0.05)" : "0 16px 30px rgba(26, 26, 46, 0.06)",
                     }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
@@ -7256,7 +7263,11 @@ function StudyContent() {
 
         {!showHub && activeTab === "learnkana" && (
           <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop, animation: "studyViewIn 220ms ease" }}>
-            <AprenderKanaModule userKey={userKey} onRecordActivity={(detail) => recordStudyActivity("learnkana", detail)} />
+            <AprenderKanaModule
+              userKey={userKey}
+              initialMode={searchParams.get("learn") === "1" ? "learn" : null}
+              onRecordActivity={(detail) => recordStudyActivity("learnkana", detail)}
+            />
           </section>
         )}
 
@@ -7456,24 +7467,6 @@ function StudyContent() {
                             >
                               ↗
                             </span>
-                          </div>
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                            {entry.sets.map((set) => (
-                              <span
-                                key={`folder-preview-${set.id}`}
-                                style={{
-                                  ...chipStyle,
-                                  padding: "4px 8px",
-                                  fontSize: 10,
-                                  background: "color-mix(in srgb, var(--color-accent-soft) 72%, white)",
-                                }}
-                              >
-                                {set.title}
-                              </span>
-                            ))}
-                          </div>
-                          <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
-                            {entry.setCount} sets
                           </div>
                         </button>
                       ))}
