@@ -47,7 +47,7 @@
   --shadow-raised: 0 16px 32px rgba(26, 26, 46, 0.08);
   --container-max: 760px;
   --page-padding: 16px;
-  --app-sticky-offset: 76px;
+  --app-sticky-offset: 88px;
 
   /* legacy aliases kept for old pages */
   --bg: var(--color-bg);

@@ -6128,7 +6128,7 @@ function StudyContent() {
           ? "Repaso mixto"
           : "Flashcards"
     : "Study";
-  const sectionScrollMarginTop = "calc(var(--app-sticky-offset) + var(--space-4))";
+  const sectionScrollMarginTop = "calc(var(--app-sticky-offset) + var(--space-5))";
   const sectionStyle: CSSProperties = {
     background: "var(--color-surface)",
     border: "1px solid var(--color-border)",
@@ -6601,13 +6601,13 @@ function StudyContent() {
         <AppTopNav primary="study" tone="study" />
 
         {showHub ? (
-          <section style={{ display: "grid", gap: "var(--space-2)", padding: "var(--space-4) 0 var(--space-2)", scrollMarginTop: sectionScrollMarginTop }}>
+          <section style={{ display: "grid", gap: "var(--space-2)", padding: "calc(var(--space-5) + 4px) 0 var(--space-2)", scrollMarginTop: sectionScrollMarginTop }}>
             <div style={{ fontSize: "clamp(48px, 11vw, 82px)", lineHeight: 0.9, letterSpacing: "-.065em", fontWeight: 800, color: "var(--color-text)" }}>
               Study
             </div>
           </section>
         ) : (
-          <section style={{ ...sectionStyle, gap: "var(--space-2)", padding: "var(--space-4) var(--space-5)", scrollMarginTop: sectionScrollMarginTop }}>
+          <section style={{ ...sectionStyle, gap: "var(--space-2)", padding: "calc(var(--space-4) + 4px) var(--space-5) var(--space-4)", scrollMarginTop: sectionScrollMarginTop }}>
             <div style={{ fontSize: "var(--text-h1)", lineHeight: 0.98, letterSpacing: "-.04em", fontWeight: 800, color: "var(--color-text)" }}>
               {pageTitle}
             </div>
@@ -6621,7 +6621,7 @@ function StudyContent() {
         )}
 
         {showHub && (
-          <section style={{ display: "grid", gap: "var(--space-2)", paddingBottom: "var(--space-4)" }}>
+          <section style={{ display: "grid", gap: "var(--space-2)", paddingTop: "var(--space-1)", paddingBottom: "var(--space-4)", scrollMarginTop: sectionScrollMarginTop }}>
             <div style={{ display: "grid", gap: "var(--space-2)" }}>
               <div
                 style={{
