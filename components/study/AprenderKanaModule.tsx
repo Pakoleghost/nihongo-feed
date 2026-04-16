@@ -219,6 +219,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
   }, [session]);
 
   const sessionFinished = Boolean(session) && sessionIndex >= (session?.questions.length || 0);
+  const currentQuestion = session?.questions[sessionIndex] || null;
 
   useEffect(() => {
     if (currentQuestion?.mode !== "romaji_input" || sessionFinished) return;
@@ -228,7 +229,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
 
   const allKanaSummary = useMemo(() => getKanaProgressSummary(KANA_ITEMS, progress), [progress]);
   const tableSections = useMemo(() => getKanaTableSections(tableScript, tableFilter), [tableFilter, tableScript]);
-  const currentQuestion = session?.questions[sessionIndex] || null;
   const practicePool = useMemo(() => collectPracticeItems(practiceScripts, practiceSets), [practiceScripts, practiceSets]);
 
   const subtlePillStyle: CSSProperties = {
