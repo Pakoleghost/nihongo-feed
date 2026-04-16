@@ -568,7 +568,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
                         autoCapitalize="off"
                         autoCorrect="off"
                         spellCheck={false}
-                        inputMode="latin"
+                        inputMode="text"
                         enterKeyHint="done"
                         onKeyDown={(event) => {
                           if (event.key === "Enter" && !romajiFeedback) {
