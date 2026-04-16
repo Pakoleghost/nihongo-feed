@@ -177,13 +177,6 @@ const VK_BUCKETS: Array<{ key: VkBucketKey; label: string; lessons: number[] }> 
   { key: "l11_12", label: "L11-12", lessons: [11, 12] },
 ];
 const VK_MODE_KEYS = VK_BUCKETS.map((bucket) => `vk:${bucket.key}`);
-const FLASHCARD_ROUTE_GROUPS = [
-  { id: "route-foundations", title: "Fundamentos", subtitle: "Kana, vocab base y primeras estructuras.", lessons: [1, 2], accent: "#4ECDC4", surface: "rgba(78, 205, 196, 0.12)" },
-  { id: "route-core-a", title: "Núcleo I", subtitle: "Verbos, kanji inicial y práctica cotidiana.", lessons: [3, 4, 5], accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
-  { id: "route-core-b", title: "Núcleo II", subtitle: "Forma て, más kanji y vocab de uso real.", lessons: [6, 7, 8], accent: "#F4A261", surface: "rgba(244, 162, 97, 0.12)" },
-  { id: "route-bridge", title: "Consolidación", subtitle: "Lecciones altas para repasar antes de examen.", lessons: [9, 10, 11, 12], accent: "#E63946", surface: "rgba(230, 57, 70, 0.08)" },
-] as const;
-
 type StudyView = "learnkana" | "kana" | "flashcards" | "quiz" | "sprint" | "exam";
 const EXAM_PASSING_PERCENT = 70;
 const EXAM_QUESTION_COUNT = 20;
@@ -5324,7 +5317,6 @@ function StudyContent() {
   const [flashDeckEditingId, setFlashDeckEditingId] = useState<string | null>(null);
   const [flashDeckName, setFlashDeckName] = useState("");
   const [flashDeckSelectedSetIds, setFlashDeckSelectedSetIds] = useState<string[]>([]);
-  const [flashRouteId, setFlashRouteId] = useState<string | null>(FLASHCARD_ROUTE_GROUPS[0]?.id ?? null);
 
   const [quizMode, setQuizMode] = useState<QuizMode>("particles");
   const [quizCount, setQuizCount] = useState<QuizCount>(10);
@@ -5829,25 +5821,18 @@ function StudyContent() {
       ),
     [flashDeckSelectedSetIds],
   );
-  const flashRoutes = useMemo(
+  const officialFlashLessons = useMemo(
     () =>
-      FLASHCARD_ROUTE_GROUPS.map((route) => ({
-        ...route,
-        entries: route.lessons.map((lesson) => ({
-          lesson,
-          sets: FLASHCARD_SETS.filter((set) => set.lesson === lesson),
-        })).filter((entry) => entry.sets.length > 0),
+      flashSetsByLesson.filter((entry) => entry.sets.length > 0).map((entry) => ({
+        lesson: entry.lesson,
+        sets: entry.sets,
+        setCount: entry.sets.length,
       })),
-    [],
-  );
-  const activeFlashRoute = useMemo(
-    () => flashRoutes.find((route) => route.id === flashRouteId) || flashRoutes[0] || null,
-    [flashRouteId, flashRoutes],
+    [flashSetsByLesson],
   );
 
   const openFlashLesson = (lesson: number) => {
     closeCustomFlashDeckBuilder();
-    setFlashRouteId(FLASHCARD_ROUTE_GROUPS.find((route) => route.lessons.some((value) => value === lesson))?.id || flashRouteId);
     setFlashLessonFolder(lesson);
     setFlashSetId(null);
     setFlashMode("browse");
@@ -7204,18 +7189,8 @@ function StudyContent() {
                     <div style={{ fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>Oficiales</div>
                   </div>
 
-                  <StudySelectorGroup
-                    options={flashRoutes.map((route) => ({ key: route.id, label: route.title, tone: route.surface }))}
-                    value={flashRouteId ?? undefined}
-                    onSelect={(value) => setFlashRouteId(value)}
-                    layout="row"
-                    compact
-                    minItemWidth={112}
-                  />
-
-                  {activeFlashRoute && (
-                    <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
-                      {activeFlashRoute.entries.map((entry) => (
+                  <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
+                    {officialFlashLessons.map((entry) => (
                         <button
                           key={`folder-${entry.lesson}`}
                           type="button"
@@ -7257,12 +7232,11 @@ function StudyContent() {
                             ))}
                           </div>
                           <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                            {entry.sets.length} sets
+                            {entry.setCount} sets
                           </div>
                         </button>
                       ))}
-                    </div>
-                  )}
+                  </div>
                 </div>
 
                 <div style={{ display: "grid", gap: 12 }}>
