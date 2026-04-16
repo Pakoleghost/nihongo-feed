@@ -27,24 +27,24 @@
   --color-primary-strong: #111122;
   --color-accent: #4ECDC4;
   --color-accent-strong: #E63946;
-  --color-accent-soft: rgba(78, 205, 196, 0.14);
-  --color-highlight-soft: rgba(230, 57, 70, 0.1);
+  --color-accent-soft: rgba(78, 205, 196, 0.22);
+  --color-highlight-soft: rgba(230, 57, 70, 0.16);
   --color-bg: #FFF8E7;
   --color-surface: #FFFFFF;
-  --color-surface-muted: #FFFCF4;
+  --color-surface-muted: #FFF5E6;
   --color-text: #1A1A2E;
-  --color-text-muted: #666C7A;
-  --color-border: rgba(26, 26, 46, 0.10);
-  --color-border-strong: rgba(26, 26, 46, 0.16);
-  --color-focus: rgba(78, 205, 196, 0.28);
+  --color-text-muted: #53596B;
+  --color-border: rgba(26, 26, 46, 0.14);
+  --color-border-strong: rgba(26, 26, 46, 0.22);
+  --color-focus: rgba(78, 205, 196, 0.34);
 
   /* primitives */
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 24px;
   --radius-pill: 999px;
-  --shadow-card: 0 10px 24px rgba(26, 26, 46, 0.05);
-  --shadow-raised: 0 16px 32px rgba(26, 26, 46, 0.08);
+  --shadow-card: 0 14px 30px rgba(26, 26, 46, 0.07);
+  --shadow-raised: 0 20px 38px rgba(26, 26, 46, 0.1);
   --container-max: 760px;
   --page-padding: 16px;
   --app-sticky-offset: 88px;
@@ -196,7 +196,7 @@ a:focus-visible {
 }
 
 .ds-btn-secondary:hover {
-  background: var(--color-surface-muted);
+  background: color-mix(in srgb, var(--color-surface-muted) 86%, white);
   border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border-strong));
 }
 

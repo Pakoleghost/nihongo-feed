@@ -26,6 +26,7 @@ import {
   type KanaProgressMap,
   type KanaRating,
 } from "@/lib/kana-progress";
+import { recordStudyResultToStorage } from "@/lib/study-srs";
 
 type AprenderKanaModuleProps = {
   userKey: string;
@@ -305,6 +306,13 @@ export default function AprenderKanaModule({ userKey, onRecordActivity }: Aprend
 
   const recordResult = (item: KanaItem, rating: KanaRating, extra?: { recognitionScore?: number }) => {
     setProgress((previous) => applyKanaRating(previous, item, rating));
+    recordStudyResultToStorage(userKey, {
+      itemId: item.id,
+      itemType: "kana",
+      sourceTool: "learnkana",
+      label: `${item.kana} · ${item.romaji}`,
+      rating,
+    });
     setSessionResults((previous) => [
       ...previous,
       { item, rating, mode: currentQuestion?.mode || practiceModes[0] || "multiple_choice", recognitionScore: extra?.recognitionScore },

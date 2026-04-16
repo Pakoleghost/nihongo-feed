@@ -10,8 +10,11 @@ import AppTopNav from "@/components/AppTopNav";
 import AprenderKanaModule from "@/components/study/AprenderKanaModule";
 import PracticeShell, { PracticeStageCard } from "@/components/study/PracticeShell";
 import StudySelectorGroup from "@/components/study/StudySelectorGroup";
+import { KANA_ITEMS } from "@/lib/kana-data";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
+import { applyKanaRating, loadKanaProgress, saveKanaProgress } from "@/lib/kana-progress";
+import { getStudyDueSummary, loadStudySrs, rankItemsForReview, recordStudyResult, saveStudySrs, type StudySrsMap, type StudySrsItemType, type StudySrsSourceTool } from "@/lib/study-srs";
 
 type KanaPair = readonly [string, string];
 type QuizCount = 10 | 20 | 30;
@@ -95,6 +98,8 @@ type PracticeFeedbackState = {
   answer: string;
   explanation?: string;
 };
+
+type StudyHomeToolKey = "learnkana" | "flashcards" | "sprint" | "exam";
 
 function getLocalWeekStart(date = new Date()) {
   const value = new Date(date);
@@ -214,9 +219,19 @@ type CustomFlashDeckRecord = {
 
 type FlashLearnQuestion = {
   id: string;
+  itemId: string;
+  lesson: number;
+  deckTitle: string;
   prompt: string;
   correct: string;
   options: string[];
+};
+
+type FlashLearnResult = {
+  itemId: string;
+  lesson: number;
+  deckTitle: string;
+  correct: boolean;
 };
 
 type StudyActivityTool = "learnkana" | "kana" | "sprint" | "flashcards" | "exam";
@@ -5271,10 +5286,11 @@ function StudyContent() {
   const [vkResetLabel, setVkResetLabel] = useState("");
   const [kanaLeaderboard, setKanaLeaderboard] = useState<Record<KanaMode, KanaScoreRow[]>>({ hiragana: [], katakana: [], mixed: [] });
   const [leaderboardUnavailable, setLeaderboardUnavailable] = useState(false);
-  const [kanaQuestion, setKanaQuestion] = useState<{ char: string; correct: string; options: string[] }>({
+  const [kanaQuestion, setKanaQuestion] = useState<{ char: string; correct: string; options: string[]; itemId: string | null }>({
     char: "あ",
     correct: "a",
     options: ["a", "i", "u", "e"],
+    itemId: null,
   });
   const kanaRoundSubmittedRef = useRef(false);
   const pendingKanaSubmitRef = useRef<KanaRoundPayload | null>(null);
@@ -5306,11 +5322,14 @@ function StudyContent() {
     l11_12: [],
   });
   const [vkLeaderboardUnavailable, setVkLeaderboardUnavailable] = useState(false);
-  const [vkQuestion, setVkQuestion] = useState<{ prompt: string; correct: string; options: string[]; hint: string }>({
+  const [vkQuestion, setVkQuestion] = useState<{ prompt: string; correct: string; options: string[]; hint: string; itemId: string; itemType: "vocab" | "kanji"; lesson: number }>({
     prompt: "だいがく",
     correct: "universidad; instituto",
     options: ["universidad; instituto", "escuela", "libro", "agua"],
     hint: "Significado",
+    itemId: "l1-vocab-daigaku",
+    itemType: "vocab",
+    lesson: 1,
   });
   const vkRoundSubmittedRef = useRef(false);
   const pendingVkSubmitRef = useRef<VkRoundPayload | null>(null);
@@ -5328,6 +5347,7 @@ function StudyContent() {
   const [flashLearnChoice, setFlashLearnChoice] = useState<string | null>(null);
   const [flashLearnScore, setFlashLearnScore] = useState(0);
   const [flashLearnFinished, setFlashLearnFinished] = useState(false);
+  const [flashLearnResults, setFlashLearnResults] = useState<FlashLearnResult[]>([]);
   const [customFlashDecks, setCustomFlashDecks] = useState<CustomFlashDeckRecord[]>([]);
   const [flashDeckBuilderOpen, setFlashDeckBuilderOpen] = useState(false);
   const [flashDeckEditingId, setFlashDeckEditingId] = useState<string | null>(null);
@@ -5355,6 +5375,7 @@ function StudyContent() {
   const [examStreakPulse, setExamStreakPulse] = useState(0);
   const [examSheetVisible, setExamSheetVisible] = useState(false);
   const [examHistory, setExamHistory] = useState<ExamAttempt[]>([]);
+  const [studySrs, setStudySrs] = useState<StudySrsMap>({});
   const examCardRef = useRef<HTMLDivElement | null>(null);
   const examPersistedRef = useRef(false);
   const examAdvanceTimerRef = useRef<number | null>(null);
@@ -5420,6 +5441,7 @@ function StudyContent() {
             );
           }
         }
+        setStudySrs(loadStudySrs(key));
       } catch {}
     };
     void boot();
@@ -5466,6 +5488,11 @@ function StudyContent() {
   }, [selectedView]);
 
   useEffect(() => {
+    if (selectedView) return;
+    setStudySrs(loadStudySrs(userKey));
+  }, [selectedView, userKey]);
+
+  useEffect(() => {
     if (!kanaRunning || kanaTime <= 0 || kanaCountdown !== null) return;
     const timer = window.setTimeout(() => setKanaTime((v) => v - 1), 1000);
     return () => window.clearTimeout(timer);
@@ -5494,10 +5521,15 @@ function StudyContent() {
   }, [kanaPenalty]);
 
   const kanaPool = kanaSet === "hiragana" ? HIRAGANA : kanaSet === "katakana" ? KATAKANA : [...HIRAGANA, ...KATAKANA];
+  const kanaItemLookup = useMemo(
+    () => new Map(KANA_ITEMS.map((item) => [`${item.kana}:${item.romaji}`, item])),
+    [],
+  );
 
   const createKanaQuestion = () => {
     const [char, romaji] = kanaPool[Math.floor(Math.random() * kanaPool.length)];
-    setKanaQuestion({ char, correct: romaji, options: romajiOptions(kanaPool, romaji) });
+    const item = kanaItemLookup.get(`${char}:${romaji}`) || null;
+    setKanaQuestion({ char, correct: romaji, options: romajiOptions(kanaPool, romaji), itemId: item?.id || null });
   };
 
   const loadKanaLeaderboard = async () => {
@@ -5601,29 +5633,41 @@ function StudyContent() {
   }, [vkBucketConfig]);
 
   const createVkQuestion = () => {
-    const canUseKanji = vkKanjiPool.length >= 4;
-    const canUseVocab = vkVocabPool.length >= 4;
+    const rankedKanjiPool = rankItemsForReview(vkKanjiPool, studySrs, (row) => ({
+      itemId: row.id,
+      itemType: "kanji",
+      sourceTool: "sprint",
+    }));
+    const rankedVocabPool = rankItemsForReview(vkVocabPool, studySrs, (row) => ({
+      itemId: row.id,
+      itemType: "vocab",
+      sourceTool: "sprint",
+    }));
+    const canUseKanji = rankedKanjiPool.length >= 4;
+    const canUseVocab = rankedVocabPool.length >= 4;
     if (!canUseKanji && !canUseVocab) return;
 
     const useKanji = canUseKanji && (!canUseVocab || Math.random() < 0.45);
     if (useKanji) {
-      const picked = vkKanjiPool[Math.floor(Math.random() * vkKanjiPool.length)];
+      const kanjiCandidates = rankedKanjiPool.slice(0, Math.min(rankedKanjiPool.length, 8));
+      const picked = kanjiCandidates[Math.floor(Math.random() * kanjiCandidates.length)];
       const options = buildOptionSet(
         picked.hira,
-        vkKanjiPool.filter((row) => row.id !== picked.id).map((row) => row.hira),
-        vkKanjiPool.map((row) => row.hira),
+        rankedKanjiPool.filter((row) => row.id !== picked.id).map((row) => row.hira),
+        rankedKanjiPool.map((row) => row.hira),
       );
-      setVkQuestion({ prompt: picked.kanji, correct: picked.hira, options, hint: "Lectura" });
+      setVkQuestion({ prompt: picked.kanji, correct: picked.hira, options, hint: "Lectura", itemId: picked.id, itemType: "kanji", lesson: picked.lesson });
       return;
     }
 
-    const picked = vkVocabPool[Math.floor(Math.random() * vkVocabPool.length)];
+    const vocabCandidates = rankedVocabPool.slice(0, Math.min(rankedVocabPool.length, 8));
+    const picked = vocabCandidates[Math.floor(Math.random() * vocabCandidates.length)];
     const options = buildOptionSet(
       picked.es,
-      vkVocabPool.filter((row) => row.id !== picked.id).map((row) => row.es),
-      vkVocabPool.map((row) => row.es),
+      rankedVocabPool.filter((row) => row.id !== picked.id).map((row) => row.es),
+      rankedVocabPool.map((row) => row.es),
     );
-    setVkQuestion({ prompt: picked.jp, correct: picked.es, options, hint: "Significado" });
+    setVkQuestion({ prompt: picked.jp, correct: picked.es, options, hint: "Significado", itemId: picked.id, itemType: "vocab", lesson: picked.lesson });
   };
 
   const loadVkLeaderboard = async () => {
@@ -5723,10 +5767,25 @@ function StudyContent() {
   const answerKana = (choice: string) => {
     if (!kanaRunning || kanaPenalty > 0 || kanaCountdown !== null || kanaTime <= 0) return;
     kanaAnswersCountRef.current += 1;
-    if (choice === kanaQuestion.correct) {
+    const correct = choice === kanaQuestion.correct;
+    if (correct) {
       setKanaScore((v) => v + 1);
     } else {
       setKanaPenalty(2);
+    }
+    if (kanaQuestion.itemId) {
+      const kanaItem = KANA_ITEMS.find((item) => item.id === kanaQuestion.itemId);
+      if (kanaItem) {
+        const nextProgress = applyKanaRating(loadKanaProgress(userKey), kanaItem, correct ? "correct" : "wrong");
+        saveKanaProgress(userKey, nextProgress);
+        recordSrsResult({
+          itemId: kanaItem.id,
+          itemType: "kana",
+          sourceTool: "kana",
+          label: `${kanaItem.kana} · ${kanaItem.romaji}`,
+          rating: correct ? "correct" : "wrong",
+        });
+      }
     }
     createKanaQuestion();
   };
@@ -5785,11 +5844,20 @@ function StudyContent() {
   const answerVk = (choice: string) => {
     if (!vkRunning || vkPenalty > 0 || vkCountdown !== null || vkTime <= 0) return;
     vkAnswersCountRef.current += 1;
-    if (choice === vkQuestion.correct) {
+    const correct = choice === vkQuestion.correct;
+    if (correct) {
       setVkScore((v) => v + 1);
     } else {
       setVkPenalty(2);
     }
+    recordSrsResult({
+      itemId: vkQuestion.itemId,
+      itemType: vkQuestion.itemType,
+      sourceTool: "sprint",
+      sourceLesson: vkQuestion.lesson,
+      label: vkQuestion.prompt,
+      rating: correct ? "correct" : "wrong",
+    });
     createVkQuestion();
   };
 
@@ -5801,6 +5869,38 @@ function StudyContent() {
       { id: `${tool}-${Date.now()}`, tool, label, href, detail, occurredAt },
       ...prev,
     ].slice(0, 12));
+  };
+
+  const recordSrsResult = ({
+    itemId,
+    itemType,
+    sourceTool,
+    rating,
+    sourceLesson,
+    sourceDeck,
+    label,
+  }: {
+    itemId: string;
+    itemType: StudySrsItemType;
+    sourceTool: StudySrsSourceTool;
+    rating: "wrong" | "almost" | "correct";
+    sourceLesson?: number | null;
+    sourceDeck?: string | null;
+    label?: string | null;
+  }) => {
+    setStudySrs((previous) => {
+      const next = recordStudyResult(previous, {
+        itemId,
+        itemType,
+        sourceTool,
+        sourceLesson,
+        sourceDeck,
+        label,
+        rating,
+      });
+      saveStudySrs(userKey, next);
+      return next;
+    });
   };
 
   const flashLessons = useMemo(
@@ -5911,6 +6011,7 @@ function StudyContent() {
     setFlashLearnChoice(null);
     setFlashLearnScore(0);
     setFlashLearnFinished(false);
+    setFlashLearnResults([]);
   };
 
   const openCustomFlashDeckBuilder = (deck?: CustomFlashDeckRecord) => {
@@ -6007,8 +6108,8 @@ function StudyContent() {
     focusFlashArea();
   };
 
-  const buildFlashLearnQuestions = (set: FlashcardSet, shuffledItems: FlashcardItem[]) => {
-    const picked = shuffledItems.slice(0, Math.min(20, shuffledItems.length));
+  const buildFlashLearnQuestions = (set: FlashcardSet, orderedItems: FlashcardItem[]) => {
+    const picked = orderedItems.slice(0, Math.min(20, orderedItems.length));
     const recentDistractorHistory: string[] = [];
     let previousDistractors: string[] = [];
     const recentWindowSize = 9;
@@ -6028,6 +6129,9 @@ function StudyContent() {
 
       return {
         id: `${set.id}-learn-${index + 1}`,
+        itemId: item.id,
+        lesson: set.lesson,
+        deckTitle: set.title,
         prompt: item.front,
         correct: item.back,
         options,
@@ -6035,14 +6139,8 @@ function StudyContent() {
     });
   };
 
-  const startFlashLearn = () => {
-    if (!activeFlashSet || activeFlashItems.length < 4) {
-      alert("Este set necesita al menos 4 tarjetas para el modo Aprender.");
-      return;
-    }
-    recordStudyActivity("flashcards", activeFlashSet.title);
-    const shuffledItems = shuffle([...activeFlashItems]);
-    const questions = buildFlashLearnQuestions(activeFlashSet, shuffledItems);
+  const launchFlashLearnSession = (set: FlashcardSet, items: FlashcardItem[]) => {
+    const questions = buildFlashLearnQuestions(set, items);
     if (questions.length === 0) {
       alert("No se pudieron generar preguntas para este set.");
       return;
@@ -6053,19 +6151,58 @@ function StudyContent() {
     setFlashLearnChoice(null);
     setFlashLearnScore(0);
     setFlashLearnFinished(false);
+    setFlashLearnResults([]);
     setFlashMode("learn");
     focusFlashArea();
+  };
+
+  const startFlashLearn = () => {
+    if (!activeFlashSet || activeFlashItems.length < 4) {
+      alert("Este set necesita al menos 4 tarjetas para el modo Aprender.");
+      return;
+    }
+    recordStudyActivity("flashcards", activeFlashSet.title);
+    const rankedItems = rankItemsForReview(activeFlashItems, studySrs, (item) => ({
+      itemId: item.id,
+      itemType: "flashcard",
+      sourceTool: "flashcards",
+    }));
+    launchFlashLearnSession(activeFlashSet, rankedItems);
   };
 
   const currentFlashLearnQ = flashLearnQuestions[flashLearnIndex] || null;
   const flashLearnProgressPct = flashLearnQuestions.length
     ? Math.round(((flashLearnFinished ? flashLearnQuestions.length : flashLearnIndex + 1) / flashLearnQuestions.length) * 100)
     : 0;
+  const flashLearnWrongItems = useMemo(() => {
+    if (!activeFlashSet) return [];
+    const wrongIds = new Set(flashLearnResults.filter((result) => !result.correct).map((result) => result.itemId));
+    return activeFlashSet.items.filter((item) => wrongIds.has(item.id));
+  }, [activeFlashSet, flashLearnResults]);
 
   const answerFlashLearn = (option: string) => {
     if (!currentFlashLearnQ || flashLearnChoice) return;
     setFlashLearnChoice(option);
-    if (option === currentFlashLearnQ.correct) setFlashLearnScore((value) => value + 1);
+    const correct = option === currentFlashLearnQ.correct;
+    if (correct) setFlashLearnScore((value) => value + 1);
+    setFlashLearnResults((prev) => [
+      ...prev,
+      {
+        itemId: currentFlashLearnQ.itemId,
+        lesson: currentFlashLearnQ.lesson,
+        deckTitle: currentFlashLearnQ.deckTitle,
+        correct,
+      },
+    ]);
+    recordSrsResult({
+      itemId: currentFlashLearnQ.itemId,
+      itemType: "flashcard",
+      sourceTool: "flashcards",
+      sourceLesson: currentFlashLearnQ.lesson,
+      sourceDeck: currentFlashLearnQ.deckTitle,
+      label: currentFlashLearnQ.prompt,
+      rating: correct ? "correct" : "wrong",
+    });
   };
 
   const nextFlashLearn = () => {
@@ -6130,15 +6267,18 @@ function StudyContent() {
   const vkLeaderboardForBucket = vkLeaderboard[vkBucket] || [];
   const showHub = !selectedView;
   const latestStudyActivity = studyActivity[0] || null;
-  const recentStudyActivity = useMemo(() => {
-    const seen = new Set<string>();
-    return studyActivity.filter((entry) => {
-      const key = `${entry.tool}:${entry.href}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, [studyActivity]);
+  const studyDueSummary = useMemo(() => getStudyDueSummary(studySrs), [studySrs]);
+  const homeDueByTool = useMemo<Record<StudyHomeToolKey, number>>(
+    () => ({
+      learnkana: studyDueSummary.byTool.learnkana + studyDueSummary.byTool.kana,
+      flashcards: studyDueSummary.byTool.flashcards,
+      sprint: studyDueSummary.byTool.sprint,
+      exam: studyDueSummary.byTool.exam,
+    }),
+    [studyDueSummary],
+  );
+  const primaryReviewTool = (Object.entries(homeDueByTool).sort((a, b) => b[1] - a[1])[0]?.[0] as StudyHomeToolKey | undefined) || "learnkana";
+  const reviewHref = `/study?view=${primaryReviewTool === "exam" ? "exam" : primaryReviewTool}`;
   const weekStart = getLocalWeekStart();
   const weeklyActivity = studyActivity.filter((entry) => {
     const value = new Date(entry.occurredAt);
@@ -6582,11 +6722,27 @@ function StudyContent() {
     if (!examCurrentQ || examFinished || examFeedback) return;
     const key = examCurrentQ.stableKey || examCurrentQ.id;
     const correct = isExamQuestionCorrect(examCurrentQ, answerValue);
+    const examItemType: StudySrsItemType =
+      examCurrentQ.category === "kana"
+        ? "kana"
+        : examCurrentQ.category === "kanji"
+          ? "kanji"
+          : examCurrentQ.category === "vocab"
+            ? "vocab"
+            : "grammar";
     setExamAnswers((prev) => ({ ...prev, [key]: answerValue }));
     setExamFeedback({
       status: correct ? "correct" : "wrong",
       answer: examCurrentQ.correct,
       explanation: examCurrentQ.explanation,
+    });
+    recordSrsResult({
+      itemId: key,
+      itemType: examItemType,
+      sourceTool: "exam",
+      sourceLesson: examLesson,
+      label: examCurrentQ.prompt,
+      rating: correct ? "correct" : "wrong",
     });
     if (correct) {
       setExamStreak((value) => {
@@ -6656,6 +6812,17 @@ function StudyContent() {
     window.setTimeout(() => {
       resetExam();
     }, 220);
+  };
+
+  const startExamRetryWrong = () => {
+    if (examWrongQuestions.length === 0) return;
+    setExamQuestions(examWrongQuestions);
+    setExamIndex(0);
+    setExamAnswers({});
+    setExamFinished(false);
+    setExamFeedback(null);
+    setExamStreak(0);
+    examPersistedRef.current = false;
   };
 
   const renderQuizConfigurator = (compact = false) => (
@@ -6838,7 +7005,7 @@ function StudyContent() {
                 style={{
                   display: "grid",
                   gap: "var(--space-2)",
-                gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
                   alignItems: "stretch",
                 }}
               >
@@ -6952,55 +7119,38 @@ function StudyContent() {
                     ))}
                   </div>
                 </div>
-              </div>
 
-              {recentStudyActivity.length > 1 && (
-                <div
-                  style={{
-                    background: "color-mix(in srgb, rgba(244, 162, 97, 0.11) 68%, white)",
-                    borderRadius: 24,
-                    padding: "9px 12px",
-                    display: "grid",
-                    gap: 6,
-                    boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
-                  }}
-                >
-                  <div style={sectionKickerStyle}>Actividad reciente</div>
-                  <div style={{ display: "grid", gap: 6 }}>
-                    {recentStudyActivity.slice(0, 2).map((entry) => (
-                      <Link
-                        key={entry.id}
-                        href={entry.href}
-                        style={{
-                          textDecoration: "none",
-                          color: "var(--color-text)",
-                          display: "grid",
-                          gridTemplateColumns: "minmax(0, 1fr) auto",
-                          gap: 8,
-                          alignItems: "center",
-                          borderRadius: 14,
-                          background: "rgba(255,255,255,0.72)",
-                          padding: "7px 9px",
-                        }}
-                      >
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: "var(--text-body)", fontWeight: 800, color: "var(--color-text)" }}>
-                            {entry.label}
-                          </div>
-                          {entry.detail && (
-                            <div style={{ marginTop: 2, fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                              {entry.detail}
-                            </div>
-                          )}
-                        </div>
-                        <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
-                          {formatStudyActivityTime(entry.occurredAt)}
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
+                {studyDueSummary.totalDue > 0 && (
+                  <Link
+                    href={reviewHref}
+                    style={{
+                      textDecoration: "none",
+                      color: "var(--color-text)",
+                      background: "color-mix(in srgb, rgba(244, 162, 97, 0.18) 72%, white)",
+                      borderRadius: 24,
+                      padding: "10px 12px",
+                      display: "grid",
+                      gap: 6,
+                      boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+                      <div style={sectionKickerStyle}>Repasar pendientes</div>
+                      <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
+                        Repasar ↗
+                      </div>
+                    </div>
+                    <div style={{ fontSize: "clamp(22px, 5vw, 28px)", lineHeight: 1, fontWeight: 800, letterSpacing: "-.04em" }}>
+                      {studyDueSummary.totalDue} pendientes
+                    </div>
+                    {studyDueSummary.difficult > 0 ? (
+                      <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                        {studyDueSummary.difficult} difíciles
+                      </div>
+                    ) : null}
+                  </Link>
+                )}
+              </div>
             </div>
 
             <div
@@ -7013,6 +7163,10 @@ function StudyContent() {
             >
               {toolCards.map((tool) => {
                 const isSoftAccent = tool.key === "flashcards";
+                const toolDueCount =
+                  tool.key === "learnkana" || tool.key === "flashcards" || tool.key === "sprint" || tool.key === "exam"
+                    ? homeDueByTool[tool.key]
+                    : 0;
                 const cardBackground =
                   tool.key === "learnkana"
                     ? "color-mix(in srgb, var(--color-highlight-soft) 44%, white)"
@@ -7050,8 +7204,8 @@ function StudyContent() {
                       background: cardBackground,
                       boxShadow: isSoftAccent ? "0 10px 24px rgba(26, 26, 46, 0.04)" : "0 14px 28px rgba(26, 26, 46, 0.05)",
                     }}
-                  >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
                       <div style={{ display: "grid", gap: 2, minWidth: 0 }}>
                     <span
                       style={{
@@ -7066,6 +7220,11 @@ function StudyContent() {
                       >
                         {tool.title}
                       </span>
+                      {toolDueCount > 0 ? (
+                        <span style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 700 }}>
+                          {toolDueCount} pendientes
+                        </span>
+                      ) : null}
                       </div>
                       <span
                         style={{
@@ -7637,11 +7796,16 @@ function StudyContent() {
                           {Math.round((flashLearnScore / Math.max(1, flashLearnQuestions.length)) * 100)}% de aciertos
                         </div>
                         <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                          {activeFlashSet && flashLearnWrongItems.length >= 4 ? (
+                            <button type="button" onClick={() => launchFlashLearnSession(activeFlashSet, flashLearnWrongItems)} style={primaryButtonStyle}>
+                              Repasar falladas
+                            </button>
+                          ) : null}
                           <button type="button" onClick={startFlashLearn} style={primaryButtonStyle}>
-                            Repetir
+                            Otra sesión
                           </button>
                           <button type="button" onClick={() => setFlashMode("browse")} style={secondaryButtonStyle}>
-                            Volver a lista
+                            Volver
                           </button>
                         </div>
                       </div>
@@ -7950,11 +8114,16 @@ function StudyContent() {
               </div>
 
               <div style={{ display: "grid", gap: 8 }}>
+                {examWrongQuestions.length > 0 ? (
+                  <button type="button" onClick={startExamRetryWrong} className="ds-btn">
+                    Repasar falladas
+                  </button>
+                ) : null}
                 <button type="button" onClick={startExam} className="ds-btn">
-                  Repetir repaso L{examLesson}
+                  Otra sesión
                 </button>
                 <button type="button" onClick={closeExamSession} className="ds-btn-secondary">
-                  Cambiar lección
+                  Volver
                 </button>
               </div>
             </div>
