@@ -8,6 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import AppTopNav from "@/components/AppTopNav";
 import AprenderKanaModule from "@/components/study/AprenderKanaModule";
+import StudySelectorGroup from "@/components/study/StudySelectorGroup";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 
@@ -6489,69 +6490,63 @@ function StudyContent() {
 
   const renderQuizConfigurator = (compact = false) => (
     <div style={{ marginTop: compact ? 0 : 10, display: "grid", gap: 10 }}>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-        {([
-          ["particles", "Partículas"],
-          ["conjugation", "Conjugación"],
-          ["vocab", "Vocab"],
-          ["kanji", "Kanji"],
-        ] as [QuizMode, string][]).map(([mode, label]) => (
-          <button key={mode} type="button" onClick={() => setQuizMode(mode)} style={{ border: 0, borderRadius: 999, padding: "7px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: quizMode === mode ? "#fff" : "#61616e", background: quizMode === mode ? "#111114" : "#f3f4f6" }}>{label}</button>
-        ))}
-      </div>
+      <StudySelectorGroup
+        options={[
+          { key: "particles", label: "Partículas", tone: "var(--color-highlight-soft)" },
+          { key: "conjugation", label: "Conjugación", tone: "var(--color-highlight-soft)" },
+          { key: "vocab", label: "Vocab", tone: "var(--color-highlight-soft)" },
+          { key: "kanji", label: "Kanji", tone: "var(--color-highlight-soft)" },
+        ]}
+        value={quizMode}
+        onSelect={(value) => setQuizMode(value)}
+        compact
+        minItemWidth={108}
+      />
 
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-        {[10, 20, 30].map((n) => (
-          <button key={n} type="button" onClick={() => setQuizCount(n as QuizCount)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 10px", fontSize: 12, fontWeight: 700, background: quizCount === n ? "#111114" : "#fff", color: quizCount === n ? "#fff" : "#333" }}>{n} preguntas</button>
-        ))}
-      </div>
+      <StudySelectorGroup
+        options={[10, 20, 30].map((n) => ({ key: String(n) as "10" | "20" | "30", label: `${n} preguntas` }))}
+        value={String(quizCount) as "10" | "20" | "30"}
+        onSelect={(value) => setQuizCount(Number(value) as QuizCount)}
+        compact
+        minItemWidth={108}
+      />
 
       {quizMode !== "particles" && (
         <div>
           <div style={{ fontSize: 12, color: "#7c7c85", marginBottom: 6, fontWeight: 700 }}>
             Lecciones (acumulable){quizMode === "conjugation" ? " · desde L3" : ""}
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {availableQuizLessons.map((lesson) => (
-              <button key={lesson} type="button" onClick={() => toggleLesson(lesson)} style={{ border: "1px solid rgba(17,17,20,.1)", borderRadius: 999, padding: "6px 9px", fontSize: 12, fontWeight: 700, background: quizLessons.includes(lesson) ? "#111114" : "#fff", color: quizLessons.includes(lesson) ? "#fff" : "#333" }}>L{lesson}</button>
-            ))}
-          </div>
+          <StudySelectorGroup
+            options={availableQuizLessons.map((lesson) => ({ key: String(lesson) as `${number}`, label: `L${lesson}` }))}
+            values={quizLessons.map((lesson) => String(lesson) as `${number}`)}
+            multiple
+            onToggle={(value) => toggleLesson(Number(value))}
+            compact
+            minItemWidth={72}
+          />
         </div>
       )}
 
       {quizMode === "conjugation" && (
         <div>
           <div style={{ fontSize: 12, color: "#7c7c85", marginBottom: 6, fontWeight: 700 }}>Tipos de conjugación</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {([
+          <StudySelectorGroup
+            options={([
               ["te", "Forma て", hasVerbInSelectedLessons],
               ["past", "Pasado corto", hasVerbInSelectedLessons],
               ["masu", "Forma ます", hasVerbInSelectedLessons],
               ["plain", "Forma base", hasVerbInSelectedLessons],
-              ["adj-negative", "Adjetivo negativo", hasAdjInSelectedLessons],
-              ["adj-past", "Adjetivo pasado", hasAdjInSelectedLessons],
+              ["adj-negative", "Adj. negativo", hasAdjInSelectedLessons],
+              ["adj-past", "Adj. pasado", hasAdjInSelectedLessons],
             ] as [ConjType, string, boolean][])
               .filter(([, , enabled]) => enabled)
-              .map(([kind, label]) => (
-              <button
-                key={kind}
-                type="button"
-                onClick={() => toggleConjType(kind)}
-                style={{
-                  border: "1px solid rgba(17,17,20,.1)",
-                  borderRadius: 999,
-                  padding: "6px 9px",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  background: activeConjTypes.includes(kind) ? "#111114" : "#fff",
-                  color: activeConjTypes.includes(kind) ? "#fff" : "#333",
-                  cursor: "pointer",
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+              .map(([kind, label]) => ({ key: kind, label }))}
+            values={activeConjTypes}
+            multiple
+            onToggle={toggleConjType}
+            compact
+            minItemWidth={120}
+          />
         </div>
       )}
 
@@ -6938,10 +6933,19 @@ function StudyContent() {
           <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Kana Sprint</h2>
-              <div style={pillGroupStyle}>
-                <button type="button" onClick={() => setKanaSet("hiragana")} style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: kanaSet === "hiragana" ? "var(--color-accent)" : "transparent", color: kanaSet === "hiragana" ? "var(--color-primary)" : "var(--color-text-muted)" }}>Hiragana</button>
-                <button type="button" onClick={() => setKanaSet("katakana")} style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: kanaSet === "katakana" ? "var(--color-accent)" : "transparent", color: kanaSet === "katakana" ? "var(--color-primary)" : "var(--color-text-muted)" }}>Katakana</button>
-                <button type="button" onClick={() => setKanaSet("mixed")} style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: kanaSet === "mixed" ? "var(--color-accent)" : "transparent", color: kanaSet === "mixed" ? "var(--color-primary)" : "var(--color-text-muted)" }}>Mixto</button>
+              <div style={{ minWidth: 0, flex: "1 1 280px" }}>
+                <StudySelectorGroup
+                  options={[
+                    { key: "hiragana", label: "Hiragana", tone: "var(--color-accent-soft)" },
+                    { key: "katakana", label: "Katakana", tone: "rgba(69, 123, 157, 0.14)" },
+                    { key: "mixed", label: "Mixto", tone: "var(--color-highlight-soft)" },
+                  ]}
+                  value={kanaSet}
+                  onSelect={(value) => setKanaSet(value as KanaMode)}
+                  layout="row"
+                  compact
+                  minItemWidth={112}
+                />
               </div>
             </div>
             <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
@@ -7054,17 +7058,15 @@ function StudyContent() {
           <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Vocab + Kanji Sprint</h2>
-              <div style={{ ...pillGroupStyle, gap: 4 }}>
-                {VK_BUCKETS.map((bucket) => (
-                  <button
-                    key={bucket.key}
-                    type="button"
-                    onClick={() => setVkBucket(bucket.key)}
-                    style={{ ...secondaryButtonStyle, border: 0, padding: "6px 10px", background: vkBucket === bucket.key ? "var(--color-accent)" : "transparent", color: vkBucket === bucket.key ? "var(--color-primary)" : "var(--color-text-muted)", fontWeight: 700, fontSize: 12 }}
-                  >
-                    {bucket.label}
-                  </button>
-                ))}
+              <div style={{ minWidth: 0, flex: "1 1 320px" }}>
+                <StudySelectorGroup
+                  options={VK_BUCKETS.map((bucket) => ({ key: bucket.key, label: bucket.label, tone: "rgba(69, 123, 157, 0.14)" }))}
+                  value={vkBucket}
+                  onSelect={(value) => setVkBucket(value as VkBucketKey)}
+                  layout="row"
+                  compact
+                  minItemWidth={88}
+                />
               </div>
             </div>
             <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
@@ -7256,29 +7258,15 @@ function StudyContent() {
                           {flashSetsByLesson.map((entry) => (
                             <div key={`builder-${entry.lesson}`} style={{ display: "grid", gap: 8 }}>
                               <div style={{ fontSize: "var(--text-body-sm)", fontWeight: 800, color: "var(--color-text)" }}>Lección {entry.lesson}</div>
-                              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                                {entry.sets.map((set) => {
-                                  const selected = flashDeckSelectedSetIds.includes(set.id);
-                                  return (
-                                    <button
-                                      key={`pick-${set.id}`}
-                                      type="button"
-                                      onClick={() => toggleCustomFlashSetSelection(set.id)}
-                                      style={{
-                                        border: selected ? "1px solid var(--color-border-strong)" : "1px solid var(--color-border)",
-                                        borderRadius: 999,
-                                        background: selected ? "var(--color-surface-muted)" : "var(--color-surface)",
-                                        color: selected ? "var(--color-text)" : "var(--color-text-muted)",
-                                        padding: "8px 11px",
-                                        fontWeight: 700,
-                                        cursor: "pointer",
-                                      }}
-                                    >
-                                      {set.title}
-                                    </button>
-                                  );
-                                })}
-                              </div>
+                              <StudySelectorGroup
+                                options={entry.sets.map((set) => ({ key: set.id, label: set.title }))}
+                                values={flashDeckSelectedSetIds}
+                                multiple
+                                onToggle={toggleCustomFlashSetSelection}
+                                layout="row"
+                                compact
+                                minItemWidth={112}
+                              />
                             </div>
                           ))}
                         </div>
@@ -7302,29 +7290,14 @@ function StudyContent() {
                     <div style={{ marginTop: 4, fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>Decks oficiales</div>
                   </div>
 
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {flashRoutes.map((route) => {
-                      const selected = activeFlashRoute?.id === route.id;
-                      return (
-                        <button
-                          key={route.id}
-                          type="button"
-                          onClick={() => setFlashRouteId(route.id)}
-                          style={{
-                            border: selected ? "1px solid var(--color-border-strong)" : "1px solid var(--color-border)",
-                            borderRadius: 999,
-                            background: selected ? "var(--color-surface-muted)" : "var(--color-surface)",
-                            color: selected ? "var(--color-text)" : "var(--color-text-muted)",
-                            padding: "8px 12px",
-                            fontWeight: 800,
-                            cursor: "pointer",
-                          }}
-                        >
-                          {route.title}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <StudySelectorGroup
+                    options={flashRoutes.map((route) => ({ key: route.id, label: route.title, tone: route.surface }))}
+                    value={flashRouteId}
+                    onSelect={(value) => setFlashRouteId(value)}
+                    layout="row"
+                    compact
+                    minItemWidth={112}
+                  />
 
                   {activeFlashRoute && (
                     <div style={{ ...mutedPanelStyle, display: "grid", gap: 10 }}>
@@ -7605,47 +7578,31 @@ function StudyContent() {
           <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Repaso mixto</h2>
-              <div style={{ display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
-                {LESSONS.map((lesson) => (
-                  <button
-                    key={lesson}
-                    type="button"
-                    onClick={() => {
-                      setExamLesson(lesson);
-                      resetExam();
-                    }}
-                    style={{
-                      border: "1px solid rgba(17,17,20,.1)",
-                      borderRadius: 999,
-                      padding: "6px 10px",
-                      fontSize: 12,
-                      fontWeight: 700,
-                      background: examLesson === lesson ? "#111114" : "#fff",
-                      color: examLesson === lesson ? "#fff" : "#333",
-                    }}
-                  >
-                    L{lesson}
-                  </button>
-                ))}
+              <div style={{ minWidth: 0, flex: "1 1 320px" }}>
+                <StudySelectorGroup
+                  options={LESSONS.map((lesson) => ({ key: String(lesson) as `${number}`, label: `L${lesson}`, tone: "var(--color-highlight-soft)" }))}
+                  value={String(examLesson) as `${number}`}
+                  onSelect={(value) => {
+                    setExamLesson(Number(value));
+                    resetExam();
+                  }}
+                  layout="row"
+                  compact
+                  minItemWidth={72}
+                />
               </div>
             </div>
-            <p style={{ color: "var(--color-text-muted)", fontSize: "var(--text-body-sm)", margin: 0 }}>
-              20 reactivos aleatorios basados en Genki (opción múltiple, abierta, relacionar, ordenar y contexto). Passing score: {EXAM_PASSING_PERCENT}%. Feedback completo al final.
-            </p>
 
             {examQuestions.length === 0 && (
               <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14, scrollMarginTop: sectionScrollMarginTop }}>
                 <div style={sectionKickerStyle}>Configuración</div>
-                <div style={{ marginTop: 6, fontSize: "var(--text-h2)", fontWeight: 800 }}>Examen L{examLesson}</div>
-                <p style={{ marginTop: 8, color: "var(--color-text-muted)", fontSize: "var(--text-body-sm)", lineHeight: 1.5 }}>
-                  El sistema prioriza reactivos no vistos. Si ya agotaste banco nuevo, rota por los menos recientes para evitar repetición inmediata.
-                </p>
+                <div style={{ marginTop: 6, fontSize: "var(--text-h2)", fontWeight: 800 }}>Repaso L{examLesson}</div>
                 <button
                   type="button"
                   onClick={startExam}
                   style={{ ...primaryButtonStyle, marginTop: 10 }}
                 >
-                  Iniciar examen
+                  Iniciar repaso
                 </button>
               </div>
             )}
@@ -7802,7 +7759,7 @@ function StudyContent() {
 
                 <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <button type="button" onClick={startExam} style={primaryButtonStyle}>
-                    Repetir examen L{examLesson}
+                    Repetir repaso L{examLesson}
                   </button>
                   <button type="button" onClick={resetExam} style={secondaryButtonStyle}>
                     Cambiar lección
