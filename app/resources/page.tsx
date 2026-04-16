@@ -315,7 +315,7 @@ export default function ResourcesPage() {
     <>
       <div className="resourcesPage">
         <div className="resourcesShell ds-container">
-          <AppTopNav primary="resources" />
+          <AppTopNav primary="resources" tone="study" />
 
           <header className="pageHeader">
             <div className="pageHeaderMain">
