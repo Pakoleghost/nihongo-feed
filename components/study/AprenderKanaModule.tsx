@@ -89,14 +89,19 @@ const HIRAGANA_BASIC_GROUPS: readonly (readonly string[])[] = [
   ["わ", "を", "ん"],
 ];
 
-function getLearnFrontierItems(hiraganaBasic: KanaItem[], progress: KanaProgressMap): KanaItem[] {
+function getCurrentLearnBatch(hiraganaBasic: KanaItem[], progress: KanaProgressMap): number {
   const kanaToItem = new Map(hiraganaBasic.map((item) => [item.kana, item]));
-  for (const group of HIRAGANA_BASIC_GROUPS) {
-    const groupItems = group.map((k) => kanaToItem.get(k)).filter((item): item is KanaItem => Boolean(item));
-    const unseen = groupItems.filter((item) => !progress[item.id]);
-    if (unseen.length > 0) return unseen;
+  for (let i = 0; i < HIRAGANA_BASIC_GROUPS.length; i++) {
+    const groupItems = HIRAGANA_BASIC_GROUPS[i]
+      .map((k) => kanaToItem.get(k))
+      .filter((item): item is KanaItem => Boolean(item));
+    const allStable = groupItems.every((item) => {
+      const entry = progress[item.id];
+      return entry && entry.level >= 1 && !entry.difficult;
+    });
+    if (!allStable) return i;
   }
-  return [];
+  return HIRAGANA_BASIC_GROUPS.length - 1;
 }
 
 function isDueReview(nextReview?: string | null) {
@@ -229,42 +234,50 @@ function buildSession(
 }
 
 function buildLearnSession(hiraganaBasic: KanaItem[], progress: KanaProgressMap) {
-  // Seen kana: any kana the user has interacted with
-  const seenItems = KANA_ITEMS.filter((item) => Boolean(progress[item.id]));
+  const kanaToItem = new Map(hiraganaBasic.map((item) => [item.kana, item]));
+  const batchIdx = getCurrentLearnBatch(hiraganaBasic, progress);
 
-  // Due items from all seen kana
-  const due = seenItems.filter((item) => isDueReview(progress[item.id]?.nextReview));
+  // All unlocked items: batches 0..batchIdx
+  const unlockedItems = HIRAGANA_BASIC_GROUPS.slice(0, batchIdx + 1)
+    .flat()
+    .map((k) => kanaToItem.get(k))
+    .filter((item): item is KanaItem => Boolean(item));
 
-  // Difficult items (wrong >= 2 and >= correct)
-  const difficult = seenItems.filter((item) => progress[item.id]?.difficult);
+  // Current batch items
+  const currentBatchItems = HIRAGANA_BASIC_GROUPS[batchIdx]
+    .map((k) => kanaToItem.get(k))
+    .filter((item): item is KanaItem => Boolean(item));
 
-  // Almost items: timesAlmost > 0 AND not yet stable (level < 3), excluding those already in difficult
-  const almostKnown = seenItems.filter((item) => {
+  // Items in current batch that still need to reach level >= 1
+  const unstableInBatch = currentBatchItems.filter((item) => {
     const entry = progress[item.id];
-    return entry && entry.timesAlmost > 0 && entry.level < 3 && !entry.difficult;
+    return !entry || entry.level < 1 || entry.difficult;
   });
 
-  const reviewPool = uniqueKanaItems([...due, ...difficult, ...almostKnown]);
+  // Due/difficult reviews from earlier unlocked batches
+  const currentBatchIds = new Set(currentBatchItems.map((item) => item.id));
+  const reviewPool = unlockedItems.filter((item) => {
+    if (currentBatchIds.has(item.id)) return false;
+    const entry = progress[item.id];
+    if (!entry) return false;
+    return isDueReview(entry.nextReview) || entry.difficult;
+  });
 
-  // New kana to introduce: from the first incomplete group
-  const frontierItems = getLearnFrontierItems(hiraganaBasic, progress);
-  const maxNew = reviewPool.length > 6 ? 1 : reviewPool.length > 2 ? 2 : reviewPool.length === 0 ? 5 : 3;
-  const newItems = frontierItems.slice(0, maxNew);
-
-  const pool = uniqueKanaItems([...reviewPool, ...newItems]);
-
-  if (pool.length === 0) {
-    // Brand new user: start with the first group
-    const starter = HIRAGANA_BASIC_GROUPS[0]
-      .map((k) => hiraganaBasic.find((item) => item.kana === k))
-      .filter((item): item is KanaItem => Boolean(item));
-    const questions = buildQuestionsForItems(starter, hiraganaBasic, ["multiple_choice"]);
-    return { setKey: "learn", modes: ["multiple_choice"] as KanaPracticeMode[], count: starter.length, questions };
+  let pool: KanaItem[];
+  if (unstableInBatch.length > 0) {
+    const maxReview = unstableInBatch.length >= 3 ? 3 : 5;
+    pool = uniqueKanaItems([...unstableInBatch, ...reviewPool.slice(0, maxReview)]);
+  } else if (reviewPool.length > 0) {
+    pool = reviewPool;
+  } else {
+    pool = unlockedItems.length > 0 ? unlockedItems : currentBatchItems;
   }
 
   const sessionCount = Math.min(12, Math.max(5, pool.length));
-  const items = buildKanaSessionItems(pool, progress, sessionCount);
-  const fallbackPool = uniqueKanaItems([...hiraganaBasic, ...seenItems]);
+  // Rank by SRS priority, then shuffle so order differs every session
+  const ranked = buildKanaSessionItems(pool, progress, sessionCount);
+  const items = shuffle(ranked);
+  const fallbackPool = uniqueKanaItems([...hiraganaBasic, ...unlockedItems]);
   const questions = buildQuestionsForItems(items, fallbackPool, ["multiple_choice"]);
   return { setKey: "learn", modes: ["multiple_choice"] as KanaPracticeMode[], count: sessionCount, questions };
 }
@@ -289,6 +302,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   const [answerFeedback, setAnswerFeedback] = useState<AnswerFeedback | null>(null);
   const [handwritingRating, setHandwritingRating] = useState<KanaHandwritingRating | null>(null);
   const [sessionNewItemIds, setSessionNewItemIds] = useState<Set<string>>(new Set());
+  const [sessionStartBatchIdx, setSessionStartBatchIdx] = useState(0);
   const [streak, setStreak] = useState(0);
   const [streakPulse, setStreakPulse] = useState(0);
   const romajiInputRef = useRef<HTMLInputElement | null>(null);
@@ -350,39 +364,73 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     .map((entry) => `${entry.script === "hiragana" ? "H" : "K"} ${KANA_SCOPE_LABELS[entry.set]}`)
     .join(", ");
 
-  const learnSummary = useMemo(() => {
-    const seenItems = KANA_ITEMS.filter((item) => Boolean(progress[item.id]));
-    const due = seenItems.filter((item) => isDueReview(progress[item.id]?.nextReview)).length;
-    const difficult = seenItems.filter((item) => progress[item.id]?.difficult).length;
-    const almost = seenItems.filter((item) => {
+  const learnProgressContext = useMemo(() => {
+    const kanaToItem = new Map(basicHiragana.map((item) => [item.kana, item]));
+    const batchIdx = getCurrentLearnBatch(basicHiragana, progress);
+
+    const learnedCount = basicHiragana.filter((item) => {
       const entry = progress[item.id];
-      return entry && entry.timesAlmost > 0 && entry.level < 3 && !entry.difficult;
+      return entry && entry.level >= 1 && !entry.difficult;
     }).length;
-    const frontier = getLearnFrontierItems(basicHiragana, progress);
-    const reviewCount = due + difficult + almost;
-    const maxNew = reviewCount > 6 ? 1 : reviewCount > 2 ? 2 : reviewCount === 0 ? 5 : 3;
-    return { due, difficult, almost, fresh: Math.min(maxNew, frontier.length) };
+
+    const currentBatchItems = HIRAGANA_BASIC_GROUPS[batchIdx]
+      .map((k) => kanaToItem.get(k))
+      .filter((item): item is KanaItem => Boolean(item));
+
+    const unstableInBatch = currentBatchItems.filter((item) => {
+      const entry = progress[item.id];
+      return !entry || entry.level < 1 || entry.difficult;
+    });
+
+    const unlockedItems = HIRAGANA_BASIC_GROUPS.slice(0, batchIdx + 1)
+      .flat()
+      .map((k) => kanaToItem.get(k))
+      .filter((item): item is KanaItem => Boolean(item));
+
+    const currentBatchIds = new Set(currentBatchItems.map((item) => item.id));
+    const reviewCount = unlockedItems.filter((item) => {
+      if (currentBatchIds.has(item.id)) return false;
+      const entry = progress[item.id];
+      if (!entry) return false;
+      return isDueReview(entry.nextReview) || entry.difficult;
+    }).length;
+
+    const nextBatchIdx = batchIdx + 1;
+    const nextBatchKana =
+      nextBatchIdx < HIRAGANA_BASIC_GROUPS.length ? HIRAGANA_BASIC_GROUPS[nextBatchIdx].join(" ") : null;
+
+    return {
+      learnedCount,
+      totalCount: basicHiragana.length,
+      batchIdx,
+      freshCount: unstableInBatch.length,
+      reviewCount,
+      currentBatchKana: HIRAGANA_BASIC_GROUPS[batchIdx].join(" "),
+      nextBatchKana,
+    };
   }, [basicHiragana, progress]);
 
-  const learnSessionDescription = useMemo(() => {
-    const { due, difficult, almost, fresh } = learnSummary;
-    const reviewTotal = due + difficult + almost;
-    if (allKanaSummary.practiced === 0) return "Empieza con hiragana básico";
-    if (reviewTotal > 0 && fresh > 0) return `${reviewTotal} repaso · ${fresh} nuevo${fresh > 1 ? "s" : ""}`;
-    if (reviewTotal > 0) return `${reviewTotal} kana pendiente${reviewTotal > 1 ? "s" : ""} de repaso`;
-    if (fresh > 0) return `${fresh} kana nuevo${fresh > 1 ? "s" : ""}`;
-    return "Sesión guiada";
-  }, [learnSummary, allKanaSummary.practiced]);
-
   const learnEndSummary = useMemo(() => {
+    const kanaToItem = new Map(basicHiragana.map((item) => [item.kana, item]));
+    const startBatchIds = new Set(
+      (HIRAGANA_BASIC_GROUPS[sessionStartBatchIdx] || [])
+        .map((k) => kanaToItem.get(k))
+        .filter((item): item is KanaItem => Boolean(item))
+        .map((item) => item.id),
+    );
+    const masteredMap = new Map<string, KanaItem>();
+    sessionResults.forEach((r) => {
+      if (startBatchIds.has(r.item.id) && r.rating === "correct") masteredMap.set(r.item.id, r.item);
+    });
+    const masteredInSession = Array.from(masteredMap.values());
     const reviewedCount = new Set(
       sessionResults.filter((r) => !sessionNewItemIds.has(r.item.id)).map((r) => r.item.id),
     ).size;
     const newPracticed = new Set(
       sessionResults.filter((r) => sessionNewItemIds.has(r.item.id)).map((r) => r.item.id),
     ).size;
-    return { reviewedCount, newPracticed };
-  }, [sessionResults, sessionNewItemIds]);
+    return { masteredInSession, reviewedCount, newPracticed };
+  }, [sessionResults, sessionNewItemIds, sessionStartBatchIdx, basicHiragana]);
 
   const subtlePillStyle: CSSProperties = {
     borderRadius: 999,
@@ -514,6 +562,8 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   };
 
   const startLearnSession = () => {
+    const batchIdx = getCurrentLearnBatch(basicHiragana, progress);
+    setSessionStartBatchIdx(batchIdx);
     const s = buildLearnSession(basicHiragana, progress);
     const newIds = new Set(s.questions.map((q) => q.item.id).filter((id) => !progress[id]));
     setSessionNewItemIds(newIds);
@@ -625,8 +675,8 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
           >
             <div style={{ fontSize: "clamp(28px, 7vw, 36px)", lineHeight: 1, fontWeight: 800 }}>Learn</div>
             <div style={{ fontSize: "var(--text-body-sm)", fontWeight: 700, opacity: 0.64 }}>
-              {learnSummary.due > 0
-                ? `${learnSummary.due} pendiente${learnSummary.due > 1 ? "s" : ""} · repaso inteligente`
+              {learnProgressContext.reviewCount > 0
+                ? `${learnProgressContext.reviewCount} pendiente${learnProgressContext.reviewCount > 1 ? "s" : ""} · repaso inteligente`
                 : allKanaSummary.practiced === 0
                   ? "Empieza con hiragana · guiado paso a paso"
                   : "Guiado · progresivo · sin saturarte"}
@@ -706,30 +756,53 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                 borderRadius: 28,
                 border: "1px solid var(--color-border)",
                 background: "color-mix(in srgb, var(--color-surface) 88%, white)",
+                display: "grid",
+                gap: 14,
               }}
             >
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "var(--color-text-muted)",
-                  fontWeight: 800,
-                  marginBottom: 8,
-                  textTransform: "uppercase",
-                  letterSpacing: ".06em",
-                }}
-              >
-                Sesión de hoy
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                <div style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".06em" }}>
+                  Progreso
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "var(--color-text)" }}>
+                  {learnProgressContext.learnedCount} / {learnProgressContext.totalCount} aprendidos
+                </div>
               </div>
-              <div
-                style={{
-                  fontSize: "clamp(20px, 5vw, 26px)",
-                  fontWeight: 800,
-                  color: "var(--color-text)",
-                  lineHeight: 1.2,
-                }}
-              >
-                {learnSessionDescription}
+
+              <div style={{ display: "grid", gap: 6 }}>
+                <div style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".06em" }}>
+                  Sesión de hoy
+                </div>
+                {allKanaSummary.practiced === 0 ? (
+                  <div style={{ fontSize: "clamp(18px, 4.5vw, 22px)", fontWeight: 800, color: "var(--color-text)", lineHeight: 1.2 }}>
+                    Empieza con hiragana básico
+                  </div>
+                ) : (
+                  <div style={{ display: "grid", gap: 4 }}>
+                    {learnProgressContext.reviewCount > 0 && (
+                      <div style={{ fontSize: "clamp(16px, 4vw, 20px)", fontWeight: 800, color: "var(--color-text)" }}>
+                        • {learnProgressContext.reviewCount} para repasar
+                      </div>
+                    )}
+                    {learnProgressContext.freshCount > 0 && (
+                      <div style={{ fontSize: "clamp(16px, 4vw, 20px)", fontWeight: 800, color: "var(--color-text)" }}>
+                        • {learnProgressContext.freshCount} nuevo{learnProgressContext.freshCount > 1 ? "s" : ""}
+                      </div>
+                    )}
+                    {learnProgressContext.reviewCount === 0 && learnProgressContext.freshCount === 0 && (
+                      <div style={{ fontSize: "clamp(16px, 4vw, 20px)", fontWeight: 800, color: "var(--color-text)" }}>
+                        Sesión guiada
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
+
+              {learnProgressContext.nextBatchKana && learnProgressContext.learnedCount > 0 && (
+                <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
+                  Siguiente: {learnProgressContext.nextBatchKana}
+                </div>
+              )}
             </div>
           </div>
 
@@ -1397,7 +1470,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
             <div
               style={{
                 display: "grid",
-                gap: 14,
+                gap: 16,
                 padding: "22px 20px 20px",
                 borderRadius: 30,
                 background: "color-mix(in srgb, var(--color-surface) 86%, white)",
@@ -1408,16 +1481,54 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                 {summary.correct / Math.max(1, sessionQuestionCount) >= 0.7 ? "Buen trabajo" : "Sigue practicando"}
               </div>
 
+              {/* Batch unlocked */}
+              {learnProgressContext.batchIdx > sessionStartBatchIdx && (
+                <div style={{ display: "grid", gap: 8, paddingBottom: 12, borderBottom: "1px solid var(--color-border)" }}>
+                  <div style={{ fontSize: 11, color: "#117964", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em" }}>
+                    Desbloqueado
+                  </div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {HIRAGANA_BASIC_GROUPS[learnProgressContext.batchIdx].map((k) => (
+                      <div
+                        key={k}
+                        style={{
+                          ...subtlePillStyle,
+                          background: "color-mix(in srgb, #4ECDC4 14%, white)",
+                          border: "1px solid color-mix(in srgb, #4ECDC4 32%, transparent)",
+                          color: "#117964",
+                          fontSize: 18,
+                          padding: "6px 10px",
+                        }}
+                      >
+                        {k}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Mastered in this session */}
+              {learnEndSummary.masteredInSession.length > 0 && (
+                <div style={{ display: "grid", gap: 8 }}>
+                  <div style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em" }}>
+                    Dominados esta sesión
+                  </div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {learnEndSummary.masteredInSession.map((item) => (
+                      <div key={item.id} style={subtlePillStyle}>
+                        {item.kana} {item.romaji}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Total progress */}
               <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                {learnEndSummary.reviewedCount > 0 && learnEndSummary.newPracticed > 0
-                  ? `${learnEndSummary.reviewedCount} repasados · ${learnEndSummary.newPracticed} nuevo${learnEndSummary.newPracticed > 1 ? "s" : ""}`
-                  : learnEndSummary.reviewedCount > 0
-                    ? `${learnEndSummary.reviewedCount} kana repasados`
-                    : learnEndSummary.newPracticed > 0
-                      ? `${learnEndSummary.newPracticed} kana nuevo${learnEndSummary.newPracticed > 1 ? "s" : ""} practicados`
-                      : `${sessionQuestionCount} preguntas completadas`}
+                Progreso total: {learnProgressContext.learnedCount} / {learnProgressContext.totalCount} kana
               </div>
 
+              {/* Hardest */}
               {hardestSessionKana.length > 0 && (
                 <div
                   style={{
@@ -1429,16 +1540,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                     alignItems: "center",
                   }}
                 >
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "var(--color-text-muted)",
-                      fontWeight: 800,
-                      textTransform: "uppercase",
-                      letterSpacing: ".08em",
-                      flexShrink: 0,
-                    }}
-                  >
+                  <div style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em", flexShrink: 0 }}>
                     Para repasar
                   </div>
                   {hardestSessionKana.slice(0, 3).map((item) => (
