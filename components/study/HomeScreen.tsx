@@ -94,13 +94,7 @@ export default function HomeScreen({
             fontFamily: DS.fontHead, fontSize: 34, fontWeight: 700,
             color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05, marginTop: 10,
           }}>
-            Continúa donde
-          </div>
-          <div style={{
-            fontFamily: DS.fontHead, fontSize: 34, fontWeight: 300,
-            color: DS.inkSoft, letterSpacing: -0.8, lineHeight: 1.05, fontStyle: "italic",
-          }}>
-            lo dejaste.
+            Continúa donde lo dejaste.
           </div>
         </div>
 

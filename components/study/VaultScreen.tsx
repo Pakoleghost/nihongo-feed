@@ -78,7 +78,6 @@ export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) 
       <div style={{ flex: 1, overflow: "auto" }}>
         <ScreenTitle
           title="Biblioteca"
-          subtitle="todo lo que sabes."
           right={
             <div style={{ textAlign: "right", paddingTop: 4 }}>
               <Eyebrow>Dominadas</Eyebrow>

@@ -751,7 +751,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 700, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>Aprender</div>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.8, lineHeight: 1.05, fontStyle: "italic" }}>hiragana.</div>
                 </div>
                 <div style={{ textAlign: "right", paddingTop: 4 }}>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>

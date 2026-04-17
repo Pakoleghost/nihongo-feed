@@ -40,7 +40,7 @@ export default function PracticeIndexScreen({
       <TopBar onMenu={() => setMenuOpen(true)} />
 
       <div style={{ flex: 1, overflow: "auto" }}>
-        <ScreenTitle title="Practicar" subtitle="sin presión." />
+        <ScreenTitle title="Practicar" />
 
         <div style={{ padding: "0 24px" }}>
           <div style={{

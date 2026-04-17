@@ -59,7 +59,7 @@ export default function ReviewScreen({ userKey, onTabChange, onStartReview }: Re
       <TopBar onMenu={() => setMenuOpen(true)} />
 
       <div style={{ flex: 1, overflow: "auto", paddingBottom: 0 }}>
-        <ScreenTitle title="Repasar" subtitle="lo que toca." />
+        <ScreenTitle title="Repasar" />
 
         {/* Hero: due count + start */}
         <div style={{ padding: "0 24px" }}>
