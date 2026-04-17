@@ -288,6 +288,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   const [multipleChoiceAnswer, setMultipleChoiceAnswer] = useState<string | null>(null);
   const [answerFeedback, setAnswerFeedback] = useState<AnswerFeedback | null>(null);
   const [handwritingRating, setHandwritingRating] = useState<KanaHandwritingRating | null>(null);
+  const [sessionNewItemIds, setSessionNewItemIds] = useState<Set<string>>(new Set());
   const [streak, setStreak] = useState(0);
   const [streakPulse, setStreakPulse] = useState(0);
   const romajiInputRef = useRef<HTMLInputElement | null>(null);
@@ -363,20 +364,25 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     return { due, difficult, almost, fresh: Math.min(maxNew, frontier.length) };
   }, [basicHiragana, progress]);
 
-  const learnSessionCount = useMemo(() => {
-    const seenItems = KANA_ITEMS.filter((item) => Boolean(progress[item.id]));
-    const due = seenItems.filter((item) => isDueReview(progress[item.id]?.nextReview));
-    const difficult = seenItems.filter((item) => progress[item.id]?.difficult);
-    const almost = seenItems.filter((item) => {
-      const entry = progress[item.id];
-      return entry && entry.timesAlmost > 0 && entry.level < 3 && !entry.difficult;
-    });
-    const base = uniqueKanaItems([...due, ...difficult, ...almost]);
-    const frontier = getLearnFrontierItems(basicHiragana, progress);
-    const maxNew = base.length > 6 ? 1 : base.length > 2 ? 2 : base.length === 0 ? 5 : 3;
-    const pool = uniqueKanaItems([...base, ...frontier.slice(0, maxNew)]);
-    return Math.min(12, Math.max(5, pool.length));
-  }, [basicHiragana, progress]);
+  const learnSessionDescription = useMemo(() => {
+    const { due, difficult, almost, fresh } = learnSummary;
+    const reviewTotal = due + difficult + almost;
+    if (allKanaSummary.practiced === 0) return "Empieza con hiragana básico";
+    if (reviewTotal > 0 && fresh > 0) return `${reviewTotal} repaso · ${fresh} nuevo${fresh > 1 ? "s" : ""}`;
+    if (reviewTotal > 0) return `${reviewTotal} kana pendiente${reviewTotal > 1 ? "s" : ""} de repaso`;
+    if (fresh > 0) return `${fresh} kana nuevo${fresh > 1 ? "s" : ""}`;
+    return "Sesión guiada";
+  }, [learnSummary, allKanaSummary.practiced]);
+
+  const learnEndSummary = useMemo(() => {
+    const reviewedCount = new Set(
+      sessionResults.filter((r) => !sessionNewItemIds.has(r.item.id)).map((r) => r.item.id),
+    ).size;
+    const newPracticed = new Set(
+      sessionResults.filter((r) => sessionNewItemIds.has(r.item.id)).map((r) => r.item.id),
+    ).size;
+    return { reviewedCount, newPracticed };
+  }, [sessionResults, sessionNewItemIds]);
 
   const subtlePillStyle: CSSProperties = {
     borderRadius: 999,
@@ -462,6 +468,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
       setRomajiFeedback(null);
       setAnswerFeedback(null);
       setHandwritingRating(null);
+      setSessionNewItemIds(new Set());
       setStreak(0);
     }, 220);
   };
@@ -507,7 +514,10 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   };
 
   const startLearnSession = () => {
-    openSession(buildLearnSession(basicHiragana, progress), "Learn");
+    const s = buildLearnSession(basicHiragana, progress);
+    const newIds = new Set(s.questions.map((q) => q.item.id).filter((id) => !progress[id]));
+    setSessionNewItemIds(newIds);
+    openSession(s, "Learn");
   };
 
   useEffect(() => {
@@ -692,9 +702,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
             <div
               style={{
-                display: "grid",
-                gap: 12,
-                padding: "18px 18px 16px",
+                padding: "20px 20px 18px",
                 borderRadius: 28,
                 border: "1px solid var(--color-border)",
                 background: "color-mix(in srgb, var(--color-surface) 88%, white)",
@@ -702,32 +710,25 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
             >
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 10,
-                  alignItems: "baseline",
-                  flexWrap: "wrap",
+                  fontSize: 11,
+                  color: "var(--color-text-muted)",
+                  fontWeight: 800,
+                  marginBottom: 8,
+                  textTransform: "uppercase",
+                  letterSpacing: ".06em",
                 }}
               >
-                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 800 }}>
-                  Sesión guiada
-                </div>
-                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text)", fontWeight: 800 }}>
-                  {learnSessionCount} preguntas
-                </div>
+                Sesión de hoy
               </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {learnSummary.due > 0 && <div style={subtlePillStyle}>{learnSummary.due} pendientes</div>}
-                {learnSummary.difficult > 0 && <div style={subtlePillStyle}>{learnSummary.difficult} difíciles</div>}
-                {learnSummary.almost > 0 && <div style={subtlePillStyle}>{learnSummary.almost} por fijar</div>}
-                {learnSummary.fresh > 0 && <div style={subtlePillStyle}>{learnSummary.fresh} nuevos</div>}
-              </div>
-              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", lineHeight: 1.45 }}>
-                {learnSummary.due > 0 || learnSummary.difficult > 0
-                  ? "Repaso primero, kana nuevos solo cuando estés listo."
-                  : allKanaSummary.practiced === 0
-                    ? "Empieza con las vocales hiragana. Poco a poco."
-                    : "Introduces kana nuevos del siguiente grupo."}
+              <div
+                style={{
+                  fontSize: "clamp(20px, 5vw, 26px)",
+                  fontWeight: 800,
+                  color: "var(--color-text)",
+                  lineHeight: 1.2,
+                }}
+              >
+                {learnSessionDescription}
               </div>
             </div>
           </div>
@@ -1390,8 +1391,82 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
           </div>
         ) : null}
 
-        {/* Summary */}
-        {sessionFinished ? (
+        {/* Summary — Learn */}
+        {sessionFinished && isLearnSession ? (
+          <div style={{ display: "grid", gap: "var(--space-3)" }}>
+            <div
+              style={{
+                display: "grid",
+                gap: 14,
+                padding: "22px 20px 20px",
+                borderRadius: 30,
+                background: "color-mix(in srgb, var(--color-surface) 86%, white)",
+                boxShadow: "0 18px 34px rgba(26,26,46,.05)",
+              }}
+            >
+              <div style={{ fontSize: "clamp(26px, 7vw, 32px)", fontWeight: 800, color: "var(--color-text)", lineHeight: 1.1 }}>
+                {summary.correct / Math.max(1, sessionQuestionCount) >= 0.7 ? "Buen trabajo" : "Sigue practicando"}
+              </div>
+
+              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                {learnEndSummary.reviewedCount > 0 && learnEndSummary.newPracticed > 0
+                  ? `${learnEndSummary.reviewedCount} repasados · ${learnEndSummary.newPracticed} nuevo${learnEndSummary.newPracticed > 1 ? "s" : ""}`
+                  : learnEndSummary.reviewedCount > 0
+                    ? `${learnEndSummary.reviewedCount} kana repasados`
+                    : learnEndSummary.newPracticed > 0
+                      ? `${learnEndSummary.newPracticed} kana nuevo${learnEndSummary.newPracticed > 1 ? "s" : ""} practicados`
+                      : `${sessionQuestionCount} preguntas completadas`}
+              </div>
+
+              {hardestSessionKana.length > 0 && (
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    flexWrap: "wrap",
+                    paddingTop: 12,
+                    borderTop: "1px solid var(--color-border)",
+                    alignItems: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "var(--color-text-muted)",
+                      fontWeight: 800,
+                      textTransform: "uppercase",
+                      letterSpacing: ".08em",
+                      flexShrink: 0,
+                    }}
+                  >
+                    Para repasar
+                  </div>
+                  {hardestSessionKana.slice(0, 3).map((item) => (
+                    <div key={item.id} style={subtlePillStyle}>
+                      {item.kana} · {item.romaji}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: "grid", gap: 8 }}>
+              <button type="button" onClick={startLearnSession} className="ds-btn" style={{ width: "100%", minHeight: 54 }}>
+                Continuar
+              </button>
+              <button
+                type="button"
+                onClick={() => { closeSession(); setScreen("home"); }}
+                className="ds-btn-ghost"
+              >
+                Salir
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Summary — Custom Practice */}
+        {sessionFinished && !isLearnSession ? (
           <div style={{ display: "grid", gap: "var(--space-3)" }}>
             <div
               style={{
@@ -1415,14 +1490,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                 >
                   {summary.correct} / {session?.questions.length || 0}
                 </div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 800,
-                    color: "var(--color-text-muted)",
-                    paddingBottom: 6,
-                  }}
-                >
+                <div style={{ fontSize: 18, fontWeight: 800, color: "var(--color-text-muted)", paddingBottom: 6 }}>
                   {Math.round((summary.correct / Math.max(1, session?.questions.length || 1)) * 100)}%
                 </div>
               </div>
@@ -1478,10 +1546,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                 >
                   Practicar falladas ({repeatCandidates.length})
                 </button>
-              ) : isLearnSession ? (
-                <button type="button" onClick={startLearnSession} className="ds-btn">
-                  Nueva sesión Learn
-                </button>
               ) : (
                 <button type="button" onClick={() => startSession()} className="ds-btn">
                   Otra sesión
@@ -1489,10 +1553,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               )}
               <button
                 type="button"
-                onClick={() => {
-                  closeSession();
-                  setScreen("home");
-                }}
+                onClick={() => { closeSession(); setScreen("home"); }}
                 className="ds-btn-ghost"
               >
                 Volver
