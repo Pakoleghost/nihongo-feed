@@ -7067,11 +7067,11 @@ function StudyContent() {
           subtitle={`${kanaSet === "mixed" ? "Mixto" : kanaSet === "hiragana" ? "Hiragana" : "Katakana"} · ${kanaTime}s · ${kanaScore} pts`}
           onClose={closeKanaSession}
         >
-          <div style={{ display: "grid", gap: "var(--space-4)" }}>
+          <div style={{ display: "grid", gap: 16 }}>
             <PracticeStageCard
               label={kanaCountdown !== null ? "Preparado" : "Kana"}
               value={
-                <div style={{ fontSize: kanaCountdown !== null ? "clamp(56px, 18vw, 84px)" : "clamp(110px, 34vw, 168px)", lineHeight: 0.92, letterSpacing: "-.05em", fontWeight: 800, color: "var(--color-text)" }}>
+                <div style={{ fontSize: kanaCountdown !== null ? "clamp(56px, 18vw, 84px)" : "clamp(110px, 34vw, 168px)", lineHeight: 0.92, letterSpacing: "-.05em", fontWeight: 800, fontFamily: kanaCountdown !== null ? DS.fontHead : DS.fontKana, color: DS.ink }}>
                   {kanaCountdown !== null ? (kanaCountdown > 0 ? kanaCountdown : "GO!") : kanaQuestion.char}
                 </div>
               }
@@ -7084,9 +7084,9 @@ function StudyContent() {
                   onClick={() => answerKana(op)}
                   disabled={!kanaRunning || kanaCountdown !== null || kanaPenalty > 0 || kanaTime <= 0}
                   style={{
-                    border: "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
+                    border: `1px solid ${DS.lineStrong}`,
                     borderRadius: 24,
-                    background: "color-mix(in srgb, var(--color-surface) 82%, white)",
+                    background: DS.surface,
                     padding: "18px 14px",
                     fontSize: 26,
                     fontWeight: 800,
@@ -7113,11 +7113,11 @@ function StudyContent() {
           subtitle={`${vkBucketConfig.label} · ${vkTime}s · ${vkScore} pts`}
           onClose={closeVkSession}
         >
-          <div style={{ display: "grid", gap: "var(--space-4)" }}>
+          <div style={{ display: "grid", gap: 16 }}>
             <PracticeStageCard
               label={vkCountdown !== null ? "Preparado" : vkQuestion.hint}
               value={
-                <div style={{ fontSize: vkCountdown !== null ? "clamp(56px, 18vw, 84px)" : "clamp(42px, 10vw, 56px)", lineHeight: 1.08, letterSpacing: "-.04em", fontWeight: 800, color: "var(--color-text)", wordBreak: "break-word" }}>
+                <div style={{ fontSize: vkCountdown !== null ? "clamp(56px, 18vw, 84px)" : "clamp(42px, 10vw, 56px)", lineHeight: 1.08, letterSpacing: "-.04em", fontWeight: 800, fontFamily: DS.fontHead, color: DS.ink, wordBreak: "break-word" }}>
                   {vkCountdown !== null ? (vkCountdown > 0 ? vkCountdown : "GO!") : vkQuestion.prompt}
                 </div>
               }
@@ -7130,9 +7130,9 @@ function StudyContent() {
                   onClick={() => answerVk(option)}
                   disabled={!vkRunning || vkCountdown !== null || vkPenalty > 0 || vkTime <= 0}
                   style={{
-                    border: "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
+                    border: `1px solid ${DS.lineStrong}`,
                     borderRadius: 24,
-                    background: "color-mix(in srgb, var(--color-surface) 82%, white)",
+                    background: DS.surface,
                     padding: "18px 14px",
                     fontSize: 18,
                     fontWeight: 800,

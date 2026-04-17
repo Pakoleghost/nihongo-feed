@@ -68,7 +68,7 @@ export function TopBar({ onMenu }: { onMenu?: () => void }) {
 
 const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode }> = [
   {
-    k: "home", label: "Home",
+    k: "home", label: "Inicio",
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
         <path d="M3 10l8-7 8 7v8a1.5 1.5 0 01-1.5 1.5H13v-6h-4v6H4.5A1.5 1.5 0 013 18v-8z" stroke={c} strokeWidth="1.5" strokeLinejoin="round" />
@@ -76,7 +76,7 @@ const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode
     ),
   },
   {
-    k: "learn", label: "Learn",
+    k: "learn", label: "Aprender",
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
         <path d="M3 5.5a2 2 0 012-2h5v15H5a2 2 0 01-2-2v-11zM12 3.5h5a2 2 0 012 2v11a2 2 0 01-2 2h-5v-15z" stroke={c} strokeWidth="1.5" />
@@ -84,7 +84,7 @@ const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode
     ),
   },
   {
-    k: "review", label: "Review",
+    k: "review", label: "Repasar",
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
         <path d="M18 11a7 7 0 11-2.05-4.95M18 3v4h-4" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -92,7 +92,7 @@ const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode
     ),
   },
   {
-    k: "practice", label: "Practice",
+    k: "practice", label: "Practicar",
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
         <path d="M6 3v16M10 5v12M14 7v8M18 9v4" stroke={c} strokeWidth="1.5" strokeLinecap="round" />
@@ -100,7 +100,7 @@ const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode
     ),
   },
   {
-    k: "vault", label: "Vault",
+    k: "vault", label: "Biblioteca",
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
         <rect x="3" y="5" width="16" height="13" rx="2" stroke={c} strokeWidth="1.5" />
@@ -283,4 +283,63 @@ export function PlayButton({ onClick, size = 68 }: { onClick?: () => void; size?
 
 export function StatusSpacer() {
   return <div style={{ height: 54 }} />;
+}
+
+// ─── NavDrawer ────────────────────────────────────────────────────────────────
+
+const NAV_ITEMS: Array<{ tab: DSTab; label: string }> = [
+  { tab: "home", label: "Inicio" },
+  { tab: "learn", label: "Aprender" },
+  { tab: "review", label: "Repasar" },
+  { tab: "practice", label: "Practicar" },
+  { tab: "vault", label: "Biblioteca" },
+];
+
+export function NavDrawer({
+  open,
+  onClose,
+  onNavigate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onNavigate: (tab: DSTab) => void;
+}) {
+  if (!open) return null;
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex" }}>
+      <div
+        style={{ position: "absolute", inset: 0, background: "rgba(28,27,23,0.38)" }}
+        onClick={onClose}
+      />
+      <nav style={{
+        position: "relative",
+        width: 240, height: "100%",
+        background: DS.bg,
+        padding: "calc(env(safe-area-inset-top) + 60px) 16px 40px",
+        display: "flex", flexDirection: "column", gap: 2,
+        boxShadow: "4px 0 40px rgba(28,27,23,0.10)",
+      }}>
+        <div style={{
+          fontFamily: DS.fontKana, fontSize: 22, color: DS.ink,
+          marginBottom: 28, paddingLeft: 16,
+        }}>禅</div>
+        {NAV_ITEMS.map(({ tab, label }) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => { onNavigate(tab); onClose(); }}
+            style={{
+              display: "flex", alignItems: "center",
+              padding: "13px 16px", borderRadius: 14,
+              background: "none", border: "none", cursor: "pointer",
+              fontFamily: DS.fontHead, fontSize: 16, fontWeight: 600,
+              color: DS.ink, textAlign: "left", width: "100%",
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
 }
