@@ -656,112 +656,103 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     <div style={{ display: "grid", gap: "var(--space-3)" }}>
       {/* ── HOME ── */}
       {screen === "home" && (
-        <div style={{ display: "grid", gap: "var(--space-3)" }}>
+        <div style={{ display: "grid", gap: 0 }}>
 
-          {/* Header: Learn / hiragana. + N/46 + thin bar */}
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 14 }}>
+          {/* Header — editorial typographic block */}
+          <div style={{ paddingBottom: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, marginBottom: 18 }}>
               <div>
-                <div style={{ fontSize: "clamp(28px, 8vw, 34px)", fontWeight: 800, color: "var(--color-text)", letterSpacing: "-0.03em", lineHeight: 1.05 }}>
+                <div style={{ fontSize: "clamp(34px, 10vw, 44px)", fontWeight: 800, color: "var(--color-text)", letterSpacing: "-0.04em", lineHeight: 0.92 }}>
                   Learn
                 </div>
-                <div style={{ fontSize: "clamp(20px, 5vw, 26px)", fontWeight: 300, fontStyle: "italic", color: "var(--color-text-muted)", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+                <div style={{ fontSize: "clamp(22px, 6vw, 30px)", fontWeight: 300, fontStyle: "italic", color: "var(--color-text-muted)", letterSpacing: "-0.025em", lineHeight: 1.1, marginTop: 4 }}>
                   hiragana.
                 </div>
               </div>
-              <div style={{ display: "grid", justifyItems: "end", gap: 6, paddingTop: 4 }}>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".16em", color: "var(--color-text-muted)" }}>
-                    Progreso
-                  </div>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: "var(--color-text)", letterSpacing: "-0.02em", marginTop: 2, lineHeight: 1 }}>
-                    {learnProgressContext.learnedCount}
-                    <span style={{ color: "var(--color-text-muted)", fontWeight: 400, fontSize: 15 }}> / {learnProgressContext.totalCount}</span>
-                  </div>
+              {/* Progress numerics — aligned to baseline, editorial weight */}
+              <div style={{ textAlign: "right", paddingBottom: 3 }}>
+                <div style={{ fontSize: "clamp(26px, 7vw, 32px)", fontWeight: 700, color: "var(--color-text)", letterSpacing: "-0.04em", lineHeight: 1 }}>
+                  {learnProgressContext.learnedCount}
+                  <span style={{ color: "var(--color-text-muted)", fontWeight: 300, fontSize: "0.55em", letterSpacing: 0 }}>/{learnProgressContext.totalCount}</span>
+                </div>
+                <div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".14em", color: "var(--color-text-muted)", opacity: 0.6, marginTop: 3 }}>
+                  kana
                 </div>
               </div>
             </div>
-            <div style={{ height: 3, borderRadius: 999, background: "var(--color-border)", overflow: "hidden" }}>
-              <div style={{ height: "100%", background: "#2cb696", width: `${Math.round((learnProgressContext.learnedCount / learnProgressContext.totalCount) * 100)}%` }} />
+            {/* Progress bar — structural hairline, not a widget */}
+            <div style={{ height: 2, borderRadius: 999, background: "var(--color-border)", overflow: "hidden" }}>
+              <div style={{ height: "100%", background: "#2cb696", width: `${Math.round((learnProgressContext.learnedCount / learnProgressContext.totalCount) * 100)}%`, transition: "width 500ms ease" }} />
             </div>
           </div>
 
-          {/* Kana trio preview */}
+          {/* Kana preview — study tiles, no borders */}
           {learnPreviewKana.length > 0 && (
-            <div style={{ display: "grid", gap: 10 }}>
-              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".2em", color: "#2cb696" }}>
+            <div style={{ paddingTop: 22, paddingBottom: 28 }}>
+              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".18em", color: "#2cb696", marginBottom: 14 }}>
                 {learnProgressContext.freshCount > 0 ? "Practicando ahora" : "Próximo grupo"}
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
+              <div style={{ display: "flex", gap: 10 }}>
                 {learnPreviewKana.map((item) => (
                   <div
                     key={item.id}
                     style={{
                       flex: 1,
                       display: "grid",
-                      gap: 4,
+                      gap: 7,
                       justifyItems: "center",
-                      padding: "14px 6px 12px",
-                      borderRadius: 20,
-                      background: "color-mix(in srgb, var(--color-surface) 84%, white)",
-                      border: "1px solid var(--color-border)",
+                      padding: "20px 8px 18px",
+                      borderRadius: 18,
+                      background: "color-mix(in srgb, var(--color-surface) 62%, var(--color-bg))",
+                      boxShadow: "0 2px 10px rgba(26,26,46,.055)",
                     }}
                   >
-                    <div style={{ fontSize: "clamp(28px, 8vw, 36px)", fontWeight: 800, lineHeight: 1, color: "var(--color-text)" }}>{item.kana}</div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--color-text-muted)" }}>{item.romaji}</div>
+                    <div style={{ fontSize: "clamp(32px, 10vw, 42px)", fontWeight: 800, lineHeight: 1, color: "var(--color-text)" }}>{item.kana}</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-muted)", letterSpacing: ".05em" }}>{item.romaji}</div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Today's queue card */}
-          <div
-            style={{
-              borderRadius: 24,
-              border: "1px solid var(--color-border)",
-              background: "color-mix(in srgb, var(--color-surface) 88%, white)",
-              padding: "18px 20px 20px",
-              display: "grid",
-              gap: 16,
-            }}
-          >
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".2em", color: "var(--color-text-muted)" }}>
-                Sesión de hoy
+          {/* Session context — floats freely in the flow */}
+          <div style={{ paddingTop: learnPreviewKana.length > 0 ? 0 : 24 }}>
+            {(learnProgressContext.reviewCount > 0 || learnProgressContext.freshCount > 0) ? (
+              <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginBottom: 24 }}>
+                {learnProgressContext.reviewCount > 0 && (
+                  <div>
+                    <span style={{ fontSize: "clamp(30px, 9vw, 38px)", fontWeight: 700, color: "var(--color-text)", letterSpacing: "-0.04em", lineHeight: 1 }}>{learnProgressContext.reviewCount}</span>
+                    <span style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 600, marginLeft: 6 }}>para repasar</span>
+                  </div>
+                )}
+                {learnProgressContext.reviewCount > 0 && learnProgressContext.freshCount > 0 && (
+                  <div style={{ width: 1, height: 22, background: "var(--color-border)", alignSelf: "center" }} />
+                )}
+                {learnProgressContext.freshCount > 0 && (
+                  <div>
+                    <span style={{ fontSize: "clamp(30px, 9vw, 38px)", fontWeight: 700, color: "var(--color-text)", letterSpacing: "-0.04em", lineHeight: 1 }}>{learnProgressContext.freshCount}</span>
+                    <span style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 600, marginLeft: 6 }}>nuevo{learnProgressContext.freshCount > 1 ? "s" : ""}</span>
+                  </div>
+                )}
               </div>
-              {(learnProgressContext.reviewCount > 0 || learnProgressContext.freshCount > 0) ? (
-                <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginTop: 8 }}>
-                  {learnProgressContext.reviewCount > 0 && (
-                    <div>
-                      <span style={{ fontSize: 28, fontWeight: 700, color: "var(--color-text)", letterSpacing: "-0.03em" }}>{learnProgressContext.reviewCount}</span>
-                      <span style={{ fontSize: 12, color: "var(--color-text-muted)", marginLeft: 5 }}>para repasar</span>
-                    </div>
-                  )}
-                  {learnProgressContext.reviewCount > 0 && learnProgressContext.freshCount > 0 && (
-                    <div style={{ width: 1, height: 20, background: "var(--color-border)", alignSelf: "center" }} />
-                  )}
-                  {learnProgressContext.freshCount > 0 && (
-                    <div>
-                      <span style={{ fontSize: 28, fontWeight: 700, color: "var(--color-text)", letterSpacing: "-0.03em" }}>{learnProgressContext.freshCount}</span>
-                      <span style={{ fontSize: 12, color: "var(--color-text-muted)", marginLeft: 5 }}>nuevo{learnProgressContext.freshCount > 1 ? "s" : ""}</span>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700, marginTop: 6 }}>
-                  Repaso guiado
-                </div>
-              )}
-            </div>
-            <button type="button" onClick={startLearnSession} className="ds-btn" style={{ width: "100%", minHeight: 54 }}>
+            ) : (
+              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 600, marginBottom: 24, letterSpacing: ".01em" }}>
+                Repaso guiado · sin nuevos kana hoy
+              </div>
+            )}
+
+            {/* Primary CTA */}
+            <button type="button" onClick={startLearnSession} className="ds-btn" style={{ width: "100%", minHeight: 52, fontSize: "var(--text-body)", fontWeight: 800, letterSpacing: "-.01em" }}>
               Empezar sesión
             </button>
-            <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-              <button type="button" onClick={() => setScreen("table")} className="ds-btn-ghost">
+
+            {/* Secondary actions — inline, muted, clearly subordinate */}
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 2, marginTop: 14 }}>
+              <button type="button" onClick={() => setScreen("table")} className="ds-btn-ghost" style={{ fontSize: 13, color: "var(--color-text-muted)", padding: "8px 14px" }}>
                 Tabla kana
               </button>
-              <button type="button" onClick={() => setScreen("setup")} className="ds-btn-ghost">
+              <span style={{ color: "var(--color-border)", fontSize: 16, userSelect: "none", lineHeight: 1 }}>·</span>
+              <button type="button" onClick={() => setScreen("setup")} className="ds-btn-ghost" style={{ fontSize: 13, color: "var(--color-text-muted)", padding: "8px 14px" }}>
                 Práctica libre
               </button>
             </div>
