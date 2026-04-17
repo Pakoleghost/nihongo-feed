@@ -44,6 +44,7 @@ export function PracticeStageCard({ label, value, compact = false, feedback = nu
         borderRadius: 32,
         background: "color-mix(in srgb, var(--color-surface) 82%, white)",
         boxShadow: shadow,
+        transition: "box-shadow 130ms ease",
         position: "relative",
         overflow: "hidden",
       }}
@@ -135,7 +136,7 @@ export default function PracticeShell({
     color: "var(--color-text)",
     fontSize: "var(--text-body-sm)",
     fontWeight: 800,
-    animation: "practiceStreakPop 420ms cubic-bezier(.2,.9,.2,1)",
+    animation: "practiceStreakPop 300ms cubic-bezier(.2,.9,.2,1)",
   };
 
   return (
@@ -245,16 +246,19 @@ export default function PracticeShell({
         }
         @keyframes practiceStreakPop {
           0% {
-            transform: translateY(8px) scale(0.88);
-            opacity: 0.35;
+            transform: translateY(6px) scale(0.84);
+            opacity: 0.3;
+            box-shadow: none;
           }
-          55% {
-            transform: translateY(-1px) scale(1.08);
+          50% {
+            transform: translateY(-2px) scale(1.14);
             opacity: 1;
+            box-shadow: 0 0 0 4px rgba(78,205,196,.32), 0 0 0 8px rgba(78,205,196,.1);
           }
           100% {
             transform: translateY(0) scale(1);
             opacity: 1;
+            box-shadow: 0 0 0 0px rgba(78,205,196,0);
           }
         }
         .practiceSuccessDots {
