@@ -27,25 +27,21 @@ type PracticeStageCardProps = {
 export function PracticeStageCard({ label, value, compact = false, feedback = null, children }: PracticeStageCardProps) {
   const bg =
     feedback === "correct" ? DS.correctSoft :
-    feedback === "wrong" ? DS.wrongSoft : DS.surface;
-  const border =
-    feedback === "correct" ? `1.5px solid ${DS.correct}` :
-    feedback === "wrong" ? `1.5px solid ${DS.wrong}` :
-    `1.5px solid ${DS.line}`;
+    feedback === "wrong" ? DS.wrongSoft : "transparent";
 
   return (
     <div style={{
       display: "grid", gap: 10, justifyItems: "center", textAlign: "center",
-      minHeight: compact ? 148 : 220, alignContent: "center",
-      padding: compact ? "12px 12px 10px" : "24px 20px",
-      borderRadius: 32, background: bg, border,
-      transition: "background 130ms ease, border-color 130ms ease",
+      minHeight: compact ? 148 : 240, alignContent: "center",
+      padding: compact ? "16px 12px 14px" : "32px 20px",
+      borderRadius: 32, background: bg,
+      transition: "background 130ms ease",
       position: "relative", overflow: "hidden",
     }}>
       {label && (
         <div style={{
           fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600,
-          color: DS.inkSoft, letterSpacing: "0.18em", textTransform: "uppercase",
+          color: DS.inkSoft, letterSpacing: "0.22em", textTransform: "uppercase",
         }}>{label}</div>
       )}
       <div>{value}</div>
@@ -159,8 +155,8 @@ export default function PracticeShell({
       {/* Content */}
       <div style={{
         flex: 1, overflowY: "auto",
-        padding: "20px 20px calc(24px + env(safe-area-inset-bottom))",
-        display: "grid", gap: 16, alignContent: "start",
+        padding: "8px 20px calc(32px + env(safe-area-inset-bottom))",
+        display: "grid", gap: 14, alignContent: "start",
       }}>
         {children}
       </div>
