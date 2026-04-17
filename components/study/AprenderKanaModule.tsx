@@ -282,6 +282,40 @@ function buildLearnSession(hiraganaBasic: KanaItem[], progress: KanaProgressMap)
   return { setKey: "learn", modes: ["multiple_choice"] as KanaPracticeMode[], count: sessionCount, questions };
 }
 
+// ─── Kana System design tokens (light theme) ─────────────────────────────────
+const DS = {
+  bg: "#fbf8f1",
+  surface: "#fdfaf3",
+  surfaceAlt: "#f4efe3",
+  card: "#ffffff",
+  ink: "#1c1b17",
+  inkSoft: "#66645c",
+  inkFaint: "#bcb9af",
+  line: "rgba(28,27,23,0.06)",
+  lineStrong: "rgba(28,27,23,0.12)",
+  accent: "#ac3e53",
+  accentSoft: "rgba(172,62,83,0.10)",
+  accentInk: "#ffffff",
+  fontHead: "var(--font-study), 'Plus Jakarta Sans', 'Manrope', system-ui, sans-serif",
+  fontBody: "'Inter', system-ui, sans-serif",
+  fontKana: "var(--font-noto-serif-jp), 'Noto Serif JP', var(--font-noto-sans-jp), 'Noto Sans JP', serif",
+} as const;
+
+// Full 5-column hiragana chart (nulls = empty cells for y/w rows)
+const KANA_CHART_ROWS: Array<{ label: string; chars: Array<string | null> }> = [
+  { label: "a", chars: ["あ", "い", "う", "え", "お"] },
+  { label: "k", chars: ["か", "き", "く", "け", "こ"] },
+  { label: "s", chars: ["さ", "し", "す", "せ", "そ"] },
+  { label: "t", chars: ["た", "ち", "つ", "て", "と"] },
+  { label: "n", chars: ["な", "に", "ぬ", "ね", "の"] },
+  { label: "h", chars: ["は", "ひ", "ふ", "へ", "ほ"] },
+  { label: "m", chars: ["ま", "み", "む", "め", "も"] },
+  { label: "y", chars: ["や", null, "ゆ", null, "よ"] },
+  { label: "r", chars: ["ら", "り", "る", "れ", "ろ"] },
+  { label: "w", chars: ["わ", null, null, null, "を"] },
+  { label: "n", chars: ["ん", null, null, null, null] },
+];
+
 export default function AprenderKanaModule({ userKey, onRecordActivity, initialMode = null }: AprenderKanaModuleProps) {
   const [screen, setScreen] = useState<"home" | "table" | "learn" | "setup">("home");
   const [tableScript, setTableScript] = useState<KanaScript>("hiragana");
@@ -420,16 +454,20 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
   const kanaGridData = useMemo(() => {
     const kanaToItem = new Map(basicHiragana.map((item) => [item.kana, item]));
-    return HIRAGANA_BASIC_GROUPS.map((group) =>
-      group
-        .map((kanaChar) => {
-          const item = kanaToItem.get(kanaChar);
-          if (!item) return null;
-          const entry = progress[item.id];
-          return { kana: kanaChar, id: item.id, level: entry?.level ?? 0, seen: Boolean(entry) };
-        })
-        .filter((x): x is NonNullable<typeof x> => x !== null),
-    );
+    return KANA_CHART_ROWS.map((row) => ({
+      label: row.label,
+      cells: row.chars.map((kanaChar) => {
+        if (!kanaChar) return null;
+        const item = kanaToItem.get(kanaChar);
+        if (!item) return null;
+        const entry = progress[item.id];
+        const level = entry?.level ?? 0;
+        const seen = Boolean(entry);
+        // 0=locked, 1=new/seen, 2=learning, 3=reviewing, 4=mastered
+        const masteryLevel = !seen ? 0 : level === 0 ? 1 : level === 1 ? 2 : level <= 3 ? 3 : 4;
+        return { kana: kanaChar, id: item.id, masteryLevel };
+      }),
+    }));
   }, [basicHiragana, progress]);
 
   const learnEndSummary = useMemo(() => {
@@ -668,209 +706,227 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
   return (
     <div style={{ display: "grid", gap: "var(--space-3)" }}>
-      {/* ── HOME ── */}
+      {/* ── HOME — Kana System design ── */}
       {screen === "home" && (
-        <div style={{ display: "grid", gap: 0, paddingBottom: "calc(72px + env(safe-area-inset-bottom, 0px))" }}>
+        <div>
 
-          {/* ① HEADER — sits directly on background, no enclosing card */}
-          <div style={{ paddingBottom: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
-              <div>
-                <div style={{ fontSize: "clamp(38px, 11vw, 52px)", fontWeight: 900, letterSpacing: "-0.045em", lineHeight: 0.88, color: "var(--color-text)" }}>
-                  Learn
-                </div>
-                {/* hiragana. with the only red accent on screen */}
-                <div style={{ marginTop: 7, display: "inline-block", paddingBottom: 5, borderBottom: "2px solid var(--color-accent-strong)" }}>
-                  <span style={{ fontSize: "clamp(24px, 6.5vw, 32px)", fontWeight: 300, fontStyle: "italic", letterSpacing: "-0.03em", color: "var(--color-text-muted)" }}>
-                    hiragana.
-                  </span>
-                </div>
-              </div>
-              <div style={{ textAlign: "right", paddingTop: 6 }}>
-                <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".2em", color: "var(--color-text-muted)", opacity: 0.6, marginBottom: 4 }}>
-                  Progress
-                </div>
-                <div style={{ fontSize: "clamp(28px, 8vw, 36px)", fontWeight: 700, letterSpacing: "-0.04em", lineHeight: 1, color: "var(--color-text)" }}>
-                  {learnProgressContext.learnedCount}
-                  <span style={{ fontWeight: 300, color: "var(--color-text-muted)", fontSize: "0.55em", letterSpacing: 0 }}>{" / "}{learnProgressContext.totalCount}</span>
-                </div>
-              </div>
-            </div>
-            {/* Single structural hairline — neutral, not red */}
-            <div style={{ height: 1, background: "var(--color-border)", overflow: "hidden", marginTop: 20 }}>
-              <div style={{
-                height: "100%",
-                background: "var(--color-accent)",
-                width: `${Math.round((learnProgressContext.learnedCount / learnProgressContext.totalCount) * 100)}%`,
-                transition: "width 600ms ease",
-              }} />
-            </div>
+          {/* TopBar: menu · 禅 · avatar */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 20px 16px" }}>
+            <button type="button" style={{ width: 38, height: 38, borderRadius: 12, background: "transparent", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, flexShrink: 0 }}>
+              <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
+                <path d="M1 1h16M1 6h16M1 11h10" stroke={DS.ink} strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+            <div style={{ fontFamily: DS.fontKana, fontSize: 20, fontWeight: 500, color: DS.ink, letterSpacing: 1 }}>禅</div>
+            <button type="button" style={{ width: 38, height: 38, borderRadius: 19, background: DS.surfaceAlt, border: `1px solid ${DS.line}`, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: DS.fontHead, fontSize: 11, fontWeight: 600, color: DS.inkSoft, padding: 0, flexShrink: 0 }}>
+              MK
+            </button>
           </div>
 
-          {/* ② KANA TILES — independent section, no wrapping box */}
-          {learnPreviewKana.length > 0 && (
-            <div style={{ paddingTop: 28, paddingBottom: 28 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".18em", color: "var(--color-accent-strong)" }}>
-                  {learnProgressContext.freshCount > 0 ? "Practicing now" : "Next"}
-                  {" · "}
-                  {(["A", "K", "S", "T", "N", "H", "M", "Y", "R", "W"])[learnProgressContext.batchIdx] ?? ""}
-                  {"-row"}
-                </div>
-                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".06em", color: "var(--color-text-muted)" }}>
-                  {learnPreviewKana.length} of {(HIRAGANA_BASIC_GROUPS[learnProgressContext.batchIdx] ?? []).length}
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: 10 }}>
-                {learnPreviewKana.map((item) => {
-                  const entry = progress[item.id];
-                  const masteryLevel = entry ? Math.min(3, Math.max(0, entry.level)) : 0;
-                  return (
-                    <div
-                      key={item.id}
-                      style={{
-                        flex: 1,
-                        padding: "14px 8px 16px",
-                        borderRadius: 20,
-                        background: "color-mix(in srgb, var(--color-surface) 70%, var(--color-bg))",
-                        boxShadow: "0 1px 3px rgba(26,26,46,.05), 0 4px 12px rgba(26,26,46,.04)",
-                        display: "grid",
-                      }}
-                    >
-                      <div style={{ display: "flex", gap: 3, paddingLeft: 4, marginBottom: 12 }}>
-                        {[0, 1, 2].map((dot) => (
-                          <div key={dot} style={{ width: 6, height: 6, borderRadius: 999, background: dot < masteryLevel ? "var(--color-accent-strong)" : "var(--color-border)" }} />
-                        ))}
-                      </div>
-                      <div style={{ fontSize: "clamp(34px, 10vw, 44px)", fontWeight: 800, lineHeight: 1, color: "var(--color-text)", textAlign: "center", marginBottom: 10 }}>
-                        {item.kana}
-                      </div>
-                      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--color-text-muted)", textAlign: "center" }}>
-                        {item.romaji}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          {/* Scrollable body */}
+          <div style={{ paddingBottom: 110 }}>
 
-          {/* ③ TODAY'S QUEUE — open section, no card container */}
-          <div style={{ paddingTop: learnPreviewKana.length > 0 ? 0 : 28, paddingBottom: 32, borderTop: "1px solid var(--color-border)" }}>
-            <div style={{ paddingTop: 22, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".22em", color: "var(--color-text-muted)", opacity: 0.6, marginBottom: 12 }}>
-                  Today's queue
+            {/* Screen title: "Learn" + "hiragana." + progress */}
+            <div style={{ padding: "0 24px 20px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 700, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>Learn</div>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.8, lineHeight: 1.05, fontStyle: "italic" }}>hiragana.</div>
                 </div>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 16 }}>
-                  {learnProgressContext.reviewCount > 0 && (
-                    <div>
-                      <span style={{ fontSize: "clamp(30px, 9vw, 40px)", fontWeight: 700, letterSpacing: "-0.045em", lineHeight: 1, color: "var(--color-text)" }}>
-                        {learnProgressContext.reviewCount}
-                      </span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-muted)", marginLeft: 5 }}>due</span>
-                    </div>
-                  )}
-                  {learnProgressContext.freshCount > 0 && (
-                    <div>
-                      <span style={{ fontSize: "clamp(30px, 9vw, 40px)", fontWeight: 700, letterSpacing: "-0.045em", lineHeight: 1, color: "var(--color-text)" }}>
-                        {learnProgressContext.freshCount}
-                      </span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-muted)", marginLeft: 5 }}>new</span>
-                    </div>
-                  )}
-                  {learnProgressContext.reviewCount === 0 && learnProgressContext.freshCount === 0 && (
-                    <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 600 }}>
-                      Guided review
-                    </div>
-                  )}
-                </div>
-              </div>
-              {/* Circular play — the sole dominant CTA */}
-              <button
-                type="button"
-                onClick={startLearnSession}
-                style={{
-                  width: 60,
-                  height: 60,
-                  borderRadius: 999,
-                  border: "none",
-                  background: "var(--color-primary)",
-                  color: "var(--color-bg)",
-                  display: "grid",
-                  placeItems: "center",
-                  cursor: "pointer",
-                  flexShrink: 0,
-                  boxShadow: "0 6px 20px rgba(26,26,46,.28)",
-                }}
-              >
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-label="Empezar sesión">
-                  <path d="M8 5.5L17 11L8 16.5V5.5Z" fill="currentColor" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* ④ HIRAGANA GRID — mastery map, no enclosing card */}
-          <div style={{ paddingBottom: 28 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
-              <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".22em", color: "var(--color-text-muted)", opacity: 0.6 }}>
-                Hiragana
-              </div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-muted)" }}>
-                {learnProgressContext.learnedCount} / {learnProgressContext.totalCount} dominados
-              </div>
-            </div>
-            <div style={{ display: "grid", gap: 4 }}>
-              {kanaGridData.map((row, rowIdx) => (
-                <div key={rowIdx} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <div style={{ width: 14, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em", color: "var(--color-text-muted)", opacity: 0.5, flexShrink: 0 }}>
-                    {(["A", "K", "S", "T", "N", "H", "M", "Y", "R", "W"])[rowIdx]}
+                <div style={{ textAlign: "right", paddingTop: 4 }}>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>
+                    Progress
                   </div>
-                  {row.map(({ kana: kanaChar, id, level }) => {
-                    const isMastered = level >= 2;
-                    const isLearning = level === 1;
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 20, fontWeight: 600, color: DS.ink, marginTop: 4, letterSpacing: -0.3 }}>
+                    {learnProgressContext.learnedCount}
+                    <span style={{ color: DS.inkFaint, fontWeight: 400 }}> / {learnProgressContext.totalCount}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Progress line */}
+            <div style={{ padding: "0 24px" }}>
+              <div style={{ height: 3, borderRadius: 3, background: DS.surfaceAlt, overflow: "hidden" }}>
+                <div style={{ width: `${(learnProgressContext.learnedCount / learnProgressContext.totalCount) * 100}%`, height: "100%", background: DS.accent, transition: "width 0.4s ease" }} />
+              </div>
+            </div>
+
+            {/* Next kana tiles */}
+            {learnPreviewKana.length > 0 && (
+              <div style={{ padding: "28px 24px 0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.accent }}>
+                    {learnProgressContext.freshCount > 0 ? "Practicing now" : "Next"}
+                    {" · "}
+                    {(["A", "K", "S", "T", "N", "H", "M", "Y", "R", "W"])[learnProgressContext.batchIdx] ?? ""}
+                    {"-row"}
+                  </div>
+                  <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkSoft, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                    {learnPreviewKana.length} of {(HIRAGANA_BASIC_GROUPS[learnProgressContext.batchIdx] ?? []).length}
+                  </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+                  {learnPreviewKana.map((item, idx) => {
+                    const entry = progress[item.id];
+                    const level = entry?.level ?? 0;
+                    const masteryLevel = !entry ? 0 : level === 0 ? 1 : level === 1 ? 2 : level <= 3 ? 3 : 4;
+                    const isActive = idx === 0;
                     return (
                       <div
-                        key={id}
+                        key={item.id}
                         style={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: 8,
-                          display: "grid",
-                          placeItems: "center",
-                          fontSize: 17,
-                          fontWeight: 700,
-                          background: isMastered
-                            ? "rgba(230,57,70,.12)"
-                            : isLearning
-                              ? "rgba(230,57,70,.05)"
-                              : "transparent",
-                          color: isMastered
-                            ? "var(--color-accent-strong)"
-                            : isLearning
-                              ? "color-mix(in srgb, var(--color-accent-strong) 55%, var(--color-text-muted))"
-                              : "var(--color-border)",
+                          aspectRatio: "1 / 1.08",
+                          background: isActive ? DS.card : DS.surfaceAlt,
+                          border: isActive ? `1px solid ${DS.lineStrong}` : "1px solid transparent",
+                          borderRadius: 20,
+                          display: "flex", flexDirection: "column",
+                          alignItems: "center", justifyContent: "center",
+                          position: "relative",
+                          boxShadow: isActive ? "0 4px 24px rgba(28,27,23,0.05)" : "none",
                         }}
                       >
-                        {kanaChar}
+                        {/* Level pips */}
+                        <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 3 }}>
+                          {[0, 1, 2, 3].map((n) => (
+                            <div key={n} style={{ width: 4, height: 4, borderRadius: 2, background: n < masteryLevel ? DS.accent : DS.lineStrong }} />
+                          ))}
+                        </div>
+                        <div style={{ fontFamily: DS.fontKana, fontSize: 58, color: DS.ink, lineHeight: 1 }}>{item.kana}</div>
+                        <div style={{ fontFamily: DS.fontBody, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: DS.inkSoft, marginTop: 8 }}>{item.romaji}</div>
                       </div>
                     );
                   })}
                 </div>
-              ))}
+              </div>
+            )}
+
+            {/* Session card: Today's queue + PlayButton */}
+            <div style={{ padding: "24px 24px 0" }}>
+              <div style={{ background: DS.card, borderRadius: 24, padding: "20px 22px", display: "flex", alignItems: "center", gap: 18, border: `1px solid ${DS.line}` }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>
+                    Today's queue
+                  </div>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginTop: 8 }}>
+                    {learnProgressContext.reviewCount > 0 && (
+                      <div>
+                        <span style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.5 }}>{learnProgressContext.reviewCount}</span>
+                        <span style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginLeft: 6 }}>due</span>
+                      </div>
+                    )}
+                    {learnProgressContext.reviewCount > 0 && learnProgressContext.freshCount > 0 && (
+                      <div style={{ width: 1, height: 18, background: DS.lineStrong }} />
+                    )}
+                    {learnProgressContext.freshCount > 0 && (
+                      <div>
+                        <span style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.5 }}>{learnProgressContext.freshCount}</span>
+                        <span style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginLeft: 6 }}>new</span>
+                      </div>
+                    )}
+                    {learnProgressContext.reviewCount === 0 && learnProgressContext.freshCount === 0 && (
+                      <span style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>Guided review</span>
+                    )}
+                  </div>
+                </div>
+                {/* Primary CTA — play button */}
+                <button
+                  type="button"
+                  onClick={startLearnSession}
+                  style={{ background: DS.ink, color: DS.card, border: "none", borderRadius: 999, width: 68, height: 68, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 6px 20px rgba(28,27,23,0.18)", padding: 0 }}
+                >
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-label="Start session">
+                    <path d="M7 4l11 7-11 7V4z" fill="currentColor" />
+                  </svg>
+                </button>
+              </div>
             </div>
+
+            {/* Mastery chart */}
+            <div style={{ padding: "28px 24px 0" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
+                <div>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>
+                    Hiragana
+                  </div>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600, color: DS.ink, marginTop: 2 }}>
+                    <span style={{ color: DS.accent }}>{learnProgressContext.learnedCount}</span>
+                    <span style={{ color: DS.inkFaint }}> / {learnProgressContext.totalCount} </span>
+                    <span style={{ color: DS.inkSoft, fontSize: 12, fontWeight: 500 }}>mastered</span>
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 10, alignItems: "center", fontFamily: DS.fontBody, fontSize: 10, color: DS.inkSoft }}>
+                  {([{ c: DS.accent, l: "set" }, { c: DS.accentSoft, l: "learning" }, { c: DS.surfaceAlt, l: "new" }] as const).map(({ c, l }) => (
+                    <div key={l} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />{l}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {kanaGridData.map((row, rowIdx) => (
+                  <div key={rowIdx} style={{ display: "grid", gridTemplateColumns: "16px repeat(5, 1fr)", gap: 6, alignItems: "center" }}>
+                    <div style={{ fontFamily: DS.fontBody, fontSize: 10, color: DS.inkFaint, letterSpacing: 1, textTransform: "uppercase" }}>{row.label}</div>
+                    {row.cells.map((cell, ci) => {
+                      if (!cell) return <div key={ci} style={{ width: 28, height: 28 }} />;
+                      const { kana: kanaChar, masteryLevel } = cell;
+                      const fills = [
+                        { bg: "transparent", fg: DS.inkFaint, op: 0.35, border: `1px dashed ${DS.lineStrong}` },
+                        { bg: DS.surfaceAlt, fg: DS.ink, op: 1, border: "none" },
+                        { bg: DS.accentSoft, fg: DS.ink, op: 1, border: "none" },
+                        { bg: DS.accentSoft, fg: DS.accent, op: 1, border: "none" },
+                        { bg: DS.accent, fg: DS.accentInk, op: 1, border: "none" },
+                      ] as const;
+                      const f = fills[masteryLevel];
+                      return (
+                        <div key={ci} style={{ width: 28, height: 28, borderRadius: 10, background: f.bg, border: f.border, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: DS.fontKana, fontSize: 14, fontWeight: 500, color: f.fg, opacity: f.op }}>
+                          {kanaChar}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
 
-          {/* ⑤ SECONDARY — minimal, last in flow */}
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 2, paddingTop: 4 }}>
-            <button type="button" onClick={() => setScreen("table")} className="ds-btn-ghost" style={{ fontSize: 12, color: "var(--color-text-muted)", padding: "8px 14px" }}>
-              Tabla kana
-            </button>
-            <span style={{ color: "var(--color-border)", fontSize: 16, userSelect: "none", lineHeight: 1 }}>·</span>
-            <button type="button" onClick={() => setScreen("setup")} className="ds-btn-ghost" style={{ fontSize: 12, color: "var(--color-text-muted)", padding: "8px 14px" }}>
-              Práctica libre
-            </button>
+          {/* Tab bar: Learn · Review · Vault */}
+          <div style={{ position: "sticky", bottom: 0, height: 84, paddingBottom: 24, background: `linear-gradient(to top, ${DS.bg} 55%, transparent)`, display: "flex", alignItems: "center", justifyContent: "space-around", zIndex: 10 }}>
+            {([
+              {
+                k: "learn", label: "Learn", active: true, action: () => {},
+                icon: (c: string) => (
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <path d="M3 5.5a2 2 0 012-2h5v15H5a2 2 0 01-2-2v-11zM12 3.5h5a2 2 0 012 2v11a2 2 0 01-2 2h-5v-15z" stroke={c} strokeWidth="1.5" />
+                  </svg>
+                ),
+              },
+              {
+                k: "review", label: "Review", active: false, action: () => setScreen("setup"),
+                icon: (c: string) => (
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <path d="M18 11a7 7 0 11-2.05-4.95M18 3v4h-4" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                ),
+              },
+              {
+                k: "vault", label: "Vault", active: false, action: () => setScreen("table"),
+                icon: (c: string) => (
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <rect x="3" y="5" width="16" height="13" rx="2" stroke={c} strokeWidth="1.5" />
+                    <path d="M3 8h16M8 5V3.5h6V5" stroke={c} strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                ),
+              },
+            ] as const).map((tab) => (
+              <button key={tab.k} type="button" onClick={tab.action} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: "4px 12px" }}>
+                {tab.icon(tab.active ? DS.accent : DS.inkFaint)}
+                <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, letterSpacing: 0.8, textTransform: "uppercase", color: tab.active ? DS.ink : DS.inkFaint }}>
+                  {tab.label}
+                </div>
+              </button>
+            ))}
           </div>
 
         </div>

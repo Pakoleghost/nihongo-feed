@@ -1,5 +1,5 @@
 import "./globals.css";
-import { Noto_Sans_JP, Plus_Jakarta_Sans, Poppins } from "next/font/google";
+import { Noto_Sans_JP, Noto_Serif_JP, Plus_Jakarta_Sans, Poppins } from "next/font/google";
 import type { Viewport } from "next";
 
 const noto = Noto_Sans_JP({
@@ -7,6 +7,13 @@ const noto = Noto_Sans_JP({
   weight: ["400", "500", "700"],
   display: "swap",
   variable: "--font-noto-sans-jp",
+});
+
+const notoSerif = Noto_Serif_JP({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+  variable: "--font-noto-serif-jp",
 });
 
 const poppins = Poppins({
@@ -41,7 +48,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" className={`${poppins.variable} ${jakarta.variable} ${noto.variable}`}>
+    <html lang="ja" className={`${poppins.variable} ${jakarta.variable} ${noto.variable} ${notoSerif.variable}`}>
       <body className={noto.className}>{children}</body>
     </html>
   );
