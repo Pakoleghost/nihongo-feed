@@ -7243,7 +7243,7 @@ function StudyContent() {
         )}
 
         {!showHub && activeTab === "learnkana" && (
-          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop, animation: "studyViewIn 220ms ease" }}>
+          <section style={{ scrollMarginTop: sectionScrollMarginTop, animation: "studyViewIn 220ms ease" }}>
             <AprenderKanaModule
               userKey={userKey}
               initialMode={searchParams.get("learn") === "1" ? "learn" : null}
