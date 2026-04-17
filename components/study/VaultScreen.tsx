@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { DS, TopBar, TabBar, Eyebrow, ScreenTitle, type DSTab } from "./ds";
+import { DS, TopBar, TabBar, Eyebrow, ScreenTitle, NavDrawer, type DSTab } from "./ds";
 import { filterKanaItemsForSelection } from "@/lib/kana-data";
 import { loadKanaProgress } from "@/lib/kana-progress";
 
@@ -28,6 +28,7 @@ type VaultScreenProps = {
 
 export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) {
   const [filter, setFilter] = useState<FilterKey>("all");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const basicHiragana = useMemo(() => filterKanaItemsForSelection("hiragana", "basic"), []);
   const progress = useMemo(() => loadKanaProgress(userKey), [userKey]);
@@ -52,10 +53,10 @@ export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) 
   }).length;
 
   const filters: Array<{ key: FilterKey; label: string }> = [
-    { key: "all", label: "All" },
-    { key: "mastered", label: "Mastered" },
-    { key: "learning", label: "Learning" },
-    { key: "new", label: "New" },
+    { key: "all", label: "Todas" },
+    { key: "mastered", label: "Dominadas" },
+    { key: "learning", label: "Aprendiendo" },
+    { key: "new", label: "Nuevas" },
   ];
 
   const passesFilter = (kana: string | null): boolean => {
@@ -70,16 +71,16 @@ export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) 
 
   return (
     <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
+      <NavDrawer open={menuOpen} onClose={() => setMenuOpen(false)} onNavigate={onTabChange} />
       <div style={{ height: 54 }} />
-      <TopBar />
+      <TopBar onMenu={() => setMenuOpen(true)} />
 
       <div style={{ flex: 1, overflow: "auto" }}>
         <ScreenTitle
-          title="Vault"
-          subtitle="everything you know."
+          title="Biblioteca"
           right={
             <div style={{ textAlign: "right", paddingTop: 4 }}>
-              <Eyebrow>Mastered</Eyebrow>
+              <Eyebrow>Dominadas</Eyebrow>
               <div style={{
                 fontFamily: DS.fontHead, fontSize: 20, fontWeight: 600,
                 color: DS.ink, marginTop: 4, letterSpacing: -0.3,
@@ -103,7 +104,7 @@ export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) 
               <path d="M9.5 9.5L13 13" stroke={DS.inkSoft} strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             <span style={{ fontFamily: DS.fontBody, fontSize: 14, color: DS.inkSoft }}>
-              Search kana…
+              Buscar kana…
             </span>
           </div>
         </div>
@@ -143,7 +144,7 @@ export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) 
                   borderBottom: `1px solid ${DS.line}`,
                   marginBottom: 10,
                 }}>
-                  <Eyebrow>{row.label}-row</Eyebrow>
+                  <Eyebrow>fila-{row.label}</Eyebrow>
                   <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkFaint }}>
                     {rowMastered} / {rowTotal}
                   </div>

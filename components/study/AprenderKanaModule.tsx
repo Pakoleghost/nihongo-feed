@@ -26,6 +26,7 @@ import {
   type KanaRating,
 } from "@/lib/kana-progress";
 import { recordStudyResultToStorage } from "@/lib/study-srs";
+import { DS, NavDrawer } from "@/components/study/ds";
 
 type AprenderKanaModuleProps = {
   userKey: string;
@@ -283,25 +284,6 @@ function buildLearnSession(hiraganaBasic: KanaItem[], progress: KanaProgressMap)
   return { setKey: "learn", modes: ["multiple_choice"] as KanaPracticeMode[], count: sessionCount, questions };
 }
 
-// ─── Kana System design tokens (light theme) ─────────────────────────────────
-const DS = {
-  bg: "#fbf8f1",
-  surface: "#fdfaf3",
-  surfaceAlt: "#f4efe3",
-  card: "#ffffff",
-  ink: "#1c1b17",
-  inkSoft: "#66645c",
-  inkFaint: "#bcb9af",
-  line: "rgba(28,27,23,0.06)",
-  lineStrong: "rgba(28,27,23,0.12)",
-  accent: "#ac3e53",
-  accentSoft: "rgba(172,62,83,0.10)",
-  accentInk: "#ffffff",
-  fontHead: "var(--font-study), 'Plus Jakarta Sans', 'Manrope', system-ui, sans-serif",
-  fontBody: "'Inter', system-ui, sans-serif",
-  fontKana: "var(--font-noto-serif-jp), 'Noto Serif JP', var(--font-noto-sans-jp), 'Noto Sans JP', serif",
-} as const;
-
 // Full 5-column hiragana chart (nulls = empty cells for y/w rows)
 const KANA_CHART_ROWS: Array<{ label: string; chars: Array<string | null> }> = [
   { label: "a", chars: ["あ", "い", "う", "え", "お"] },
@@ -341,9 +323,14 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   const [sessionStartBatchIdx, setSessionStartBatchIdx] = useState(0);
   const [streak, setStreak] = useState(0);
   const [streakPulse, setStreakPulse] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
   const romajiInputRef = useRef<HTMLInputElement | null>(null);
   const advanceTimerRef = useRef<number | null>(null);
   const autoStartedLearnRef = useRef(false);
+
+  const btnPrimary = { background: DS.ink, color: DS.bg, border: "none", borderRadius: 18, padding: "14px 22px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600 as const, cursor: "pointer" as const };
+  const btnGhost = { background: "none", border: "none", cursor: "pointer" as const, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600 as const, color: DS.inkSoft };
+  const btnSecondary = { background: DS.surfaceAlt, color: DS.ink, border: "none", borderRadius: 18, padding: "14px 22px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600 as const, cursor: "pointer" as const };
 
   useEffect(() => {
     setProgress(loadKanaProgress(userKey));
@@ -496,11 +483,12 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   const subtlePillStyle: CSSProperties = {
     borderRadius: 999,
     padding: "7px 10px",
-    border: "1px solid var(--color-border)",
-    background: "color-mix(in srgb, var(--color-surface) 82%, white)",
-    color: "var(--color-text)",
-    fontSize: "var(--text-body-sm)",
-    fontWeight: 700,
+    border: `1px solid ${DS.line}`,
+    background: DS.surfaceAlt,
+    color: DS.ink,
+    fontFamily: DS.fontHead,
+    fontSize: 12,
+    fontWeight: 600,
   };
 
   const toggleScopeKey = (scopeKey: KanaScopeKey) => {
@@ -737,13 +725,14 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
   return (
     <div style={{ display: "grid", gap: "var(--space-3)" }}>
+      <NavDrawer open={menuOpen} onClose={() => setMenuOpen(false)} onNavigate={(tab) => onTabChange?.(tab)} />
       {/* ── HOME — Kana System design ── */}
       {screen === "home" && (
         <div>
 
           {/* TopBar: menu · 禅 · avatar */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 20px 16px" }}>
-            <button type="button" style={{ width: 38, height: 38, borderRadius: 12, background: "transparent", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, flexShrink: 0 }}>
+            <button type="button" onClick={() => setMenuOpen(true)} style={{ width: 38, height: 38, borderRadius: 12, background: "transparent", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, flexShrink: 0 }}>
               <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
                 <path d="M1 1h16M1 6h16M1 11h10" stroke={DS.ink} strokeWidth="1.5" strokeLinecap="round" />
               </svg>
@@ -761,12 +750,11 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
             <div style={{ padding: "0 24px 20px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 700, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>Learn</div>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.8, lineHeight: 1.05, fontStyle: "italic" }}>hiragana.</div>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 700, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>Aprender</div>
                 </div>
                 <div style={{ textAlign: "right", paddingTop: 4 }}>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>
-                    Progress
+                    Progreso
                   </div>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 20, fontWeight: 600, color: DS.ink, marginTop: 4, letterSpacing: -0.3 }}>
                     {learnProgressContext.learnedCount}
@@ -788,13 +776,13 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               <div style={{ padding: "28px 24px 0" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.accent }}>
-                    {learnProgressContext.freshCount > 0 ? "Practicing now" : "Next"}
+                    {learnProgressContext.freshCount > 0 ? "Practicando" : "Siguiente"}
                     {" · "}
                     {(["A", "K", "S", "T", "N", "H", "M", "Y", "R", "W"])[learnProgressContext.batchIdx] ?? ""}
                     {"-row"}
                   </div>
                   <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkSoft, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                    {learnPreviewKana.length} of {(HIRAGANA_BASIC_GROUPS[learnProgressContext.batchIdx] ?? []).length}
+                    {learnPreviewKana.length} de {(HIRAGANA_BASIC_GROUPS[learnProgressContext.batchIdx] ?? []).length}
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
@@ -837,13 +825,13 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               <div style={{ background: DS.card, borderRadius: 24, padding: "20px 22px", display: "flex", alignItems: "center", gap: 18, border: `1px solid ${DS.line}` }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>
-                    Today's queue
+                    Sesión de hoy
                   </div>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginTop: 8 }}>
                     {learnProgressContext.reviewCount > 0 && (
                       <div>
                         <span style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.5 }}>{learnProgressContext.reviewCount}</span>
-                        <span style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginLeft: 6 }}>due</span>
+                        <span style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginLeft: 6 }}>pendientes</span>
                       </div>
                     )}
                     {learnProgressContext.reviewCount > 0 && learnProgressContext.freshCount > 0 && (
@@ -852,11 +840,11 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                     {learnProgressContext.freshCount > 0 && (
                       <div>
                         <span style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.5 }}>{learnProgressContext.freshCount}</span>
-                        <span style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginLeft: 6 }}>new</span>
+                        <span style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginLeft: 6 }}>nuevas</span>
                       </div>
                     )}
                     {learnProgressContext.reviewCount === 0 && learnProgressContext.freshCount === 0 && (
-                      <span style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>Guided review</span>
+                      <span style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>Repaso guiado</span>
                     )}
                   </div>
                 </div>
@@ -883,11 +871,11 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                   <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600, color: DS.ink, marginTop: 2 }}>
                     <span style={{ color: DS.accent }}>{learnProgressContext.learnedCount}</span>
                     <span style={{ color: DS.inkFaint }}> / {learnProgressContext.totalCount} </span>
-                    <span style={{ color: DS.inkSoft, fontSize: 12, fontWeight: 500 }}>mastered</span>
+                    <span style={{ color: DS.inkSoft, fontSize: 12, fontWeight: 500 }}>dominadas</span>
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 10, alignItems: "center", fontFamily: DS.fontBody, fontSize: 10, color: DS.inkSoft }}>
-                  {([{ c: DS.accent, l: "set" }, { c: DS.accentSoft, l: "learning" }, { c: DS.surfaceAlt, l: "new" }] as const).map(({ c, l }) => (
+                  {([{ c: DS.accent, l: "estables" }, { c: DS.accentSoft, l: "aprendiendo" }, { c: DS.surfaceAlt, l: "nuevas" }] as const).map(({ c, l }) => (
                     <div key={l} style={{ display: "flex", alignItems: "center", gap: 4 }}>
                       <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />{l}
                     </div>
@@ -1330,7 +1318,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
       <PracticeShell
         open={Boolean(session)}
         visible={sheetVisible}
-        title={isLearnSession ? "Learn" : "Práctica"}
+        title={isLearnSession ? "Aprender" : "Práctica"}
         subtitle={
           sessionFinished
             ? "Resultado"
@@ -1346,7 +1334,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
         {!sessionFinished && currentQuestion ? (
           <div
             key={`${currentQuestion.item.id}-${sessionIndex}`}
-            style={{ display: "grid", gap: "var(--space-4)", animation: "kanaPracticeStepIn 200ms cubic-bezier(.22,1,.36,1)" }}
+            style={{ display: "grid", gap: 20, animation: "kanaPracticeStepIn 200ms cubic-bezier(.22,1,.36,1)" }}
           >
             <PracticeStageCard
               label={activeQuestionLabel}
@@ -1367,10 +1355,11 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                       currentQuestion.mode === "handwriting"
                         ? "clamp(28px, 8vw, 42px)"
                         : "clamp(96px, 32vw, 154px)",
-                    lineHeight: 0.92,
-                    letterSpacing: "-.05em",
-                    fontWeight: 800,
-                    color: "var(--color-text)",
+                    lineHeight: 1,
+                    letterSpacing: currentQuestion.mode === "handwriting" ? "-0.03em" : 0,
+                    fontWeight: currentQuestion.mode === "handwriting" ? 600 : 400,
+                    color: DS.ink,
+                    fontFamily: currentQuestion.mode === "handwriting" ? DS.fontHead : DS.fontKana,
                   }}
                 >
                   {currentQuestion.mode === "handwriting" ? currentQuestion.item.romaji : currentQuestion.item.kana}
@@ -1393,27 +1382,29 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                         disabled={showAnswer}
                         onClick={() => handleMultipleChoiceAnswer(option)}
                         style={{
-                          minHeight: 120,
-                          borderRadius: 28,
+                          minHeight: 110,
+                          borderRadius: 24,
                           border: showAnswer && isCorrect
-                            ? "1px solid color-mix(in srgb, #4ECDC4 44%, transparent)"
+                            ? `1px solid ${DS.correct}`
                             : showAnswer && isChosen && !isCorrect
-                              ? "1px solid color-mix(in srgb, #E63946 32%, transparent)"
-                              : "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
+                              ? `1px solid ${DS.wrong}`
+                              : `1px solid ${DS.line}`,
                           background:
                             showAnswer && isCorrect
-                              ? "color-mix(in srgb, #4ECDC4 18%, white)"
+                              ? DS.correctSoft
                               : showAnswer && isChosen && !isCorrect
-                                ? "color-mix(in srgb, #E63946 10%, white)"
-                                : "color-mix(in srgb, var(--color-surface) 82%, white)",
+                                ? DS.wrongSoft
+                                : DS.surfaceAlt,
                           color:
                             showAnswer && isCorrect
-                              ? "#117964"
+                              ? DS.correct
                               : showAnswer && isChosen && !isCorrect
-                                ? "#E63946"
-                                : "var(--color-text)",
-                          fontSize: 28,
-                          fontWeight: 800,
+                                ? DS.wrong
+                                : DS.ink,
+                          fontFamily: DS.fontHead,
+                          fontSize: 24,
+                          fontWeight: 600,
+                          letterSpacing: "0.04em",
                           cursor: showAnswer ? "default" : "pointer",
                           transition: "background 110ms ease, border-color 110ms ease, color 90ms ease",
                         }}
@@ -1430,43 +1421,33 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                       <div
                         style={{
                           textAlign: "center",
-                          fontSize: "var(--text-body)",
-                          color: "#117964",
-                          fontWeight: 800,
+                          fontFamily: DS.fontHead,
+                          fontSize: 13,
+                          color: DS.correct,
+                          fontWeight: 600,
+                          letterSpacing: "0.06em",
                         }}
                       >
                         Correcto
                       </div>
                     ) : (
-                      <div
-                        style={{
-                          padding: "12px 16px",
-                          borderRadius: 20,
-                          background: "color-mix(in srgb, #E63946 8%, white)",
-                          border: "1px solid color-mix(in srgb, #E63946 18%, transparent)",
-                          display: "grid",
-                          gap: 4,
-                          justifyItems: "start",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: 11,
-                            color: "#E63946",
-                            fontWeight: 800,
-                            textTransform: "uppercase",
-                            letterSpacing: ".08em",
-                          }}
-                        >
-                          Respuesta correcta
+                      <div style={{ textAlign: "center", display: "grid", gap: 2 }}>
+                        <div style={{
+                          fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600,
+                          color: DS.inkFaint, textTransform: "uppercase", letterSpacing: "0.18em",
+                        }}>
+                          Era
                         </div>
-                        <div style={{ fontSize: 26, fontWeight: 800, color: "var(--color-text)" }}>
+                        <div style={{
+                          fontFamily: DS.fontHead, fontSize: 22, fontWeight: 600,
+                          color: DS.ink, letterSpacing: "0.06em",
+                        }}>
                           {currentQuestion.item.romaji}
                         </div>
                       </div>
                     )}
                     {answerFeedback.status === "wrong" && (
-                      <button type="button" onClick={moveToNext} className="ds-btn" style={{ width: "100%" }}>
+                      <button type="button" onClick={moveToNext} style={{ ...btnPrimary, width: "100%" }}>
                         {sessionIndex >= sessionQuestionCount - 1 ? "Ver resumen" : "Siguiente"}
                       </button>
                     )}
@@ -1495,13 +1476,16 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                     width: "100%",
                     maxWidth: 340,
                     textAlign: "center",
-                    fontSize: 30,
-                    fontWeight: 800,
+                    fontFamily: DS.fontHead,
+                    fontSize: 28,
+                    fontWeight: 600,
+                    letterSpacing: "0.04em",
                     minHeight: 64,
                     borderRadius: 20,
-                    border: "1px solid var(--color-border)",
-                    background: "color-mix(in srgb, var(--color-surface) 90%, white)",
-                    color: "var(--color-text)",
+                    border: `1px solid ${DS.line}`,
+                    background: DS.surfaceAlt,
+                    color: DS.ink,
+                    outline: "none",
                   }}
                 />
                 <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
@@ -1509,12 +1493,12 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                     type="button"
                     onClick={handleRomajiSubmit}
                     disabled={Boolean(romajiFeedback) || normalizeRomaji(romajiValue).length === 0}
-                    className="ds-btn"
+                    style={btnPrimary}
                   >
                     Comprobar
                   </button>
                   {romajiFeedback && (
-                    <button type="button" onClick={moveToNext} className="ds-btn-secondary">
+                    <button type="button" onClick={moveToNext} style={btnSecondary}>
                       {sessionIndex >= sessionQuestionCount - 1 ? "Ver resumen" : "Siguiente"}
                     </button>
                   )}
@@ -1522,13 +1506,15 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                 {romajiFeedback && (
                   <div
                     style={{
-                      fontSize: "var(--text-body)",
-                      color: romajiFeedback.correct ? "#117964" : "var(--color-text-muted)",
-                      fontWeight: 800,
+                      fontFamily: DS.fontHead,
+                      fontSize: 13,
+                      color: romajiFeedback.correct ? DS.correct : DS.inkSoft,
+                      fontWeight: 600,
                       textAlign: "center",
+                      letterSpacing: "0.04em",
                     }}
                   >
-                    {romajiFeedback.correct ? "Correcto" : `Respuesta: ${romajiFeedback.answer}`}
+                    {romajiFeedback.correct ? "Correcto" : `Era: ${romajiFeedback.answer}`}
                   </div>
                 )}
               </div>
@@ -1558,7 +1544,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                   }}
                 />
                 {handwritingRating && handwritingRating !== "correct" ? (
-                  <button type="button" onClick={moveToNext} className="ds-btn" style={{ width: "100%" }}>
+                  <button type="button" onClick={moveToNext} style={{ ...btnPrimary, width: "100%" }}>
                     {sessionIndex >= sessionQuestionCount - 1 ? "Ver resumen" : "Siguiente"}
                   </button>
                 ) : null}
@@ -1569,23 +1555,20 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
         {/* Summary — Learn */}
         {sessionFinished && isLearnSession ? (
-          <div style={{ display: "grid", gap: "var(--space-3)" }}>
+          <div style={{ display: "grid", gap: 24 }}>
             <div
               style={{
                 display: "grid",
                 gap: 20,
-                padding: "22px 20px 20px",
-                borderRadius: 30,
-                background: "color-mix(in srgb, var(--color-surface) 86%, white)",
-                boxShadow: "0 18px 34px rgba(26,26,46,.05)",
+                padding: "24px 0 20px",
               }}
             >
               {/* Header */}
               <div style={{ display: "grid", gap: 4 }}>
-                <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".06em", color: "var(--color-text-muted)" }}>
+                <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.22em", color: DS.inkSoft }}>
                   Hiragana básico · en progreso
                 </div>
-                <div style={{ fontSize: "clamp(24px, 6vw, 30px)", fontWeight: 800, color: "var(--color-text)", lineHeight: 1.1 }}>
+                <div style={{ fontFamily: DS.fontHead, fontSize: "clamp(24px, 6vw, 30px)", fontWeight: 700, color: DS.ink, lineHeight: 1.05, letterSpacing: -0.5 }}>
                   Buen progreso
                 </div>
               </div>
@@ -1599,7 +1582,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                     </div>
                   )}
                   {learnEndSummary.newPracticed > 0 && (
-                    <div style={{ ...subtlePillStyle, color: "#117964", background: "color-mix(in srgb, #4ECDC4 12%, white)", border: "1px solid color-mix(in srgb, #4ECDC4 28%, transparent)" }}>
+                    <div style={{ ...subtlePillStyle, color: DS.correct, background: DS.correctSoft, border: `1px solid ${DS.correct}` }}>
                       +{learnEndSummary.newPracticed} nuevo{learnEndSummary.newPracticed > 1 ? "s" : ""}
                     </div>
                   )}
@@ -1609,7 +1592,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               {/* Practiced kana — visual cards */}
               {learnEndSummary.masteredInSession.length > 0 && (
                 <div style={{ display: "grid", gap: 10 }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".06em", color: "var(--color-text-muted)" }}>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.22em", color: DS.inkSoft }}>
                     Practicados
                   </div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -1619,15 +1602,14 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                         style={{
                           display: "grid",
                           justifyItems: "center",
-                          gap: 2,
-                          padding: "8px 12px",
+                          gap: 4,
+                          padding: "10px 14px",
                           borderRadius: 14,
-                          border: "1px solid var(--color-border)",
-                          background: "color-mix(in srgb, var(--color-surface) 82%, white)",
+                          background: DS.surfaceAlt,
                         }}
                       >
-                        <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1, color: "var(--color-text)" }}>{item.kana}</div>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--color-text-muted)" }}>{item.romaji}</div>
+                        <div style={{ fontFamily: DS.fontKana, fontSize: 26, fontWeight: 400, lineHeight: 1, color: DS.ink }}>{item.kana}</div>
+                        <div style={{ fontFamily: DS.fontBody, fontSize: 10, fontWeight: 600, color: DS.inkSoft, letterSpacing: "0.14em", textTransform: "uppercase" }}>{item.romaji}</div>
                       </div>
                     ))}
                   </div>
@@ -1636,30 +1618,22 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
               {/* Batch unlocked */}
               {learnProgressContext.batchIdx > sessionStartBatchIdx && (
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 10,
-                    padding: "14px 16px",
-                    borderRadius: 20,
-                    background: "color-mix(in srgb, #4ECDC4 10%, white)",
-                    border: "1px solid color-mix(in srgb, #4ECDC4 30%, transparent)",
-                  }}
-                >
-                  <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em", color: "#117964" }}>
+                <div style={{ display: "grid", gap: 12 }}>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.22em", color: DS.correct }}>
                     Grupo desbloqueado
                   </div>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {HIRAGANA_BASIC_GROUPS[learnProgressContext.batchIdx].map((k) => (
                       <div
                         key={k}
                         style={{
-                          fontSize: 26,
-                          fontWeight: 800,
-                          color: "#117964",
-                          padding: "4px 10px",
+                          fontFamily: DS.fontKana,
+                          fontSize: 28,
+                          fontWeight: 400,
+                          color: DS.ink,
+                          padding: "8px 12px",
                           borderRadius: 12,
-                          background: "color-mix(in srgb, #4ECDC4 18%, white)",
+                          background: DS.surfaceAlt,
                         }}
                       >
                         {k}
@@ -1671,11 +1645,11 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
               {/* Next group preview — only when no unlock this session */}
               {learnProgressContext.nextBatchKana && learnProgressContext.batchIdx === sessionStartBatchIdx && (
-                <div style={{ display: "grid", gap: 4 }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".06em", color: "var(--color-text-muted)" }}>
+                <div style={{ display: "grid", gap: 6 }}>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.22em", color: DS.inkSoft }}>
                     Próximo grupo
                   </div>
-                  <div style={{ fontSize: "var(--text-body-sm)", fontWeight: 700, color: "var(--color-text-muted)", letterSpacing: ".04em" }}>
+                  <div style={{ fontFamily: DS.fontKana, fontSize: 20, fontWeight: 400, color: DS.inkSoft, letterSpacing: 2 }}>
                     {learnProgressContext.nextBatchKana}
                   </div>
                 </div>
@@ -1688,26 +1662,26 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                   justifyContent: "space-between",
                   alignItems: "center",
                   paddingTop: 14,
-                  borderTop: "1px solid var(--color-border)",
+                  borderTop: `1px solid ${DS.line}`,
                 }}
               >
-                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                <div style={{ fontFamily: DS.fontHead, fontSize: 12, color: DS.inkSoft, fontWeight: 600 }}>
                   Progreso total
                 </div>
-                <div style={{ fontWeight: 800, color: "var(--color-text)", fontSize: "var(--text-body-sm)" }}>
+                <div style={{ fontFamily: DS.fontHead, fontWeight: 600, color: DS.ink, fontSize: 12 }}>
                   {learnProgressContext.learnedCount} / {learnProgressContext.totalCount} kana
                 </div>
               </div>
             </div>
 
             <div style={{ display: "grid", gap: 8 }}>
-              <button type="button" onClick={startLearnSession} className="ds-btn" style={{ width: "100%", minHeight: 54 }}>
+              <button type="button" onClick={startLearnSession} style={{ ...btnPrimary, width: "100%", minHeight: 54 }}>
                 Continuar
               </button>
               <button
                 type="button"
                 onClick={() => { closeSession(); setScreen("home"); }}
-                className="ds-btn-ghost"
+                style={btnGhost}
               >
                 Salir
               </button>
@@ -1717,40 +1691,38 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
         {/* Summary — Custom Practice */}
         {sessionFinished && !isLearnSession ? (
-          <div style={{ display: "grid", gap: "var(--space-3)" }}>
+          <div style={{ display: "grid", gap: 24 }}>
             <div
               style={{
                 display: "grid",
                 gap: 16,
-                padding: "20px 20px 18px",
-                borderRadius: 30,
-                background: "color-mix(in srgb, var(--color-surface) 86%, white)",
-                boxShadow: "0 18px 34px rgba(26,26,46,.05)",
+                padding: "24px 0 20px",
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
                 <div
                   style={{
+                    fontFamily: DS.fontHead,
                     fontSize: "clamp(42px, 12vw, 62px)",
                     lineHeight: 0.9,
-                    letterSpacing: "-.05em",
-                    fontWeight: 800,
-                    color: "var(--color-text)",
+                    letterSpacing: "-.04em",
+                    fontWeight: 700,
+                    color: DS.ink,
                   }}
                 >
                   {summary.correct} / {session?.questions.length || 0}
                 </div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "var(--color-text-muted)", paddingBottom: 6 }}>
+                <div style={{ fontFamily: DS.fontHead, fontSize: 17, fontWeight: 600, color: DS.inkSoft, paddingBottom: 6 }}>
                   {Math.round((summary.correct / Math.max(1, session?.questions.length || 1)) * 100)}%
                 </div>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
-                <div style={{ ...subtlePillStyle, textAlign: "center", color: summary.correct > 0 ? "#117964" : "var(--color-text-muted)" }}>
+                <div style={{ ...subtlePillStyle, textAlign: "center", color: summary.correct > 0 ? DS.correct : DS.inkSoft }}>
                   ✓ {summary.correct}
                 </div>
                 <div style={{ ...subtlePillStyle, textAlign: "center" }}>～ {summary.almost}</div>
-                <div style={{ ...subtlePillStyle, textAlign: "center", color: summary.wrong > 0 ? "#E63946" : "var(--color-text-muted)" }}>
+                <div style={{ ...subtlePillStyle, textAlign: "center", color: summary.wrong > 0 ? DS.wrong : DS.inkSoft }}>
                   ✕ {summary.wrong}
                 </div>
               </div>
@@ -1762,17 +1734,18 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                     gap: 8,
                     flexWrap: "wrap",
                     paddingTop: 12,
-                    borderTop: "1px solid var(--color-border)",
+                    borderTop: `1px solid ${DS.line}`,
                     alignItems: "center",
                   }}
                 >
                   <div
                     style={{
-                      fontSize: 11,
-                      color: "var(--color-text-muted)",
-                      fontWeight: 800,
+                      fontFamily: DS.fontHead,
+                      fontSize: 10.5,
+                      color: DS.inkSoft,
+                      fontWeight: 600,
                       textTransform: "uppercase",
-                      letterSpacing: ".08em",
+                      letterSpacing: "0.22em",
                       flexShrink: 0,
                     }}
                   >
@@ -1792,19 +1765,19 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                 <button
                   type="button"
                   onClick={() => startSession(repeatCandidates.slice(0, Math.min(repeatCandidates.length, 20)))}
-                  className="ds-btn"
+                  style={btnPrimary}
                 >
                   Practicar falladas ({repeatCandidates.length})
                 </button>
               ) : (
-                <button type="button" onClick={() => startSession()} className="ds-btn">
+                <button type="button" onClick={() => startSession()} style={btnPrimary}>
                   Otra sesión
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => { closeSession(); setScreen("home"); }}
-                className="ds-btn-ghost"
+                style={btnGhost}
               >
                 Volver
               </button>

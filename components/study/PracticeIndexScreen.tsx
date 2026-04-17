@@ -1,6 +1,7 @@
 "use client";
 
-import { DS, TopBar, TabBar, ScreenTitle, Eyebrow, type DSTab } from "./ds";
+import { useState } from "react";
+import { DS, TopBar, TabBar, ScreenTitle, Eyebrow, NavDrawer, type DSTab } from "./ds";
 
 export type PracticeSubView = "sprint" | "vocabkanji" | "flashcards" | "exam";
 
@@ -13,10 +14,10 @@ type PracticeMode = {
 };
 
 const MODES: PracticeMode[] = [
-  { key: "sprint",     title: "Kana Sprint",    kana: "速", desc: "Read as many kana as you can in 60 seconds.", tag: "Speed" },
-  { key: "flashcards", title: "Flashcards",      kana: "札", desc: "Classic front-back drill with self-rating.", tag: "Recall" },
-  { key: "vocabkanji", title: "Vocab + Kanji",   kana: "語", desc: "Sprint through vocabulary and kanji readings.", tag: "Vocab" },
-  { key: "exam",       title: "Repaso mixto",    kana: "復", desc: "Mixed grammar, vocab, and kanji review quiz.", tag: "Mixed" },
+  { key: "sprint",     title: "Sprint de Kana",   kana: "速", desc: "Lee el máximo de kana posible en 60 segundos.", tag: "Velocidad" },
+  { key: "flashcards", title: "Flashcards",         kana: "札", desc: "Repaso clásico cara a cara con autoevaluación.", tag: "Memoria" },
+  { key: "vocabkanji", title: "Vocab + Kanji",      kana: "語", desc: "Sprint de vocabulario y lecturas de kanji.", tag: "Vocab" },
+  { key: "exam",       title: "Repaso mixto",       kana: "復", desc: "Quiz combinado de gramática, vocab y kanji.", tag: "Mixto" },
 ];
 
 type PracticeIndexScreenProps = {
@@ -30,20 +31,23 @@ export default function PracticeIndexScreen({
   onSelectMode,
   recentActivity = [],
 }: PracticeIndexScreenProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
+      <NavDrawer open={menuOpen} onClose={() => setMenuOpen(false)} onNavigate={onTabChange} />
       <div style={{ height: 54 }} />
-      <TopBar />
+      <TopBar onMenu={() => setMenuOpen(true)} />
 
       <div style={{ flex: 1, overflow: "auto" }}>
-        <ScreenTitle title="Practice" subtitle="no stakes." />
+        <ScreenTitle title="Practicar" />
 
         <div style={{ padding: "0 24px" }}>
           <div style={{
             fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft,
             lineHeight: 1.5, maxWidth: 280,
           }}>
-            Free-form drills that don't affect your SRS queue. Pick a mode and go.
+            Ejercicios libres que no afectan tu cola SRS. Elige un modo y empieza.
           </div>
         </div>
 
@@ -95,7 +99,7 @@ export default function PracticeIndexScreen({
         {/* Recent */}
         {recentActivity.length > 0 && (
           <div style={{ padding: "32px 24px 0" }}>
-            <Eyebrow>Recent</Eyebrow>
+            <Eyebrow>Reciente</Eyebrow>
             <div style={{ marginTop: 14 }}>
               {recentActivity.map((r, i) => (
                 <div key={i} style={{

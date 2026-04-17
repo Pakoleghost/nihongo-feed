@@ -16,7 +16,9 @@
       "Bash(ls -la design-bundle)",
       "Bash(mkdir -p design-extract2)",
       "Bash(tar xf *)",
-      "Bash(python3)"
+      "Bash(python3)",
+      "Bash(gh pr create --title 'Fix session UI, navigation drawer, and Spanish language consistency' --body ' *)",
+      "Bash(grep -n \"TabBar active.*practice.*onTab.*setActiveTab\\\\|<\\\\/div>\\\\s*\\\\\\)\\\\}\\\\s*$\" /Users/pako/nihongo-feed/.claude/worktrees/hungry-hermann-3d1a92/app/study/page.tsx)"
     ]
   }
 }

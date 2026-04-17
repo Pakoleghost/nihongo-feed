@@ -6979,41 +6979,34 @@ function StudyContent() {
 
 
       {activeTab === "practice" && practiceSubView === "sprint" && (
-        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
+        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead, display: "flex", flexDirection: "column" }}>
           <div style={{ height: 54 }} />
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
               <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              Practice
+              Practicar
             </button>
           </div>
-          <div style={{ padding: "16px 24px 8px" }}>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Kana Sprint</div>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.6, fontStyle: "italic" }}>read fast.</div>
-          </div>
-          <div style={{ padding: "16px 24px 24px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <div style={{ minWidth: 0, flex: "1 1 280px" }}>
-                <StudySelectorGroup
-                  options={[
-                    { key: "hiragana", label: "Hiragana", tone: "var(--color-accent-soft)" },
-                    { key: "katakana", label: "Katakana", tone: "rgba(69, 123, 157, 0.14)" },
-                    { key: "mixed", label: "Mixto", tone: "var(--color-highlight-soft)" },
-                  ]}
-                  value={kanaSet}
-                  onSelect={(value) => setKanaSet(value as KanaMode)}
-                  layout="row"
-                  compact
-                  minItemWidth={112}
-                />
-              </div>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 16 }}>
+          <div style={{ flex: 1, padding: "16px 24px calc(100px + env(safe-area-inset-bottom))" }}>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 700, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05, marginBottom: 24 }}>Kana Sprint</div>
+            <StudySelectorGroup
+              options={[
+                { key: "hiragana", label: "Hiragana", tone: DS.accentSoft },
+                { key: "katakana", label: "Katakana", tone: "rgba(69, 123, 157, 0.12)" },
+                { key: "mixed", label: "Mixto", tone: DS.surfaceAlt },
+              ]}
+              value={kanaSet}
+              onSelect={(value) => setKanaSet(value as KanaMode)}
+              layout="row"
+              compact
+              minItemWidth={112}
+            />
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 24 }}>
               <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>
-                Best: <span style={{ color: DS.ink, fontWeight: 600 }}>{kanaBestByMode[kanaSet] || 0}</span> · Resets {weeklyResetLabel || "..."}
+                Mejor: <span style={{ color: DS.ink, fontWeight: 600 }}>{kanaBestByMode[kanaSet] || 0}</span> · Reinicia {weeklyResetLabel || "..."}
               </div>
-              <button type="button" onClick={startKana} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 14, padding: "12px 24px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
-                Start Sprint
+              <button type="button" onClick={startKana} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 18, padding: "14px 28px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+                Empezar
               </button>
             </div>
           </div>
@@ -7022,37 +7015,30 @@ function StudyContent() {
       )}
 
       {activeTab === "practice" && practiceSubView === "vocabkanji" && (
-        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
+        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead, display: "flex", flexDirection: "column" }}>
           <div style={{ height: 54 }} />
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
               <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              Practice
+              Practicar
             </button>
           </div>
-          <div style={{ padding: "16px 24px 8px" }}>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Vocab + Kanji</div>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.6, fontStyle: "italic" }}>sprint mode.</div>
-          </div>
-          <div style={{ padding: "16px 24px 24px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <div style={{ minWidth: 0, flex: "1 1 320px" }}>
-                <StudySelectorGroup
-                  options={VK_BUCKETS.map((bucket) => ({ key: bucket.key, label: bucket.label, tone: "rgba(69, 123, 157, 0.14)" }))}
-                  value={vkBucket}
-                  onSelect={(value) => setVkBucket(value as VkBucketKey)}
-                  layout="row"
-                  compact
-                  minItemWidth={88}
-                />
-              </div>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 16 }}>
+          <div style={{ flex: 1, padding: "16px 24px calc(100px + env(safe-area-inset-bottom))" }}>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 700, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05, marginBottom: 24 }}>Vocab + Kanji</div>
+            <StudySelectorGroup
+              options={VK_BUCKETS.map((bucket) => ({ key: bucket.key, label: bucket.label, tone: "rgba(69, 123, 157, 0.12)" }))}
+              value={vkBucket}
+              onSelect={(value) => setVkBucket(value as VkBucketKey)}
+              layout="row"
+              compact
+              minItemWidth={88}
+            />
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 24 }}>
               <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>
-                Best: <span style={{ color: DS.ink, fontWeight: 600 }}>{vkBestByBucket[vkBucket] || 0}</span> · Resets {vkResetLabel || "..."}
+                Mejor: <span style={{ color: DS.ink, fontWeight: 600 }}>{vkBestByBucket[vkBucket] || 0}</span> · Reinicia {vkResetLabel || "..."}
               </div>
-              <button type="button" onClick={startVkSprint} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 14, padding: "12px 24px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
-                Start Sprint
+              <button type="button" onClick={startVkSprint} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 18, padding: "14px 28px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+                Empezar
               </button>
             </div>
           </div>
@@ -7067,11 +7053,11 @@ function StudyContent() {
           subtitle={`${kanaSet === "mixed" ? "Mixto" : kanaSet === "hiragana" ? "Hiragana" : "Katakana"} · ${kanaTime}s · ${kanaScore} pts`}
           onClose={closeKanaSession}
         >
-          <div style={{ display: "grid", gap: "var(--space-4)" }}>
+          <div style={{ display: "grid", gap: 16 }}>
             <PracticeStageCard
               label={kanaCountdown !== null ? "Preparado" : "Kana"}
               value={
-                <div style={{ fontSize: kanaCountdown !== null ? "clamp(56px, 18vw, 84px)" : "clamp(110px, 34vw, 168px)", lineHeight: 0.92, letterSpacing: "-.05em", fontWeight: 800, color: "var(--color-text)" }}>
+                <div style={{ fontSize: kanaCountdown !== null ? "clamp(56px, 18vw, 84px)" : "clamp(110px, 34vw, 168px)", lineHeight: 0.92, letterSpacing: "-.05em", fontWeight: 800, fontFamily: kanaCountdown !== null ? DS.fontHead : DS.fontKana, color: DS.ink }}>
                   {kanaCountdown !== null ? (kanaCountdown > 0 ? kanaCountdown : "GO!") : kanaQuestion.char}
                 </div>
               }
@@ -7084,9 +7070,9 @@ function StudyContent() {
                   onClick={() => answerKana(op)}
                   disabled={!kanaRunning || kanaCountdown !== null || kanaPenalty > 0 || kanaTime <= 0}
                   style={{
-                    border: "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
+                    border: `1px solid ${DS.lineStrong}`,
                     borderRadius: 24,
-                    background: "color-mix(in srgb, var(--color-surface) 82%, white)",
+                    background: DS.surface,
                     padding: "18px 14px",
                     fontSize: 26,
                     fontWeight: 800,
@@ -7113,11 +7099,11 @@ function StudyContent() {
           subtitle={`${vkBucketConfig.label} · ${vkTime}s · ${vkScore} pts`}
           onClose={closeVkSession}
         >
-          <div style={{ display: "grid", gap: "var(--space-4)" }}>
+          <div style={{ display: "grid", gap: 16 }}>
             <PracticeStageCard
               label={vkCountdown !== null ? "Preparado" : vkQuestion.hint}
               value={
-                <div style={{ fontSize: vkCountdown !== null ? "clamp(56px, 18vw, 84px)" : "clamp(42px, 10vw, 56px)", lineHeight: 1.08, letterSpacing: "-.04em", fontWeight: 800, color: "var(--color-text)", wordBreak: "break-word" }}>
+                <div style={{ fontSize: vkCountdown !== null ? "clamp(56px, 18vw, 84px)" : "clamp(42px, 10vw, 56px)", lineHeight: 1.08, letterSpacing: "-.04em", fontWeight: 800, fontFamily: DS.fontHead, color: DS.ink, wordBreak: "break-word" }}>
                   {vkCountdown !== null ? (vkCountdown > 0 ? vkCountdown : "GO!") : vkQuestion.prompt}
                 </div>
               }
@@ -7130,9 +7116,9 @@ function StudyContent() {
                   onClick={() => answerVk(option)}
                   disabled={!vkRunning || vkCountdown !== null || vkPenalty > 0 || vkTime <= 0}
                   style={{
-                    border: "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
+                    border: `1px solid ${DS.lineStrong}`,
                     borderRadius: 24,
-                    background: "color-mix(in srgb, var(--color-surface) 82%, white)",
+                    background: DS.surface,
                     padding: "18px 14px",
                     fontSize: 18,
                     fontWeight: 800,
@@ -7153,21 +7139,18 @@ function StudyContent() {
         </PracticeShell>
 
       {activeTab === "practice" && practiceSubView === "flashcards" && (
-        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
+        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead, display: "flex", flexDirection: "column" }}>
           <div style={{ height: 54 }} />
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
               <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              Practice
+              Practicar
             </button>
           </div>
-          <div style={{ padding: "16px 24px 24px" }}>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Flashcards</div>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.6, fontStyle: "italic" }}>your decks.</div>
-          </div>
-          <div style={{ padding: "0 24px" }}>
+          <div style={{ flex: 1, overflow: "auto", padding: "16px 24px calc(100px + env(safe-area-inset-bottom))" }}>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 700, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05, marginBottom: 24 }}>Flashcards</div>
             {(flashLessonFolder !== null || Boolean(activeFlashSet?.isCustom)) && (
-              <div style={{ marginBottom: 10 }}>
+              <div style={{ marginBottom: 16 }}>
                 <button
                   type="button"
                   onClick={() => {
@@ -7175,67 +7158,41 @@ function StudyContent() {
                     setFlashSetId(null);
                     setFlashMode("browse");
                   }}
-                  style={secondaryButtonStyle}
+                  style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: 0 }}
                 >
+                  <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M5 1L1 5l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   Volver a decks
                 </button>
               </div>
             )}
 
             {flashLessonFolder === null && flashSetId === null && (
-              <div style={{ display: "grid", gap: 14 }}>
-                <div style={flashSectionStyle}>
-                  <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-                    {officialFlashLessons.map((entry) => (
-                        <button
-                          key={`folder-${entry.lesson}`}
-                          type="button"
-                          onClick={() => openFlashLesson(entry.lesson)}
-                          style={flashDeckCardStyle}
-                        >
-                          <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
-                            <div style={{ fontSize: 17, fontWeight: 800, color: "var(--color-text)" }}>Lección {entry.lesson}</div>
-                            <span
-                              style={{
-                                width: 24,
-                                height: 24,
-                                borderRadius: 999,
-                                display: "inline-flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                background: "color-mix(in srgb, var(--color-highlight-soft) 70%, white)",
-                                color: "var(--color-accent-strong)",
-                                fontSize: 12,
-                                fontWeight: 800,
-                                flexShrink: 0,
-                              }}
-                            >
-                              ↗
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-                  </div>
+              <div style={{ display: "grid", gap: 32 }}>
+                <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+                  {officialFlashLessons.map((entry) => (
+                    <button
+                      key={`folder-${entry.lesson}`}
+                      type="button"
+                      onClick={() => openFlashLesson(entry.lesson)}
+                      style={{
+                        textAlign: "left", borderRadius: 20,
+                        background: DS.surfaceAlt, border: `1px solid ${DS.line}`,
+                        padding: "14px 16px", cursor: "pointer",
+                        display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8,
+                      }}
+                    >
+                      <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600, color: DS.ink }}>Lección {entry.lesson}</div>
+                      <svg width="10" height="12" viewBox="0 0 10 12" fill="none">
+                        <path d="M1 1l5 5-5 5" stroke={DS.inkFaint} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  ))}
                 </div>
 
-                <div style={{ display: "grid", gap: 12 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: 10,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <div style={{ display: "grid", gap: 4 }}>
-                      <div style={{ fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>Mis decks</div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => openCustomFlashDeckBuilder()}
-                      style={secondaryButtonStyle}
-                    >
+                <div style={{ display: "grid", gap: 14 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, color: DS.inkSoft, letterSpacing: "0.22em", textTransform: "uppercase" }}>Mis decks</div>
+                    <button type="button" onClick={() => openCustomFlashDeckBuilder()} style={{ background: DS.surfaceAlt, border: "none", borderRadius: 10, padding: "6px 14px", fontFamily: DS.fontHead, fontSize: 12, fontWeight: 600, color: DS.ink, cursor: "pointer" }}>
                       Crear deck
                     </button>
                   </div>
@@ -7243,33 +7200,19 @@ function StudyContent() {
                   {customFlashSets.length > 0 ? (
                     <div style={{ display: "grid", gap: 10 }}>
                       {customFlashSets.map((set) => (
-                        <div
-                          key={set.id}
-                          style={{
-                            display: "grid",
-                            gap: 8,
-                            padding: "10px 12px",
-                            borderRadius: 18,
-                            background: "color-mix(in srgb, var(--color-surface) 82%, white)",
-                            border: "1px solid var(--color-border)",
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => openFlashSet(set.id)}
-                            style={{ display: "block", width: "100%", textAlign: "left", border: 0, background: "transparent", padding: 0, cursor: "pointer" }}
-                          >
-                            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                              <div style={{ fontSize: 16, fontWeight: 800, color: "var(--color-text)" }}>{set.title}</div>
-                              <div style={{ ...chipStyle, padding: "4px 8px", fontSize: 10 }}>{set.items.length} tarjetas</div>
+                        <div key={set.id} style={{ display: "grid", gap: 10, padding: "14px 16px", borderRadius: 20, background: DS.surfaceAlt, border: `1px solid ${DS.line}` }}>
+                          <button type="button" onClick={() => openFlashSet(set.id)} style={{ display: "block", width: "100%", textAlign: "left", border: 0, background: "transparent", padding: 0, cursor: "pointer" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
+                              <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600, color: DS.ink }}>{set.title}</div>
+                              <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, color: DS.inkSoft, background: DS.card, borderRadius: 8, padding: "3px 8px" }}>{set.items.length} tarjetas</div>
                             </div>
-                            <div style={{ marginTop: 2, fontSize: 12, color: "var(--color-text-muted)", lineHeight: 1.35 }}>{set.description}</div>
+                            {set.description ? <div style={{ fontFamily: DS.fontBody, marginTop: 4, fontSize: 12, color: DS.inkSoft, lineHeight: 1.4 }}>{set.description}</div> : null}
                           </button>
-                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                            <button type="button" onClick={() => openCustomFlashDeckBuilder(customFlashDecks.find((deck) => deck.id === set.id))} style={secondaryButtonStyle}>
+                          <div style={{ display: "flex", gap: 8 }}>
+                            <button type="button" onClick={() => openCustomFlashDeckBuilder(customFlashDecks.find((deck) => deck.id === set.id))} style={{ background: DS.card, border: "none", borderRadius: 10, padding: "6px 14px", fontFamily: DS.fontHead, fontSize: 12, fontWeight: 600, color: DS.ink, cursor: "pointer" }}>
                               Editar
                             </button>
-                            <button type="button" onClick={() => deleteCustomFlashDeck(set.id)} style={{ ...secondaryButtonStyle, color: "var(--color-text-muted)" }}>
+                            <button type="button" onClick={() => deleteCustomFlashDeck(set.id)} style={{ background: "none", border: "none", padding: "6px 14px", fontFamily: DS.fontHead, fontSize: 12, fontWeight: 600, color: DS.inkFaint, cursor: "pointer" }}>
                               Borrar
                             </button>
                           </div>
@@ -7277,193 +7220,113 @@ function StudyContent() {
                       ))}
                     </div>
                   ) : (
-                    <div
-                      style={{
-                        fontSize: 12,
-                        color: "var(--color-text-muted)",
-                        fontWeight: 700,
-                        padding: "2px 2px 0",
-                      }}
-                    >
+                    <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkFaint }}>
                       Aún no tienes decks personalizados.
                     </div>
                   )}
-
                 </div>
               </div>
             )}
 
             {flashLessonFolder !== null && flashSetId === null && (
-              <div style={{ marginTop: 10, display: "grid", gap: 8, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+              <div style={{ display: "grid", gap: 10 }}>
                 {flashSetsInLesson.map((set) => (
                   <button
                     key={set.id}
                     type="button"
                     onClick={() => openFlashSet(set.id)}
-                    style={flashDeckCardStyle}
+                    style={{
+                      textAlign: "left", borderRadius: 20,
+                      background: DS.surfaceAlt, border: `1px solid ${DS.line}`,
+                      padding: "16px 18px", cursor: "pointer",
+                      display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12,
+                    }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
-                      <div style={{ fontSize: 16, fontWeight: 800 }}>{set.title}</div>
-                      <span
-                        style={{
-                          width: 24,
-                          height: 24,
-                          borderRadius: 999,
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          background: "color-mix(in srgb, var(--color-accent-soft) 68%, white)",
-                          color: "var(--color-primary)",
-                          fontSize: 12,
-                          fontWeight: 800,
-                          flexShrink: 0,
-                        }}
-                      >
-                        ↗
-                      </span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600, color: DS.ink }}>{set.title}</div>
+                      {set.description ? <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 3, lineHeight: 1.4 }}>{set.description}</div> : null}
+                      <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkFaint, marginTop: 4 }}>{set.items.length} tarjetas</div>
                     </div>
-                    <div style={{ fontSize: 12, color: "#667085", lineHeight: 1.35 }}>{set.description}</div>
-                    <div style={{ fontSize: 11, color: "#344054", fontWeight: 700 }}>{set.items.length} tarjetas</div>
+                    <svg width="10" height="12" viewBox="0 0 10 12" fill="none">
+                      <path d="M1 1l5 5-5 5" stroke={DS.inkFaint} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </button>
                 ))}
               </div>
             )}
 
             {activeFlashSet && (
-              <div
-                ref={flashFocusRef}
-                onClick={() => {
-                  if (isFlashFocusMode) setFlashMode("browse");
-                }}
-                style={
-                  isFlashFocusMode
-                    ? {
-                        position: "fixed",
-                        inset: 0,
-                        zIndex: 70,
-                        background: "rgba(17,17,20,.42)",
-                        padding: "max(12px,env(safe-area-inset-top)) 12px 12px",
-                        overflowY: "auto",
-                      }
-                    : { marginTop: 10, display: "grid", gap: 12, scrollMarginTop: sectionScrollMarginTop }
-                }
-              >
-                <div
-                  onClick={(event) => event.stopPropagation()}
-                  style={
-                    isFlashFocusMode
-                      ? { maxWidth: 920, margin: "0 auto", display: "grid", gap: 12 }
-                      : { display: "grid", gap: 12 }
-                  }
-                >
-                  <div style={panelStyle}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                    <div>
-                      <div style={sectionKickerStyle}>
-                        {activeFlashSet.isCustom ? "Mi deck" : `Lección ${activeFlashSet.lesson}`}
-                      </div>
-                      <div style={{ marginTop: 4, fontSize: 20, fontWeight: 800 }}>{activeFlashSet.title}</div>
-                      <div style={{ marginTop: 4, color: "#667085", fontSize: 13 }}>{activeFlashSet.description}</div>
-                    </div>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      {isFlashFocusMode && (
-                        <button type="button" onClick={() => setFlashMode("browse")} style={secondaryButtonStyle}>
-                          Cerrar práctica
-                        </button>
-                      )}
-                      <button type="button" onClick={() => setFlashSetId(null)} style={secondaryButtonStyle}>
-                        Cambiar set
-                      </button>
-                      <button type="button" onClick={startFlashCards} style={primaryButtonStyle}>
-                        Empezar flashcards
-                      </button>
-                      <button type="button" onClick={startFlashLearn} style={secondaryButtonStyle}>
-                        Aprender
-                      </button>
-                    </div>
+              <div ref={flashFocusRef} style={{ display: "grid", gap: 20 }}>
+                {/* Set header */}
+                <div>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, color: DS.inkSoft, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 6 }}>
+                    {activeFlashSet.isCustom ? "Mi deck" : `Lección ${activeFlashSet.lesson}`}
+                  </div>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 22, fontWeight: 700, color: DS.ink, letterSpacing: -0.4 }}>{activeFlashSet.title}</div>
+                  {activeFlashSet.description ? <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft, marginTop: 4 }}>{activeFlashSet.description}</div> : null}
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
+                    <button type="button" onClick={startFlashCards} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 18, padding: "13px 24px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+                      Empezar
+                    </button>
+                    <button type="button" onClick={startFlashLearn} style={{ background: DS.surfaceAlt, border: "none", borderRadius: 18, padding: "13px 24px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, color: DS.ink, cursor: "pointer" }}>
+                      Aprender
+                    </button>
+                    <button type="button" onClick={() => setFlashSetId(null)} style={{ background: "none", border: "none", padding: "13px 0", fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, cursor: "pointer" }}>
+                      Cambiar
+                    </button>
                   </div>
                 </div>
 
                 {flashMode === "browse" && (
-                  <div style={panelStyle}>
-                    <div style={{ ...sectionKickerStyle, marginBottom: 8 }}>Lista del set</div>
-                    <div style={{ display: "grid", gap: 8 }}>
-                      {activeFlashItems.map((item) => (
-                        <div key={item.id} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 1px minmax(0,1fr)", gap: 10, alignItems: "center", background: "var(--color-surface-muted)", color: "var(--color-text)", borderRadius: 12, padding: "10px 12px", border: "1px solid var(--color-border)" }}>
-                          <span style={{ fontSize: 22, fontWeight: 700, wordBreak: "break-word" }}>{item.front}</span>
-                          <span style={{ width: 1, height: "70%", background: "var(--color-border-strong)" }} />
-                          <span style={{ fontSize: 20, fontWeight: 600, color: "var(--color-text-muted)", wordBreak: "break-word" }}>{item.back}</span>
-                        </div>
-                      ))}
+                  <div style={{ display: "grid", gap: 8 }}>
+                    <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, color: DS.inkSoft, letterSpacing: "0.22em", textTransform: "uppercase", paddingBottom: 10, borderBottom: `1px solid ${DS.line}` }}>
+                      Tarjetas
                     </div>
+                    {activeFlashItems.map((item) => (
+                      <div key={item.id} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 1px minmax(0,1fr)", gap: 12, alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${DS.line}` }}>
+                        <span style={{ fontFamily: DS.fontHead, fontSize: 18, fontWeight: 600, color: DS.ink, wordBreak: "break-word" }}>{item.front}</span>
+                        <span style={{ width: 1, height: "70%", background: DS.line }} />
+                        <span style={{ fontFamily: DS.fontBody, fontSize: 15, color: DS.inkSoft, wordBreak: "break-word" }}>{item.back}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
 
                 {flashMode === "cards" && activeFlashCard && (
-                  <div style={panelStyle}>
-                    <div style={{ marginBottom: 10, fontSize: 13, color: "#667085", fontWeight: 700 }}>
-                      Tarjeta {flashCardIndex + 1} de {activeFlashDeck.length}
+                  <div style={{ display: "grid", gap: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>
+                        {flashCardIndex + 1} / {activeFlashDeck.length}
+                      </div>
                     </div>
-                    <div style={{ ...progressTrackStyle, marginBottom: 12 }}>
-                      <div style={{ width: `${flashCardProgressPct}%`, height: "100%", background: "var(--color-accent)" }} />
+                    <div style={{ height: 2, background: DS.surfaceAlt, borderRadius: 1 }}>
+                      <div style={{ width: `${flashCardProgressPct}%`, height: "100%", background: DS.accent, borderRadius: 1, transition: "width 200ms ease" }} />
                     </div>
                     <button
                       type="button"
                       onClick={() => setFlashCardFlipped((value) => !value)}
-                      style={{
-                        width: "100%",
-                        minHeight: 240,
-                        border: 0,
-                        background: "transparent",
-                        cursor: "pointer",
-                        perspective: 1000,
-                      }}
+                      style={{ width: "100%", minHeight: 260, border: 0, background: "transparent", cursor: "pointer", perspective: 1000, padding: 0 }}
                     >
-                      <div
-                        style={{
-                          position: "relative",
-                          width: "100%",
-                          minHeight: 240,
-                          transformStyle: "preserve-3d",
-                          transition: "transform .32s ease",
-                          transform: flashCardFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
-                        }}
-                      >
-                        <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", border: "1px solid var(--color-border)", borderRadius: 14, background: "var(--color-surface-muted)", color: "var(--color-text)", display: "grid", placeItems: "center", padding: 16 }}>
+                      <div style={{ position: "relative", width: "100%", minHeight: 260, transformStyle: "preserve-3d", transition: "transform .32s ease", transform: flashCardFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}>
+                        <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", borderRadius: 28, background: DS.surfaceAlt, display: "grid", placeItems: "center", padding: 24 }}>
                           <div style={{ textAlign: "center" }}>
-                            <div style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.2, wordBreak: "break-word" }}>{activeFlashCard.front}</div>
-                            <div style={{ marginTop: 10, fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>Toca para voltear</div>
+                            <div style={{ fontFamily: DS.fontHead, fontSize: 36, fontWeight: 600, lineHeight: 1.2, color: DS.ink, wordBreak: "break-word" }}>{activeFlashCard.front}</div>
+                            <div style={{ marginTop: 12, fontFamily: DS.fontBody, fontSize: 12, color: DS.inkFaint }}>Toca para voltear</div>
                           </div>
                         </div>
-                        <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", border: "1px solid var(--color-border)", borderRadius: 14, background: "var(--color-surface)", color: "var(--color-text)", display: "grid", placeItems: "center", padding: 16 }}>
+                        <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", borderRadius: 28, background: DS.card, border: `1px solid ${DS.line}`, display: "grid", placeItems: "center", padding: 24 }}>
                           <div style={{ textAlign: "center" }}>
-                            <div style={{ fontSize: 36, fontWeight: 800, lineHeight: 1.2, wordBreak: "break-word" }}>{activeFlashCard.back}</div>
-                            <div style={{ marginTop: 10, fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>Toca para regresar</div>
+                            <div style={{ fontFamily: DS.fontHead, fontSize: 30, fontWeight: 600, lineHeight: 1.2, color: DS.ink, wordBreak: "break-word" }}>{activeFlashCard.back}</div>
+                            <div style={{ marginTop: 12, fontFamily: DS.fontBody, fontSize: 12, color: DS.inkFaint }}>Toca para regresar</div>
                           </div>
                         </div>
                       </div>
                     </button>
-                    <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFlashCardIndex((value) => Math.max(0, value - 1));
-                          setFlashCardFlipped(false);
-                        }}
-                        disabled={flashCardIndex <= 0}
-                        style={{ ...secondaryButtonStyle, cursor: flashCardIndex <= 0 ? "not-allowed" : "pointer", opacity: flashCardIndex <= 0 ? 0.5 : 1 }}
-                      >
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <button type="button" onClick={() => { setFlashCardIndex((v) => Math.max(0, v - 1)); setFlashCardFlipped(false); }} disabled={flashCardIndex <= 0} style={{ background: DS.surfaceAlt, border: "none", borderRadius: 14, padding: "12px 20px", fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.ink, cursor: flashCardIndex <= 0 ? "not-allowed" : "pointer", opacity: flashCardIndex <= 0 ? 0.4 : 1 }}>
                         ← Anterior
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFlashCardIndex((value) => Math.min(activeFlashDeck.length - 1, value + 1));
-                          setFlashCardFlipped(false);
-                        }}
-                        disabled={flashCardIndex >= activeFlashDeck.length - 1}
-                        style={{ ...secondaryButtonStyle, cursor: flashCardIndex >= activeFlashDeck.length - 1 ? "not-allowed" : "pointer", opacity: flashCardIndex >= activeFlashDeck.length - 1 ? 0.5 : 1 }}
-                      >
+                      <button type="button" onClick={() => { setFlashCardIndex((v) => Math.min(activeFlashDeck.length - 1, v + 1)); setFlashCardFlipped(false); }} disabled={flashCardIndex >= activeFlashDeck.length - 1} style={{ background: DS.surfaceAlt, border: "none", borderRadius: 14, padding: "12px 20px", fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.ink, cursor: flashCardIndex >= activeFlashDeck.length - 1 ? "not-allowed" : "pointer", opacity: flashCardIndex >= activeFlashDeck.length - 1 ? 0.4 : 1 }}>
                         Siguiente →
                       </button>
                     </div>
@@ -7471,80 +7334,70 @@ function StudyContent() {
                 )}
 
                 {flashMode === "learn" && (
-                  <div style={panelStyle}>
+                  <div style={{ display: "grid", gap: 16 }}>
                     {!currentFlashLearnQ && !flashLearnFinished && (
-                      <div style={{ fontSize: 13, color: "#667085" }}>Generando quiz...</div>
+                      <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>Generando quiz...</div>
                     )}
                     {currentFlashLearnQ && !flashLearnFinished && (
-                      <div>
-                        <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                          <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>Pregunta {flashLearnIndex + 1} / {flashLearnQuestions.length}</div>
-                          <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 700 }}>Score: {flashLearnScore}</div>
+                      <div style={{ display: "grid", gap: 16 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>{flashLearnIndex + 1} / {flashLearnQuestions.length}</div>
+                          <div style={{ fontFamily: DS.fontHead, fontSize: 12, fontWeight: 600, color: DS.inkSoft }}>{flashLearnScore} pts</div>
                         </div>
-                        <div style={{ ...progressTrackStyle, marginTop: 8 }}>
-                          <div style={{ width: `${flashLearnProgressPct}%`, height: "100%", background: "var(--color-accent)" }} />
+                        <div style={{ height: 2, background: DS.surfaceAlt, borderRadius: 1 }}>
+                          <div style={{ width: `${flashLearnProgressPct}%`, height: "100%", background: DS.accent, borderRadius: 1, transition: "width 200ms ease" }} />
                         </div>
-                        <div style={{ ...sectionKickerStyle, marginTop: 10 }}>Definición</div>
-                        <div style={{ marginTop: 6, fontSize: 30, fontWeight: 800, color: "#111114", wordBreak: "break-word" }}>{currentFlashLearnQ.prompt}</div>
-                        <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 8 }}>
+                        <div>
+                          <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, color: DS.inkSoft, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 8 }}>Definición</div>
+                          <div style={{ fontFamily: DS.fontHead, fontSize: 24, fontWeight: 600, color: DS.ink, wordBreak: "break-word", letterSpacing: -0.3 }}>{currentFlashLearnQ.prompt}</div>
+                        </div>
+                        <div style={{ display: "grid", gap: 10 }}>
                           {currentFlashLearnQ.options.map((option) => {
                             const isSelected = flashLearnChoice === option;
                             const isCorrect = option === currentFlashLearnQ.correct;
                             const showResult = Boolean(flashLearnChoice);
-                            let bg = "var(--color-surface)";
-                            let color = "var(--color-text)";
-                            let border = "1px solid var(--color-border)";
-                            if (showResult && isCorrect) {
-                              bg = "var(--color-surface-muted)";
-                              color = "var(--color-text)";
-                              border = "1px solid var(--color-border-strong)";
-                            } else if (showResult && isSelected && !isCorrect) {
-                              bg = "var(--color-surface-muted)";
-                              color = "var(--color-text)";
-                              border = "1px solid var(--color-border-strong)";
-                            }
+                            const bg = showResult && isCorrect ? DS.correctSoft : showResult && isSelected && !isCorrect ? DS.wrongSoft : DS.surfaceAlt;
+                            const border = showResult && isCorrect ? `1px solid ${DS.correct}` : showResult && isSelected && !isCorrect ? `1px solid ${DS.wrong}` : `1px solid ${DS.line}`;
+                            const color = showResult && isCorrect ? DS.correct : showResult && isSelected && !isCorrect ? DS.wrong : DS.ink;
                             return (
-                              <button
-                                key={option}
-                                type="button"
-                                onClick={() => answerFlashLearn(option)}
-                                disabled={Boolean(flashLearnChoice)}
-                                style={{ textAlign: "left", border, borderRadius: 10, background: bg, color, padding: "10px 12px", fontSize: 20, fontWeight: 700, cursor: flashLearnChoice ? "default" : "pointer", wordBreak: "break-word" }}
-                              >
+                              <button key={option} type="button" onClick={() => answerFlashLearn(option)} disabled={Boolean(flashLearnChoice)}
+                                style={{ textAlign: "left", border, borderRadius: 18, background: bg, color, padding: "14px 16px", fontFamily: DS.fontHead, fontSize: 16, fontWeight: 600, cursor: flashLearnChoice ? "default" : "pointer", wordBreak: "break-word", transition: "background 110ms ease, border-color 110ms ease" }}>
                                 {option}
                               </button>
                             );
                           })}
                         </div>
                         {flashLearnChoice && (
-                          <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                            <div style={{ fontWeight: 700, color: "var(--color-text)" }}>
-                              {flashLearnChoice === currentFlashLearnQ.correct ? "Correcto" : `Incorrecto. Respuesta: ${currentFlashLearnQ.correct}`}
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                            <div style={{ fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: flashLearnChoice === currentFlashLearnQ.correct ? DS.correct : DS.inkSoft }}>
+                              {flashLearnChoice === currentFlashLearnQ.correct ? "Correcto" : `Era: ${currentFlashLearnQ.correct}`}
                             </div>
-                            <button type="button" onClick={nextFlashLearn} style={secondaryButtonStyle}>
-                              {flashLearnIndex >= flashLearnQuestions.length - 1 ? "Ver score" : "Siguiente"}
+                            <button type="button" onClick={nextFlashLearn} style={{ background: DS.surfaceAlt, border: "none", borderRadius: 14, padding: "10px 20px", fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.ink, cursor: "pointer" }}>
+                              {flashLearnIndex >= flashLearnQuestions.length - 1 ? "Ver resultado" : "Siguiente"}
                             </button>
                           </div>
                         )}
                       </div>
                     )}
                     {flashLearnFinished && (
-                      <div>
-                        <div style={sectionKickerStyle}>Resultado</div>
-                        <div style={{ marginTop: 8, fontSize: 34, fontWeight: 800 }}>{flashLearnScore} / {flashLearnQuestions.length}</div>
-                        <div style={{ marginTop: 4, color: "#667085", fontSize: 14 }}>
-                          {Math.round((flashLearnScore / Math.max(1, flashLearnQuestions.length)) * 100)}% de aciertos
+                      <div style={{ display: "grid", gap: 20 }}>
+                        <div>
+                          <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, color: DS.inkSoft, letterSpacing: "0.22em", textTransform: "uppercase" }}>Resultado</div>
+                          <div style={{ fontFamily: DS.fontHead, fontSize: 48, fontWeight: 700, color: DS.ink, letterSpacing: -1, lineHeight: 1, marginTop: 8 }}>{flashLearnScore} / {flashLearnQuestions.length}</div>
+                          <div style={{ fontFamily: DS.fontBody, fontSize: 14, color: DS.inkSoft, marginTop: 6 }}>
+                            {Math.round((flashLearnScore / Math.max(1, flashLearnQuestions.length)) * 100)}% de aciertos
+                          </div>
                         </div>
-                        <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                           {activeFlashSet && flashLearnWrongItems.length >= 4 ? (
-                            <button type="button" onClick={() => launchFlashLearnSession(activeFlashSet, flashLearnWrongItems)} style={primaryButtonStyle}>
+                            <button type="button" onClick={() => launchFlashLearnSession(activeFlashSet, flashLearnWrongItems)} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 18, padding: "13px 24px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
                               Repasar falladas
                             </button>
                           ) : null}
-                          <button type="button" onClick={startFlashLearn} style={primaryButtonStyle}>
+                          <button type="button" onClick={startFlashLearn} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 18, padding: "13px 24px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
                             Otra sesión
                           </button>
-                          <button type="button" onClick={() => setFlashMode("browse")} style={secondaryButtonStyle}>
+                          <button type="button" onClick={() => setFlashMode("browse")} style={{ background: "none", border: "none", padding: "13px 0", fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, cursor: "pointer" }}>
                             Volver
                           </button>
                         </div>
@@ -7553,7 +7406,6 @@ function StudyContent() {
                   </div>
                 )}
               </div>
-              </div>
             )}
           </div>
           <TabBar active="practice" onTab={(tab) => setActiveTab(tab as StudyView)} />
@@ -7561,67 +7413,56 @@ function StudyContent() {
       )}
 
       {activeTab === "practice" && practiceSubView === "exam" && (
-        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
+        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead, display: "flex", flexDirection: "column" }}>
           <div style={{ height: 54 }} />
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
               <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              Practice
+              Practicar
             </button>
           </div>
-          <div style={{ padding: "16px 24px 24px" }}>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Repaso mixto</div>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.6, fontStyle: "italic" }}>mixed review.</div>
-          </div>
-          <div style={{ padding: "0 24px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Repaso mixto</h2>
-              <div style={{ minWidth: 0, flex: "1 1 320px" }}>
-                <StudySelectorGroup
-                  options={LESSONS.map((lesson) => ({ key: String(lesson) as `${number}`, label: `L${lesson}`, tone: "var(--color-highlight-soft)" }))}
-                  value={String(examLesson) as `${number}`}
-                  onSelect={(value) => {
-                    setExamLesson(Number(value));
-                    resetExam();
-                  }}
-                  layout="row"
-                  compact
-                  minItemWidth={72}
-                />
-              </div>
-            </div>
+          <div style={{ flex: 1, overflow: "auto", padding: "16px 24px calc(100px + env(safe-area-inset-bottom))" }}>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 700, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05, marginBottom: 20 }}>Repaso mixto</div>
+            <StudySelectorGroup
+              options={LESSONS.map((lesson) => ({ key: String(lesson) as `${number}`, label: `L${lesson}`, tone: DS.surfaceAlt }))}
+              value={String(examLesson) as `${number}`}
+              onSelect={(value) => {
+                setExamLesson(Number(value));
+                resetExam();
+              }}
+              layout="row"
+              compact
+              minItemWidth={72}
+            />
 
             {examQuestions.length === 0 && (
-              <div ref={examCardRef} style={{ ...mutedPanelStyle, marginTop: 14, scrollMarginTop: sectionScrollMarginTop }}>
-                <div style={{ marginTop: 6, fontSize: "var(--text-h2)", fontWeight: 800 }}>Repaso L{examLesson}</div>
-                <button
-                  type="button"
-                  onClick={startExam}
-                  style={{ ...primaryButtonStyle, marginTop: 10 }}
-                >
+              <div ref={examCardRef} style={{ marginTop: 24, display: "grid", gap: 16 }}>
+                <div style={{ fontFamily: DS.fontHead, fontSize: 22, fontWeight: 700, color: DS.ink, letterSpacing: -0.4 }}>Repaso L{examLesson}</div>
+                <button type="button" onClick={startExam} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 18, padding: "14px 28px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer", alignSelf: "start" }}>
                   Iniciar repaso
                 </button>
               </div>
             )}
 
-            <div style={{ marginTop: 14, borderTop: "1px dashed rgba(17,17,20,.1)", paddingTop: 12 }}>
-              <div style={{ ...sectionKickerStyle, marginBottom: 8 }}>
-                Historial reciente
+            {examHistory.length > 0 && (
+              <div style={{ marginTop: 32, paddingTop: 24, borderTop: `1px solid ${DS.line}` }}>
+                <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, color: DS.inkSoft, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 14 }}>
+                  Historial reciente
+                </div>
+                <div style={{ display: "grid", gap: 10 }}>
+                  {examHistory.slice(0, 6).map((attempt, index) => (
+                    <div key={`${attempt.createdAt}-${index}`} style={{ display: "flex", justifyContent: "space-between", gap: 8, padding: "12px 0", borderBottom: `1px solid ${DS.line}` }}>
+                      <span style={{ fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.ink }}>
+                        L{attempt.lesson} · {attempt.score}/{attempt.total} ({attempt.percent}%)
+                      </span>
+                      <span style={{ fontFamily: DS.fontBody, fontSize: 12, color: attempt.passed ? DS.correct : DS.inkFaint }}>
+                        {attempt.passed ? "Aprobado" : "No aprobado"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div style={{ display: "grid", gap: 6 }}>
-                {examHistory.slice(0, 6).map((attempt, index) => (
-                  <div key={`${attempt.createdAt}-${index}`} style={{ ...panelStyle, padding: "8px 10px", display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 13, color: "var(--color-text)", fontWeight: 700 }}>
-                      L{attempt.lesson} · {attempt.score}/{attempt.total} ({attempt.percent}%)
-                    </span>
-                    <span style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
-                      {attempt.passed ? "Aprobado" : "No aprobado"}
-                    </span>
-                  </div>
-                ))}
-                {examHistory.length === 0 && <div style={{ color: "#98a2b3", fontSize: 12 }}>Aún no hay intentos.</div>}
-              </div>
-            </div>
+            )}
           </div>
           <TabBar active="practice" onTab={(tab) => setActiveTab(tab as StudyView)} />
         </div>
@@ -7643,84 +7484,68 @@ function StudyContent() {
           onClose={closeExamSession}
         >
           {examCurrentQ && !examFinished ? (
-            <div style={{ display: "grid", gap: "var(--space-4)" }}>
+            <div style={{ display: "grid", gap: 20 }}>
               <PracticeStageCard
                 label={formatExamCategoryLabel(examCurrentQ.category)}
                 feedback={examFeedback?.status || null}
                 value={
-                  <div style={{ fontSize: "clamp(24px, 6vw, 34px)", fontWeight: 800, color: "var(--color-text)", whiteSpace: "pre-line", lineHeight: 1.3 }}>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: "clamp(22px, 6vw, 32px)", fontWeight: 600, color: DS.ink, whiteSpace: "pre-line", lineHeight: 1.3, letterSpacing: -0.3 }}>
                     {examCurrentQ.prompt}
                   </div>
                 }
               >
                 {examCurrentQ.hint ? (
-                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                  <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>
                     {examCurrentQ.hint}
                   </div>
                 ) : null}
               </PracticeStageCard>
 
               {examCurrentQ.type === "match" && examCurrentQ.matchLeft && examCurrentQ.matchRight ? (
-                <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))" }}>
-                  <div style={{ ...panelStyle, padding: 12 }}>
-                    <div style={sectionKickerStyle}>A</div>
-                    <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
-                      {examCurrentQ.matchLeft.map((item) => <div key={item} style={{ fontSize: 14, color: "var(--color-text)" }}>{item}</div>)}
+                <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))" }}>
+                  <div style={{ padding: "12px 16px", borderRadius: 18, background: DS.surfaceAlt }}>
+                    <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, color: DS.inkSoft, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 8 }}>A</div>
+                    <div style={{ display: "grid", gap: 6 }}>
+                      {examCurrentQ.matchLeft.map((item) => <div key={item} style={{ fontFamily: DS.fontBody, fontSize: 14, color: DS.ink }}>{item}</div>)}
                     </div>
                   </div>
-                  <div style={{ ...panelStyle, padding: 12 }}>
-                    <div style={sectionKickerStyle}>B</div>
-                    <div style={{ marginTop: 6, display: "grid", gap: 4 }}>
-                      {examCurrentQ.matchRight.map((item) => <div key={item} style={{ fontSize: 14, color: "var(--color-text)" }}>{item}</div>)}
+                  <div style={{ padding: "12px 16px", borderRadius: 18, background: DS.surfaceAlt }}>
+                    <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, color: DS.inkSoft, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 8 }}>B</div>
+                    <div style={{ display: "grid", gap: 6 }}>
+                      {examCurrentQ.matchRight.map((item) => <div key={item} style={{ fontFamily: DS.fontBody, fontSize: 14, color: DS.ink }}>{item}</div>)}
                     </div>
                   </div>
                 </div>
               ) : null}
 
               {examCurrentQ.type === "reorder" ? (
-                <div style={{ display: "grid", gap: 10 }}>
-                  <div style={{ ...panelStyle, padding: 12 }}>
-                    <div style={sectionKickerStyle}>Tu oración</div>
-                    <div style={{ marginTop: 8, minHeight: 52, display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-                      {decodeReorderAnswer(examCurrentChoice || "").length > 0 ? (
-                        decodeReorderAnswer(examCurrentChoice || "").map((tokenId) => {
-                          const token = examCurrentQ.reorderTokens?.find((item) => item.id === tokenId);
-                          if (!token) return null;
-                          return <span key={tokenId} style={chipStyle}>{token.label}</span>;
-                        })
-                      ) : (
-                        <span style={{ color: "#98a2b3", fontSize: 14 }}>Ordena los bloques.</span>
-                      )}
-                    </div>
+                <div style={{ display: "grid", gap: 12 }}>
+                  <div style={{ padding: "14px 16px", borderRadius: 18, background: DS.surfaceAlt, minHeight: 56, display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                    {decodeReorderAnswer(examCurrentChoice || "").length > 0 ? (
+                      decodeReorderAnswer(examCurrentChoice || "").map((tokenId) => {
+                        const token = examCurrentQ.reorderTokens?.find((item) => item.id === tokenId);
+                        if (!token) return null;
+                        return <span key={tokenId} style={{ fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, color: DS.ink, background: DS.card, borderRadius: 10, padding: "4px 12px", border: `1px solid ${DS.line}` }}>{token.label}</span>;
+                      })
+                    ) : (
+                      <span style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkFaint }}>Ordena los bloques.</span>
+                    )}
                   </div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {(examCurrentQ.reorderTokens || []).map((token) => {
                       const used = decodeReorderAnswer(examCurrentChoice || "").includes(token.id);
                       return (
-                        <button
-                          key={token.id}
-                          type="button"
-                          disabled={used || Boolean(examFeedback)}
-                          onClick={() => appendExamReorderToken(token.id)}
-                          style={{
-                            border: "1px solid var(--color-border)",
-                            borderRadius: 999,
-                            background: used ? "var(--color-surface-muted)" : "var(--color-surface)",
-                            color: used ? "var(--color-text-muted)" : "var(--color-text)",
-                            padding: "8px 12px",
-                            fontWeight: 700,
-                            cursor: used || examFeedback ? "not-allowed" : "pointer",
-                          }}
-                        >
+                        <button key={token.id} type="button" disabled={used || Boolean(examFeedback)} onClick={() => appendExamReorderToken(token.id)}
+                          style={{ fontFamily: DS.fontHead, border: `1px solid ${DS.line}`, borderRadius: 999, background: used ? DS.surfaceAlt : DS.card, color: used ? DS.inkFaint : DS.ink, padding: "8px 14px", fontSize: 14, fontWeight: 600, cursor: used || examFeedback ? "not-allowed" : "pointer", opacity: used ? 0.5 : 1 }}>
                           {token.label}
                         </button>
                       );
                     })}
                   </div>
                   {!examFeedback ? (
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      <button type="button" onClick={popExamReorderToken} style={secondaryButtonStyle}>Borrar último</button>
-                      <button type="button" onClick={clearExamReorder} style={secondaryButtonStyle}>Limpiar</button>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button type="button" onClick={popExamReorderToken} style={{ background: DS.surfaceAlt, border: "none", borderRadius: 12, padding: "8px 14px", fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.ink, cursor: "pointer" }}>Borrar último</button>
+                      <button type="button" onClick={clearExamReorder} style={{ background: "none", border: "none", padding: "8px 14px", fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, cursor: "pointer" }}>Limpiar</button>
                     </div>
                   ) : null}
                 </div>
@@ -7730,7 +7555,7 @@ function StudyContent() {
                     value={examCurrentChoice || ""}
                     onChange={(event) => answerExam(event.target.value)}
                     placeholder="Escribe tu respuesta"
-                    style={{ border: "1px solid var(--color-border)", borderRadius: 18, background: "var(--color-surface)", padding: "14px 16px", fontSize: 18, fontWeight: 700, color: "var(--color-text)" }}
+                    style={{ fontFamily: DS.fontHead, border: `1px solid ${DS.line}`, borderRadius: 18, background: DS.surfaceAlt, padding: "14px 16px", fontSize: 18, fontWeight: 600, color: DS.ink, outline: "none" }}
                   />
                 </div>
               ) : (
@@ -7739,32 +7564,12 @@ function StudyContent() {
                     const isSelected = examCurrentChoice === op;
                     const isCorrect = op === examCurrentQ.correct;
                     const showResult = Boolean(examFeedback);
+                    const bg = showResult && isCorrect ? DS.correctSoft : showResult && isSelected && !isCorrect ? DS.wrongSoft : DS.surfaceAlt;
+                    const border = showResult && isCorrect ? `1px solid ${DS.correct}` : showResult && isSelected && !isCorrect ? `1px solid ${DS.wrong}` : `1px solid ${DS.line}`;
+                    const color = showResult && isCorrect ? DS.correct : showResult && isSelected && !isCorrect ? DS.wrong : DS.ink;
                     return (
-                      <button
-                        key={op}
-                        type="button"
-                        onClick={() => {
-                          if (showResult) return;
-                          finalizeExamAnswer(op);
-                        }}
-                        disabled={showResult}
-                        style={{
-                          textAlign: "left",
-                          border: "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
-                          borderRadius: 22,
-                          background:
-                            showResult && isCorrect
-                              ? "color-mix(in srgb, var(--color-accent-soft) 76%, white)"
-                              : showResult && isSelected && !isCorrect
-                                ? "color-mix(in srgb, var(--color-highlight-soft) 76%, white)"
-                                : "color-mix(in srgb, var(--color-surface) 82%, white)",
-                          color: "var(--color-text)",
-                          padding: "16px 18px",
-                          fontSize: 17,
-                          fontWeight: 700,
-                          cursor: showResult ? "default" : "pointer",
-                        }}
-                      >
+                      <button key={op} type="button" onClick={() => { if (showResult) return; finalizeExamAnswer(op); }} disabled={showResult}
+                        style={{ textAlign: "left", border, borderRadius: 20, background: bg, color, padding: "15px 18px", fontFamily: DS.fontHead, fontSize: 16, fontWeight: 600, cursor: showResult ? "default" : "pointer", transition: "background 110ms ease, border-color 110ms ease" }}>
                         {op}
                       </button>
                     );
@@ -7774,11 +7579,11 @@ function StudyContent() {
 
               {examFeedback ? (
                 <div style={{ display: "grid", gap: 10, justifyItems: "center", textAlign: "center" }}>
-                  <div style={{ fontSize: "var(--text-body)", color: examFeedback.status === "correct" ? "#117964" : "var(--color-text)", fontWeight: 800 }}>
-                    {examFeedback.status === "correct" ? "Correcto" : `Respuesta: ${examFeedback.answer}`}
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: examFeedback.status === "correct" ? DS.correct : DS.inkSoft, letterSpacing: "0.04em" }}>
+                    {examFeedback.status === "correct" ? "Correcto" : `Era: ${examFeedback.answer}`}
                   </div>
                   {examFeedback.explanation ? (
-                    <div style={{ maxWidth: 520, fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                    <div style={{ maxWidth: 520, fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>
                       {examFeedback.explanation}
                     </div>
                   ) : null}
@@ -7797,88 +7602,65 @@ function StudyContent() {
           ) : null}
 
           {examFinished ? (
-            <div style={{ display: "grid", gap: "var(--space-3)" }}>
-              <div
-                style={{
-                  display: "grid",
-                  gap: 14,
-                  padding: "18px 18px 16px",
-                  borderRadius: 30,
-                  background: "color-mix(in srgb, var(--color-surface) 86%, white)",
-                  boxShadow: "0 18px 34px rgba(26,26,46,.05)",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "end", flexWrap: "wrap" }}>
-                  <div style={{ display: "grid", gap: 6 }}>
-                    <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
-                      Resultado
-                    </div>
-                    <div style={{ fontSize: "clamp(38px, 12vw, 62px)", lineHeight: 0.92, letterSpacing: "-.05em", fontWeight: 800, color: "var(--color-text)" }}>
+            <div style={{ display: "grid", gap: 24 }}>
+              <div style={{ display: "grid", gap: 20, padding: "24px 0 0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-end" }}>
+                  <div style={{ display: "grid", gap: 4 }}>
+                    <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, color: DS.inkSoft, letterSpacing: "0.22em", textTransform: "uppercase" }}>Resultado</div>
+                    <div style={{ fontFamily: DS.fontHead, fontSize: "clamp(38px, 12vw, 62px)", lineHeight: 0.9, letterSpacing: "-0.04em", fontWeight: 700, color: DS.ink }}>
                       {examScore} / {examQuestions.length}
                     </div>
                   </div>
-                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                    {examPercent}% · {examPassed ? "Aprobado" : "No aprobado"}
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600, color: examPassed ? DS.correct : DS.inkSoft, paddingBottom: 6 }}>
+                    {examPercent}%
                   </div>
                 </div>
 
-                <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))" }}>
+                <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))" }}>
                   {examCategoryBreakdown.map((row) => {
                     const pct = Math.round((row.correct / Math.max(1, row.total)) * 100);
                     return (
-                      <div key={row.category} style={{ ...panelStyle, padding: 12 }}>
-                        <div style={sectionKickerStyle}>{formatExamCategoryLabel(row.category)}</div>
-                        <div style={{ marginTop: 4, fontSize: 18, fontWeight: 800, color: "var(--color-text)" }}>{row.correct}/{row.total}</div>
-                        <div style={{ marginTop: 2, fontSize: 12, color: "var(--color-text-muted)" }}>{pct}%</div>
+                      <div key={row.category} style={{ padding: "12px 14px", borderRadius: 16, background: DS.surfaceAlt }}>
+                        <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, color: DS.inkSoft, letterSpacing: "0.22em", textTransform: "uppercase" }}>{formatExamCategoryLabel(row.category)}</div>
+                        <div style={{ fontFamily: DS.fontHead, marginTop: 6, fontSize: 18, fontWeight: 700, color: DS.ink }}>{row.correct}/{row.total}</div>
+                        <div style={{ fontFamily: DS.fontBody, marginTop: 2, fontSize: 11, color: DS.inkFaint }}>{pct}%</div>
                       </div>
                     );
                   })}
                 </div>
 
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 8,
-                    padding: "12px 14px",
-                    borderRadius: 22,
-                    background: "color-mix(in srgb, var(--color-highlight-soft) 52%, white)",
-                  }}
-                >
-                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
-                    Errores
-                  </div>
-                  {examWrongQuestions.length === 0 ? (
-                    <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text)", fontWeight: 700 }}>Excelente. No hubo errores.</div>
-                  ) : (
-                    <div style={{ display: "grid", gap: 8 }}>
-                      {examWrongQuestions.slice(0, 6).map((question, index) => {
-                        const key = question.stableKey || question.id;
-                        return (
-                          <div key={`${key}-${index}`} style={{ ...panelStyle, padding: 10 }}>
-                            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--color-text)", whiteSpace: "pre-line" }}>{question.prompt}</div>
-                            <div style={{ marginTop: 4, fontSize: 12, color: "var(--color-text-muted)" }}>
-                              Tu respuesta: {formatExamAnswer(question, examAnswers[key])}
-                            </div>
-                            <div style={{ marginTop: 2, fontSize: 12, color: "var(--color-text)" }}>Correcta: {question.correct}</div>
-                            {question.explanation ? <div style={{ marginTop: 4, fontSize: 12, color: "var(--color-text-muted)" }}>{question.explanation}</div> : null}
+                {examWrongQuestions.length > 0 ? (
+                  <div style={{ display: "grid", gap: 10, paddingTop: 16, borderTop: `1px solid ${DS.line}` }}>
+                    <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, color: DS.inkSoft, letterSpacing: "0.22em", textTransform: "uppercase" }}>Errores</div>
+                    {examWrongQuestions.slice(0, 6).map((question, index) => {
+                      const key = question.stableKey || question.id;
+                      return (
+                        <div key={`${key}-${index}`} style={{ padding: "12px 0", borderBottom: `1px solid ${DS.line}` }}>
+                          <div style={{ fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.ink, whiteSpace: "pre-line" }}>{question.prompt}</div>
+                          <div style={{ fontFamily: DS.fontBody, marginTop: 4, fontSize: 12, color: DS.inkSoft }}>
+                            Tu respuesta: {formatExamAnswer(question, examAnswers[key])}
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+                          <div style={{ fontFamily: DS.fontBody, marginTop: 2, fontSize: 12, color: DS.ink }}>Correcta: {question.correct}</div>
+                          {question.explanation ? <div style={{ fontFamily: DS.fontBody, marginTop: 4, fontSize: 12, color: DS.inkSoft }}>{question.explanation}</div> : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.correct }}>Sin errores.</div>
+                )}
               </div>
 
-              <div style={{ display: "grid", gap: 8 }}>
+              <div style={{ display: "grid", gap: 10 }}>
                 {examWrongQuestions.length > 0 ? (
-                  <button type="button" onClick={startExamRetryWrong} className="ds-btn">
+                  <button type="button" onClick={startExamRetryWrong} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 18, padding: "14px 22px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
                     Repasar falladas
                   </button>
                 ) : null}
-                <button type="button" onClick={startExam} className="ds-btn">
+                <button type="button" onClick={startExam} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 18, padding: "14px 22px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
                   Otra sesión
                 </button>
-                <button type="button" onClick={closeExamSession} className="ds-btn-secondary">
+                <button type="button" onClick={closeExamSession} style={{ background: "none", border: "none", padding: "12px 0", fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, cursor: "pointer" }}>
                   Volver
                 </button>
               </div>
