@@ -657,84 +657,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
       {/* ── HOME ── */}
       {screen === "home" && (
         <div style={{ display: "grid", gap: "var(--space-3)" }}>
-          {allKanaSummary.practiced > 0 && (
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <div style={subtlePillStyle}>{allKanaSummary.practiced} practicados</div>
-              {allKanaSummary.difficult > 0 && <div style={subtlePillStyle}>{allKanaSummary.difficult} difíciles</div>}
-              {allKanaSummary.due > 0 && <div style={subtlePillStyle}>{allKanaSummary.due} pendientes</div>}
-            </div>
-          )}
-
-          {/* Learn hero */}
-          <button
-            type="button"
-            onClick={() => setScreen("learn")}
-            style={{
-              border: "none",
-              background: "#1A1A2E",
-              borderRadius: 28,
-              padding: "22px 20px 20px",
-              textAlign: "left",
-              display: "grid",
-              gap: 10,
-              color: "#FFF8E7",
-              width: "100%",
-            }}
-          >
-            <div style={{ fontSize: "clamp(28px, 7vw, 36px)", lineHeight: 1, fontWeight: 800 }}>Learn</div>
-            <div style={{ fontSize: "var(--text-body-sm)", fontWeight: 700, opacity: 0.64 }}>
-              {learnProgressContext.reviewCount > 0
-                ? `${learnProgressContext.reviewCount} pendiente${learnProgressContext.reviewCount > 1 ? "s" : ""} · repaso inteligente`
-                : allKanaSummary.practiced === 0
-                  ? "Empieza con hiragana · guiado paso a paso"
-                  : "Guiado · progresivo · sin saturarte"}
-            </div>
-          </button>
-
-          {/* Secondary row */}
-          <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-            <button
-              type="button"
-              onClick={() => setScreen("table")}
-              style={{
-                border: "1px solid var(--color-border)",
-                background: "color-mix(in srgb, var(--color-surface) 86%, white)",
-                borderRadius: 24,
-                padding: "16px 14px 14px",
-                textAlign: "left",
-                display: "grid",
-                gap: 6,
-                color: "var(--color-text)",
-              }}
-            >
-              <div style={{ fontSize: "clamp(18px, 4.5vw, 22px)", lineHeight: 1, fontWeight: 800 }}>Tabla kana</div>
-              <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>Hiragana · Katakana</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setScreen("setup")}
-              style={{
-                border: "1px solid var(--color-border)",
-                background: "color-mix(in srgb, var(--color-surface-muted) 74%, white)",
-                borderRadius: 24,
-                padding: "16px 14px 14px",
-                textAlign: "left",
-                display: "grid",
-                gap: 6,
-                color: "var(--color-text)",
-              }}
-            >
-              <div style={{ fontSize: "clamp(18px, 4.5vw, 22px)", lineHeight: 1, fontWeight: 800 }}>Práctica</div>
-              <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>Scripts · modos · libre</div>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── LEARN ── */}
-      {screen === "learn" && (
-        <div style={{ display: "grid", gap: "var(--space-3)" }}>
 
           {/* Header: Learn / hiragana. + N/46 + thin bar */}
           <div>
@@ -757,9 +679,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                     <span style={{ color: "var(--color-text-muted)", fontWeight: 400, fontSize: 15 }}> / {learnProgressContext.totalCount}</span>
                   </div>
                 </div>
-                <button type="button" onClick={() => setScreen("home")} className="ds-btn-ghost" style={{ fontSize: 12, padding: "4px 10px" }}>
-                  Volver
-                </button>
               </div>
             </div>
             <div style={{ height: 3, borderRadius: 999, background: "var(--color-border)", overflow: "hidden" }}>
@@ -838,9 +757,14 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
             <button type="button" onClick={startLearnSession} className="ds-btn" style={{ width: "100%", minHeight: 54 }}>
               Empezar sesión
             </button>
-            <button type="button" onClick={() => setScreen("setup")} className="ds-btn-ghost">
-              Práctica libre
-            </button>
+            <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+              <button type="button" onClick={() => setScreen("table")} className="ds-btn-ghost">
+                Tabla kana
+              </button>
+              <button type="button" onClick={() => setScreen("setup")} className="ds-btn-ghost">
+                Práctica libre
+              </button>
+            </div>
           </div>
 
         </div>
