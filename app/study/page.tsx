@@ -6,8 +6,12 @@ import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import AppTopNav from "@/components/AppTopNav";
 import AprenderKanaModule from "@/components/study/AprenderKanaModule";
+import HomeScreen from "@/components/study/HomeScreen";
+import ReviewScreen from "@/components/study/ReviewScreen";
+import PracticeIndexScreen, { type PracticeSubView } from "@/components/study/PracticeIndexScreen";
+import VaultScreen from "@/components/study/VaultScreen";
+import { DS, TabBar } from "@/components/study/ds";
 import PracticeShell, { PracticeStageCard } from "@/components/study/PracticeShell";
 import StudySelectorGroup from "@/components/study/StudySelectorGroup";
 import { KANA_ITEMS } from "@/lib/kana-data";
@@ -189,7 +193,7 @@ const VK_BUCKETS: Array<{ key: VkBucketKey; label: string; lessons: number[] }> 
   { key: "l11_12", label: "L11-12", lessons: [11, 12] },
 ];
 const VK_MODE_KEYS = VK_BUCKETS.map((bucket) => `vk:${bucket.key}`);
-type StudyView = "learnkana" | "kana" | "flashcards" | "quiz" | "sprint" | "exam";
+type StudyView = "home" | "learn" | "review" | "practice" | "vault";
 const EXAM_PASSING_PERCENT = 70;
 const EXAM_QUESTION_COUNT = 20;
 
@@ -5013,12 +5017,13 @@ function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, n
 
 function resolveStudyView(searchParams: Pick<URLSearchParams, "get">): StudyView | null {
   const view = searchParams.get("view");
-  if (view === "learnkana" || view === "kana" || view === "flashcards" || view === "sprint" || view === "exam") return view;
-  if (searchParams.get("learnkana") === "1") return "learnkana";
-  if (searchParams.get("kana") === "1") return "kana";
-  if (searchParams.get("flashcards") === "1") return "flashcards";
-  if (searchParams.get("sprint") === "1") return "sprint";
-  if (searchParams.get("exam") === "1") return "exam";
+  if (view === "home" || view === "learn" || view === "review" || view === "practice" || view === "vault") return view;
+  // Backward compat with old view names
+  if (view === "learnkana") return "learn";
+  if (view === "kana" || view === "flashcards" || view === "sprint") return "practice";
+  if (view === "exam") return "practice";
+  if (view === "quiz") return "practice";
+  if (searchParams.get("learnkana") === "1") return "learn";
   return null;
 }
 
@@ -5262,7 +5267,8 @@ const FLASHCARD_SETS: FlashcardSet[] = buildFlashcardSets();
 function StudyContent() {
   const searchParams = useSearchParams();
   const selectedView = useMemo(() => resolveStudyView(searchParams), [searchParams]);
-  const [activeTab, setActiveTab] = useState<StudyView>("kana");
+  const [activeTab, setActiveTab] = useState<StudyView>("home");
+  const [practiceSubView, setPracticeSubView] = useState<PracticeSubView | null>(null);
   const [userKey, setUserKey] = useState("anon");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -5473,9 +5479,11 @@ function StudyContent() {
   useEffect(() => {
     if (selectedView) {
       setActiveTab(selectedView);
+      setPracticeSubView(null);
       return;
     }
-    setActiveTab("kana");
+    setActiveTab("home");
+    setPracticeSubView(null);
   }, [selectedView]);
 
   useEffect(() => {
@@ -6318,17 +6326,7 @@ function StudyContent() {
     }, new Map<string, { category: string; correct: number; total: number }>()),
   ).map(([, value]) => value);
 
-  const pageTitle = selectedView
-    ? selectedView === "learnkana"
-      ? "Aprender Kana"
-      : selectedView === "kana"
-      ? "Kana Sprint"
-      : selectedView === "sprint"
-        ? "Vocab + Kanji Sprint"
-        : selectedView === "exam"
-          ? "Repaso mixto"
-          : "Flashcards"
-    : "Study";
+  const pageTitle = selectedView ? selectedView.charAt(0).toUpperCase() + selectedView.slice(1) : "Study";
   const sectionScrollMarginTop = "calc(var(--app-sticky-offset) + var(--space-5))";
   const sectionStyle: CSSProperties = {
     background: "var(--color-surface)",
@@ -6538,20 +6536,20 @@ function StudyContent() {
   }, [quizMode, hasAdjInSelectedLessons, hasVerbInSelectedLessons]);
 
   useEffect(() => {
-    if (activeTab !== "quiz") return;
+    if (practiceSubView !== "exam") return;
     if (!currentQ && !quizFinished) return;
     if (!quizCardRef.current) return;
     quizCardRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [activeTab, currentQ, quizFinished, quizIndex]);
 
   useEffect(() => {
-    if (activeTab !== "flashcards") return;
+    if (practiceSubView !== "flashcards") return;
     if (flashMode !== "cards" && flashMode !== "learn") return;
     focusFlashArea();
   }, [activeTab, flashMode]);
 
   useEffect(() => {
-    if (activeTab !== "exam") return;
+    if (practiceSubView !== "exam") return;
     if (!examCardRef.current) return;
     examCardRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [activeTab, examIndex, examFinished]);
@@ -6936,326 +6934,65 @@ function StudyContent() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "var(--color-bg)",
-        padding: activeTab === "learnkana" ? 0 : "var(--page-padding)",
-        fontFamily: `var(--font-study), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif`,
-      }}
-    >
-      <div className={activeTab === "learnkana" ? "" : "ds-container"} style={{ display: "grid", gap: activeTab === "learnkana" ? 0 : "var(--space-4)" }}>
-        {activeTab !== "learnkana" && <AppTopNav primary="study" tone="study" />}
+    <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
 
-        {activeTab !== "learnkana" && (showHub ? (
-          <section style={{ display: "grid", gap: "var(--space-1)", padding: "calc(var(--space-5) + 4px) 0 var(--space-2)", scrollMarginTop: sectionScrollMarginTop }}>
-            <div style={{ fontSize: "clamp(48px, 11vw, 82px)", lineHeight: 0.9, letterSpacing: "-.065em", fontWeight: 800, color: "var(--color-text)" }}>
-              Study
-            </div>
-          </section>
-        ) : (
-          <section style={{ ...sectionStyle, gap: "var(--space-2)", padding: "calc(var(--space-4) + 4px) var(--space-5) var(--space-4)", scrollMarginTop: sectionScrollMarginTop }}>
-            <div style={{ fontSize: "var(--text-h1)", lineHeight: 0.98, letterSpacing: "-.04em", fontWeight: 800, color: "var(--color-text)" }}>
-              {pageTitle}
-            </div>
-          </section>
-        ))}
+      {activeTab === "home" && (
+        <HomeScreen
+          userKey={userKey}
+          onTabChange={(tab) => setActiveTab(tab as StudyView)}
+          weeklyActiveDays={weeklyActiveDays.size}
+          dueCount={studyDueSummary.totalDue}
+        />
+      )}
 
-        {activeTab !== "learnkana" && !showHub && (
-          <section
-            style={{
-              display: "grid",
-              gap: 10,
-              scrollMarginTop: sectionScrollMarginTop,
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                gap: 10,
-                overflowX: "auto",
-                paddingBottom: 2,
-                scrollSnapType: "x proximity",
-                WebkitOverflowScrolling: "touch",
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-              }}
-            >
-            {toolCards.map(renderToolPill)}
-            </div>
-          </section>
-        )}
+      {activeTab === "learn" && (
+        <AprenderKanaModule
+          userKey={userKey}
+          initialMode={searchParams.get("learn") === "1" ? "learn" : null}
+          onRecordActivity={(detail) => recordStudyActivity("learnkana", detail)}
+          onTabChange={(tab) => setActiveTab(tab as StudyView)}
+        />
+      )}
 
-        {showHub && (
-          <section style={{ display: "grid", gap: "var(--space-2)", paddingTop: "var(--space-1)", paddingBottom: "var(--space-4)", scrollMarginTop: sectionScrollMarginTop }}>
-            <div style={{ display: "grid", gap: "var(--space-2)" }}>
-              <div
-                style={{
-                  display: "grid",
-                  gap: "var(--space-2)",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-                  alignItems: "stretch",
-                }}
-              >
-                <div
-                  style={{
-                    background: "color-mix(in srgb, var(--color-surface) 84%, white)",
-                    borderRadius: 24,
-                    padding: "12px 14px",
-                    display: "grid",
-                    gap: 8,
-                    boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-                    <div style={sectionKickerStyle}>Seguir</div>
-                    {latestStudyActivity && (
-                      <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
-                        {formatStudyActivityTime(latestStudyActivity.occurredAt)}
-                      </div>
-                    )}
-                  </div>
+      {activeTab === "review" && (
+        <ReviewScreen
+          userKey={userKey}
+          onTabChange={(tab) => setActiveTab(tab as StudyView)}
+          onStartReview={() => setActiveTab("learn")}
+        />
+      )}
 
-                  {latestStudyActivity ? (
-                    <Link
-                      href={latestStudyActivity.href}
-                      style={{
-                        textDecoration: "none",
-                        color: "var(--color-text)",
-                        display: "grid",
-                        gap: 4,
-                        borderRadius: 18,
-                        background: "color-mix(in srgb, var(--color-highlight-soft) 56%, white)",
-                        padding: "9px 11px",
-                      }}
-                    >
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
-                        <div style={{ fontSize: "clamp(20px, 4.4vw, 24px)", lineHeight: 0.98, letterSpacing: "-.04em", fontWeight: 800 }}>
-                          {latestStudyActivity.label}
-                        </div>
-                        <span
-                          style={{
-                            width: 30,
-                            height: 30,
-                            borderRadius: 999,
-                            background: "rgba(230, 57, 70, 0.12)",
-                            color: "var(--color-accent-strong)",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: 15,
-                            fontWeight: 800,
-                            flexShrink: 0,
-                          }}
-                        >
-                          ↗
-                        </span>
-                      </div>
-                      {latestStudyActivity.detail && (
-                        <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                          {latestStudyActivity.detail}
-                        </div>
-                      )}
-                    </Link>
-                    ) : (
-                      <div
-                        style={{
-                        borderRadius: 20,
-                        background: "color-mix(in srgb, var(--color-surface-muted) 72%, white)",
-                        padding: "9px 12px",
-                        fontSize: "var(--text-body-sm)",
-                        color: "var(--color-text-muted)",
-                        fontWeight: 700,
-                      }}
-                    >
-                      Nada todavía
-                    </div>
-                  )}
-                </div>
+      {activeTab === "practice" && !practiceSubView && (
+        <PracticeIndexScreen
+          onTabChange={(tab) => setActiveTab(tab as StudyView)}
+          onSelectMode={(mode) => setPracticeSubView(mode)}
+        />
+      )}
 
-                <div
-                  style={{
-                    background: "color-mix(in srgb, rgba(78, 205, 196, 0.12) 72%, white)",
-                    borderRadius: 24,
-                    padding: "10px 12px",
-                    display: "grid",
-                    gap: 6,
-                    boxShadow: "0 12px 26px rgba(26, 26, 46, 0.04)",
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-                    <div style={sectionKickerStyle}>Esta semana</div>
-                    <div style={{ fontSize: 24, lineHeight: 1, fontWeight: 800, color: "var(--color-text)" }}>
-                      {weeklyActiveDays.size}
-                    </div>
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 4 }}>
-                    {weeklyProgressDays.map((day) => (
-                      <div key={day.key} style={{ display: "grid", gap: 4, justifyItems: "center" }}>
-                        <div
-                          style={{
-                            width: "100%",
-                            minHeight: 10,
-                            borderRadius: 999,
-                            background: day.active ? "var(--color-accent)" : "rgba(26, 26, 46, 0.08)",
-                          }}
-                        />
-                        <div style={{ fontSize: 10, color: "var(--color-text-muted)", fontWeight: 700 }}>
-                          {day.label}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+      {activeTab === "vault" && (
+        <VaultScreen
+          userKey={userKey}
+          onTabChange={(tab) => setActiveTab(tab as StudyView)}
+        />
+      )}
 
-                {studyDueSummary.totalDue > 0 && (
-                  <Link
-                    href={reviewHref}
-                    style={{
-                      textDecoration: "none",
-                      color: "var(--color-text)",
-                      background: "color-mix(in srgb, rgba(244, 162, 97, 0.24) 76%, white)",
-                      border: "1px solid color-mix(in srgb, rgba(244, 162, 97, 0.34) 74%, var(--color-border))",
-                      borderRadius: 24,
-                      padding: "10px 12px",
-                      display: "grid",
-                      gap: 6,
-                      boxShadow: "0 14px 26px rgba(26, 26, 46, 0.05)",
-                    }}
-                  >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-                      <div style={sectionKickerStyle}>Repasar pendientes</div>
-                      <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
-                        {primaryReviewTool === "learnkana" ? "Abrir Learn ↗" : "Repasar ↗"}
-                      </div>
-                    </div>
-                    <div style={{ fontSize: "clamp(22px, 5vw, 28px)", lineHeight: 1, fontWeight: 800, letterSpacing: "-.04em" }}>
-                      {studyDueSummary.totalDue} pendientes
-                    </div>
-                    {studyDueSummary.difficult > 0 ? (
-                      <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                        {studyDueSummary.difficult} difíciles
-                      </div>
-                    ) : null}
-                  </Link>
-                )}
-              </div>
-            </div>
 
-            <div
-              style={{
-                display: "grid",
-                gap: 10,
-                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                alignItems: "stretch",
-              }}
-            >
-              {toolCards.map((tool) => {
-                const isSoftAccent = tool.key === "flashcards";
-                const toolDueCount =
-                  tool.key === "learnkana" || tool.key === "flashcards" || tool.key === "sprint" || tool.key === "exam"
-                    ? homeDueByTool[tool.key]
-                    : 0;
-                const cardBackground =
-                  tool.key === "learnkana"
-                    ? "color-mix(in srgb, var(--color-highlight-soft) 56%, white)"
-                    : tool.key === "kana"
-                    ? "color-mix(in srgb, var(--color-surface) 84%, white)"
-                    : tool.key === "sprint"
-                      ? "color-mix(in srgb, var(--color-accent-soft) 66%, white)"
-                      : tool.key === "exam"
-                        ? "color-mix(in srgb, var(--color-highlight-soft) 64%, white)"
-                        : tool.key === "flashcards"
-                          ? "color-mix(in srgb, rgba(244, 162, 97, 0.2) 76%, white)"
-                          : "color-mix(in srgb, var(--color-surface-muted) 80%, white)";
-                const arrowBackground =
-                  tool.key === "learnkana" || tool.key === "exam" || tool.key === "kana"
-                    ? "var(--color-highlight-soft)"
-                    : tool.key === "sprint"
-                      ? "var(--color-accent-soft)"
-                      : "rgba(244, 162, 97, 0.16)";
-                const cardPadding = "11px 11px 10px";
-                const cardRadius = 24;
-                const cardMinHeight = 88;
-                return (
-                  <Link
-                    key={tool.key}
-                    href={tool.href}
-                    style={{
-                      textDecoration: "none",
-                      color: "var(--color-text)",
-                      display: "grid",
-                      gap: 8,
-                      alignContent: "space-between",
-                      minHeight: cardMinHeight,
-                      padding: cardPadding,
-                      borderRadius: cardRadius,
-                      background: cardBackground,
-                      border: "1px solid color-mix(in srgb, var(--color-border) 84%, white)",
-                      boxShadow: isSoftAccent ? "0 12px 24px rgba(26, 26, 46, 0.05)" : "0 16px 30px rgba(26, 26, 46, 0.06)",
-                    }}
-                    >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                      <div style={{ display: "grid", gap: 2, minWidth: 0 }}>
-                    <span
-                      style={{
-                        fontSize: "clamp(17px, 3.8vw, 21px)",
-                        lineHeight: 1.06,
-                        letterSpacing: "-.03em",
-                        fontWeight: 800,
-                        color: "var(--color-text)",
-                        textWrap: "balance",
-                        maxWidth: "100%",
-                        }}
-                      >
-                        {tool.title}
-                      </span>
-                      {toolDueCount > 0 ? (
-                        <span style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 700 }}>
-                          {toolDueCount} pendientes
-                        </span>
-                      ) : null}
-                      </div>
-                      <span
-                        style={{
-                          flexShrink: 0,
-                          width: 28,
-                          height: 28,
-                          borderRadius: 999,
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          background: arrowBackground,
-                          color: tool.key === "learnkana" || tool.key === "kana" || tool.key === "exam" ? "var(--color-accent-strong)" : "var(--color-primary)",
-                          fontSize: 14,
-                          fontWeight: 800,
-                          marginTop: 0,
-                        }}
-                      >
-                        ↗
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-        )}
 
-        {!showHub && activeTab === "learnkana" && (
-          <section style={{ scrollMarginTop: sectionScrollMarginTop, animation: "studyViewIn 220ms ease" }}>
-            <AprenderKanaModule
-              userKey={userKey}
-              initialMode={searchParams.get("learn") === "1" ? "learn" : null}
-              onRecordActivity={(detail) => recordStudyActivity("learnkana", detail)}
-            />
-          </section>
-        )}
-
-        {!showHub && activeTab === "kana" && (
-          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop, animation: "studyViewIn 220ms ease" }}>
+      {activeTab === "practice" && practiceSubView === "sprint" && (
+        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
+          <div style={{ height: 54 }} />
+          <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
+            <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
+              <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Practice
+            </button>
+          </div>
+          <div style={{ padding: "16px 24px 8px" }}>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Kana Sprint</div>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.6, fontStyle: "italic" }}>read fast.</div>
+          </div>
+          <div style={{ padding: "16px 24px 24px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Kana Sprint</h2>
               <div style={{ minWidth: 0, flex: "1 1 280px" }}>
                 <StudySelectorGroup
                   options={[
@@ -7271,21 +7008,34 @@ function StudyContent() {
                 />
               </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
-              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                Mejor semanal: <span style={{ color: "var(--color-text)" }}>{kanaBestByMode[kanaSet] || 0}</span> · Reinicio en <span style={{ color: "var(--color-text)" }}>{weeklyResetLabel || "..."}</span>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 16 }}>
+              <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>
+                Best: <span style={{ color: DS.ink, fontWeight: 600 }}>{kanaBestByMode[kanaSet] || 0}</span> · Resets {weeklyResetLabel || "..."}
               </div>
-              <button type="button" onClick={startKana} style={primaryButtonStyle}>
-                Iniciar Sprint
+              <button type="button" onClick={startKana} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 14, padding: "12px 24px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+                Start Sprint
               </button>
             </div>
-          </section>
-        )}
+          </div>
+          <TabBar active="practice" onTab={(tab) => setActiveTab(tab as StudyView)} />
+        </div>
+      )}
 
-        {!showHub && activeTab === "sprint" && (
-          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop, animation: "studyViewIn 220ms ease" }}>
+      {activeTab === "practice" && practiceSubView === "vocabkanji" && (
+        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
+          <div style={{ height: 54 }} />
+          <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
+            <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
+              <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Practice
+            </button>
+          </div>
+          <div style={{ padding: "16px 24px 8px" }}>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Vocab + Kanji</div>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.6, fontStyle: "italic" }}>sprint mode.</div>
+          </div>
+          <div style={{ padding: "16px 24px 24px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Vocab + Kanji Sprint</h2>
               <div style={{ minWidth: 0, flex: "1 1 320px" }}>
                 <StudySelectorGroup
                   options={VK_BUCKETS.map((bucket) => ({ key: bucket.key, label: bucket.label, tone: "rgba(69, 123, 157, 0.14)" }))}
@@ -7297,19 +7047,21 @@ function StudyContent() {
                 />
               </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
-              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                Mejor mensual: <span style={{ color: "var(--color-text)" }}>{vkBestByBucket[vkBucket] || 0}</span> · Reinicio en <span style={{ color: "var(--color-text)" }}>{vkResetLabel || "..."}</span>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 16 }}>
+              <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>
+                Best: <span style={{ color: DS.ink, fontWeight: 600 }}>{vkBestByBucket[vkBucket] || 0}</span> · Resets {vkResetLabel || "..."}
               </div>
-              <button type="button" onClick={startVkSprint} style={primaryButtonStyle}>
-                Iniciar Sprint
+              <button type="button" onClick={startVkSprint} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 14, padding: "12px 24px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+                Start Sprint
               </button>
             </div>
-          </section>
-        )}
+          </div>
+          <TabBar active="practice" onTab={(tab) => setActiveTab(tab as StudyView)} />
+        </div>
+      )}
 
         <PracticeShell
-          open={!showHub && activeTab === "kana" && kanaSessionOpen}
+          open={activeTab === "practice" && practiceSubView === "sprint" && kanaSessionOpen}
           visible={kanaSessionOpen}
           title="Kana Sprint"
           subtitle={`${kanaSet === "mixed" ? "Mixto" : kanaSet === "hiragana" ? "Hiragana" : "Katakana"} · ${kanaTime}s · ${kanaScore} pts`}
@@ -7355,7 +7107,7 @@ function StudyContent() {
         </PracticeShell>
 
         <PracticeShell
-          open={!showHub && activeTab === "sprint" && vkSessionOpen}
+          open={activeTab === "practice" && practiceSubView === "vocabkanji" && vkSessionOpen}
           visible={vkSessionOpen}
           title="Vocab + Kanji Sprint"
           subtitle={`${vkBucketConfig.label} · ${vkTime}s · ${vkScore} pts`}
@@ -7400,8 +7152,20 @@ function StudyContent() {
           </div>
         </PracticeShell>
 
-        {!showHub && activeTab === "flashcards" && (
-          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop, animation: "studyViewIn 220ms ease" }}>
+      {activeTab === "practice" && practiceSubView === "flashcards" && (
+        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
+          <div style={{ height: 54 }} />
+          <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
+            <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
+              <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Practice
+            </button>
+          </div>
+          <div style={{ padding: "16px 24px 24px" }}>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Flashcards</div>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.6, fontStyle: "italic" }}>your decks.</div>
+          </div>
+          <div style={{ padding: "0 24px" }}>
             {(flashLessonFolder !== null || Boolean(activeFlashSet?.isCustom)) && (
               <div style={{ marginBottom: 10 }}>
                 <button
@@ -7791,11 +7555,25 @@ function StudyContent() {
               </div>
               </div>
             )}
-          </section>
-        )}
+          </div>
+          <TabBar active="practice" onTab={(tab) => setActiveTab(tab as StudyView)} />
+        </div>
+      )}
 
-        {!showHub && activeTab === "exam" && (
-          <section style={{ ...sectionStyle, scrollMarginTop: sectionScrollMarginTop, animation: "studyViewIn 220ms ease" }}>
+      {activeTab === "practice" && practiceSubView === "exam" && (
+        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
+          <div style={{ height: 54 }} />
+          <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
+            <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
+              <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Practice
+            </button>
+          </div>
+          <div style={{ padding: "16px 24px 24px" }}>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Repaso mixto</div>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.6, fontStyle: "italic" }}>mixed review.</div>
+          </div>
+          <div style={{ padding: "0 24px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Repaso mixto</h2>
               <div style={{ minWidth: 0, flex: "1 1 320px" }}>
@@ -7844,11 +7622,13 @@ function StudyContent() {
                 {examHistory.length === 0 && <div style={{ color: "#98a2b3", fontSize: 12 }}>Aún no hay intentos.</div>}
               </div>
             </div>
-          </section>
-        )}
+          </div>
+          <TabBar active="practice" onTab={(tab) => setActiveTab(tab as StudyView)} />
+        </div>
+      )}
 
         <PracticeShell
-          open={!showHub && activeTab === "exam" && examSessionOpen}
+          open={activeTab === "practice" && practiceSubView === "exam" && examSessionOpen}
           visible={examSheetVisible}
           title="Repaso mixto"
           subtitle={
@@ -8217,7 +7997,6 @@ function StudyContent() {
             }
           }
         `}</style>
-      </div>
     </div>
   );
 }

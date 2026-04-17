@@ -31,6 +31,7 @@ type AprenderKanaModuleProps = {
   userKey: string;
   onRecordActivity?: (detail?: string) => void;
   initialMode?: "learn" | null;
+  onTabChange?: (tab: "home" | "learn" | "review" | "practice" | "vault") => void;
 };
 
 type KanaSessionQuestion = {
@@ -316,7 +317,7 @@ const KANA_CHART_ROWS: Array<{ label: string; chars: Array<string | null> }> = [
   { label: "n", chars: ["ん", null, null, null, null] },
 ];
 
-export default function AprenderKanaModule({ userKey, onRecordActivity, initialMode = null }: AprenderKanaModuleProps) {
+export default function AprenderKanaModule({ userKey, onRecordActivity, initialMode = null, onTabChange }: AprenderKanaModuleProps) {
   const [screen, setScreen] = useState<"home" | "table" | "learn" | "setup">("home");
   const [tableScript, setTableScript] = useState<KanaScript>("hiragana");
   const [tableFilter, setTableFilter] = useState<"basic" | "dakuten" | "handakuten" | "yoon" | "mixed">("basic");
@@ -636,6 +637,36 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     startLearnSession();
   }, [initialMode, progressReady, session]);
 
+  const TAB_BAR_ITEMS = [
+    { k: "home" as const, label: "Home", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10l8-7 8 7v8a1.5 1.5 0 01-1.5 1.5H13v-6h-4v6H4.5A1.5 1.5 0 013 18v-8z" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/></svg>) },
+    { k: "learn" as const, label: "Learn", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 5.5a2 2 0 012-2h5v15H5a2 2 0 01-2-2v-11zM12 3.5h5a2 2 0 012 2v11a2 2 0 01-2 2h-5v-15z" stroke={c} strokeWidth="1.5"/></svg>) },
+    { k: "review" as const, label: "Review", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M18 11a7 7 0 11-2.05-4.95M18 3v4h-4" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>) },
+    { k: "practice" as const, label: "Practice", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M6 3v16M10 5v12M14 7v8M18 9v4" stroke={c} strokeWidth="1.5" strokeLinecap="round"/></svg>) },
+    { k: "vault" as const, label: "Vault", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="13" rx="2" stroke={c} strokeWidth="1.5"/><path d="M3 8h16M8 5V3.5h6V5" stroke={c} strokeWidth="1.5" strokeLinecap="round"/></svg>) },
+  ] as const;
+
+  const renderTabBar = () => (
+    <div style={{ position: "sticky", bottom: 0, height: 84, background: `linear-gradient(to top, ${DS.bg} 60%, transparent)`, display: "flex", alignItems: "center", justifyContent: "space-around", zIndex: 10, padding: "0 8px 24px" }}>
+      {TAB_BAR_ITEMS.map((tab) => {
+        const isActive = tab.k === "learn";
+        return (
+          <button
+            key={tab.k}
+            type="button"
+            onClick={() => onTabChange?.(tab.k)}
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", flex: 1, padding: "4px 0", position: "relative" }}
+          >
+            {tab.icon(isActive ? DS.accent : DS.inkFaint)}
+            <div style={{ fontFamily: DS.fontHead, fontSize: 9.5, fontWeight: 600, letterSpacing: 0.6, textTransform: "uppercase", color: isActive ? DS.ink : DS.inkFaint }}>
+              {tab.label}
+            </div>
+            {isActive && <div style={{ position: "absolute", bottom: -8, width: 4, height: 4, borderRadius: 2, background: DS.accent }} />}
+          </button>
+        );
+      })}
+    </div>
+  );
+
   const hardestSessionKana = useMemo(() => {
     const buckets = new Map<string, { item: KanaItem; weight: number }>();
     sessionResults.forEach((result) => {
@@ -891,43 +922,8 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
           </div>
 
-          {/* Tab bar: Learn · Review · Vault */}
-          <div style={{ position: "sticky", bottom: 0, height: 84, paddingBottom: 24, background: `linear-gradient(to top, ${DS.bg} 55%, transparent)`, display: "flex", alignItems: "center", justifyContent: "space-around", zIndex: 10 }}>
-            {([
-              {
-                k: "learn", label: "Learn", active: true, action: () => {},
-                icon: (c: string) => (
-                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                    <path d="M3 5.5a2 2 0 012-2h5v15H5a2 2 0 01-2-2v-11zM12 3.5h5a2 2 0 012 2v11a2 2 0 01-2 2h-5v-15z" stroke={c} strokeWidth="1.5" />
-                  </svg>
-                ),
-              },
-              {
-                k: "review", label: "Review", active: false, action: () => setScreen("setup"),
-                icon: (c: string) => (
-                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                    <path d="M18 11a7 7 0 11-2.05-4.95M18 3v4h-4" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ),
-              },
-              {
-                k: "vault", label: "Vault", active: false, action: () => setScreen("table"),
-                icon: (c: string) => (
-                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                    <rect x="3" y="5" width="16" height="13" rx="2" stroke={c} strokeWidth="1.5" />
-                    <path d="M3 8h16M8 5V3.5h6V5" stroke={c} strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                ),
-              },
-            ] as const).map((tab) => (
-              <button key={tab.k} type="button" onClick={tab.action} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: "4px 12px" }}>
-                {tab.icon(tab.active ? DS.accent : DS.inkFaint)}
-                <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, letterSpacing: 0.8, textTransform: "uppercase", color: tab.active ? DS.ink : DS.inkFaint }}>
-                  {tab.label}
-                </div>
-              </button>
-            ))}
-          </div>
+          {/* Tab bar — 5-tab global nav */}
+          {renderTabBar()}
 
         </div>
       )}

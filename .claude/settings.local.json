@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(gunzip -c \"/Users/pako/.claude/projects/-Users-pako-nihongo-feed--claude-worktrees-hungry-hermann-3d1a92/dff5523b-d56d-411d-86ff-0a95965c6dda/tool-results/webfetch-1776452411947-fmlnef.bin\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(cp \"/Users/pako/.claude/projects/-Users-pako-nihongo-feed--claude-worktrees-hungry-hermann-3d1a92/dff5523b-d56d-411d-86ff-0a95965c6dda/tool-results/webfetch-1776455541488-dprsc5.bin\" /tmp/design-kana.tar.gz)",
+      "Read(//private/tmp/**)",
+      "Bash(tar -tzf design-kana.tar.gz)",
+      "Bash(tar -xzf design-kana.tar.gz)",
+      "Bash(cp \"/Users/pako/.claude/projects/-Users-pako-nihongo-feed--claude-worktrees-hungry-hermann-3d1a92/dff5523b-d56d-411d-86ff-0a95965c6dda/tool-results/webfetch-1776457381152-v5d9m9.bin\" /tmp/design-bundle.gz)",
+      "Bash(gunzip -f design-bundle.gz)",
+      "Bash(ls -la design-bundle)",
+      "Bash(mkdir -p design-extract2)",
+      "Bash(tar xf *)",
+      "Bash(python3)"
+    ]
+  }
+}
