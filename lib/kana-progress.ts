@@ -90,9 +90,9 @@ export function applyKanaRating(progress: KanaProgressMap, item: KanaItem, ratin
 
   const nextReview =
     rating === "wrong"
-      ? hoursFromNow(4)
+      ? hoursFromNow(2)
       : rating === "almost"
-        ? hoursFromNow(18)
+        ? hoursFromNow(12)
         : hoursFromNow(Math.max(LEVEL_INTERVALS_HOURS[level], 12) * ease);
 
   const difficult = timesWrong >= 2 && timesWrong >= timesCorrect;

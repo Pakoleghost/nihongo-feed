@@ -7,10 +7,9 @@ import PracticeShell, { PracticeStageCard } from "@/components/study/PracticeShe
 import StudySelectorGroup from "@/components/study/StudySelectorGroup";
 import {
   KANA_ITEMS,
-  KANA_PRACTICE_MODE_OPTIONS,
   KANA_QUESTION_COUNT_OPTIONS,
-  getKanaTableSections,
   filterKanaItemsForSelection,
+  getKanaTableSections,
   getKanaSetLabel,
   type KanaItem,
   type KanaPracticeMode,
@@ -50,7 +49,7 @@ type KanaSessionResult = {
 type KanaSession = {
   setKey: string;
   modes: KanaPracticeMode[];
-  count: KanaQuestionCount;
+  count: number;
   questions: KanaSessionQuestion[];
 };
 
@@ -75,6 +74,35 @@ const KANA_SCOPE_LABELS: Record<KanaSelectableSet, string> = {
   handakuten: "Handakuten",
   yoon: "Yōon",
 };
+
+// Ordered hiragana groups for progressive Learn mode introduction
+const HIRAGANA_BASIC_GROUPS: readonly (readonly string[])[] = [
+  ["あ", "い", "う", "え", "お"],
+  ["か", "き", "く", "け", "こ"],
+  ["さ", "し", "す", "せ", "そ"],
+  ["た", "ち", "つ", "て", "と"],
+  ["な", "に", "ぬ", "ね", "の"],
+  ["は", "ひ", "ふ", "へ", "ほ"],
+  ["ま", "み", "む", "め", "も"],
+  ["や", "ゆ", "よ"],
+  ["ら", "り", "る", "れ", "ろ"],
+  ["わ", "を", "ん"],
+];
+
+function getLearnFrontierItems(hiraganaBasic: KanaItem[], progress: KanaProgressMap): KanaItem[] {
+  const kanaToItem = new Map(hiraganaBasic.map((item) => [item.kana, item]));
+  for (const group of HIRAGANA_BASIC_GROUPS) {
+    const groupItems = group.map((k) => kanaToItem.get(k)).filter((item): item is KanaItem => Boolean(item));
+    const unseen = groupItems.filter((item) => !progress[item.id]);
+    if (unseen.length > 0) return unseen;
+  }
+  return [];
+}
+
+function isDueReview(nextReview?: string | null) {
+  if (!nextReview) return true;
+  return new Date(nextReview).getTime() <= Date.now();
+}
 
 function shuffle<T>(items: T[]) {
   const next = [...items];
@@ -200,38 +228,45 @@ function buildSession(
   return { setKey: scopeKeys.join("+"), modes, count, questions };
 }
 
-function isDueReview(nextReview?: string | null) {
-  if (!nextReview) return true;
-  return new Date(nextReview).getTime() <= Date.now();
-}
+function buildLearnSession(hiraganaBasic: KanaItem[], progress: KanaProgressMap) {
+  // Seen kana: any kana the user has interacted with
+  const seenItems = KANA_ITEMS.filter((item) => Boolean(progress[item.id]));
 
-function buildLearnSession(progress: KanaProgressMap) {
-  const basicHiragana = filterKanaItemsForSelection("hiragana", "basic");
-  const due = KANA_ITEMS.filter((item) => {
+  // Due items from all seen kana
+  const due = seenItems.filter((item) => isDueReview(progress[item.id]?.nextReview));
+
+  // Difficult items (wrong >= 2 and >= correct)
+  const difficult = seenItems.filter((item) => progress[item.id]?.difficult);
+
+  // Almost items: timesAlmost > 0 AND not yet stable (level < 3), excluding those already in difficult
+  const almostKnown = seenItems.filter((item) => {
     const entry = progress[item.id];
-    return entry && isDueReview(entry.nextReview);
+    return entry && entry.timesAlmost > 0 && entry.level < 3 && !entry.difficult;
   });
-  const difficult = KANA_ITEMS.filter((item) => progress[item.id]?.difficult);
-  const almostKnown = KANA_ITEMS.filter((item) => (progress[item.id]?.timesAlmost || 0) > 0);
 
-  let learnPool = uniqueKanaItems([...due, ...difficult, ...almostKnown]);
-  if (learnPool.length === 0) {
-    learnPool = basicHiragana.slice(0, 5);
+  const reviewPool = uniqueKanaItems([...due, ...difficult, ...almostKnown]);
+
+  // New kana to introduce: from the first incomplete group
+  const frontierItems = getLearnFrontierItems(hiraganaBasic, progress);
+  const maxNew = reviewPool.length > 6 ? 1 : reviewPool.length > 2 ? 2 : reviewPool.length === 0 ? 5 : 3;
+  const newItems = frontierItems.slice(0, maxNew);
+
+  const pool = uniqueKanaItems([...reviewPool, ...newItems]);
+
+  if (pool.length === 0) {
+    // Brand new user: start with the first group
+    const starter = HIRAGANA_BASIC_GROUPS[0]
+      .map((k) => hiraganaBasic.find((item) => item.kana === k))
+      .filter((item): item is KanaItem => Boolean(item));
+    const questions = buildQuestionsForItems(starter, hiraganaBasic, ["multiple_choice"]);
+    return { setKey: "learn", modes: ["multiple_choice"] as KanaPracticeMode[], count: starter.length, questions };
   }
 
-  if (learnPool.length < 8) {
-    const additions = basicHiragana.filter((item) => !learnPool.some((entry) => entry.id === item.id));
-    learnPool = uniqueKanaItems([...learnPool, ...additions.slice(0, 8 - learnPool.length)]);
-  }
-
-  const items = buildKanaSessionItems(learnPool, progress, Math.min(10, Math.max(5, learnPool.length)));
-  const questions = buildQuestionsForItems(items, learnPool, ["multiple_choice"]);
-  return {
-    setKey: "learn",
-    modes: ["multiple_choice"] as KanaPracticeMode[],
-    count: 10 as KanaQuestionCount,
-    questions,
-  };
+  const sessionCount = Math.min(12, Math.max(5, pool.length));
+  const items = buildKanaSessionItems(pool, progress, sessionCount);
+  const fallbackPool = uniqueKanaItems([...hiraganaBasic, ...seenItems]);
+  const questions = buildQuestionsForItems(items, fallbackPool, ["multiple_choice"]);
+  return { setKey: "learn", modes: ["multiple_choice"] as KanaPracticeMode[], count: sessionCount, questions };
 }
 
 export default function AprenderKanaModule({ userKey, onRecordActivity, initialMode = null }: AprenderKanaModuleProps) {
@@ -252,6 +287,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   const [romajiFeedback, setRomajiFeedback] = useState<null | { correct: boolean; answer: string }>(null);
   const [multipleChoiceAnswer, setMultipleChoiceAnswer] = useState<string | null>(null);
   const [answerFeedback, setAnswerFeedback] = useState<AnswerFeedback | null>(null);
+  const [handwritingRating, setHandwritingRating] = useState<KanaHandwritingRating | null>(null);
   const [streak, setStreak] = useState(0);
   const [streakPulse, setStreakPulse] = useState(0);
   const romajiInputRef = useRef<HTMLInputElement | null>(null);
@@ -284,7 +320,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   const sessionFinished = Boolean(session) && sessionIndex >= (session?.questions.length || 0);
   const currentQuestion = session?.questions[sessionIndex] || null;
   const sessionQuestionCount = session?.questions.length || 0;
-  const progressPercent = session?.questions.length ? Math.round((Math.min(sessionIndex + 1, session.questions.length) / session.questions.length) * 100) : 0;
 
   useEffect(() => {
     if (currentQuestion?.mode !== "romaji_input" || sessionFinished) return;
@@ -302,40 +337,45 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
       selectedScopeKeys.map((scopeKey) => {
         const [script, set] = scopeKey.split(":") as [KanaScript, KanaSelectableSet];
         const items = filterKanaItemsForSelection(script, set);
-        return {
-          key: scopeKey,
-          script,
-          set,
-          count: items.length,
-        };
+        return { key: scopeKey, script, set, count: items.length };
       }),
     [selectedScopeKeys],
   );
   const selectedKanaCount = selectedScopeDetails.reduce((sum, entry) => sum + entry.count, 0);
-  const selectedScriptSummary = Array.from(new Set(selectedScopeDetails.map((entry) => (entry.script === "hiragana" ? "Hiragana" : "Katakana")))).join(" · ");
+  const selectedScriptSummary = Array.from(
+    new Set(selectedScopeDetails.map((entry) => (entry.script === "hiragana" ? "Hiragana" : "Katakana"))),
+  ).join(" · ");
   const selectedSetSummary = selectedScopeDetails
     .map((entry) => `${entry.script === "hiragana" ? "H" : "K"} ${KANA_SCOPE_LABELS[entry.set]}`)
     .join(", ");
-  const learnReadyItems = useMemo(() => {
-    const dueItems = KANA_ITEMS.filter((item) => {
-      const entry = progress[item.id];
-      return entry && isDueReview(entry.nextReview);
-    });
-    const difficultItems = KANA_ITEMS.filter((item) => progress[item.id]?.difficult);
-    const almostItems = KANA_ITEMS.filter((item) => (progress[item.id]?.timesAlmost || 0) > 0);
-    const base = uniqueKanaItems([...dueItems, ...difficultItems, ...almostItems]);
-    if (base.length > 0) return base;
-    return basicHiragana.slice(0, 5);
-  }, [basicHiragana, progress]);
+
   const learnSummary = useMemo(() => {
-    const due = KANA_ITEMS.filter((item) => {
+    const seenItems = KANA_ITEMS.filter((item) => Boolean(progress[item.id]));
+    const due = seenItems.filter((item) => isDueReview(progress[item.id]?.nextReview)).length;
+    const difficult = seenItems.filter((item) => progress[item.id]?.difficult).length;
+    const almost = seenItems.filter((item) => {
       const entry = progress[item.id];
-      return entry && isDueReview(entry.nextReview);
+      return entry && entry.timesAlmost > 0 && entry.level < 3 && !entry.difficult;
     }).length;
-    const difficult = KANA_ITEMS.filter((item) => progress[item.id]?.difficult).length;
-    const almost = KANA_ITEMS.filter((item) => (progress[item.id]?.timesAlmost || 0) > 0).length;
-    const fresh = basicHiragana.filter((item) => !progress[item.id]).length;
-    return { due, difficult, almost, fresh };
+    const frontier = getLearnFrontierItems(basicHiragana, progress);
+    const reviewCount = due + difficult + almost;
+    const maxNew = reviewCount > 6 ? 1 : reviewCount > 2 ? 2 : reviewCount === 0 ? 5 : 3;
+    return { due, difficult, almost, fresh: Math.min(maxNew, frontier.length) };
+  }, [basicHiragana, progress]);
+
+  const learnSessionCount = useMemo(() => {
+    const seenItems = KANA_ITEMS.filter((item) => Boolean(progress[item.id]));
+    const due = seenItems.filter((item) => isDueReview(progress[item.id]?.nextReview));
+    const difficult = seenItems.filter((item) => progress[item.id]?.difficult);
+    const almost = seenItems.filter((item) => {
+      const entry = progress[item.id];
+      return entry && entry.timesAlmost > 0 && entry.level < 3 && !entry.difficult;
+    });
+    const base = uniqueKanaItems([...due, ...difficult, ...almost]);
+    const frontier = getLearnFrontierItems(basicHiragana, progress);
+    const maxNew = base.length > 6 ? 1 : base.length > 2 ? 2 : base.length === 0 ? 5 : 3;
+    const pool = uniqueKanaItems([...base, ...frontier.slice(0, maxNew)]);
+    return Math.min(12, Math.max(5, pool.length));
   }, [basicHiragana, progress]);
 
   const subtlePillStyle: CSSProperties = {
@@ -373,7 +413,12 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     });
     setSessionResults((previous) => [
       ...previous,
-      { item, rating, mode: currentQuestion?.mode || practiceModes[0] || "multiple_choice", recognitionScore: extra?.recognitionScore },
+      {
+        item,
+        rating,
+        mode: currentQuestion?.mode || practiceModes[0] || "multiple_choice",
+        recognitionScore: extra?.recognitionScore,
+      },
     ]);
   };
 
@@ -386,6 +431,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     setRomajiValue("");
     setRomajiFeedback(null);
     setAnswerFeedback(null);
+    setHandwritingRating(null);
     setSessionIndex((value) => value + 1);
   };
 
@@ -394,6 +440,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     setRomajiValue("");
     setRomajiFeedback(null);
     setAnswerFeedback(null);
+    setHandwritingRating(null);
   }, [sessionIndex, currentQuestion?.mode, currentQuestion?.item.id]);
 
   useEffect(() => {
@@ -414,6 +461,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
       setRomajiValue("");
       setRomajiFeedback(null);
       setAnswerFeedback(null);
+      setHandwritingRating(null);
       setStreak(0);
     }, 220);
   };
@@ -426,6 +474,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     setRomajiValue("");
     setRomajiFeedback(null);
     setAnswerFeedback(null);
+    setHandwritingRating(null);
     setStreak(0);
     setSetupError(null);
     onRecordActivity?.(activityLabel);
@@ -449,7 +498,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
       ? {
           setKey: selectedScopeKeys.join("+"),
           modes: practiceModes,
-          count: overrideItems.length as KanaQuestionCount,
+          count: overrideItems.length,
           questions: buildQuestionsForItems(uniqueKanaItems(overrideItems), practicePool, practiceModes),
         }
       : buildSession(selectedScopeKeys, practiceModes, questionCount, progress);
@@ -458,7 +507,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   };
 
   const startLearnSession = () => {
-    openSession(buildLearnSession(progress), "Learn");
+    openSession(buildLearnSession(basicHiragana, progress), "Learn");
   };
 
   useEffect(() => {
@@ -478,7 +527,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     return Array.from(buckets.values())
       .filter((entry) => entry.weight > 0)
       .sort((a, b) => b.weight - a.weight)
-      .slice(0, 3)
+      .slice(0, 4)
       .map((entry) => entry.item);
   }, [sessionResults]);
 
@@ -497,8 +546,47 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   );
 
   const activeQuestionLabel = currentQuestion ? getKanaSetLabel(currentQuestion.item) : "";
+  const isLearnSession = session?.setKey === "learn";
+
+  const handleMultipleChoiceAnswer = (option: string) => {
+    if (answerFeedback) return;
+    const correct = option === currentQuestion!.item.romaji;
+    setMultipleChoiceAnswer(option);
+    setAnswerFeedback({ status: correct ? "correct" : "wrong", answer: currentQuestion!.item.romaji });
+    recordResult(currentQuestion!.item, correct ? "correct" : "wrong");
+    if (correct) {
+      setStreak((value) => {
+        const next = value + 1;
+        setStreakPulse(next);
+        return next;
+      });
+      advanceTimerRef.current = window.setTimeout(moveToNext, 700);
+    } else {
+      setStreak(0);
+    }
+  };
+
+  const handleRomajiSubmit = () => {
+    if (romajiFeedback || !currentQuestion) return;
+    const correct = isKanaAnswerCorrect(currentQuestion.item, romajiValue);
+    setRomajiFeedback({ correct, answer: currentQuestion.item.romaji });
+    setAnswerFeedback({ status: correct ? "correct" : "wrong", answer: currentQuestion.item.romaji });
+    recordResult(currentQuestion.item, correct ? "correct" : "wrong");
+    if (correct) {
+      setStreak((value) => {
+        const next = value + 1;
+        setStreakPulse(next);
+        return next;
+      });
+      advanceTimerRef.current = window.setTimeout(moveToNext, 700);
+    } else {
+      setStreak(0);
+    }
+  };
+
   return (
     <div style={{ display: "grid", gap: "var(--space-3)" }}>
+      {/* ── HOME ── */}
       {screen === "home" && (
         <div style={{ display: "grid", gap: "var(--space-3)" }}>
           {allKanaSummary.practiced > 0 && (
@@ -509,45 +597,50 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
             </div>
           )}
 
-          <div style={{ display: "grid", gap: "var(--space-2)", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))" }}>
+          {/* Learn hero */}
+          <button
+            type="button"
+            onClick={() => setScreen("learn")}
+            style={{
+              border: "none",
+              background: "#1A1A2E",
+              borderRadius: 28,
+              padding: "22px 20px 20px",
+              textAlign: "left",
+              display: "grid",
+              gap: 10,
+              color: "#FFF8E7",
+              width: "100%",
+            }}
+          >
+            <div style={{ fontSize: "clamp(28px, 7vw, 36px)", lineHeight: 1, fontWeight: 800 }}>Learn</div>
+            <div style={{ fontSize: "var(--text-body-sm)", fontWeight: 700, opacity: 0.64 }}>
+              {learnSummary.due > 0
+                ? `${learnSummary.due} pendiente${learnSummary.due > 1 ? "s" : ""} · repaso inteligente`
+                : allKanaSummary.practiced === 0
+                  ? "Empieza con hiragana · guiado paso a paso"
+                  : "Guiado · progresivo · sin saturarte"}
+            </div>
+          </button>
+
+          {/* Secondary row */}
+          <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
             <button
               type="button"
               onClick={() => setScreen("table")}
               style={{
                 border: "1px solid var(--color-border)",
                 background: "color-mix(in srgb, var(--color-surface) 86%, white)",
-                borderRadius: 28,
-                padding: "18px 18px 16px",
+                borderRadius: 24,
+                padding: "16px 14px 14px",
                 textAlign: "left",
                 display: "grid",
-                gap: 10,
+                gap: 6,
                 color: "var(--color-text)",
               }}
             >
-              <div style={{ fontSize: "clamp(24px, 5vw, 30px)", lineHeight: 1, fontWeight: 800 }}>Kana table</div>
-              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                Hiragana · Katakana
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setScreen("learn")}
-              style={{
-                border: "1px solid transparent",
-                background: "color-mix(in srgb, var(--color-highlight-soft) 66%, white)",
-                borderRadius: 28,
-                padding: "18px 18px 16px",
-                textAlign: "left",
-                display: "grid",
-                gap: 10,
-                color: "var(--color-text)",
-              }}
-            >
-              <div style={{ fontSize: "clamp(24px, 5vw, 30px)", lineHeight: 1, fontWeight: 800 }}>Learn</div>
-              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                Guiado · progresivo
-              </div>
+              <div style={{ fontSize: "clamp(18px, 4.5vw, 22px)", lineHeight: 1, fontWeight: 800 }}>Tabla kana</div>
+              <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>Hiragana · Katakana</div>
             </button>
 
             <button
@@ -556,40 +649,42 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               style={{
                 border: "1px solid var(--color-border)",
                 background: "color-mix(in srgb, var(--color-surface-muted) 74%, white)",
-                borderRadius: 28,
-                padding: "18px 18px 16px",
+                borderRadius: 24,
+                padding: "16px 14px 14px",
                 textAlign: "left",
                 display: "grid",
-                gap: 10,
+                gap: 6,
                 color: "var(--color-text)",
               }}
             >
-              <div style={{ fontSize: "clamp(24px, 5vw, 30px)", lineHeight: 1, fontWeight: 800 }}>Custom Practice</div>
-              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                Scripts · modos · preguntas
-              </div>
+              <div style={{ fontSize: "clamp(18px, 4.5vw, 22px)", lineHeight: 1, fontWeight: 800 }}>Práctica</div>
+              <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>Scripts · modos · libre</div>
             </button>
           </div>
         </div>
       )}
 
+      {/* ── LEARN ── */}
       {screen === "learn" && (
         <div
           style={{
             display: "grid",
             gap: "var(--space-3)",
-            minHeight: "min(100dvh - 160px, 680px)",
+            minHeight: "min(100dvh - 160px, 600px)",
             alignContent: "space-between",
           }}
         >
           <div style={{ display: "grid", gap: "var(--space-3)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <div style={{ display: "grid", gap: 4 }}>
-                <div style={{ fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>Learn</div>
-                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                  Repasa primero lo pendiente y añade kana nuevos sin saturarte.
-                </div>
-              </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 8,
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              <div style={{ fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>Learn</div>
               <button type="button" onClick={() => setScreen("home")} className="ds-btn-ghost">
                 Volver
               </button>
@@ -603,29 +698,36 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                 borderRadius: 28,
                 border: "1px solid var(--color-border)",
                 background: "color-mix(in srgb, var(--color-surface) 88%, white)",
-                boxShadow: "0 18px 30px rgba(26, 26, 46, 0.05)",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline", flexWrap: "wrap" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 10,
+                  alignItems: "baseline",
+                  flexWrap: "wrap",
+                }}
+              >
                 <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 800 }}>
                   Sesión guiada
                 </div>
                 <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text)", fontWeight: 800 }}>
-                  {Math.min(10, Math.max(5, learnReadyItems.length))} preguntas
+                  {learnSessionCount} preguntas
                 </div>
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {learnSummary.due > 0 ? <div style={subtlePillStyle}>{learnSummary.due} pendientes</div> : null}
-                {learnSummary.difficult > 0 ? <div style={subtlePillStyle}>{learnSummary.difficult} difíciles</div> : null}
-                {learnSummary.almost > 0 ? <div style={subtlePillStyle}>{learnSummary.almost} por fijar</div> : null}
-                {learnSummary.due === 0 && learnSummary.difficult === 0 && (
-                  <div style={subtlePillStyle}>{Math.min(5, learnSummary.fresh)} nuevos</div>
-                )}
+                {learnSummary.due > 0 && <div style={subtlePillStyle}>{learnSummary.due} pendientes</div>}
+                {learnSummary.difficult > 0 && <div style={subtlePillStyle}>{learnSummary.difficult} difíciles</div>}
+                {learnSummary.almost > 0 && <div style={subtlePillStyle}>{learnSummary.almost} por fijar</div>}
+                {learnSummary.fresh > 0 && <div style={subtlePillStyle}>{learnSummary.fresh} nuevos</div>}
               </div>
               <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", lineHeight: 1.45 }}>
                 {learnSummary.due > 0 || learnSummary.difficult > 0
-                  ? "Esta sesión va a priorizar lo que ya necesita repaso antes de meter kana nuevos."
-                  : "Si todavía no tienes progreso, Learn empieza con hiragana básico y lo amplía poco a poco."}
+                  ? "Repaso primero, kana nuevos solo cuando estés listo."
+                  : allKanaSummary.practiced === 0
+                    ? "Empieza con las vocales hiragana. Poco a poco."
+                    : "Introduces kana nuevos del siguiente grupo."}
               </div>
             </div>
           </div>
@@ -641,15 +743,16 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
             }}
           >
             <button type="button" onClick={startLearnSession} className="ds-btn" style={{ width: "100%", minHeight: 54 }}>
-              Empezar Learn
+              Empezar
             </button>
             <button type="button" onClick={() => setScreen("setup")} className="ds-btn-ghost">
-              Abrir práctica personalizada
+              Práctica libre
             </button>
           </div>
         </div>
       )}
 
+      {/* ── KANA TABLE ── */}
       {screen === "table" && (
         <div style={{ display: "grid", gap: "var(--space-3)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
@@ -690,13 +793,28 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
             {tableSections.map((section) => (
               <div key={section.key} style={{ display: "grid", gap: 10 }}>
                 {tableFilter === "mixed" && (
-                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
+                  <div
+                    style={{
+                      fontSize: "var(--text-label)",
+                      color: "var(--color-text-muted)",
+                      fontWeight: 800,
+                      letterSpacing: ".08em",
+                      textTransform: "uppercase",
+                    }}
+                  >
                     {section.label}
                   </div>
                 )}
                 <div style={{ display: "grid", gap: 8 }}>
                   {section.rows.map((row, rowIndex) => (
-                    <div key={`${section.key}-${rowIndex}`} style={{ display: "grid", gridTemplateColumns: `repeat(${section.columns}, minmax(0, 1fr))`, gap: 8 }}>
+                    <div
+                      key={`${section.key}-${rowIndex}`}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: `repeat(${section.columns}, minmax(0, 1fr))`,
+                        gap: 8,
+                      }}
+                    >
                       {row.map((item, cellIndex) =>
                         item ? (
                           <div
@@ -711,8 +829,19 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                               minHeight: 74,
                             }}
                           >
-                            <div style={{ fontSize: section.columns === 5 ? 28 : 26, lineHeight: 1, fontWeight: 800, color: "var(--color-text)" }}>{item.kana}</div>
-                            <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>{item.romaji}</div>
+                            <div
+                              style={{
+                                fontSize: section.columns === 5 ? 28 : 26,
+                                lineHeight: 1,
+                                fontWeight: 800,
+                                color: "var(--color-text)",
+                              }}
+                            >
+                              {item.kana}
+                            </div>
+                            <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
+                              {item.romaji}
+                            </div>
                           </div>
                         ) : (
                           <div key={`${section.key}-blank-${rowIndex}-${cellIndex}`} aria-hidden="true" />
@@ -727,18 +856,29 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
         </div>
       )}
 
+      {/* ── CUSTOM PRACTICE SETUP ── */}
       {screen === "setup" && (
         <div
           style={{
             display: "grid",
             gap: "var(--space-3)",
-            minHeight: "min(100dvh - 160px, 720px)",
+            minHeight: "min(100dvh - 160px, 680px)",
             alignContent: "space-between",
           }}
         >
           <div style={{ display: "grid", gap: "var(--space-3)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-              <div style={{ fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>Practice</div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 8,
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
+              <div style={{ fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>
+                Custom Practice
+              </div>
               <button type="button" onClick={() => setScreen("home")} className="ds-btn-ghost">
                 Volver
               </button>
@@ -772,8 +912,18 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                 color: "var(--color-text)",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 800 }}>Kana seleccionados</div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 8,
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                }}
+              >
+                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 800 }}>
+                  Kana seleccionados
+                </div>
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
                   <div style={{ fontSize: "var(--text-body)", fontWeight: 800 }}>{selectedKanaCount}</div>
                   <div
@@ -797,18 +947,27 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text)", fontWeight: 700 }}>
                 {selectedScriptSummary || "Ninguno"}
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 8,
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                }}
+              >
                 <div style={{ fontSize: 12, color: "var(--color-text-muted)", lineHeight: 1.35 }}>
                   {selectedSetSummary || "Toca para elegir"}
                 </div>
-                <div style={{ fontSize: 12, color: "var(--color-accent-strong)", fontWeight: 800 }}>
-                  Editar
-                </div>
+                <div style={{ fontSize: 12, color: "var(--color-accent-strong)", fontWeight: 800 }}>Editar</div>
               </div>
             </button>
 
             <StudySelectorGroup
-              options={KANA_QUESTION_COUNT_OPTIONS.map((value) => ({ key: String(value) as "10" | "20" | "30", label: String(value) }))}
+              options={KANA_QUESTION_COUNT_OPTIONS.map((value) => ({
+                key: String(value) as "10" | "20" | "30",
+                label: String(value),
+              }))}
               value={String(questionCount) as "10" | "20" | "30"}
               onSelect={(value) => setQuestionCount(Number(value) as KanaQuestionCount)}
               layout="row"
@@ -833,9 +992,19 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               border: "1px solid var(--color-border)",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 10,
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
               <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                {practiceModes.length > 0 ? `${practiceModes.length} modo${practiceModes.length > 1 ? "s" : ""}` : "Sin modo"}
+                {practiceModes.length > 0
+                  ? `${practiceModes.length} modo${practiceModes.length > 1 ? "s" : ""}`
+                  : "Sin modo"}
               </div>
               <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text)", fontWeight: 800 }}>
                 {questionCount} preguntas
@@ -853,12 +1022,13 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                 cursor: selectedScopeKeys.length === 0 || practiceModes.length === 0 ? "not-allowed" : "pointer",
               }}
             >
-              Start
+              Empezar
             </button>
           </div>
         </div>
       )}
 
+      {/* ── KANA SCOPE MODAL ── */}
       {scopeModalOpen && (
         <div
           style={{
@@ -885,7 +1055,15 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               boxShadow: "0 20px 40px rgba(26,26,46,.1)",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 8,
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
               <div style={{ fontSize: 20, fontWeight: 800, color: "var(--color-text)" }}>Kana</div>
               <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
                 {selectedKanaCount}
@@ -901,12 +1079,32 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               }}
             >
               <div />
-              <div style={{ textAlign: "center", fontSize: "var(--text-body-sm)", fontWeight: 800, color: "var(--color-text)" }}>Hiragana</div>
-              <div style={{ textAlign: "center", fontSize: "var(--text-body-sm)", fontWeight: 800, color: "var(--color-text)" }}>Katakana</div>
+              <div
+                style={{
+                  textAlign: "center",
+                  fontSize: "var(--text-body-sm)",
+                  fontWeight: 800,
+                  color: "var(--color-text)",
+                }}
+              >
+                Hiragana
+              </div>
+              <div
+                style={{
+                  textAlign: "center",
+                  fontSize: "var(--text-body-sm)",
+                  fontWeight: 800,
+                  color: "var(--color-text)",
+                }}
+              >
+                Katakana
+              </div>
 
               {KANA_SCOPE_ROWS.map((row) => (
                 <div key={row.set} style={{ display: "contents" }}>
-                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>{row.label}</div>
+                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                    {row.label}
+                  </div>
                   {(["hiragana", "katakana"] as KanaScript[]).map((script) => {
                     const key = `${script}:${row.set}` as KanaScopeKey;
                     const selected = selectedScopeKeys.includes(key);
@@ -929,6 +1127,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                           fontWeight: 800,
                           display: "grid",
                           placeItems: "center",
+                          cursor: "pointer",
                         }}
                       >
                         {selected ? "✓" : ""}
@@ -951,277 +1150,323 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
         </div>
       )}
 
+      {/* ── PRACTICE SHELL ── */}
       <PracticeShell
         open={Boolean(session)}
         visible={sheetVisible}
-        title="Aprender Kana"
-        subtitle={sessionFinished ? "Resumen" : `Pregunta ${Math.min(sessionIndex + 1, session?.questions.length || 0)} / ${session?.questions.length || 0}`}
+        title={isLearnSession ? "Learn" : "Práctica"}
+        subtitle={
+          sessionFinished
+            ? "Resultado"
+            : `${Math.min(sessionIndex + 1, session?.questions.length || 0)} / ${session?.questions.length || 0}`
+        }
         current={sessionFinished ? undefined : Math.min(sessionIndex + 1, session?.questions.length || 0)}
         total={sessionFinished ? undefined : session?.questions.length || 0}
         streak={sessionFinished ? 0 : streak}
         streakPulseKey={streakPulse}
         onClose={closeSession}
       >
+        {/* Active question */}
         {!sessionFinished && currentQuestion ? (
-                <div key={`${currentQuestion.item.id}-${sessionIndex}`} style={{ display: "grid", gap: "var(--space-4)", animation: "kanaPracticeStepIn 180ms ease" }}>
-                  <PracticeStageCard
-                    label={activeQuestionLabel}
-                    compact={currentQuestion.mode === "handwriting"}
-                    feedback={answerFeedback?.status || null}
-                    value={
-                      <div
+          <div
+            key={`${currentQuestion.item.id}-${sessionIndex}`}
+            style={{ display: "grid", gap: "var(--space-4)", animation: "kanaPracticeStepIn 180ms ease" }}
+          >
+            <PracticeStageCard
+              label={activeQuestionLabel}
+              compact={currentQuestion.mode === "handwriting"}
+              feedback={
+                currentQuestion.mode === "handwriting"
+                  ? handwritingRating === "correct"
+                    ? "correct"
+                    : handwritingRating === "wrong"
+                      ? "wrong"
+                      : null
+                  : answerFeedback?.status || null
+              }
+              value={
+                <div
+                  style={{
+                    fontSize:
+                      currentQuestion.mode === "handwriting"
+                        ? "clamp(28px, 8vw, 42px)"
+                        : "clamp(96px, 32vw, 154px)",
+                    lineHeight: 0.92,
+                    letterSpacing: "-.05em",
+                    fontWeight: 800,
+                    color: "var(--color-text)",
+                  }}
+                >
+                  {currentQuestion.mode === "handwriting" ? currentQuestion.item.romaji : currentQuestion.item.kana}
+                </div>
+              }
+            />
+
+            {/* Multiple choice */}
+            {currentQuestion.mode === "multiple_choice" && currentQuestion.options && (
+              <div style={{ display: "grid", gap: 12 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
+                  {currentQuestion.options.map((option) => {
+                    const isChosen = multipleChoiceAnswer === option;
+                    const isCorrect = option === currentQuestion.item.romaji;
+                    const showAnswer = Boolean(answerFeedback);
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        disabled={showAnswer}
+                        onClick={() => handleMultipleChoiceAnswer(option)}
                         style={{
-                          fontSize: currentQuestion.mode === "handwriting" ? "clamp(28px, 8vw, 42px)" : "clamp(96px, 32vw, 154px)",
-                          lineHeight: 0.92,
-                          letterSpacing: "-.05em",
+                          minHeight: 120,
+                          borderRadius: 28,
+                          border: showAnswer && isCorrect
+                            ? "1px solid color-mix(in srgb, #4ECDC4 44%, transparent)"
+                            : showAnswer && isChosen && !isCorrect
+                              ? "1px solid color-mix(in srgb, #E63946 32%, transparent)"
+                              : "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
+                          background:
+                            showAnswer && isCorrect
+                              ? "color-mix(in srgb, #4ECDC4 18%, white)"
+                              : showAnswer && isChosen && !isCorrect
+                                ? "color-mix(in srgb, #E63946 10%, white)"
+                                : "color-mix(in srgb, var(--color-surface) 82%, white)",
+                          color:
+                            showAnswer && isCorrect
+                              ? "#117964"
+                              : showAnswer && isChosen && !isCorrect
+                                ? "#E63946"
+                                : "var(--color-text)",
+                          fontSize: 28,
                           fontWeight: 800,
-                          color: "var(--color-text)",
+                          cursor: showAnswer ? "default" : "pointer",
                         }}
                       >
-                        {currentQuestion.mode === "handwriting" ? currentQuestion.item.romaji : currentQuestion.item.kana}
-                      </div>
-                    }
-                  />
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
 
-                  {currentQuestion.mode === "multiple_choice" && currentQuestion.options && (
-                    <div style={{ display: "grid", gap: 12 }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
-                        {currentQuestion.options.map((option) => {
-                          const isChosen = multipleChoiceAnswer === option;
-                          const isCorrect = option === currentQuestion.item.romaji;
-                          const showAnswer = Boolean(answerFeedback);
-                          return (
-                            <button
-                              key={option}
-                              type="button"
-                              disabled={showAnswer}
-                              onClick={() => {
-                                if (answerFeedback) return;
-                                const correct = option === currentQuestion.item.romaji;
-                                setMultipleChoiceAnswer(option);
-                                setAnswerFeedback({ status: correct ? "correct" : "wrong", answer: currentQuestion.item.romaji });
-                                recordResult(currentQuestion.item, correct ? "correct" : "wrong");
-                                if (correct) {
-                                  setStreak((value) => {
-                                    const next = value + 1;
-                                    setStreakPulse(next);
-                                    return next;
-                                  });
-                                  advanceTimerRef.current = window.setTimeout(() => {
-                                    moveToNext();
-                                  }, 650);
-                                } else {
-                                  setStreak(0);
-                                }
-                              }}
-                              style={{
-                                minHeight: 128,
-                                borderRadius: 28,
-                                border: "1px solid color-mix(in srgb, var(--color-border) 88%, white)",
-                                background:
-                                  showAnswer && isCorrect
-                                    ? "color-mix(in srgb, var(--color-accent-soft) 76%, white)"
-                                    : showAnswer && isChosen && !isCorrect
-                                      ? "color-mix(in srgb, var(--color-highlight-soft) 76%, white)"
-                                      : "color-mix(in srgb, var(--color-surface) 82%, white)",
-                                color: "var(--color-text)",
-                                fontSize: 28,
-                                fontWeight: 800,
-                                cursor: showAnswer ? "default" : "pointer",
-                                boxShadow: showAnswer && isCorrect ? "0 12px 26px rgba(78,205,196,.14)" : "0 10px 22px rgba(26,26,46,.04)",
-                              }}
-                            >
-                              {option}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {answerFeedback && (
-                        <div style={{ display: "grid", gap: 10, justifyItems: "center", textAlign: "center" }}>
-                          <div
-                            style={{
-                              fontSize: "var(--text-body)",
-                              color: answerFeedback.status === "correct" ? "#117964" : "var(--color-text-muted)",
-                              fontWeight: 800,
-                            }}
-                          >
-                            {answerFeedback.status === "correct" ? "Correcto" : `Respuesta: ${currentQuestion.item.romaji}`}
-                          </div>
-                          {answerFeedback.status === "wrong" ? (
-                            <button type="button" onClick={moveToNext} className="ds-btn">
-                              {sessionIndex >= sessionQuestionCount - 1 ? "Ver resumen" : "Siguiente"}
-                            </button>
-                          ) : null}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {currentQuestion.mode === "romaji_input" && (
-                    <div style={{ display: "grid", gap: 12, justifyItems: "center" }}>
-                      <input
-                        ref={romajiInputRef}
-                        value={romajiValue}
-                        onChange={(event) => setRomajiValue(event.target.value)}
-                        placeholder="romaji"
-                        autoCapitalize="off"
-                        autoCorrect="off"
-                        spellCheck={false}
-                        inputMode="text"
-                        enterKeyHint="done"
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" && !romajiFeedback) {
-                            const correct = isKanaAnswerCorrect(currentQuestion.item, romajiValue);
-                            setRomajiFeedback({ correct, answer: currentQuestion.item.romaji });
-                            setAnswerFeedback({ status: correct ? "correct" : "wrong", answer: currentQuestion.item.romaji });
-                            recordResult(currentQuestion.item, correct ? "correct" : "wrong");
-                            if (correct) {
-                              setStreak((value) => {
-                                const next = value + 1;
-                                setStreakPulse(next);
-                                return next;
-                              });
-                              advanceTimerRef.current = window.setTimeout(() => {
-                                moveToNext();
-                              }, 650);
-                            } else {
-                              setStreak(0);
-                            }
-                          }
+                {answerFeedback && (
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {answerFeedback.status === "correct" ? (
+                      <div
+                        style={{
+                          textAlign: "center",
+                          fontSize: "var(--text-body)",
+                          color: "#117964",
+                          fontWeight: 800,
                         }}
-                        style={{ width: "100%", maxWidth: 340, textAlign: "center", fontSize: 30, fontWeight: 800, minHeight: 64, borderRadius: 20, border: "1px solid var(--color-border)", background: "color-mix(in srgb, var(--color-surface) 90%, white)" }}
-                      />
-                      <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const correct = isKanaAnswerCorrect(currentQuestion.item, romajiValue);
-                            setRomajiFeedback({ correct, answer: currentQuestion.item.romaji });
-                            setAnswerFeedback({ status: correct ? "correct" : "wrong", answer: currentQuestion.item.romaji });
-                            recordResult(currentQuestion.item, correct ? "correct" : "wrong");
-                            if (correct) {
-                              setStreak((value) => {
-                                const next = value + 1;
-                                setStreakPulse(next);
-                                return next;
-                              });
-                              advanceTimerRef.current = window.setTimeout(() => {
-                                moveToNext();
-                              }, 650);
-                            } else {
-                              setStreak(0);
-                            }
+                      >
+                        Correcto
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          padding: "12px 16px",
+                          borderRadius: 20,
+                          background: "color-mix(in srgb, #E63946 8%, white)",
+                          border: "1px solid color-mix(in srgb, #E63946 18%, transparent)",
+                          display: "grid",
+                          gap: 4,
+                          justifyItems: "start",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: 11,
+                            color: "#E63946",
+                            fontWeight: 800,
+                            textTransform: "uppercase",
+                            letterSpacing: ".08em",
                           }}
-                          disabled={Boolean(romajiFeedback) || normalizeRomaji(romajiValue).length === 0}
-                          className="ds-btn"
                         >
-                          Submit
-                        </button>
-                        {romajiFeedback && (
-                          <button type="button" onClick={moveToNext} className="ds-btn-secondary">
-                            {sessionIndex >= sessionQuestionCount - 1 ? "Ver resumen" : "Siguiente"}
-                          </button>
-                        )}
-                      </div>
-                      {romajiFeedback && (
-                        <div style={{ fontSize: "var(--text-body)", color: romajiFeedback.correct ? "#117964" : "var(--color-text-muted)", fontWeight: 800, textAlign: "center" }}>
-                          {romajiFeedback.correct ? "Correcto" : `Respuesta correcta: ${romajiFeedback.answer}`}
+                          Respuesta correcta
                         </div>
-                      )}
-                    </div>
-                  )}
+                        <div style={{ fontSize: 26, fontWeight: 800, color: "var(--color-text)" }}>
+                          {currentQuestion.item.romaji}
+                        </div>
+                      </div>
+                    )}
+                    {answerFeedback.status === "wrong" && (
+                      <button type="button" onClick={moveToNext} className="ds-btn" style={{ width: "100%" }}>
+                        {sessionIndex >= sessionQuestionCount - 1 ? "Ver resumen" : "Siguiente"}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
-                  {currentQuestion.mode === "handwriting" && (
-                    <div style={{ display: "grid", gap: 10, justifyItems: "center", textAlign: "center" }}>
-                      <KanaHandwritingPad
-                        key={`${currentQuestion.item.id}-${sessionIndex}`}
-                        targetKana={currentQuestion.item.kana}
-                        onRated={(rating: KanaHandwritingRating, score) => {
-                          recordResult(currentQuestion.item, rating, { recognitionScore: score });
-                          if (rating === "correct") {
-                            setAnswerFeedback({ status: "correct", answer: currentQuestion.item.kana });
-                            setStreak((value) => {
-                              const next = value + 1;
-                              setStreakPulse(next);
-                              return next;
-                            });
-                            advanceTimerRef.current = window.setTimeout(() => {
-                              moveToNext();
-                            }, 620);
-                          } else {
-                            setAnswerFeedback({ status: rating === "almost" ? "correct" : "wrong", answer: currentQuestion.item.kana });
-                            setStreak(0);
-                          }
-                        }}
-                      />
-                      {answerFeedback && answerFeedback.status === "wrong" ? (
-                        <button type="button" onClick={moveToNext} className="ds-btn">
-                          {sessionIndex >= sessionQuestionCount - 1 ? "Ver resumen" : "Siguiente"}
-                        </button>
-                      ) : null}
-                    </div>
+            {/* Romaji input */}
+            {currentQuestion.mode === "romaji_input" && (
+              <div style={{ display: "grid", gap: 12, justifyItems: "center" }}>
+                <input
+                  ref={romajiInputRef}
+                  value={romajiValue}
+                  onChange={(event) => setRomajiValue(event.target.value)}
+                  placeholder="romaji"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  inputMode="text"
+                  enterKeyHint="done"
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !romajiFeedback) handleRomajiSubmit();
+                  }}
+                  style={{
+                    width: "100%",
+                    maxWidth: 340,
+                    textAlign: "center",
+                    fontSize: 30,
+                    fontWeight: 800,
+                    minHeight: 64,
+                    borderRadius: 20,
+                    border: "1px solid var(--color-border)",
+                    background: "color-mix(in srgb, var(--color-surface) 90%, white)",
+                    color: "var(--color-text)",
+                  }}
+                />
+                <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={handleRomajiSubmit}
+                    disabled={Boolean(romajiFeedback) || normalizeRomaji(romajiValue).length === 0}
+                    className="ds-btn"
+                  >
+                    Comprobar
+                  </button>
+                  {romajiFeedback && (
+                    <button type="button" onClick={moveToNext} className="ds-btn-secondary">
+                      {sessionIndex >= sessionQuestionCount - 1 ? "Ver resumen" : "Siguiente"}
+                    </button>
                   )}
                 </div>
-              ) : null}
+                {romajiFeedback && (
+                  <div
+                    style={{
+                      fontSize: "var(--text-body)",
+                      color: romajiFeedback.correct ? "#117964" : "var(--color-text-muted)",
+                      fontWeight: 800,
+                      textAlign: "center",
+                    }}
+                  >
+                    {romajiFeedback.correct ? "Correcto" : `Respuesta: ${romajiFeedback.answer}`}
+                  </div>
+                )}
+              </div>
+            )}
 
+            {/* Handwriting */}
+            {currentQuestion.mode === "handwriting" && (
+              <div style={{ display: "grid", gap: 10 }}>
+                <KanaHandwritingPad
+                  key={`${currentQuestion.item.id}-${sessionIndex}`}
+                  targetKana={currentQuestion.item.kana}
+                  onRated={(rating: KanaHandwritingRating, score) => {
+                    setHandwritingRating(rating);
+                    recordResult(currentQuestion.item, rating, { recognitionScore: score });
+                    if (rating === "correct") {
+                      setAnswerFeedback({ status: "correct", answer: currentQuestion.item.kana });
+                      setStreak((value) => {
+                        const next = value + 1;
+                        setStreakPulse(next);
+                        return next;
+                      });
+                      advanceTimerRef.current = window.setTimeout(moveToNext, 700);
+                    } else {
+                      setAnswerFeedback({ status: "wrong", answer: currentQuestion.item.kana });
+                      setStreak(0);
+                    }
+                  }}
+                />
+                {handwritingRating && handwritingRating !== "correct" ? (
+                  <button type="button" onClick={moveToNext} className="ds-btn" style={{ width: "100%" }}>
+                    {sessionIndex >= sessionQuestionCount - 1 ? "Ver resumen" : "Siguiente"}
+                  </button>
+                ) : null}
+              </div>
+            )}
+          </div>
+        ) : null}
+
+        {/* Summary */}
         {sessionFinished ? (
           <div style={{ display: "grid", gap: "var(--space-3)" }}>
             <div
               style={{
                 display: "grid",
-                gap: 14,
-                padding: "18px 18px 16px",
+                gap: 16,
+                padding: "20px 20px 18px",
                 borderRadius: 30,
                 background: "color-mix(in srgb, var(--color-surface) 86%, white)",
                 boxShadow: "0 18px 34px rgba(26,26,46,.05)",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "end", flexWrap: "wrap" }}>
-                <div style={{ display: "grid", gap: 6 }}>
-                  <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
-                    Resultado
-                  </div>
-                  <div style={{ fontSize: "clamp(38px, 12vw, 62px)", lineHeight: 0.92, letterSpacing: "-.05em", fontWeight: 800, color: "var(--color-text)" }}>
-                    {summary.correct} / {session?.questions.length || 0}
-                  </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
+                <div
+                  style={{
+                    fontSize: "clamp(42px, 12vw, 62px)",
+                    lineHeight: 0.9,
+                    letterSpacing: "-.05em",
+                    fontWeight: 800,
+                    color: "var(--color-text)",
+                  }}
+                >
+                  {summary.correct} / {session?.questions.length || 0}
                 </div>
-                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
+                <div
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 800,
+                    color: "var(--color-text-muted)",
+                    paddingBottom: 6,
+                  }}
+                >
                   {Math.round((summary.correct / Math.max(1, session?.questions.length || 1)) * 100)}%
                 </div>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
-                <div style={{ ...subtlePillStyle, textAlign: "center" }}>✓ {summary.correct}</div>
+                <div style={{ ...subtlePillStyle, textAlign: "center", color: summary.correct > 0 ? "#117964" : "var(--color-text-muted)" }}>
+                  ✓ {summary.correct}
+                </div>
                 <div style={{ ...subtlePillStyle, textAlign: "center" }}>～ {summary.almost}</div>
-                <div style={{ ...subtlePillStyle, textAlign: "center" }}>✕ {summary.wrong}</div>
+                <div style={{ ...subtlePillStyle, textAlign: "center", color: summary.wrong > 0 ? "#E63946" : "var(--color-text-muted)" }}>
+                  ✕ {summary.wrong}
+                </div>
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gap: 8,
-                  padding: "12px 14px",
-                  borderRadius: 22,
-                  background: "color-mix(in srgb, var(--color-highlight-soft) 52%, white)",
-                }}
-              >
-                <div style={{ fontSize: "var(--text-label)", color: "var(--color-text-muted)", fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>
-                  Hardest kana
+              {hardestSessionKana.length > 0 && (
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    flexWrap: "wrap",
+                    paddingTop: 12,
+                    borderTop: "1px solid var(--color-border)",
+                    alignItems: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "var(--color-text-muted)",
+                      fontWeight: 800,
+                      textTransform: "uppercase",
+                      letterSpacing: ".08em",
+                      flexShrink: 0,
+                    }}
+                  >
+                    Complicados
+                  </div>
+                  {hardestSessionKana.map((item) => (
+                    <div key={item.id} style={subtlePillStyle}>
+                      {item.kana} · {item.romaji}
+                    </div>
+                  ))}
                 </div>
-                {hardestSessionKana.length > 0 ? (
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {hardestSessionKana.map((item) => (
-                      <div key={item.id} style={subtlePillStyle}>
-                        {item.kana} · {item.romaji}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                    Nada problemático en esta sesión.
-                  </div>
-                )}
-              </div>
+              )}
             </div>
 
             <div style={{ display: "grid", gap: 8 }}>
@@ -1231,12 +1476,17 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                   onClick={() => startSession(repeatCandidates.slice(0, Math.min(repeatCandidates.length, 20)))}
                   className="ds-btn"
                 >
-                  Practicar falladas
+                  Practicar falladas ({repeatCandidates.length})
                 </button>
-              ) : null}
-              <button type="button" onClick={() => startSession()} className="ds-btn-secondary">
-                Otra sesión
-              </button>
+              ) : isLearnSession ? (
+                <button type="button" onClick={startLearnSession} className="ds-btn">
+                  Nueva sesión Learn
+                </button>
+              ) : (
+                <button type="button" onClick={() => startSession()} className="ds-btn">
+                  Otra sesión
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -1245,7 +1495,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                 }}
                 className="ds-btn-ghost"
               >
-                Volver a Aprender Kana
+                Volver
               </button>
             </div>
           </div>

@@ -130,7 +130,7 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
   const [activeStroke, setActiveStroke] = useState<StrokePoint[]>([]);
   const [reviewMode, setReviewMode] = useState(false);
   const [recognition, setRecognition] = useState<RecognitionResult>({ score: 0, status: "empty" });
-  const [canvasHeight, setCanvasHeight] = useState(188);
+  const [canvasHeight, setCanvasHeight] = useState(240);
 
   useEffect(() => {
     setStrokes([]);
@@ -155,7 +155,7 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
   useEffect(() => {
     const updateHeight = () => {
       if (typeof window === "undefined") return;
-      setCanvasHeight(window.innerWidth < 420 ? 160 : 188);
+      setCanvasHeight(window.innerWidth < 380 ? 200 : 240);
     };
     updateHeight();
     window.addEventListener("resize", updateHeight);
@@ -179,12 +179,6 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
     setRecognition(result);
     return result;
   };
-
-  useEffect(() => {
-    if (!reviewMode && strokes.length > 0) {
-      evaluateRecognition();
-    }
-  }, [reviewMode, strokes, targetKana]);
 
   const clearCanvas = () => {
     setStrokes([]);
@@ -245,34 +239,139 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
           border: "1px solid var(--color-border)",
           display: "grid",
           gap: 8,
+          position: "relative",
         }}
       >
-        <canvas
-          ref={canvasRef}
-          aria-label="Área de escritura manual"
-          style={{
-            width: "100%",
-            height: canvasHeight,
-            borderRadius: 16,
-            background: "#FFFDFC",
-            touchAction: "none",
-            display: "block",
-            overscrollBehavior: "contain",
-          }}
-        />
+        <div style={{ position: "relative", borderRadius: 16, overflow: "hidden" }}>
+          <canvas
+            ref={canvasRef}
+            aria-label="Área de escritura manual"
+            style={{
+              width: "100%",
+              height: canvasHeight,
+              background: "#FFFDFC",
+              touchAction: "none",
+              display: "block",
+              overscrollBehavior: "contain",
+            }}
+          />
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
-            {recognition.status === "confident"
-              ? "✓ Se parece bien"
-              : recognition.status === "empty"
-                ? "Traza el kana"
-                : "Reconocimiento aproximado"}
-          </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button type="button" onClick={clearCanvas} className="ds-btn-secondary">
-              Borrar
-            </button>
+          {reviewMode && (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(255, 248, 231, 0.96)",
+                backdropFilter: "blur(6px)",
+                display: "grid",
+                alignContent: "center",
+                justifyItems: "center",
+                gap: 14,
+                padding: "16px 20px",
+                borderRadius: 16,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "clamp(52px, 16vw, 72px)",
+                  lineHeight: 1,
+                  fontWeight: 800,
+                  color: "var(--color-text)",
+                  letterSpacing: "-.02em",
+                }}
+              >
+                {targetKana}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700, textAlign: "center" }}>
+                {recognition.status === "confident"
+                  ? `~${Math.round(recognition.score * 100)}% coincidencia`
+                  : "Evalúate tú mismo"}
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8, width: "100%" }}>
+                <button
+                  type="button"
+                  onClick={() => onRated("wrong", recognition.score)}
+                  style={{
+                    minHeight: 54,
+                    borderRadius: 16,
+                    border: "1px solid color-mix(in srgb, #E63946 28%, transparent)",
+                    background: "color-mix(in srgb, #E63946 10%, white)",
+                    color: "#E63946",
+                    fontSize: 13,
+                    fontWeight: 800,
+                    display: "grid",
+                    gap: 2,
+                    placeItems: "center",
+                    cursor: "pointer",
+                  }}
+                  aria-label="Incorrecto"
+                >
+                  <span style={{ fontSize: 18 }}>✕</span>
+                  <span>Mal</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onRated("almost", recognition.score)}
+                  style={{
+                    minHeight: 54,
+                    borderRadius: 16,
+                    border: "1px solid var(--color-border)",
+                    background: "color-mix(in srgb, var(--color-surface) 80%, white)",
+                    color: "var(--color-text)",
+                    fontSize: 13,
+                    fontWeight: 800,
+                    display: "grid",
+                    gap: 2,
+                    placeItems: "center",
+                    cursor: "pointer",
+                  }}
+                  aria-label="Casi correcto"
+                >
+                  <span style={{ fontSize: 18 }}>～</span>
+                  <span>Casi</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onRated("correct", recognition.score)}
+                  style={{
+                    minHeight: 54,
+                    borderRadius: 16,
+                    border: "1px solid color-mix(in srgb, #4ECDC4 36%, transparent)",
+                    background: "color-mix(in srgb, #4ECDC4 18%, white)",
+                    color: "#117964",
+                    fontSize: 13,
+                    fontWeight: 800,
+                    display: "grid",
+                    gap: 2,
+                    placeItems: "center",
+                    cursor: "pointer",
+                  }}
+                  aria-label="Correcto"
+                >
+                  <span style={{ fontSize: 18 }}>✓</span>
+                  <span>Bien</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {!reviewMode && (
+          <div style={{ display: "grid", gap: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+              <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
+                {recognition.status === "confident"
+                  ? "Se parece bien"
+                  : recognition.status === "empty"
+                    ? "Traza el kana aquí"
+                    : "Reconocimiento aproximado"}
+              </div>
+              {strokes.length > 0 && (
+                <button type="button" onClick={clearCanvas} className="ds-btn-ghost" style={{ fontSize: 12, padding: "6px 12px" }}>
+                  Borrar
+                </button>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => {
@@ -281,54 +380,13 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
               }}
               className="ds-btn"
               disabled={!drawingBounds}
+              style={{ width: "100%", minHeight: 50, opacity: drawingBounds ? 1 : 0.4 }}
             >
-              Submit
+              Revisar
             </button>
           </div>
-        </div>
+        )}
       </div>
-
-      {reviewMode && (
-        <div
-        style={{
-            borderRadius: 22,
-            background: "color-mix(in srgb, var(--color-surface-muted) 70%, white)",
-            border: "1px solid var(--color-border)",
-            padding: 12,
-            display: "grid",
-            gap: 10,
-          }}
-        >
-          <div style={{ display: "grid", gap: 4 }}>
-            <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em" }}>
-              Objetivo
-            </div>
-            <div style={{ fontSize: 34, lineHeight: 1, fontWeight: 800, color: "var(--color-text)" }}>{targetKana}</div>
-          </div>
-
-          <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
-            {recognition.status === "confident"
-              ? `Reconocimiento aproximado: ${Math.round(recognition.score * 100)}%`
-              : "La app no está segura. Usa tu criterio para evaluarte."}
-          </div>
-
-          <div style={{ fontSize: 14, color: "var(--color-text)", fontWeight: 800 }}>
-            ¿Lo hiciste bien?
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
-            <button type="button" onClick={() => onRated("wrong", recognition.score)} className="ds-btn-secondary" aria-label="Incorrecto">
-              ✕
-            </button>
-            <button type="button" onClick={() => onRated("almost", recognition.score)} className="ds-btn-secondary" aria-label="Casi correcto">
-              ～
-            </button>
-            <button type="button" onClick={() => onRated("correct", recognition.score)} className="ds-btn" aria-label="Correcto">
-              ✓
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
