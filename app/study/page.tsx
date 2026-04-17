@@ -6940,14 +6940,14 @@ function StudyContent() {
       style={{
         minHeight: "100vh",
         background: "var(--color-bg)",
-        padding: "var(--page-padding)",
+        padding: activeTab === "learnkana" ? 0 : "var(--page-padding)",
         fontFamily: `var(--font-study), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif`,
       }}
     >
-      <div className="ds-container" style={{ display: "grid", gap: "var(--space-4)" }}>
-        <AppTopNav primary="study" tone="study" />
+      <div className={activeTab === "learnkana" ? "" : "ds-container"} style={{ display: "grid", gap: activeTab === "learnkana" ? 0 : "var(--space-4)" }}>
+        {activeTab !== "learnkana" && <AppTopNav primary="study" tone="study" />}
 
-        {showHub ? (
+        {activeTab !== "learnkana" && (showHub ? (
           <section style={{ display: "grid", gap: "var(--space-1)", padding: "calc(var(--space-5) + 4px) 0 var(--space-2)", scrollMarginTop: sectionScrollMarginTop }}>
             <div style={{ fontSize: "clamp(48px, 11vw, 82px)", lineHeight: 0.9, letterSpacing: "-.065em", fontWeight: 800, color: "var(--color-text)" }}>
               Study
@@ -6959,9 +6959,9 @@ function StudyContent() {
               {pageTitle}
             </div>
           </section>
-        )}
+        ))}
 
-        {!showHub && (
+        {activeTab !== "learnkana" && !showHub && (
           <section
             style={{
               display: "grid",
