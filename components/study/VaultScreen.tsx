@@ -24,9 +24,10 @@ type FilterKey = "all" | "mastered" | "learning" | "new";
 type VaultScreenProps = {
   userKey: string;
   onTabChange: (tab: DSTab) => void;
+  onMenu?: () => void;
 };
 
-export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) {
+export default function VaultScreen({ userKey, onTabChange, onMenu }: VaultScreenProps) {
   const [filter, setFilter] = useState<FilterKey>("all");
 
   const basicHiragana = useMemo(() => filterKanaItemsForSelection("hiragana", "basic"), []);
@@ -71,7 +72,7 @@ export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) 
   return (
     <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
       <div style={{ height: 54 }} />
-      <TopBar />
+      <TopBar onMenu={onMenu} />
 
       <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
         <ScreenTitle

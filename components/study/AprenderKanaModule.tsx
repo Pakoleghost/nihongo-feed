@@ -32,7 +32,8 @@ type AprenderKanaModuleProps = {
   userKey: string;
   onRecordActivity?: (detail?: string) => void;
   initialMode?: "learn" | null;
-  onTabChange?: (tab: "home" | "learn" | "review" | "practice" | "vault") => void;
+  onTabChange?: (tab: "home" | "learn" | "review" | "practice" | "vault" | "resources") => void;
+  onMenu?: () => void;
 };
 
 type KanaSessionQuestion = {
@@ -492,7 +493,7 @@ const KATAKANA_CHART_ROWS: Array<{ label: string; chars: Array<string | null> }>
   { label: "n", chars: ["ン", null, null, null, null] },
 ];
 
-export default function AprenderKanaModule({ userKey, onRecordActivity, initialMode = null, onTabChange }: AprenderKanaModuleProps) {
+export default function AprenderKanaModule({ userKey, onRecordActivity, initialMode = null, onTabChange, onMenu }: AprenderKanaModuleProps) {
   const [screen, setScreen] = useState<"home" | "table">("home");
   const [tableScript, setTableScript] = useState<KanaScript>("hiragana");
   const [tableFilter, setTableFilter] = useState<"basic" | "dakuten" | "handakuten" | "yoon" | "mixed">("basic");
@@ -927,6 +928,19 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
           {/* TopBar */}
           <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 20, height: 54, background: DS.bg, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", borderBottom: `1px solid ${DS.line}` }}>
+            <button
+                type="button"
+                onClick={onMenu}
+                style={{
+                  width: 38, height: 38, borderRadius: 12,
+                  background: "transparent", border: "none", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
+                }}
+              >
+                <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
+                  <path d="M1 1h16M1 6h16M1 11h10" stroke={DS.ink} strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </button>
             <div style={{ fontFamily: DS.fontKana, fontSize: 20, fontWeight: 500, color: DS.ink, letterSpacing: 1 }}>禅</div>
             <button type="button" onClick={() => setScreen("table")} style={{ fontFamily: DS.fontHead, fontSize: 11, fontWeight: 600, color: DS.inkSoft, background: DS.surfaceAlt, border: `1px solid ${DS.line}`, borderRadius: 10, padding: "5px 12px", cursor: "pointer" }}>
               Tabla de kana
