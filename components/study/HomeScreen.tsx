@@ -28,8 +28,6 @@ type HomeScreenProps = {
 export default function HomeScreen({
   userKey,
   onTabChange,
-  weeklyActiveDays = 0,
-  dueCount = 0,
 }: HomeScreenProps) {
   const hour = new Date().getHours();
   const greeting =
@@ -55,7 +53,6 @@ export default function HomeScreen({
     [basicHiragana],
   );
 
-  // Current batch: first group where not all items are stable (level >= 3)
   const batchIdx = useMemo(() => {
     for (let i = 0; i < HIRAGANA_BASIC_GROUPS.length; i++) {
       const stable = HIRAGANA_BASIC_GROUPS[i].every((k) => {
@@ -70,7 +67,10 @@ export default function HomeScreen({
   }, [kanaToItem, progress]);
 
   const heroKana = HIRAGANA_BASIC_GROUPS[batchIdx]?.[0] ?? "あ";
-  const progressPct = basicHiragana.length > 0 ? Math.round((stateCounts.fijado / basicHiragana.length) * 100) : 0;
+  const hasPending = kanaDueCount > 0;
+  const progressPct = basicHiragana.length > 0
+    ? Math.round((stateCounts.fijado / basicHiragana.length) * 100)
+    : 0;
 
   return (
     <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
@@ -91,44 +91,47 @@ export default function HomeScreen({
           }}>¿Qué hacemos hoy?</div>
         </div>
 
-        {/* Primary action card */}
+        {/* Primary Action Card */}
         <div style={{ padding: "20px 24px 0" }}>
           <div style={{
-            borderRadius: 28, background: DS.surfaceAlt, padding: "22px 22px",
+            borderRadius: 48, background: DS.dark,
+            padding: "28px 24px",
             position: "relative", overflow: "hidden",
-            boxShadow: "0 8px 32px rgba(26,26,46,0.04)",
           }}>
-            {/* Ghost kana decoration */}
             <div aria-hidden="true" style={{
-              position: "absolute", right: -14, top: -10,
-              fontFamily: DS.fontKana, fontSize: 120, color: DS.ink,
-              opacity: 0.05, lineHeight: 1, userSelect: "none", pointerEvents: "none",
+              position: "absolute", right: -10, top: -14,
+              fontFamily: DS.fontKana, fontSize: 140,
+              color: "#ffffff", opacity: 0.04,
+              lineHeight: 1, userSelect: "none", pointerEvents: "none",
             }}>{heroKana}</div>
 
             <div style={{ position: "relative" }}>
               <div style={{
                 fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600,
-                letterSpacing: "0.2em", textTransform: "uppercase", color: DS.accent,
+                letterSpacing: "0.2em", textTransform: "uppercase",
+                color: hasPending ? DS.accent : DS.teal,
                 marginBottom: 6,
-              }}>Continuar</div>
+              }}>{hasPending ? "Pendientes" : "Continuar"}</div>
               <div style={{
-                fontFamily: DS.fontHead, fontSize: 20, fontWeight: 700,
-                color: DS.ink, letterSpacing: -0.4, marginBottom: 4,
+                fontFamily: DS.fontHead, fontSize: 22, fontWeight: 700,
+                color: "#ffffff", letterSpacing: -0.5, marginBottom: 4,
               }}>Hiragana básico</div>
               <div style={{
-                fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft,
-                marginBottom: 16, lineHeight: 1.4,
+                fontFamily: DS.fontBody, fontSize: 13,
+                color: "rgba(255,255,255,0.50)",
+                marginBottom: 22, lineHeight: 1.4,
               }}>
                 {stateCounts.fijado} fijados · {stateCounts.aprendiendo + stateCounts.en_repaso} en curso · {stateCounts.nuevo} nuevos
               </div>
 
-              {/* Teal progress bar */}
-              <div style={{ height: 6, borderRadius: 6, background: DS.card, overflow: "hidden", marginBottom: 18 }}>
+              <div style={{ height: 5, borderRadius: 5, background: "rgba(255,255,255,0.10)", overflow: "hidden", marginBottom: 22 }}>
                 <div style={{
                   width: `${progressPct}%`, height: "100%",
-                  background: `linear-gradient(to right, ${DS.teal}, ${DS.tealDark})`,
-                  borderRadius: 6, transition: "width 0.5s ease",
-                  minWidth: stateCounts.fijado > 0 ? 16 : 0,
+                  background: hasPending
+                    ? `linear-gradient(to right, ${DS.accent}, #c42b38)`
+                    : `linear-gradient(to right, ${DS.teal}, ${DS.tealDark})`,
+                  borderRadius: 5, transition: "width 0.5s ease",
+                  minWidth: stateCounts.fijado > 0 ? 12 : 0,
                 }} />
               </div>
 
@@ -137,41 +140,59 @@ export default function HomeScreen({
                 onClick={() => onTabChange("learn")}
                 style={{
                   width: "100%", padding: "16px",
-                  background: `linear-gradient(135deg, ${DS.accent} 0%, #c42b38 100%)`,
-                  color: "#fff", border: "none", borderRadius: 999,
+                  background: hasPending
+                    ? `linear-gradient(135deg, ${DS.accent} 0%, #c42b38 100%)`
+                    : `linear-gradient(135deg, ${DS.teal} 0%, ${DS.tealDark} 100%)`,
+                  color: hasPending ? "#ffffff" : DS.dark,
+                  border: "none", borderRadius: 999,
                   fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700,
                   cursor: "pointer", letterSpacing: -0.2,
-                  boxShadow: "0 8px 20px rgba(230,57,70,0.25)",
+                  boxShadow: hasPending
+                    ? "0 8px 20px rgba(230,57,70,0.35)"
+                    : "0 8px 20px rgba(78,205,196,0.35)",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 }}
               >
-                Empezar sesión
+                {hasPending ? "Repasar pendientes" : "Continuar aprendiendo"}
                 <svg width="16" height="10" viewBox="0 0 18 12" fill="none">
-                  <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Stats row */}
-        <div style={{ padding: "20px 24px 0" }}>
-          <div style={{
-            display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10,
-          }}>
-            {[
-              { label: "Por repasar", value: kanaDueCount, color: kanaDueCount > 0 ? DS.accent : DS.inkFaint },
-              { label: "Fijados", value: stateCounts.fijado, color: DS.tealDark },
-              { label: "Días activos", value: weeklyActiveDays, color: DS.ink },
-            ].map(({ label, value, color }) => (
+        {/* Stats row — Bento */}
+        <div style={{ padding: "14px 24px 0" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+            {([
+              {
+                label: "Por repasar",
+                value: kanaDueCount,
+                color: kanaDueCount > 0 ? DS.accent : DS.inkFaint,
+                bg: kanaDueCount > 0 ? "rgba(230,57,70,0.06)" : DS.card,
+              },
+              {
+                label: "Aprendiendo",
+                value: stateCounts.aprendiendo,
+                color: DS.teal,
+                bg: DS.card,
+              },
+              {
+                label: "Fijados",
+                value: stateCounts.fijado,
+                color: DS.tealDark,
+                bg: stateCounts.fijado > 0 ? "rgba(78,205,196,0.08)" : DS.card,
+              },
+            ] as const).map(({ label, value, color, bg }) => (
               <div key={label} style={{
-                padding: "16px 12px", borderRadius: 20,
-                background: DS.card,
+                padding: "18px 12px", borderRadius: 28,
+                background: bg,
                 boxShadow: "0 4px 16px rgba(26,26,46,0.04)",
                 textAlign: "center",
               }}>
                 <div style={{
-                  fontFamily: DS.fontHead, fontSize: 24, fontWeight: 800,
+                  fontFamily: DS.fontHead, fontSize: 28, fontWeight: 800,
                   color, letterSpacing: -0.5,
                 }}>{value}</div>
                 <div style={{
@@ -217,7 +238,6 @@ export default function HomeScreen({
               style={{
                 display: "flex", alignItems: "center", gap: 16,
                 padding: "16px 0",
-                borderBottom: i < arr.length - 1 ? `1px solid ${DS.line}` : "none",
                 background: "none", border: "none",
                 borderBottomStyle: "solid",
                 borderBottomWidth: i < arr.length - 1 ? 1 : 0,
