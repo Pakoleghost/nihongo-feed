@@ -1659,7 +1659,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                 Salir
               </button>
             </div>
-          </div>
         ) : null}
 
         {/* Summary — Custom Practice */}
