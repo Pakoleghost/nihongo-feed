@@ -814,9 +814,8 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   const TAB_BAR_ITEMS = [
     { k: "home" as const, label: "Inicio", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10l8-7 8 7v8a1.5 1.5 0 01-1.5 1.5H13v-6h-4v6H4.5A1.5 1.5 0 013 18v-8z" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/></svg>) },
     { k: "learn" as const, label: "Aprender", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 5.5a2 2 0 012-2h5v15H5a2 2 0 01-2-2v-11zM12 3.5h5a2 2 0 012 2v11a2 2 0 01-2 2h-5v-15z" stroke={c} strokeWidth="1.5"/></svg>) },
-    { k: "review" as const, label: "Repasar", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M18 11a7 7 0 11-2.05-4.95M18 3v4h-4" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>) },
     { k: "practice" as const, label: "Practicar", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M6 3v16M10 5v12M14 7v8M18 9v4" stroke={c} strokeWidth="1.5" strokeLinecap="round"/></svg>) },
-    { k: "vault" as const, label: "Biblioteca", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="13" rx="2" stroke={c} strokeWidth="1.5"/><path d="M3 8h16M8 5V3.5h6V5" stroke={c} strokeWidth="1.5" strokeLinecap="round"/></svg>) },
+    { k: "recursos" as const, label: "Recursos", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 4h6v14H4zM12 4h6v14h-6z" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/></svg>) },
   ] as const;
 
   const renderTabBar = () => (
