@@ -6985,11 +6985,11 @@ function StudyContent() {
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
               <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              Practice
+              Practicar
             </button>
           </div>
           <div style={{ padding: "16px 24px 24px" }}>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Kana Sprint</div>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Sprint de Kana</div>
           </div>
           <div style={{ padding: "0 24px 24px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -7010,10 +7010,10 @@ function StudyContent() {
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 16 }}>
               <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>
-                Best: <span style={{ color: DS.ink, fontWeight: 600 }}>{kanaBestByMode[kanaSet] || 0}</span> · Resets {weeklyResetLabel || "..."}
+                Mejor: <span style={{ color: DS.ink, fontWeight: 600 }}>{kanaBestByMode[kanaSet] || 0}</span> · Se reinicia {weeklyResetLabel || "..."}
               </div>
               <button type="button" onClick={startKana} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 14, padding: "12px 24px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
-                Start Sprint
+                Empezar sprint
               </button>
             </div>
           </div>
@@ -7029,7 +7029,7 @@ function StudyContent() {
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
               <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              Practice
+              Practicar
             </button>
           </div>
           <div style={{ padding: "16px 24px 24px" }}>
@@ -7050,10 +7050,10 @@ function StudyContent() {
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 16 }}>
               <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>
-                Best: <span style={{ color: DS.ink, fontWeight: 600 }}>{vkBestByBucket[vkBucket] || 0}</span> · Resets {vkResetLabel || "..."}
+                Mejor: <span style={{ color: DS.ink, fontWeight: 600 }}>{vkBestByBucket[vkBucket] || 0}</span> · Se reinicia {vkResetLabel || "..."}
               </div>
               <button type="button" onClick={startVkSprint} style={{ background: DS.ink, color: DS.bg, border: "none", borderRadius: 14, padding: "12px 24px", fontFamily: DS.fontHead, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
-                Start Sprint
+                Empezar sprint
               </button>
             </div>
           </div>
@@ -7065,7 +7065,7 @@ function StudyContent() {
         <PracticeShell
           open={activeTab === "practice" && practiceSubView === "sprint" && kanaSessionOpen}
           visible={kanaSessionOpen}
-          title="Kana Sprint"
+          title="Sprint de Kana"
           subtitle={`${kanaSet === "mixed" ? "Mixto" : kanaSet === "hiragana" ? "Hiragana" : "Katakana"} · ${kanaTime}s · ${kanaScore} pts`}
           onClose={closeKanaSession}
         >
@@ -7111,7 +7111,7 @@ function StudyContent() {
         <PracticeShell
           open={activeTab === "practice" && practiceSubView === "vocabkanji" && vkSessionOpen}
           visible={vkSessionOpen}
-          title="Vocab + Kanji Sprint"
+          title="Vocab + Kanji"
           subtitle={`${vkBucketConfig.label} · ${vkTime}s · ${vkScore} pts`}
           onClose={closeVkSession}
         >
@@ -7161,11 +7161,11 @@ function StudyContent() {
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
               <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              Practice
+              Practicar
             </button>
           </div>
           <div style={{ padding: "16px 24px 24px" }}>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Flashcards</div>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Tarjetas</div>
           </div>
           <div style={{ padding: "0 24px" }}>
             {(flashLessonFolder !== null || Boolean(activeFlashSet?.isCustom)) && (
@@ -7570,7 +7570,7 @@ function StudyContent() {
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
               <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              Practice
+              Practicar
             </button>
           </div>
           <div style={{ padding: "16px 24px 24px" }}>

@@ -70,10 +70,10 @@ export default function ReviewScreen({ userKey, onTabChange, onStartReview }: Re
             }}>{dueCount}</div>
             <div style={{ paddingBottom: 8 }}>
               <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600, color: DS.ink }}>
-                due now
+                por repasar
               </div>
               <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 2 }}>
-                {dueCount === 0 ? "All caught up!" : `~${estMinutes} min at your pace`}
+                {dueCount === 0 ? "¡Al día!" : `~${estMinutes} min a tu ritmo`}
               </div>
             </div>
           </div>
@@ -91,7 +91,7 @@ export default function ReviewScreen({ userKey, onTabChange, onStartReview }: Re
               fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600,
             }}
           >
-            <span>{dueCount === 0 ? "Nothing due right now" : "Start review"}</span>
+            <span>{dueCount === 0 ? "Nada por repasar" : "Empezar repaso"}</span>
             {dueCount > 0 && (
               <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
                 <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke={DS.bg} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -103,7 +103,7 @@ export default function ReviewScreen({ userKey, onTabChange, onStartReview }: Re
         {/* Due now list */}
         {dueNow.length > 0 && (
           <div style={{ padding: "36px 24px 0" }}>
-            <Eyebrow>Due now</Eyebrow>
+            <Eyebrow>Por repasar</Eyebrow>
             <div style={{ marginTop: 14 }}>
               {dueNow.slice(0, 8).map((q, i) => (
                 <div key={q.kana + i} style={{
@@ -121,7 +121,7 @@ export default function ReviewScreen({ userKey, onTabChange, onStartReview }: Re
                       color: DS.ink, letterSpacing: "0.14em", textTransform: "uppercase",
                     }}>{q.romaji}</div>
                     <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkSoft, marginTop: 2 }}>
-                      {["locked", "new", "learning", "reviewing", "mastered"][q.level]}
+                      {["bloqueado", "nuevo", "aprendiendo", "repasando", "dominado"][q.level]}
                     </div>
                   </div>
                   <LevelPips level={q.level} size="lg" />
@@ -139,7 +139,7 @@ export default function ReviewScreen({ userKey, onTabChange, onStartReview }: Re
         {/* Later list */}
         {later.length > 0 && (
           <div style={{ padding: "32px 24px 0" }}>
-            <Eyebrow>Later</Eyebrow>
+            <Eyebrow>Más tarde</Eyebrow>
             <div style={{ marginTop: 14 }}>
               {later.map((q, i) => (
                 <div key={q.kana + i} style={{
@@ -171,10 +171,10 @@ export default function ReviewScreen({ userKey, onTabChange, onStartReview }: Re
           <div style={{ padding: "40px 24px 0", textAlign: "center" }}>
             <div style={{ fontFamily: DS.fontKana, fontSize: 48, color: DS.inkFaint }}>✓</div>
             <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600, color: DS.inkSoft, marginTop: 12 }}>
-              No kana to review yet
+              Sin kana para repasar aún
             </div>
             <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkFaint, marginTop: 6 }}>
-              Start learning to build your review queue
+              Empieza a aprender para llenar tu cola de repaso
             </div>
           </div>
         )}

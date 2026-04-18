@@ -13,10 +13,10 @@ type PracticeMode = {
 };
 
 const MODES: PracticeMode[] = [
-  { key: "sprint",     title: "Kana Sprint",    kana: "速", desc: "Read as many kana as you can in 60 seconds.", tag: "Speed" },
-  { key: "flashcards", title: "Flashcards",      kana: "札", desc: "Classic front-back drill with self-rating.", tag: "Recall" },
-  { key: "vocabkanji", title: "Vocab + Kanji",   kana: "語", desc: "Sprint through vocabulary and kanji readings.", tag: "Vocab" },
-  { key: "exam",       title: "Repaso mixto",    kana: "復", desc: "Mixed grammar, vocab, and kanji review quiz.", tag: "Mixed" },
+  { key: "sprint",     title: "Sprint de Kana",  kana: "速", desc: "Lee todos los kana que puedas en 60 segundos.", tag: "Velocidad" },
+  { key: "flashcards", title: "Tarjetas",         kana: "札", desc: "Repaso clásico con autoevaluación.", tag: "Memoria" },
+  { key: "vocabkanji", title: "Vocab + Kanji",    kana: "語", desc: "Practica vocabulario y lecturas de kanji.", tag: "Vocab" },
+  { key: "exam",       title: "Repaso mixto",     kana: "復", desc: "Repaso combinado de gramática, vocab y kanji.", tag: "Mixto" },
 ];
 
 type PracticeIndexScreenProps = {
@@ -43,7 +43,7 @@ export default function PracticeIndexScreen({
             fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft,
             lineHeight: 1.5, maxWidth: 280,
           }}>
-            Free-form drills that don't affect your SRS queue. Pick a mode and go.
+            Práctica libre que no afecta tu cola SRS. Elige un modo y empieza.
           </div>
         </div>
 
@@ -95,7 +95,7 @@ export default function PracticeIndexScreen({
         {/* Recent */}
         {recentActivity.length > 0 && (
           <div style={{ padding: "32px 24px 0" }}>
-            <Eyebrow>Recent</Eyebrow>
+            <Eyebrow>Reciente</Eyebrow>
             <div style={{ marginTop: 14 }}>
               {recentActivity.map((r, i) => (
                 <div key={i} style={{

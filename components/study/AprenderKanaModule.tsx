@@ -3,6 +3,7 @@
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import KanaHandwritingPad, { type KanaHandwritingRating } from "@/components/study/KanaHandwritingPad";
+import KanaReadingSession, { type KanaSessionFeedback, type KanaSessionSummaryData } from "@/components/study/KanaReadingSession";
 import PracticeShell, { PracticeStageCard } from "@/components/study/PracticeShell";
 import StudySelectorGroup from "@/components/study/StudySelectorGroup";
 import {
@@ -63,14 +64,14 @@ type KanaSelectableSet = "basic" | "dakuten" | "handakuten" | "yoon";
 type KanaScopeKey = `${KanaScript}:${KanaSelectableSet}`;
 
 const KANA_SCOPE_ROWS: Array<{ set: KanaSelectableSet; label: string }> = [
-  { set: "basic", label: "Basic" },
+  { set: "basic", label: "Básico" },
   { set: "dakuten", label: "Dakuten" },
   { set: "handakuten", label: "Handakuten" },
   { set: "yoon", label: "Yōon" },
 ];
 
 const KANA_SCOPE_LABELS: Record<KanaSelectableSet, string> = {
-  basic: "Basic",
+  basic: "Básico",
   dakuten: "Dakuten",
   handakuten: "Handakuten",
   yoon: "Yōon",
@@ -279,8 +280,8 @@ function buildLearnSession(hiraganaBasic: KanaItem[], progress: KanaProgressMap)
   const ranked = buildKanaSessionItems(pool, progress, sessionCount);
   const items = shuffle(ranked);
   const fallbackPool = uniqueKanaItems([...hiraganaBasic, ...unlockedItems]);
-  const questions = buildQuestionsForItems(items, fallbackPool, ["multiple_choice"]);
-  return { setKey: "learn", modes: ["multiple_choice"] as KanaPracticeMode[], count: sessionCount, questions };
+  const questions = buildQuestionsForItems(items, fallbackPool, ["romaji_input"]);
+  return { setKey: "learn", modes: ["romaji_input"] as KanaPracticeMode[], count: sessionCount, questions };
 }
 
 // ─── Kana System design tokens (light theme) ─────────────────────────────────
@@ -341,6 +342,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   const [sessionStartBatchIdx, setSessionStartBatchIdx] = useState(0);
   const [streak, setStreak] = useState(0);
   const [streakPulse, setStreakPulse] = useState(0);
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
   const romajiInputRef = useRef<HTMLInputElement | null>(null);
   const advanceTimerRef = useRef<number | null>(null);
   const autoStartedLearnRef = useRef(false);
@@ -493,6 +495,21 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     return { masteredInSession, reviewedCount, newPracticed };
   }, [sessionResults, sessionNewItemIds, sessionStartBatchIdx, basicHiragana]);
 
+  const learnSessionSummaryData = useMemo((): KanaSessionSummaryData => {
+    const correct = sessionResults.filter((r) => r.rating === "correct").length;
+    const wrong = sessionResults.filter((r) => r.rating !== "correct").length;
+    const total = session?.questions.length ?? 0;
+    const durationMs = sessionStartTime ? Date.now() - sessionStartTime : 0;
+    const newlySet = learnEndSummary.masteredInSession.map((item) => ({ kana: item.kana, romaji: item.romaji }));
+    const nextBatch = learnProgressContext.nextBatchKana;
+    return {
+      correct, wrong, total, durationMs, streak,
+      newlySet,
+      upNextLabel: nextBatch ? "Siguiente fila" : undefined,
+      upNextKana: nextBatch ? nextBatch.split(" ")[0] : undefined,
+    };
+  }, [sessionResults, session, sessionStartTime, streak, learnEndSummary, learnProgressContext]);
+
   const subtlePillStyle: CSSProperties = {
     borderRadius: 999,
     padding: "7px 10px",
@@ -579,6 +596,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
       setHandwritingRating(null);
       setSessionNewItemIds(new Set());
       setStreak(0);
+      setSessionStartTime(null);
     }, 220);
   };
 
@@ -592,6 +610,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     setAnswerFeedback(null);
     setHandwritingRating(null);
     setStreak(0);
+    setSessionStartTime(Date.now());
     setSetupError(null);
     onRecordActivity?.(activityLabel);
   };
@@ -638,11 +657,11 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   }, [initialMode, progressReady, session]);
 
   const TAB_BAR_ITEMS = [
-    { k: "home" as const, label: "Home", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10l8-7 8 7v8a1.5 1.5 0 01-1.5 1.5H13v-6h-4v6H4.5A1.5 1.5 0 013 18v-8z" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/></svg>) },
-    { k: "learn" as const, label: "Learn", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 5.5a2 2 0 012-2h5v15H5a2 2 0 01-2-2v-11zM12 3.5h5a2 2 0 012 2v11a2 2 0 01-2 2h-5v-15z" stroke={c} strokeWidth="1.5"/></svg>) },
-    { k: "review" as const, label: "Review", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M18 11a7 7 0 11-2.05-4.95M18 3v4h-4" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>) },
-    { k: "practice" as const, label: "Practice", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M6 3v16M10 5v12M14 7v8M18 9v4" stroke={c} strokeWidth="1.5" strokeLinecap="round"/></svg>) },
-    { k: "vault" as const, label: "Vault", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="13" rx="2" stroke={c} strokeWidth="1.5"/><path d="M3 8h16M8 5V3.5h6V5" stroke={c} strokeWidth="1.5" strokeLinecap="round"/></svg>) },
+    { k: "home" as const, label: "Inicio", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10l8-7 8 7v8a1.5 1.5 0 01-1.5 1.5H13v-6h-4v6H4.5A1.5 1.5 0 013 18v-8z" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/></svg>) },
+    { k: "learn" as const, label: "Aprender", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 5.5a2 2 0 012-2h5v15H5a2 2 0 01-2-2v-11zM12 3.5h5a2 2 0 012 2v11a2 2 0 01-2 2h-5v-15z" stroke={c} strokeWidth="1.5"/></svg>) },
+    { k: "review" as const, label: "Repasar", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M18 11a7 7 0 11-2.05-4.95M18 3v4h-4" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>) },
+    { k: "practice" as const, label: "Practicar", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M6 3v16M10 5v12M14 7v8M18 9v4" stroke={c} strokeWidth="1.5" strokeLinecap="round"/></svg>) },
+    { k: "vault" as const, label: "Biblioteca", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="13" rx="2" stroke={c} strokeWidth="1.5"/><path d="M3 8h16M8 5V3.5h6V5" stroke={c} strokeWidth="1.5" strokeLinecap="round"/></svg>) },
   ] as const;
 
   const renderTabBar = () => (
@@ -735,6 +754,27 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     }
   };
 
+  const handleLearnAnswer = (value: string) => {
+    if (romajiFeedback || !currentQuestion) return;
+    const correct = isKanaAnswerCorrect(currentQuestion.item, value);
+    setRomajiValue(value);
+    setRomajiFeedback({ correct, answer: currentQuestion.item.romaji });
+    recordResult(currentQuestion.item, correct ? "correct" : "wrong");
+    if (correct) {
+      setStreak((v) => { const n = v + 1; setStreakPulse(n); return n; });
+    } else {
+      setStreak(0);
+    }
+  };
+
+  const handleLearnDontKnow = () => {
+    if (romajiFeedback || !currentQuestion) return;
+    setRomajiValue("");
+    setRomajiFeedback({ correct: false, answer: currentQuestion.item.romaji });
+    recordResult(currentQuestion.item, "wrong");
+    setStreak(0);
+  };
+
   return (
     <div style={{ display: "grid", gap: "var(--space-3)" }}>
       {/* ── HOME — Kana System design ── */}
@@ -761,11 +801,11 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
             <div style={{ padding: "0 24px 20px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 700, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>Learn</div>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 700, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>Aprender</div>
                 </div>
                 <div style={{ textAlign: "right", paddingTop: 4 }}>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>
-                    Progress
+                    Progreso
                   </div>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 20, fontWeight: 600, color: DS.ink, marginTop: 4, letterSpacing: -0.3 }}>
                     {learnProgressContext.learnedCount}
@@ -787,13 +827,13 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               <div style={{ padding: "28px 24px 0" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.accent }}>
-                    {learnProgressContext.freshCount > 0 ? "Practicing now" : "Next"}
+                    {learnProgressContext.freshCount > 0 ? "Practicando ahora" : "Siguiente"}
                     {" · "}
                     {(["A", "K", "S", "T", "N", "H", "M", "Y", "R", "W"])[learnProgressContext.batchIdx] ?? ""}
-                    {"-row"}
+                    {"-fila"}
                   </div>
                   <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkSoft, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                    {learnPreviewKana.length} of {(HIRAGANA_BASIC_GROUPS[learnProgressContext.batchIdx] ?? []).length}
+                    {learnPreviewKana.length} de {(HIRAGANA_BASIC_GROUPS[learnProgressContext.batchIdx] ?? []).length}
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
@@ -836,13 +876,13 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               <div style={{ background: DS.card, borderRadius: 24, padding: "20px 22px", display: "flex", alignItems: "center", gap: 18, border: `1px solid ${DS.line}` }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>
-                    Today's queue
+                    Cola de hoy
                   </div>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginTop: 8 }}>
                     {learnProgressContext.reviewCount > 0 && (
                       <div>
                         <span style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.5 }}>{learnProgressContext.reviewCount}</span>
-                        <span style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginLeft: 6 }}>due</span>
+                        <span style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginLeft: 6 }}>por repasar</span>
                       </div>
                     )}
                     {learnProgressContext.reviewCount > 0 && learnProgressContext.freshCount > 0 && (
@@ -851,11 +891,11 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                     {learnProgressContext.freshCount > 0 && (
                       <div>
                         <span style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.5 }}>{learnProgressContext.freshCount}</span>
-                        <span style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginLeft: 6 }}>new</span>
+                        <span style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginLeft: 6 }}>nuevos</span>
                       </div>
                     )}
                     {learnProgressContext.reviewCount === 0 && learnProgressContext.freshCount === 0 && (
-                      <span style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>Guided review</span>
+                      <span style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>Repaso guiado</span>
                     )}
                   </div>
                 </div>
@@ -882,11 +922,11 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                   <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600, color: DS.ink, marginTop: 2 }}>
                     <span style={{ color: DS.accent }}>{learnProgressContext.learnedCount}</span>
                     <span style={{ color: DS.inkFaint }}> / {learnProgressContext.totalCount} </span>
-                    <span style={{ color: DS.inkSoft, fontSize: 12, fontWeight: 500 }}>mastered</span>
+                    <span style={{ color: DS.inkSoft, fontSize: 12, fontWeight: 500 }}>dominados</span>
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 10, alignItems: "center", fontFamily: DS.fontBody, fontSize: 10, color: DS.inkSoft }}>
-                  {([{ c: DS.accent, l: "set" }, { c: DS.accentSoft, l: "learning" }, { c: DS.surfaceAlt, l: "new" }] as const).map(({ c, l }) => (
+                  {([{ c: DS.accent, l: "fijado" }, { c: DS.accentSoft, l: "aprendiendo" }, { c: DS.surfaceAlt, l: "nuevo" }] as const).map(({ c, l }) => (
                     <div key={l} style={{ display: "flex", alignItems: "center", gap: 4 }}>
                       <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />{l}
                     </div>
@@ -951,7 +991,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
           <StudySelectorGroup
             options={[
-              { key: "basic", label: "Basic" },
+              { key: "basic", label: "Básico" },
               { key: "dakuten", label: "Dakuten" },
               { key: "handakuten", label: "Handakuten" },
               { key: "yoon", label: "Yōon" },
@@ -1052,7 +1092,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               }}
             >
               <div style={{ fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>
-                Custom Practice
+                Práctica personalizada
               </div>
               <button type="button" onClick={() => setScreen("home")} className="ds-btn-ghost">
                 Volver
@@ -1063,7 +1103,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               options={[
                 { key: "multiple_choice", label: "Opciones" },
                 { key: "romaji_input", label: "Romaji" },
-                { key: "handwriting", label: "Manual" },
+                { key: "handwriting", label: "Escritura" },
               ]}
               values={practiceModes}
               multiple
@@ -1325,11 +1365,35 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
         </div>
       )}
 
+      {/* ── LEARN SESSION (KanaReadingSession) ── */}
+      {isLearnSession && (
+        <KanaReadingSession
+          open={Boolean(session)}
+          visible={sheetVisible}
+          kana={currentQuestion?.item.kana ?? ""}
+          romaji={currentQuestion?.item.romaji ?? ""}
+          questionIndex={Math.min(sessionIndex + 1, session?.questions.length ?? 0)}
+          totalQuestions={session?.questions.length ?? 0}
+          feedback={romajiFeedback ? {
+            status: romajiFeedback.correct ? "correct" : "wrong",
+            userAnswer: romajiValue,
+            correctAnswer: romajiFeedback.answer,
+          } as KanaSessionFeedback : null}
+          isFinished={sessionFinished}
+          summary={sessionFinished ? learnSessionSummaryData : null}
+          onAnswer={handleLearnAnswer}
+          onDontKnow={handleLearnDontKnow}
+          onNext={moveToNext}
+          onRestart={() => { closeSession(); window.setTimeout(startLearnSession, 260); }}
+          onClose={closeSession}
+        />
+      )}
+
       {/* ── PRACTICE SHELL ── */}
       <PracticeShell
-        open={Boolean(session)}
-        visible={sheetVisible}
-        title={isLearnSession ? "Learn" : "Práctica"}
+        open={Boolean(session) && !isLearnSession}
+        visible={sheetVisible && !isLearnSession}
+        title="Práctica"
         subtitle={
           sessionFinished
             ? "Resultado"

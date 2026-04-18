@@ -68,7 +68,7 @@ export function TopBar({ onMenu }: { onMenu?: () => void }) {
 
 const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode }> = [
   {
-    k: "home", label: "Home",
+    k: "home", label: "Inicio",
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
         <path d="M3 10l8-7 8 7v8a1.5 1.5 0 01-1.5 1.5H13v-6h-4v6H4.5A1.5 1.5 0 013 18v-8z" stroke={c} strokeWidth="1.5" strokeLinejoin="round" />
@@ -76,7 +76,7 @@ const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode
     ),
   },
   {
-    k: "learn", label: "Learn",
+    k: "learn", label: "Aprender",
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
         <path d="M3 5.5a2 2 0 012-2h5v15H5a2 2 0 01-2-2v-11zM12 3.5h5a2 2 0 012 2v11a2 2 0 01-2 2h-5v-15z" stroke={c} strokeWidth="1.5" />
@@ -84,7 +84,7 @@ const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode
     ),
   },
   {
-    k: "review", label: "Review",
+    k: "review", label: "Repasar",
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
         <path d="M18 11a7 7 0 11-2.05-4.95M18 3v4h-4" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -92,7 +92,7 @@ const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode
     ),
   },
   {
-    k: "practice", label: "Practice",
+    k: "practice", label: "Practicar",
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
         <path d="M6 3v16M10 5v12M14 7v8M18 9v4" stroke={c} strokeWidth="1.5" strokeLinecap="round" />
@@ -100,7 +100,7 @@ const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode
     ),
   },
   {
-    k: "vault", label: "Vault",
+    k: "vault", label: "Biblioteca",
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
         <rect x="3" y="5" width="16" height="13" rx="2" stroke={c} strokeWidth="1.5" />

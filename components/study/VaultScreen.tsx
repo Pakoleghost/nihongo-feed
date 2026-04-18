@@ -52,10 +52,10 @@ export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) 
   }).length;
 
   const filters: Array<{ key: FilterKey; label: string }> = [
-    { key: "all", label: "All" },
-    { key: "mastered", label: "Mastered" },
-    { key: "learning", label: "Learning" },
-    { key: "new", label: "New" },
+    { key: "all", label: "Todos" },
+    { key: "mastered", label: "Dominados" },
+    { key: "learning", label: "Aprendiendo" },
+    { key: "new", label: "Nuevos" },
   ];
 
   const passesFilter = (kana: string | null): boolean => {
@@ -78,7 +78,7 @@ export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) 
           title="Vault"
           right={
             <div style={{ textAlign: "right", paddingTop: 4 }}>
-              <Eyebrow>Mastered</Eyebrow>
+              <Eyebrow>Dominados</Eyebrow>
               <div style={{
                 fontFamily: DS.fontHead, fontSize: 20, fontWeight: 600,
                 color: DS.ink, marginTop: 4, letterSpacing: -0.3,
@@ -102,7 +102,7 @@ export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) 
               <path d="M9.5 9.5L13 13" stroke={DS.inkSoft} strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             <span style={{ fontFamily: DS.fontBody, fontSize: 14, color: DS.inkSoft }}>
-              Search kana…
+              Buscar kana…
             </span>
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) 
                   borderBottom: `1px solid ${DS.line}`,
                   marginBottom: 10,
                 }}>
-                  <Eyebrow>{row.label}-row</Eyebrow>
+                  <Eyebrow>{row.label}-fila</Eyebrow>
                   <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkFaint }}>
                     {rowMastered} / {rowTotal}
                   </div>

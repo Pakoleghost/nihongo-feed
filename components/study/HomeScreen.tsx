@@ -34,9 +34,9 @@ export default function HomeScreen({
 }: HomeScreenProps) {
   const hour = new Date().getHours();
   const greeting =
-    hour < 5 ? "Good night" :
-    hour < 12 ? "Good morning" :
-    hour < 18 ? "Good afternoon" : "Good evening";
+    hour < 5 ? "Buenas noches" :
+    hour < 12 ? "Buenos días" :
+    hour < 18 ? "Buenas tardes" : "Buenas noches";
 
   const basicHiragana = useMemo(() => filterKanaItemsForSelection("hiragana", "basic"), []);
   const progress = useMemo(() => loadKanaProgress(userKey), [userKey]);
@@ -71,10 +71,10 @@ export default function HomeScreen({
   const rowName = `${HIRAGANA_ROW_NAMES[batchIdx] ?? "A"}-row`;
 
   const jumpItems: Array<{ k: DSTab; label: string; sub: string; kana: string }> = [
-    { k: "learn", label: "Learn", sub: `Next · ${rowName}`, kana: heroKana },
-    { k: "review", label: "Review", sub: dueCount > 0 ? `${dueCount} due now` : "All caught up", kana: "時" },
-    { k: "practice", label: "Practice", sub: "Sprint · Flashcards · Repaso", kana: "練" },
-    { k: "vault", label: "Vault", sub: `${learnedCount} kana mastered`, kana: "蔵" },
+    { k: "learn", label: "Aprender", sub: `Siguiente · ${rowName}`, kana: heroKana },
+    { k: "review", label: "Repasar", sub: dueCount > 0 ? `${dueCount} por repasar` : "Al día", kana: "時" },
+    { k: "practice", label: "Practicar", sub: "Sprint · Tarjetas · Repaso", kana: "練" },
+    { k: "vault", label: "Biblioteca", sub: `${learnedCount} kana dominados`, kana: "蔵" },
   ];
 
   return (
@@ -91,13 +91,13 @@ export default function HomeScreen({
             fontFamily: DS.fontHead, fontSize: 34, fontWeight: 700,
             color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05, marginTop: 10,
           }}>
-            Pick up where
+            Continúa donde
           </div>
           <div style={{
             fontFamily: DS.fontHead, fontSize: 34, fontWeight: 300,
             color: DS.inkSoft, letterSpacing: -0.8, lineHeight: 1.05, fontStyle: "italic",
           }}>
-            you left off.
+            lo dejaste.
           </div>
         </div>
 
@@ -115,7 +115,7 @@ export default function HomeScreen({
               fontFamily: DS.fontKana, fontSize: 44, color: DS.ink, flexShrink: 0,
             }}>{heroKana}</div>
             <div style={{ flex: 1 }}>
-              <Eyebrow color={DS.accent}>Continue</Eyebrow>
+              <Eyebrow color={DS.accent}>Continuar</Eyebrow>
               <div style={{
                 fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600,
                 color: DS.ink, marginTop: 6,
@@ -130,16 +130,16 @@ export default function HomeScreen({
 
         {/* Today strip */}
         <div style={{ padding: "32px 24px 0" }}>
-          <Eyebrow>Today</Eyebrow>
+          <Eyebrow>Hoy</Eyebrow>
           <div style={{
             marginTop: 14,
             display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
             borderTop: `1px solid ${DS.line}`, borderBottom: `1px solid ${DS.line}`,
           }}>
             {([
-              { l: "Due", v: String(dueCount), s: "review" },
-              { l: "New", v: String(Math.max(0, basicHiragana.length - learnedCount)), s: "kana" },
-              { l: "Streak", v: String(weeklyActiveDays), s: "days" },
+              { l: "Por repasar", v: String(dueCount), s: "repaso" },
+              { l: "Nuevos", v: String(Math.max(0, basicHiragana.length - learnedCount)), s: "kana" },
+              { l: "Racha", v: String(weeklyActiveDays), s: "días" },
             ] as const).map((x, i) => (
               <div key={x.l} style={{
                 padding: "16px 0",
@@ -164,7 +164,7 @@ export default function HomeScreen({
 
         {/* Jump to */}
         <div style={{ padding: "32px 24px 0" }}>
-          <Eyebrow>Jump to</Eyebrow>
+          <Eyebrow>Ir a</Eyebrow>
           <div style={{ marginTop: 10 }}>
             {jumpItems.map((item, i) => (
               <button
