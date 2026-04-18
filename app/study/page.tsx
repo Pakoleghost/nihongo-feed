@@ -8,9 +8,8 @@ import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import AprenderKanaModule from "@/components/study/AprenderKanaModule";
 import HomeScreen from "@/components/study/HomeScreen";
-import ReviewScreen from "@/components/study/ReviewScreen";
 import PracticeIndexScreen, { type PracticeSubView } from "@/components/study/PracticeIndexScreen";
-import VaultScreen from "@/components/study/VaultScreen";
+import ResourcesScreen from "@/components/study/ResourcesScreen";
 import { DS, TabBar } from "@/components/study/ds";
 import PracticeShell, { PracticeStageCard } from "@/components/study/PracticeShell";
 import StudySelectorGroup from "@/components/study/StudySelectorGroup";
@@ -193,7 +192,7 @@ const VK_BUCKETS: Array<{ key: VkBucketKey; label: string; lessons: number[] }> 
   { key: "l11_12", label: "L11-12", lessons: [11, 12] },
 ];
 const VK_MODE_KEYS = VK_BUCKETS.map((bucket) => `vk:${bucket.key}`);
-type StudyView = "home" | "learn" | "review" | "practice" | "vault";
+type StudyView = "home" | "learn" | "practice" | "resources";
 const EXAM_PASSING_PERCENT = 70;
 const EXAM_QUESTION_COUNT = 20;
 
@@ -5017,9 +5016,11 @@ function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, n
 
 function resolveStudyView(searchParams: Pick<URLSearchParams, "get">): StudyView | null {
   const view = searchParams.get("view");
-  if (view === "home" || view === "learn" || view === "review" || view === "practice" || view === "vault") return view;
+  if (view === "home" || view === "learn" || view === "practice" || view === "resources") return view;
   // Backward compat with old view names
   if (view === "learnkana") return "learn";
+  if (view === "review") return "learn";
+  if (view === "vault") return "learn";
   if (view === "kana" || view === "flashcards" || view === "sprint") return "practice";
   if (view === "exam") return "practice";
   if (view === "quiz") return "practice";
@@ -6954,14 +6955,6 @@ function StudyContent() {
         />
       )}
 
-      {activeTab === "review" && (
-        <ReviewScreen
-          userKey={userKey}
-          onTabChange={(tab) => setActiveTab(tab as StudyView)}
-          onStartReview={() => setActiveTab("learn")}
-        />
-      )}
-
       {activeTab === "practice" && !practiceSubView && (
         <PracticeIndexScreen
           onTabChange={(tab) => setActiveTab(tab as StudyView)}
@@ -6969,9 +6962,8 @@ function StudyContent() {
         />
       )}
 
-      {activeTab === "vault" && (
-        <VaultScreen
-          userKey={userKey}
+      {activeTab === "resources" && (
+        <ResourcesScreen
           onTabChange={(tab) => setActiveTab(tab as StudyView)}
         />
       )}
