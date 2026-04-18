@@ -32,7 +32,7 @@ type AprenderKanaModuleProps = {
   userKey: string;
   onRecordActivity?: (detail?: string) => void;
   initialMode?: "learn" | null;
-  onTabChange?: (tab: "home" | "learn" | "review" | "practice" | "vault") => void;
+  onTabChange?: (tab: "home" | "learn" | "practice" | "recursos") => void;
 };
 
 type KanaSessionQuestion = {
@@ -416,7 +416,13 @@ function getLearnStats(
     : uniqueKanaItems([...hiraganaBasic, ...katakanaBasic]);
   return {
     total: items.length,
-    aprendidos: items.filter((item) => { const e = progress[item.id]; return e && e.level >= 4; }).length,
+    // fijados: level >= 4 — sustained correct recall across multiple sessions
+    fijados: items.filter((item) => { const e = progress[item.id]; return e && e.level >= 4; }).length,
+    // en_repaso: level 3 — repeated correct, entering long-term review
+    en_repaso: items.filter((item) => { const e = progress[item.id]; return e && e.level === 3; }).length,
+    // aprendiendo: level 1-2 — seen and practicing but not stable
+    aprendiendo: items.filter((item) => { const e = progress[item.id]; return e && e.level >= 1 && e.level <= 2; }).length,
+    // pendientes: seen before, currently due for review
     pendientes: items.filter((item) => { const e = progress[item.id]; return e && e.timesSeen > 0 && isDueReview(e.nextReview); }).length,
     debiles: items.filter((item) => !!progress[item.id]?.difficult).length,
     nuevos: items.filter((item) => !progress[item.id] || progress[item.id].timesSeen === 0).length,
@@ -978,25 +984,25 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 12 }}>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft }}>Progreso</div>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 13, fontWeight: 700, color: DS.accent }}>
-                    {learnStats.aprendidos} / {learnStats.total} fijados
+                    {learnStats.fijados} / {learnStats.total} fijados
                   </div>
                 </div>
                 {/* Teal gradient progress bar */}
                 <div style={{ height: 8, borderRadius: 8, background: DS.card, overflow: "hidden", marginBottom: 16 }}>
                   <div style={{
-                    width: `${learnStats.total > 0 ? (learnStats.aprendidos / learnStats.total) * 100 : 0}%`,
+                    width: `${learnStats.total > 0 ? (learnStats.fijados / learnStats.total) * 100 : 0}%`,
                     height: "100%",
                     background: `linear-gradient(to right, ${DS.teal}, ${DS.tealDark})`,
                     borderRadius: 8, transition: "width 0.5s ease",
-                    minWidth: learnStats.aprendidos > 0 ? 24 : 0,
+                    minWidth: learnStats.fijados > 0 ? 24 : 0,
                   }} />
                 </div>
                 {/* Stats row */}
                 <div style={{ display: "flex", gap: 20 }}>
                   {[
+                    { label: "aprendiendo", value: learnStats.aprendiendo },
                     { label: "pendientes", value: learnStats.pendientes },
                     { label: "nuevos", value: learnStats.nuevos },
-                    ...(learnStats.debiles > 0 ? [{ label: "débiles", value: learnStats.debiles }] : []),
                   ].map(({ label, value }) => (
                     <div key={label}>
                       <div style={{ fontFamily: DS.fontHead, fontSize: 17, fontWeight: 700, color: DS.ink, letterSpacing: -0.3 }}>{value}</div>

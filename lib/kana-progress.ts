@@ -122,6 +122,24 @@ function isDue(entry?: KanaProgressEntry | null) {
   return new Date(entry.nextReview).getTime() <= Date.now();
 }
 
+export type KanaItemState = "nuevo" | "aprendiendo" | "en_repaso" | "fijado";
+
+export function getKanaItemState(entry: KanaProgressEntry | undefined): KanaItemState {
+  if (!entry || entry.timesSeen === 0) return "nuevo";
+  if (entry.level <= 2) return "aprendiendo";
+  if (entry.level === 3) return "en_repaso";
+  return "fijado"; // level >= 4
+}
+
+export function getKanaStateCounts(items: KanaItem[], progress: KanaProgressMap) {
+  const counts = { nuevo: 0, aprendiendo: 0, en_repaso: 0, fijado: 0 };
+  for (const item of items) {
+    const state = getKanaItemState(progress[item.id]);
+    counts[state]++;
+  }
+  return counts;
+}
+
 export function getKanaProgressSummary(items: KanaItem[], progress: KanaProgressMap) {
   const relevant = items
     .map((item) => progress[item.id])

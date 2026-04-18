@@ -28,7 +28,7 @@ export const DS = {
   fontKana: "var(--font-noto-serif-jp), 'Noto Serif JP', var(--font-noto-sans-jp), 'Noto Sans JP', serif",
 } as const;
 
-export type DSTab = "home" | "learn" | "review" | "practice" | "vault";
+export type DSTab = "home" | "learn" | "practice" | "recursos";
 
 // ─── TopBar ───────────────────────────────────────────────────────────────────
 
@@ -66,7 +66,7 @@ export function TopBar({ onMenu }: { onMenu?: () => void }) {
   );
 }
 
-// ─── TabBar (5 tabs) ──────────────────────────────────────────────────────────
+// ─── TabBar (4 tabs) ──────────────────────────────────────────────────────────
 
 const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode }> = [
   {
@@ -86,14 +86,6 @@ const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode
     ),
   },
   {
-    k: "review", label: "Repasar",
-    icon: (c) => (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <path d="M18 11a7 7 0 11-2.05-4.95M18 3v4h-4" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
     k: "practice", label: "Practicar",
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
@@ -102,11 +94,10 @@ const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode
     ),
   },
   {
-    k: "vault", label: "Biblioteca",
+    k: "recursos", label: "Recursos",
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <rect x="3" y="5" width="16" height="13" rx="2" stroke={c} strokeWidth="1.5" />
-        <path d="M3 8h16M8 5V3.5h6V5" stroke={c} strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M4 4h6v14H4zM12 4h6v14h-6z" stroke={c} strokeWidth="1.5" strokeLinejoin="round" />
       </svg>
     ),
   },

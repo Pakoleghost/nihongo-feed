@@ -1,11 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import { DS, TopBar, TabBar, Eyebrow, PlayButton, type DSTab } from "./ds";
+import { DS, TopBar, TabBar, type DSTab } from "./ds";
 import { filterKanaItemsForSelection } from "@/lib/kana-data";
-import { loadKanaProgress } from "@/lib/kana-progress";
+import { loadKanaProgress, getKanaStateCounts } from "@/lib/kana-progress";
 
-const HIRAGANA_ROW_NAMES = ["A", "K", "S", "T", "N", "H", "M", "Y", "R", "W"];
 const HIRAGANA_BASIC_GROUPS: readonly (readonly string[])[] = [
   ["あ", "い", "う", "え", "お"],
   ["か", "き", "く", "け", "こ"],
@@ -41,26 +40,24 @@ export default function HomeScreen({
   const basicHiragana = useMemo(() => filterKanaItemsForSelection("hiragana", "basic"), []);
   const progress = useMemo(() => loadKanaProgress(userKey), [userKey]);
 
+  const stateCounts = useMemo(
+    () => getKanaStateCounts(basicHiragana, progress),
+    [basicHiragana, progress],
+  );
+
   const kanaToItem = useMemo(
     () => new Map(basicHiragana.map((item) => [item.kana, item])),
     [basicHiragana],
   );
 
-  const learnedCount = useMemo(
-    () => basicHiragana.filter((item) => {
-      const entry = progress[item.id];
-      return entry && entry.level >= 1 && !entry.difficult;
-    }).length,
-    [basicHiragana, progress],
-  );
-
+  // Current batch: first group where not all items are stable (level >= 3)
   const batchIdx = useMemo(() => {
     for (let i = 0; i < HIRAGANA_BASIC_GROUPS.length; i++) {
       const stable = HIRAGANA_BASIC_GROUPS[i].every((k) => {
         const item = kanaToItem.get(k);
         if (!item) return false;
         const entry = progress[item.id];
-        return entry && entry.level >= 1 && !entry.difficult;
+        return entry && entry.level >= 3;
       });
       if (!stable) return i;
     }
@@ -68,14 +65,7 @@ export default function HomeScreen({
   }, [kanaToItem, progress]);
 
   const heroKana = HIRAGANA_BASIC_GROUPS[batchIdx]?.[0] ?? "あ";
-  const rowName = `${HIRAGANA_ROW_NAMES[batchIdx] ?? "A"}-row`;
-
-  const jumpItems: Array<{ k: DSTab; label: string; sub: string; kana: string }> = [
-    { k: "learn", label: "Aprender", sub: `Siguiente · ${rowName}`, kana: heroKana },
-    { k: "review", label: "Repasar", sub: dueCount > 0 ? `${dueCount} por repasar` : "Al día", kana: "時" },
-    { k: "practice", label: "Practicar", sub: "Sprint · Tarjetas · Repaso", kana: "練" },
-    { k: "vault", label: "Biblioteca", sub: `${learnedCount} kana dominados`, kana: "蔵" },
-  ];
+  const progressPct = basicHiragana.length > 0 ? Math.round((stateCounts.fijado / basicHiragana.length) * 100) : 0;
 
   return (
     <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
@@ -85,121 +75,169 @@ export default function HomeScreen({
       <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
 
         {/* Greeting */}
-        <div style={{ padding: "0 24px 28px" }}>
-          <Eyebrow>{greeting}</Eyebrow>
+        <div style={{ padding: "16px 24px 0" }}>
           <div style={{
-            fontFamily: DS.fontHead, fontSize: 34, fontWeight: 700,
-            color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05, marginTop: 10,
-          }}>
-            Continúa donde
-          </div>
+            fontFamily: DS.fontHead, fontSize: 11, fontWeight: 600,
+            letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft,
+          }}>{greeting}</div>
           <div style={{
-            fontFamily: DS.fontHead, fontSize: 34, fontWeight: 300,
-            color: DS.inkSoft, letterSpacing: -0.8, lineHeight: 1.05, fontStyle: "italic",
-          }}>
-            lo dejaste.
-          </div>
+            fontFamily: DS.fontHead, fontSize: 30, fontWeight: 800,
+            color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05, marginTop: 8,
+          }}>¿Qué hacemos hoy?</div>
         </div>
 
-        {/* Continue card */}
-        <div style={{ padding: "0 24px" }}>
+        {/* Primary action card */}
+        <div style={{ padding: "20px 24px 0" }}>
           <div style={{
-            display: "flex", alignItems: "center", gap: 18,
-            padding: "22px 22px",
-            background: DS.card, borderRadius: 24, border: `1px solid ${DS.line}`,
+            borderRadius: 28, background: DS.surfaceAlt, padding: "22px 22px",
+            position: "relative", overflow: "hidden",
+            boxShadow: "0 8px 32px rgba(26,26,46,0.04)",
           }}>
-            <div style={{
-              width: 76, height: 76, borderRadius: 18,
-              background: DS.surfaceAlt,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: DS.fontKana, fontSize: 44, color: DS.ink, flexShrink: 0,
+            {/* Ghost kana decoration */}
+            <div aria-hidden="true" style={{
+              position: "absolute", right: -14, top: -10,
+              fontFamily: DS.fontKana, fontSize: 120, color: DS.ink,
+              opacity: 0.05, lineHeight: 1, userSelect: "none", pointerEvents: "none",
             }}>{heroKana}</div>
-            <div style={{ flex: 1 }}>
-              <Eyebrow color={DS.accent}>Continuar</Eyebrow>
+
+            <div style={{ position: "relative" }}>
               <div style={{
-                fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600,
-                color: DS.ink, marginTop: 6,
-              }}>{rowName} · learning</div>
+                fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600,
+                letterSpacing: "0.2em", textTransform: "uppercase", color: DS.accent,
+                marginBottom: 6,
+              }}>Continuar</div>
               <div style={{
-                fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 2,
-              }}>{learnedCount} / {basicHiragana.length} kana mastered</div>
+                fontFamily: DS.fontHead, fontSize: 20, fontWeight: 700,
+                color: DS.ink, letterSpacing: -0.4, marginBottom: 4,
+              }}>Hiragana básico</div>
+              <div style={{
+                fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft,
+                marginBottom: 16, lineHeight: 1.4,
+              }}>
+                {stateCounts.fijado} fijados · {stateCounts.aprendiendo + stateCounts.en_repaso} en curso · {stateCounts.nuevo} nuevos
+              </div>
+
+              {/* Teal progress bar */}
+              <div style={{ height: 6, borderRadius: 6, background: DS.card, overflow: "hidden", marginBottom: 18 }}>
+                <div style={{
+                  width: `${progressPct}%`, height: "100%",
+                  background: `linear-gradient(to right, ${DS.teal}, ${DS.tealDark})`,
+                  borderRadius: 6, transition: "width 0.5s ease",
+                  minWidth: stateCounts.fijado > 0 ? 16 : 0,
+                }} />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onTabChange("learn")}
+                style={{
+                  width: "100%", padding: "16px",
+                  background: `linear-gradient(135deg, ${DS.accent} 0%, #c42b38 100%)`,
+                  color: "#fff", border: "none", borderRadius: 999,
+                  fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700,
+                  cursor: "pointer", letterSpacing: -0.2,
+                  boxShadow: "0 8px 20px rgba(230,57,70,0.25)",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                }}
+              >
+                Empezar sesión
+                <svg width="16" height="10" viewBox="0 0 18 12" fill="none">
+                  <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
             </div>
-            <PlayButton size={52} onClick={() => onTabChange("learn")} />
           </div>
         </div>
 
-        {/* Today strip */}
-        <div style={{ padding: "32px 24px 0" }}>
-          <Eyebrow>Hoy</Eyebrow>
+        {/* Stats row */}
+        <div style={{ padding: "20px 24px 0" }}>
           <div style={{
-            marginTop: 14,
-            display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
-            borderTop: `1px solid ${DS.line}`, borderBottom: `1px solid ${DS.line}`,
+            display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10,
           }}>
-            {([
-              { l: "Por repasar", v: String(dueCount), s: "repaso" },
-              { l: "Nuevos", v: String(Math.max(0, basicHiragana.length - learnedCount)), s: "kana" },
-              { l: "Racha", v: String(weeklyActiveDays), s: "días" },
-            ] as const).map((x, i) => (
-              <div key={x.l} style={{
-                padding: "16px 0",
-                borderRight: i < 2 ? `1px solid ${DS.line}` : "none",
-                textAlign: i === 0 ? "left" : i === 1 ? "center" : "right",
+            {[
+              { label: "Por repasar", value: dueCount, color: dueCount > 0 ? DS.accent : DS.inkFaint },
+              { label: "Fijados", value: stateCounts.fijado, color: DS.tealDark },
+              { label: "Días activos", value: weeklyActiveDays, color: DS.ink },
+            ].map(({ label, value, color }) => (
+              <div key={label} style={{
+                padding: "16px 12px", borderRadius: 20,
+                background: DS.card,
+                boxShadow: "0 4px 16px rgba(26,26,46,0.04)",
+                textAlign: "center",
               }}>
                 <div style={{
-                  fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600,
-                  color: DS.inkSoft, letterSpacing: "0.22em", textTransform: "uppercase",
-                }}>{x.l}</div>
+                  fontFamily: DS.fontHead, fontSize: 24, fontWeight: 800,
+                  color, letterSpacing: -0.5,
+                }}>{value}</div>
                 <div style={{
-                  marginTop: 6, fontFamily: DS.fontHead, fontSize: 24,
-                  fontWeight: 700, color: DS.ink, letterSpacing: -0.5,
-                }}>
-                  {x.v}
-                  <span style={{ color: DS.inkFaint, fontSize: 12, fontWeight: 400, marginLeft: 4 }}>{x.s}</span>
-                </div>
+                  fontFamily: DS.fontBody, fontSize: 10, color: DS.inkSoft,
+                  marginTop: 4, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600,
+                }}>{label}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Jump to */}
-        <div style={{ padding: "32px 24px 0" }}>
-          <Eyebrow>Ir a</Eyebrow>
-          <div style={{ marginTop: 10 }}>
-            {jumpItems.map((item, i) => (
-              <button
-                key={item.k}
-                type="button"
-                onClick={() => onTabChange(item.k)}
-                style={{
-                  display: "flex", alignItems: "center", gap: 16,
-                  padding: "16px 0",
-                  borderBottom: i < jumpItems.length - 1 ? `1px solid ${DS.line}` : "none",
-                  background: "none", border: "none",
-                  borderBottomStyle: "solid",
-                  borderBottomWidth: i < jumpItems.length - 1 ? 1 : 0,
-                  borderBottomColor: DS.line,
-                  width: "100%", cursor: "pointer", textAlign: "left",
-                }}
-              >
+        {/* Navigation shortcuts */}
+        <div style={{ padding: "28px 24px 0" }}>
+          <div style={{
+            fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600,
+            letterSpacing: "0.2em", textTransform: "uppercase", color: DS.inkSoft,
+            marginBottom: 12,
+          }}>Ir a</div>
+          {([
+            {
+              k: "learn" as DSTab,
+              label: "Aprender Kana",
+              sub: `${stateCounts.aprendiendo + stateCounts.en_repaso} en curso · ${stateCounts.nuevo} por ver`,
+              kana: heroKana,
+            },
+            {
+              k: "practice" as DSTab,
+              label: "Practicar",
+              sub: "Sprint · Tarjetas · Repaso mixto",
+              kana: "練",
+            },
+            {
+              k: "recursos" as DSTab,
+              label: "Recursos",
+              sub: "Material, notas y referencias",
+              kana: "本",
+            },
+          ] as const).map((item, i, arr) => (
+            <button
+              key={item.k}
+              type="button"
+              onClick={() => onTabChange(item.k)}
+              style={{
+                display: "flex", alignItems: "center", gap: 16,
+                padding: "16px 0",
+                borderBottom: i < arr.length - 1 ? `1px solid ${DS.line}` : "none",
+                background: "none", border: "none",
+                borderBottomStyle: "solid",
+                borderBottomWidth: i < arr.length - 1 ? 1 : 0,
+                borderBottomColor: DS.line,
+                width: "100%", cursor: "pointer", textAlign: "left",
+              }}
+            >
+              <div style={{
+                fontFamily: DS.fontKana, fontSize: 24,
+                color: DS.inkSoft, width: 32, textAlign: "center", lineHeight: 1, flexShrink: 0,
+              }}>{item.kana}</div>
+              <div style={{ flex: 1 }}>
                 <div style={{
-                  fontFamily: DS.fontKana, fontSize: 26,
-                  color: DS.inkSoft, width: 36, textAlign: "center", lineHeight: 1,
-                }}>{item.kana}</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600, color: DS.ink }}>
-                    {item.label}
-                  </div>
-                  <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 2 }}>
-                    {item.sub}
-                  </div>
-                </div>
-                <svg width="10" height="12" viewBox="0 0 10 12" fill="none">
-                  <path d="M1 1l5 5-5 5" stroke={DS.inkFaint} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            ))}
-          </div>
+                  fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600,
+                  color: DS.ink, letterSpacing: -0.1,
+                }}>{item.label}</div>
+                <div style={{
+                  fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 2,
+                }}>{item.sub}</div>
+              </div>
+              <svg width="10" height="12" viewBox="0 0 10 12" fill="none" style={{ flexShrink: 0 }}>
+                <path d="M1 1l5 5-5 5" stroke={DS.inkFaint} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          ))}
         </div>
 
         <div style={{ height: 16 }} />

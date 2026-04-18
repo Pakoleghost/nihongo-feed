@@ -16,7 +16,18 @@
       "Bash(ls -la design-bundle)",
       "Bash(mkdir -p design-extract2)",
       "Bash(tar xf *)",
-      "Bash(python3)"
+      "Bash(python3)",
+      "Bash(xargs ls *)",
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(gtimeout 120 npm run build)",
+      "Bash(echo \"TypeScript exit: $?\")",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(lsof -ti:3000)",
+      "Bash(echo \"DONE:$?\")",
+      "Bash(git commit *)"
     ]
   }
 }

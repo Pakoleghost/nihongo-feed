@@ -185,7 +185,7 @@ export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) 
         <div style={{ height: 16 }} />
       </div>
 
-      <TabBar active="vault" onTab={onTabChange} />
+      <TabBar active={"vault" as DSTab} onTab={onTabChange} />
     </div>
   );
 }

@@ -182,7 +182,7 @@ export default function ReviewScreen({ userKey, onTabChange, onStartReview }: Re
         <div style={{ height: 16 }} />
       </div>
 
-      <TabBar active="review" onTab={onTabChange} />
+      <TabBar active={"review" as DSTab} onTab={onTabChange} />
     </div>
   );
 }

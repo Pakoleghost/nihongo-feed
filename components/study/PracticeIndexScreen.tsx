@@ -36,7 +36,7 @@ export default function PracticeIndexScreen({
       <TopBar />
 
       <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
-        <ScreenTitle title="Practice" />
+        <ScreenTitle title="Practicar" />
 
         <div style={{ padding: "0 24px" }}>
           <div style={{
