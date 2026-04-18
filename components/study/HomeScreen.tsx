@@ -82,7 +82,7 @@ export default function HomeScreen({
       <div style={{ height: 54 }} />
       <TopBar />
 
-      <div style={{ flex: 1, overflow: "auto", paddingBottom: 0 }}>
+      <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
 
         {/* Greeting */}
         <div style={{ padding: "0 24px 28px" }}>

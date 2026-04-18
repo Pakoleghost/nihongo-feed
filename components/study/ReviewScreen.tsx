@@ -58,8 +58,8 @@ export default function ReviewScreen({ userKey, onTabChange, onStartReview }: Re
       <div style={{ height: 54 }} />
       <TopBar />
 
-      <div style={{ flex: 1, overflow: "auto", paddingBottom: 0 }}>
-        <ScreenTitle title="Review" subtitle="what's due." />
+      <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
+        <ScreenTitle title="Review" />
 
         {/* Hero: due count + start */}
         <div style={{ padding: "0 24px" }}>

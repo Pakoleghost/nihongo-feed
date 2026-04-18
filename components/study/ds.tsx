@@ -113,7 +113,7 @@ const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode
 export function TabBar({ active, onTab }: { active: DSTab; onTab: (tab: DSTab) => void }) {
   return (
     <div style={{
-      position: "sticky", bottom: 0,
+      position: "fixed", bottom: 0, left: 0, right: 0,
       height: 84,
       background: `linear-gradient(to top, ${DS.bg} 60%, transparent)`,
       display: "flex", alignItems: "center", justifyContent: "space-around",

@@ -6979,19 +6979,19 @@ function StudyContent() {
 
 
       {activeTab === "practice" && practiceSubView === "sprint" && (
-        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
+        <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
           <div style={{ height: 54 }} />
+          <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
               <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
               Practice
             </button>
           </div>
-          <div style={{ padding: "16px 24px 8px" }}>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Kana Sprint</div>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.6, fontStyle: "italic" }}>read fast.</div>
-          </div>
           <div style={{ padding: "16px 24px 24px" }}>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Kana Sprint</div>
+          </div>
+          <div style={{ padding: "0 24px 24px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <div style={{ minWidth: 0, flex: "1 1 280px" }}>
                 <StudySelectorGroup
@@ -7017,24 +7017,25 @@ function StudyContent() {
               </button>
             </div>
           </div>
+          </div>
           <TabBar active="practice" onTab={(tab) => setActiveTab(tab as StudyView)} />
         </div>
       )}
 
       {activeTab === "practice" && practiceSubView === "vocabkanji" && (
-        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
+        <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
           <div style={{ height: 54 }} />
+          <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
               <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
               Practice
             </button>
           </div>
-          <div style={{ padding: "16px 24px 8px" }}>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Vocab + Kanji</div>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.6, fontStyle: "italic" }}>sprint mode.</div>
-          </div>
           <div style={{ padding: "16px 24px 24px" }}>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Vocab + Kanji</div>
+          </div>
+          <div style={{ padding: "0 24px 24px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <div style={{ minWidth: 0, flex: "1 1 320px" }}>
                 <StudySelectorGroup
@@ -7055,6 +7056,7 @@ function StudyContent() {
                 Start Sprint
               </button>
             </div>
+          </div>
           </div>
           <TabBar active="practice" onTab={(tab) => setActiveTab(tab as StudyView)} />
         </div>
@@ -7153,8 +7155,9 @@ function StudyContent() {
         </PracticeShell>
 
       {activeTab === "practice" && practiceSubView === "flashcards" && (
-        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
+        <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
           <div style={{ height: 54 }} />
+          <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
               <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -7163,7 +7166,6 @@ function StudyContent() {
           </div>
           <div style={{ padding: "16px 24px 24px" }}>
             <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Flashcards</div>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.6, fontStyle: "italic" }}>your decks.</div>
           </div>
           <div style={{ padding: "0 24px" }}>
             {(flashLessonFolder !== null || Boolean(activeFlashSet?.isCustom)) && (
@@ -7556,13 +7558,15 @@ function StudyContent() {
               </div>
             )}
           </div>
+          </div>
           <TabBar active="practice" onTab={(tab) => setActiveTab(tab as StudyView)} />
         </div>
       )}
 
       {activeTab === "practice" && practiceSubView === "exam" && (
-        <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
+        <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
           <div style={{ height: 54 }} />
+          <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
               <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M7 1L1 6l6 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -7571,11 +7575,9 @@ function StudyContent() {
           </div>
           <div style={{ padding: "16px 24px 24px" }}>
             <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Repaso mixto</div>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.6, fontStyle: "italic" }}>mixed review.</div>
           </div>
           <div style={{ padding: "0 24px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <h2 style={{ margin: 0, fontSize: "var(--text-h2)" }}>Repaso mixto</h2>
               <div style={{ minWidth: 0, flex: "1 1 320px" }}>
                 <StudySelectorGroup
                   options={LESSONS.map((lesson) => ({ key: String(lesson) as `${number}`, label: `L${lesson}`, tone: "var(--color-highlight-soft)" }))}
@@ -7622,6 +7624,7 @@ function StudyContent() {
                 {examHistory.length === 0 && <div style={{ color: "#98a2b3", fontSize: 12 }}>Aún no hay intentos.</div>}
               </div>
             </div>
+          </div>
           </div>
           <TabBar active="practice" onTab={(tab) => setActiveTab(tab as StudyView)} />
         </div>

@@ -35,8 +35,8 @@ export default function PracticeIndexScreen({
       <div style={{ height: 54 }} />
       <TopBar />
 
-      <div style={{ flex: 1, overflow: "auto" }}>
-        <ScreenTitle title="Practice" subtitle="no stakes." />
+      <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
+        <ScreenTitle title="Practice" />
 
         <div style={{ padding: "0 24px" }}>
           <div style={{

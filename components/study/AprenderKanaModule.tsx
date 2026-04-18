@@ -646,7 +646,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   ] as const;
 
   const renderTabBar = () => (
-    <div style={{ position: "sticky", bottom: 0, height: 84, background: `linear-gradient(to top, ${DS.bg} 60%, transparent)`, display: "flex", alignItems: "center", justifyContent: "space-around", zIndex: 10, padding: "0 8px 24px" }}>
+    <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, height: 84, background: `linear-gradient(to top, ${DS.bg} 60%, transparent)`, display: "flex", alignItems: "center", justifyContent: "space-around", zIndex: 10, padding: "0 8px 24px" }}>
       {TAB_BAR_ITEMS.map((tab) => {
         const isActive = tab.k === "learn";
         return (
@@ -762,7 +762,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 700, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>Learn</div>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 300, color: DS.inkSoft, letterSpacing: -0.8, lineHeight: 1.05, fontStyle: "italic" }}>hiragana.</div>
                 </div>
                 <div style={{ textAlign: "right", paddingTop: 4 }}>
                   <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>
