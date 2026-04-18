@@ -12,7 +12,10 @@ export type KanaProgressEntry = {
   timesWrong: number;
   timesAlmost: number;
   lastReviewed: string | null;
+  /** @deprecated legacy field — use next_due_at instead */
   nextReview: string | null;
+  /** Timestamp (ms) when this item is next due. null = immediately due. */
+  next_due_at: number | null;
   level: number;
   ease: number;
   difficult: boolean;
@@ -20,7 +23,32 @@ export type KanaProgressEntry = {
 
 export type KanaProgressMap = Record<string, KanaProgressEntry>;
 
-const LEVEL_INTERVALS_HOURS = [0, 8, 24, 72, 168, 336, 720];
+// Leitner intervals in milliseconds
+const MS = {
+  h4:  4  * 60 * 60 * 1000,
+  h24: 24 * 60 * 60 * 1000,
+  d3:  3  * 24 * 60 * 60 * 1000,
+  d7:  7  * 24 * 60 * 60 * 1000,
+} as const;
+
+function leitnerNextDueAt(level: number): number {
+  if (level <= 0) return Date.now();
+  if (level === 1) return Date.now() + MS.h4;
+  if (level === 2) return Date.now() + MS.h24;
+  if (level === 3) return Date.now() + MS.d3;
+  return Date.now() + MS.d7; // level 4+
+}
+
+/** True when the item should appear in a review session. */
+export function isKanaDue(entry: KanaProgressEntry | undefined | null): boolean {
+  if (!entry || entry.timesSeen === 0) return false; // nuevos no están "pendientes"
+  if (entry.next_due_at !== null && entry.next_due_at !== undefined) {
+    return entry.next_due_at <= Date.now();
+  }
+  // backward-compat: fall back to legacy nextReview ISO string
+  if (!entry.nextReview) return true;
+  return new Date(entry.nextReview).getTime() <= Date.now();
+}
 
 function hoursFromNow(hours: number) {
   return new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
@@ -61,6 +89,7 @@ function createInitialEntry(item: KanaItem): KanaProgressEntry {
     timesAlmost: 0,
     lastReviewed: null,
     nextReview: null,
+    next_due_at: null,
     level: 0,
     ease: 1,
     difficult: false,
@@ -71,31 +100,30 @@ export function applyKanaRating(progress: KanaProgressMap, item: KanaItem, ratin
   const current = progress[item.id] || createInitialEntry(item);
   const timesSeen = current.timesSeen + 1;
   const timesCorrect = current.timesCorrect + (rating === "correct" ? 1 : 0);
-  const timesWrong = current.timesWrong + (rating === "wrong" ? 1 : 0);
-  const timesAlmost = current.timesAlmost + (rating === "almost" ? 1 : 0);
+  const timesWrong  = current.timesWrong  + (rating === "wrong"   ? 1 : 0);
+  const timesAlmost = current.timesAlmost + (rating === "almost"  ? 1 : 0);
 
-  let level = current.level;
-  let ease = current.ease;
+  let level: number;
+  let next_due_at: number;
 
   if (rating === "correct") {
-    level = Math.min(current.level + 1, LEVEL_INTERVALS_HOURS.length - 1);
-    ease = Math.min(current.ease + 0.08, 2.4);
+    // Advance one level, schedule according to Leitner intervals
+    level = Math.min(current.level + 1, 6);
+    next_due_at = leitnerNextDueAt(level);
   } else if (rating === "almost") {
+    // Keep level, review again in 4 hours
     level = Math.max(current.level, 1);
-    ease = Math.max(current.ease - 0.04, 1);
+    next_due_at = Date.now() + MS.h4;
   } else {
-    level = Math.max(current.level - 1, 0);
-    ease = Math.max(current.ease - 0.12, 1);
+    // Wrong at ANY level → drop to level 1, review immediately
+    level = 1;
+    next_due_at = Date.now();
   }
 
-  const nextReview =
-    rating === "wrong"
-      ? hoursFromNow(2)
-      : rating === "almost"
-        ? hoursFromNow(12)
-        : hoursFromNow(Math.max(LEVEL_INTERVALS_HOURS[level], 12) * ease);
-
   const difficult = timesWrong >= 2 && timesWrong >= timesCorrect;
+
+  // Keep legacy nextReview in sync for any code still reading it
+  const nextReview = new Date(next_due_at).toISOString();
 
   return {
     ...progress,
@@ -110,16 +138,16 @@ export function applyKanaRating(progress: KanaProgressMap, item: KanaItem, ratin
       timesAlmost,
       lastReviewed: new Date().toISOString(),
       nextReview,
+      next_due_at,
       level,
-      ease,
+      ease: current.ease, // ease factor kept for future use; not driving scheduling now
       difficult,
     },
   };
 }
 
 function isDue(entry?: KanaProgressEntry | null) {
-  if (!entry?.nextReview) return true;
-  return new Date(entry.nextReview).getTime() <= Date.now();
+  return isKanaDue(entry);
 }
 
 export type KanaItemState = "nuevo" | "aprendiendo" | "en_repaso" | "fijado";

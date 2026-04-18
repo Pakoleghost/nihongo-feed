@@ -132,7 +132,11 @@ function getCurrentLearnBatch(hiraganaBasic: KanaItem[], progress: KanaProgressM
   return getCurrentLearnBatchForScript(hiraganaBasic, HIRAGANA_BASIC_GROUPS, progress);
 }
 
-function isDueReview(nextReview?: string | null) {
+function isDueReview(nextReview?: string | null, next_due_at?: number | null) {
+  // Prioriza next_due_at (nuevo modelo); hace fallback a nextReview por compatibilidad
+  if (next_due_at !== null && next_due_at !== undefined) {
+    return next_due_at <= Date.now();
+  }
   if (!nextReview) return true;
   return new Date(nextReview).getTime() <= Date.now();
 }
@@ -288,7 +292,7 @@ function buildLearnSession(hiraganaBasic: KanaItem[], progress: KanaProgressMap)
     if (currentBatchIds.has(item.id)) return false;
     const entry = progress[item.id];
     if (!entry) return false;
-    return isDueReview(entry.nextReview) || entry.difficult;
+    return isDueReview(entry.nextReview, entry.next_due_at) || entry.difficult;
   });
 
   let pool: KanaItem[];
@@ -325,7 +329,7 @@ function buildLearnSessionForItems(
   const reviewPool = unlockedItems.filter((item) => {
     if (currentBatchIds.has(item.id)) return false;
     const e = progress[item.id];
-    return e && (isDueReview(e.nextReview) || e.difficult);
+    return e && (isDueReview(e.nextReview, e.next_due_at) || e.difficult);
   });
   let pool: KanaItem[];
   if (unstableInBatch.length > 0) {
@@ -384,7 +388,7 @@ function buildInteligenteSession(
   }
 
   if (action === "pendientes") {
-    const items = scopeItems.filter((item) => { const e = progress[item.id]; return e && e.timesSeen > 0 && isDueReview(e.nextReview); });
+    const items = scopeItems.filter((item) => { const e = progress[item.id]; return e && e.timesSeen > 0 && isDueReview(e.nextReview, e.next_due_at); });
     if (items.length === 0) return null;
     const selected = buildKanaSessionItems(items, progress, Math.min(12, items.length));
     return makeSession(selected);
@@ -423,7 +427,7 @@ function getLearnStats(
     // aprendiendo: level 1-2 — seen and practicing but not stable
     aprendiendo: items.filter((item) => { const e = progress[item.id]; return e && e.level >= 1 && e.level <= 2; }).length,
     // pendientes: seen before, currently due for review
-    pendientes: items.filter((item) => { const e = progress[item.id]; return e && e.timesSeen > 0 && isDueReview(e.nextReview); }).length,
+    pendientes: items.filter((item) => { const e = progress[item.id]; return e && e.timesSeen > 0 && isDueReview(e.nextReview, e.next_due_at); }).length,
     debiles: items.filter((item) => !!progress[item.id]?.difficult).length,
     nuevos: items.filter((item) => !progress[item.id] || progress[item.id].timesSeen === 0).length,
   };

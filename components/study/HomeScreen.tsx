@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { DS, TopBar, TabBar, type DSTab } from "./ds";
 import { filterKanaItemsForSelection } from "@/lib/kana-data";
-import { loadKanaProgress, getKanaStateCounts } from "@/lib/kana-progress";
+import { loadKanaProgress, getKanaStateCounts, isKanaDue } from "@/lib/kana-progress";
 
 const HIRAGANA_BASIC_GROUPS: readonly (readonly string[])[] = [
   ["あ", "い", "う", "え", "お"],
@@ -42,6 +42,11 @@ export default function HomeScreen({
 
   const stateCounts = useMemo(
     () => getKanaStateCounts(basicHiragana, progress),
+    [basicHiragana, progress],
+  );
+
+  const kanaDueCount = useMemo(
+    () => basicHiragana.filter((item) => isKanaDue(progress[item.id])).length,
     [basicHiragana, progress],
   );
 
@@ -155,7 +160,7 @@ export default function HomeScreen({
             display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10,
           }}>
             {[
-              { label: "Por repasar", value: dueCount, color: dueCount > 0 ? DS.accent : DS.inkFaint },
+              { label: "Por repasar", value: kanaDueCount, color: kanaDueCount > 0 ? DS.accent : DS.inkFaint },
               { label: "Fijados", value: stateCounts.fijado, color: DS.tealDark },
               { label: "Días activos", value: weeklyActiveDays, color: DS.ink },
             ].map(({ label, value, color }) => (
