@@ -446,18 +446,24 @@ function getScriptLearnContext(
 
 // ─── Kana System design tokens (light theme) ─────────────────────────────────
 const DS = {
-  bg: "#fbf8f1",
-  surface: "#fdfaf3",
-  surfaceAlt: "#f4efe3",
-  card: "#ffffff",
-  ink: "#1c1b17",
-  inkSoft: "#66645c",
-  inkFaint: "#bcb9af",
-  line: "rgba(28,27,23,0.06)",
-  lineStrong: "rgba(28,27,23,0.12)",
-  accent: "#ac3e53",
-  accentSoft: "rgba(172,62,83,0.10)",
+  bg: "#FFF8E7",
+  surface: "#FDFCF5",
+  surfaceAlt: "#FAF3E2",
+  card: "#FFFFFF",
+  ink: "#1E1C12",
+  inkSoft: "#5B403F",
+  inkFaint: "#C4BAB0",
+  line: "rgba(30,28,18,0.06)",
+  lineStrong: "rgba(30,28,18,0.12)",
+  accent: "#E63946",
+  accentSoft: "rgba(230,57,70,0.10)",
   accentInk: "#ffffff",
+  teal: "#4ECDC4",
+  tealDark: "#006A65",
+  correct: "oklch(0.48 0.12 150)",
+  correctSoft: "oklch(0.48 0.12 150 / 0.10)",
+  wrong: "oklch(0.55 0.16 25)",
+  wrongSoft: "oklch(0.55 0.16 25 / 0.10)",
   fontHead: "var(--font-study), 'Plus Jakarta Sans', 'Manrope', system-ui, sans-serif",
   fontBody: "'Inter', system-ui, sans-serif",
   fontKana: "var(--font-noto-serif-jp), 'Noto Serif JP', var(--font-noto-sans-jp), 'Noto Sans JP', serif",
@@ -926,51 +932,34 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
           <div style={{ height: 54 }} />
 
           {/* TopBar */}
-          <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 20, height: 54, background: DS.bg, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", borderBottom: `1px solid ${DS.line}` }}>
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 20, height: 54, background: DS.bg, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px" }}>
             <div style={{ fontFamily: DS.fontKana, fontSize: 20, fontWeight: 500, color: DS.ink, letterSpacing: 1 }}>禅</div>
-            <button type="button" onClick={() => setScreen("table")} style={{ fontFamily: DS.fontHead, fontSize: 11, fontWeight: 600, color: DS.inkSoft, background: DS.surfaceAlt, border: `1px solid ${DS.line}`, borderRadius: 10, padding: "5px 12px", cursor: "pointer" }}>
-              Tabla de kana
+            <button type="button" onClick={() => setScreen("table")} style={{ fontFamily: DS.fontHead, fontSize: 11, fontWeight: 600, color: DS.inkSoft, background: DS.surfaceAlt, border: "none", borderRadius: 999, padding: "6px 14px", cursor: "pointer" }}>
+              Tabla
             </button>
           </div>
 
           {/* Scrollable body */}
           <div style={{ flex: 1, overflow: "auto", paddingBottom: 100 }}>
 
-            {/* Title + progress counter */}
-            <div style={{ padding: "20px 24px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div>
-                <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6, lineHeight: 1.1 }}>Aprender Kana</div>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>Progreso</div>
-                <div style={{ fontFamily: DS.fontHead, fontSize: 18, fontWeight: 700, color: DS.ink, marginTop: 2, letterSpacing: -0.3 }}>
-                  <span style={{ color: DS.accent }}>{learnStats.aprendidos}</span>
-                  <span style={{ color: DS.inkFaint, fontWeight: 400 }}> / {learnStats.total}</span>
-                </div>
-              </div>
+            {/* Title */}
+            <div style={{ padding: "20px 24px 0" }}>
+              <div style={{ fontFamily: DS.fontHead, fontSize: 30, fontWeight: 800, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>Aprender Kana</div>
             </div>
 
-            {/* Progress bar */}
-            <div style={{ padding: "10px 24px 0" }}>
-              <div style={{ height: 3, borderRadius: 3, background: DS.surfaceAlt, overflow: "hidden" }}>
-                <div style={{ width: `${learnStats.total > 0 ? (learnStats.aprendidos / learnStats.total) * 100 : 0}%`, height: "100%", background: DS.accent, transition: "width 0.4s ease" }} />
-              </div>
-            </div>
-
-            {/* Script selector */}
-            <div style={{ padding: "20px 24px 0", display: "flex", gap: 8 }}>
+            {/* Script pills */}
+            <div style={{ padding: "16px 24px 0", display: "flex", gap: 8 }}>
               {(["hiragana", "katakana", "ambos"] as LearnScript[]).map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => setLearnScript(s)}
                   style={{
-                    fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, letterSpacing: 0.1,
-                    padding: "8px 16px", borderRadius: 999, cursor: "pointer",
+                    fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600,
+                    padding: "8px 18px", borderRadius: 999, border: "none", cursor: "pointer",
                     background: learnScript === s ? DS.ink : DS.surfaceAlt,
                     color: learnScript === s ? DS.card : DS.inkSoft,
-                    border: "none",
-                    transition: "background 150ms, color 150ms",
+                    transition: "background 140ms, color 140ms",
                   }}
                 >
                   {s === "hiragana" ? "Hiragana" : s === "katakana" ? "Katakana" : "Ambos"}
@@ -978,128 +967,134 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               ))}
             </div>
 
-            {/* Stats row */}
-            <div style={{ padding: "16px 24px 0", display: "flex", gap: 20 }}>
-              {[
-                { label: "aprendidos", value: learnStats.aprendidos, highlight: true },
-                { label: "pendientes", value: learnStats.pendientes, highlight: false },
-                { label: "nuevos", value: learnStats.nuevos, highlight: false },
-              ].map(({ label, value, highlight }) => (
-                <div key={label}>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 18, fontWeight: 700, color: highlight ? DS.accent : DS.ink, letterSpacing: -0.3 }}>{value}</div>
-                  <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkSoft, marginTop: 2 }}>{label}</div>
+            {/* Hero card */}
+            <div style={{ margin: "20px 24px 0", borderRadius: 28, background: DS.surfaceAlt, padding: "22px 24px", position: "relative", overflow: "hidden", boxShadow: "0 8px 32px rgba(26,26,46,0.04)" }}>
+              {/* Decorative ghost kana */}
+              <div aria-hidden="true" style={{ position: "absolute", right: -16, top: -16, fontFamily: DS.fontKana, fontSize: 130, color: DS.ink, opacity: 0.04, lineHeight: 1, userSelect: "none", pointerEvents: "none" }}>
+                {learnScript === "katakana" ? "ア" : "あ"}
+              </div>
+              <div style={{ position: "relative" }}>
+                {/* Progress counter */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 12 }}>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft }}>Progreso</div>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 13, fontWeight: 700, color: DS.accent }}>
+                    {learnStats.aprendidos} / {learnStats.total} fijados
+                  </div>
                 </div>
-              ))}
-              {learnStats.debiles > 0 && (
-                <div>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 18, fontWeight: 700, color: DS.ink, letterSpacing: -0.3 }}>{learnStats.debiles}</div>
-                  <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkSoft, marginTop: 2 }}>débiles</div>
+                {/* Teal gradient progress bar */}
+                <div style={{ height: 8, borderRadius: 8, background: DS.card, overflow: "hidden", marginBottom: 16 }}>
+                  <div style={{
+                    width: `${learnStats.total > 0 ? (learnStats.aprendidos / learnStats.total) * 100 : 0}%`,
+                    height: "100%",
+                    background: `linear-gradient(to right, ${DS.teal}, ${DS.tealDark})`,
+                    borderRadius: 8, transition: "width 0.5s ease",
+                    minWidth: learnStats.aprendidos > 0 ? 24 : 0,
+                  }} />
                 </div>
-              )}
+                {/* Stats row */}
+                <div style={{ display: "flex", gap: 20 }}>
+                  {[
+                    { label: "pendientes", value: learnStats.pendientes },
+                    { label: "nuevos", value: learnStats.nuevos },
+                    ...(learnStats.debiles > 0 ? [{ label: "débiles", value: learnStats.debiles }] : []),
+                  ].map(({ label, value }) => (
+                    <div key={label}>
+                      <div style={{ fontFamily: DS.fontHead, fontSize: 17, fontWeight: 700, color: DS.ink, letterSpacing: -0.3 }}>{value}</div>
+                      <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkSoft, marginTop: 1 }}>{label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Mode tabs: Inteligente / Personalizado */}
-            <div style={{ padding: "24px 24px 0", display: "flex", gap: 24, borderBottom: `1px solid ${DS.line}`, marginBottom: 0 }}>
+            <div style={{ padding: "24px 24px 0", display: "flex", gap: 24 }}>
               {(["inteligente", "personalizado"] as HomeMode[]).map((m) => (
                 <button
                   key={m}
                   type="button"
                   onClick={() => setHomeMode(m)}
                   style={{
-                    fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, letterSpacing: 0.1,
-                    padding: "0 0 14px", background: "none", border: "none", cursor: "pointer",
+                    fontFamily: DS.fontHead, fontSize: 13, fontWeight: 700,
+                    padding: "0 0 12px", background: "none", border: "none", cursor: "pointer",
                     borderBottom: homeMode === m ? `2px solid ${DS.ink}` : "2px solid transparent",
                     color: homeMode === m ? DS.ink : DS.inkSoft,
-                    marginBottom: -1,
                   }}
                 >
                   {m === "inteligente" ? "Inteligente" : "Personalizado"}
                 </button>
               ))}
             </div>
+            {/* Thin separator */}
+            <div style={{ height: 1, background: DS.line, margin: "0 24px" }} />
 
             {/* ── INTELIGENTE ── */}
             {homeMode === "inteligente" && (() => {
               const ctx = learnScript === "katakana" ? katakanaLearnCtx : hiraganaLearnCtx;
-              const actions: Array<{ key: InteligenteAction; title: string; desc: string; count: number | null; alwaysEnabled: boolean }> = [
-                {
-                  key: "seguir",
-                  title: "Seguir aprendiendo",
-                  desc: ctx.freshCount > 0 ? `${ctx.freshCount} kana por introducir` : "Continúa tu progresión guiada",
-                  count: null,
-                  alwaysEnabled: true,
-                },
-                {
-                  key: "pendientes",
-                  title: "Repasar pendientes",
-                  desc: learnStats.pendientes > 0 ? "Kana listos para repasar" : "Nada por repasar",
-                  count: learnStats.pendientes,
-                  alwaysEnabled: false,
-                },
-                {
-                  key: "debiles",
-                  title: "Repasar débiles",
-                  desc: learnStats.debiles > 0 ? "Kana que todavía te cuestan" : "Sin kana difíciles",
-                  count: learnStats.debiles,
-                  alwaysEnabled: false,
-                },
-                {
-                  key: "nuevos",
-                  title: "Kana nuevos",
-                  desc: learnStats.nuevos > 0 ? "Kana que no has visto aún" : "Ya viste todos",
-                  count: learnStats.nuevos,
-                  alwaysEnabled: false,
-                },
-              ];
 
               return (
-                <div style={{ padding: "0 24px" }}>
-                  {/* Action cards */}
-                  {actions.map((action, i) => {
-                    const isAvailable = action.alwaysEnabled || (action.count ?? 0) > 0;
-                    return (
-                      <button
-                        key={action.key}
-                        type="button"
-                        onClick={() => isAvailable ? startInteligenteSession(action.key) : undefined}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 16,
-                          padding: "18px 0", width: "100%", textAlign: "left",
-                          background: "none", border: "none",
-                          borderTop: `1px solid ${DS.line}`,
-                          borderBottom: i === actions.length - 1 ? `1px solid ${DS.line}` : "none",
-                          cursor: isAvailable ? "pointer" : "default",
-                          opacity: isAvailable ? 1 : 0.4,
-                        }}
-                      >
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600, color: DS.ink, letterSpacing: -0.2 }}>
-                            {action.title}
-                          </div>
-                          <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 3, lineHeight: 1.4 }}>
-                            {action.desc}
-                          </div>
-                        </div>
-                        {action.count !== null && action.count > 0 && (
-                          <div style={{
-                            fontFamily: DS.fontHead, fontSize: 13, fontWeight: 700,
-                            color: DS.accentInk, background: DS.accent,
-                            borderRadius: 999, padding: "3px 10px", flexShrink: 0,
-                          }}>
+                <div style={{ padding: "16px 24px 0" }}>
+                  {/* Primary action card */}
+                  <div style={{
+                    borderRadius: 28, background: DS.card,
+                    boxShadow: "0 4px 24px rgba(26,26,46,0.06)",
+                    padding: "22px 22px", marginBottom: 12,
+                  }}>
+                    <div style={{ fontFamily: DS.fontHead, fontSize: 17, fontWeight: 700, color: DS.ink, letterSpacing: -0.2, marginBottom: 6 }}>
+                      Seguir aprendiendo
+                    </div>
+                    <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft, marginBottom: 18, lineHeight: 1.5 }}>
+                      {ctx.freshCount > 0 ? `${ctx.freshCount} kana por introducir` : "Continúa tu progresión guiada"}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => startInteligenteSession("seguir")}
+                      style={{
+                        width: "100%", padding: "16px",
+                        background: `linear-gradient(135deg, ${DS.accent} 0%, #c42b38 100%)`,
+                        color: "#fff", border: "none", borderRadius: 999,
+                        fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700,
+                        cursor: "pointer", letterSpacing: -0.2,
+                        boxShadow: "0 8px 20px rgba(230,57,70,0.25)",
+                      }}
+                    >
+                      Comenzar sesión
+                    </button>
+                  </div>
+
+                  {/* Secondary action cards – pendientes, debiles, nuevos */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 24 }}>
+                    {[
+                      { key: "pendientes" as InteligenteAction, label: "Pendientes", count: learnStats.pendientes },
+                      { key: "debiles" as InteligenteAction, label: "Débiles", count: learnStats.debiles },
+                      { key: "nuevos" as InteligenteAction, label: "Nuevos", count: learnStats.nuevos },
+                    ].map((action) => {
+                      const available = action.count > 0;
+                      return (
+                        <button
+                          key={action.key}
+                          type="button"
+                          onClick={() => available ? startInteligenteSession(action.key) : undefined}
+                          style={{
+                            borderRadius: 20, padding: "16px 12px", textAlign: "center",
+                            background: DS.surfaceAlt, border: "none",
+                            cursor: available ? "pointer" : "default",
+                            opacity: available ? 1 : 0.4,
+                          }}
+                        >
+                          <div style={{ fontFamily: DS.fontHead, fontSize: 20, fontWeight: 800, color: available ? DS.ink : DS.inkFaint, letterSpacing: -0.5 }}>
                             {action.count}
                           </div>
-                        )}
-                        {isAvailable && (
-                          <svg width="10" height="12" viewBox="0 0 10 12" fill="none" style={{ flexShrink: 0 }}>
-                            <path d="M1 1l5 5-5 5" stroke={DS.inkFaint} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        )}
-                      </button>
-                    );
-                  })}
+                          <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkSoft, marginTop: 4 }}>
+                            {action.label}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
 
                   {/* Mastery dots */}
-                  <div style={{ paddingTop: 24 }}>
+                  <div style={{ paddingBottom: 16 }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                       {kanaGridData.map((row, rowIdx) => (
                         <div key={rowIdx} style={{ display: "flex", gap: 4 }}>
@@ -1113,7 +1108,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                       ))}
                     </div>
                   </div>
-
                 </div>
               );
             })()}
@@ -1227,10 +1221,12 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                   onClick={() => startSession()}
                   disabled={selectedSets.length === 0 || practiceModes.length === 0}
                   style={{
-                    width: "100%", padding: "16px 0", borderRadius: 16,
-                    background: DS.ink, color: DS.card, border: "none",
+                    width: "100%", padding: "18px", borderRadius: 999,
+                    background: `linear-gradient(135deg, ${DS.accent} 0%, #c42b38 100%)`,
+                    color: "#fff", border: "none",
                     fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, cursor: "pointer",
                     opacity: selectedSets.length === 0 || practiceModes.length === 0 ? 0.4 : 1,
+                    boxShadow: selectedSets.length > 0 ? "0 8px 20px rgba(230,57,70,0.22)" : "none",
                     marginBottom: 16,
                   }}
                 >

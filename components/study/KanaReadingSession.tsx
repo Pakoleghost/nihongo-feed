@@ -67,110 +67,101 @@ function SummaryScreen({
   const accuracy = summary.total > 0 ? Math.round((summary.correct / summary.total) * 100) : 0;
 
   const headline =
-    accuracy >= 90 ? "Perfecto." :
-    accuracy >= 70 ? "Buen trabajo." :
+    accuracy >= 90 ? "¡Perfecto!" :
+    accuracy >= 70 ? "¡Buen trabajo!" :
     accuracy >= 50 ? "Sigue así." : "Vamos mejorando.";
 
   const sub =
     accuracy >= 90 ? "Lo tienes dominado." :
-    accuracy >= 70 ? "Las vocales son tuyas." :
+    accuracy >= 70 ? "Estás progresando." :
     accuracy >= 50 ? "La práctica hace al maestro." : "Cada sesión cuenta.";
 
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 92,
-      background: DS.bg,
+      background: "#FFF8E7",
       display: "flex", flexDirection: "column",
       fontFamily: DS.fontHead,
     }}>
       <div style={{ flex: 1, overflowY: "auto" }}>
         {/* Header */}
         <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          padding: "max(16px, env(safe-area-inset-top)) 20px 12px",
+          display: "flex", justifyContent: "flex-end",
+          padding: "max(20px, env(safe-area-inset-top)) 20px 12px",
         }}>
-          <div style={{
-            fontFamily: DS.fontKana, fontSize: 22, fontWeight: 500,
-            color: DS.ink, letterSpacing: 1,
-          }}>禅</div>
           <button
             type="button"
             onClick={onClose}
             style={{
-              width: 36, height: 36, borderRadius: 12,
-              background: DS.surfaceAlt, border: `1px solid ${DS.line}`,
+              width: 38, height: 38, borderRadius: 999,
+              background: "#FAF3E2", border: "none",
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer",
             }}
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M1 1l10 10M11 1L1 11" stroke={DS.ink} strokeWidth="1.8" strokeLinecap="round" />
+              <path d="M1 1l10 10M11 1L1 11" stroke="#1E1C12" strokeWidth="1.8" strokeLinecap="round" />
             </svg>
           </button>
         </div>
 
         <div style={{ padding: "8px 24px 32px" }}>
-          {/* Eyebrow */}
-          <div style={{
-            fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em",
-            textTransform: "uppercase", color: DS.accent, marginBottom: 10,
-          }}>Sesión completa</div>
+          {/* Celebration headline */}
+          <div style={{ marginBottom: 28 }}>
+            <div style={{
+              fontSize: "clamp(36px, 11vw, 48px)", fontWeight: 800,
+              color: "#1E1C12", letterSpacing: -1, lineHeight: 1.0,
+            }}>{headline}</div>
+            <div style={{
+              fontSize: "clamp(17px, 5vw, 20px)", fontWeight: 400,
+              color: "#5B403F", marginTop: 6, lineHeight: 1.3,
+            }}>{sub}</div>
+          </div>
 
-          {/* Headline */}
+          {/* Stats — 3 column grid of cards */}
           <div style={{
-            fontSize: "clamp(30px, 9vw, 40px)", fontWeight: 700,
-            color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05,
-          }}>{headline}</div>
-          <div style={{
-            fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 300,
-            color: DS.inkSoft, letterSpacing: -0.5, lineHeight: 1.1,
-            fontStyle: "italic", marginBottom: 28,
-          }}>{sub}</div>
-
-          {/* Stats grid */}
-          <div style={{
-            display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
-            borderTop: `1px solid ${DS.line}`, borderBottom: `1px solid ${DS.line}`,
-            marginBottom: 28,
+            display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10,
+            marginBottom: 24,
           }}>
             {([
               { l: "Precisión", v: `${accuracy}%` },
               { l: "Tiempo", v: formatDuration(summary.durationMs) },
               { l: "Racha", v: `${summary.streak}` },
-            ] as const).map((x, i) => (
+            ] as const).map((x) => (
               <div key={x.l} style={{
-                padding: "16px 0",
-                borderRight: i < 2 ? `1px solid ${DS.line}` : "none",
-                textAlign: i === 0 ? "left" : i === 1 ? "center" : "right",
+                padding: "16px 12px", borderRadius: 20,
+                background: "#FFFFFF",
+                boxShadow: "0 4px 20px rgba(26,26,46,0.05)",
+                textAlign: "center",
               }}>
                 <div style={{
-                  fontSize: 10, fontWeight: 600, letterSpacing: "0.22em",
-                  textTransform: "uppercase", color: DS.inkSoft,
+                  fontSize: 10, fontWeight: 600, letterSpacing: "0.18em",
+                  textTransform: "uppercase", color: "#5B403F", marginBottom: 6,
                 }}>{x.l}</div>
                 <div style={{
-                  marginTop: 6, fontSize: 24, fontWeight: 700,
-                  color: DS.ink, letterSpacing: -0.5,
+                  fontSize: 24, fontWeight: 800, color: "#1E1C12", letterSpacing: -0.5,
                 }}>{x.v}</div>
               </div>
             ))}
           </div>
 
-          {/* Newly set */}
+          {/* Newly mastered kana */}
           {summary.newlySet.length > 0 && (
             <div style={{ marginBottom: 24 }}>
               <div style={{
-                fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em",
-                textTransform: "uppercase", color: DS.inkSoft, marginBottom: 12,
-              }}>Recién fijados</div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                fontSize: 10.5, fontWeight: 600, letterSpacing: "0.2em",
+                textTransform: "uppercase", color: "#5B403F", marginBottom: 12,
+              }}>Kana dominados hoy</div>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 {summary.newlySet.map((item) => (
                   <div
                     key={item.kana}
                     style={{
-                      padding: "8px 14px", borderRadius: 14,
-                      background: DS.accentSoft,
-                      fontFamily: DS.fontKana, fontSize: 22,
-                      color: DS.accent,
+                      width: 60, height: 60, borderRadius: 20,
+                      background: "#FFFFFF",
+                      boxShadow: "0 6px 20px rgba(26,26,46,0.07)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontFamily: DS.fontKana, fontSize: 26, color: "#E63946",
                     }}
                   >{item.kana}</div>
                 ))}
@@ -178,24 +169,24 @@ function SummaryScreen({
             </div>
           )}
 
-          {/* Up next */}
+          {/* Up next card */}
           {summary.upNextLabel && (
             <div style={{
               display: "flex", alignItems: "center", gap: 16,
-              padding: "18px 20px", borderRadius: 22,
-              background: DS.card, border: `1px solid ${DS.line}`,
+              padding: "18px 20px", borderRadius: 24,
+              background: "#FAF3E2",
               marginBottom: 28,
             }}>
               <div style={{ flex: 1 }}>
                 <div style={{
-                  fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em",
-                  textTransform: "uppercase", color: DS.inkSoft, marginBottom: 4,
+                  fontSize: 10, fontWeight: 600, letterSpacing: "0.2em",
+                  textTransform: "uppercase", color: "#5B403F", marginBottom: 4,
                 }}>Próximo</div>
                 <div style={{
-                  fontFamily: DS.fontKana, fontSize: 20, color: DS.ink, letterSpacing: 2,
+                  fontFamily: DS.fontKana, fontSize: 22, color: "#1E1C12", letterSpacing: 2,
                 }}>{summary.upNextKana}</div>
                 <div style={{
-                  fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 2,
+                  fontFamily: DS.fontBody, fontSize: 12, color: "#5B403F", marginTop: 2,
                 }}>{summary.upNextLabel}</div>
               </div>
               <button
@@ -203,13 +194,14 @@ function SummaryScreen({
                 onClick={onRestart}
                 style={{
                   width: 52, height: 52, borderRadius: 999,
-                  background: DS.ink, border: "none", cursor: "pointer",
+                  background: "#E63946", border: "none", cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   flexShrink: 0,
+                  boxShadow: "0 6px 16px rgba(230,57,70,0.25)",
                 }}
               >
                 <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
-                  <path d="M7 4l11 7-11 7V4z" fill={DS.bg} />
+                  <path d="M7 4l11 7-11 7V4z" fill="#fff" />
                 </svg>
               </button>
             </div>
@@ -218,15 +210,17 @@ function SummaryScreen({
       </div>
 
       {/* Done button */}
-      <div style={{ padding: "12px 24px calc(12px + env(safe-area-inset-bottom))" }}>
+      <div style={{ padding: "12px 24px calc(16px + env(safe-area-inset-bottom))" }}>
         <button
           type="button"
           onClick={onClose}
           style={{
             width: "100%", padding: "18px 22px",
-            background: DS.ink, color: DS.bg,
-            border: "none", borderRadius: 22, cursor: "pointer",
-            fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600,
+            background: "linear-gradient(135deg, #E63946 0%, #c42b38 100%)",
+            color: "#fff",
+            border: "none", borderRadius: 999, cursor: "pointer",
+            fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700,
+            boxShadow: "0 8px 24px rgba(230,57,70,0.28)",
           }}
         >Listo</button>
       </div>
