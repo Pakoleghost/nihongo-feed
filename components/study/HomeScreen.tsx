@@ -22,6 +22,7 @@ const HIRAGANA_BASIC_GROUPS: readonly (readonly string[])[] = [
 type HomeScreenProps = {
   userKey: string;
   onTabChange: (tab: DSTab) => void;
+  onMenu: () => void;
   weeklyActiveDays?: number;
   dueCount?: number;
 };
@@ -29,6 +30,7 @@ type HomeScreenProps = {
 export default function HomeScreen({
   userKey,
   onTabChange,
+  onMenu,
   weeklyActiveDays = 0,
   dueCount = 0,
 }: HomeScreenProps) {
@@ -80,7 +82,7 @@ export default function HomeScreen({
   return (
     <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
       <div style={{ height: 54 }} />
-      <TopBar />
+      <TopBar onMenu={onMenu} />
 
       <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
 

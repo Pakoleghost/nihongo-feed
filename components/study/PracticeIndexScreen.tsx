@@ -22,18 +22,20 @@ const MODES: PracticeMode[] = [
 type PracticeIndexScreenProps = {
   onTabChange: (tab: DSTab) => void;
   onSelectMode: (mode: PracticeSubView) => void;
+  onMenu?: () => void;
   recentActivity?: Array<{ mode: string; when: string; stat: string }>;
 };
 
 export default function PracticeIndexScreen({
   onTabChange,
   onSelectMode,
+  onMenu,
   recentActivity = [],
 }: PracticeIndexScreenProps) {
   return (
     <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
       <div style={{ height: 54 }} />
-      <TopBar />
+      <TopBar onMenu={onMenu} />
 
       <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
         <ScreenTitle title="Practice" />

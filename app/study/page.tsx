@@ -11,6 +11,8 @@ import HomeScreen from "@/components/study/HomeScreen";
 import ReviewScreen from "@/components/study/ReviewScreen";
 import PracticeIndexScreen, { type PracticeSubView } from "@/components/study/PracticeIndexScreen";
 import VaultScreen from "@/components/study/VaultScreen";
+import ResourcesScreen from "@/components/study/ResourcesScreen";
+import SideMenu from "@/components/study/SideMenu";
 import { DS, TabBar } from "@/components/study/ds";
 import PracticeShell, { PracticeStageCard } from "@/components/study/PracticeShell";
 import StudySelectorGroup from "@/components/study/StudySelectorGroup";
@@ -193,7 +195,7 @@ const VK_BUCKETS: Array<{ key: VkBucketKey; label: string; lessons: number[] }> 
   { key: "l11_12", label: "L11-12", lessons: [11, 12] },
 ];
 const VK_MODE_KEYS = VK_BUCKETS.map((bucket) => `vk:${bucket.key}`);
-type StudyView = "home" | "learn" | "review" | "practice" | "vault";
+type StudyView = "home" | "learn" | "review" | "practice" | "vault" | "resources";
 const EXAM_PASSING_PERCENT = 70;
 const EXAM_QUESTION_COUNT = 20;
 
@@ -5017,7 +5019,7 @@ function pickLessonExamQuestions(pool: QuizQuestion[], seenMap: Record<string, n
 
 function resolveStudyView(searchParams: Pick<URLSearchParams, "get">): StudyView | null {
   const view = searchParams.get("view");
-  if (view === "home" || view === "learn" || view === "review" || view === "practice" || view === "vault") return view;
+  if (view === "home" || view === "learn" || view === "review" || view === "practice" || view === "vault" || view === "resources") return view;
   // Backward compat with old view names
   if (view === "learnkana") return "learn";
   if (view === "kana" || view === "flashcards" || view === "sprint") return "practice";
@@ -5268,6 +5270,7 @@ function StudyContent() {
   const searchParams = useSearchParams();
   const selectedView = useMemo(() => resolveStudyView(searchParams), [searchParams]);
   const [activeTab, setActiveTab] = useState<StudyView>("home");
+  const [menuOpen, setMenuOpen] = useState(false);
   const [practiceSubView, setPracticeSubView] = useState<PracticeSubView | null>(null);
   const [userKey, setUserKey] = useState("anon");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -6936,12 +6939,19 @@ function StudyContent() {
   return (
     <div style={{ minHeight: "100vh", background: DS.bg, fontFamily: DS.fontHead }}>
 
+      <SideMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onTabChange={(tab) => setActiveTab(tab as StudyView)}
+      />
+
       {activeTab === "home" && (
         <HomeScreen
           userKey={userKey}
           onTabChange={(tab) => setActiveTab(tab as StudyView)}
           weeklyActiveDays={weeklyActiveDays.size}
           dueCount={studyDueSummary.totalDue}
+          onMenu={() => setMenuOpen(true)}
         />
       )}
 
@@ -6951,6 +6961,7 @@ function StudyContent() {
           initialMode={searchParams.get("learn") === "1" ? "learn" : null}
           onRecordActivity={(detail) => recordStudyActivity("learnkana", detail)}
           onTabChange={(tab) => setActiveTab(tab as StudyView)}
+          onMenu={() => setMenuOpen(true)}
         />
       )}
 
@@ -6959,6 +6970,7 @@ function StudyContent() {
           userKey={userKey}
           onTabChange={(tab) => setActiveTab(tab as StudyView)}
           onStartReview={() => setActiveTab("learn")}
+          onMenu={() => setMenuOpen(true)}
         />
       )}
 
@@ -6966,6 +6978,7 @@ function StudyContent() {
         <PracticeIndexScreen
           onTabChange={(tab) => setActiveTab(tab as StudyView)}
           onSelectMode={(mode) => setPracticeSubView(mode)}
+          onMenu={() => setMenuOpen(true)}
         />
       )}
 
@@ -6973,6 +6986,14 @@ function StudyContent() {
         <VaultScreen
           userKey={userKey}
           onTabChange={(tab) => setActiveTab(tab as StudyView)}
+          onMenu={() => setMenuOpen(true)}
+        />
+      )}
+
+      {activeTab === "resources" && (
+        <ResourcesScreen
+          onTabChange={(tab) => setActiveTab(tab as StudyView)}
+          onMenu={() => setMenuOpen(true)}
         />
       )}
 

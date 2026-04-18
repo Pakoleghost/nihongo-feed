@@ -9,6 +9,7 @@ type ReviewScreenProps = {
   userKey: string;
   onTabChange: (tab: DSTab) => void;
   onStartReview: () => void;
+  onMenu?: () => void;
 };
 
 function isDueReview(nextReview?: string | null) {
@@ -16,7 +17,7 @@ function isDueReview(nextReview?: string | null) {
   return new Date(nextReview).getTime() <= Date.now();
 }
 
-export default function ReviewScreen({ userKey, onTabChange, onStartReview }: ReviewScreenProps) {
+export default function ReviewScreen({ userKey, onTabChange, onStartReview, onMenu }: ReviewScreenProps) {
   const basicHiragana = useMemo(() => filterKanaItemsForSelection("hiragana", "basic"), []);
   const progress = useMemo(() => loadKanaProgress(userKey), [userKey]);
 
@@ -56,7 +57,7 @@ export default function ReviewScreen({ userKey, onTabChange, onStartReview }: Re
   return (
     <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
       <div style={{ height: 54 }} />
-      <TopBar />
+      <TopBar onMenu={onMenu} />
 
       <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
         <ScreenTitle title="Review" />
