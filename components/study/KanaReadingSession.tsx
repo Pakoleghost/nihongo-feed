@@ -34,6 +34,8 @@ type Props = {
   /** 1-based current question index */
   questionIndex: number;
   totalQuestions: number;
+  mode?: "romaji_input" | "multiple_choice";
+  options?: string[];
   feedback: KanaSessionFeedback | null;
   isFinished: boolean;
   summary: KanaSessionSummaryData | null;
@@ -244,6 +246,8 @@ export default function KanaReadingSession({
   hint,
   questionIndex,
   totalQuestions,
+  mode = "romaji_input",
+  options = [],
   feedback,
   isFinished,
   summary,
@@ -272,6 +276,11 @@ export default function KanaReadingSession({
     const trimmed = inputValue.trim();
     if (!trimmed) return;
     onAnswer(trimmed);
+  };
+
+  const handleOptionSelect = (option: string) => {
+    if (feedback) return;
+    onAnswer(option);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -361,19 +370,46 @@ export default function KanaReadingSession({
 
         {/* Kana display */}
         <div style={{
-          flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-          padding: "24px 32px",
+          flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          padding: "24px 32px", gap: 32,
         }}>
           <div style={{
             fontFamily: DS.fontKana,
-            fontSize: "clamp(120px, 38vw, 200px)",
+            fontSize: mode === "multiple_choice" ? "clamp(100px, 28vw, 160px)" : "clamp(120px, 38vw, 200px)",
             lineHeight: 0.9,
             color: feedback
               ? isCorrect ? "oklch(0.48 0.14 150)" : "oklch(0.55 0.16 25)"
               : DS.ink,
-            transition: "color 150ms ease",
+            transition: "color 150ms ease, font-size 150ms ease",
             userSelect: "none",
           }}>{kana}</div>
+
+          {/* Multiple Choice Options */}
+          {mode === "multiple_choice" && !feedback && (
+            <div style={{
+              display: "grid", gridTemplateColumns: "repeat(2, 1fr)",
+              gap: 12, width: "100%", maxWidth: 400,
+            }}>
+              {options.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => handleOptionSelect(option)}
+                  style={{
+                    padding: "20px 10px", borderRadius: 24,
+                    background: DS.card, border: `1px solid ${DS.lineStrong}`,
+                    fontFamily: DS.fontHead, fontSize: 24, fontWeight: 700,
+                    color: DS.ink, cursor: "pointer",
+                    transition: "transform 100ms ease, background 100ms ease",
+                  }}
+                  onPointerDown={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
+                  onPointerUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Feedback area (shown when answered) */}
@@ -419,7 +455,7 @@ export default function KanaReadingSession({
       {/* Footer */}
       <div style={{
         padding: "8px 16px calc(16px + env(safe-area-inset-bottom))",
-        borderTop: `1px solid ${DS.line}`,
+        borderTop: mode === "romaji_input" || feedback ? `1px solid ${DS.line}` : "none",
         background: DS.bg,
       }}>
         {feedback ? (
@@ -440,7 +476,7 @@ export default function KanaReadingSession({
               <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke={DS.bg} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-        ) : (
+        ) : mode === "romaji_input" ? (
           /* Question input row */
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {/* Text input */}
@@ -501,7 +537,7 @@ export default function KanaReadingSession({
               >Comprobar</button>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       <style jsx>{`

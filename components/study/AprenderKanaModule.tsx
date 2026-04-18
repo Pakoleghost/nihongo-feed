@@ -32,7 +32,7 @@ type AprenderKanaModuleProps = {
   userKey: string;
   onRecordActivity?: (detail?: string) => void;
   initialMode?: "learn" | null;
-  onTabChange?: (tab: "home" | "learn" | "review" | "practice" | "vault") => void;
+  onTabChange?: (tab: "home" | "learn" | "practice" | "resources") => void;
 };
 
 type KanaSessionQuestion = {
@@ -802,9 +802,8 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   const TAB_BAR_ITEMS = [
     { k: "home" as const, label: "Inicio", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10l8-7 8 7v8a1.5 1.5 0 01-1.5 1.5H13v-6h-4v6H4.5A1.5 1.5 0 013 18v-8z" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/></svg>) },
     { k: "learn" as const, label: "Aprender", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 5.5a2 2 0 012-2h5v15H5a2 2 0 01-2-2v-11zM12 3.5h5a2 2 0 012 2v11a2 2 0 01-2 2h-5v-15z" stroke={c} strokeWidth="1.5"/></svg>) },
-    { k: "review" as const, label: "Repasar", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M18 11a7 7 0 11-2.05-4.95M18 3v4h-4" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>) },
     { k: "practice" as const, label: "Practicar", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M6 3v16M10 5v12M14 7v8M18 9v4" stroke={c} strokeWidth="1.5" strokeLinecap="round"/></svg>) },
-    { k: "vault" as const, label: "Biblioteca", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="13" rx="2" stroke={c} strokeWidth="1.5"/><path d="M3 8h16M8 5V3.5h6V5" stroke={c} strokeWidth="1.5" strokeLinecap="round"/></svg>) },
+    { k: "resources" as const, label: "Recursos", icon: (c: string) => (<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3.5 6.5a2 2 0 012-2h4l1.5 1.7h6.5a2 2 0 012 2v7.3a2 2 0 01-2 2H5.5a2 2 0 01-2-2v-9z" stroke={c} strokeWidth="1.5" strokeLinejoin="round" /></svg>) },
   ] as const;
 
   const renderTabBar = () => (
@@ -860,6 +859,8 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
   const activeQuestionLabel = currentQuestion ? getKanaSetLabel(currentQuestion.item) : "";
   const isLearnSession = session?.setKey === "learn";
+  const isInteligenteSession = session?.setKey === "inteligente";
+  const useNewDesign = isLearnSession || isInteligenteSession;
 
   const handleMultipleChoiceAnswer = (option: string) => {
     if (answerFeedback) return;
@@ -897,23 +898,39 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     }
   };
 
-  const handleLearnAnswer = (value: string) => {
+  const handleNewDesignAnswer = (value: string) => {
     if (romajiFeedback || !currentQuestion) return;
-    const correct = isKanaAnswerCorrect(currentQuestion.item, value);
-    setRomajiValue(value);
-    setRomajiFeedback({ correct, answer: currentQuestion.item.romaji });
-    recordResult(currentQuestion.item, correct ? "correct" : "wrong");
-    if (correct) {
-      setStreak((v) => { const n = v + 1; setStreakPulse(n); return n; });
+    const isCorrect = isKanaAnswerCorrect(currentQuestion.item, value);
+
+    if (currentQuestion.mode === "multiple_choice") {
+      setMultipleChoiceAnswer(value);
+    } else {
+      setRomajiValue(value);
+    }
+
+    setRomajiFeedback({ correct: isCorrect, answer: currentQuestion.item.romaji });
+    setAnswerFeedback({ status: isCorrect ? "correct" : "wrong", answer: currentQuestion.item.romaji });
+    recordResult(currentQuestion.item, isCorrect ? "correct" : "wrong");
+
+    if (isCorrect) {
+      setStreak((v) => {
+        const n = v + 1;
+        setStreakPulse(n);
+        return n;
+      });
+      if (currentQuestion.mode === "multiple_choice") {
+        advanceTimerRef.current = window.setTimeout(moveToNext, 700);
+      }
     } else {
       setStreak(0);
     }
   };
 
-  const handleLearnDontKnow = () => {
+  const handleNewDesignDontKnow = () => {
     if (romajiFeedback || !currentQuestion) return;
     setRomajiValue("");
     setRomajiFeedback({ correct: false, answer: currentQuestion.item.romaji });
+    setAnswerFeedback({ status: "wrong", answer: currentQuestion.item.romaji });
     recordResult(currentQuestion.item, "wrong");
     setStreak(0);
   };
@@ -1321,6 +1338,8 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                               gap: 4,
                               justifyItems: "center",
                               minHeight: 74,
+                              position: "relative",
+                              opacity: progress[item.id] ? 1 : 0.4,
                             }}
                           >
                             <div
@@ -1336,6 +1355,12 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                             <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
                               {item.romaji}
                             </div>
+                            {progress[item.id] && (
+                              <div style={{
+                                position: "absolute", bottom: 6, width: 14, height: 2, borderRadius: 1,
+                                background: progress[item.id]!.level >= 4 ? DS.accent : DS.accentSoft,
+                              }} />
+                            )}
                           </div>
                         ) : (
                           <div key={`${section.key}-blank-${rowIndex}-${cellIndex}`} aria-hidden="true" />
@@ -1350,34 +1375,41 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
         </div>
       )}
 
-      {/* ── LEARN SESSION (KanaReadingSession) ── */}
-      {isLearnSession && (
+      {/* ── NEW DESIGN SESSION (KanaReadingSession) ── */}
+      {useNewDesign && (
         <KanaReadingSession
           open={Boolean(session)}
           visible={sheetVisible}
           kana={currentQuestion?.item.kana ?? ""}
           romaji={currentQuestion?.item.romaji ?? ""}
+          mode={currentQuestion?.mode === "multiple_choice" ? "multiple_choice" : "romaji_input"}
+          options={currentQuestion?.options}
           questionIndex={Math.min(sessionIndex + 1, session?.questions.length ?? 0)}
           totalQuestions={session?.questions.length ?? 0}
           feedback={romajiFeedback ? {
             status: romajiFeedback.correct ? "correct" : "wrong",
-            userAnswer: romajiValue,
+            userAnswer: currentQuestion?.mode === "multiple_choice" ? multipleChoiceAnswer || "" : romajiValue,
             correctAnswer: romajiFeedback.answer,
           } as KanaSessionFeedback : null}
           isFinished={sessionFinished}
           summary={sessionFinished ? learnSessionSummaryData : null}
-          onAnswer={handleLearnAnswer}
-          onDontKnow={handleLearnDontKnow}
+          onAnswer={handleNewDesignAnswer}
+          onDontKnow={handleNewDesignDontKnow}
           onNext={moveToNext}
-          onRestart={() => { closeSession(); window.setTimeout(startLearnSession, 260); }}
+          onRestart={() => {
+            closeSession();
+            if (isLearnSession) {
+              window.setTimeout(startLearnSession, 260);
+            }
+          }}
           onClose={closeSession}
         />
       )}
 
       {/* ── PRACTICE SHELL ── */}
       <PracticeShell
-        open={Boolean(session) && !isLearnSession}
-        visible={sheetVisible && !isLearnSession}
+        open={Boolean(session) && !useNewDesign}
+        visible={sheetVisible && !useNewDesign}
         title="Práctica"
         subtitle={
           sessionFinished
@@ -1616,9 +1648,9 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
         ) : null}
 
         {/* Summary — Learn (handled by KanaReadingSession overlay, not PracticeShell) */}
-        {sessionFinished && isLearnSession ? (
+        {sessionFinished && useNewDesign ? (
           <div style={{ display: "grid", gap: 8 }}>
-            <button type="button" onClick={startLearnSession} className="ds-btn" style={{ width: "100%", minHeight: 54 }}>
+            <button type="button" onClick={() => { if (isLearnSession) startLearnSession(); else closeSession(); }} className="ds-btn" style={{ width: "100%", minHeight: 54 }}>
               Continuar
             </button>
             <button
@@ -1632,7 +1664,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
         ) : null}
 
         {/* Summary — Custom Practice */}
-        {sessionFinished && !isLearnSession ? (
+        {sessionFinished && !useNewDesign ? (
           <div style={{ display: "grid", gap: "var(--space-3)" }}>
             <div
               style={{

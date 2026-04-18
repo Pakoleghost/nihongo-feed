@@ -72,9 +72,8 @@ export default function HomeScreen({
 
   const jumpItems: Array<{ k: DSTab; label: string; sub: string; kana: string }> = [
     { k: "learn", label: "Aprender", sub: `Siguiente · ${rowName}`, kana: heroKana },
-    { k: "review", label: "Repasar", sub: dueCount > 0 ? `${dueCount} por repasar` : "Al día", kana: "時" },
     { k: "practice", label: "Practicar", sub: "Sprint · Tarjetas · Repaso", kana: "練" },
-    { k: "vault", label: "Biblioteca", sub: `${learnedCount} kana dominados`, kana: "蔵" },
+    { k: "resources", label: "Recursos", sub: "Enlaces · Archivos · Notas", kana: "蔵" },
   ];
 
   return (
