@@ -32,7 +32,7 @@ export default function PendingApprovalPage() {
       // No session on first load.
       setSessionExpired(true);
 
-      const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      const { data: sub } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
         const nextUid = session?.user?.id ?? null;
         if (!alive) return;
         if (nextUid) {
