@@ -62,6 +62,9 @@ type AnswerFeedback = {
 
 type KanaSelectableSet = "basic" | "dakuten" | "handakuten" | "yoon";
 type KanaScopeKey = `${KanaScript}:${KanaSelectableSet}`;
+type LearnScript = "hiragana" | "katakana" | "ambos";
+type HomeMode = "inteligente" | "personalizado";
+type InteligenteAction = "seguir" | "pendientes" | "debiles" | "nuevos";
 
 const KANA_SCOPE_ROWS: Array<{ set: KanaSelectableSet; label: string }> = [
   { set: "basic", label: "Básico" },
@@ -77,7 +80,7 @@ const KANA_SCOPE_LABELS: Record<KanaSelectableSet, string> = {
   yoon: "Yōon",
 };
 
-// Ordered hiragana groups for progressive Learn mode introduction
+// Ordered groups for progressive Learn mode introduction
 const HIRAGANA_BASIC_GROUPS: readonly (readonly string[])[] = [
   ["あ", "い", "う", "え", "お"],
   ["か", "き", "く", "け", "こ"],
@@ -91,10 +94,29 @@ const HIRAGANA_BASIC_GROUPS: readonly (readonly string[])[] = [
   ["わ", "を", "ん"],
 ];
 
-function getCurrentLearnBatch(hiraganaBasic: KanaItem[], progress: KanaProgressMap): number {
-  const kanaToItem = new Map(hiraganaBasic.map((item) => [item.kana, item]));
-  for (let i = 0; i < HIRAGANA_BASIC_GROUPS.length; i++) {
-    const groupItems = HIRAGANA_BASIC_GROUPS[i]
+const KATAKANA_BASIC_GROUPS: readonly (readonly string[])[] = [
+  ["ア", "イ", "ウ", "エ", "オ"],
+  ["カ", "キ", "ク", "ケ", "コ"],
+  ["サ", "シ", "ス", "セ", "ソ"],
+  ["タ", "チ", "ツ", "テ", "ト"],
+  ["ナ", "ニ", "ヌ", "ネ", "ノ"],
+  ["ハ", "ヒ", "フ", "ヘ", "ホ"],
+  ["マ", "ミ", "ム", "メ", "モ"],
+  ["ヤ", "ユ", "ヨ"],
+  ["ラ", "リ", "ル", "レ", "ロ"],
+  ["ワ", "ヲ", "ン"],
+];
+
+const ROW_LABELS = ["A", "K", "S", "T", "N", "H", "M", "Y", "R", "W"] as const;
+
+function getCurrentLearnBatchForScript(
+  basicItems: KanaItem[],
+  groups: readonly (readonly string[])[],
+  progress: KanaProgressMap,
+): number {
+  const kanaToItem = new Map(basicItems.map((item) => [item.kana, item]));
+  for (let i = 0; i < groups.length; i++) {
+    const groupItems = groups[i]
       .map((k) => kanaToItem.get(k))
       .filter((item): item is KanaItem => Boolean(item));
     const allStable = groupItems.every((item) => {
@@ -103,7 +125,11 @@ function getCurrentLearnBatch(hiraganaBasic: KanaItem[], progress: KanaProgressM
     });
     if (!allStable) return i;
   }
-  return HIRAGANA_BASIC_GROUPS.length - 1;
+  return groups.length - 1;
+}
+
+function getCurrentLearnBatch(hiraganaBasic: KanaItem[], progress: KanaProgressMap): number {
+  return getCurrentLearnBatchForScript(hiraganaBasic, HIRAGANA_BASIC_GROUPS, progress);
 }
 
 function isDueReview(nextReview?: string | null) {
@@ -284,6 +310,130 @@ function buildLearnSession(hiraganaBasic: KanaItem[], progress: KanaProgressMap)
   return { setKey: "learn", modes: ["romaji_input"] as KanaPracticeMode[], count: sessionCount, questions };
 }
 
+// Generic guided session for any script
+function buildLearnSessionForItems(
+  basicItems: KanaItem[],
+  groups: readonly (readonly string[])[],
+  progress: KanaProgressMap,
+): KanaSession {
+  const kanaToItem = new Map(basicItems.map((item) => [item.kana, item]));
+  const batchIdx = getCurrentLearnBatchForScript(basicItems, groups, progress);
+  const unlockedItems = groups.slice(0, batchIdx + 1).flat().map((k) => kanaToItem.get(k)).filter((item): item is KanaItem => Boolean(item));
+  const currentBatchItems = groups[batchIdx].map((k) => kanaToItem.get(k)).filter((item): item is KanaItem => Boolean(item));
+  const unstableInBatch = currentBatchItems.filter((item) => { const e = progress[item.id]; return !e || e.level < 1 || e.difficult; });
+  const currentBatchIds = new Set(currentBatchItems.map((item) => item.id));
+  const reviewPool = unlockedItems.filter((item) => {
+    if (currentBatchIds.has(item.id)) return false;
+    const e = progress[item.id];
+    return e && (isDueReview(e.nextReview) || e.difficult);
+  });
+  let pool: KanaItem[];
+  if (unstableInBatch.length > 0) {
+    pool = uniqueKanaItems([...unstableInBatch, ...reviewPool.slice(0, unstableInBatch.length >= 3 ? 3 : 5)]);
+  } else if (reviewPool.length > 0) {
+    pool = reviewPool;
+  } else {
+    pool = unlockedItems.length > 0 ? unlockedItems : currentBatchItems;
+  }
+  const sessionCount = Math.min(12, Math.max(5, pool.length));
+  const ranked = buildKanaSessionItems(pool, progress, sessionCount);
+  const items = shuffle(ranked);
+  const fallbackPool = uniqueKanaItems([...basicItems, ...unlockedItems]);
+  const questions = buildQuestionsForItems(items, fallbackPool, ["romaji_input"]);
+  return { setKey: "learn", modes: ["romaji_input"] as KanaPracticeMode[], count: sessionCount, questions };
+}
+
+function buildInteligenteSession(
+  action: InteligenteAction,
+  learnScript: LearnScript,
+  hiraganaBasic: KanaItem[],
+  katakanaBasic: KanaItem[],
+  progress: KanaProgressMap,
+): KanaSession | null {
+  const scopeItems = learnScript === "hiragana" ? hiraganaBasic
+    : learnScript === "katakana" ? katakanaBasic
+    : uniqueKanaItems([...hiraganaBasic, ...katakanaBasic]);
+
+  if (action === "seguir") {
+    if (learnScript === "ambos") {
+      const hq = buildLearnSessionForItems(hiraganaBasic, HIRAGANA_BASIC_GROUPS, progress).questions;
+      const kq = buildLearnSessionForItems(katakanaBasic, KATAKANA_BASIC_GROUPS, progress).questions;
+      const merged: typeof hq = [];
+      let hi = 0, ki = 0;
+      while (merged.length < 12 && (hi < hq.length || ki < kq.length)) {
+        if (hi < hq.length) merged.push(hq[hi++]);
+        if (ki < kq.length && merged.length < 12) merged.push(kq[ki++]);
+      }
+      if (merged.length === 0) return null;
+      return { setKey: "learn", modes: ["romaji_input"] as KanaPracticeMode[], count: merged.length, questions: merged };
+    }
+    if (learnScript === "katakana") return buildLearnSessionForItems(katakanaBasic, KATAKANA_BASIC_GROUPS, progress);
+    return buildLearnSessionForItems(hiraganaBasic, HIRAGANA_BASIC_GROUPS, progress);
+  }
+
+  if (action === "pendientes") {
+    const items = scopeItems.filter((item) => { const e = progress[item.id]; return e && e.timesSeen > 0 && isDueReview(e.nextReview); });
+    if (items.length === 0) return null;
+    const selected = buildKanaSessionItems(items, progress, Math.min(12, items.length));
+    return { setKey: "learn", modes: ["romaji_input"] as KanaPracticeMode[], count: selected.length, questions: buildQuestionsForItems(selected, scopeItems, ["romaji_input"]) };
+  }
+
+  if (action === "debiles") {
+    const items = scopeItems.filter((item) => progress[item.id]?.difficult);
+    if (items.length === 0) return null;
+    const selected = shuffle(items).slice(0, 12);
+    return { setKey: "learn", modes: ["romaji_input"] as KanaPracticeMode[], count: selected.length, questions: buildQuestionsForItems(selected, scopeItems, ["romaji_input"]) };
+  }
+
+  if (action === "nuevos") {
+    const items = scopeItems.filter((item) => !progress[item.id] || progress[item.id].timesSeen === 0);
+    if (items.length === 0) return null;
+    const selected = shuffle(items).slice(0, 12);
+    return { setKey: "learn", modes: ["romaji_input"] as KanaPracticeMode[], count: selected.length, questions: buildQuestionsForItems(selected, scopeItems, ["romaji_input"]) };
+  }
+
+  return null;
+}
+
+function getLearnStats(
+  learnScript: LearnScript,
+  hiraganaBasic: KanaItem[],
+  katakanaBasic: KanaItem[],
+  progress: KanaProgressMap,
+) {
+  const items = learnScript === "hiragana" ? hiraganaBasic
+    : learnScript === "katakana" ? katakanaBasic
+    : uniqueKanaItems([...hiraganaBasic, ...katakanaBasic]);
+  return {
+    total: items.length,
+    aprendidos: items.filter((item) => { const e = progress[item.id]; return e && e.level >= 1 && !e.difficult; }).length,
+    pendientes: items.filter((item) => { const e = progress[item.id]; return e && e.timesSeen > 0 && isDueReview(e.nextReview); }).length,
+    debiles: items.filter((item) => !!progress[item.id]?.difficult).length,
+    nuevos: items.filter((item) => !progress[item.id] || progress[item.id].timesSeen === 0).length,
+  };
+}
+
+function getScriptLearnContext(
+  basicItems: KanaItem[],
+  groups: readonly (readonly string[])[],
+  progress: KanaProgressMap,
+) {
+  const kanaToItem = new Map(basicItems.map((item) => [item.kana, item]));
+  const batchIdx = getCurrentLearnBatchForScript(basicItems, groups, progress);
+  const currentBatch = groups[batchIdx] ?? [];
+  const unstable = currentBatch.map((k) => kanaToItem.get(k)).filter((item): item is KanaItem => Boolean(item)).filter((item) => { const e = progress[item.id]; return !e || e.level < 1 || e.difficult; });
+  const nextBatch = groups[batchIdx + 1] ?? null;
+  const learnedCount = basicItems.filter((item) => { const e = progress[item.id]; return e && e.level >= 1 && !e.difficult; }).length;
+  return {
+    batchIdx,
+    totalCount: basicItems.length,
+    learnedCount,
+    currentBatchKana: currentBatch.slice(0, 5),
+    freshCount: unstable.length,
+    nextBatchKana: nextBatch ? nextBatch.slice(0, 5) : null,
+  };
+}
+
 // ─── Kana System design tokens (light theme) ─────────────────────────────────
 const DS = {
   bg: "#fbf8f1",
@@ -318,15 +468,31 @@ const KANA_CHART_ROWS: Array<{ label: string; chars: Array<string | null> }> = [
   { label: "n", chars: ["ん", null, null, null, null] },
 ];
 
+const KATAKANA_CHART_ROWS: Array<{ label: string; chars: Array<string | null> }> = [
+  { label: "a", chars: ["ア", "イ", "ウ", "エ", "オ"] },
+  { label: "k", chars: ["カ", "キ", "ク", "ケ", "コ"] },
+  { label: "s", chars: ["サ", "シ", "ス", "セ", "ソ"] },
+  { label: "t", chars: ["タ", "チ", "ツ", "テ", "ト"] },
+  { label: "n", chars: ["ナ", "ニ", "ヌ", "ネ", "ノ"] },
+  { label: "h", chars: ["ハ", "ヒ", "フ", "ヘ", "ホ"] },
+  { label: "m", chars: ["マ", "ミ", "ム", "メ", "モ"] },
+  { label: "y", chars: ["ヤ", null, "ユ", null, "ヨ"] },
+  { label: "r", chars: ["ラ", "リ", "ル", "レ", "ロ"] },
+  { label: "w", chars: ["ワ", null, null, null, "ヲ"] },
+  { label: "n", chars: ["ン", null, null, null, null] },
+];
+
 export default function AprenderKanaModule({ userKey, onRecordActivity, initialMode = null, onTabChange }: AprenderKanaModuleProps) {
-  const [screen, setScreen] = useState<"home" | "table" | "learn" | "setup">("home");
+  const [screen, setScreen] = useState<"home" | "table">("home");
   const [tableScript, setTableScript] = useState<KanaScript>("hiragana");
   const [tableFilter, setTableFilter] = useState<"basic" | "dakuten" | "handakuten" | "yoon" | "mixed">("basic");
+  const [learnScript, setLearnScript] = useState<LearnScript>("hiragana");
+  const [homeMode, setHomeMode] = useState<HomeMode>("inteligente");
+  const [selectedSets, setSelectedSets] = useState<KanaSelectableSet[]>(["basic"]);
   const [selectedScopeKeys, setSelectedScopeKeys] = useState<KanaScopeKey[]>(["hiragana:basic"]);
   const [practiceModes, setPracticeModes] = useState<KanaPracticeMode[]>(["multiple_choice"]);
   const [questionCount, setQuestionCount] = useState<KanaQuestionCount>(20);
   const [setupError, setSetupError] = useState<string | null>(null);
-  const [scopeModalOpen, setScopeModalOpen] = useState(false);
   const [progress, setProgress] = useState<KanaProgressMap>({});
   const [progressReady, setProgressReady] = useState(false);
   const [session, setSession] = useState<KanaSession | null>(null);
@@ -383,81 +549,53 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
   const allKanaSummary = useMemo(() => getKanaProgressSummary(KANA_ITEMS, progress), [progress]);
   const tableSections = useMemo(() => getKanaTableSections(tableScript, tableFilter), [tableFilter, tableScript]);
-  const practicePool = useMemo(() => collectPracticeItems(selectedScopeKeys), [selectedScopeKeys]);
   const basicHiragana = useMemo(() => filterKanaItemsForSelection("hiragana", "basic"), []);
+  const basicKatakana = useMemo(() => filterKanaItemsForSelection("katakana", "basic"), []);
 
-  const selectedScopeDetails = useMemo(
-    () =>
-      selectedScopeKeys.map((scopeKey) => {
-        const [script, set] = scopeKey.split(":") as [KanaScript, KanaSelectableSet];
-        const items = filterKanaItemsForSelection(script, set);
-        return { key: scopeKey, script, set, count: items.length };
-      }),
-    [selectedScopeKeys],
+  // Derive selectedScopeKeys from learnScript + selectedSets for Personalizado
+  const personalizedScopeKeys = useMemo<KanaScopeKey[]>(() => {
+    const scripts: KanaScript[] = learnScript === "ambos" ? ["hiragana", "katakana"]
+      : learnScript === "hiragana" ? ["hiragana"] : ["katakana"];
+    return scripts.flatMap((s) => selectedSets.map((set) => `${s}:${set}` as KanaScopeKey));
+  }, [learnScript, selectedSets]);
+
+  const practicePool = useMemo(() => collectPracticeItems(personalizedScopeKeys), [personalizedScopeKeys]);
+
+  const selectedKanaCount = useMemo(() =>
+    personalizedScopeKeys.reduce((sum, k) => {
+      const [script, set] = k.split(":") as [KanaScript, KanaSelectableSet];
+      return sum + filterKanaItemsForSelection(script, set).length;
+    }, 0),
+  [personalizedScopeKeys]);
+
+  const selectedScriptSummary = learnScript === "ambos" ? "Hiragana · Katakana"
+    : learnScript === "hiragana" ? "Hiragana" : "Katakana";
+
+  const selectedSetSummary = selectedSets.map((s) => KANA_SCOPE_LABELS[s]).join(", ");
+
+  const learnStats = useMemo(
+    () => getLearnStats(learnScript, basicHiragana, basicKatakana, progress),
+    [learnScript, basicHiragana, basicKatakana, progress],
   );
-  const selectedKanaCount = selectedScopeDetails.reduce((sum, entry) => sum + entry.count, 0);
-  const selectedScriptSummary = Array.from(
-    new Set(selectedScopeDetails.map((entry) => (entry.script === "hiragana" ? "Hiragana" : "Katakana"))),
-  ).join(" · ");
-  const selectedSetSummary = selectedScopeDetails
-    .map((entry) => `${entry.script === "hiragana" ? "H" : "K"} ${KANA_SCOPE_LABELS[entry.set]}`)
-    .join(", ");
 
-  const learnProgressContext = useMemo(() => {
-    const kanaToItem = new Map(basicHiragana.map((item) => [item.kana, item]));
-    const batchIdx = getCurrentLearnBatch(basicHiragana, progress);
+  const hiraganaLearnCtx = useMemo(
+    () => getScriptLearnContext(basicHiragana, HIRAGANA_BASIC_GROUPS, progress),
+    [basicHiragana, progress],
+  );
 
-    const learnedCount = basicHiragana.filter((item) => {
-      const entry = progress[item.id];
-      return entry && entry.level >= 1 && !entry.difficult;
-    }).length;
+  const katakanaLearnCtx = useMemo(
+    () => getScriptLearnContext(basicKatakana, KATAKANA_BASIC_GROUPS, progress),
+    [basicKatakana, progress],
+  );
 
-    const currentBatchItems = HIRAGANA_BASIC_GROUPS[batchIdx]
-      .map((k) => kanaToItem.get(k))
-      .filter((item): item is KanaItem => Boolean(item));
-
-    const unstableInBatch = currentBatchItems.filter((item) => {
-      const entry = progress[item.id];
-      return !entry || entry.level < 1 || entry.difficult;
-    });
-
-    const unlockedItems = HIRAGANA_BASIC_GROUPS.slice(0, batchIdx + 1)
-      .flat()
-      .map((k) => kanaToItem.get(k))
-      .filter((item): item is KanaItem => Boolean(item));
-
-    const currentBatchIds = new Set(currentBatchItems.map((item) => item.id));
-    const reviewCount = unlockedItems.filter((item) => {
-      if (currentBatchIds.has(item.id)) return false;
-      const entry = progress[item.id];
-      if (!entry) return false;
-      return isDueReview(entry.nextReview) || entry.difficult;
-    }).length;
-
-    const nextBatchIdx = batchIdx + 1;
-    const nextBatchKana =
-      nextBatchIdx < HIRAGANA_BASIC_GROUPS.length ? HIRAGANA_BASIC_GROUPS[nextBatchIdx].join(" ") : null;
-
-    return {
-      learnedCount,
-      totalCount: basicHiragana.length,
-      batchIdx,
-      freshCount: unstableInBatch.length,
-      reviewCount,
-      currentBatchKana: HIRAGANA_BASIC_GROUPS[batchIdx].join(" "),
-      nextBatchKana,
-    };
-  }, [basicHiragana, progress]);
-
-  const learnPreviewKana = useMemo(() => {
-    const kanaToItem = new Map(basicHiragana.map((item) => [item.kana, item]));
-    const group = HIRAGANA_BASIC_GROUPS[learnProgressContext.batchIdx] ?? [];
-    return group.slice(0, 3).map((k) => kanaToItem.get(k)).filter((item): item is KanaItem => Boolean(item));
-  }, [basicHiragana, learnProgressContext.batchIdx]);
+  // Primary context for the selected script (for charts + next-batch display)
+  const primaryLearnCtx = learnScript === "katakana" ? katakanaLearnCtx : hiraganaLearnCtx;
 
   const kanaGridData = useMemo(() => {
-    const kanaToItem = new Map(basicHiragana.map((item) => [item.kana, item]));
-    return KANA_CHART_ROWS.map((row) => ({
+    const chartRows = learnScript === "katakana" ? KATAKANA_CHART_ROWS : KANA_CHART_ROWS;
+    const allBasic = learnScript === "katakana" ? basicKatakana : basicHiragana;
+    const kanaToItem = new Map(allBasic.map((item) => [item.kana, item]));
+    return chartRows.map((row) => ({
       label: row.label,
       cells: row.chars.map((kanaChar) => {
         if (!kanaChar) return null;
@@ -466,34 +604,22 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
         const entry = progress[item.id];
         const level = entry?.level ?? 0;
         const seen = Boolean(entry);
-        // 0=locked, 1=new/seen, 2=learning, 3=reviewing, 4=mastered
         const masteryLevel = !seen ? 0 : level === 0 ? 1 : level === 1 ? 2 : level <= 3 ? 3 : 4;
         return { kana: kanaChar, id: item.id, masteryLevel };
       }),
     }));
-  }, [basicHiragana, progress]);
+  }, [learnScript, basicHiragana, basicKatakana, progress]);
 
   const learnEndSummary = useMemo(() => {
-    const kanaToItem = new Map(basicHiragana.map((item) => [item.kana, item]));
-    const startBatchIds = new Set(
-      (HIRAGANA_BASIC_GROUPS[sessionStartBatchIdx] || [])
-        .map((k) => kanaToItem.get(k))
-        .filter((item): item is KanaItem => Boolean(item))
-        .map((item) => item.id),
-    );
     const masteredMap = new Map<string, KanaItem>();
     sessionResults.forEach((r) => {
-      if (startBatchIds.has(r.item.id) && r.rating === "correct") masteredMap.set(r.item.id, r.item);
+      if (sessionNewItemIds.has(r.item.id) && r.rating === "correct") masteredMap.set(r.item.id, r.item);
     });
     const masteredInSession = Array.from(masteredMap.values());
-    const reviewedCount = new Set(
-      sessionResults.filter((r) => !sessionNewItemIds.has(r.item.id)).map((r) => r.item.id),
-    ).size;
-    const newPracticed = new Set(
-      sessionResults.filter((r) => sessionNewItemIds.has(r.item.id)).map((r) => r.item.id),
-    ).size;
+    const reviewedCount = new Set(sessionResults.filter((r) => !sessionNewItemIds.has(r.item.id)).map((r) => r.item.id)).size;
+    const newPracticed = new Set(sessionResults.filter((r) => sessionNewItemIds.has(r.item.id)).map((r) => r.item.id)).size;
     return { masteredInSession, reviewedCount, newPracticed };
-  }, [sessionResults, sessionNewItemIds, sessionStartBatchIdx, basicHiragana]);
+  }, [sessionResults, sessionNewItemIds]);
 
   const learnSessionSummaryData = useMemo((): KanaSessionSummaryData => {
     const correct = sessionResults.filter((r) => r.rating === "correct").length;
@@ -501,14 +627,14 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     const total = session?.questions.length ?? 0;
     const durationMs = sessionStartTime ? Date.now() - sessionStartTime : 0;
     const newlySet = learnEndSummary.masteredInSession.map((item) => ({ kana: item.kana, romaji: item.romaji }));
-    const nextBatch = learnProgressContext.nextBatchKana;
+    const nextBatch = primaryLearnCtx.nextBatchKana;
     return {
       correct, wrong, total, durationMs, streak,
       newlySet,
       upNextLabel: nextBatch ? "Siguiente fila" : undefined,
-      upNextKana: nextBatch ? nextBatch.split(" ")[0] : undefined,
+      upNextKana: nextBatch?.[0] ?? undefined,
     };
-  }, [sessionResults, session, sessionStartTime, streak, learnEndSummary, learnProgressContext]);
+  }, [sessionResults, session, sessionStartTime, streak, learnEndSummary, primaryLearnCtx]);
 
   const subtlePillStyle: CSSProperties = {
     borderRadius: 999,
@@ -616,8 +742,8 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   };
 
   const startSession = (overrideItems?: KanaItem[]) => {
-    if (selectedScopeKeys.length === 0) {
-      setSetupError("Selecciona al menos un bloque de kana.");
+    if (personalizedScopeKeys.length === 0) {
+      setSetupError("Selecciona al menos un grupo de kana.");
       return;
     }
     if (practiceModes.length === 0) {
@@ -631,23 +757,30 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
     const nextSession = overrideItems
       ? {
-          setKey: selectedScopeKeys.join("+"),
+          setKey: personalizedScopeKeys.join("+"),
           modes: practiceModes,
           count: overrideItems.length,
           questions: buildQuestionsForItems(uniqueKanaItems(overrideItems), practicePool, practiceModes),
         }
-      : buildSession(selectedScopeKeys, practiceModes, questionCount, progress);
+      : buildSession(personalizedScopeKeys, practiceModes, questionCount, progress);
 
-    openSession(nextSession, `${selectedScriptSummary || "Kana"} · ${selectedSetSummary || "Basic"}`);
+    openSession(nextSession, `${selectedScriptSummary} · ${selectedSetSummary || "Básico"}`);
   };
 
   const startLearnSession = () => {
-    const batchIdx = getCurrentLearnBatch(basicHiragana, progress);
-    setSessionStartBatchIdx(batchIdx);
     const s = buildLearnSession(basicHiragana, progress);
     const newIds = new Set(s.questions.map((q) => q.item.id).filter((id) => !progress[id]));
     setSessionNewItemIds(newIds);
-    openSession(s, "Learn");
+    openSession(s, "Aprender · Hiragana");
+  };
+
+  const startInteligenteSession = (action: InteligenteAction) => {
+    const s = buildInteligenteSession(action, learnScript, basicHiragana, basicKatakana, progress);
+    if (!s) return;
+    const newIds = new Set(s.questions.map((q) => q.item.id).filter((id) => !progress[id]));
+    setSessionNewItemIds(newIds);
+    const label = action === "seguir" ? "Seguir aprendiendo" : action === "pendientes" ? "Repasar pendientes" : action === "debiles" ? "Repasar débiles" : "Kana nuevos";
+    openSession(s, label);
   };
 
   useEffect(() => {
@@ -779,191 +912,367 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     <div style={{ display: "grid", gap: "var(--space-3)" }}>
       {/* ── HOME — Kana System design ── */}
       {screen === "home" && (
-        <div>
+        <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
+          <div style={{ height: 54 }} />
 
-          {/* TopBar: menu · 禅 · avatar */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 20px 16px" }}>
-            <button type="button" style={{ width: 38, height: 38, borderRadius: 12, background: "transparent", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, flexShrink: 0 }}>
-              <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
-                <path d="M1 1h16M1 6h16M1 11h10" stroke={DS.ink} strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </button>
+          {/* TopBar */}
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 20, height: 54, background: DS.bg, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", borderBottom: `1px solid ${DS.line}` }}>
             <div style={{ fontFamily: DS.fontKana, fontSize: 20, fontWeight: 500, color: DS.ink, letterSpacing: 1 }}>禅</div>
-            <button type="button" style={{ width: 38, height: 38, borderRadius: 19, background: DS.surfaceAlt, border: `1px solid ${DS.line}`, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: DS.fontHead, fontSize: 11, fontWeight: 600, color: DS.inkSoft, padding: 0, flexShrink: 0 }}>
-              MK
+            <button type="button" onClick={() => setScreen("table")} style={{ fontFamily: DS.fontHead, fontSize: 11, fontWeight: 600, color: DS.inkSoft, background: DS.surfaceAlt, border: `1px solid ${DS.line}`, borderRadius: 10, padding: "5px 12px", cursor: "pointer" }}>
+              Tabla de kana
             </button>
           </div>
 
           {/* Scrollable body */}
-          <div style={{ paddingBottom: 110 }}>
+          <div style={{ flex: 1, overflow: "auto", paddingBottom: 100 }}>
 
-            {/* Screen title: "Learn" + "hiragana." + progress */}
-            <div style={{ padding: "0 24px 20px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 32, fontWeight: 700, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>Aprender</div>
-                </div>
-                <div style={{ textAlign: "right", paddingTop: 4 }}>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>
-                    Progreso
-                  </div>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 20, fontWeight: 600, color: DS.ink, marginTop: 4, letterSpacing: -0.3 }}>
-                    {learnProgressContext.learnedCount}
-                    <span style={{ color: DS.inkFaint, fontWeight: 400 }}> / {learnProgressContext.totalCount}</span>
-                  </div>
+            {/* Title + progress counter */}
+            <div style={{ padding: "20px 24px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6, lineHeight: 1.1 }}>Aprender Kana</div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>Progreso</div>
+                <div style={{ fontFamily: DS.fontHead, fontSize: 18, fontWeight: 700, color: DS.ink, marginTop: 2, letterSpacing: -0.3 }}>
+                  <span style={{ color: DS.accent }}>{learnStats.aprendidos}</span>
+                  <span style={{ color: DS.inkFaint, fontWeight: 400 }}> / {learnStats.total}</span>
                 </div>
               </div>
             </div>
 
-            {/* Progress line */}
-            <div style={{ padding: "0 24px" }}>
+            {/* Progress bar */}
+            <div style={{ padding: "10px 24px 0" }}>
               <div style={{ height: 3, borderRadius: 3, background: DS.surfaceAlt, overflow: "hidden" }}>
-                <div style={{ width: `${(learnProgressContext.learnedCount / learnProgressContext.totalCount) * 100}%`, height: "100%", background: DS.accent, transition: "width 0.4s ease" }} />
+                <div style={{ width: `${learnStats.total > 0 ? (learnStats.aprendidos / learnStats.total) * 100 : 0}%`, height: "100%", background: DS.accent, transition: "width 0.4s ease" }} />
               </div>
             </div>
 
-            {/* Next kana tiles */}
-            {learnPreviewKana.length > 0 && (
-              <div style={{ padding: "28px 24px 0" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.accent }}>
-                    {learnProgressContext.freshCount > 0 ? "Practicando ahora" : "Siguiente"}
-                    {" · "}
-                    {(["A", "K", "S", "T", "N", "H", "M", "Y", "R", "W"])[learnProgressContext.batchIdx] ?? ""}
-                    {"-fila"}
-                  </div>
-                  <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkSoft, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                    {learnPreviewKana.length} de {(HIRAGANA_BASIC_GROUPS[learnProgressContext.batchIdx] ?? []).length}
-                  </div>
+            {/* Script selector */}
+            <div style={{ padding: "20px 24px 0", display: "flex", gap: 8 }}>
+              {(["hiragana", "katakana", "ambos"] as LearnScript[]).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setLearnScript(s)}
+                  style={{
+                    fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, letterSpacing: 0.1,
+                    padding: "8px 16px", borderRadius: 999, cursor: "pointer",
+                    background: learnScript === s ? DS.ink : DS.surfaceAlt,
+                    color: learnScript === s ? DS.card : DS.inkSoft,
+                    border: "none",
+                    transition: "background 150ms, color 150ms",
+                  }}
+                >
+                  {s === "hiragana" ? "Hiragana" : s === "katakana" ? "Katakana" : "Ambos"}
+                </button>
+              ))}
+            </div>
+
+            {/* Stats row */}
+            <div style={{ padding: "16px 24px 0", display: "flex", gap: 20 }}>
+              {[
+                { label: "aprendidos", value: learnStats.aprendidos, highlight: true },
+                { label: "pendientes", value: learnStats.pendientes, highlight: false },
+                { label: "nuevos", value: learnStats.nuevos, highlight: false },
+              ].map(({ label, value, highlight }) => (
+                <div key={label}>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 18, fontWeight: 700, color: highlight ? DS.accent : DS.ink, letterSpacing: -0.3 }}>{value}</div>
+                  <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkSoft, marginTop: 2 }}>{label}</div>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
-                  {learnPreviewKana.map((item, idx) => {
-                    const entry = progress[item.id];
-                    const level = entry?.level ?? 0;
-                    const masteryLevel = !entry ? 0 : level === 0 ? 1 : level === 1 ? 2 : level <= 3 ? 3 : 4;
-                    const isActive = idx === 0;
+              ))}
+              {learnStats.debiles > 0 && (
+                <div>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 18, fontWeight: 700, color: DS.ink, letterSpacing: -0.3 }}>{learnStats.debiles}</div>
+                  <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkSoft, marginTop: 2 }}>débiles</div>
+                </div>
+              )}
+            </div>
+
+            {/* Mode tabs: Inteligente / Personalizado */}
+            <div style={{ padding: "24px 24px 0", display: "flex", gap: 24, borderBottom: `1px solid ${DS.line}`, marginBottom: 0 }}>
+              {(["inteligente", "personalizado"] as HomeMode[]).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setHomeMode(m)}
+                  style={{
+                    fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, letterSpacing: 0.1,
+                    padding: "0 0 14px", background: "none", border: "none", cursor: "pointer",
+                    borderBottom: homeMode === m ? `2px solid ${DS.ink}` : "2px solid transparent",
+                    color: homeMode === m ? DS.ink : DS.inkSoft,
+                    marginBottom: -1,
+                  }}
+                >
+                  {m === "inteligente" ? "Inteligente" : "Personalizado"}
+                </button>
+              ))}
+            </div>
+
+            {/* ── INTELIGENTE ── */}
+            {homeMode === "inteligente" && (() => {
+              const ctx = learnScript === "katakana" ? katakanaLearnCtx : hiraganaLearnCtx;
+              const actions: Array<{ key: InteligenteAction; title: string; desc: string; count: number | null; alwaysEnabled: boolean }> = [
+                {
+                  key: "seguir",
+                  title: "Seguir aprendiendo",
+                  desc: ctx.freshCount > 0
+                    ? `${ctx.freshCount} kana nuevos · ${ROW_LABELS[ctx.batchIdx] ?? ""}-fila`
+                    : ctx.currentBatchKana.length > 0
+                      ? `Fila actual: ${ROW_LABELS[ctx.batchIdx] ?? ""} · Repaso guiado`
+                      : "Progresión guiada",
+                  count: null,
+                  alwaysEnabled: true,
+                },
+                {
+                  key: "pendientes",
+                  title: "Repasar pendientes",
+                  desc: learnStats.pendientes > 0 ? "Repaso SRS de items vencidos" : "Nada por repasar",
+                  count: learnStats.pendientes,
+                  alwaysEnabled: false,
+                },
+                {
+                  key: "debiles",
+                  title: "Repasar débiles",
+                  desc: learnStats.debiles > 0 ? "Kana que todavía te cuestan" : "Sin kana difíciles",
+                  count: learnStats.debiles,
+                  alwaysEnabled: false,
+                },
+                {
+                  key: "nuevos",
+                  title: "Kana nuevos",
+                  desc: learnStats.nuevos > 0 ? "Empieza con kana sin ver" : "Ya viste todos",
+                  count: learnStats.nuevos,
+                  alwaysEnabled: false,
+                },
+              ];
+
+              return (
+                <div style={{ padding: "0 24px" }}>
+                  {/* Next batch preview */}
+                  {ctx.nextBatchKana && (
+                    <div style={{ padding: "16px 0", borderBottom: `1px solid ${DS.line}` }}>
+                      <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: DS.inkSoft, marginBottom: 8 }}>Próxima fila</div>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        {ctx.nextBatchKana.map((k) => (
+                          <div key={k} style={{ fontFamily: DS.fontKana, fontSize: 22, color: DS.inkFaint }}>{k}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action cards */}
+                  {actions.map((action, i) => {
+                    const isAvailable = action.alwaysEnabled || (action.count ?? 0) > 0;
                     return (
-                      <div
-                        key={item.id}
+                      <button
+                        key={action.key}
+                        type="button"
+                        onClick={() => isAvailable ? startInteligenteSession(action.key) : undefined}
                         style={{
-                          aspectRatio: "1 / 1.08",
-                          background: isActive ? DS.card : DS.surfaceAlt,
-                          border: isActive ? `1px solid ${DS.lineStrong}` : "1px solid transparent",
-                          borderRadius: 20,
-                          display: "flex", flexDirection: "column",
-                          alignItems: "center", justifyContent: "center",
-                          position: "relative",
-                          boxShadow: isActive ? "0 4px 24px rgba(28,27,23,0.05)" : "none",
+                          display: "flex", alignItems: "center", gap: 16,
+                          padding: "18px 0", width: "100%", textAlign: "left",
+                          background: "none", border: "none",
+                          borderTop: `1px solid ${DS.line}`,
+                          borderBottom: i === actions.length - 1 ? `1px solid ${DS.line}` : "none",
+                          cursor: isAvailable ? "pointer" : "default",
+                          opacity: isAvailable ? 1 : 0.4,
                         }}
                       >
-                        {/* Level pips */}
-                        <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 3 }}>
-                          {[0, 1, 2, 3].map((n) => (
-                            <div key={n} style={{ width: 4, height: 4, borderRadius: 2, background: n < masteryLevel ? DS.accent : DS.lineStrong }} />
-                          ))}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600, color: DS.ink, letterSpacing: -0.2 }}>
+                            {action.title}
+                          </div>
+                          <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 3, lineHeight: 1.4 }}>
+                            {action.desc}
+                          </div>
                         </div>
-                        <div style={{ fontFamily: DS.fontKana, fontSize: 58, color: DS.ink, lineHeight: 1 }}>{item.kana}</div>
-                        <div style={{ fontFamily: DS.fontBody, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: DS.inkSoft, marginTop: 8 }}>{item.romaji}</div>
-                      </div>
+                        {action.count !== null && action.count > 0 && (
+                          <div style={{
+                            fontFamily: DS.fontHead, fontSize: 13, fontWeight: 700,
+                            color: DS.accentInk, background: DS.accent,
+                            borderRadius: 999, padding: "3px 10px", flexShrink: 0,
+                          }}>
+                            {action.count}
+                          </div>
+                        )}
+                        {isAvailable && (
+                          <svg width="10" height="12" viewBox="0 0 10 12" fill="none" style={{ flexShrink: 0 }}>
+                            <path d="M1 1l5 5-5 5" stroke={DS.inkFaint} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </button>
                     );
                   })}
-                </div>
-              </div>
-            )}
 
-            {/* Session card: Today's queue + PlayButton */}
-            <div style={{ padding: "24px 24px 0" }}>
-              <div style={{ background: DS.card, borderRadius: 24, padding: "20px 22px", display: "flex", alignItems: "center", gap: 18, border: `1px solid ${DS.line}` }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>
-                    Cola de hoy
-                  </div>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginTop: 8 }}>
-                    {learnProgressContext.reviewCount > 0 && (
-                      <div>
-                        <span style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.5 }}>{learnProgressContext.reviewCount}</span>
-                        <span style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginLeft: 6 }}>por repasar</span>
+                  {/* Compact mastery chart */}
+                  <div style={{ paddingTop: 28 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: DS.inkSoft }}>
+                        {learnScript === "katakana" ? "Katakana" : "Hiragana"}
                       </div>
-                    )}
-                    {learnProgressContext.reviewCount > 0 && learnProgressContext.freshCount > 0 && (
-                      <div style={{ width: 1, height: 18, background: DS.lineStrong }} />
-                    )}
-                    {learnProgressContext.freshCount > 0 && (
-                      <div>
-                        <span style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.5 }}>{learnProgressContext.freshCount}</span>
-                        <span style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginLeft: 6 }}>nuevos</span>
+                      <div style={{ display: "flex", gap: 8, alignItems: "center", fontFamily: DS.fontBody, fontSize: 10, color: DS.inkSoft }}>
+                        {([{ c: DS.accent, l: "fijado" }, { c: DS.accentSoft, l: "aprendiendo" }, { c: DS.surfaceAlt, l: "nuevo" }] as const).map(({ c, l }) => (
+                          <div key={l} style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                            <div style={{ width: 7, height: 7, borderRadius: 2, background: c }} />{l}
+                          </div>
+                        ))}
                       </div>
-                    )}
-                    {learnProgressContext.reviewCount === 0 && learnProgressContext.freshCount === 0 && (
-                      <span style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft }}>Repaso guiado</span>
-                    )}
-                  </div>
-                </div>
-                {/* Primary CTA — play button */}
-                <button
-                  type="button"
-                  onClick={startLearnSession}
-                  style={{ background: DS.ink, color: DS.card, border: "none", borderRadius: 999, width: 68, height: 68, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 6px 20px rgba(28,27,23,0.18)", padding: 0 }}
-                >
-                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-label="Start session">
-                    <path d="M7 4l11 7-11 7V4z" fill="currentColor" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Mastery chart */}
-            <div style={{ padding: "28px 24px 0" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-                <div>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft }}>
-                    Hiragana
-                  </div>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600, color: DS.ink, marginTop: 2 }}>
-                    <span style={{ color: DS.accent }}>{learnProgressContext.learnedCount}</span>
-                    <span style={{ color: DS.inkFaint }}> / {learnProgressContext.totalCount} </span>
-                    <span style={{ color: DS.inkSoft, fontSize: 12, fontWeight: 500 }}>dominados</span>
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: 10, alignItems: "center", fontFamily: DS.fontBody, fontSize: 10, color: DS.inkSoft }}>
-                  {([{ c: DS.accent, l: "fijado" }, { c: DS.accentSoft, l: "aprendiendo" }, { c: DS.surfaceAlt, l: "nuevo" }] as const).map(({ c, l }) => (
-                    <div key={l} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />{l}
                     </div>
-                  ))}
-                </div>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {kanaGridData.map((row, rowIdx) => (
-                  <div key={rowIdx} style={{ display: "grid", gridTemplateColumns: "16px repeat(5, 1fr)", gap: 6, alignItems: "center" }}>
-                    <div style={{ fontFamily: DS.fontBody, fontSize: 10, color: DS.inkFaint, letterSpacing: 1, textTransform: "uppercase" }}>{row.label}</div>
-                    {row.cells.map((cell, ci) => {
-                      if (!cell) return <div key={ci} style={{ width: 28, height: 28 }} />;
-                      const { kana: kanaChar, masteryLevel } = cell;
-                      const fills = [
-                        { bg: "transparent", fg: DS.inkFaint, op: 0.35, border: `1px dashed ${DS.lineStrong}` },
-                        { bg: DS.surfaceAlt, fg: DS.ink, op: 1, border: "none" },
-                        { bg: DS.accentSoft, fg: DS.ink, op: 1, border: "none" },
-                        { bg: DS.accentSoft, fg: DS.accent, op: 1, border: "none" },
-                        { bg: DS.accent, fg: DS.accentInk, op: 1, border: "none" },
-                      ] as const;
-                      const f = fills[masteryLevel];
-                      return (
-                        <div key={ci} style={{ width: 28, height: 28, borderRadius: 10, background: f.bg, border: f.border, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: DS.fontKana, fontSize: 14, fontWeight: 500, color: f.fg, opacity: f.op }}>
-                          {kanaChar}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                      {kanaGridData.map((row, rowIdx) => (
+                        <div key={rowIdx} style={{ display: "grid", gridTemplateColumns: "14px repeat(5, 1fr)", gap: 5, alignItems: "center" }}>
+                          <div style={{ fontFamily: DS.fontBody, fontSize: 9, color: DS.inkFaint, letterSpacing: 1, textTransform: "uppercase" }}>{row.label}</div>
+                          {row.cells.map((cell, ci) => {
+                            if (!cell) return <div key={ci} style={{ width: 26, height: 26 }} />;
+                            const { kana: kanaChar, masteryLevel } = cell;
+                            const fills = [
+                              { bg: "transparent", fg: DS.inkFaint, op: 0.3, border: `1px dashed ${DS.lineStrong}` },
+                              { bg: DS.surfaceAlt, fg: DS.ink, op: 1, border: "none" },
+                              { bg: DS.accentSoft, fg: DS.ink, op: 1, border: "none" },
+                              { bg: DS.accentSoft, fg: DS.accent, op: 1, border: "none" },
+                              { bg: DS.accent, fg: DS.accentInk, op: 1, border: "none" },
+                            ] as const;
+                            const f = fills[masteryLevel];
+                            return (
+                              <div key={ci} style={{ width: 26, height: 26, borderRadius: 8, background: f.bg, border: f.border, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: DS.fontKana, fontSize: 13, color: f.fg, opacity: f.op }}>
+                                {kanaChar}
+                              </div>
+                            );
+                          })}
                         </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              );
+            })()}
+
+            {/* ── PERSONALIZADO ── */}
+            {homeMode === "personalizado" && (
+              <div style={{ padding: "24px 24px 0" }}>
+
+                {/* Sets */}
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: DS.inkSoft, marginBottom: 12 }}>Grupos</div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {KANA_SCOPE_ROWS.map((row) => {
+                      const active = selectedSets.includes(row.set);
+                      return (
+                        <button
+                          key={row.set}
+                          type="button"
+                          onClick={() => {
+                            setSelectedSets((prev) =>
+                              prev.includes(row.set) ? prev.filter((s) => s !== row.set) : [...prev, row.set],
+                            );
+                            setSetupError(null);
+                          }}
+                          style={{
+                            fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, padding: "8px 16px",
+                            borderRadius: 999, cursor: "pointer",
+                            background: active ? DS.ink : DS.surfaceAlt,
+                            color: active ? DS.card : DS.inkSoft,
+                            border: "none",
+                          }}
+                        >
+                          {row.label}
+                        </button>
                       );
                     })}
                   </div>
-                ))}
+                </div>
+
+                {/* Answer mode */}
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: DS.inkSoft, marginBottom: 12 }}>Modo de respuesta</div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {([
+                      { key: "multiple_choice" as KanaPracticeMode, label: "Opciones" },
+                      { key: "romaji_input" as KanaPracticeMode, label: "Romaji" },
+                      { key: "handwriting" as KanaPracticeMode, label: "Escritura" },
+                    ]).map(({ key, label }) => {
+                      const active = practiceModes.includes(key);
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            setPracticeModes((prev) =>
+                              prev.includes(key) ? prev.filter((m) => m !== key) : [...prev, key],
+                            );
+                            setSetupError(null);
+                          }}
+                          style={{
+                            fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, padding: "8px 16px",
+                            borderRadius: 999, cursor: "pointer",
+                            background: active ? DS.ink : DS.surfaceAlt,
+                            color: active ? DS.card : DS.inkSoft,
+                            border: "none",
+                          }}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Question count */}
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: DS.inkSoft, marginBottom: 12 }}>Preguntas</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {KANA_QUESTION_COUNT_OPTIONS.map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setQuestionCount(n)}
+                        style={{
+                          fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, padding: "8px 20px",
+                          borderRadius: 999, cursor: "pointer",
+                          background: questionCount === n ? DS.ink : DS.surfaceAlt,
+                          color: questionCount === n ? DS.card : DS.inkSoft,
+                          border: "none",
+                        }}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Summary + error */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft }}>
+                    {selectedKanaCount} kana · {selectedScriptSummary} · {selectedSetSummary || "ningún grupo"}
+                  </div>
+                  {setupError && (
+                    <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.accent, marginTop: 6 }}>{setupError}</div>
+                  )}
+                </div>
+
+                {/* Start button */}
+                <button
+                  type="button"
+                  onClick={() => startSession()}
+                  disabled={selectedSets.length === 0 || practiceModes.length === 0}
+                  style={{
+                    width: "100%", padding: "16px 0", borderRadius: 16,
+                    background: DS.ink, color: DS.card, border: "none",
+                    fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, cursor: "pointer",
+                    opacity: selectedSets.length === 0 || practiceModes.length === 0 ? 0.4 : 1,
+                    marginBottom: 16,
+                  }}
+                >
+                  Empezar sesión
+                </button>
+
               </div>
-            </div>
+            )}
 
           </div>
 
-          {/* Tab bar — 5-tab global nav */}
           {renderTabBar()}
-
         </div>
       )}
 
@@ -1067,300 +1376,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── CUSTOM PRACTICE SETUP ── */}
-      {screen === "setup" && (
-        <div
-          style={{
-            display: "grid",
-            gap: "var(--space-3)",
-            minHeight: "min(100dvh - 160px, 680px)",
-            alignContent: "space-between",
-          }}
-        >
-          <div style={{ display: "grid", gap: "var(--space-3)" }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 8,
-                flexWrap: "wrap",
-                alignItems: "center",
-              }}
-            >
-              <div style={{ fontSize: "var(--text-h3)", fontWeight: 800, color: "var(--color-text)" }}>
-                Práctica personalizada
-              </div>
-              <button type="button" onClick={() => setScreen("home")} className="ds-btn-ghost">
-                Volver
-              </button>
-            </div>
-
-            <StudySelectorGroup
-              options={[
-                { key: "multiple_choice", label: "Opciones" },
-                { key: "romaji_input", label: "Romaji" },
-                { key: "handwriting", label: "Escritura" },
-              ]}
-              values={practiceModes}
-              multiple
-              onToggle={togglePracticeMode}
-              layout="grid"
-              compact
-              minItemWidth={96}
-            />
-
-            <button
-              type="button"
-              onClick={() => setScopeModalOpen(true)}
-              style={{
-                display: "grid",
-                gap: 6,
-                textAlign: "left",
-                border: "1px solid var(--color-border)",
-                borderRadius: 24,
-                background: "color-mix(in srgb, var(--color-surface) 86%, white)",
-                padding: "14px 16px",
-                color: "var(--color-text)",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 8,
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                }}
-              >
-                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 800 }}>
-                  Kana seleccionados
-                </div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ fontSize: "var(--text-body)", fontWeight: 800 }}>{selectedKanaCount}</div>
-                  <div
-                    style={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: 999,
-                      display: "grid",
-                      placeItems: "center",
-                      background: "color-mix(in srgb, var(--color-highlight-soft) 64%, white)",
-                      color: "var(--color-accent-strong)",
-                      fontSize: 14,
-                      fontWeight: 800,
-                    }}
-                    aria-hidden="true"
-                  >
-                    ↗
-                  </div>
-                </div>
-              </div>
-              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text)", fontWeight: 700 }}>
-                {selectedScriptSummary || "Ninguno"}
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 8,
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                }}
-              >
-                <div style={{ fontSize: 12, color: "var(--color-text-muted)", lineHeight: 1.35 }}>
-                  {selectedSetSummary || "Toca para elegir"}
-                </div>
-                <div style={{ fontSize: 12, color: "var(--color-accent-strong)", fontWeight: 800 }}>Editar</div>
-              </div>
-            </button>
-
-            <StudySelectorGroup
-              options={KANA_QUESTION_COUNT_OPTIONS.map((value) => ({
-                key: String(value) as "10" | "20" | "30",
-                label: String(value),
-              }))}
-              value={String(questionCount) as "10" | "20" | "30"}
-              onSelect={(value) => setQuestionCount(Number(value) as KanaQuestionCount)}
-              layout="row"
-              minItemWidth={82}
-              compact
-            />
-
-            {setupError ? (
-              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-accent-strong)", fontWeight: 700 }}>
-                {setupError}
-              </div>
-            ) : null}
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gap: 10,
-              padding: "14px 16px calc(14px + env(safe-area-inset-bottom))",
-              borderRadius: 26,
-              background: "color-mix(in srgb, var(--color-surface) 86%, white)",
-              border: "1px solid var(--color-border)",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 10,
-                alignItems: "center",
-                flexWrap: "wrap",
-              }}
-            >
-              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                {practiceModes.length > 0
-                  ? `${practiceModes.length} modo${practiceModes.length > 1 ? "s" : ""}`
-                  : "Sin modo"}
-              </div>
-              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text)", fontWeight: 800 }}>
-                {questionCount} preguntas
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => startSession()}
-              disabled={selectedScopeKeys.length === 0 || practiceModes.length === 0}
-              className="ds-btn"
-              style={{
-                width: "100%",
-                minHeight: 54,
-                opacity: selectedScopeKeys.length === 0 || practiceModes.length === 0 ? 0.5 : 1,
-                cursor: selectedScopeKeys.length === 0 || practiceModes.length === 0 ? "not-allowed" : "pointer",
-              }}
-            >
-              Empezar
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── KANA SCOPE MODAL ── */}
-      {scopeModalOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 95,
-            background: "rgba(26, 26, 46, 0.18)",
-            backdropFilter: "blur(10px)",
-            display: "grid",
-            alignItems: "end",
-            padding: "12px",
-          }}
-        >
-          <div
-            style={{
-              width: "min(100%, 560px)",
-              margin: "0 auto",
-              display: "grid",
-              gap: 14,
-              padding: "16px 16px calc(16px + env(safe-area-inset-bottom))",
-              borderRadius: 30,
-              background: "color-mix(in srgb, var(--color-surface) 90%, white)",
-              border: "1px solid var(--color-border)",
-              boxShadow: "0 20px 40px rgba(26,26,46,.1)",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 8,
-                alignItems: "center",
-                flexWrap: "wrap",
-              }}
-            >
-              <div style={{ fontSize: 20, fontWeight: 800, color: "var(--color-text)" }}>Kana</div>
-              <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                {selectedKanaCount}
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "112px repeat(2, minmax(0, 1fr))",
-                gap: 8,
-                alignItems: "center",
-              }}
-            >
-              <div />
-              <div
-                style={{
-                  textAlign: "center",
-                  fontSize: "var(--text-body-sm)",
-                  fontWeight: 800,
-                  color: "var(--color-text)",
-                }}
-              >
-                Hiragana
-              </div>
-              <div
-                style={{
-                  textAlign: "center",
-                  fontSize: "var(--text-body-sm)",
-                  fontWeight: 800,
-                  color: "var(--color-text)",
-                }}
-              >
-                Katakana
-              </div>
-
-              {KANA_SCOPE_ROWS.map((row) => (
-                <div key={row.set} style={{ display: "contents" }}>
-                  <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                    {row.label}
-                  </div>
-                  {(["hiragana", "katakana"] as KanaScript[]).map((script) => {
-                    const key = `${script}:${row.set}` as KanaScopeKey;
-                    const selected = selectedScopeKeys.includes(key);
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => toggleScopeKey(key)}
-                        style={{
-                          minHeight: 54,
-                          borderRadius: 18,
-                          border: selected ? "1px solid transparent" : "1px solid var(--color-border)",
-                          background: selected
-                            ? script === "hiragana"
-                              ? "color-mix(in srgb, var(--color-accent-soft) 74%, white)"
-                              : "color-mix(in srgb, rgba(69, 123, 157, 0.14) 72%, white)"
-                            : "color-mix(in srgb, var(--color-surface) 82%, white)",
-                          color: "var(--color-text)",
-                          fontSize: "var(--text-body)",
-                          fontWeight: 800,
-                          display: "grid",
-                          placeItems: "center",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {selected ? "✓" : ""}
-                      </button>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setScopeModalOpen(false)}
-              className="ds-btn"
-              style={{ width: "100%", minHeight: 54 }}
-            >
-              OK
-            </button>
           </div>
         </div>
       )}
@@ -1630,144 +1645,13 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
           </div>
         ) : null}
 
-        {/* Summary — Learn */}
+        {/* Summary — Learn (handled by KanaReadingSession overlay, not PracticeShell) */}
         {sessionFinished && isLearnSession ? (
-          <div style={{ display: "grid", gap: "var(--space-3)" }}>
-            <div
-              style={{
-                display: "grid",
-                gap: 20,
-                padding: "22px 20px 20px",
-                borderRadius: 30,
-                background: "color-mix(in srgb, var(--color-surface) 86%, white)",
-                boxShadow: "0 18px 34px rgba(26,26,46,.05)",
-              }}
-            >
-              {/* Header */}
-              <div style={{ display: "grid", gap: 4 }}>
-                <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".06em", color: "var(--color-text-muted)" }}>
-                  Hiragana básico · en progreso
-                </div>
-                <div style={{ fontSize: "clamp(24px, 6vw, 30px)", fontWeight: 800, color: "var(--color-text)", lineHeight: 1.1 }}>
-                  Buen progreso
-                </div>
-              </div>
-
-              {/* Session stats */}
-              {(learnEndSummary.reviewedCount > 0 || learnEndSummary.newPracticed > 0) && (
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {learnEndSummary.reviewedCount > 0 && (
-                    <div style={subtlePillStyle}>
-                      {learnEndSummary.reviewedCount} repasado{learnEndSummary.reviewedCount > 1 ? "s" : ""}
-                    </div>
-                  )}
-                  {learnEndSummary.newPracticed > 0 && (
-                    <div style={{ ...subtlePillStyle, color: "#117964", background: "color-mix(in srgb, #4ECDC4 12%, white)", border: "1px solid color-mix(in srgb, #4ECDC4 28%, transparent)" }}>
-                      +{learnEndSummary.newPracticed} nuevo{learnEndSummary.newPracticed > 1 ? "s" : ""}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Practiced kana — visual cards */}
-              {learnEndSummary.masteredInSession.length > 0 && (
-                <div style={{ display: "grid", gap: 10 }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".06em", color: "var(--color-text-muted)" }}>
-                    Practicados
-                  </div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {learnEndSummary.masteredInSession.map((item) => (
-                      <div
-                        key={item.id}
-                        style={{
-                          display: "grid",
-                          justifyItems: "center",
-                          gap: 2,
-                          padding: "8px 12px",
-                          borderRadius: 14,
-                          border: "1px solid var(--color-border)",
-                          background: "color-mix(in srgb, var(--color-surface) 82%, white)",
-                        }}
-                      >
-                        <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1, color: "var(--color-text)" }}>{item.kana}</div>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--color-text-muted)" }}>{item.romaji}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Batch unlocked */}
-              {learnProgressContext.batchIdx > sessionStartBatchIdx && (
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 10,
-                    padding: "14px 16px",
-                    borderRadius: 20,
-                    background: "color-mix(in srgb, #4ECDC4 10%, white)",
-                    border: "1px solid color-mix(in srgb, #4ECDC4 30%, transparent)",
-                  }}
-                >
-                  <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em", color: "#117964" }}>
-                    Grupo desbloqueado
-                  </div>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {HIRAGANA_BASIC_GROUPS[learnProgressContext.batchIdx].map((k) => (
-                      <div
-                        key={k}
-                        style={{
-                          fontSize: 26,
-                          fontWeight: 800,
-                          color: "#117964",
-                          padding: "4px 10px",
-                          borderRadius: 12,
-                          background: "color-mix(in srgb, #4ECDC4 18%, white)",
-                        }}
-                      >
-                        {k}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Next group preview — only when no unlock this session */}
-              {learnProgressContext.nextBatchKana && learnProgressContext.batchIdx === sessionStartBatchIdx && (
-                <div style={{ display: "grid", gap: 4 }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".06em", color: "var(--color-text-muted)" }}>
-                    Próximo grupo
-                  </div>
-                  <div style={{ fontSize: "var(--text-body-sm)", fontWeight: 700, color: "var(--color-text-muted)", letterSpacing: ".04em" }}>
-                    {learnProgressContext.nextBatchKana}
-                  </div>
-                </div>
-              )}
-
-              {/* Total progress */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  paddingTop: 14,
-                  borderTop: "1px solid var(--color-border)",
-                }}
-              >
-                <div style={{ fontSize: "var(--text-body-sm)", color: "var(--color-text-muted)", fontWeight: 700 }}>
-                  Progreso total
-                </div>
-                <div style={{ fontWeight: 800, color: "var(--color-text)", fontSize: "var(--text-body-sm)" }}>
-                  {learnProgressContext.learnedCount} / {learnProgressContext.totalCount} kana
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gap: 8 }}>
-              <button type="button" onClick={startLearnSession} className="ds-btn" style={{ width: "100%", minHeight: 54 }}>
-                Continuar
-              </button>
-              <button
+          <div style={{ display: "grid", gap: 8 }}>
+            <button type="button" onClick={startLearnSession} className="ds-btn" style={{ width: "100%", minHeight: 54 }}>
+              Continuar
+            </button>
+            <button
                 type="button"
                 onClick={() => { closeSession(); setScreen("home"); }}
                 className="ds-btn-ghost"
