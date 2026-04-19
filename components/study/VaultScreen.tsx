@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { DS, TopBar, TabBar, Eyebrow, ScreenTitle, type DSTab } from "./ds";
+import { DS, TabBar, Eyebrow, ScreenTitle, type DSTab } from "./ds";
 import { filterKanaItemsForSelection } from "@/lib/kana-data";
 import { loadKanaProgress } from "@/lib/kana-progress";
 
@@ -70,8 +70,7 @@ export default function VaultScreen({ userKey, onTabChange }: VaultScreenProps) 
 
   return (
     <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
-      <div style={{ height: 54 }} />
-      <TopBar />
+
 
       <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
         <ScreenTitle

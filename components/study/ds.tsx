@@ -31,12 +31,6 @@ export const DS = {
 
 export type DSTab = "home" | "learn" | "practice" | "recursos";
 
-// ─── TopBar ───────────────────────────────────────────────────────────────────
-
-export function TopBar({ onMenu: _onMenu }: { onMenu?: () => void }) {
-  return <div style={{ height: 8 }} />;
-}
-
 // ─── TabBar (4 tabs) ──────────────────────────────────────────────────────────
 
 const TAB_ITEMS: Array<{ k: DSTab; label: string; icon: (c: string) => ReactNode }> = [
@@ -246,5 +240,5 @@ export function PlayButton({ onClick, size = 68 }: { onClick?: () => void; size?
 // ─── StatusSpacer ─────────────────────────────────────────────────────────────
 
 export function StatusSpacer() {
-  return <div style={{ height: 54 }} />;
+  return <div style={{ height: 0 }} />;
 }

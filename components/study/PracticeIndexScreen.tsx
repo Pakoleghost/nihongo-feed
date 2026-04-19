@@ -1,6 +1,6 @@
 "use client";
 
-import { DS, TopBar, TabBar, ScreenTitle, Eyebrow, type DSTab } from "./ds";
+import { DS, TabBar, ScreenTitle, Eyebrow, type DSTab } from "./ds";
 
 export type PracticeSubView = "sprint" | "vocabkanji" | "flashcards" | "exam";
 
@@ -32,8 +32,7 @@ export default function PracticeIndexScreen({
 }: PracticeIndexScreenProps) {
   return (
     <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
-      <div style={{ height: 54 }} />
-      <TopBar />
+
 
       <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
         <ScreenTitle title="Practicar" />

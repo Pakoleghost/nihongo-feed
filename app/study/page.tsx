@@ -6971,7 +6971,7 @@ function StudyContent() {
 
       {activeTab === "practice" && practiceSubView === "sprint" && (
         <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
-          <div style={{ height: 54 }} />
+          
           <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
@@ -7015,7 +7015,7 @@ function StudyContent() {
 
       {activeTab === "practice" && practiceSubView === "vocabkanji" && (
         <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
-          <div style={{ height: 54 }} />
+          
           <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
@@ -7147,7 +7147,7 @@ function StudyContent() {
 
       {activeTab === "practice" && practiceSubView === "flashcards" && (
         <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
-          <div style={{ height: 54 }} />
+          
           <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>
@@ -7556,7 +7556,6 @@ function StudyContent() {
 
       {activeTab === "practice" && practiceSubView === "exam" && (
         <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
-          <div style={{ height: 54 }} />
           <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
           <div style={{ padding: "8px 20px 0", display: "flex", alignItems: "center" }}>
             <button type="button" onClick={() => setPracticeSubView(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft, padding: "4px 0" }}>

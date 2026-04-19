@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { DS, TopBar, TabBar, type DSTab } from "./ds";
+import { DS, TabBar, type DSTab } from "./ds";
 import { filterKanaItemsForSelection } from "@/lib/kana-data";
 import { loadKanaProgress, getKanaStateCounts, isKanaDue } from "@/lib/kana-progress";
 
@@ -74,7 +74,6 @@ export default function HomeScreen({
 
   return (
     <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
-      <TopBar />
 
       <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>
 

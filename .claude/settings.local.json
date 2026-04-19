@@ -27,7 +27,19 @@
       "Bash(echo \"EXIT:$?\")",
       "Bash(lsof -ti:3000)",
       "Bash(echo \"DONE:$?\")",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(sed -n '7145,7160p' app/study/page.tsx)",
+      "Bash(sed -n '7554,7565p' app/study/page.tsx)",
+      "Bash(sed -i '' '6974s/<div style={{ height: 54 }} \\\\/>//' app/study/page.tsx)",
+      "Bash(sed -i '' '7017s/<div style={{ height: 54 }} \\\\/>//' app/study/page.tsx)",
+      "Bash(sed -i '' '7018s/<div style={{ height: 54 }} \\\\/>//' app/study/page.tsx)",
+      "Bash(sed -i '' '7149s/<div style={{ height: 54 }} \\\\/>//' app/study/page.tsx)",
+      "Bash(sed -i '' '7150s/<div style={{ height: 54 }} \\\\/>//' app/study/page.tsx)",
+      "Bash(sed -i '' '7558s/<div style={{ height: 54 }} \\\\/>//' app/study/page.tsx)",
+      "Bash(grep -v \".next\" echo \"---\")",
+      "Bash(sed -n '240,246p' components/study/ds.tsx)",
+      "Bash(sed -n '35,42p' components/study/RecursosScreen.tsx)",
+      "Bash(sed -n '55,62p' components/study/ReviewScreen.tsx)"
     ]
   }
 }

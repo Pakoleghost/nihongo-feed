@@ -1014,9 +1014,9 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                   style={{
                     fontFamily: DS.fontHead, fontSize: 13, fontWeight: 700,
                     padding: "7px 16px", borderRadius: 999, border: "none", cursor: "pointer",
-                    background: learnScript === s ? DS.ink : DS.surfaceAlt,
-                    color: learnScript === s ? DS.card : DS.inkSoft,
-                    transition: "background 140ms, color 140ms",
+                    background: learnScript === s ? DS.accent : DS.dark,
+                    color: "#ffffff",
+                    transition: "background 140ms",
                   }}
                 >
                   {s === "hiragana" ? "Hiragana" : "Katakana"}
@@ -1098,7 +1098,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                       : `linear-gradient(135deg, ${DS.teal} 0%, ${DS.tealDark} 100%)`;
                     const ctaColor = hasDue ? "#ffffff" : DS.dark;
                     const ctaShadow = hasDue ? "0 8px 20px rgba(230,57,70,0.35)" : "0 8px 20px rgba(78,205,196,0.35)";
-                    const ctaLabel = hasDue ? "Repasar pendientes" : isNew ? "Empezar fila" : "Continuar fila";
+                    const ctaLabel = hasDue ? "Repasar" : isNew ? "Empezar" : "Continuar";
                     const eyebrow = hasDue ? "Pendientes" : isNew ? "Nuevo" : "En progreso";
                     const eyebrowColor = hasDue ? DS.accent : DS.teal;
 
