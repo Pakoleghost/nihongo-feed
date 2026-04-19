@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { KANA_ITEMS } from "@/lib/kana-data";
 import type { KanaItem } from "@/lib/kana-data";
 import {
@@ -25,6 +26,7 @@ type QuestionResult = {
 };
 
 type Phase = "question" | "feedback";
+type KanaAnim = "idle" | "bounce" | "shake";
 
 function buildPool(mode: string, sets: string[]): KanaItem[] {
   if (mode === "smart" || mode === "repeat") return KANA_ITEMS;
@@ -99,6 +101,29 @@ function buildQuiz(
   }));
 }
 
+// Framer Motion variants
+const kanaEnter = {
+  initial: { x: 60, opacity: 0 },
+  animate: { x: 0, opacity: 1, transition: { duration: 0.25, ease: "easeOut" } },
+  exit: { x: -40, opacity: 0, transition: { duration: 0.15, ease: "easeIn" } },
+};
+
+const bounceVariants = {
+  idle: { y: 0 },
+  bounce: {
+    y: [0, -8, 0],
+    transition: { duration: 0.3, ease: "easeOut" },
+  },
+};
+
+const shakeVariants = {
+  idle: { x: 0 },
+  shake: {
+    x: [0, -10, 10, -6, 6, 0],
+    transition: { duration: 0.4, ease: "easeOut" },
+  },
+};
+
 function QuizContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -111,8 +136,11 @@ function QuizContent() {
 
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [kanaKey, setKanaKey] = useState(0); // trigger re-mount for entrance animation
   const [phase, setPhase] = useState<Phase>("question");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [scaledOption, setScaledOption] = useState<string | null>(null); // for correct-button scale
+  const [kanaAnim, setKanaAnim] = useState<KanaAnim>("idle");
   const [textAnswer, setTextAnswer] = useState("");
   const [results, setResults] = useState<QuestionResult[]>([]);
   const [progressMap, setProgressMap] = useState<KanaProgressMap>({});
@@ -151,8 +179,11 @@ function QuizContent() {
         router.push("/kana/resultados");
       } else {
         setCurrentIndex((i) => i + 1);
+        setKanaKey((k) => k + 1);
         setPhase("question");
         setSelectedOption(null);
+        setScaledOption(null);
+        setKanaAnim("idle");
         setTextAnswer("");
         setTimeout(() => inputRef.current?.focus(), 50);
       }
@@ -169,7 +200,14 @@ function QuizContent() {
     const updated = applyKanaRating(progressMap, currentQ.item, correct ? "correct" : "wrong");
     setProgressMap(updated);
 
-    setTimeout(() => advance({ item: currentQ.item, correct, userAnswer: option }, updated), correct ? 800 : 1200);
+    if (correct) {
+      setScaledOption(option);
+      setKanaAnim("bounce");
+      setTimeout(() => advance({ item: currentQ.item, correct, userAnswer: option }, updated), 800);
+    } else {
+      setKanaAnim("shake");
+      setTimeout(() => advance({ item: currentQ.item, correct, userAnswer: option }, updated), 1200);
+    }
   }
 
   function handleConfirm() {
@@ -179,6 +217,12 @@ function QuizContent() {
     const correct = isCorrectAnswer(currentQ.item, textAnswer);
     const updated = applyKanaRating(progressMap, currentQ.item, correct ? "correct" : "wrong");
     setProgressMap(updated);
+
+    if (correct) {
+      setKanaAnim("bounce");
+    } else {
+      setKanaAnim("shake");
+    }
 
     setTimeout(
       () => advance({ item: currentQ.item, correct, userAnswer: textAnswer.trim() }, updated),
@@ -259,13 +303,13 @@ function QuizContent() {
             overflow: "hidden",
           }}
         >
-          <div
+          <motion.div
+            animate={{ width: `${progressPct}%` }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             style={{
               height: "100%",
-              width: `${progressPct}%`,
               background: "#4ECDC4",
               borderRadius: "999px",
-              transition: "width 0.3s ease",
             }}
           />
         </div>
@@ -280,22 +324,36 @@ function QuizContent() {
           justifyContent: "center",
           flex: 1,
           padding: "32px 20px 24px",
+          overflow: "hidden",
         }}
       >
-        <div
-          style={{
-            fontSize: "104px",
-            fontWeight: 700,
-            color: "#1A1A2E",
-            lineHeight: 1,
-            fontFamily: "var(--font-noto-sans-jp), sans-serif",
-            marginBottom: "16px",
-            userSelect: "none",
-          }}
-        >
-          {currentQ.item.kana}
-        </div>
-        <p style={{ fontSize: "15px", color: "#9CA3AF", margin: 0 }}>¿Cómo se lee?</p>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={kanaKey}
+            variants={kanaEnter}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+          >
+            <motion.div
+              variants={kanaAnim === "bounce" ? bounceVariants : shakeVariants}
+              animate={kanaAnim}
+              style={{
+                fontSize: "104px",
+                fontWeight: 700,
+                color: "#1A1A2E",
+                lineHeight: 1,
+                fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                marginBottom: "16px",
+                userSelect: "none",
+              }}
+            >
+              {currentQ.item.kana}
+            </motion.div>
+            <p style={{ fontSize: "15px", color: "#9CA3AF", margin: 0 }}>¿Cómo se lee?</p>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Answer area */}
@@ -394,20 +452,20 @@ function QuizContent() {
             let color = "#1A1A2E";
 
             if (phase === "feedback") {
-              if (isCorrectOpt) {
-                bg = "#4ECDC4";
-                color = "#FFFFFF";
-              } else if (isSelected) {
-                bg = "#E63946";
-                color = "#FFFFFF";
-              }
+              if (isCorrectOpt) { bg = "#4ECDC4"; color = "#FFFFFF"; }
+              else if (isSelected) { bg = "#E63946"; color = "#FFFFFF"; }
             }
 
             return (
-              <button
+              <motion.button
                 key={option}
                 onClick={() => handleOptionSelect(option)}
                 disabled={phase === "feedback"}
+                animate={
+                  scaledOption === option
+                    ? { scale: [1, 1.08, 1], transition: { duration: 0.2 } }
+                    : { scale: 1 }
+                }
                 style={{
                   padding: "20px 12px",
                   borderRadius: "18px",
@@ -436,7 +494,7 @@ function QuizContent() {
                     <path d="M18 6L6 18M6 6l12 12" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
                   </svg>
                 )}
-              </button>
+              </motion.button>
             );
           })}
         </div>

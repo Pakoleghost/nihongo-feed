@@ -180,6 +180,28 @@ export function getKanaProgressSummary(items: KanaItem[], progress: KanaProgress
 }
 
 export function buildKanaSessionItems(items: KanaItem[], progress: KanaProgressMap, count: number) {
+  // --- Fallback 1: no progress data at all → return basic hiragana in natural order ---
+  const hasAnyProgress = Object.keys(progress).length > 0;
+  if (!hasAnyProgress) {
+    const basicHiragana = items.filter((i) => i.script === "hiragana" && i.set === "basic");
+    // Use natural KANA_ITEMS order (vowel-first: a-i-u-e-o, ka-ki-ku…)
+    const result: KanaItem[] = [];
+    const used = new Set<string>();
+    for (const item of basicHiragana) {
+      if (result.length >= count) break;
+      if (!used.has(item.id)) { used.add(item.id); result.push(item); }
+    }
+    // If count exceeds basic hiragana length, cycle through again
+    let i = 0;
+    while (result.length < count && basicHiragana.length > 0) {
+      const item = basicHiragana[i % basicHiragana.length];
+      result.push(item);
+      i++;
+      if (i > count * 3) break;
+    }
+    return result.slice(0, count);
+  }
+
   const due: KanaItem[] = [];
   const difficult: KanaItem[] = [];
   const fresh: KanaItem[] = [];
@@ -211,6 +233,28 @@ export function buildKanaSessionItems(items: KanaItem[], progress: KanaProgressM
   difficult.sort((a, b) => (progress[b.id]?.timesWrong || 0) - (progress[a.id]?.timesWrong || 0));
   fresh.sort(() => Math.random() - 0.5);
   stable.sort((a, b) => (progress[a.id]?.level || 0) - (progress[b.id]?.level || 0));
+
+  // --- Fallback 2: some progress but nothing due → pick least-practiced items ---
+  if (due.length === 0 && difficult.length === 0 && fresh.length === 0) {
+    // Sort all items by timesCorrect ascending (least practiced first)
+    const leastPracticed = [...stable].sort(
+      (a, b) => (progress[a.id]?.timesCorrect ?? 0) - (progress[b.id]?.timesCorrect ?? 0)
+    );
+    const result: KanaItem[] = [];
+    const used = new Set<string>();
+    for (const item of leastPracticed) {
+      if (result.length >= count) break;
+      if (!used.has(item.id)) { used.add(item.id); result.push(item); }
+    }
+    // Cycle if needed
+    let i = 0;
+    while (result.length < count && leastPracticed.length > 0) {
+      result.push(leastPracticed[i % leastPracticed.length]);
+      i++;
+      if (i > count * 3) break;
+    }
+    return result.slice(0, count);
+  }
 
   const unique: KanaItem[] = [];
   const used = new Set<string>();

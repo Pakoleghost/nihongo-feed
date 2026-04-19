@@ -1,21 +1,24 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { KANA_ITEMS } from "@/lib/kana-data";
 import type { KanaItem } from "@/lib/kana-data";
 
-type ChipKey = "hiragana" | "katakana" | "dakuon" | "handakuon" | "yoon";
+type ChipKey = "hiragana" | "katakana" | "tenten" | "maru" | "combinaciones";
 type Difficulty = "facil" | "dificil" | "automatico";
 type Mode = "smart" | "libre";
 
 const CHIPS: { key: ChipKey; label: string }[] = [
   { key: "hiragana", label: "Hiragana" },
   { key: "katakana", label: "Katakana" },
-  { key: "dakuon", label: "Dakuon" },
-  { key: "handakuon", label: "Handakuon" },
-  { key: "yoon", label: "Yoon" },
+  { key: "tenten", label: "Tenten" },
+  { key: "maru", label: "Maru" },
+  { key: "combinaciones", label: "Combinaciones" },
 ];
+
+const DEPENDENT_CHIPS: ChipKey[] = ["tenten", "maru", "combinaciones"];
+const BASE_CHIPS: ChipKey[] = ["hiragana", "katakana"];
 
 const DIFFICULTY_OPTIONS: { key: Difficulty; label: string }[] = [
   { key: "facil", label: "Fácil" },
@@ -23,16 +26,25 @@ const DIFFICULTY_OPTIONS: { key: Difficulty; label: string }[] = [
   { key: "automatico", label: "Automático" },
 ];
 
+// Map new chip keys to pool filter logic
 function getPool(selectedSets: ChipKey[]): KanaItem[] {
   const pool: KanaItem[] = [];
   for (const key of selectedSets) {
     if (key === "hiragana") pool.push(...KANA_ITEMS.filter((i) => i.script === "hiragana" && i.set === "basic"));
     if (key === "katakana") pool.push(...KANA_ITEMS.filter((i) => i.script === "katakana" && i.set === "basic"));
-    if (key === "dakuon") pool.push(...KANA_ITEMS.filter((i) => i.set === "dakuten"));
-    if (key === "handakuon") pool.push(...KANA_ITEMS.filter((i) => i.set === "handakuten"));
-    if (key === "yoon") pool.push(...KANA_ITEMS.filter((i) => i.set === "yoon"));
+    if (key === "tenten") pool.push(...KANA_ITEMS.filter((i) => i.set === "dakuten"));
+    if (key === "maru") pool.push(...KANA_ITEMS.filter((i) => i.set === "handakuten"));
+    if (key === "combinaciones") pool.push(...KANA_ITEMS.filter((i) => i.set === "yoon"));
   }
   return pool;
+}
+
+// Map chip keys to quiz URL param values (quiz/page.tsx uses old names internally)
+function chipToUrlParam(key: ChipKey): string {
+  if (key === "tenten") return "dakuon";
+  if (key === "maru") return "handakuon";
+  if (key === "combinaciones") return "yoon";
+  return key;
 }
 
 function ConfigurarContent() {
@@ -44,6 +56,8 @@ function ConfigurarContent() {
   const [selectedSets, setSelectedSets] = useState<ChipKey[]>(["hiragana"]);
   const [difficulty, setDifficulty] = useState<Difficulty>("facil");
   const [questionCount, setQuestionCount] = useState(20);
+  const [validationMsg, setValidationMsg] = useState(false);
+  const validationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const pool = mode === "libre" ? getPool(selectedSets) : KANA_ITEMS;
   const maxQuestions = Math.max(5, pool.length);
@@ -52,11 +66,42 @@ function ConfigurarContent() {
     setQuestionCount((prev) => Math.min(prev, maxQuestions));
   }, [maxQuestions]);
 
+  function showValidation() {
+    setValidationMsg(true);
+    if (validationTimer.current) clearTimeout(validationTimer.current);
+    validationTimer.current = setTimeout(() => setValidationMsg(false), 2000);
+  }
+
   function toggleChip(key: ChipKey) {
+    const isDependent = DEPENDENT_CHIPS.includes(key);
+    const isBase = BASE_CHIPS.includes(key);
+
     setSelectedSets((prev) => {
       if (prev.includes(key)) {
-        if (prev.length === 1) return prev; // at least one must be selected
-        return prev.filter((k) => k !== key);
+        // Deselecting
+        if (!isDependent && prev.length === 1) return prev; // must keep at least one base
+        const next = prev.filter((k) => k !== key);
+
+        // If deselecting a base chip and no base remains, also remove dependents
+        if (isBase) {
+          const hasBase = next.some((k) => BASE_CHIPS.includes(k));
+          if (!hasBase) {
+            const cleaned = next.filter((k) => !DEPENDENT_CHIPS.includes(k));
+            if (cleaned.length === 0) return prev; // can't deselect if it would leave empty
+            if (cleaned.length < next.length) showValidation();
+            return cleaned;
+          }
+        }
+        return next;
+      }
+
+      // Selecting
+      if (isDependent) {
+        const hasBase = prev.some((k) => BASE_CHIPS.includes(k));
+        if (!hasBase) {
+          showValidation();
+          return prev; // block selection
+        }
       }
       return [...prev, key];
     });
@@ -73,7 +118,7 @@ function ConfigurarContent() {
       count: String(questionCount),
     });
     if (mode === "libre") {
-      params.set("sets", selectedSets.join(","));
+      params.set("sets", selectedSets.map(chipToUrlParam).join(","));
     }
     router.push(`/kana/quiz?${params.toString()}`);
   }
@@ -184,15 +229,13 @@ function ConfigurarContent() {
             >
               Selección de caracteres
             </p>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "10px",
-              }}
-            >
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
               {CHIPS.map(({ key, label }) => {
                 const active = selectedSets.includes(key);
+                const isDependent = DEPENDENT_CHIPS.includes(key);
+                const hasBase = selectedSets.some((k) => BASE_CHIPS.includes(k));
+                const dimmed = isDependent && !hasBase;
+
                 return (
                   <button
                     key={key}
@@ -203,15 +246,17 @@ function ConfigurarContent() {
                       border: "none",
                       cursor: "pointer",
                       background: active ? "#1A1A2E" : "#FFFFFF",
-                      color: active ? "#FFFFFF" : "#1A1A2E",
+                      color: active ? "#FFFFFF" : dimmed ? "#C4BAB0" : "#1A1A2E",
                       fontWeight: 600,
                       fontSize: "15px",
                       display: "flex",
                       alignItems: "center",
                       gap: "6px",
                       boxShadow: active ? "none" : "0 2px 8px rgba(26,26,46,0.08)",
-                      flexGrow: key === "yoon" ? 1 : 0,
-                      justifyContent: key === "yoon" ? "center" : undefined,
+                      opacity: dimmed ? 0.6 : 1,
+                      flexGrow: key === "combinaciones" ? 1 : 0,
+                      justifyContent: key === "combinaciones" ? "center" : undefined,
+                      transition: "opacity 0.15s",
                     }}
                   >
                     {label}
@@ -230,6 +275,20 @@ function ConfigurarContent() {
                 );
               })}
             </div>
+
+            {/* Validation message */}
+            <p
+              style={{
+                fontSize: "13px",
+                color: "#9CA3AF",
+                margin: "10px 0 0",
+                minHeight: "18px",
+                transition: "opacity 0.3s",
+                opacity: validationMsg ? 1 : 0,
+              }}
+            >
+              Selecciona Hiragana o Katakana primero
+            </p>
           </div>
         )}
 

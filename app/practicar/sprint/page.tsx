@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { KANA_ITEMS } from "@/lib/kana-data";
 import type { KanaItem } from "@/lib/kana-data";
 import { setLastActivity } from "@/lib/streak";
@@ -35,6 +36,7 @@ export default function SprintPage() {
   const [timeLeft, setTimeLeft] = useState(DURATION);
   const [correctCount, setCorrectCount] = useState(0);
   const [current, setCurrent] = useState(() => nextQuestion(SPRINT_POOL));
+  const [kanaKey, setKanaKey] = useState(0); // used to re-mount kana for animation
   const [phase, setPhase] = useState<Phase>("question");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -70,9 +72,11 @@ export default function SprintPage() {
     (isCorrect: boolean) => {
       const newCount = isCorrect ? correctCount + 1 : correctCount;
       setCorrectCount(newCount);
-      const delay = isCorrect ? 600 : 800;
+      // 0ms on correct, short delay on wrong to show red feedback
+      const delay = isCorrect ? 0 : 600;
       setTimeout(() => {
         setCurrent(nextQuestion(SPRINT_POOL));
+        setKanaKey((k) => k + 1);
         setPhase("question");
         setSelectedOption(null);
       }, delay);
@@ -90,14 +94,17 @@ export default function SprintPage() {
   const mins = Math.floor(timeLeft / 60);
   const secs = timeLeft % 60;
   const timerLabel = `${mins}:${secs.toString().padStart(2, "0")}`;
+  // Timer turns red in last 10 seconds
+  const timerColor = timeLeft <= 10 ? "#E63946" : "#4ECDC4";
 
   return (
     <div
       style={{
         background: "#1A1A2E",
-        minHeight: "100vh",
+        height: "100dvh",
         display: "flex",
         flexDirection: "column",
+        overflow: "hidden",
       }}
     >
       {/* Top bar */}
@@ -105,8 +112,9 @@ export default function SprintPage() {
         style={{
           display: "flex",
           alignItems: "center",
-          padding: "52px 20px 0",
+          padding: "52px 20px 16px",
           position: "relative",
+          flexShrink: 0,
         }}
       >
         <button
@@ -121,7 +129,6 @@ export default function SprintPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "#FFFFFF",
             flexShrink: 0,
           }}
           aria-label="Salir"
@@ -146,12 +153,13 @@ export default function SprintPage() {
         >
           <p
             style={{
-              fontSize: "44px",
+              fontSize: "40px",
               fontWeight: 800,
-              color: "#4ECDC4",
+              color: timerColor,
               margin: 0,
               lineHeight: 1,
               fontVariantNumeric: "tabular-nums",
+              transition: "color 0.3s",
             }}
           >
             {timerLabel}
@@ -161,7 +169,7 @@ export default function SprintPage() {
               fontSize: "12px",
               fontWeight: 700,
               color: "#53596B",
-              margin: "4px 0 0",
+              margin: "2px 0 0",
               letterSpacing: "0.08em",
             }}
           >
@@ -170,27 +178,37 @@ export default function SprintPage() {
         </div>
       </div>
 
-      {/* Kana character */}
+      {/* Kana character — animated swap */}
       <div
         style={{
           flex: 1,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          overflow: "hidden",
+          minHeight: 0,
         }}
       >
-        <span
-          style={{
-            fontSize: "140px",
-            fontWeight: 700,
-            color: "#FFFFFF",
-            fontFamily: "var(--font-noto-sans-jp), sans-serif",
-            lineHeight: 1,
-            userSelect: "none",
-          }}
-        >
-          {current.item.kana}
-        </span>
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={kanaKey}
+            initial={{ y: 36, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -36, opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            style={{
+              fontSize: "96px",
+              fontWeight: 700,
+              color: "#FFFFFF",
+              fontFamily: "var(--font-noto-sans-jp), sans-serif",
+              lineHeight: 1,
+              userSelect: "none",
+              display: "block",
+            }}
+          >
+            {current.item.kana}
+          </motion.span>
+        </AnimatePresence>
       </div>
 
       {/* Answer grid */}
@@ -198,8 +216,9 @@ export default function SprintPage() {
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
-          gap: "12px",
-          padding: "0 20px 52px",
+          gap: "10px",
+          padding: "0 16px 40px",
+          flexShrink: 0,
         }}
       >
         {current.options.map((option) => {
@@ -209,13 +228,8 @@ export default function SprintPage() {
           let color = "#FFFFFF";
 
           if (phase === "feedback") {
-            if (isCorrectOpt) {
-              bg = "#4ECDC4";
-              color = "#1A1A2E";
-            } else if (isSelected) {
-              bg = "#E63946";
-              color = "#FFFFFF";
-            }
+            if (isCorrectOpt) { bg = "#4ECDC4"; color = "#1A1A2E"; }
+            else if (isSelected) { bg = "#E63946"; color = "#FFFFFF"; }
           }
 
           return (
@@ -224,15 +238,15 @@ export default function SprintPage() {
               onClick={() => handleOption(option)}
               disabled={phase === "feedback"}
               style={{
-                padding: "22px 12px",
+                padding: "18px 12px",
                 borderRadius: "18px",
                 border: "none",
                 cursor: phase === "feedback" ? "default" : "pointer",
                 background: bg,
                 color,
-                fontSize: "22px",
+                fontSize: "20px",
                 fontWeight: 700,
-                transition: "background 0.15s",
+                transition: "background 0.12s",
               }}
             >
               {option}
