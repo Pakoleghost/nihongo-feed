@@ -123,7 +123,14 @@ function getGroupState(
     const e = progress[item.id];
     return e && e.level >= 3;
   });
-  if (allCleared) return "completed";
+  if (allCleared) {
+    // A "dominado" group that has due items must become active so the user can review
+    const hasDue = groupItems.some((item) => {
+      const e = progress[item.id];
+      return e && isDueReview(e.nextReview, e.next_due_at);
+    });
+    return hasDue ? "active" : "completed";
+  }
   if (prevGroupKana !== null) {
     const prevItems = prevGroupKana.map((k) => kanaToItem.get(k)).filter((i): i is KanaItem => Boolean(i));
     const prevCleared = prevItems.every((item) => {
@@ -857,11 +864,12 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     openSession(s, label);
   };
 
-  const startGroupSession = (groupKana: readonly string[]) => {
-    const s = buildGroupSession(groupKana, basicHiragana, progress);
+  const startGroupSession = (groupKana: readonly string[], script: "hiragana" | "katakana") => {
+    const pathItems = script === "katakana" ? basicKatakana : basicHiragana;
+    const s = buildGroupSession(groupKana, pathItems, progress);
     const newIds = new Set(s.questions.map((q) => q.item.id).filter((id) => !progress[id]));
     setSessionNewItemIds(newIds);
-    openSession(s, "Aprender · Hiragana");
+    openSession(s, `Aprender · ${script === "katakana" ? "Katakana" : "Hiragana"}`);
   };
 
   useEffect(() => {
@@ -993,11 +1001,28 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
       {/* ── HOME — El Camino Secuencial ── */}
       {screen === "home" && (
         <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
-          <div style={{ height: 54 }} />
+          <div style={{ height: 44 }} />
 
-          {/* TopBar */}
-          <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 20, height: 54, background: DS.bg, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px" }}>
-            <div style={{ fontFamily: DS.fontKana, fontSize: 20, fontWeight: 500, color: DS.ink, letterSpacing: 1 }}>禅</div>
+          {/* Header bar — script selector + Tabla */}
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 20, background: DS.bg, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 20px 10px" }}>
+            <div style={{ display: "flex", gap: 6 }}>
+              {(["hiragana", "katakana"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setLearnScript(s)}
+                  style={{
+                    fontFamily: DS.fontHead, fontSize: 13, fontWeight: 700,
+                    padding: "7px 16px", borderRadius: 999, border: "none", cursor: "pointer",
+                    background: learnScript === s ? DS.ink : DS.surfaceAlt,
+                    color: learnScript === s ? DS.card : DS.inkSoft,
+                    transition: "background 140ms, color 140ms",
+                  }}
+                >
+                  {s === "hiragana" ? "Hiragana" : "Katakana"}
+                </button>
+              ))}
+            </div>
             <button type="button" onClick={() => setScreen("table")} style={{ fontFamily: DS.fontHead, fontSize: 11, fontWeight: 600, color: DS.inkSoft, background: DS.surfaceAlt, border: "none", borderRadius: 999, padding: "6px 14px", cursor: "pointer" }}>
               Tabla
             </button>
@@ -1007,99 +1032,106 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
           <div style={{ flex: 1, overflow: "auto", paddingBottom: 100 }}>
 
             {/* Title */}
-            <div style={{ padding: "20px 24px 10px" }}>
-              <div style={{ fontFamily: DS.fontHead, fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft, marginBottom: 6 }}>Hiragana básico</div>
+            <div style={{ padding: "16px 24px 10px" }}>
               <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 800, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>El Camino</div>
             </div>
 
             {/* Sequential group cards */}
-            <div style={{ padding: "8px 24px 0", display: "flex", flexDirection: "column", gap: 12 }}>
-              {HIRAGANA_BASIC_GROUPS.map((group, idx) => {
-                const state = getGroupState(
-                  group,
-                  idx > 0 ? HIRAGANA_BASIC_GROUPS[idx - 1] : null,
-                  basicHiragana,
-                  progress,
-                );
-                const label = HIRAGANA_GROUP_LABELS[idx] ?? `Fila ${idx + 1}`;
-                const kanaToItem = new Map(basicHiragana.map((item) => [item.kana, item]));
-                const groupItems = group.map((k) => kanaToItem.get(k)).filter((i): i is KanaItem => Boolean(i));
-                const clearedCount = groupItems.filter((item) => { const e = progress[item.id]; return e && e.level >= 3; }).length;
+            {(() => {
+              const pathScript = learnScript === "katakana" ? "katakana" : "hiragana";
+              const pathGroups = pathScript === "katakana" ? KATAKANA_BASIC_GROUPS : HIRAGANA_BASIC_GROUPS;
+              const pathItems = pathScript === "katakana" ? basicKatakana : basicHiragana;
+              const kanaToItem = new Map(pathItems.map((item) => [item.kana, item]));
 
-                if (state === "locked") {
-                  return (
-                    <div key={idx} style={{ borderRadius: 48, background: DS.surfaceAlt, padding: "22px 24px", opacity: 0.45, display: "flex", alignItems: "center", gap: 16 }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 14, background: DS.card, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
-                          <rect x="1" y="8" width="14" height="11" rx="2.5" stroke={DS.inkFaint} strokeWidth="1.5"/>
-                          <path d="M4 8V5.5a4 4 0 018 0V8" stroke={DS.inkFaint} strokeWidth="1.5"/>
-                        </svg>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, color: DS.inkSoft }}>{label}</div>
-                        <div style={{ fontFamily: DS.fontKana, fontSize: 17, color: DS.inkFaint, marginTop: 3, letterSpacing: 3 }}>{group.slice(0, 5).join(" ")}</div>
-                      </div>
-                    </div>
-                  );
-                }
+              return (
+                <div style={{ padding: "8px 24px 0", display: "flex", flexDirection: "column", gap: 12 }}>
+                  {pathGroups.map((group, idx) => {
+                    const state = getGroupState(
+                      group,
+                      idx > 0 ? pathGroups[idx - 1] : null,
+                      pathItems,
+                      progress,
+                    );
+                    const label = HIRAGANA_GROUP_LABELS[idx] ?? `Fila ${idx + 1}`;
+                    const groupItems = group.map((k) => kanaToItem.get(k)).filter((i): i is KanaItem => Boolean(i));
+                    const clearedCount = groupItems.filter((item) => { const e = progress[item.id]; return e && e.level >= 3; }).length;
 
-                if (state === "completed") {
-                  return (
-                    <div key={idx} style={{ borderRadius: 48, background: "rgba(78,205,196,0.09)", padding: "22px 24px", display: "flex", alignItems: "center", gap: 16 }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(78,205,196,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
-                          <path d="M1 7l5 5L17 1" stroke={DS.teal} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, color: DS.tealDark }}>{label}</div>
-                        <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 2 }}>Dominado · {clearedCount}/{group.length}</div>
-                      </div>
-                      <div style={{ fontFamily: DS.fontKana, fontSize: 22, color: DS.teal, opacity: 0.65, flexShrink: 0 }}>{group[0]}</div>
-                    </div>
-                  );
-                }
+                    if (state === "locked") {
+                      return (
+                        <div key={idx} style={{ borderRadius: 48, background: DS.surfaceAlt, padding: "22px 24px", opacity: 0.45, display: "flex", alignItems: "center", gap: 16 }}>
+                          <div style={{ width: 44, height: 44, borderRadius: 14, background: DS.card, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
+                              <rect x="1" y="8" width="14" height="11" rx="2.5" stroke={DS.inkFaint} strokeWidth="1.5"/>
+                              <path d="M4 8V5.5a4 4 0 018 0V8" stroke={DS.inkFaint} strokeWidth="1.5"/>
+                            </svg>
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, color: DS.inkSoft }}>{label}</div>
+                            <div style={{ fontFamily: DS.fontKana, fontSize: 17, color: DS.inkFaint, marginTop: 3, letterSpacing: 3 }}>{group.slice(0, 5).join(" ")}</div>
+                          </div>
+                        </div>
+                      );
+                    }
 
-                // active
-                const hasDue = groupItems.some((item) => { const e = progress[item.id]; return e && e.timesSeen > 0 && isDueReview(e.nextReview, e.next_due_at); });
-                const isNew = clearedCount === 0 && groupItems.every((item) => !progress[item.id] || progress[item.id].timesSeen === 0);
-                const ctaBg = hasDue
-                  ? `linear-gradient(135deg, ${DS.accent} 0%, #c42b38 100%)`
-                  : `linear-gradient(135deg, ${DS.teal} 0%, ${DS.tealDark} 100%)`;
-                const ctaColor = hasDue ? "#ffffff" : DS.dark;
-                const ctaShadow = hasDue ? "0 8px 20px rgba(230,57,70,0.35)" : "0 8px 20px rgba(78,205,196,0.35)";
-                const ctaLabel = hasDue ? "Repasar pendientes" : isNew ? "Empezar fila" : "Continuar fila";
-                const eyebrow = hasDue ? "Pendientes" : isNew ? "Nuevo" : "En progreso";
-                const eyebrowColor = hasDue ? DS.accent : DS.teal;
+                    if (state === "completed") {
+                      return (
+                        <div key={idx} style={{ borderRadius: 48, background: "rgba(78,205,196,0.09)", padding: "22px 24px", display: "flex", alignItems: "center", gap: 16 }}>
+                          <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(78,205,196,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+                              <path d="M1 7l5 5L17 1" stroke={DS.teal} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, color: DS.tealDark }}>{label}</div>
+                            <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 2 }}>Dominado · {clearedCount}/{group.length}</div>
+                          </div>
+                          <div style={{ fontFamily: DS.fontKana, fontSize: 22, color: DS.teal, opacity: 0.65, flexShrink: 0 }}>{group[0]}</div>
+                        </div>
+                      );
+                    }
 
-                return (
-                  <div key={idx} style={{ borderRadius: 48, background: DS.dark, padding: "28px 24px", position: "relative", overflow: "hidden", boxShadow: "0 12px 40px rgba(26,26,46,0.18)" }}>
-                    <div aria-hidden="true" style={{ position: "absolute", right: -10, top: -14, fontFamily: DS.fontKana, fontSize: 130, color: "#fff", opacity: 0.04, lineHeight: 1, userSelect: "none", pointerEvents: "none" }}>{group[0]}</div>
-                    <div style={{ position: "relative" }}>
-                      <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: eyebrowColor, marginBottom: 6 }}>{eyebrow}</div>
-                      <div style={{ fontFamily: DS.fontHead, fontSize: 22, fontWeight: 700, color: "#ffffff", letterSpacing: -0.5, marginBottom: 4 }}>{label}</div>
-                      <div style={{ fontFamily: DS.fontKana, fontSize: 20, color: "rgba(255,255,255,0.65)", marginBottom: 6, letterSpacing: 4 }}>{group.slice(0, 5).join(" ")}</div>
-                      <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: "rgba(255,255,255,0.45)", marginBottom: 20 }}>
-                        {clearedCount}/{group.length} dominados
+                    // active — only state with a CTA button
+                    const hasDue = groupItems.some((item) => { const e = progress[item.id]; return e && e.timesSeen > 0 && isDueReview(e.nextReview, e.next_due_at); });
+                    const isNew = clearedCount === 0 && groupItems.every((item) => !progress[item.id] || progress[item.id].timesSeen === 0);
+                    const ctaBg = hasDue
+                      ? `linear-gradient(135deg, ${DS.accent} 0%, #c42b38 100%)`
+                      : `linear-gradient(135deg, ${DS.teal} 0%, ${DS.tealDark} 100%)`;
+                    const ctaColor = hasDue ? "#ffffff" : DS.dark;
+                    const ctaShadow = hasDue ? "0 8px 20px rgba(230,57,70,0.35)" : "0 8px 20px rgba(78,205,196,0.35)";
+                    const ctaLabel = hasDue ? "Repasar pendientes" : isNew ? "Empezar fila" : "Continuar fila";
+                    const eyebrow = hasDue ? "Pendientes" : isNew ? "Nuevo" : "En progreso";
+                    const eyebrowColor = hasDue ? DS.accent : DS.teal;
+
+                    return (
+                      <div key={idx} style={{ borderRadius: 48, background: DS.dark, padding: "28px 24px", position: "relative", overflow: "hidden", boxShadow: "0 12px 40px rgba(26,26,46,0.18)" }}>
+                        <div aria-hidden="true" style={{ position: "absolute", right: -10, top: -14, fontFamily: DS.fontKana, fontSize: 130, color: "#fff", opacity: 0.04, lineHeight: 1, userSelect: "none", pointerEvents: "none" }}>{group[0]}</div>
+                        <div style={{ position: "relative" }}>
+                          <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: eyebrowColor, marginBottom: 6 }}>{eyebrow}</div>
+                          <div style={{ fontFamily: DS.fontHead, fontSize: 22, fontWeight: 700, color: "#ffffff", letterSpacing: -0.5, marginBottom: 4 }}>{label}</div>
+                          <div style={{ fontFamily: DS.fontKana, fontSize: 20, color: "rgba(255,255,255,0.65)", marginBottom: 6, letterSpacing: 4 }}>{group.slice(0, 5).join(" ")}</div>
+                          <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: "rgba(255,255,255,0.45)", marginBottom: 20 }}>
+                            {clearedCount}/{group.length} dominados
+                          </div>
+                          <div style={{ height: 4, borderRadius: 4, background: "rgba(255,255,255,0.10)", overflow: "hidden", marginBottom: 22 }}>
+                            <div style={{ width: `${group.length > 0 ? (clearedCount / group.length) * 100 : 0}%`, height: "100%", background: `linear-gradient(to right, ${DS.teal}, ${DS.tealDark})`, borderRadius: 4 }} />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => startGroupSession(group, pathScript)}
+                            style={{ width: "100%", padding: "16px", background: ctaBg, color: ctaColor, border: "none", borderRadius: 999, fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, cursor: "pointer", letterSpacing: -0.2, boxShadow: ctaShadow, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+                          >
+                            {ctaLabel}
+                            <svg width="16" height="10" viewBox="0 0 18 12" fill="none">
+                              <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                        </div>
                       </div>
-                      <div style={{ height: 4, borderRadius: 4, background: "rgba(255,255,255,0.10)", overflow: "hidden", marginBottom: 22 }}>
-                        <div style={{ width: `${group.length > 0 ? (clearedCount / group.length) * 100 : 0}%`, height: "100%", background: `linear-gradient(to right, ${DS.teal}, ${DS.tealDark})`, borderRadius: 4 }} />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => startGroupSession(group)}
-                        style={{ width: "100%", padding: "16px", background: ctaBg, color: ctaColor, border: "none", borderRadius: 999, fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, cursor: "pointer", letterSpacing: -0.2, boxShadow: ctaShadow, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
-                      >
-                        {ctaLabel}
-                        <svg width="16" height="10" viewBox="0 0 18 12" fill="none">
-                          <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
 
           </div>
 

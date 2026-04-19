@@ -74,7 +74,6 @@ export default function HomeScreen({
 
   return (
     <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
-      <div style={{ height: 54 }} />
       <TopBar />
 
       <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>

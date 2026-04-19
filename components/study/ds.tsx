@@ -33,38 +33,8 @@ export type DSTab = "home" | "learn" | "practice" | "recursos";
 
 // ─── TopBar ───────────────────────────────────────────────────────────────────
 
-export function TopBar({ onMenu }: { onMenu?: () => void }) {
-  return (
-    <div style={{
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      padding: "8px 20px 16px", flexShrink: 0,
-    }}>
-      <button
-        type="button"
-        onClick={onMenu}
-        style={{
-          width: 38, height: 38, borderRadius: 12,
-          background: "transparent", border: "none", cursor: "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
-        }}
-      >
-        <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
-          <path d="M1 1h16M1 6h16M1 11h10" stroke={DS.ink} strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
-      </button>
-      <div style={{
-        fontFamily: DS.fontKana, fontSize: 20, fontWeight: 500,
-        color: DS.ink, letterSpacing: 1,
-      }}>禅</div>
-      <div style={{
-        width: 38, height: 38, borderRadius: 19,
-        background: DS.surfaceAlt, border: `1px solid ${DS.line}`,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontFamily: DS.fontHead, fontSize: 11, fontWeight: 600,
-        color: DS.inkSoft,
-      }}>MK</div>
-    </div>
-  );
+export function TopBar({ onMenu: _onMenu }: { onMenu?: () => void }) {
+  return <div style={{ height: 8 }} />;
 }
 
 // ─── TabBar (4 tabs) ──────────────────────────────────────────────────────────
