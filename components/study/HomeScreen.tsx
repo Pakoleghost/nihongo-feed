@@ -204,67 +204,6 @@ export default function HomeScreen({
           </div>
         </div>
 
-        {/* Navigation shortcuts */}
-        <div style={{ padding: "28px 24px 0" }}>
-          <div style={{
-            fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600,
-            letterSpacing: "0.2em", textTransform: "uppercase", color: DS.inkSoft,
-            marginBottom: 12,
-          }}>Ir a</div>
-          {([
-            {
-              k: "learn" as DSTab,
-              label: "Aprender Kana",
-              sub: `${stateCounts.aprendiendo + stateCounts.en_repaso} en curso · ${stateCounts.nuevo} por ver`,
-              kana: heroKana,
-            },
-            {
-              k: "practice" as DSTab,
-              label: "Practicar",
-              sub: "Sprint · Tarjetas · Repaso mixto",
-              kana: "練",
-            },
-            {
-              k: "recursos" as DSTab,
-              label: "Recursos",
-              sub: "Material, notas y referencias",
-              kana: "本",
-            },
-          ] as const).map((item, i, arr) => (
-            <button
-              key={item.k}
-              type="button"
-              onClick={() => onTabChange(item.k)}
-              style={{
-                display: "flex", alignItems: "center", gap: 16,
-                padding: "16px 0",
-                background: "none", border: "none",
-                borderBottomStyle: "solid",
-                borderBottomWidth: i < arr.length - 1 ? 1 : 0,
-                borderBottomColor: DS.line,
-                width: "100%", cursor: "pointer", textAlign: "left",
-              }}
-            >
-              <div style={{
-                fontFamily: DS.fontKana, fontSize: 24,
-                color: DS.inkSoft, width: 32, textAlign: "center", lineHeight: 1, flexShrink: 0,
-              }}>{item.kana}</div>
-              <div style={{ flex: 1 }}>
-                <div style={{
-                  fontFamily: DS.fontHead, fontSize: 15, fontWeight: 600,
-                  color: DS.ink, letterSpacing: -0.1,
-                }}>{item.label}</div>
-                <div style={{
-                  fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 2,
-                }}>{item.sub}</div>
-              </div>
-              <svg width="10" height="12" viewBox="0 0 10 12" fill="none" style={{ flexShrink: 0 }}>
-                <path d="M1 1l5 5-5 5" stroke={DS.inkFaint} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          ))}
-        </div>
-
         <div style={{ height: 16 }} />
       </div>
 

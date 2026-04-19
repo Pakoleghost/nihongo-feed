@@ -109,6 +109,53 @@ const KATAKANA_BASIC_GROUPS: readonly (readonly string[])[] = [
 
 const ROW_LABELS = ["A", "K", "S", "T", "N", "H", "M", "Y", "R", "W"] as const;
 
+const HIRAGANA_GROUP_LABELS = ["Vocales", "Fila K", "Fila S", "Fila T", "Fila N", "Fila H", "Fila M", "Fila Y", "Fila R", "Fila W"] as const;
+
+function getGroupState(
+  groupKana: readonly string[],
+  prevGroupKana: readonly string[] | null,
+  basicItems: KanaItem[],
+  progress: KanaProgressMap,
+): "locked" | "active" | "completed" {
+  const kanaToItem = new Map(basicItems.map((item) => [item.kana, item]));
+  const groupItems = groupKana.map((k) => kanaToItem.get(k)).filter((i): i is KanaItem => Boolean(i));
+  const allCleared = groupItems.every((item) => {
+    const e = progress[item.id];
+    return e && e.level >= 3;
+  });
+  if (allCleared) return "completed";
+  if (prevGroupKana !== null) {
+    const prevItems = prevGroupKana.map((k) => kanaToItem.get(k)).filter((i): i is KanaItem => Boolean(i));
+    const prevCleared = prevItems.every((item) => {
+      const e = progress[item.id];
+      return e && e.level >= 3;
+    });
+    if (!prevCleared) return "locked";
+  }
+  return "active";
+}
+
+function buildGroupSession(
+  groupKana: readonly string[],
+  basicItems: KanaItem[],
+  progress: KanaProgressMap,
+): KanaSession {
+  const kanaToItem = new Map(basicItems.map((item) => [item.kana, item]));
+  const groupItems = groupKana.map((k) => kanaToItem.get(k)).filter((item): item is KanaItem => Boolean(item));
+  const dueItems = groupItems.filter((item) => {
+    const e = progress[item.id];
+    return e && e.timesSeen > 0 && isDueReview(e.nextReview, e.next_due_at);
+  });
+  const newItems = groupItems.filter((item) => !progress[item.id] || progress[item.id].timesSeen === 0);
+  const pool = uniqueKanaItems([...dueItems, ...newItems]);
+  const finalPool = pool.length > 0 ? pool : groupItems;
+  const sessionCount = Math.min(15, Math.max(finalPool.length, 5));
+  const ranked = buildKanaSessionItems(finalPool, progress, sessionCount);
+  const items = shuffle(ranked);
+  const questions = buildQuestionsForItems(items, basicItems, ["romaji_input"]);
+  return { setKey: "learn", modes: ["romaji_input"] as KanaPracticeMode[], count: items.length, questions };
+}
+
 function getCurrentLearnBatchForScript(
   basicItems: KanaItem[],
   groups: readonly (readonly string[])[],
@@ -460,6 +507,7 @@ const DS = {
   surface: "#FDFCF5",
   surfaceAlt: "#FAF3E2",
   card: "#FFFFFF",
+  dark: "#1A1A2E",
   ink: "#1E1C12",
   inkSoft: "#5B403F",
   inkFaint: "#C4BAB0",
@@ -469,7 +517,7 @@ const DS = {
   accentSoft: "rgba(230,57,70,0.10)",
   accentInk: "#ffffff",
   teal: "#4ECDC4",
-  tealDark: "#006A65",
+  tealDark: "#2BA99F",
   correct: "oklch(0.48 0.12 150)",
   correctSoft: "oklch(0.48 0.12 150 / 0.10)",
   wrong: "oklch(0.55 0.16 25)",
@@ -809,6 +857,13 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     openSession(s, label);
   };
 
+  const startGroupSession = (groupKana: readonly string[]) => {
+    const s = buildGroupSession(groupKana, basicHiragana, progress);
+    const newIds = new Set(s.questions.map((q) => q.item.id).filter((id) => !progress[id]));
+    setSessionNewItemIds(newIds);
+    openSession(s, "Aprender · Hiragana");
+  };
+
   useEffect(() => {
     if (!progressReady || initialMode !== "learn" || autoStartedLearnRef.current || session) return;
     autoStartedLearnRef.current = true;
@@ -935,7 +990,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
   return (
     <div style={{ display: "grid", gap: "var(--space-3)" }}>
-      {/* ── HOME — Kana System design ── */}
+      {/* ── HOME — El Camino Secuencial ── */}
       {screen === "home" && (
         <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
           <div style={{ height: 54 }} />
@@ -952,298 +1007,99 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
           <div style={{ flex: 1, overflow: "auto", paddingBottom: 100 }}>
 
             {/* Title */}
-            <div style={{ padding: "20px 24px 0" }}>
-              <div style={{ fontFamily: DS.fontHead, fontSize: 30, fontWeight: 800, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>Aprender Kana</div>
+            <div style={{ padding: "20px 24px 10px" }}>
+              <div style={{ fontFamily: DS.fontHead, fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: DS.inkSoft, marginBottom: 6 }}>Hiragana básico</div>
+              <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 800, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>El Camino</div>
             </div>
 
-            {/* Script pills */}
-            <div style={{ padding: "16px 24px 0", display: "flex", gap: 8 }}>
-              {(["hiragana", "katakana", "ambos"] as LearnScript[]).map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setLearnScript(s)}
-                  style={{
-                    fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600,
-                    padding: "8px 18px", borderRadius: 999, border: "none", cursor: "pointer",
-                    background: learnScript === s ? DS.ink : DS.surfaceAlt,
-                    color: learnScript === s ? DS.card : DS.inkSoft,
-                    transition: "background 140ms, color 140ms",
-                  }}
-                >
-                  {s === "hiragana" ? "Hiragana" : s === "katakana" ? "Katakana" : "Ambos"}
-                </button>
-              ))}
-            </div>
+            {/* Sequential group cards */}
+            <div style={{ padding: "8px 24px 0", display: "flex", flexDirection: "column", gap: 12 }}>
+              {HIRAGANA_BASIC_GROUPS.map((group, idx) => {
+                const state = getGroupState(
+                  group,
+                  idx > 0 ? HIRAGANA_BASIC_GROUPS[idx - 1] : null,
+                  basicHiragana,
+                  progress,
+                );
+                const label = HIRAGANA_GROUP_LABELS[idx] ?? `Fila ${idx + 1}`;
+                const kanaToItem = new Map(basicHiragana.map((item) => [item.kana, item]));
+                const groupItems = group.map((k) => kanaToItem.get(k)).filter((i): i is KanaItem => Boolean(i));
+                const clearedCount = groupItems.filter((item) => { const e = progress[item.id]; return e && e.level >= 3; }).length;
 
-            {/* Hero card */}
-            <div style={{ margin: "20px 24px 0", borderRadius: 28, background: DS.surfaceAlt, padding: "22px 24px", position: "relative", overflow: "hidden", boxShadow: "0 8px 32px rgba(26,26,46,0.04)" }}>
-              {/* Decorative ghost kana */}
-              <div aria-hidden="true" style={{ position: "absolute", right: -16, top: -16, fontFamily: DS.fontKana, fontSize: 130, color: DS.ink, opacity: 0.04, lineHeight: 1, userSelect: "none", pointerEvents: "none" }}>
-                {learnScript === "katakana" ? "ア" : "あ"}
-              </div>
-              <div style={{ position: "relative" }}>
-                {/* Progress counter */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 12 }}>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, color: DS.inkSoft }}>Progreso</div>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 13, fontWeight: 700, color: DS.accent }}>
-                    {learnStats.fijados} / {learnStats.total} fijados
-                  </div>
-                </div>
-                {/* Teal gradient progress bar */}
-                <div style={{ height: 8, borderRadius: 8, background: DS.card, overflow: "hidden", marginBottom: 16 }}>
-                  <div style={{
-                    width: `${learnStats.total > 0 ? (learnStats.fijados / learnStats.total) * 100 : 0}%`,
-                    height: "100%",
-                    background: `linear-gradient(to right, ${DS.teal}, ${DS.tealDark})`,
-                    borderRadius: 8, transition: "width 0.5s ease",
-                    minWidth: learnStats.fijados > 0 ? 24 : 0,
-                  }} />
-                </div>
-                {/* Stats row */}
-                <div style={{ display: "flex", gap: 20 }}>
-                  {[
-                    { label: "aprendiendo", value: learnStats.aprendiendo },
-                    { label: "pendientes", value: learnStats.pendientes },
-                    { label: "nuevos", value: learnStats.nuevos },
-                  ].map(({ label, value }) => (
-                    <div key={label}>
-                      <div style={{ fontFamily: DS.fontHead, fontSize: 17, fontWeight: 700, color: DS.ink, letterSpacing: -0.3 }}>{value}</div>
-                      <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkSoft, marginTop: 1 }}>{label}</div>
+                if (state === "locked") {
+                  return (
+                    <div key={idx} style={{ borderRadius: 48, background: DS.surfaceAlt, padding: "22px 24px", opacity: 0.45, display: "flex", alignItems: "center", gap: 16 }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 14, background: DS.card, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
+                          <rect x="1" y="8" width="14" height="11" rx="2.5" stroke={DS.inkFaint} strokeWidth="1.5"/>
+                          <path d="M4 8V5.5a4 4 0 018 0V8" stroke={DS.inkFaint} strokeWidth="1.5"/>
+                        </svg>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, color: DS.inkSoft }}>{label}</div>
+                        <div style={{ fontFamily: DS.fontKana, fontSize: 17, color: DS.inkFaint, marginTop: 3, letterSpacing: 3 }}>{group.slice(0, 5).join(" ")}</div>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+                  );
+                }
 
-            {/* Mode tabs: Inteligente / Personalizado */}
-            <div style={{ padding: "24px 24px 0", display: "flex", gap: 24 }}>
-              {(["inteligente", "personalizado"] as HomeMode[]).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setHomeMode(m)}
-                  style={{
-                    fontFamily: DS.fontHead, fontSize: 13, fontWeight: 700,
-                    padding: "0 0 12px", background: "none", border: "none", cursor: "pointer",
-                    borderBottom: homeMode === m ? `2px solid ${DS.ink}` : "2px solid transparent",
-                    color: homeMode === m ? DS.ink : DS.inkSoft,
-                  }}
-                >
-                  {m === "inteligente" ? "Inteligente" : "Personalizado"}
-                </button>
-              ))}
-            </div>
-            {/* Thin separator */}
-            <div style={{ height: 1, background: DS.line, margin: "0 24px" }} />
-
-            {/* ── INTELIGENTE ── */}
-            {homeMode === "inteligente" && (() => {
-              const ctx = learnScript === "katakana" ? katakanaLearnCtx : hiraganaLearnCtx;
-
-              return (
-                <div style={{ padding: "16px 24px 0" }}>
-                  {/* Primary action card */}
-                  <div style={{
-                    borderRadius: 28, background: DS.card,
-                    boxShadow: "0 4px 24px rgba(26,26,46,0.06)",
-                    padding: "22px 22px", marginBottom: 12,
-                  }}>
-                    <div style={{ fontFamily: DS.fontHead, fontSize: 17, fontWeight: 700, color: DS.ink, letterSpacing: -0.2, marginBottom: 6 }}>
-                      Seguir aprendiendo
+                if (state === "completed") {
+                  return (
+                    <div key={idx} style={{ borderRadius: 48, background: "rgba(78,205,196,0.09)", padding: "22px 24px", display: "flex", alignItems: "center", gap: 16 }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(78,205,196,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+                          <path d="M1 7l5 5L17 1" stroke={DS.teal} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, color: DS.tealDark }}>{label}</div>
+                        <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 2 }}>Dominado · {clearedCount}/{group.length}</div>
+                      </div>
+                      <div style={{ fontFamily: DS.fontKana, fontSize: 22, color: DS.teal, opacity: 0.65, flexShrink: 0 }}>{group[0]}</div>
                     </div>
-                    <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkSoft, marginBottom: 18, lineHeight: 1.5 }}>
-                      {ctx.freshCount > 0 ? `${ctx.freshCount} kana por introducir` : "Continúa tu progresión guiada"}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => startInteligenteSession("seguir")}
-                      style={{
-                        width: "100%", padding: "16px",
-                        background: `linear-gradient(135deg, ${DS.accent} 0%, #c42b38 100%)`,
-                        color: "#fff", border: "none", borderRadius: 999,
-                        fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700,
-                        cursor: "pointer", letterSpacing: -0.2,
-                        boxShadow: "0 8px 20px rgba(230,57,70,0.25)",
-                      }}
-                    >
-                      Comenzar sesión
-                    </button>
-                  </div>
+                  );
+                }
 
-                  {/* Secondary action cards – pendientes, debiles, nuevos */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 24 }}>
-                    {[
-                      { key: "pendientes" as InteligenteAction, label: "Pendientes", count: learnStats.pendientes },
-                      { key: "debiles" as InteligenteAction, label: "Débiles", count: learnStats.debiles },
-                      { key: "nuevos" as InteligenteAction, label: "Nuevos", count: learnStats.nuevos },
-                    ].map((action) => {
-                      const available = action.count > 0;
-                      return (
-                        <button
-                          key={action.key}
-                          type="button"
-                          onClick={() => available ? startInteligenteSession(action.key) : undefined}
-                          style={{
-                            borderRadius: 20, padding: "16px 12px", textAlign: "center",
-                            background: DS.surfaceAlt, border: "none",
-                            cursor: available ? "pointer" : "default",
-                            opacity: available ? 1 : 0.4,
-                          }}
-                        >
-                          <div style={{ fontFamily: DS.fontHead, fontSize: 20, fontWeight: 800, color: available ? DS.ink : DS.inkFaint, letterSpacing: -0.5 }}>
-                            {action.count}
-                          </div>
-                          <div style={{ fontFamily: DS.fontBody, fontSize: 11, color: DS.inkSoft, marginTop: 4 }}>
-                            {action.label}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
+                // active
+                const hasDue = groupItems.some((item) => { const e = progress[item.id]; return e && e.timesSeen > 0 && isDueReview(e.nextReview, e.next_due_at); });
+                const isNew = clearedCount === 0 && groupItems.every((item) => !progress[item.id] || progress[item.id].timesSeen === 0);
+                const ctaBg = hasDue
+                  ? `linear-gradient(135deg, ${DS.accent} 0%, #c42b38 100%)`
+                  : `linear-gradient(135deg, ${DS.teal} 0%, ${DS.tealDark} 100%)`;
+                const ctaColor = hasDue ? "#ffffff" : DS.dark;
+                const ctaShadow = hasDue ? "0 8px 20px rgba(230,57,70,0.35)" : "0 8px 20px rgba(78,205,196,0.35)";
+                const ctaLabel = hasDue ? "Repasar pendientes" : isNew ? "Empezar fila" : "Continuar fila";
+                const eyebrow = hasDue ? "Pendientes" : isNew ? "Nuevo" : "En progreso";
+                const eyebrowColor = hasDue ? DS.accent : DS.teal;
 
-                  {/* Mastery dots */}
-                  <div style={{ paddingBottom: 16 }}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      {kanaGridData.map((row, rowIdx) => (
-                        <div key={rowIdx} style={{ display: "flex", gap: 4 }}>
-                          {row.cells.map((cell, ci) => {
-                            if (!cell) return <div key={ci} style={{ width: 18, height: 18 }} />;
-                            const lvl = cell.masteryLevel;
-                            const bg = lvl >= 4 ? DS.accent : lvl >= 2 ? DS.accentSoft : lvl >= 1 ? DS.surfaceAlt : DS.line;
-                            return <div key={ci} style={{ width: 18, height: 18, borderRadius: 5, background: bg }} />;
-                          })}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* ── PERSONALIZADO ── */}
-            {homeMode === "personalizado" && (
-              <div style={{ padding: "24px 24px 0" }}>
-
-                {/* Sets */}
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: DS.inkSoft, marginBottom: 12 }}>Grupos</div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {KANA_SCOPE_ROWS.map((row) => {
-                      const active = selectedSets.includes(row.set);
-                      return (
-                        <button
-                          key={row.set}
-                          type="button"
-                          onClick={() => {
-                            setSelectedSets((prev) =>
-                              prev.includes(row.set) ? prev.filter((s) => s !== row.set) : [...prev, row.set],
-                            );
-                            setSetupError(null);
-                          }}
-                          style={{
-                            fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, padding: "8px 16px",
-                            borderRadius: 999, cursor: "pointer",
-                            background: active ? DS.ink : DS.surfaceAlt,
-                            color: active ? DS.card : DS.inkSoft,
-                            border: "none",
-                          }}
-                        >
-                          {row.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Answer mode */}
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: DS.inkSoft, marginBottom: 12 }}>Modo de respuesta</div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {([
-                      { key: "multiple_choice" as KanaPracticeMode, label: "Opciones" },
-                      { key: "romaji_input" as KanaPracticeMode, label: "Romaji" },
-                      { key: "handwriting" as KanaPracticeMode, label: "Escritura" },
-                    ]).map(({ key, label }) => {
-                      const active = practiceModes.includes(key);
-                      return (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => {
-                            setPracticeModes((prev) =>
-                              prev.includes(key) ? prev.filter((m) => m !== key) : [...prev, key],
-                            );
-                            setSetupError(null);
-                          }}
-                          style={{
-                            fontFamily: DS.fontHead, fontSize: 13, fontWeight: 600, padding: "8px 16px",
-                            borderRadius: 999, cursor: "pointer",
-                            background: active ? DS.ink : DS.surfaceAlt,
-                            color: active ? DS.card : DS.inkSoft,
-                            border: "none",
-                          }}
-                        >
-                          {label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Question count */}
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ fontFamily: DS.fontHead, fontSize: 10, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: DS.inkSoft, marginBottom: 12 }}>Preguntas</div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    {KANA_QUESTION_COUNT_OPTIONS.map((n) => (
+                return (
+                  <div key={idx} style={{ borderRadius: 48, background: DS.dark, padding: "28px 24px", position: "relative", overflow: "hidden", boxShadow: "0 12px 40px rgba(26,26,46,0.18)" }}>
+                    <div aria-hidden="true" style={{ position: "absolute", right: -10, top: -14, fontFamily: DS.fontKana, fontSize: 130, color: "#fff", opacity: 0.04, lineHeight: 1, userSelect: "none", pointerEvents: "none" }}>{group[0]}</div>
+                    <div style={{ position: "relative" }}>
+                      <div style={{ fontFamily: DS.fontHead, fontSize: 10.5, fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase", color: eyebrowColor, marginBottom: 6 }}>{eyebrow}</div>
+                      <div style={{ fontFamily: DS.fontHead, fontSize: 22, fontWeight: 700, color: "#ffffff", letterSpacing: -0.5, marginBottom: 4 }}>{label}</div>
+                      <div style={{ fontFamily: DS.fontKana, fontSize: 20, color: "rgba(255,255,255,0.65)", marginBottom: 6, letterSpacing: 4 }}>{group.slice(0, 5).join(" ")}</div>
+                      <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: "rgba(255,255,255,0.45)", marginBottom: 20 }}>
+                        {clearedCount}/{group.length} dominados
+                      </div>
+                      <div style={{ height: 4, borderRadius: 4, background: "rgba(255,255,255,0.10)", overflow: "hidden", marginBottom: 22 }}>
+                        <div style={{ width: `${group.length > 0 ? (clearedCount / group.length) * 100 : 0}%`, height: "100%", background: `linear-gradient(to right, ${DS.teal}, ${DS.tealDark})`, borderRadius: 4 }} />
+                      </div>
                       <button
-                        key={n}
                         type="button"
-                        onClick={() => setQuestionCount(n)}
-                        style={{
-                          fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, padding: "8px 20px",
-                          borderRadius: 999, cursor: "pointer",
-                          background: questionCount === n ? DS.ink : DS.surfaceAlt,
-                          color: questionCount === n ? DS.card : DS.inkSoft,
-                          border: "none",
-                        }}
+                        onClick={() => startGroupSession(group)}
+                        style={{ width: "100%", padding: "16px", background: ctaBg, color: ctaColor, border: "none", borderRadius: 999, fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, cursor: "pointer", letterSpacing: -0.2, boxShadow: ctaShadow, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
                       >
-                        {n}
+                        {ctaLabel}
+                        <svg width="16" height="10" viewBox="0 0 18 12" fill="none">
+                          <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
                       </button>
-                    ))}
+                    </div>
                   </div>
-                </div>
-
-                {/* Summary + error */}
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft }}>
-                    {selectedKanaCount} kana · {selectedScriptSummary} · {selectedSetSummary || "ningún grupo"}
-                  </div>
-                  {setupError && (
-                    <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.accent, marginTop: 6 }}>{setupError}</div>
-                  )}
-                </div>
-
-                {/* Start button */}
-                <button
-                  type="button"
-                  onClick={() => startSession()}
-                  disabled={selectedSets.length === 0 || practiceModes.length === 0}
-                  style={{
-                    width: "100%", padding: "18px", borderRadius: 999,
-                    background: `linear-gradient(135deg, ${DS.accent} 0%, #c42b38 100%)`,
-                    color: "#fff", border: "none",
-                    fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, cursor: "pointer",
-                    opacity: selectedSets.length === 0 || practiceModes.length === 0 ? 0.4 : 1,
-                    boxShadow: selectedSets.length > 0 ? "0 8px 20px rgba(230,57,70,0.22)" : "none",
-                    marginBottom: 16,
-                  }}
-                >
-                  Empezar sesión
-                </button>
-
-              </div>
-            )}
+                );
+              })}
+            </div>
 
           </div>
 
