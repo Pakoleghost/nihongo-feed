@@ -82,6 +82,7 @@ export default function ComunidadPage() {
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -304,13 +305,15 @@ export default function ComunidadPage() {
                   <img
                     src={post.image_url}
                     alt="publicación"
+                    onClick={() => setLightboxUrl(post.image_url)}
                     style={{
                       width: "100%",
-                      borderRadius: "14px",
+                      aspectRatio: "4/3",
+                      borderRadius: "1rem",
                       display: "block",
                       marginBottom: "12px",
                       objectFit: "cover",
-                      maxHeight: "260px",
+                      cursor: "pointer",
                     }}
                   />
                 )}
@@ -345,6 +348,58 @@ export default function ComunidadPage() {
           })
         )}
       </div>
+
+      {/* Lightbox */}
+      {lightboxUrl && (
+        <div
+          onClick={() => setLightboxUrl(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.95)",
+            zIndex: 200,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setLightboxUrl(null)}
+            style={{
+              position: "absolute",
+              top: "20px",
+              right: "20px",
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.15)",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 201,
+            }}
+            aria-label="Cerrar"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6l12 12" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={lightboxUrl}
+            alt="imagen ampliada"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              objectFit: "contain",
+            }}
+          />
+        </div>
+      )}
 
       <BottomNav />
     </div>
