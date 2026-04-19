@@ -56,7 +56,7 @@ export default function PracticarPage() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        padding: "56px 20px 100px",
+        padding: "20px 20px 100px",
       }}
     >
       <h1

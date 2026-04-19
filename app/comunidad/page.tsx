@@ -188,7 +188,7 @@ export default function ComunidadPage() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "56px 20px 20px",
+          padding: "20px 20px 16px",
         }}
       >
         <h1

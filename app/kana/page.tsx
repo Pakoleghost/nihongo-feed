@@ -81,7 +81,7 @@ export default function KanaPage() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        padding: "56px 20px 100px",
+        padding: "20px 20px 100px",
       }}
     >
       {/* Title */}

@@ -3,61 +3,51 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import BottomNav from "@/components/BottomNav";
 
-type Carpeta = {
-  id: string;
-  nombre: string;
-  descripcion: string | null;
-  orden: number;
+type ResourceRow = {
+  id: number;
+  title: string;
+  url: string | null;
+  category: string | null;
 };
 
-type ItemCount = {
-  carpeta_id: string;
-  tipo: string;
-};
+function isFile(url: string | null): boolean {
+  if (!url) return false;
+  const path = url.split("?")[0];
+  if (/\.(pdf|doc|docx|ppt|pptx|xls|xlsx|txt|zip|mp4|jpg|jpeg|png|webp)$/i.test(path)) return true;
+  if (url.includes("/storage/v1/object/public/uploads/")) return true;
+  return false;
+}
 
-function FolderIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="#E63946">
-      <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
-    </svg>
-  );
+function openResource(url: string | null) {
+  if (!url) return;
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 export default function RecursosPage() {
   const router = useRouter();
-  const [carpetas, setCarpetas] = useState<Carpeta[]>([]);
-  const [itemCounts, setItemCounts] = useState<Record<string, { total: number; links: number }>>({});
+  const [grouped, setGrouped] = useState<[string, ResourceRow[]][]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
-      const { data: carpetaData } = await supabase
-        .from("recursos_carpetas")
-        .select("id, nombre, descripcion, orden")
-        .order("orden", { ascending: true });
-
-      const fetchedCarpetas = (carpetaData as Carpeta[] | null) ?? [];
-      setCarpetas(fetchedCarpetas);
-
-      if (fetchedCarpetas.length > 0) {
-        const { data: itemData } = await supabase
-          .from("recursos_items")
-          .select("carpeta_id, tipo");
-
-        const counts: Record<string, { total: number; links: number }> = {};
-        (itemData as ItemCount[] | null)?.forEach(({ carpeta_id, tipo }) => {
-          if (!counts[carpeta_id]) counts[carpeta_id] = { total: 0, links: 0 };
-          counts[carpeta_id].total++;
-          if (tipo === "link") counts[carpeta_id].links++;
+    supabase
+      .from("resources")
+      .select("id, title, url, category")
+      .order("category", { ascending: true })
+      .order("title", { ascending: true })
+      .then(({ data }) => {
+        const rows = (data as ResourceRow[] | null) ?? [];
+        // Group by category
+        const map = new Map<string, ResourceRow[]>();
+        rows.forEach((r) => {
+          const cat = r.category ?? "General";
+          if (!map.has(cat)) map.set(cat, []);
+          map.get(cat)!.push(r);
         });
-        setItemCounts(counts);
-      }
-
-      setLoading(false);
-    }
-
-    load();
+        setGrouped([...map.entries()]);
+        setLoading(false);
+      });
   }, []);
 
   return (
@@ -67,136 +57,183 @@ export default function RecursosPage() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        padding: "56px 20px 48px",
+        paddingBottom: "100px",
       }}
     >
       {/* Header */}
-      <h1
+      <div
         style={{
-          fontSize: "36px",
-          fontWeight: 800,
-          color: "#1A1A2E",
-          margin: "0 0 28px",
-          lineHeight: 1,
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          padding: "56px 20px 24px",
         }}
       >
-        Recursos
-      </h1>
-
-      {/* Content */}
-      {loading ? (
-        <div style={{ textAlign: "center", color: "#9CA3AF", padding: "40px 0" }}>
-          Cargando...
-        </div>
-      ) : carpetas.length === 0 ? (
-        <div
+        <button
+          onClick={() => router.push("/")}
           style={{
+            width: "40px",
+            height: "40px",
+            borderRadius: "50%",
             background: "#FFFFFF",
-            borderRadius: "20px",
-            padding: "32px",
-            textAlign: "center",
-            boxShadow: "0 4px 20px rgba(26,26,46,0.07)",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 2px 10px rgba(26,26,46,0.10)",
+            flexShrink: 0,
+          }}
+          aria-label="Volver"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M19 12H5M12 5l-7 7 7 7"
+              stroke="#1A1A2E"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+        <h1
+          style={{
+            fontSize: "32px",
+            fontWeight: 800,
+            color: "#1A1A2E",
+            margin: 0,
+            lineHeight: 1,
           }}
         >
-          <p style={{ fontSize: "28px", margin: "0 0 8px" }}>📂</p>
-          <p style={{ fontSize: "16px", color: "#9CA3AF", margin: 0 }}>
-            El profesor aún no ha subido material.
-          </p>
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {carpetas.map((carpeta) => {
-            const counts = itemCounts[carpeta.id] ?? { total: 0, links: 0 };
-            const label =
-              counts.total === 0
-                ? "0 archivos"
-                : counts.total === counts.links
-                ? `${counts.total} enlaces`
-                : `${counts.total} archivos`;
+          Recursos
+        </h1>
+      </div>
 
-            return (
-              <button
-                key={carpeta.id}
-                onClick={() => router.push(`/recursos/${carpeta.id}`)}
+      {/* Content */}
+      <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: "28px" }}>
+        {loading ? (
+          <div style={{ textAlign: "center", color: "#9CA3AF", padding: "40px 0" }}>
+            Cargando...
+          </div>
+        ) : grouped.length === 0 ? (
+          <div
+            style={{
+              background: "#FFFFFF",
+              borderRadius: "20px",
+              padding: "32px",
+              textAlign: "center",
+              boxShadow: "0 4px 20px rgba(26,26,46,0.07)",
+            }}
+          >
+            <p style={{ fontSize: "28px", margin: "0 0 8px" }}>📂</p>
+            <p style={{ fontSize: "16px", color: "#9CA3AF", margin: 0 }}>
+              El profesor aún no ha subido material.
+            </p>
+          </div>
+        ) : (
+          grouped.map(([category, items]) => (
+            <div key={category}>
+              {/* Section title */}
+              <p
                 style={{
-                  background: "#FFFFFF",
-                  borderRadius: "20px",
-                  padding: "16px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "14px",
-                  border: "none",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  boxShadow: "0 2px 12px rgba(26,26,46,0.07)",
-                  width: "100%",
+                  fontSize: "15px",
+                  fontWeight: 700,
+                  color: "#53596B",
+                  margin: "0 0 10px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
                 }}
               >
-                {/* Icon */}
-                <div
-                  style={{
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "50%",
-                    background: "rgba(230,57,70,0.10)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <FolderIcon />
-                </div>
+                {category}
+              </p>
 
-                {/* Text */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: 700,
-                      color: "#1A1A2E",
-                      margin: 0,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {carpeta.nombre}
-                  </p>
-                  {carpeta.descripcion && (
-                    <p
+              {/* Item cards */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {items.map((item) => {
+                  const file = isFile(item.url);
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => openResource(item.url)}
+                      disabled={!item.url}
                       style={{
-                        fontSize: "13px",
-                        color: "#9CA3AF",
-                        margin: "2px 0 0",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
+                        background: "#FFFFFF",
+                        borderRadius: "1.5rem",
+                        padding: "14px 16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "14px",
+                        border: "none",
+                        cursor: item.url ? "pointer" : "default",
+                        textAlign: "left",
+                        boxShadow: "0 2px 12px rgba(26,26,46,0.07)",
+                        width: "100%",
+                        opacity: item.url ? 1 : 0.5,
                       }}
                     >
-                      {carpeta.descripcion}
-                    </p>
-                  )}
-                  <p style={{ fontSize: "12px", color: "#C4BAB0", margin: "2px 0 0" }}>
-                    {label}
-                  </p>
-                </div>
+                      {/* Icon circle */}
+                      <div
+                        style={{
+                          width: "48px",
+                          height: "48px",
+                          borderRadius: "50%",
+                          background: "rgba(230,57,70,0.10)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "22px",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {file ? "📄" : "🔗"}
+                      </div>
 
-                {/* Chevron */}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                  <path
-                    d="M9 18l6-6-6-6"
-                    stroke="#C4BAB0"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            );
-          })}
-        </div>
-      )}
+                      {/* Text */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p
+                          style={{
+                            fontSize: "15px",
+                            fontWeight: 700,
+                            color: "#1A1A2E",
+                            margin: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {item.title}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "12px",
+                            color: "#9CA3AF",
+                            margin: "2px 0 0",
+                          }}
+                        >
+                          {file ? "Archivo" : "Enlace"}
+                        </p>
+                      </div>
+
+                      {/* Chevron */}
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                        <path
+                          d="M9 18l6-6-6-6"
+                          stroke="#C4BAB0"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <BottomNav />
     </div>
   );
 }
