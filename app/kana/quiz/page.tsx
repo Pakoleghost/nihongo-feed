@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import type { Variants } from "framer-motion";
 import { KANA_ITEMS } from "@/lib/kana-data";
 import type { KanaItem } from "@/lib/kana-data";
 import {
@@ -101,14 +102,14 @@ function buildQuiz(
   }));
 }
 
-// Framer Motion variants
-const kanaEnter = {
+// Framer Motion variants — use `Variants` type so TypeScript accepts easing strings
+const kanaEnter: Variants = {
   initial: { x: 60, opacity: 0 },
   animate: { x: 0, opacity: 1, transition: { duration: 0.25, ease: "easeOut" } },
   exit: { x: -40, opacity: 0, transition: { duration: 0.15, ease: "easeIn" } },
 };
 
-const bounceVariants = {
+const bounceVariants: Variants = {
   idle: { y: 0 },
   bounce: {
     y: [0, -8, 0],
@@ -116,7 +117,7 @@ const bounceVariants = {
   },
 };
 
-const shakeVariants = {
+const shakeVariants: Variants = {
   idle: { x: 0 },
   shake: {
     x: [0, -10, 10, -6, 6, 0],
