@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
@@ -81,8 +80,17 @@ export default function ComunidadPage() {
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
+  const [myProfile, setMyProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+
+  // Compose state
+  const [composeText, setComposeText] = useState("");
+  const [composeImage, setComposeImage] = useState<File | null>(null);
+  const [composePreview, setComposePreview] = useState<string | null>(null);
+  const [publishing, setPublishing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     async function load() {
@@ -102,7 +110,10 @@ export default function ComunidadPage() {
       setPosts(fetchedPosts);
 
       // Fetch profiles for post authors
-      const userIds = [...new Set(fetchedPosts.map((p) => p.user_id))];
+      const userIds = [...new Set([
+        ...fetchedPosts.map((p) => p.user_id),
+        ...(uid ? [uid] : []),
+      ])];
       if (userIds.length > 0) {
         const { data: profileData } = await supabase
           .from("profiles")
@@ -113,6 +124,7 @@ export default function ComunidadPage() {
           profileMap[p.id] = p;
         });
         setProfiles(profileMap);
+        if (uid && profileMap[uid]) setMyProfile(profileMap[uid]);
       }
 
       // Fetch likes for current user
@@ -133,6 +145,78 @@ export default function ComunidadPage() {
     load();
   }, []);
 
+  // Auto-resize textarea
+  function handleTextareaInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setComposeText(e.target.value);
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
+    }
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setComposeImage(file);
+    setComposePreview(URL.createObjectURL(file));
+    e.target.value = "";
+  }
+
+  async function handlePublish() {
+    if (!composeText.trim() || publishing || !userId) return;
+    setPublishing(true);
+
+    try {
+      let imageUrl: string | null = null;
+
+      if (composeImage) {
+        const ext = composeImage.name.split(".").pop() ?? "jpg";
+        const path = `${userId}/${Date.now()}.${ext}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("comunidad-images")
+          .upload(path, composeImage, { upsert: false });
+        if (!uploadError && uploadData) {
+          const { data: urlData } = supabase.storage
+            .from("comunidad-images")
+            .getPublicUrl(uploadData.path);
+          imageUrl = urlData.publicUrl;
+        }
+      }
+
+      const { data: inserted } = await supabase
+        .from("comunidad_posts")
+        .insert({
+          user_id: userId,
+          content: composeText.trim(),
+          image_url: imageUrl,
+          likes: 0,
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (inserted) {
+        // Optimistically prepend
+        setPosts((prev) => [inserted as Post, ...prev]);
+        // Ensure own profile is in map
+        if (myProfile) {
+          setProfiles((prev) => ({ ...prev, [userId]: myProfile }));
+        }
+      }
+
+      // Clear compose
+      setComposeText("");
+      setComposeImage(null);
+      setComposePreview(null);
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+      }
+    } finally {
+      setPublishing(false);
+    }
+  }
+
   async function toggleLike(post: Post) {
     if (!userId) {
       router.push("/login");
@@ -142,7 +226,6 @@ export default function ComunidadPage() {
     const alreadyLiked = likedIds.has(post.id);
     const newCount = post.likes + (alreadyLiked ? -1 : 1);
 
-    // Optimistic update
     setLikedIds((prev) => {
       const next = new Set(prev);
       alreadyLiked ? next.delete(post.id) : next.add(post.id);
@@ -153,24 +236,15 @@ export default function ComunidadPage() {
     );
 
     if (alreadyLiked) {
-      await supabase
-        .from("comunidad_likes")
-        .delete()
-        .match({ post_id: post.id, user_id: userId });
-      await supabase
-        .from("comunidad_posts")
-        .update({ likes: Math.max(0, newCount) })
-        .eq("id", post.id);
+      await supabase.from("comunidad_likes").delete().match({ post_id: post.id, user_id: userId });
+      await supabase.from("comunidad_posts").update({ likes: Math.max(0, newCount) }).eq("id", post.id);
     } else {
-      await supabase
-        .from("comunidad_likes")
-        .insert({ post_id: post.id, user_id: userId });
-      await supabase
-        .from("comunidad_posts")
-        .update({ likes: newCount })
-        .eq("id", post.id);
+      await supabase.from("comunidad_likes").insert({ post_id: post.id, user_id: userId });
+      await supabase.from("comunidad_posts").update({ likes: newCount }).eq("id", post.id);
     }
   }
+
+  const canPublish = composeText.trim().length > 0 && !publishing && !!userId;
 
   return (
     <div
@@ -183,14 +257,7 @@ export default function ComunidadPage() {
       }}
     >
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "20px 20px 16px",
-        }}
-      >
+      <div style={{ padding: "20px 20px 16px" }}>
         <h1
           style={{
             fontSize: "36px",
@@ -202,23 +269,145 @@ export default function ComunidadPage() {
         >
           Comunidad
         </h1>
-        <Link
-          href="/comunidad/publicar"
-          style={{
-            background: "#E63946",
-            color: "#FFFFFF",
-            borderRadius: "999px",
-            padding: "10px 18px",
-            fontWeight: 700,
-            fontSize: "15px",
-            textDecoration: "none",
-            whiteSpace: "nowrap",
-            boxShadow: "0 4px 16px rgba(230,57,70,0.28)",
-          }}
-        >
-          + Publicar
-        </Link>
       </div>
+
+      {/* Inline compose box — only shown when logged in */}
+      {userId && (
+        <div style={{ padding: "0 16px 16px" }}>
+          <div
+            style={{
+              background: "#FFFFFF",
+              borderRadius: "2rem",
+              padding: "16px",
+              boxShadow: "0 4px 20px rgba(26,26,46,0.07)",
+            }}
+          >
+            {/* Top row: avatar + textarea */}
+            <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
+              <AvatarCircle
+                url={myProfile?.avatar_url ?? null}
+                name={myProfile?.username ?? null}
+                size={38}
+              />
+              <textarea
+                ref={textareaRef}
+                value={composeText}
+                onChange={handleTextareaInput}
+                placeholder="¿Qué aprendiste hoy?"
+                rows={1}
+                style={{
+                  flex: 1,
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  resize: "none",
+                  fontSize: "15px",
+                  fontFamily: "var(--font-noto-sans-jp), inherit",
+                  color: "#1A1A2E",
+                  lineHeight: 1.5,
+                  padding: "6px 0",
+                  overflow: "hidden",
+                }}
+              />
+            </div>
+
+            {/* Image preview */}
+            {composePreview && (
+              <div style={{ position: "relative", display: "inline-block", margin: "10px 0 0 50px" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={composePreview}
+                  alt="preview"
+                  style={{
+                    width: "56px",
+                    height: "56px",
+                    borderRadius: "12px",
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
+                <button
+                  onClick={() => { setComposeImage(null); setComposePreview(null); }}
+                  style={{
+                    position: "absolute",
+                    top: "-6px",
+                    right: "-6px",
+                    width: "20px",
+                    height: "20px",
+                    borderRadius: "50%",
+                    background: "#1A1A2E",
+                    border: "none",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#FFFFFF",
+                    fontSize: "11px",
+                    lineHeight: 1,
+                  }}
+                  aria-label="Quitar imagen"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {/* Bottom row: image picker + publish button */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: "12px",
+                paddingTop: "10px",
+                borderTop: "1px solid #F0EDE8",
+              }}
+            >
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "22px",
+                  padding: "4px",
+                  lineHeight: 1,
+                }}
+                aria-label="Agregar imagen"
+              >
+                🖼️
+              </button>
+
+              <button
+                onClick={handlePublish}
+                disabled={!canPublish}
+                style={{
+                  background: canPublish ? "#E63946" : "#C4BAB0",
+                  color: "#FFFFFF",
+                  borderRadius: "999px",
+                  padding: "8px 20px",
+                  border: "none",
+                  cursor: canPublish ? "pointer" : "not-allowed",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  transition: "background 0.15s",
+                  boxShadow: canPublish ? "0 4px 14px rgba(230,57,70,0.28)" : "none",
+                }}
+              >
+                {publishing ? "Publicando…" : "Publicar"}
+              </button>
+            </div>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+          />
+        </div>
+      )}
 
       {/* Feed */}
       <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -256,27 +445,10 @@ export default function ComunidadPage() {
                 }}
               >
                 {/* Author row */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    marginBottom: "12px",
-                  }}
-                >
-                  <AvatarCircle
-                    url={profile?.avatar_url ?? null}
-                    name={profile?.username ?? null}
-                  />
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
+                  <AvatarCircle url={profile?.avatar_url ?? null} name={profile?.username ?? null} />
                   <div>
-                    <p
-                      style={{
-                        fontSize: "15px",
-                        fontWeight: 700,
-                        color: "#1A1A2E",
-                        margin: 0,
-                      }}
-                    >
+                    <p style={{ fontSize: "15px", fontWeight: 700, color: "#1A1A2E", margin: 0 }}>
                       {profile?.username ?? "Usuario"}
                     </p>
                     <p style={{ fontSize: "13px", color: "#9CA3AF", margin: 0 }}>
@@ -286,18 +458,20 @@ export default function ComunidadPage() {
                 </div>
 
                 {/* Content */}
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 600,
-                    color: "#1A1A2E",
-                    margin: "0 0 12px",
-                    lineHeight: 1.5,
-                    fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                  }}
-                >
-                  {post.content}
-                </p>
+                {post.content && (
+                  <p
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: 600,
+                      color: "#1A1A2E",
+                      margin: "0 0 12px",
+                      lineHeight: 1.5,
+                      fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                    }}
+                  >
+                    {post.content}
+                  </p>
+                )}
 
                 {/* Image */}
                 {post.image_url && (
@@ -326,9 +500,7 @@ export default function ComunidadPage() {
                       display: "flex",
                       alignItems: "center",
                       gap: "6px",
-                      background: liked
-                        ? "rgba(230,57,70,0.10)"
-                        : "rgba(26,26,46,0.06)",
+                      background: liked ? "rgba(230,57,70,0.10)" : "rgba(26,26,46,0.06)",
                       borderRadius: "999px",
                       padding: "7px 14px",
                       border: "none",
@@ -363,7 +535,6 @@ export default function ComunidadPage() {
             justifyContent: "center",
           }}
         >
-          {/* Close button */}
           <button
             onClick={() => setLightboxUrl(null)}
             style={{
@@ -392,11 +563,7 @@ export default function ComunidadPage() {
             src={lightboxUrl}
             alt="imagen ampliada"
             onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: "100%",
-              maxHeight: "100%",
-              objectFit: "contain",
-            }}
+            style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
           />
         </div>
       )}
