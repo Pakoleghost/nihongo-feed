@@ -9,9 +9,9 @@ import BottomNav from "@/components/BottomNav";
 
 function getGreeting(): string {
   const h = new Date().getHours();
-  if (h >= 6 && h < 12) return "Buenos días,";
-  if (h >= 12 && h < 20) return "Buenas tardes,";
-  return "Buenas noches,";
+  if (h >= 6 && h < 12) return "おはようございます";
+  if (h >= 12 && h < 18) return "こんにちは";
+  return "こんばんは";
 }
 
 type Carpeta = {

@@ -49,7 +49,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja" className={`${poppins.variable} ${jakarta.variable} ${noto.variable} ${notoSerif.variable}`}>
-      <body className={noto.className}>{children}</body>
+      <body className={jakarta.className}>{children}</body>
     </html>
   );
 }
