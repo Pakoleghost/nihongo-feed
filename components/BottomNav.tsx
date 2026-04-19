@@ -51,20 +51,14 @@ function PracticarIcon({ color }: { color: string }) {
   );
 }
 
-function RecursosIcon({ color }: { color: string }) {
+function ComunidadIcon({ color }: { color: string }) {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
       <path
-        d="M4 19.5A2.5 2.5 0 016.5 17H20"
+        d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
         stroke={color}
         strokeWidth="2"
         strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"
-        stroke={color}
-        strokeWidth="2"
         strokeLinejoin="round"
       />
     </svg>
@@ -75,7 +69,7 @@ const tabs = [
   { href: "/", label: "Inicio", Icon: HomeIcon },
   { href: "/kana", label: "Kana", Icon: KanaIcon },
   { href: "/practicar", label: "Practicar", Icon: PracticarIcon },
-  { href: "/recursos", label: "Recursos", Icon: RecursosIcon },
+  { href: "/comunidad", label: "Comunidad", Icon: ComunidadIcon },
 ] as const;
 
 export default function BottomNav() {
