@@ -1,6 +1,8 @@
 import "./globals.css";
 import { Noto_Sans_JP, Noto_Serif_JP, Plus_Jakarta_Sans, Poppins } from "next/font/google";
 import type { Viewport } from "next";
+import Script from "next/script";
+import PushInit from "@/components/PushInit";
 
 const noto = Noto_Sans_JP({
   subsets: ["latin"],
@@ -56,7 +58,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className={jakarta.className}>{children}</body>
+      <body className={jakarta.className}>
+        {children}
+        <Script id="sw-register" strategy="afterInteractive">{`
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+          }
+        `}</Script>
+        <PushInit />
+      </body>
     </html>
   );
 }

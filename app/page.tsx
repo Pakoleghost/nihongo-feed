@@ -58,6 +58,7 @@ export default function InicioPage() {
   const [lastActivity, setLastActivityState] = useState<{ label: string; path: string } | null>(null);
   const [profile, setProfile] = useState<MiniProfile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
     markActiveToday();
@@ -67,7 +68,14 @@ export default function InicioPage() {
     supabase.auth.getUser().then(({ data }) => {
       const uid = data.user?.id;
       const userKey = uid ?? "anon";
-      setDueCount(getDueKanaCount(userKey));
+      const count = getDueKanaCount(userKey);
+      setDueCount(count);
+      if (count > 0) {
+        const today = new Date().toDateString();
+        if (localStorage.getItem("banner-seen-date") !== today) {
+          setShowBanner(true);
+        }
+      }
 
       if (uid) {
         supabase
@@ -141,6 +149,53 @@ export default function InicioPage() {
           </div>
         </div>
       </div>
+
+      {/* Dismissible banner */}
+      {showBanner && (
+        <Link
+          href="/kana/quiz?mode=smart&difficulty=automatico&count=20"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            background: "#4ECDC4",
+            borderRadius: "1.5rem",
+            padding: "14px 16px",
+            marginTop: "16px",
+            textDecoration: "none",
+          }}
+        >
+          <span style={{ fontSize: "15px", fontWeight: 700, color: "#1A1A2E" }}>
+            🔔 Tienes {dueCount} kana por repasar hoy
+          </span>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowBanner(false);
+              localStorage.setItem("banner-seen-date", new Date().toDateString());
+            }}
+            style={{
+              background: "rgba(26,26,46,0.12)",
+              border: "none",
+              borderRadius: "50%",
+              width: "28px",
+              height: "28px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              marginLeft: "8px",
+              fontSize: "14px",
+              color: "#1A1A2E",
+            }}
+            aria-label="Cerrar"
+          >
+            ×
+          </button>
+        </Link>
+      )}
 
       {/* Urgent kana card — only when dueCount > 0 */}
       {dueCount > 0 && (
