@@ -107,10 +107,13 @@ export default function ComunidadPage() {
 
   useEffect(() => {
     async function load() {
+      // getSession() reads from localStorage immediately (no network call).
+      // This ensures the compose box and user-specific UI appear on first
+      // render even before the token is validated against the server.
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      const uid = user?.id ?? null;
+        data: { session },
+      } = await supabase.auth.getSession();
+      const uid = session?.user?.id ?? null;
       setUserId(uid);
 
       const { data: postData } = await supabase
