@@ -34,7 +34,7 @@ export const metadata = {
   title: "Nihongo",
   icons: {
     icon: "/icon.png",
-    apple: "/apple-icon.png",
+    apple: "/apple-touch-icon.png",
   },
 };
 
@@ -49,6 +49,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja" className={`${poppins.variable} ${jakarta.variable} ${noto.variable} ${notoSerif.variable}`}>
+      <head>
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      </head>
       <body className={jakarta.className}>{children}</body>
     </html>
   );
