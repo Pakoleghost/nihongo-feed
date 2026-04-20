@@ -14,7 +14,7 @@ function getGreeting(): string {
   return "こんばんは";
 }
 
-type MiniProfile = { username: string | null; avatar_url: string | null };
+type MiniProfile = { username: string | null; avatar_url: string | null; is_admin: boolean | null };
 
 function AvatarCircle({ url, name }: { url: string | null; name: string | null }) {
   const size = 36;
@@ -57,6 +57,7 @@ export default function InicioPage() {
   const [dueCount, setDueCount] = useState(0);
   const [lastActivity, setLastActivityState] = useState<{ label: string; path: string } | null>(null);
   const [profile, setProfile] = useState<MiniProfile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     markActiveToday();
@@ -71,11 +72,14 @@ export default function InicioPage() {
       if (uid) {
         supabase
           .from("profiles")
-          .select("username, avatar_url")
+          .select("username, avatar_url, is_admin")
           .eq("id", uid)
           .single()
           .then(({ data: p }) => {
-            if (p) setProfile(p as MiniProfile);
+            if (p) {
+              setProfile(p as MiniProfile);
+              setIsAdmin((p as MiniProfile).is_admin === true);
+            }
           });
       }
     });
@@ -309,6 +313,62 @@ export default function InicioPage() {
           </svg>
         </Link>
       </div>
+
+      {/* Admin panel card — only for admins */}
+      {isAdmin && (
+        <div
+          style={{
+            background: "#1A1A2E",
+            borderRadius: "2rem",
+            padding: "20px",
+            marginTop: "28px",
+          }}
+        >
+          {/* Title */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"
+                stroke="#FFFFFF"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <p style={{ fontSize: "16px", fontWeight: 800, color: "#FFFFFF", margin: 0 }}>
+              Panel de administrador
+            </p>
+          </div>
+
+          {/* Links */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {[
+              { label: "Usuarios", href: "/admin/usuarios" },
+              { label: "Recursos", href: "/resources" },
+              { label: "Comunidad", href: "/admin/comunidad" },
+            ].map(({ label, href }) => (
+              <Link
+                key={href}
+                href={href}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "rgba(255,255,255,0.10)",
+                  borderRadius: "1rem",
+                  padding: "14px 16px",
+                  textDecoration: "none",
+                }}
+              >
+                <span style={{ fontSize: "15px", fontWeight: 600, color: "#FFFFFF" }}>{label}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 18l6-6-6-6" stroke="rgba(255,255,255,0.5)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <BottomNav />
     </div>
