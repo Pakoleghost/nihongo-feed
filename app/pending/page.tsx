@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { AuthChangeEvent } from "@supabase/supabase-js";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 
 type ApplicationStatus = "pending" | "rejected";
@@ -33,7 +33,7 @@ export default function PendingApprovalPage() {
       // No session on first load.
       setSessionExpired(true);
 
-      const { data: sub } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session) => {
+      const { data: sub } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
         const nextUid = session?.user?.id ?? null;
         if (!alive) return;
         if (nextUid) {
