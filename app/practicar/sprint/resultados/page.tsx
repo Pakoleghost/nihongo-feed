@@ -112,6 +112,22 @@ export default function SprintResultadosPage() {
           Volver
         </button>
       </div>
+
+      <button
+        onClick={() => router.push("/practicar/sprint/scoreboard")}
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          color: "#4ECDC4",
+          fontSize: "15px",
+          fontWeight: 700,
+          marginTop: "20px",
+          padding: "4px",
+        }}
+      >
+        Ver scoreboard →
+      </button>
     </div>
   );
 }
