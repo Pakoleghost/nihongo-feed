@@ -31,23 +31,24 @@ export default function RecursosPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase
-      .from("resources")
-      .select("id, title, url, category")
-      .order("category", { ascending: true })
-      .order("title", { ascending: true })
-      .then(({ data }) => {
-        const rows = (data as ResourceRow[] | null) ?? [];
-        // Group by category
-        const map = new Map<string, ResourceRow[]>();
-        rows.forEach((r) => {
-          const cat = r.category ?? "General";
-          if (!map.has(cat)) map.set(cat, []);
-          map.get(cat)!.push(r);
-        });
-        setGrouped([...map.entries()]);
-        setLoading(false);
+    async function load() {
+      const { data } = await supabase
+        .from("resources")
+        .select("id, title, url, category")
+        .order("category", { ascending: true })
+        .order("title", { ascending: true });
+      const rows = (data as ResourceRow[] | null) ?? [];
+      // Group by category
+      const map = new Map<string, ResourceRow[]>();
+      rows.forEach((r) => {
+        const cat = r.category ?? "General";
+        if (!map.has(cat)) map.set(cat, []);
+        map.get(cat)!.push(r);
       });
+      setGrouped([...map.entries()]);
+      setLoading(false);
+    }
+    load();
   }, []);
 
   return (

@@ -65,7 +65,8 @@ export default function InicioPage() {
     setStreak(getStreak());
     setLastActivityState(getLastActivity());
 
-    supabase.auth.getUser().then(({ data }) => {
+    async function init() {
+      const { data } = await supabase.auth.getUser();
       const uid = data.user?.id;
       const userKey = uid ?? "anon";
       const count = getDueKanaCount(userKey);
@@ -78,19 +79,18 @@ export default function InicioPage() {
       }
 
       if (uid) {
-        supabase
+        const { data: p } = await supabase
           .from("profiles")
           .select("username, avatar_url, is_admin")
           .eq("id", uid)
-          .single()
-          .then(({ data: p }) => {
-            if (p) {
-              setProfile(p as MiniProfile);
-              setIsAdmin((p as MiniProfile).is_admin === true);
-            }
-          });
+          .single();
+        if (p) {
+          setProfile(p as MiniProfile);
+          setIsAdmin((p as MiniProfile).is_admin === true);
+        }
       }
-    });
+    }
+    init();
   }, []);
 
   return (

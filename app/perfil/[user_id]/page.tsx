@@ -57,19 +57,20 @@ export default function PublicProfilePage() {
   useEffect(() => {
     if (!userId) { setNotFound(true); setLoading(false); return; }
 
-    supabase
-      .from("profiles")
-      .select("id, username, avatar_url, group_name")
-      .eq("id", userId)
-      .single()
-      .then(({ data, error }) => {
-        if (error || !data) {
-          setNotFound(true);
-        } else {
-          setProfile(data as PublicProfile);
-        }
-        setLoading(false);
-      });
+    async function load() {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, username, avatar_url, group_name")
+        .eq("id", userId)
+        .single();
+      if (error || !data) {
+        setNotFound(true);
+      } else {
+        setProfile(data as PublicProfile);
+      }
+      setLoading(false);
+    }
+    load();
   }, [userId]);
 
   return (

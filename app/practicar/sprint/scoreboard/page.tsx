@@ -64,9 +64,11 @@ export default function ScoreboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    async function loadUser() {
+      const { data } = await supabase.auth.getUser();
       setUserId(data.user?.id ?? null);
-    });
+    }
+    loadUser();
   }, []);
 
   useEffect(() => {
