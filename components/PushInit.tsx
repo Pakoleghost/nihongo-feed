@@ -3,15 +3,16 @@
 import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
+function vapidKeyToBuffer(base64String: string): ArrayBuffer {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
   const rawData = window.atob(base64);
-  const output = new Uint8Array(rawData.length);
+  const buffer = new ArrayBuffer(rawData.length);
+  const view = new Uint8Array(buffer);
   for (let i = 0; i < rawData.length; i++) {
-    output[i] = rawData.charCodeAt(i);
+    view[i] = rawData.charCodeAt(i);
   }
-  return output;
+  return buffer;
 }
 
 export default function PushInit() {
@@ -34,7 +35,7 @@ export default function PushInit() {
       const existing = await reg.pushManager.getSubscription();
       const sub = existing ?? await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidKey),
+        applicationServerKey: vapidKeyToBuffer(vapidKey),
       });
 
       await fetch("/api/push/subscribe", {
