@@ -314,59 +314,27 @@ export default function InicioPage() {
         </Link>
       </div>
 
-      {/* Admin panel card — only for admins */}
+      {/* Admin pill — only for admins */}
       {isAdmin && (
-        <div
-          style={{
-            background: "#1A1A2E",
-            borderRadius: "2rem",
-            padding: "20px",
-            marginTop: "28px",
-          }}
-        >
-          {/* Title */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"
-                stroke="#FFFFFF"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <p style={{ fontSize: "16px", fontWeight: 800, color: "#FFFFFF", margin: 0 }}>
-              Panel de administrador
-            </p>
-          </div>
-
-          {/* Links */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {[
-              { label: "Usuarios", href: "/admin/usuarios" },
-              { label: "Recursos", href: "/resources" },
-              { label: "Comunidad", href: "/admin/comunidad" },
-            ].map(({ label, href }) => (
-              <Link
-                key={href}
-                href={href}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  background: "rgba(255,255,255,0.10)",
-                  borderRadius: "1rem",
-                  padding: "14px 16px",
-                  textDecoration: "none",
-                }}
-              >
-                <span style={{ fontSize: "15px", fontWeight: 600, color: "#FFFFFF" }}>{label}</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 18l6-6-6-6" stroke="rgba(255,255,255,0.5)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </Link>
-            ))}
-          </div>
+        <div style={{ marginTop: "20px" }}>
+          <Link
+            href="/admin/usuarios"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              background: "#1A1A2E",
+              color: "#FFFFFF",
+              borderRadius: "3rem",
+              padding: "12px 22px",
+              textDecoration: "none",
+              fontSize: "15px",
+              fontWeight: 700,
+            }}
+          >
+            <span>⚙️</span>
+            <span>Panel de administrador</span>
+          </Link>
         </div>
       )}
 

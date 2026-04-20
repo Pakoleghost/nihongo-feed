@@ -84,6 +84,7 @@ export default function ComunidadPage() {
   const [myProfile, setMyProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Compose state
   const [composeText, setComposeText] = useState("");
@@ -133,7 +134,16 @@ export default function ComunidadPage() {
           profileMap[p.id] = p;
         });
         setProfiles(profileMap);
-        if (uid && profileMap[uid]) setMyProfile(profileMap[uid]);
+        if (uid && profileMap[uid]) {
+          setMyProfile(profileMap[uid]);
+          // Check admin flag separately
+          const { data: adminRow } = await supabase
+            .from("profiles")
+            .select("is_admin")
+            .eq("id", uid)
+            .single();
+          setIsAdmin((adminRow as { is_admin: boolean | null } | null)?.is_admin === true);
+        }
       }
 
       if (uid) {
@@ -571,6 +581,21 @@ export default function ComunidadPage() {
                     <span style={{ fontSize: "16px" }}>{liked ? "❤️" : "🤍"}</span>
                     いいね！ {post.likes}
                   </button>
+
+                  {/* Admin delete — non-own posts */}
+                  {isAdmin && !isOwn && (
+                    <button
+                      onClick={() => setConfirmDeleteId(confirmDeleteId === post.id ? null : post.id)}
+                      style={{
+                        marginLeft: "auto", background: "none", border: "none",
+                        cursor: "pointer", fontSize: "18px", padding: "4px 8px",
+                        borderRadius: "8px", opacity: 0.5,
+                      }}
+                      aria-label="Eliminar (admin)"
+                    >
+                      🗑️
+                    </button>
+                  )}
                 </div>
               </div>
             );
