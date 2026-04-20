@@ -30,9 +30,11 @@ function nextQuestion(pool: KanaItem[]): { item: KanaItem; options: string[] } {
 }
 
 type Phase = "question" | "feedback";
+type CountdownStep = number | "¡Ya!" | null;
 
 export default function SprintPage() {
   const router = useRouter();
+  const [countdown, setCountdown] = useState<CountdownStep>(3);
   const [timeLeft, setTimeLeft] = useState(DURATION);
   const [correctCount, setCorrectCount] = useState(0);
   const [current, setCurrent] = useState(() => nextQuestion(SPRINT_POOL));
@@ -42,7 +44,19 @@ export default function SprintPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const doneRef = useRef(false);
 
+  // Countdown before game starts: 3 → 2 → 1 → ¡Ya! → null (game begins)
   useEffect(() => {
+    const t1 = setTimeout(() => setCountdown(2), 800);
+    const t2 = setTimeout(() => setCountdown(1), 1600);
+    const t3 = setTimeout(() => setCountdown("¡Ya!"), 2400);
+    const t4 = setTimeout(() => setCountdown(null), 3000);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
+  }, []);
+
+  // Game timer — only starts once countdown finishes
+  useEffect(() => {
+    if (countdown !== null) return;
+
     setLastActivity("Kana Sprint", "/practicar/sprint");
 
     timerRef.current = setInterval(() => {
@@ -58,7 +72,7 @@ export default function SprintPage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [countdown]);
 
   useEffect(() => {
     if (timeLeft === 0 && !doneRef.current) {
@@ -105,8 +119,48 @@ export default function SprintPage() {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
+        position: "relative",
       }}
     >
+      {/* Countdown overlay */}
+      <AnimatePresence>
+        {countdown !== null && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 20,
+              background: "#1A1A2E",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={String(countdown)}
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: [0.5, 1.2, 1], opacity: [0, 1, 1], transition: { duration: 0.8, times: [0, 0.55, 1], ease: "easeOut" } }}
+                exit={{ scale: 1.3, opacity: 0, transition: { duration: 0.15 } }}
+                style={{
+                  fontSize: countdown === "¡Ya!" ? "72px" : "120px",
+                  fontWeight: 800,
+                  color: countdown === "¡Ya!" ? "#4ECDC4" : "#FFFFFF",
+                  margin: 0,
+                  lineHeight: 1,
+                  userSelect: "none",
+                }}
+              >
+                {countdown}
+              </motion.p>
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Top bar */}
       <div
         style={{
@@ -176,6 +230,28 @@ export default function SprintPage() {
             {correctCount} CORRECTAS
           </p>
         </div>
+
+        {/* Scoreboard button */}
+        <button
+          onClick={() => router.push("/practicar/sprint/scoreboard")}
+          style={{
+            marginLeft: "auto",
+            width: "40px",
+            height: "40px",
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.12)",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "20px",
+            flexShrink: 0,
+          }}
+          aria-label="Scoreboard"
+        >
+          🏆
+        </button>
       </div>
 
       {/* Kana character — animated swap */}
