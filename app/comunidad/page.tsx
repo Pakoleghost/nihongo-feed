@@ -100,6 +100,7 @@ export default function ComunidadPage() {
   const [editContent, setEditContent] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
 
   // Lightbox swipe-down to close
   const lbTouchStartY = useRef(0);
@@ -261,7 +262,39 @@ export default function ComunidadPage() {
   }
 
   async function handleDelete(postId: string) {
-    await supabase.from("comunidad_posts").delete().eq("id", postId);
+    if (deletingPostId) return;
+    const targetPost = posts.find((p) => p.id === postId);
+    if (!targetPost) return;
+
+    setDeletingPostId(postId);
+
+    let deleteError: { message: string } | null = null;
+
+    if (targetPost.user_id === userId) {
+      // Own post — include user_id in the filter so RLS always matches
+      const { error } = await supabase
+        .from("comunidad_posts")
+        .delete()
+        .eq("id", postId)
+        .eq("user_id", userId!);
+      deleteError = error;
+    } else {
+      // Admin deleting another user's post — no user_id constraint
+      const { error } = await supabase
+        .from("comunidad_posts")
+        .delete()
+        .eq("id", postId);
+      deleteError = error;
+    }
+
+    setDeletingPostId(null);
+
+    if (deleteError) {
+      alert("No se pudo eliminar la publicación. Inténtalo de nuevo.");
+      return;
+    }
+
+    // Only remove from local state AFTER the DB confirms the delete
     setPosts((prev) => prev.filter((p) => p.id !== postId));
     setConfirmDeleteId(null);
   }
@@ -517,13 +550,16 @@ export default function ComunidadPage() {
                     <div style={{ display: "flex", gap: "8px" }}>
                       <button
                         onClick={() => handleDelete(post.id)}
+                        disabled={deletingPostId === post.id}
                         style={{
-                          background: "#E63946", color: "#FFFFFF", borderRadius: "999px",
-                          padding: "7px 16px", border: "none", cursor: "pointer",
+                          background: deletingPostId === post.id ? "#C4BAB0" : "#E63946",
+                          color: "#FFFFFF", borderRadius: "999px",
+                          padding: "7px 16px", border: "none",
+                          cursor: deletingPostId === post.id ? "not-allowed" : "pointer",
                           fontSize: "13px", fontWeight: 700,
                         }}
                       >
-                        Sí, eliminar
+                        {deletingPostId === post.id ? "Eliminando…" : "Sí, eliminar"}
                       </button>
                       <button
                         onClick={() => setConfirmDeleteId(null)}
