@@ -25,12 +25,13 @@ export default function PublicarPage() {
 
     try {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
         router.push("/login");
         return;
       }
+      const user = session.user;
 
       let imageUrl: string | null = null;
 

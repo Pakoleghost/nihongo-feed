@@ -12,16 +12,16 @@ export default function MyProfilePage() {
 
     const routeToProfile = async () => {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!alive) return;
-      if (!user) {
+      if (!session) {
         router.replace("/login");
         return;
       }
 
-      router.replace(`/profile/${user.id}`);
+      router.replace(`/profile/${session.user.id}`);
     };
 
     void routeToProfile();

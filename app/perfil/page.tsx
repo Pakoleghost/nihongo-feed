@@ -91,9 +91,10 @@ export default function PerfilPage() {
   useEffect(() => {
     async function load() {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) { router.push("/login"); return; }
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) { router.push("/login"); return; }
+      const user = session.user;
       setUserId(user.id);
 
       const { data } = await supabase

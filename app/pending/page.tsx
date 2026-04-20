@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 
 type ApplicationStatus = "pending" | "rejected";
 
 export default function PendingApprovalPage() {
+  const router = useRouter();
   const [status, setStatus] = useState<ApplicationStatus>("pending");
   const [checked, setChecked] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -172,10 +174,8 @@ export default function PendingApprovalPage() {
   }, [authReady, userId, status]);
 
   async function goToLogin() {
-    try {
-      await supabase.auth.signOut();
-    } catch {}
-    window.location.href = "/";
+    await supabase.auth.signOut();
+    router.push("/login");
   }
 
   if (!authReady || (userId && !checked)) {

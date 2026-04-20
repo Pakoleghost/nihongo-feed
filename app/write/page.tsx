@@ -76,9 +76,10 @@ function WriteContent() {
   useEffect(() => {
     const checkUser = async () => {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return router.push("/login");
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) return router.push("/login");
+      const user = session.user;
 
       const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
       if (profile?.is_admin) {
