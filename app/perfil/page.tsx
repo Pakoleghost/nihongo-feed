@@ -390,6 +390,27 @@ export default function PerfilPage() {
         </div>
       </div>
 
+      {/* Logout */}
+      <div style={{ display: "flex", justifyContent: "center", marginTop: "32px" }}>
+        <button
+          onClick={async () => {
+            await supabase.auth.signOut();
+            router.push("/login");
+          }}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "15px",
+            fontWeight: 700,
+            color: "#E63946",
+            padding: "8px 16px",
+          }}
+        >
+          Cerrar sesión
+        </button>
+      </div>
+
       <BottomNav />
     </div>
   );

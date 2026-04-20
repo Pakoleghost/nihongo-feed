@@ -14,6 +14,8 @@ if (!supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
+    storageKey: "nihongo-auth",
+    storage: typeof window !== "undefined" ? window.localStorage : undefined,
     autoRefreshToken: true,
     detectSessionInUrl: true,
   },
