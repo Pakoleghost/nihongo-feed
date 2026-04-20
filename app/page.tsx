@@ -14,10 +14,49 @@ function getGreeting(): string {
   return "こんばんは";
 }
 
+type MiniProfile = { username: string | null; avatar_url: string | null };
+
+function AvatarCircle({ url, name }: { url: string | null; name: string | null }) {
+  const size = 36;
+  if (url) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={url}
+        alt={name ?? "perfil"}
+        width={size}
+        height={size}
+        style={{ borderRadius: "50%", objectFit: "cover", display: "block", flexShrink: 0 }}
+      />
+    );
+  }
+  const initial = (name ?? "?").charAt(0).toUpperCase();
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        background: "#E5E7EB",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 14,
+        fontWeight: 700,
+        color: "#53596B",
+        flexShrink: 0,
+      }}
+    >
+      {initial}
+    </div>
+  );
+}
+
 export default function InicioPage() {
   const [streak, setStreak] = useState(0);
   const [dueCount, setDueCount] = useState(0);
   const [lastActivity, setLastActivityState] = useState<{ label: string; path: string } | null>(null);
+  const [profile, setProfile] = useState<MiniProfile | null>(null);
 
   useEffect(() => {
     markActiveToday();
@@ -25,8 +64,20 @@ export default function InicioPage() {
     setLastActivityState(getLastActivity());
 
     supabase.auth.getUser().then(({ data }) => {
-      const userKey = data.user?.id ?? "anon";
+      const uid = data.user?.id;
+      const userKey = uid ?? "anon";
       setDueCount(getDueKanaCount(userKey));
+
+      if (uid) {
+        supabase
+          .from("profiles")
+          .select("username, avatar_url")
+          .eq("id", uid)
+          .single()
+          .then(({ data: p }) => {
+            if (p) setProfile(p as MiniProfile);
+          });
+      }
     });
   }, []);
 
@@ -66,21 +117,24 @@ export default function InicioPage() {
           </h1>
         </div>
 
-        {/* Streak pill */}
-        <div
-          style={{
-            background: "rgba(230,57,70,0.12)",
-            borderRadius: "999px",
-            padding: "8px 14px",
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            flexShrink: 0,
-            marginTop: "4px",
-          }}
-        >
-          <span style={{ fontSize: "16px" }}>🔥</span>
-          <span style={{ fontSize: "16px", fontWeight: 700, color: "#E63946" }}>{streak}</span>
+        {/* Avatar + streak */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0, marginTop: "4px" }}>
+          <Link href="/perfil" style={{ display: "block", flexShrink: 0 }}>
+            <AvatarCircle url={profile?.avatar_url ?? null} name={profile?.username ?? null} />
+          </Link>
+          <div
+            style={{
+              background: "rgba(230,57,70,0.12)",
+              borderRadius: "999px",
+              padding: "8px 14px",
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+            }}
+          >
+            <span style={{ fontSize: "16px" }}>🔥</span>
+            <span style={{ fontSize: "16px", fontWeight: 700, color: "#E63946" }}>{streak}</span>
+          </div>
         </div>
       </div>
 
