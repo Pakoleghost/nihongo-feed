@@ -2,8 +2,10 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { KANA_ITEMS } from "@/lib/kana-data";
 import type { KanaItem } from "@/lib/kana-data";
+import KanaStrokeAnimation from "@/components/KanaStrokeAnimation";
 
 // ─── lookup: kana character → KanaItem ───────────────────────────────────────
 const KANA_MAP = new Map<string, KanaItem>(KANA_ITEMS.map((i) => [i.kana, i]));
@@ -286,9 +288,18 @@ export default function TablaPage() {
   const [openTenten, setOpenTenten] = useState(false);
   const [openMaru, setOpenMaru] = useState(false);
   const [openYoon, setOpenYoon] = useState(false);
+  const [modalKana, setModalKana] = useState<string | null>(null);
+  const [replayKey, setReplayKey] = useState(0);
 
   function handleSelect(kana: string) {
-    setSelected((prev) => (prev === kana ? null : kana));
+    setSelected(kana);
+    setModalKana(kana);
+    setReplayKey(0);
+  }
+
+  function closeModal() {
+    setModalKana(null);
+    setSelected(null);
   }
 
   const nKana = N_KANA[script];
@@ -501,6 +512,136 @@ export default function TablaPage() {
         </CollapsibleSection>
 
       </div>
+
+      {/* ── Stroke order modal ──────────────────────────────────────────── */}
+      <AnimatePresence>
+        {modalKana && (() => {
+          const item = KANA_MAP.get(modalKana);
+          return (
+            <motion.div
+              key="modal-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={closeModal}
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0,0,0,0.55)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 100,
+                padding: "24px",
+              }}
+            >
+              <motion.div
+                key="modal-card"
+                initial={{ scale: 0.88, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.88, opacity: 0 }}
+                transition={{ duration: 0.22, ease: [0.34, 1.2, 0.64, 1] }}
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  background: "#FFFFFF",
+                  borderRadius: "2rem",
+                  padding: "28px 24px 24px",
+                  width: "100%",
+                  maxWidth: "320px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "6px",
+                  position: "relative",
+                }}
+              >
+                {/* Close button */}
+                <button
+                  onClick={closeModal}
+                  style={{
+                    position: "absolute",
+                    top: "14px",
+                    right: "14px",
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "50%",
+                    background: "#F3F0EB",
+                    border: "none",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "18px",
+                    color: "#9CA3AF",
+                    lineHeight: 1,
+                  }}
+                  aria-label="Cerrar"
+                >
+                  ×
+                </button>
+
+                {/* Kana */}
+                <p
+                  style={{
+                    fontSize: "72px",
+                    fontWeight: 800,
+                    color: "#E63946",
+                    margin: 0,
+                    lineHeight: 1,
+                    fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                  }}
+                >
+                  {modalKana}
+                </p>
+
+                {/* Romaji */}
+                <p
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: 700,
+                    color: "#9CA3AF",
+                    margin: "0 0 12px",
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  {item?.romaji ?? ""}
+                </p>
+
+                {/* Stroke animation */}
+                <KanaStrokeAnimation
+                  key={`${modalKana}-${replayKey}`}
+                  kana={modalKana}
+                  size={200}
+                  autoPlay
+                />
+
+                {/* Replay button */}
+                <button
+                  onClick={() => setReplayKey((k) => k + 1)}
+                  style={{
+                    marginTop: "14px",
+                    background: "#4ECDC4",
+                    border: "none",
+                    borderRadius: "999px",
+                    padding: "12px 32px",
+                    fontSize: "15px",
+                    fontWeight: 700,
+                    color: "#1A1A2E",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "7px",
+                  }}
+                >
+                  <span style={{ fontSize: "18px" }}>↺</span>
+                  Repetir
+                </button>
+              </motion.div>
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
     </div>
   );
 }
