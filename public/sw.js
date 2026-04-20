@@ -1,4 +1,4 @@
-const CACHE_NAME = "nihongo-v2";
+const CACHE_NAME = "nihongo-v3";
 const OFFLINE_URL = "/offline.html";
 
 // On install: only cache the offline fallback page, nothing else.
