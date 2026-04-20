@@ -13,7 +13,8 @@ export default function SprintResultadosPage() {
     const s = parseInt(sessionStorage.getItem("sprint-score") ?? "0", 10);
     setScore(s);
 
-    supabase.auth.getUser().then(async ({ data }) => {
+    async function saveScore() {
+      const { data } = await supabase.auth.getUser();
       if (!data.user) return;
       const userId = data.user.id;
 
@@ -35,7 +36,8 @@ export default function SprintResultadosPage() {
           updated_at: new Date().toISOString(),
         });
       }
-    });
+    }
+    saveScore();
   }, []);
 
   return (
