@@ -104,7 +104,7 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) alert(error.message);
         else {
-          router.push("/study");
+          router.push("/");
           router.refresh();
         }
       }

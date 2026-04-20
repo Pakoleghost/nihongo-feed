@@ -77,12 +77,12 @@ export default function PendingApprovalPage() {
       const username = (profile?.username ?? "").toString().trim();
 
       if (profile?.is_admin) {
-        window.location.href = "/study";
+        window.location.href = "/";
         return;
       }
 
       if (profile?.is_approved) {
-        window.location.href = username ? "/study" : "/pick-username";
+        window.location.href = username ? "/" : "/pick-username";
         return;
       }
 
@@ -103,7 +103,7 @@ export default function PendingApprovalPage() {
       if (app?.status === "approved") {
         // Fallback: if applications is approved but profiles.approved hasn't propagated yet,
         // still move the user forward.
-        window.location.href = username ? "/study" : "/pick-username";
+        window.location.href = username ? "/" : "/pick-username";
         return;
       }
 
@@ -138,13 +138,13 @@ export default function PendingApprovalPage() {
       if (!alive) return;
 
       if (profile?.is_admin) {
-        window.location.href = "/study";
+        window.location.href = "/";
         return;
       }
 
       if (profile?.is_approved) {
         // Keep the session. Just move them into the app.
-        window.location.href = username ? "/study" : "/pick-username";
+        window.location.href = username ? "/" : "/pick-username";
       }
 
       const { data: app } = await supabase
@@ -156,7 +156,7 @@ export default function PendingApprovalPage() {
         .maybeSingle();
 
       if (app?.status === "approved") {
-        window.location.href = username ? "/study" : "/pick-username";
+        window.location.href = username ? "/" : "/pick-username";
       }
     };
 
