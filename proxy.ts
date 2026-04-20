@@ -11,7 +11,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * Route protection is still handled inside each page/component; this
  * middleware does NOT redirect — it only keeps the session alive.
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Start with a pass-through response that carries the incoming request
   // headers (required so Server Components can read cookies).
   let supabaseResponse = NextResponse.next({ request });
