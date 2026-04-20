@@ -73,34 +73,45 @@ export default function PracticarPage() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: "16px", flex: 1 }}>
         {CARDS.map(({ href, title, sub, bg, color, subColor, shadow }) => (
-          <Link
-            key={href}
-            href={href}
-            style={{
-              background: bg,
-              borderRadius: "24px",
-              padding: "28px 24px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-end",
-              textDecoration: "none",
-              minHeight: "150px",
-              boxShadow: shadow,
-            }}
-          >
-            <p
+          <div key={href}>
+            <Link
+              href={href}
               style={{
-                fontSize: "28px",
-                fontWeight: 800,
-                color,
-                margin: 0,
-                lineHeight: 1.1,
+                background: bg,
+                borderRadius: "24px",
+                padding: "28px 24px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-end",
+                textDecoration: "none",
+                minHeight: "150px",
+                boxShadow: shadow,
               }}
             >
-              {title}
-            </p>
-            <p style={{ fontSize: "15px", color: subColor, margin: "6px 0 0" }}>{sub}</p>
-          </Link>
+              <p style={{ fontSize: "28px", fontWeight: 800, color, margin: 0, lineHeight: 1.1 }}>
+                {title}
+              </p>
+              <p style={{ fontSize: "15px", color: subColor, margin: "6px 0 0" }}>{sub}</p>
+            </Link>
+
+            {/* Scoreboard link — only below Kana Sprint */}
+            {href === "/practicar/sprint" && (
+              <Link
+                href="/practicar/sprint/scoreboard"
+                style={{
+                  display: "inline-block",
+                  marginTop: "10px",
+                  marginLeft: "8px",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#4ECDC4",
+                  textDecoration: "none",
+                }}
+              >
+                🏆 Ver scoreboard
+              </Link>
+            )}
+          </div>
         ))}
       </div>
 
