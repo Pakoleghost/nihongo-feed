@@ -6,12 +6,6 @@ import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import type { GenkiVocabItem } from "@/lib/genki-vocab-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
 
-const LESSON_LABELS: Record<number, string> = {
-  1: "Saludos", 2: "Números", 3: "Familia", 4: "Horario",
-  5: "Mi día", 6: "Deportes", 7: "Ciudad", 8: "Fin de semana",
-  9: "Viajes", 10: "Invierno", 11: "Recuerdos", 12: "Festivales",
-};
-
 const LESSONS = Object.keys(GENKI_VOCAB_BY_LESSON)
   .map(Number)
   .sort((a, b) => a - b);
@@ -73,9 +67,10 @@ export default function FlashcardsPage() {
     <div
       style={{
         background: "#FFF8E7",
-        minHeight: "100vh",
+        height: "100dvh",
         display: "flex",
         flexDirection: "column",
+        overflow: "hidden",
       }}
     >
       {/* Top bar */}
@@ -125,27 +120,8 @@ export default function FlashcardsPage() {
           </span>
         </div>
 
-        {/* Dots placeholder */}
-        <button
-          style={{
-            width: "40px",
-            height: "40px",
-            borderRadius: "50%",
-            background: "#FFFFFF",
-            border: "none",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 2px 10px rgba(26,26,46,0.10)",
-            fontSize: "18px",
-            color: "#1A1A2E",
-            fontWeight: 700,
-          }}
-          aria-label="Opciones"
-        >
-          ···
-        </button>
+        {/* Spacer to keep streak pill centered */}
+        <div style={{ width: "40px" }} />
       </div>
 
       {/* Lesson chips */}
@@ -177,7 +153,7 @@ export default function FlashcardsPage() {
               whiteSpace: "nowrap",
             }}
           >
-            L{l}: {LESSON_LABELS[l] ?? `Lección ${l}`}
+            L{l}
           </button>
         ))}
       </div>
@@ -186,6 +162,7 @@ export default function FlashcardsPage() {
       <div
         style={{
           flex: 1,
+          minHeight: 0,
           padding: "20px 20px 0",
           display: "flex",
           flexDirection: "column",
@@ -342,7 +319,7 @@ export default function FlashcardsPage() {
 
       {/* Progress + buttons */}
       {!done && (
-        <div style={{ padding: "16px 20px 48px" }}>
+        <div style={{ padding: "16px 20px", paddingBottom: "max(32px, env(safe-area-inset-bottom, 32px))" }}>
           {/* Progress */}
           <div
             style={{
