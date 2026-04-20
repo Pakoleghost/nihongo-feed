@@ -84,18 +84,35 @@ export default function KanaPage() {
         padding: "20px 20px 100px",
       }}
     >
-      {/* Title */}
-      <h1
-        style={{
-          fontSize: "42px",
-          fontWeight: 800,
-          color: "#E63946",
-          margin: 0,
-          lineHeight: 1,
-        }}
-      >
-        Kana
-      </h1>
+      {/* Title row */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <h1
+          style={{
+            fontSize: "42px",
+            fontWeight: 800,
+            color: "#E63946",
+            margin: 0,
+            lineHeight: 1,
+          }}
+        >
+          Kana
+        </h1>
+        <Link
+          href="/kana/tabla"
+          style={{
+            background: "#FFFFFF",
+            borderRadius: "999px",
+            padding: "10px 18px",
+            fontSize: "14px",
+            fontWeight: 700,
+            color: "#1A1A2E",
+            textDecoration: "none",
+            boxShadow: "0 2px 10px rgba(26,26,46,0.08)",
+          }}
+        >
+          Tabla
+        </Link>
+      </div>
 
       {/* Progress section */}
       <div
