@@ -89,11 +89,13 @@ export default function AdminUsuariosPage() {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    async function init() {
+      const { data } = await supabase.auth.getSession();
       const t = data.session?.access_token ?? null;
       setToken(t);
       if (t) load(t);
-    });
+    }
+    init();
   }, [load]);
 
   async function handleApprove(user: UserRow) {
