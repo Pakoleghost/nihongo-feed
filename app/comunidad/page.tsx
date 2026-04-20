@@ -192,11 +192,15 @@ export default function ComunidadPage() {
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("comunidad-images")
           .upload(path, composeImage, { upsert: false });
-        if (!uploadError && uploadData) {
+        if (uploadError) {
+          console.error("Upload error:", uploadError.message);
+          alert(`Error al subir imagen: ${uploadError.message}`);
+        } else if (uploadData) {
           const { data: urlData } = supabase.storage
             .from("comunidad-images")
             .getPublicUrl(uploadData.path);
           imageUrl = urlData.publicUrl;
+          console.log("Upload OK, public URL:", imageUrl);
         }
       }
 
