@@ -162,6 +162,18 @@ function QuizContent() {
   const currentQ = questions[currentIndex];
   const progressPct = questions.length > 0 ? (currentIndex / questions.length) * 100 : 0;
 
+  useEffect(() => {
+    if (!currentQ?.isHard || phase !== "question") return;
+
+    const frame = window.requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [currentQ?.item.id, currentQ?.isHard, phase]);
+
   const advance = useCallback(
     (result: QuestionResult, updatedProgress: KanaProgressMap) => {
       const newResults = [...results, result];
@@ -191,7 +203,6 @@ function QuizContent() {
         setScaledOption(null);
         setKanaAnim("idle");
         setTextAnswer("");
-        setTimeout(() => inputRef.current?.focus(), 50);
       }
     },
     [results, currentIndex, questions.length, mode, difficulty, router]
