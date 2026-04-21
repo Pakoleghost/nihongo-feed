@@ -29,6 +29,27 @@ type QuestionResult = {
 type Phase = "question" | "feedback";
 type KanaAnim = "idle" | "bounce" | "shake";
 
+function formatQuizContext(primary: string, secondary: string, sets: string[]) {
+  if (primary || secondary) {
+    return `${primary}${secondary ? ` · ${secondary}` : ""}`.trim();
+  }
+
+  const uniqueSets = [...new Set(sets.filter(Boolean))];
+  if (uniqueSets.length === 1) {
+    if (uniqueSets[0] === "hiragana") return "Hiragana";
+    if (uniqueSets[0] === "katakana") return "Katakana";
+    if (uniqueSets[0] === "dakuon") return "Dakuten";
+    if (uniqueSets[0] === "handakuon") return "Handakuten";
+    if (uniqueSets[0] === "yoon") return "Combinaciones";
+  }
+
+  if (uniqueSets.length === 2 && uniqueSets.includes("hiragana") && uniqueSets.includes("katakana")) {
+    return "Hiragana y Katakana";
+  }
+
+  return "Kana";
+}
+
 function buildPool(mode: string, sets: string[]): KanaItem[] {
   if (mode === "smart" || mode === "repeat") return KANA_ITEMS;
   const pool: KanaItem[] = [];
@@ -274,6 +295,17 @@ function QuizContent() {
   if (!currentQ) return null;
 
   const feedbackIsHardCorrect = phase === "feedback" && isCorrectAnswer(currentQ.item, textAnswer);
+  const quizContext = formatQuizContext(contextPrimary, contextSecondary, sets);
+  const questionModeLabel = currentQ.isHard ? "Escribe en romaji" : "Elige la lectura";
+  const feedbackIsCorrect = currentQ.isHard ? feedbackIsHardCorrect : selectedOption === currentQ.item.romaji;
+  const feedbackLabel = feedbackIsCorrect ? "Correcto" : "No era esa";
+  const feedbackBg = feedbackIsCorrect ? "rgba(78,205,196,0.14)" : "rgba(230,57,70,0.12)";
+  const feedbackColor = feedbackIsCorrect ? "#178A83" : "#C53340";
+  const sharedCardStyle = {
+    background: "#FFFFFF",
+    borderRadius: "28px",
+    boxShadow: "0 10px 28px rgba(26,26,46,0.08)",
+  } as const;
 
   return (
     <div
@@ -289,14 +321,14 @@ function QuizContent() {
         style={{
           padding: "52px 20px 0",
           display: "grid",
-          gap: "12px",
+          gap: "14px",
         }}
       >
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "16px",
+            gap: "14px",
           }}
         >
           <button
@@ -309,6 +341,7 @@ function QuizContent() {
               flexShrink: 0,
             }}
             aria-label="Salir"
+            title="Salir y guardar progreso"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path
@@ -319,31 +352,66 @@ function QuizContent() {
               />
             </svg>
           </button>
-          <div
-            style={{
-              flex: 1,
-              height: "6px",
-              background: "#E5E7EB",
-              borderRadius: "999px",
-              overflow: "hidden",
-            }}
-          >
-            <motion.div
-              animate={{ width: `${progressPct}%` }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+          <div style={{ flex: 1, display: "grid", gap: "8px" }}>
+            <div
               style={{
-                height: "100%",
-                background: "#4ECDC4",
-                borderRadius: "999px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "12px",
               }}
-            />
+            >
+              <div
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#53596B",
+                }}
+              >
+                Practicando
+              </div>
+              <div
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#7A7F8D",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {currentIndex + 1} / {questions.length}
+              </div>
+            </div>
+            <div
+              style={{
+                height: "6px",
+                background: "#E5E7EB",
+                borderRadius: "999px",
+                overflow: "hidden",
+              }}
+            >
+              <motion.div
+                animate={{ width: `${progressPct}%` }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                style={{
+                  height: "100%",
+                  background: "#4ECDC4",
+                  borderRadius: "999px",
+                }}
+              />
+            </div>
           </div>
         </div>
 
-        {(contextPrimary || contextSecondary) && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "8px",
+            flexWrap: "wrap",
+          }}
+        >
           <div
             style={{
-              alignSelf: "center",
               borderRadius: "999px",
               background: "#FFFFFF",
               color: "#53596B",
@@ -353,9 +421,21 @@ function QuizContent() {
               boxShadow: "0 2px 10px rgba(26,26,46,0.08)",
             }}
           >
-            {contextPrimary}{contextSecondary ? ` · ${contextSecondary}` : ""}
+            {quizContext}
           </div>
-        )}
+          <div
+            style={{
+              borderRadius: "999px",
+              background: "rgba(230,57,70,0.10)",
+              color: "#C53340",
+              fontSize: "12px",
+              fontWeight: 700,
+              padding: "8px 12px",
+            }}
+          >
+            {questionModeLabel}
+          </div>
+        </div>
       </div>
 
       {/* Kana character */}
@@ -366,50 +446,112 @@ function QuizContent() {
           alignItems: "center",
           justifyContent: "center",
           flex: 1,
-          padding: "32px 20px 24px",
+          padding: "18px 20px 16px",
           overflow: "hidden",
         }}
       >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={kanaKey}
-            variants={kanaEnter}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+        <div
+          style={{
+            ...sharedCardStyle,
+            width: "100%",
+            maxWidth: "420px",
+            padding: "26px 20px 24px",
+            display: "grid",
+            justifyItems: "center",
+            gap: "14px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "12px",
+              fontWeight: 800,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              color: "#8A8F9B",
+            }}
           >
+            {questionModeLabel}
+          </div>
+
+          <AnimatePresence mode="wait">
             <motion.div
-              variants={kanaAnim === "bounce" ? bounceVariants : shakeVariants}
-              animate={kanaAnim}
-              style={{
-                fontSize: "104px",
-                fontWeight: 700,
-                color: "#1A1A2E",
-                lineHeight: 1,
-                fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                marginBottom: "16px",
-                userSelect: "none",
-              }}
+              key={kanaKey}
+              variants={kanaEnter}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
             >
-              {currentQ.item.kana}
+              <motion.div
+                variants={kanaAnim === "bounce" ? bounceVariants : shakeVariants}
+                animate={kanaAnim}
+                style={{
+                  fontSize: "112px",
+                  fontWeight: 700,
+                  color: "#1A1A2E",
+                  lineHeight: 1,
+                  fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                  userSelect: "none",
+                  textAlign: "center",
+                }}
+              >
+                {currentQ.item.kana}
+              </motion.div>
             </motion.div>
-            <p style={{ fontSize: "15px", color: "#9CA3AF", margin: 0 }}>¿Cómo se lee?</p>
-          </motion.div>
-        </AnimatePresence>
+          </AnimatePresence>
+
+          <p
+            style={{
+              fontSize: "15px",
+              color: "#6E737F",
+              margin: 0,
+              textAlign: "center",
+            }}
+          >
+            {currentQ.isHard ? "Escribe su lectura en romaji." : "Toca la lectura correcta."}
+          </p>
+        </div>
+
+        {phase === "feedback" && (
+          <div
+            style={{
+              marginTop: "14px",
+              borderRadius: "999px",
+              background: feedbackBg,
+              color: feedbackColor,
+              padding: "8px 14px",
+              fontSize: "13px",
+              fontWeight: 800,
+              letterSpacing: "0.02em",
+            }}
+          >
+            {feedbackLabel}
+          </div>
+        )}
       </div>
 
       {/* Answer area */}
       {currentQ.isHard ? (
         /* Hard mode — text input */
-        <div style={{ padding: "0 24px 48px" }}>
+        <div style={{ padding: "0 20px 40px" }}>
           <div
             style={{
-              borderBottom: `2px solid ${
-                phase === "feedback" ? (feedbackIsHardCorrect ? "#4ECDC4" : "#E63946") : "#D1D5DB"
-              }`,
-              marginBottom: "8px",
-              transition: "border-color 0.2s",
+              ...sharedCardStyle,
+              padding: "20px 18px 18px",
+              display: "grid",
+              gap: "14px",
+            }}
+          >
+            <div
+              style={{
+                borderRadius: "20px",
+                background: "#F7F3ED",
+                border: `2px solid ${
+                  phase === "feedback" ? (feedbackIsHardCorrect ? "#4ECDC4" : "#E63946") : "transparent"
+                }`,
+                padding: "6px 16px",
+                transition: "border-color 0.2s",
+              }}
             }}
           >
             <input
@@ -419,7 +561,7 @@ function QuizContent() {
               onChange={(e) => setTextAnswer(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") handleConfirm(); }}
               disabled={phase === "feedback"}
-              placeholder="escribe en romaji"
+              placeholder="Escribe el romaji"
               autoFocus
               autoComplete="off"
               autoCorrect="off"
@@ -430,29 +572,31 @@ function QuizContent() {
                 background: "transparent",
                 border: "none",
                 outline: "none",
-                fontSize: "20px",
+                fontSize: "22px",
                 fontWeight: 600,
                 color: "#1A1A2E",
                 textAlign: "center",
-                padding: "12px 0",
+                padding: "14px 0",
                 fontFamily: "inherit",
                 boxSizing: "border-box",
               }}
             />
           </div>
-          {phase === "feedback" && !feedbackIsHardCorrect && (
-            <p
-              style={{
-                textAlign: "center",
-                color: "#4ECDC4",
-                fontSize: "16px",
-                fontWeight: 700,
-                margin: "8px 0 16px",
-              }}
-            >
-              Respuesta: {currentQ.item.romaji}
-            </p>
-          )}
+          <div
+            style={{
+              minHeight: "24px",
+              textAlign: "center",
+              fontSize: "14px",
+              fontWeight: 700,
+              color: phase === "feedback" ? feedbackColor : "#8A8F9B",
+            }}
+          >
+            {phase === "feedback"
+              ? feedbackIsHardCorrect
+                ? "Respuesta correcta"
+                : `Respuesta: ${currentQ.item.romaji}`
+              : "Pulsa Enter o toca comprobar"}
+          </div>
           <button
             onClick={handleConfirm}
             disabled={phase === "feedback" || !textAnswer.trim()}
@@ -472,74 +616,106 @@ function QuizContent() {
               fontSize: "18px",
               fontWeight: 700,
               transition: "background 0.2s",
-              marginTop: "8px",
             }}
           >
-            Confirmar
+            {phase === "feedback" ? feedbackLabel : "Comprobar"}
           </button>
         </div>
       ) : (
         /* Easy mode — 2×2 grid */
         <div
           style={{
-            padding: "0 20px 48px",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "12px",
+            padding: "0 20px 40px",
           }}
         >
-          {currentQ.options.map((option) => {
-            const isSelected = selectedOption === option;
-            const isCorrectOpt = option === currentQ.item.romaji;
-            let bg = "#FFFFFF";
-            let color = "#1A1A2E";
+          <div
+            style={{
+              ...sharedCardStyle,
+              padding: "16px",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "12px",
+            }}
+          >
+            {currentQ.options.map((option) => {
+              const isSelected = selectedOption === option;
+              const isCorrectOpt = option === currentQ.item.romaji;
+              let bg = "#FFFFFF";
+              let color = "#1A1A2E";
+              let borderColor = "rgba(26,26,46,0.08)";
 
-            if (phase === "feedback") {
-              if (isCorrectOpt) { bg = "#4ECDC4"; color = "#FFFFFF"; }
-              else if (isSelected) { bg = "#E63946"; color = "#FFFFFF"; }
-            }
-
-            return (
-              <motion.button
-                key={option}
-                onClick={() => handleOptionSelect(option)}
-                disabled={phase === "feedback"}
-                animate={
-                  scaledOption === option
-                    ? { scale: [1, 1.08, 1], transition: { duration: 0.2 } }
-                    : { scale: 1 }
+              if (phase === "feedback") {
+                if (isCorrectOpt) {
+                  bg = "#4ECDC4";
+                  color = "#FFFFFF";
+                  borderColor = "#4ECDC4";
+                } else if (isSelected) {
+                  bg = "#E63946";
+                  color = "#FFFFFF";
+                  borderColor = "#E63946";
                 }
-                style={{
-                  padding: "20px 12px",
-                  borderRadius: "18px",
-                  border: "none",
-                  cursor: phase === "feedback" ? "default" : "pointer",
-                  background: bg,
-                  color,
-                  fontSize: "20px",
-                  fontWeight: 700,
-                  boxShadow: "0 4px 16px rgba(26,26,46,0.08)",
-                  transition: "background 0.2s, color 0.2s",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "6px",
-                }}
-              >
-                {option}
-                {phase === "feedback" && isCorrectOpt && (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M20 6L9 17l-5-5" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                )}
-                {phase === "feedback" && isSelected && !isCorrectOpt && (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M18 6L6 18M6 6l12 12" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
-                  </svg>
-                )}
-              </motion.button>
-            );
-          })}
+              }
+
+              return (
+                <motion.button
+                  key={option}
+                  onClick={() => handleOptionSelect(option)}
+                  disabled={phase === "feedback"}
+                  animate={
+                    scaledOption === option
+                      ? { scale: [1, 1.08, 1], transition: { duration: 0.2 } }
+                      : { scale: 1 }
+                  }
+                  style={{
+                    minHeight: "78px",
+                    padding: "18px 12px",
+                    borderRadius: "20px",
+                    border: `1px solid ${borderColor}`,
+                    cursor: phase === "feedback" ? "default" : "pointer",
+                    background: bg,
+                    color,
+                    fontSize: "22px",
+                    fontWeight: 700,
+                    boxShadow: phase === "feedback" ? "none" : "0 4px 14px rgba(26,26,46,0.06)",
+                    transition: "background 0.2s, color 0.2s, border-color 0.2s",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    textTransform: "lowercase",
+                  }}
+                >
+                  {option}
+                  {phase === "feedback" && isCorrectOpt && (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M20 6L9 17l-5-5" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                  {phase === "feedback" && isSelected && !isCorrectOpt && (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M18 6L6 18M6 6l12 12" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+                    </svg>
+                  )}
+                </motion.button>
+              );
+            })}
+          </div>
+          <div
+            style={{
+              minHeight: "24px",
+              textAlign: "center",
+              fontSize: "14px",
+              fontWeight: 700,
+              color: phase === "feedback" ? feedbackColor : "#8A8F9B",
+              marginTop: "12px",
+            }}
+          >
+            {phase === "feedback"
+              ? feedbackIsCorrect
+                ? "Respuesta correcta"
+                : `Correcta: ${currentQ.item.romaji}`
+              : "Toca una opción para responder"}
+          </div>
         </div>
       )}
     </div>
