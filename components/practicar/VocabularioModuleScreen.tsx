@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import type { GenkiVocabItem } from "@/lib/genki-vocab-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
-import { loadVocabProgress, recordVocabResult, saveVocabProgress, type VocabProgressMap } from "@/lib/vocab-progress";
+import {
+  getVocabLessonSummary,
+  loadVocabProgress,
+  recordVocabResult,
+  saveVocabProgress,
+  type VocabProgressMap,
+} from "@/lib/vocab-progress";
 
 const LESSONS = Object.keys(GENKI_VOCAB_BY_LESSON)
   .map(Number)
@@ -78,7 +84,7 @@ export default function VocabularioModuleScreen() {
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState(0);
   const [cardsDone, setCardsDone] = useState(false);
-  const [, setProgress] = useState<VocabProgressMap>({});
+  const [progress, setProgress] = useState<VocabProgressMap>({});
 
   const [questions, setQuestions] = useState<VocabQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -88,10 +94,22 @@ export default function VocabularioModuleScreen() {
 
   const lessonItems = useMemo(() => GENKI_VOCAB_BY_LESSON[lesson] ?? [], [lesson]);
   const lessonTitle = LESSON_LABELS[lesson] ?? `Lección ${lesson}`;
+  const lessonSummary = useMemo(
+    () => getVocabLessonSummary(lesson, lessonItems, progress),
+    [lesson, lessonItems, progress],
+  );
   const currentCard = cards[currentCardIndex];
   const currentQuestion = questions[currentQuestionIndex];
   const learnProgressPct = cards.length > 0 ? (currentCardIndex / cards.length) * 100 : 0;
   const practiceProgressPct = questions.length > 0 ? (currentQuestionIndex / questions.length) * 100 : 0;
+  const lessonHelper =
+    lessonSummary.pendientes > 0
+      ? `Tienes ${lessonSummary.pendientes} pendientes en esta lección.`
+      : lessonSummary.debiles > 0
+        ? `Hay ${lessonSummary.debiles} palabras débiles por reforzar.`
+        : lessonSummary.dominados > 0
+          ? `Ya dominaste ${lessonSummary.dominados} palabras en esta lección.`
+          : `Aún tienes ${lessonSummary.nuevos} palabras nuevas por trabajar.`;
 
   useEffect(() => {
     setStreak(getStreak());
@@ -383,6 +401,53 @@ export default function VocabularioModuleScreen() {
               </button>
             );
           })}
+        </div>
+
+        <div
+          style={{
+            marginTop: "16px",
+            background: "#FFF8E7",
+            borderRadius: "18px",
+            padding: "14px 14px 12px",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              gap: "8px",
+            }}
+          >
+            {[
+              { label: "Nuevos", value: lessonSummary.nuevos },
+              { label: "Aprendiendo", value: lessonSummary.aprendiendo },
+              { label: "En repaso", value: lessonSummary.en_repaso },
+              { label: "Dominados", value: lessonSummary.dominados },
+              { label: "Pendientes", value: lessonSummary.pendientes },
+              { label: "Débiles", value: lessonSummary.debiles },
+            ].map((item) => (
+              <div
+                key={item.label}
+                style={{
+                  background: "#FFFFFF",
+                  borderRadius: "14px",
+                  padding: "10px 10px 9px",
+                  boxShadow: "0 2px 8px rgba(26,26,46,0.05)",
+                }}
+              >
+                <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, color: "#9CA3AF", lineHeight: 1.2 }}>
+                  {item.label}
+                </p>
+                <p style={{ margin: "5px 0 0", fontSize: "20px", fontWeight: 800, color: "#1A1A2E", lineHeight: 1 }}>
+                  {item.value}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ margin: "10px 2px 0", fontSize: "13px", color: "#6B7280", lineHeight: 1.35 }}>
+            {lessonHelper}
+          </p>
         </div>
       </div>
 
