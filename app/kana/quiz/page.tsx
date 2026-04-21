@@ -619,6 +619,7 @@ function QuizContent() {
           >
             {phase === "feedback" ? feedbackLabel : "Comprobar"}
           </button>
+          </div>
         </div>
       ) : (
         /* Easy mode — 2×2 grid */
