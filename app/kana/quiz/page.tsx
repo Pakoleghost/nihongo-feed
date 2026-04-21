@@ -10,9 +10,9 @@ import {
   loadKanaProgress,
   saveKanaProgress,
   applyKanaRating,
-  buildKanaSessionItems,
 } from "@/lib/kana-progress";
 import type { KanaProgressMap } from "@/lib/kana-progress";
+import { buildKanaSmartSessionItems } from "@/lib/kana-smart";
 
 type QuizQuestion = {
   item: KanaItem;
@@ -93,7 +93,7 @@ function buildQuiz(
     const idSet = new Set(itemIds);
     items = KANA_ITEMS.filter((i) => idSet.has(i.id));
   } else if (mode === "smart") {
-    items = buildKanaSessionItems(pool, progress, count);
+    items = buildKanaSmartSessionItems(pool, progress, count);
   } else {
     items = shuffle(pool).slice(0, Math.min(count, pool.length));
   }
