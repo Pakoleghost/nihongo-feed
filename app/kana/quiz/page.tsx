@@ -180,7 +180,6 @@ function QuizContent() {
       setResults(newResults);
 
       if (currentIndex + 1 >= questions.length) {
-        saveKanaProgress("anon", updatedProgress);
         const missed = newResults
           .filter((r) => !r.correct)
           .map((r) => ({ kana: r.item.kana, romaji: r.item.romaji, id: r.item.id }));
@@ -216,6 +215,7 @@ function QuizContent() {
     const correct = isCorrectAnswer(currentQ.item, option);
     const updated = applyKanaRating(progressMap, currentQ.item, correct ? "correct" : "wrong");
     setProgressMap(updated);
+    saveKanaProgress("anon", updated);
 
     if (correct) {
       setScaledOption(option);
@@ -234,6 +234,7 @@ function QuizContent() {
     const correct = isCorrectAnswer(currentQ.item, textAnswer);
     const updated = applyKanaRating(progressMap, currentQ.item, correct ? "correct" : "wrong");
     setProgressMap(updated);
+    saveKanaProgress("anon", updated);
 
     if (correct) {
       setKanaAnim("bounce");
@@ -248,7 +249,8 @@ function QuizContent() {
   }
 
   function handleExit() {
-    if (confirm("¿Salir del quiz? Tu progreso actual se perderá.")) {
+    saveKanaProgress("anon", progressMap);
+    if (confirm("Puedes salir ahora. Guardaremos lo que ya practicaste.")) {
       router.push("/kana");
     }
   }
