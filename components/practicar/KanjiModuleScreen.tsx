@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 import type { GenkiKanjiItem } from "@/lib/genki-kanji-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
+import { loadKanjiProgress, recordKanjiResult, saveKanjiProgress, type KanjiProgressMap } from "@/lib/kanji-progress";
 
 const LESSONS = Object.keys(GENKI_KANJI_BY_LESSON)
   .map(Number)
@@ -29,6 +30,8 @@ type ReadingQuestion = {
   item: GenkiKanjiItem;
   options: string[];
 };
+
+const USER_KEY = "anon";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -65,6 +68,7 @@ export default function KanjiModuleScreen() {
 
   const [studyItems, setStudyItems] = useState<GenkiKanjiItem[]>([]);
   const [currentStudyIndex, setCurrentStudyIndex] = useState(0);
+  const [, setProgress] = useState<KanjiProgressMap>({});
 
   const [questions, setQuestions] = useState<ReadingQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -81,6 +85,7 @@ export default function KanjiModuleScreen() {
 
   useEffect(() => {
     setStreak(getStreak());
+    setProgress(loadKanjiProgress(USER_KEY));
   }, []);
 
   useEffect(() => {
@@ -117,6 +122,11 @@ export default function KanjiModuleScreen() {
     setQuizPhase("feedback");
     const isCorrect = option === currentQuestion.item.hira;
     if (isCorrect) setCorrectCount((value) => value + 1);
+    setProgress((previous) => {
+      const next = recordKanjiResult(previous, lesson, currentQuestion.item, isCorrect ? "correct" : "wrong");
+      saveKanjiProgress(USER_KEY, next);
+      return next;
+    });
     const delay = isCorrect ? 700 : 1000;
 
     setTimeout(() => {

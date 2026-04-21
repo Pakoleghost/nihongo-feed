@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import type { GenkiVocabItem } from "@/lib/genki-vocab-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
+import { loadVocabProgress, recordVocabResult, saveVocabProgress, type VocabProgressMap } from "@/lib/vocab-progress";
 
 const LESSONS = Object.keys(GENKI_VOCAB_BY_LESSON)
   .map(Number)
@@ -28,6 +29,9 @@ const LESSON_LABELS: Record<number, string> = {
 type Mode = "aprender" | "practicar";
 type QuizPhase = "question" | "feedback";
 type QuizItem = { display: string; reading: string; es: string };
+type VocabQuestion = { item: QuizItem; source: GenkiVocabItem; options: string[] };
+
+const USER_KEY = "anon";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -74,8 +78,9 @@ export default function VocabularioModuleScreen() {
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState(0);
   const [cardsDone, setCardsDone] = useState(false);
+  const [, setProgress] = useState<VocabProgressMap>({});
 
-  const [questions, setQuestions] = useState<{ item: QuizItem; options: string[] }[]>([]);
+  const [questions, setQuestions] = useState<VocabQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [quizPhase, setQuizPhase] = useState<QuizPhase>("question");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -90,6 +95,7 @@ export default function VocabularioModuleScreen() {
 
   useEffect(() => {
     setStreak(getStreak());
+    setProgress(loadVocabProgress(USER_KEY));
   }, []);
 
   useEffect(() => {
@@ -108,8 +114,17 @@ export default function VocabularioModuleScreen() {
 
   useEffect(() => {
     const items = toQuizItems(lessonItems);
-    const shuffled = shuffle(items);
-    setQuestions(shuffled.map((item) => ({ item, options: getOptions(item, items) })));
+    const shuffled = shuffle(lessonItems);
+    setQuestions(
+      shuffled.map((source) => {
+        const item = {
+          display: source.kanji || source.hira,
+          reading: source.hira,
+          es: source.es,
+        };
+        return { item, source, options: getOptions(item, items) };
+      }),
+    );
     setCurrentQuestionIndex(0);
     setQuizPhase("question");
     setSelectedOption(null);
@@ -138,8 +153,17 @@ export default function VocabularioModuleScreen() {
 
   function restartPracticeSession() {
     const items = toQuizItems(lessonItems);
-    const shuffled = shuffle(items);
-    setQuestions(shuffled.map((item) => ({ item, options: getOptions(item, items) })));
+    const shuffled = shuffle(lessonItems);
+    setQuestions(
+      shuffled.map((source) => {
+        const item = {
+          display: source.kanji || source.hira,
+          reading: source.hira,
+          es: source.es,
+        };
+        return { item, source, options: getOptions(item, items) };
+      }),
+    );
     setCurrentQuestionIndex(0);
     setQuizPhase("question");
     setSelectedOption(null);
@@ -152,6 +176,11 @@ export default function VocabularioModuleScreen() {
     setQuizPhase("feedback");
     const isCorrect = option === currentQuestion.item.es;
     if (isCorrect) setCorrect((value) => value + 1);
+    setProgress((previous) => {
+      const next = recordVocabResult(previous, lesson, currentQuestion.source, isCorrect ? "correct" : "wrong");
+      saveVocabProgress(USER_KEY, next);
+      return next;
+    });
     const delay = isCorrect ? 700 : 1000;
     setTimeout(() => {
       if (currentQuestionIndex + 1 >= questions.length) {
