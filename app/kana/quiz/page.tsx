@@ -552,8 +552,7 @@ function QuizContent() {
                 padding: "6px 16px",
                 transition: "border-color 0.2s",
               }}
-            }}
-          >
+            >
             <input
               ref={inputRef}
               type="text"
