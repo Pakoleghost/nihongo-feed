@@ -9,10 +9,12 @@ export type PracticeProgressEntry<M extends PracticeModule = PracticeModule> = {
   display: string;
   reading: string;
   meaning_es: string;
+  exposure_count: number;
   times_seen: number;
   times_correct: number;
   times_wrong: number;
   times_almost: number;
+  last_exposed_at: string | null;
   last_reviewed_at: string | null;
   next_due_at: number | null;
   level: number;
@@ -35,6 +37,9 @@ export type PracticeRecordMeta<M extends PracticeModule = PracticeModule> = {
 export type PracticeProgressSummary = {
   total: number;
   vistos: number;
+  expuestos: number;
+  practicados: number;
+  solo_expuestos: number;
   nuevos: number;
   aprendiendo: number;
   en_repaso: number;
@@ -93,8 +98,9 @@ export function getPracticeItemState(
   entry: PracticeProgressEntry | undefined | null,
   now = Date.now(),
 ): PracticeVisibleState {
-  if (!entry || entry.times_seen === 0) return "nuevo";
+  if (!entry || (entry.times_seen === 0 && entry.exposure_count === 0)) return "nuevo";
   if (isPracticeDominated(entry, now)) return "dominado";
+  if (entry.times_seen === 0 && entry.exposure_count > 0) return "aprendiendo";
   if (entry.level <= 2) return "aprendiendo";
   return "en_repaso";
 }
@@ -102,10 +108,12 @@ export function getPracticeItemState(
 function createInitialEntry<M extends PracticeModule>(meta: PracticeRecordMeta<M>): PracticeProgressEntry<M> {
   return {
     ...meta,
+    exposure_count: 0,
     times_seen: 0,
     times_correct: 0,
     times_wrong: 0,
     times_almost: 0,
+    last_exposed_at: null,
     last_reviewed_at: null,
     next_due_at: null,
     level: 0,
@@ -145,10 +153,12 @@ export function recordPracticeResult<M extends PracticeModule>(
 
   const nextEntry: PracticeProgressEntry<M> = {
     ...meta,
+    exposure_count: base.exposure_count,
     times_seen,
     times_correct,
     times_wrong,
     times_almost,
+    last_exposed_at: base.last_exposed_at,
     last_reviewed_at: new Date(now).toISOString(),
     next_due_at,
     level,
@@ -161,6 +171,22 @@ export function recordPracticeResult<M extends PracticeModule>(
   return nextEntry;
 }
 
+export function recordPracticeExposure<M extends PracticeModule>(
+  current: PracticeProgressEntry<M> | undefined,
+  meta: PracticeRecordMeta<M>,
+): PracticeProgressEntry<M> {
+  const base = current ?? createInitialEntry(meta);
+  const nowIso = new Date().toISOString();
+
+  return {
+    ...base,
+    ...meta,
+    exposure_count: base.exposure_count + 1,
+    last_exposed_at: nowIso,
+    first_seen_at: base.first_seen_at ?? nowIso,
+  };
+}
+
 export function buildPracticeSummary<T extends PracticeProgressEntry>(
   entries: Array<T | undefined>,
   now = Date.now(),
@@ -168,6 +194,9 @@ export function buildPracticeSummary<T extends PracticeProgressEntry>(
   const summary: PracticeProgressSummary = {
     total: entries.length,
     vistos: 0,
+    expuestos: 0,
+    practicados: 0,
+    solo_expuestos: 0,
     nuevos: 0,
     aprendiendo: 0,
     en_repaso: 0,
@@ -178,10 +207,16 @@ export function buildPracticeSummary<T extends PracticeProgressEntry>(
 
   for (const entry of entries) {
     const state = getPracticeItemState(entry, now);
-    if (!entry || entry.times_seen === 0) {
+    const hasExposure = Boolean(entry && entry.exposure_count > 0);
+    const hasPractice = Boolean(entry && entry.times_seen > 0);
+
+    if (!entry || (!hasExposure && !hasPractice)) {
       summary.nuevos += 1;
     } else {
       summary.vistos += 1;
+      if (hasExposure) summary.expuestos += 1;
+      if (hasPractice) summary.practicados += 1;
+      if (hasExposure && !hasPractice) summary.solo_expuestos += 1;
       if (isPracticeDue(entry, now)) summary.pendientes += 1;
       if (isPracticeDifficult(entry)) summary.debiles += 1;
     }

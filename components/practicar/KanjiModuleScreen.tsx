@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 import type { GenkiKanjiItem } from "@/lib/genki-kanji-by-lesson";
@@ -8,6 +8,7 @@ import { getStreak, setLastActivity } from "@/lib/streak";
 import {
   getKanjiLessonSummary,
   loadKanjiProgress,
+  recordKanjiExposure,
   recordKanjiResult,
   saveKanjiProgress,
   type KanjiProgressMap,
@@ -68,6 +69,7 @@ function getReadingOptions(correct: GenkiKanjiItem, pool: GenkiKanjiItem[]): str
 
 export default function KanjiModuleScreen() {
   const router = useRouter();
+  const learnExposureIdsRef = useRef<Set<string>>(new Set());
   const [lesson, setLesson] = useState(LESSONS[0] ?? 3);
   const [mode, setMode] = useState<Mode>("aprender");
   const [streak, setStreak] = useState(0);
@@ -97,6 +99,8 @@ export default function KanjiModuleScreen() {
       ? `Tienes ${lessonSummary.pendientes} lecturas pendientes en esta lección.`
       : lessonSummary.debiles > 0
         ? `Hay ${lessonSummary.debiles} lecturas débiles por reforzar.`
+        : lessonSummary.solo_expuestos > 0
+          ? `Ya viste ${lessonSummary.solo_expuestos} en Aprender. Practica para fijar su lectura.`
         : lessonSummary.dominados > 0
           ? `Ya dominaste ${lessonSummary.dominados} palabras con kanji en esta lección.`
           : `Aún tienes ${lessonSummary.nuevos} palabras nuevas por trabajar.`;
@@ -112,9 +116,22 @@ export default function KanjiModuleScreen() {
   }, [lesson, mode]);
 
   useEffect(() => {
+    learnExposureIdsRef.current = new Set();
     setStudyItems(lessonItems);
     setCurrentStudyIndex(0);
   }, [lessonItems]);
+
+  useEffect(() => {
+    if (mode !== "aprender" || !currentStudyItem) return;
+    const itemId = `${lesson}:${currentStudyItem.kanji}:${currentStudyItem.hira}:${currentStudyItem.es}`;
+    if (learnExposureIdsRef.current.has(itemId)) return;
+    learnExposureIdsRef.current.add(itemId);
+    setProgress((previous) => {
+      const next = recordKanjiExposure(previous, lesson, currentStudyItem);
+      saveKanjiProgress(USER_KEY, next);
+      return next;
+    });
+  }, [mode, lesson, currentStudyItem]);
 
   useEffect(() => {
     const shuffled = shuffle(lessonItems);

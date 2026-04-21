@@ -5,6 +5,7 @@ import {
   isPracticeDifficult,
   isPracticeDominated,
   isPracticeDue,
+  recordPracticeExposure,
   recordPracticeResult,
   type PracticeProgressEntry,
   type PracticeProgressMap,
@@ -63,6 +64,27 @@ export function recordVocabResult(
     reading: item.hira,
     meaning_es: item.es,
   }, rating);
+
+  return {
+    ...progress,
+    [id]: nextEntry,
+  };
+}
+
+export function recordVocabExposure(
+  progress: VocabProgressMap,
+  lesson: number,
+  item: GenkiVocabItem,
+) {
+  const id = getVocabProgressId(lesson, item);
+  const nextEntry = recordPracticeExposure(progress[id], {
+    id,
+    module: "vocab",
+    lesson,
+    display: item.kanji || item.hira,
+    reading: item.hira,
+    meaning_es: item.es,
+  });
 
   return {
     ...progress,

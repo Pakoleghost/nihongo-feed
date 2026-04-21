@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import type { GenkiVocabItem } from "@/lib/genki-vocab-by-lesson";
@@ -8,6 +8,7 @@ import { getStreak, setLastActivity } from "@/lib/streak";
 import {
   getVocabLessonSummary,
   loadVocabProgress,
+  recordVocabExposure,
   recordVocabResult,
   saveVocabProgress,
   type VocabProgressMap,
@@ -75,6 +76,7 @@ function getOptions(correct: QuizItem, pool: QuizItem[]): string[] {
 
 export default function VocabularioModuleScreen() {
   const router = useRouter();
+  const learnExposureIdsRef = useRef<Set<string>>(new Set());
   const [lesson, setLesson] = useState(1);
   const [mode, setMode] = useState<Mode>("aprender");
   const [streak, setStreak] = useState(0);
@@ -107,6 +109,8 @@ export default function VocabularioModuleScreen() {
       ? `Tienes ${lessonSummary.pendientes} pendientes en esta lección.`
       : lessonSummary.debiles > 0
         ? `Hay ${lessonSummary.debiles} palabras débiles por reforzar.`
+        : lessonSummary.solo_expuestos > 0
+          ? `Ya viste ${lessonSummary.solo_expuestos} en Aprender. Practica para reforzarlas.`
         : lessonSummary.dominados > 0
           ? `Ya dominaste ${lessonSummary.dominados} palabras en esta lección.`
           : `Aún tienes ${lessonSummary.nuevos} palabras nuevas por trabajar.`;
@@ -122,6 +126,7 @@ export default function VocabularioModuleScreen() {
   }, [lesson, mode]);
 
   useEffect(() => {
+    learnExposureIdsRef.current = new Set();
     const items = shuffle(lessonItems);
     setCards(items);
     setCurrentCardIndex(0);
@@ -129,6 +134,18 @@ export default function VocabularioModuleScreen() {
     setFlipped(false);
     setCardsDone(false);
   }, [lessonItems]);
+
+  useEffect(() => {
+    if (mode !== "aprender" || !currentCard) return;
+    const itemId = `${lesson}:${currentCard.kanji || currentCard.hira}:${currentCard.hira}:${currentCard.es}`;
+    if (learnExposureIdsRef.current.has(itemId)) return;
+    learnExposureIdsRef.current.add(itemId);
+    setProgress((previous) => {
+      const next = recordVocabExposure(previous, lesson, currentCard);
+      saveVocabProgress(USER_KEY, next);
+      return next;
+    });
+  }, [mode, lesson, currentCard]);
 
   useEffect(() => {
     const items = toQuizItems(lessonItems);
@@ -161,6 +178,7 @@ export default function VocabularioModuleScreen() {
   }
 
   function restartLearnSession() {
+    learnExposureIdsRef.current = new Set();
     const items = shuffle(lessonItems);
     setCards(items);
     setCurrentCardIndex(0);

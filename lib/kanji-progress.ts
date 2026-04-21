@@ -5,6 +5,7 @@ import {
   isPracticeDifficult,
   isPracticeDominated,
   isPracticeDue,
+  recordPracticeExposure,
   recordPracticeResult,
   type PracticeProgressEntry,
   type PracticeProgressMap,
@@ -62,6 +63,27 @@ export function recordKanjiResult(
     reading: item.hira,
     meaning_es: item.es,
   }, rating);
+
+  return {
+    ...progress,
+    [id]: nextEntry,
+  };
+}
+
+export function recordKanjiExposure(
+  progress: KanjiProgressMap,
+  lesson: number,
+  item: GenkiKanjiItem,
+) {
+  const id = getKanjiProgressId(lesson, item);
+  const nextEntry = recordPracticeExposure(progress[id], {
+    id,
+    module: "kanji",
+    lesson,
+    display: item.kanji,
+    reading: item.hira,
+    meaning_es: item.es,
+  });
 
   return {
     ...progress,
