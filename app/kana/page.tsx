@@ -2,37 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { KANA_ITEMS, type KanaItem } from "@/lib/kana-data";
-import { getKanaProgressSummary, getKanaStateCounts, isKanaDue, loadKanaProgress, type KanaProgressMap } from "@/lib/kana-progress";
+import { KANA_ITEMS } from "@/lib/kana-data";
+import { getKanaProgressSummary, getKanaStateCounts, loadKanaProgress } from "@/lib/kana-progress";
+import { getKanaSmartRecommendation, type KanaSmartRecommendation } from "@/lib/kana-smart";
 import BottomNav from "@/components/BottomNav";
 
 const TOTAL = KANA_ITEMS.length;
-
-const ROADMAP_GROUPS: Array<{
-  label: string;
-  scope: string;
-  kana: string[];
-}> = [
-  { label: "vocales", scope: "Hiragana básico", kana: ["あ", "い", "う", "え", "お"] },
-  { label: "fila K", scope: "Hiragana básico", kana: ["か", "き", "く", "け", "こ"] },
-  { label: "fila S", scope: "Hiragana básico", kana: ["さ", "し", "す", "せ", "そ"] },
-  { label: "fila T", scope: "Hiragana básico", kana: ["た", "ち", "つ", "て", "と"] },
-  { label: "fila N", scope: "Hiragana básico", kana: ["な", "に", "ぬ", "ね", "の"] },
-  { label: "fila H", scope: "Hiragana básico", kana: ["は", "ひ", "ふ", "へ", "ほ"] },
-  { label: "fila M", scope: "Hiragana básico", kana: ["ま", "み", "む", "め", "も"] },
-  { label: "fila Y", scope: "Hiragana básico", kana: ["や", "ゆ", "よ"] },
-  { label: "fila R", scope: "Hiragana básico", kana: ["ら", "り", "る", "れ", "ろ"] },
-  { label: "fila W", scope: "Hiragana básico", kana: ["わ", "を", "ん"] },
-  { label: "katakana básico", scope: "Katakana básico", kana: KANA_ITEMS.filter((item) => item.script === "katakana" && item.set === "basic").map((item) => item.kana) },
-  { label: "diacríticos", scope: "Diacríticos", kana: KANA_ITEMS.filter((item) => item.set === "dakuten" || item.set === "handakuten").map((item) => item.kana) },
-  { label: "combinaciones", scope: "Combinaciones", kana: KANA_ITEMS.filter((item) => item.set === "yoon").map((item) => item.kana) },
-];
-
-type SmartPlan = {
-  title: string;
-  detail: string;
-  chips: string[];
-};
 
 type KanaHomeSummary = {
   vistos: number;
@@ -41,94 +16,8 @@ type KanaHomeSummary = {
   pendientes: number;
   progressPct: number;
   goal: string;
-  smartPlan: SmartPlan;
+  smartPlan: KanaSmartRecommendation;
 };
-
-function isDominated(item: KanaItem, progress: KanaProgressMap) {
-  return (progress[item.id]?.level ?? 0) >= 4;
-}
-
-function getItemsForKanaList(kana: string[]) {
-  const set = new Set(kana);
-  return KANA_ITEMS.filter((item) => set.has(item.kana));
-}
-
-function getNextRoadmapGroup(progress: KanaProgressMap) {
-  return ROADMAP_GROUPS.find((group) => {
-    const items = getItemsForKanaList(group.kana);
-    return items.some((item) => !isDominated(item, progress));
-  }) ?? null;
-}
-
-function getBucketLabel(item: KanaItem) {
-  if (item.set === "basic") return item.script === "hiragana" ? "Hiragana básico" : "Katakana básico";
-  if (item.set === "yoon") return "Combinaciones";
-  return "Diacríticos";
-}
-
-function getPrimaryBucketLabel(items: KanaItem[]) {
-  if (items.length === 0) return null;
-
-  const counts = items.reduce<Record<string, number>>((acc, item) => {
-    const label = getBucketLabel(item);
-    acc[label] = (acc[label] || 0) + 1;
-    return acc;
-  }, {});
-
-  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-}
-
-function buildSmartPlan(progress: KanaProgressMap, vistos: number, aprendiendo: number, dominados: number, pendientes: number): SmartPlan {
-  const entries = KANA_ITEMS
-    .map((item) => ({ item, entry: progress[item.id] }))
-    .filter(({ entry }) => Boolean(entry));
-
-  const dueItems = entries
-    .filter(({ entry }) => isKanaDue(entry))
-    .map(({ item }) => item);
-
-  const difficultItems = entries
-    .filter(({ entry }) => entry?.difficult)
-    .map(({ item }) => item);
-
-  const nextGroup = getNextRoadmapGroup(progress);
-
-  if (pendientes > 0) {
-    return {
-      title: `Repasa ${pendientes} pendientes`,
-      detail: getPrimaryBucketLabel(dueItems) ?? "Tu cola actual",
-      chips: [
-        `${aprendiendo} en aprendizaje`,
-        difficultItems.length > 0 ? `${difficultItems.length} difíciles` : `${dominados} dominados`,
-      ],
-    };
-  }
-
-  if (vistos === 0) {
-    return {
-      title: "Empieza con hiragana básico",
-      detail: "Primer bloque: vocales",
-      chips: ["5 vocales", `${TOTAL} kana en total`],
-    };
-  }
-
-  if (nextGroup) {
-    return {
-      title: `Sigue con ${nextGroup.label}`,
-      detail: nextGroup.scope,
-      chips: [
-        `${aprendiendo} en aprendizaje`,
-        `${dominados} dominados`,
-      ],
-    };
-  }
-
-  return {
-    title: "Repasa todo tu repertorio",
-    detail: "Kana ya vistos",
-    chips: [`${vistos} vistos`, `${dominados} dominados`],
-  };
-}
 
 function buildKanaHomeSummary(): KanaHomeSummary {
   const progress = loadKanaProgress("anon");
@@ -140,7 +29,7 @@ function buildKanaHomeSummary(): KanaHomeSummary {
   const dominados = stateCounts.fijado;
   const pendientes = progressSummary.due;
   const progressPct = TOTAL > 0 ? Math.round((vistos / TOTAL) * 100) : 0;
-  const nextGroup = getNextRoadmapGroup(progress);
+  const smartPlan = getKanaSmartRecommendation(progress, { vistos, aprendiendo, dominados });
 
   let goal = "Meta actual: empezar hiragana básico";
 
@@ -148,8 +37,8 @@ function buildKanaHomeSummary(): KanaHomeSummary {
     goal = `Meta actual: repasar ${pendientes} pendientes`;
   } else if (vistos > 0 && dominados === 0) {
     goal = "Meta actual: dominar tu primer kana";
-  } else if (nextGroup) {
-    goal = `Meta actual: completar ${nextGroup.label}`;
+  } else if (smartPlan.kind === "learn") {
+    goal = `Meta actual: completar ${smartPlan.contextSecondary.toLowerCase() || smartPlan.contextPrimary.toLowerCase()}`;
   } else if (dominados > 0) {
     goal = "Meta actual: sumar más dominados";
   }
@@ -161,7 +50,7 @@ function buildKanaHomeSummary(): KanaHomeSummary {
     pendientes,
     progressPct,
     goal,
-    smartPlan: buildSmartPlan(progress, vistos, aprendiendo, dominados, pendientes),
+    smartPlan,
   };
 }
 

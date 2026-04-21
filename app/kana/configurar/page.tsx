@@ -4,6 +4,8 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { KANA_ITEMS } from "@/lib/kana-data";
 import type { KanaItem } from "@/lib/kana-data";
+import { getKanaProgressSummary, getKanaStateCounts, loadKanaProgress } from "@/lib/kana-progress";
+import { getKanaSmartRecommendation } from "@/lib/kana-smart";
 
 type ChipKey = "hiragana" | "katakana" | "tenten" | "maru" | "combinaciones";
 type Difficulty = "facil" | "dificil" | "automatico";
@@ -119,6 +121,20 @@ function ConfigurarContent() {
     });
     if (mode === "libre") {
       params.set("sets", selectedSets.map(chipToUrlParam).join(","));
+    } else {
+      const progress = loadKanaProgress("anon");
+      const stateCounts = getKanaStateCounts(KANA_ITEMS, progress);
+      const progressSummary = getKanaProgressSummary(KANA_ITEMS, progress);
+      const recommendation = getKanaSmartRecommendation(progress, {
+        vistos: progressSummary.practiced,
+        aprendiendo: stateCounts.aprendiendo + stateCounts.en_repaso,
+        dominados: stateCounts.fijado,
+      });
+      params.set("items", recommendation.itemIds.join(","));
+      params.set("contextPrimary", recommendation.contextPrimary);
+      if (recommendation.contextSecondary) {
+        params.set("contextSecondary", recommendation.contextSecondary);
+      }
     }
     router.push(`/kana/quiz?${params.toString()}`);
   }

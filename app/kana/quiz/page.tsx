@@ -84,7 +84,10 @@ function buildQuiz(
   progress: KanaProgressMap
 ): QuizQuestion[] {
   let items: KanaItem[];
-  const pool = buildPool(mode, sets);
+  const smartPool = mode === "smart" && itemIds.length > 0
+    ? KANA_ITEMS.filter((item) => itemIds.includes(item.id))
+    : null;
+  const pool = smartPool && smartPool.length > 0 ? smartPool : buildPool(mode, sets);
 
   if (mode === "repeat") {
     const idSet = new Set(itemIds);
@@ -134,6 +137,8 @@ function QuizContent() {
   const difficulty = searchParams.get("difficulty") ?? "facil";
   const count = parseInt(searchParams.get("count") ?? "20", 10);
   const itemIds = (searchParams.get("items") ?? "").split(",").filter(Boolean);
+  const contextPrimary = searchParams.get("contextPrimary") ?? "";
+  const contextSecondary = searchParams.get("contextSecondary") ?? "";
 
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -270,50 +275,74 @@ function QuizContent() {
       <div
         style={{
           padding: "52px 20px 0",
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
+          display: "grid",
+          gap: "12px",
         }}
       >
-        <button
-          onClick={handleExit}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "4px",
-            flexShrink: 0,
-          }}
-          aria-label="Salir"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M18 6L6 18M6 6l12 12"
-              stroke="#E63946"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
         <div
           style={{
-            flex: 1,
-            height: "6px",
-            background: "#E5E7EB",
-            borderRadius: "999px",
-            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
           }}
         >
-          <motion.div
-            animate={{ width: `${progressPct}%` }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+          <button
+            onClick={handleExit}
             style={{
-              height: "100%",
-              background: "#4ECDC4",
-              borderRadius: "999px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "4px",
+              flexShrink: 0,
             }}
-          />
+            aria-label="Salir"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M18 6L6 18M6 6l12 12"
+                stroke="#E63946"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+          <div
+            style={{
+              flex: 1,
+              height: "6px",
+              background: "#E5E7EB",
+              borderRadius: "999px",
+              overflow: "hidden",
+            }}
+          >
+            <motion.div
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              style={{
+                height: "100%",
+                background: "#4ECDC4",
+                borderRadius: "999px",
+              }}
+            />
+          </div>
         </div>
+
+        {(contextPrimary || contextSecondary) && (
+          <div
+            style={{
+              alignSelf: "center",
+              borderRadius: "999px",
+              background: "#FFFFFF",
+              color: "#53596B",
+              fontSize: "12px",
+              fontWeight: 700,
+              padding: "8px 12px",
+              boxShadow: "0 2px 10px rgba(26,26,46,0.08)",
+            }}
+          >
+            {contextPrimary}{contextSecondary ? ` · ${contextSecondary}` : ""}
+          </div>
+        )}
       </div>
 
       {/* Kana character */}
