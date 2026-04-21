@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import KanaAudioButton from "@/components/study/KanaAudioButton";
 import KanaHandwritingPad, { type KanaHandwritingRating } from "@/components/study/KanaHandwritingPad";
 import KanaReadingSession, { type KanaSessionFeedback, type KanaSessionSummaryData } from "@/components/study/KanaReadingSession";
 import PracticeShell, { PracticeStageCard } from "@/components/study/PracticeShell";
@@ -26,6 +27,7 @@ import {
   type KanaProgressMap,
   type KanaRating,
 } from "@/lib/kana-progress";
+import { getKanaSpeechAvailability, hasJapaneseVoice, observeKanaVoices, stopKanaSpeech, type KanaSpeechAvailability } from "@/lib/kana-speech";
 import { recordStudyResultToStorage } from "@/lib/study-srs";
 
 type AprenderKanaModuleProps = {
@@ -565,6 +567,7 @@ const KATAKANA_CHART_ROWS: Array<{ label: string; chars: Array<string | null> }>
 
 export default function AprenderKanaModule({ userKey, onRecordActivity, initialMode = null, onTabChange }: AprenderKanaModuleProps) {
   const [screen, setScreen] = useState<"home" | "table">("home");
+  const [kanaAudioAvailability, setKanaAudioAvailability] = useState<KanaSpeechAvailability | "checking">("checking");
   const [tableScript, setTableScript] = useState<KanaScript>("hiragana");
   const [tableFilter, setTableFilter] = useState<"basic" | "dakuten" | "handakuten" | "yoon" | "mixed">("basic");
   const [learnScript, setLearnScript] = useState<LearnScript>("hiragana");
@@ -617,6 +620,28 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
       document.body.style.overflow = previousOverflow;
     };
   }, [session]);
+
+  useEffect(() => {
+    let alive = true;
+
+    const refreshKanaAudio = async () => {
+      const availability = await getKanaSpeechAvailability();
+      if (!alive) return;
+      setKanaAudioAvailability(availability);
+      void hasJapaneseVoice();
+    };
+
+    void refreshKanaAudio();
+    const unsubscribe = observeKanaVoices(() => {
+      void refreshKanaAudio();
+    });
+
+    return () => {
+      alive = false;
+      unsubscribe();
+      stopKanaSpeech();
+    };
+  }, []);
 
   const sessionFinished = Boolean(session) && sessionIndex >= (session?.questions.length || 0);
   const currentQuestion = session?.questions[sessionIndex] || null;
@@ -1176,6 +1201,36 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
             minItemWidth={106}
           />
 
+          {kanaAudioAvailability === "unsupported" && (
+            <div
+              style={{
+                borderRadius: 18,
+                background: "color-mix(in srgb, var(--color-surface) 84%, white)",
+                padding: "12px 14px",
+                fontSize: 13,
+                color: "var(--color-text-muted)",
+                fontWeight: 600,
+              }}
+            >
+              Audio no disponible en este navegador.
+            </div>
+          )}
+
+          {kanaAudioAvailability === "no-voice" && (
+            <div
+              style={{
+                borderRadius: 18,
+                background: "color-mix(in srgb, var(--color-surface) 84%, white)",
+                padding: "12px 14px",
+                fontSize: 13,
+                color: "var(--color-text-muted)",
+                fontWeight: 600,
+              }}
+            >
+              Voz japonesa no disponible en este dispositivo.
+            </div>
+          )}
+
           <div style={{ display: "grid", gap: "var(--space-3)" }}>
             {tableSections.map((section) => (
               <div key={section.key} style={{ display: "grid", gap: 10 }}>
@@ -1211,9 +1266,9 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                               background: "color-mix(in srgb, var(--color-surface) 84%, white)",
                               padding: "12px 6px 10px",
                               display: "grid",
-                              gap: 4,
+                              gap: 6,
                               justifyItems: "center",
-                              minHeight: 74,
+                              minHeight: 108,
                             }}
                           >
                             <div
@@ -1229,6 +1284,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                             <div style={{ fontSize: 12, color: "var(--color-text-muted)", fontWeight: 700 }}>
                               {item.romaji}
                             </div>
+                            <KanaAudioButton kana={item.kana} availability={kanaAudioAvailability} />
                           </div>
                         ) : (
                           <div key={`${section.key}-blank-${rowIndex}-${cellIndex}`} aria-hidden="true" />

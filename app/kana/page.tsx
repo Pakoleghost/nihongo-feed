@@ -8,59 +8,6 @@ import BottomNav from "@/components/BottomNav";
 
 const TOTAL = KANA_ITEMS.length;
 
-function CircleProgress({ pct, size = 88 }: { pct: number; size?: number }) {
-  const strokeW = 7;
-  const R = (size - strokeW * 2) / 2;
-  const cx = size / 2;
-  const circumference = 2 * Math.PI * R;
-  const filled = circumference * (pct / 100);
-  const gap = circumference - filled;
-
-  return (
-    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
-      <svg
-        width={size}
-        height={size}
-        style={{ transform: "rotate(-90deg)" }}
-        aria-hidden="true"
-      >
-        <circle
-          cx={cx}
-          cy={cx}
-          r={R}
-          fill="none"
-          stroke="#E5E7EB"
-          strokeWidth={strokeW}
-        />
-        <circle
-          cx={cx}
-          cy={cx}
-          r={R}
-          fill="none"
-          stroke="#4ECDC4"
-          strokeWidth={strokeW}
-          strokeLinecap="round"
-          strokeDasharray={`${filled} ${gap}`}
-        />
-      </svg>
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "16px",
-          fontWeight: 700,
-          color: "#1A1A2E",
-        }}
-      >
-        {pct}%
-      </div>
-    </div>
-  );
-}
-
 export default function KanaPage() {
   const [dominados, setDominados] = useState(0);
 
@@ -85,18 +32,37 @@ export default function KanaPage() {
       }}
     >
       {/* Title row */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <h1
-          style={{
-            fontSize: "42px",
-            fontWeight: 800,
-            color: "#E63946",
-            margin: 0,
-            lineHeight: 1,
-          }}
-        >
-          Kana
-        </h1>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: "12px",
+        }}
+      >
+        <div>
+          <h1
+            style={{
+              fontSize: "42px",
+              fontWeight: 800,
+              color: "#E63946",
+              margin: 0,
+              lineHeight: 1,
+            }}
+          >
+            Kana
+          </h1>
+          <p
+            style={{
+              fontSize: "15px",
+              color: "#53596B",
+              margin: "10px 0 0",
+              lineHeight: 1.4,
+            }}
+          >
+            {dominados} dominados de {TOTAL} · {pct}% completado
+          </p>
+        </div>
         <Link
           href="/kana/tabla"
           style={{
@@ -108,44 +74,11 @@ export default function KanaPage() {
             color: "#1A1A2E",
             textDecoration: "none",
             boxShadow: "0 2px 10px rgba(26,26,46,0.08)",
+            whiteSpace: "nowrap",
           }}
         >
-          Tabla
+          Ver tabla
         </Link>
-      </div>
-
-      {/* Progress section */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginTop: "28px",
-        }}
-      >
-        <div>
-          <p
-            style={{
-              fontSize: "26px",
-              fontWeight: 800,
-              color: "#1A1A2E",
-              margin: 0,
-              lineHeight: 1.1,
-            }}
-          >
-            Progreso
-          </p>
-          <p
-            style={{
-              fontSize: "15px",
-              color: "#53596B",
-              margin: "4px 0 0",
-            }}
-          >
-            {dominados} dominados
-          </p>
-        </div>
-        <CircleProgress pct={pct} />
       </div>
 
       {/* Cards */}
@@ -153,8 +86,8 @@ export default function KanaPage() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "16px",
-          marginTop: "32px",
+          gap: "14px",
+          marginTop: "24px",
           flex: 1,
         }}
       >
@@ -162,21 +95,35 @@ export default function KanaPage() {
         <Link
           href="/kana/configurar?mode=smart"
           style={{
-            flex: 1,
             background: "#E63946",
             borderRadius: "24px",
-            padding: "28px 28px",
+            padding: "24px 24px 22px",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "flex-end",
             textDecoration: "none",
-            minHeight: "180px",
+            minHeight: "160px",
             boxShadow: "0 8px 32px rgba(230,57,70,0.3)",
           }}
         >
+          <span
+            style={{
+              alignSelf: "flex-start",
+              background: "rgba(255,255,255,0.18)",
+              borderRadius: "999px",
+              padding: "7px 11px",
+              fontSize: "11px",
+              fontWeight: 800,
+              letterSpacing: "0.04em",
+              color: "#FFFFFF",
+              marginBottom: "18px",
+              textTransform: "uppercase",
+            }}
+          >
+            Recomendado
+          </span>
           <p
             style={{
-              fontSize: "34px",
+              fontSize: "32px",
               fontWeight: 800,
               color: "#FFFFFF",
               margin: 0,
@@ -187,12 +134,23 @@ export default function KanaPage() {
           </p>
           <p
             style={{
-              fontSize: "16px",
+              fontSize: "15px",
               color: "rgba(255,255,255,0.85)",
-              margin: "6px 0 0",
+              margin: "8px 0 0",
+              lineHeight: 1.35,
             }}
           >
-            El sistema elige por ti
+            La app decide qué practicar ahora.
+          </p>
+          <p
+            style={{
+              fontSize: "14px",
+              color: "rgba(255,255,255,0.7)",
+              margin: "12px 0 0",
+              fontWeight: 700,
+            }}
+          >
+            Empieza aquí
           </p>
         </Link>
 
@@ -200,21 +158,19 @@ export default function KanaPage() {
         <Link
           href="/kana/configurar?mode=libre"
           style={{
-            flex: 1,
-            background: "#4ECDC4",
+            background: "#FFFFFF",
             borderRadius: "24px",
-            padding: "28px 28px",
+            padding: "22px 24px",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "flex-end",
             textDecoration: "none",
-            minHeight: "180px",
-            boxShadow: "0 8px 32px rgba(78,205,196,0.3)",
+            minHeight: "136px",
+            boxShadow: "0 6px 24px rgba(26,26,46,0.08)",
           }}
         >
           <p
             style={{
-              fontSize: "34px",
+              fontSize: "30px",
               fontWeight: 800,
               color: "#1A1A2E",
               margin: 0,
@@ -225,12 +181,13 @@ export default function KanaPage() {
           </p>
           <p
             style={{
-              fontSize: "16px",
-              color: "rgba(26,26,46,0.7)",
-              margin: "6px 0 0",
+              fontSize: "15px",
+              color: "#53596B",
+              margin: "8px 0 0",
+              lineHeight: 1.35,
             }}
           >
-            Elige qué practicar
+            Tú eliges qué practicar.
           </p>
         </Link>
       </div>
