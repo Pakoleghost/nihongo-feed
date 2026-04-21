@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { DS, TabBar, type DSTab } from "./ds";
 import { filterKanaItemsForSelection } from "@/lib/kana-data";
-import { loadKanaProgress, getKanaStateCounts, isKanaDue } from "@/lib/kana-progress";
+import { getKanaProgressSummary, loadKanaProgress, getKanaStateCounts, isKanaDue } from "@/lib/kana-progress";
 
 const HIRAGANA_BASIC_GROUPS: readonly (readonly string[])[] = [
   ["あ", "い", "う", "え", "お"],
@@ -42,6 +42,10 @@ export default function HomeScreen({
     () => getKanaStateCounts(basicHiragana, progress),
     [basicHiragana, progress],
   );
+  const progressSummary = useMemo(
+    () => getKanaProgressSummary(basicHiragana, progress),
+    [basicHiragana, progress],
+  );
 
   const kanaDueCount = useMemo(
     () => basicHiragana.filter((item) => isKanaDue(progress[item.id])).length,
@@ -68,8 +72,11 @@ export default function HomeScreen({
 
   const heroKana = HIRAGANA_BASIC_GROUPS[batchIdx]?.[0] ?? "あ";
   const hasPending = kanaDueCount > 0;
+  const vistos = progressSummary.practiced;
+  const enAprendizaje = stateCounts.aprendiendo + stateCounts.en_repaso;
+  const dominados = stateCounts.fijado;
   const progressPct = basicHiragana.length > 0
-    ? Math.round((stateCounts.fijado / basicHiragana.length) * 100)
+    ? Math.round((vistos / basicHiragana.length) * 100)
     : 0;
 
   return (
@@ -109,7 +116,7 @@ export default function HomeScreen({
                 letterSpacing: "0.2em", textTransform: "uppercase",
                 color: hasPending ? DS.accent : DS.teal,
                 marginBottom: 6,
-              }}>{hasPending ? "Pendientes" : "Continuar"}</div>
+              }}>Smart</div>
               <div style={{
                 fontFamily: DS.fontHead, fontSize: 22, fontWeight: 700,
                 color: "#ffffff", letterSpacing: -0.5, marginBottom: 4,
@@ -119,7 +126,7 @@ export default function HomeScreen({
                 color: "rgba(255,255,255,0.50)",
                 marginBottom: 22, lineHeight: 1.4,
               }}>
-                {stateCounts.fijado} fijados · {stateCounts.aprendiendo + stateCounts.en_repaso} en curso · {stateCounts.nuevo} nuevos
+                {vistos} vistos · {enAprendizaje} en aprendizaje · {dominados} dominados
               </div>
 
               <div style={{ height: 5, borderRadius: 5, background: "rgba(255,255,255,0.10)", overflow: "hidden", marginBottom: 22 }}>
@@ -129,7 +136,7 @@ export default function HomeScreen({
                     ? `linear-gradient(to right, ${DS.accent}, #c42b38)`
                     : `linear-gradient(to right, ${DS.teal}, ${DS.tealDark})`,
                   borderRadius: 5, transition: "width 0.5s ease",
-                  minWidth: stateCounts.fijado > 0 ? 12 : 0,
+                  minWidth: vistos > 0 ? 12 : 0,
                 }} />
               </div>
 
@@ -151,7 +158,7 @@ export default function HomeScreen({
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 }}
               >
-                {hasPending ? "Repasar pendientes" : "Continuar aprendiendo"}
+                {hasPending ? "Smart: repasar pendientes" : "Smart: seguir con hiragana básico"}
                 <svg width="16" height="10" viewBox="0 0 18 12" fill="none">
                   <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -165,22 +172,22 @@ export default function HomeScreen({
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
             {([
               {
-                label: "Por repasar",
-                value: kanaDueCount,
-                color: kanaDueCount > 0 ? DS.accent : DS.inkFaint,
-                bg: kanaDueCount > 0 ? "rgba(230,57,70,0.06)" : DS.card,
+                label: "Vistos",
+                value: vistos,
+                color: vistos > 0 ? DS.ink : DS.inkFaint,
+                bg: vistos > 0 ? "rgba(26,26,46,0.06)" : DS.card,
               },
               {
-                label: "Aprendiendo",
-                value: stateCounts.aprendiendo,
+                label: "En aprendizaje",
+                value: enAprendizaje,
                 color: DS.teal,
                 bg: DS.card,
               },
               {
-                label: "Fijados",
-                value: stateCounts.fijado,
+                label: "Dominados",
+                value: dominados,
                 color: DS.tealDark,
-                bg: stateCounts.fijado > 0 ? "rgba(78,205,196,0.08)" : DS.card,
+                bg: dominados > 0 ? "rgba(78,205,196,0.08)" : DS.card,
               },
             ] as const).map(({ label, value, color, bg }) => (
               <div key={label} style={{

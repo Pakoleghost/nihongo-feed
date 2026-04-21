@@ -65,8 +65,7 @@ type AnswerFeedback = {
 type KanaSelectableSet = "basic" | "dakuten" | "handakuten" | "yoon";
 type KanaScopeKey = `${KanaScript}:${KanaSelectableSet}`;
 type LearnScript = "hiragana" | "katakana" | "ambos";
-type HomeMode = "inteligente" | "personalizado";
-type InteligenteAction = "seguir" | "pendientes" | "debiles" | "nuevos";
+type SmartAction = "seguir" | "pendientes" | "debiles" | "nuevos";
 
 const KANA_SCOPE_ROWS: Array<{ set: KanaSelectableSet; label: string }> = [
   { set: "basic", label: "Básico" },
@@ -403,8 +402,8 @@ function buildLearnSessionForItems(
   return { setKey: "learn", modes: ["romaji_input"] as KanaPracticeMode[], count: sessionCount, questions };
 }
 
-function buildInteligenteSession(
-  action: InteligenteAction,
+function buildSmartSession(
+  action: SmartAction,
   learnScript: LearnScript,
   hiraganaBasic: KanaItem[],
   katakanaBasic: KanaItem[],
@@ -416,7 +415,7 @@ function buildInteligenteSession(
 
   const mc: KanaPracticeMode[] = ["multiple_choice"];
   const makeSession = (items: KanaItem[]): KanaSession => ({
-    setKey: "inteligente",
+    setKey: "smart",
     modes: mc,
     count: items.length,
     questions: buildQuestionsForItems(items, scopeItems, mc),
@@ -476,8 +475,8 @@ function getLearnStats(
     : uniqueKanaItems([...hiraganaBasic, ...katakanaBasic]);
   return {
     total: items.length,
-    // fijados: level >= 4 — sustained correct recall across multiple sessions
-    fijados: items.filter((item) => { const e = progress[item.id]; return e && e.level >= 4; }).length,
+    // dominados: level >= 4 — sustained correct recall across multiple sessions
+    dominados: items.filter((item) => { const e = progress[item.id]; return e && e.level >= 4; }).length,
     // en_repaso: level 3 — repeated correct, entering long-term review
     en_repaso: items.filter((item) => { const e = progress[item.id]; return e && e.level === 3; }).length,
     // aprendiendo: level 1-2 — seen and practicing but not stable
@@ -571,7 +570,6 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   const [tableScript, setTableScript] = useState<KanaScript>("hiragana");
   const [tableFilter, setTableFilter] = useState<"basic" | "dakuten" | "handakuten" | "yoon" | "mixed">("basic");
   const [learnScript, setLearnScript] = useState<LearnScript>("hiragana");
-  const [homeMode, setHomeMode] = useState<HomeMode>("inteligente");
   const [selectedSets, setSelectedSets] = useState<KanaSelectableSet[]>(["basic"]);
   const [selectedScopeKeys, setSelectedScopeKeys] = useState<KanaScopeKey[]>(["hiragana:basic"]);
   const [practiceModes, setPracticeModes] = useState<KanaPracticeMode[]>(["multiple_choice"]);
@@ -658,7 +656,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   const basicHiragana = useMemo(() => filterKanaItemsForSelection("hiragana", "basic"), []);
   const basicKatakana = useMemo(() => filterKanaItemsForSelection("katakana", "basic"), []);
 
-  // Derive selectedScopeKeys from learnScript + selectedSets for Personalizado
+  // Derive selectedScopeKeys from learnScript + selectedSets for Libre
   const personalizedScopeKeys = useMemo<KanaScopeKey[]>(() => {
     const scripts: KanaScript[] = learnScript === "ambos" ? ["hiragana", "katakana"]
       : learnScript === "hiragana" ? ["hiragana"] : ["katakana"];
@@ -682,6 +680,14 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
   const learnStats = useMemo(
     () => getLearnStats(learnScript, basicHiragana, basicKatakana, progress),
     [learnScript, basicHiragana, basicKatakana, progress],
+  );
+  const visibleProgress = useMemo(
+    () => ({
+      vistos: Math.max(0, learnStats.total - learnStats.nuevos),
+      enAprendizaje: learnStats.aprendiendo + learnStats.en_repaso,
+      dominados: learnStats.dominados,
+    }),
+    [learnStats],
   );
 
   const hiraganaLearnCtx = useMemo(
@@ -870,22 +876,22 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
         }
       : buildSession(personalizedScopeKeys, practiceModes, questionCount, progress);
 
-    openSession(nextSession, `${selectedScriptSummary} · ${selectedSetSummary || "Básico"}`);
+    openSession(nextSession, `Libre · ${selectedScriptSummary} · ${selectedSetSummary || "Básico"}`);
   };
 
   const startLearnSession = () => {
     const s = buildLearnSession(basicHiragana, progress);
     const newIds = new Set(s.questions.map((q) => q.item.id).filter((id) => !progress[id]));
     setSessionNewItemIds(newIds);
-    openSession(s, "Aprender · Hiragana");
+    openSession(s, "Smart · Hiragana");
   };
 
-  const startInteligenteSession = (action: InteligenteAction) => {
-    const s = buildInteligenteSession(action, learnScript, basicHiragana, basicKatakana, progress);
+  const startSmartSession = (action: SmartAction) => {
+    const s = buildSmartSession(action, learnScript, basicHiragana, basicKatakana, progress);
     if (!s) return;
     const newIds = new Set(s.questions.map((q) => q.item.id).filter((id) => !progress[id]));
     setSessionNewItemIds(newIds);
-    const label = action === "seguir" ? "Seguir aprendiendo" : action === "pendientes" ? "Repasar pendientes" : action === "debiles" ? "Repasar débiles" : "Kana nuevos";
+    const label = action === "seguir" ? "Smart · seguir" : action === "pendientes" ? "Smart · pendientes" : action === "debiles" ? "Smart · débiles" : "Smart · nuevos";
     openSession(s, label);
   };
 
@@ -894,7 +900,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
     const s = buildGroupSession(groupKana, pathItems, progress);
     const newIds = new Set(s.questions.map((q) => q.item.id).filter((id) => !progress[id]));
     setSessionNewItemIds(newIds);
-    openSession(s, `Aprender · ${script === "katakana" ? "Katakana" : "Hiragana"}`);
+    openSession(s, `Smart · ${script === "katakana" ? "Katakana" : "Hiragana"}`);
   };
 
   useEffect(() => {
@@ -1023,7 +1029,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
   return (
     <div style={{ display: "grid", gap: "var(--space-3)" }}>
-      {/* ── HOME — El Camino Secuencial ── */}
+      {/* ── HOME — Smart ── */}
       {screen === "home" && (
         <div style={{ minHeight: "100vh", background: DS.bg, display: "flex", flexDirection: "column" }}>
           <div style={{ height: 44 }} />
@@ -1049,7 +1055,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               ))}
             </div>
             <button type="button" onClick={() => setScreen("table")} style={{ fontFamily: DS.fontHead, fontSize: 11, fontWeight: 600, color: DS.inkSoft, background: DS.surfaceAlt, border: "none", borderRadius: 999, padding: "6px 14px", cursor: "pointer" }}>
-              Tabla
+              Ver tabla
             </button>
           </div>
 
@@ -1058,7 +1064,13 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
 
             {/* Title */}
             <div style={{ padding: "16px 24px 10px" }}>
-              <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 800, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>El Camino</div>
+              <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 800, color: DS.ink, letterSpacing: -0.8, lineHeight: 1.05 }}>Smart</div>
+              <div style={{ fontFamily: DS.fontBody, fontSize: 14, color: DS.inkSoft, marginTop: 6, lineHeight: 1.35 }}>
+                {visibleProgress.vistos} vistos · {visibleProgress.enAprendizaje} en aprendizaje · {visibleProgress.dominados} dominados
+              </div>
+              <div style={{ fontFamily: DS.fontBody, fontSize: 13, color: DS.inkFaint, marginTop: 4, lineHeight: 1.35 }}>
+                {learnStats.pendientes} pendientes · {learnStats.debiles} débiles · {learnStats.nuevos} nuevos
+              </div>
             </div>
 
             {/* Sequential group cards */}
@@ -1108,7 +1120,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                           </div>
                           <div style={{ flex: 1 }}>
                             <div style={{ fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700, color: DS.tealDark }}>{label}</div>
-                            <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 2 }}>Dominado · {clearedCount}/{group.length}</div>
+                            <div style={{ fontFamily: DS.fontBody, fontSize: 12, color: DS.inkSoft, marginTop: 2 }}>Dominados · {clearedCount}/{group.length}</div>
                           </div>
                           <div style={{ fontFamily: DS.fontKana, fontSize: 22, color: DS.teal, opacity: 0.65, flexShrink: 0 }}>{group[0]}</div>
                         </div>
@@ -1124,7 +1136,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                     const ctaColor = hasDue ? "#ffffff" : DS.dark;
                     const ctaShadow = hasDue ? "0 8px 20px rgba(230,57,70,0.35)" : "0 8px 20px rgba(78,205,196,0.35)";
                     const ctaLabel = hasDue ? "Repasar" : isNew ? "Empezar" : "Continuar";
-                    const eyebrow = hasDue ? "Pendientes" : isNew ? "Nuevo" : "En progreso";
+                    const eyebrow = hasDue ? "Pendientes" : isNew ? "Nuevos" : "En aprendizaje";
                     const eyebrowColor = hasDue ? DS.accent : DS.teal;
 
                     return (
@@ -1631,17 +1643,17 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                     alignItems: "center",
                   }}
                 >
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "var(--color-text-muted)",
-                      fontWeight: 800,
-                      textTransform: "uppercase",
-                      letterSpacing: ".08em",
-                      flexShrink: 0,
-                    }}
-                  >
-                    Complicados
+                      <div
+                        style={{
+                          fontSize: 11,
+                          color: "var(--color-text-muted)",
+                          fontWeight: 800,
+                          textTransform: "uppercase",
+                          letterSpacing: ".08em",
+                          flexShrink: 0,
+                        }}
+                      >
+                    Débiles
                   </div>
                   {hardestSessionKana.map((item) => (
                     <div key={item.id} style={subtlePillStyle}>

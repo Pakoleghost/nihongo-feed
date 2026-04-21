@@ -151,7 +151,7 @@ function SummaryScreen({
               <div style={{
                 fontSize: 10.5, fontWeight: 600, letterSpacing: "0.2em",
                 textTransform: "uppercase", color: "#5B403F", marginBottom: 12,
-              }}>Kana dominados hoy</div>
+              }}>Dominados hoy</div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 {summary.newlySet.map((item) => (
                   <div
