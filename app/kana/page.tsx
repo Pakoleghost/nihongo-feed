@@ -3,23 +3,65 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { KANA_ITEMS } from "@/lib/kana-data";
-import { loadKanaProgress, getKanaItemState } from "@/lib/kana-progress";
+import { getKanaProgressSummary, getKanaStateCounts, loadKanaProgress } from "@/lib/kana-progress";
 import BottomNav from "@/components/BottomNav";
 
 const TOTAL = KANA_ITEMS.length;
 
+type KanaHomeSummary = {
+  vistos: number;
+  aprendiendo: number;
+  fijados: number;
+  siguienteMeta: string;
+};
+
+function buildKanaHomeSummary(): KanaHomeSummary {
+  const progress = loadKanaProgress("anon");
+  const stateCounts = getKanaStateCounts(KANA_ITEMS, progress);
+  const progressSummary = getKanaProgressSummary(KANA_ITEMS, progress);
+
+  let siguienteMeta = "Haz tu primera práctica Smart.";
+
+  if (progressSummary.practiced > 0 && stateCounts.fijado === 0) {
+    siguienteMeta = "Siguiente meta: fijar tu primer kana.";
+  } else if (stateCounts.en_repaso > 0) {
+    siguienteMeta = `Siguiente meta: pasar ${stateCounts.en_repaso} a fijados.`;
+  } else if (stateCounts.aprendiendo > 0) {
+    siguienteMeta = `Siguiente meta: afianzar ${stateCounts.aprendiendo} en aprendizaje.`;
+  } else if (stateCounts.fijado > 0) {
+    siguienteMeta = `Siguiente meta: sumar más kana a tus fijados.`;
+  }
+
+  return {
+    vistos: progressSummary.practiced,
+    aprendiendo: stateCounts.aprendiendo + stateCounts.en_repaso,
+    fijados: stateCounts.fijado,
+    siguienteMeta,
+  };
+}
+
 export default function KanaPage() {
-  const [dominados, setDominados] = useState(0);
+  const [summary, setSummary] = useState<KanaHomeSummary>({
+    vistos: 0,
+    aprendiendo: 0,
+    fijados: 0,
+    siguienteMeta: "Haz tu primera práctica Smart.",
+  });
 
   useEffect(() => {
-    const progress = loadKanaProgress("anon");
-    const count = KANA_ITEMS.filter(
-      (item) => getKanaItemState(progress[item.id]) === "fijado"
-    ).length;
-    setDominados(count);
-  }, []);
+    const refreshSummary = () => {
+      setSummary(buildKanaHomeSummary());
+    };
 
-  const pct = TOTAL > 0 ? Math.round((dominados / TOTAL) * 100) : 0;
+    refreshSummary();
+    window.addEventListener("focus", refreshSummary);
+    document.addEventListener("visibilitychange", refreshSummary);
+
+    return () => {
+      window.removeEventListener("focus", refreshSummary);
+      document.removeEventListener("visibilitychange", refreshSummary);
+    };
+  }, []);
 
   return (
     <div
@@ -60,7 +102,17 @@ export default function KanaPage() {
               lineHeight: 1.4,
             }}
           >
-            {dominados} dominados de {TOTAL} · {pct}% completado
+            {summary.vistos} vistos · {summary.aprendiendo} en aprendizaje · {summary.fijados} fijados
+          </p>
+          <p
+            style={{
+              fontSize: "14px",
+              color: "#7A7F8D",
+              margin: "6px 0 0",
+              lineHeight: 1.4,
+            }}
+          >
+            {summary.siguienteMeta}
           </p>
         </div>
         <Link
