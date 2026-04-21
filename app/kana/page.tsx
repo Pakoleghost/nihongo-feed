@@ -2,51 +2,171 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { KANA_ITEMS } from "@/lib/kana-data";
-import { getKanaProgressSummary, getKanaStateCounts, loadKanaProgress } from "@/lib/kana-progress";
+import { KANA_ITEMS, type KanaItem } from "@/lib/kana-data";
+import { getKanaProgressSummary, getKanaStateCounts, isKanaDue, loadKanaProgress, type KanaProgressMap } from "@/lib/kana-progress";
 import BottomNav from "@/components/BottomNav";
 
 const TOTAL = KANA_ITEMS.length;
+
+const ROADMAP_GROUPS: Array<{
+  label: string;
+  scope: string;
+  kana: string[];
+}> = [
+  { label: "vocales", scope: "Hiragana básico", kana: ["あ", "い", "う", "え", "お"] },
+  { label: "fila K", scope: "Hiragana básico", kana: ["か", "き", "く", "け", "こ"] },
+  { label: "fila S", scope: "Hiragana básico", kana: ["さ", "し", "す", "せ", "そ"] },
+  { label: "fila T", scope: "Hiragana básico", kana: ["た", "ち", "つ", "て", "と"] },
+  { label: "fila N", scope: "Hiragana básico", kana: ["な", "に", "ぬ", "ね", "の"] },
+  { label: "fila H", scope: "Hiragana básico", kana: ["は", "ひ", "ふ", "へ", "ほ"] },
+  { label: "fila M", scope: "Hiragana básico", kana: ["ま", "み", "む", "め", "も"] },
+  { label: "fila Y", scope: "Hiragana básico", kana: ["や", "ゆ", "よ"] },
+  { label: "fila R", scope: "Hiragana básico", kana: ["ら", "り", "る", "れ", "ろ"] },
+  { label: "fila W", scope: "Hiragana básico", kana: ["わ", "を", "ん"] },
+  { label: "katakana básico", scope: "Katakana básico", kana: KANA_ITEMS.filter((item) => item.script === "katakana" && item.set === "basic").map((item) => item.kana) },
+  { label: "diacríticos", scope: "Diacríticos", kana: KANA_ITEMS.filter((item) => item.set === "dakuten" || item.set === "handakuten").map((item) => item.kana) },
+  { label: "combinaciones", scope: "Combinaciones", kana: KANA_ITEMS.filter((item) => item.set === "yoon").map((item) => item.kana) },
+];
+
+type SmartPlan = {
+  title: string;
+  detail: string;
+  chips: string[];
+};
 
 type KanaHomeSummary = {
   vistos: number;
   aprendiendo: number;
   dominados: number;
-  siguienteMeta: string;
+  pendientes: number;
+  progressPct: number;
+  goal: string;
+  smartPlan: SmartPlan;
 };
+
+function isDominated(item: KanaItem, progress: KanaProgressMap) {
+  return (progress[item.id]?.level ?? 0) >= 4;
+}
+
+function getItemsForKanaList(kana: string[]) {
+  const set = new Set(kana);
+  return KANA_ITEMS.filter((item) => set.has(item.kana));
+}
+
+function getNextRoadmapGroup(progress: KanaProgressMap) {
+  return ROADMAP_GROUPS.find((group) => {
+    const items = getItemsForKanaList(group.kana);
+    return items.some((item) => !isDominated(item, progress));
+  }) ?? null;
+}
+
+function getBucketLabel(item: KanaItem) {
+  if (item.set === "basic") return item.script === "hiragana" ? "Hiragana básico" : "Katakana básico";
+  if (item.set === "yoon") return "Combinaciones";
+  return "Diacríticos";
+}
+
+function getPrimaryBucketLabel(items: KanaItem[]) {
+  if (items.length === 0) return null;
+
+  const counts = items.reduce<Record<string, number>>((acc, item) => {
+    const label = getBucketLabel(item);
+    acc[label] = (acc[label] || 0) + 1;
+    return acc;
+  }, {});
+
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+}
+
+function buildSmartPlan(progress: KanaProgressMap, vistos: number, aprendiendo: number, dominados: number, pendientes: number): SmartPlan {
+  const entries = KANA_ITEMS
+    .map((item) => ({ item, entry: progress[item.id] }))
+    .filter(({ entry }) => Boolean(entry));
+
+  const dueItems = entries
+    .filter(({ entry }) => isKanaDue(entry))
+    .map(({ item }) => item);
+
+  const difficultItems = entries
+    .filter(({ entry }) => entry?.difficult)
+    .map(({ item }) => item);
+
+  const nextGroup = getNextRoadmapGroup(progress);
+
+  if (pendientes > 0) {
+    return {
+      title: `Repasa ${pendientes} pendientes`,
+      detail: getPrimaryBucketLabel(dueItems) ?? "Tu cola actual",
+      chips: [
+        `${aprendiendo} en aprendizaje`,
+        difficultItems.length > 0 ? `${difficultItems.length} difíciles` : `${dominados} dominados`,
+      ],
+    };
+  }
+
+  if (vistos === 0) {
+    return {
+      title: "Empieza con hiragana básico",
+      detail: "Primer bloque: vocales",
+      chips: ["5 vocales", `${TOTAL} kana en total`],
+    };
+  }
+
+  if (nextGroup) {
+    return {
+      title: `Sigue con ${nextGroup.label}`,
+      detail: nextGroup.scope,
+      chips: [
+        `${aprendiendo} en aprendizaje`,
+        `${dominados} dominados`,
+      ],
+    };
+  }
+
+  return {
+    title: "Repasa todo tu repertorio",
+    detail: "Kana ya vistos",
+    chips: [`${vistos} vistos`, `${dominados} dominados`],
+  };
+}
 
 function buildKanaHomeSummary(): KanaHomeSummary {
   const progress = loadKanaProgress("anon");
   const stateCounts = getKanaStateCounts(KANA_ITEMS, progress);
   const progressSummary = getKanaProgressSummary(KANA_ITEMS, progress);
 
-  let siguienteMeta = "Empieza con Smart y verás tu progreso aquí.";
+  const vistos = progressSummary.practiced;
+  const aprendiendo = stateCounts.aprendiendo + stateCounts.en_repaso;
+  const dominados = stateCounts.fijado;
+  const pendientes = progressSummary.due;
+  const progressPct = TOTAL > 0 ? Math.round((vistos / TOTAL) * 100) : 0;
+  const nextGroup = getNextRoadmapGroup(progress);
 
-  if (progressSummary.practiced > 0 && stateCounts.fijado === 0) {
-    siguienteMeta = "Vas bien: ahora toca dominar el primero.";
-  } else if (stateCounts.en_repaso > 0) {
-    siguienteMeta = `Te faltan ${stateCounts.en_repaso} por dominar.`;
-  } else if (stateCounts.aprendiendo > 0) {
-    siguienteMeta = `Sigue así: ya tienes ${stateCounts.aprendiendo} en marcha.`;
-  } else if (stateCounts.fijado > 0) {
-    siguienteMeta = "Muy bien. Vamos por el siguiente.";
+  let goal = "Meta actual: empezar hiragana básico";
+
+  if (pendientes > 0) {
+    goal = `Meta actual: repasar ${pendientes} pendientes`;
+  } else if (vistos > 0 && dominados === 0) {
+    goal = "Meta actual: dominar tu primer kana";
+  } else if (nextGroup) {
+    goal = `Meta actual: completar ${nextGroup.label}`;
+  } else if (dominados > 0) {
+    goal = "Meta actual: sumar más dominados";
   }
 
   return {
-    vistos: progressSummary.practiced,
-    aprendiendo: stateCounts.aprendiendo + stateCounts.en_repaso,
-    dominados: stateCounts.fijado,
-    siguienteMeta,
+    vistos,
+    aprendiendo,
+    dominados,
+    pendientes,
+    progressPct,
+    goal,
+    smartPlan: buildSmartPlan(progress, vistos, aprendiendo, dominados, pendientes),
   };
 }
 
 export default function KanaPage() {
-  const [summary, setSummary] = useState<KanaHomeSummary>({
-    vistos: 0,
-    aprendiendo: 0,
-    dominados: 0,
-    siguienteMeta: "Empieza con Smart y verás tu progreso aquí.",
-  });
+  const [summary, setSummary] = useState<KanaHomeSummary>(() => buildKanaHomeSummary());
 
   useEffect(() => {
     const refreshSummary = () => {
@@ -73,7 +193,6 @@ export default function KanaPage() {
         padding: "20px 20px 100px",
       }}
     >
-      {/* Title row */}
       <div
         style={{
           display: "flex",
@@ -96,23 +215,13 @@ export default function KanaPage() {
           </h1>
           <p
             style={{
-              fontSize: "15px",
-              color: "#53596B",
-              margin: "10px 0 0",
-              lineHeight: 1.4,
-            }}
-          >
-            {summary.vistos} vistos · {summary.aprendiendo} en aprendizaje · {summary.dominados} dominados
-          </p>
-          <p
-            style={{
               fontSize: "14px",
               color: "#7A7F8D",
-              margin: "6px 0 0",
-              lineHeight: 1.4,
+              margin: "8px 0 0",
+              lineHeight: 1.35,
             }}
           >
-            {summary.siguienteMeta}
+            {summary.progressPct}% del repertorio ya pasó por tus prácticas
           </p>
         </div>
         <Link
@@ -133,124 +242,255 @@ export default function KanaPage() {
         </Link>
       </div>
 
-      {/* Cards */}
+      <div
+        style={{
+          background: "#FFFFFF",
+          borderRadius: "24px",
+          padding: "18px",
+          marginTop: "18px",
+          boxShadow: "0 8px 28px rgba(26,26,46,0.08)",
+          display: "grid",
+          gap: "14px",
+        }}
+      >
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10 }}>
+          {[
+            { label: "Vistos", value: summary.vistos, tint: "rgba(26,26,46,0.06)", color: "#1A1A2E" },
+            { label: "En aprendizaje", value: summary.aprendiendo, tint: "rgba(78,205,196,0.12)", color: "#1A1A2E" },
+            { label: "Dominados", value: summary.dominados, tint: "rgba(230,57,70,0.10)", color: "#E63946" },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              style={{
+                background: stat.tint,
+                borderRadius: 18,
+                padding: "14px 10px",
+                textAlign: "center",
+                display: "grid",
+                gap: 4,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "26px",
+                  fontWeight: 800,
+                  color: stat.color,
+                  lineHeight: 1,
+                }}
+              >
+                {stat.value}
+              </div>
+              <div
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.03em",
+                  color: "#6E737F",
+                  textTransform: "uppercase",
+                }}
+              >
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "grid", gap: 8 }}>
+          <div
+            style={{
+              height: 8,
+              borderRadius: 999,
+              background: "#F1ECE5",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                width: `${Math.max(summary.progressPct, summary.vistos > 0 ? 6 : 0)}%`,
+                height: "100%",
+                borderRadius: 999,
+                background: "linear-gradient(90deg, #E63946 0%, #F08A5D 100%)",
+              }}
+            />
+          </div>
+          <div
+            style={{
+              fontSize: "14px",
+              color: "#53596B",
+              lineHeight: 1.35,
+            }}
+          >
+            {summary.vistos} vistos · {summary.aprendiendo} en aprendizaje · {summary.dominados} dominados
+          </div>
+          <div
+            style={{
+              fontSize: "14px",
+              fontWeight: 700,
+              color: "#1A1A2E",
+              lineHeight: 1.35,
+            }}
+          >
+            {summary.goal}
+          </div>
+        </div>
+      </div>
+
       <div
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "14px",
-          marginTop: "24px",
+          gap: "12px",
+          marginTop: "18px",
           flex: 1,
         }}
       >
-        {/* Smart card */}
         <Link
           href="/kana/configurar?mode=smart"
           style={{
             background: "#E63946",
-            borderRadius: "24px",
-            padding: "24px 24px 22px",
-            display: "flex",
-            flexDirection: "column",
+            borderRadius: "26px",
+            padding: "20px 20px 18px",
+            display: "grid",
+            gap: 14,
             textDecoration: "none",
-            minHeight: "160px",
-            boxShadow: "0 8px 32px rgba(230,57,70,0.3)",
+            boxShadow: "0 10px 34px rgba(230,57,70,0.28)",
           }}
         >
-          <span
-            style={{
-              alignSelf: "flex-start",
-              background: "rgba(255,255,255,0.18)",
-              borderRadius: "999px",
-              padding: "7px 11px",
-              fontSize: "11px",
-              fontWeight: 800,
-              letterSpacing: "0.04em",
-              color: "#FFFFFF",
-              marginBottom: "18px",
-              textTransform: "uppercase",
-            }}
-          >
-            Recomendado
-          </span>
-          <p
-            style={{
-              fontSize: "32px",
-              fontWeight: 800,
-              color: "#FFFFFF",
-              margin: 0,
-              lineHeight: 1,
-            }}
-          >
-            Smart
-          </p>
-          <p
-            style={{
-              fontSize: "15px",
-              color: "rgba(255,255,255,0.85)",
-              margin: "8px 0 0",
-              lineHeight: 1.35,
-            }}
-          >
-            La app elige tu siguiente paso.
-          </p>
-          <p
-            style={{
-              fontSize: "14px",
-              color: "rgba(255,255,255,0.7)",
-              margin: "12px 0 0",
-              fontWeight: 700,
-            }}
-          >
-            Sigue con lo más importante
-          </p>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  borderRadius: 999,
+                  background: "rgba(255,255,255,0.16)",
+                  padding: "6px 10px",
+                  fontSize: "11px",
+                  fontWeight: 800,
+                  letterSpacing: "0.04em",
+                  color: "#FFFFFF",
+                  textTransform: "uppercase",
+                }}
+              >
+                Smart recomendado
+              </div>
+              <div
+                style={{
+                  fontSize: "30px",
+                  fontWeight: 800,
+                  color: "#FFFFFF",
+                  marginTop: 14,
+                  lineHeight: 1.02,
+                }}
+              >
+                {summary.smartPlan.title}
+              </div>
+              <div
+                style={{
+                  fontSize: "15px",
+                  color: "rgba(255,255,255,0.84)",
+                  marginTop: 8,
+                  lineHeight: 1.3,
+                }}
+              >
+                {summary.smartPlan.detail}
+              </div>
+            </div>
+
+            <div
+              aria-hidden="true"
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.14)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                marginTop: 2,
+              }}
+            >
+              <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
+                <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {summary.smartPlan.chips.map((chip) => (
+              <span
+                key={chip}
+                style={{
+                  borderRadius: 999,
+                  padding: "8px 12px",
+                  background: "rgba(255,255,255,0.14)",
+                  color: "#FFFFFF",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  lineHeight: 1,
+                }}
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
         </Link>
 
-        {/* Libre card */}
         <Link
           href="/kana/configurar?mode=libre"
           style={{
             background: "#FFFFFF",
-            borderRadius: "24px",
-            padding: "22px 24px",
+            borderRadius: "22px",
+            padding: "18px 18px",
             display: "flex",
-            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 14,
             textDecoration: "none",
-            minHeight: "136px",
-            boxShadow: "0 6px 24px rgba(26,26,46,0.08)",
+            boxShadow: "0 6px 22px rgba(26,26,46,0.08)",
           }}
         >
-          <p
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: "24px",
+                fontWeight: 800,
+                color: "#1A1A2E",
+                lineHeight: 1,
+              }}
+            >
+              Libre
+            </div>
+            <div
+              style={{
+                fontSize: "14px",
+                color: "#53596B",
+                marginTop: 8,
+                lineHeight: 1.35,
+              }}
+            >
+              Elige script, bloques y número de preguntas.
+            </div>
+          </div>
+
+          <div
+            aria-hidden="true"
             style={{
-              fontSize: "30px",
-              fontWeight: 800,
-              color: "#1A1A2E",
-              margin: 0,
-              lineHeight: 1,
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: "#F7F3EC",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
             }}
           >
-            Libre
-          </p>
-          <p
-            style={{
-              fontSize: "15px",
-              color: "#53596B",
-              margin: "8px 0 0",
-              lineHeight: 1.35,
-            }}
-          >
-            Tú eliges qué kana practicar.
-          </p>
-          <p
-            style={{
-              fontSize: "14px",
-              color: "#7A7F8D",
-              margin: "12px 0 0",
-              fontWeight: 700,
-            }}
-          >
-            Elige a tu ritmo
-          </p>
+            <svg width="15" height="11" viewBox="0 0 15 11" fill="none">
+              <path d="M1 5.5h12m0 0L8.5 1M13 5.5 8.5 10" stroke="#1A1A2E" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
         </Link>
       </div>
 
