@@ -14,8 +14,8 @@ type Mode = "smart" | "libre";
 const CHIPS: { key: ChipKey; label: string }[] = [
   { key: "hiragana", label: "Hiragana" },
   { key: "katakana", label: "Katakana" },
-  { key: "tenten", label: "Tenten" },
-  { key: "maru", label: "Maru" },
+  { key: "tenten", label: "Dakuten" },
+  { key: "maru", label: "Handakuten" },
   { key: "combinaciones", label: "Combinaciones" },
 ];
 
@@ -243,7 +243,7 @@ function ConfigurarContent() {
                 margin: "0 0 14px",
               }}
             >
-              Selección de caracteres
+              Kana a practicar
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
               {CHIPS.map(({ key, label }) => {
