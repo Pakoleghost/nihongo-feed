@@ -11,7 +11,7 @@ const TOTAL = KANA_ITEMS.length;
 type KanaHomeSummary = {
   vistos: number;
   aprendiendo: number;
-  fijados: number;
+  dominados: number;
   siguienteMeta: string;
 };
 
@@ -20,22 +20,22 @@ function buildKanaHomeSummary(): KanaHomeSummary {
   const stateCounts = getKanaStateCounts(KANA_ITEMS, progress);
   const progressSummary = getKanaProgressSummary(KANA_ITEMS, progress);
 
-  let siguienteMeta = "Haz tu primera práctica Smart.";
+  let siguienteMeta = "Empieza con Smart y verás tu progreso aquí.";
 
   if (progressSummary.practiced > 0 && stateCounts.fijado === 0) {
-    siguienteMeta = "Siguiente meta: fijar tu primer kana.";
+    siguienteMeta = "Vas bien: ahora toca dominar el primero.";
   } else if (stateCounts.en_repaso > 0) {
-    siguienteMeta = `Siguiente meta: pasar ${stateCounts.en_repaso} a fijados.`;
+    siguienteMeta = `Te faltan ${stateCounts.en_repaso} por dominar.`;
   } else if (stateCounts.aprendiendo > 0) {
-    siguienteMeta = `Siguiente meta: afianzar ${stateCounts.aprendiendo} en aprendizaje.`;
+    siguienteMeta = `Sigue así: ya tienes ${stateCounts.aprendiendo} en marcha.`;
   } else if (stateCounts.fijado > 0) {
-    siguienteMeta = `Siguiente meta: sumar más kana a tus fijados.`;
+    siguienteMeta = "Muy bien. Vamos por el siguiente.";
   }
 
   return {
     vistos: progressSummary.practiced,
     aprendiendo: stateCounts.aprendiendo + stateCounts.en_repaso,
-    fijados: stateCounts.fijado,
+    dominados: stateCounts.fijado,
     siguienteMeta,
   };
 }
@@ -44,8 +44,8 @@ export default function KanaPage() {
   const [summary, setSummary] = useState<KanaHomeSummary>({
     vistos: 0,
     aprendiendo: 0,
-    fijados: 0,
-    siguienteMeta: "Haz tu primera práctica Smart.",
+    dominados: 0,
+    siguienteMeta: "Empieza con Smart y verás tu progreso aquí.",
   });
 
   useEffect(() => {
@@ -102,7 +102,7 @@ export default function KanaPage() {
               lineHeight: 1.4,
             }}
           >
-            {summary.vistos} vistos · {summary.aprendiendo} en aprendizaje · {summary.fijados} fijados
+            {summary.vistos} vistos · {summary.aprendiendo} en aprendizaje · {summary.dominados} dominados
           </p>
           <p
             style={{
@@ -192,7 +192,7 @@ export default function KanaPage() {
               lineHeight: 1.35,
             }}
           >
-            La app decide qué practicar ahora.
+            La app elige tu siguiente paso.
           </p>
           <p
             style={{
@@ -202,7 +202,7 @@ export default function KanaPage() {
               fontWeight: 700,
             }}
           >
-            Empieza aquí
+            Sigue con lo más importante
           </p>
         </Link>
 
@@ -239,7 +239,17 @@ export default function KanaPage() {
               lineHeight: 1.35,
             }}
           >
-            Tú eliges qué practicar.
+            Tú eliges qué kana practicar.
+          </p>
+          <p
+            style={{
+              fontSize: "14px",
+              color: "#7A7F8D",
+              margin: "12px 0 0",
+              fontWeight: 700,
+            }}
+          >
+            Elige a tu ritmo
           </p>
         </Link>
       </div>
