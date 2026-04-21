@@ -12,6 +12,13 @@ const KANA_MAP = new Map<string, KanaItem>(KANA_ITEMS.map((i) => [i.kana, i]));
 
 type Script = "hiragana" | "katakana";
 type Row = (string | null)[];
+type StrokeSpeed = "slow" | "normal" | "fast";
+
+const STROKE_SPEED_OPTIONS: Array<{ key: StrokeSpeed; label: string }> = [
+  { key: "slow", label: "Lento" },
+  { key: "normal", label: "Normal" },
+  { key: "fast", label: "Rápido" },
+];
 
 // ─── table data ──────────────────────────────────────────────────────────────
 
@@ -290,6 +297,7 @@ export default function TablaPage() {
   const [openYoon, setOpenYoon] = useState(false);
   const [modalKana, setModalKana] = useState<string | null>(null);
   const [replayKey, setReplayKey] = useState(0);
+  const [strokeSpeed, setStrokeSpeed] = useState<StrokeSpeed>("normal");
 
   function handleSelect(kana: string) {
     setSelected(kana);
@@ -614,7 +622,44 @@ export default function TablaPage() {
                   kana={modalKana}
                   size={200}
                   autoPlay
+                  speed={strokeSpeed}
                 />
+
+                <div
+                  style={{
+                    marginTop: "10px",
+                    display: "inline-flex",
+                    background: "#F3F0EB",
+                    borderRadius: "999px",
+                    padding: "4px",
+                    gap: "4px",
+                  }}
+                >
+                  {STROKE_SPEED_OPTIONS.map((option) => {
+                    const active = strokeSpeed === option.key;
+                    return (
+                      <button
+                        key={option.key}
+                        type="button"
+                        onClick={() => setStrokeSpeed(option.key)}
+                        style={{
+                          border: "none",
+                          borderRadius: "999px",
+                          padding: "8px 14px",
+                          fontSize: "13px",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          background: active ? "#E63946" : "transparent",
+                          color: active ? "#FFFFFF" : "#6E737F",
+                          transition: "background 0.15s, color 0.15s",
+                        }}
+                        aria-pressed={active}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
 
                 {/* Replay button */}
                 <button

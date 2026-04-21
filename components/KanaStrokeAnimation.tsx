@@ -8,11 +8,19 @@ interface Props {
   kana: string;
   size?: number;
   autoPlay?: boolean;
+  speed?: "slow" | "normal" | "fast";
 }
 
-export default function KanaStrokeAnimation({ kana, size = 200, autoPlay = true }: Props) {
+const SPEED_TIMINGS = {
+  slow: { duration: 0.72, stagger: 0.92 },
+  normal: { duration: 0.45, stagger: 0.6 },
+  fast: { duration: 0.28, stagger: 0.38 },
+} as const;
+
+export default function KanaStrokeAnimation({ kana, size = 200, autoPlay = true, speed = "normal" }: Props) {
   const paths = kanaStrokes[kana] ?? [];
   const [animKey, setAnimKey] = useState(0);
+  const timing = SPEED_TIMINGS[speed];
 
   // Reset when kana changes
   useEffect(() => {
@@ -77,13 +85,13 @@ export default function KanaStrokeAnimation({ kana, size = 200, autoPlay = true 
             animate={{ pathLength: 1, opacity: 1 }}
             transition={{
               pathLength: {
-                duration: 0.45,
+                duration: timing.duration,
                 ease: "easeInOut",
-                delay: autoPlay ? index * 0.6 : 0,
+                delay: autoPlay ? index * timing.stagger : 0,
               },
               opacity: {
                 duration: 0.01,
-                delay: autoPlay ? index * 0.6 : 0,
+                delay: autoPlay ? index * timing.stagger : 0,
               },
             }}
           />
