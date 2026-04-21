@@ -4,15 +4,6 @@ const ACTIVITY_KEY = "app-last-activity";
 type StreakData = { count: number; lastActiveDate: string };
 type ActivityData = { label: string; path: string };
 
-const OFFICIAL_KANA_PATH = "/study?view=learnkana";
-
-function normalizeActivity(activity: ActivityData): ActivityData {
-  if (activity.path === "/kana" || activity.path.startsWith("/kana/")) {
-    return { ...activity, path: OFFICIAL_KANA_PATH };
-  }
-  return activity;
-}
-
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -58,10 +49,7 @@ export function getLastActivity(): ActivityData | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(ACTIVITY_KEY);
-    if (!raw) return null;
-    const parsed = normalizeActivity(JSON.parse(raw) as ActivityData);
-    localStorage.setItem(ACTIVITY_KEY, JSON.stringify(parsed));
-    return parsed;
+    return raw ? (JSON.parse(raw) as ActivityData) : null;
   } catch {
     return null;
   }
@@ -70,6 +58,6 @@ export function getLastActivity(): ActivityData | null {
 export function setLastActivity(label: string, path: string): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(ACTIVITY_KEY, JSON.stringify(normalizeActivity({ label, path })));
+    localStorage.setItem(ACTIVITY_KEY, JSON.stringify({ label, path }));
   } catch {}
 }

@@ -67,7 +67,7 @@ function ComunidadIcon({ color }: { color: string }) {
 
 const tabs = [
   { href: "/", label: "Inicio", Icon: HomeIcon },
-  { href: "/study?view=learnkana", label: "Kana", Icon: KanaIcon },
+  { href: "/kana", label: "Kana", Icon: KanaIcon },
   { href: "/practicar", label: "Practicar", Icon: PracticarIcon },
   { href: "/comunidad", label: "Comunidad", Icon: ComunidadIcon },
 ] as const;
@@ -92,10 +92,7 @@ export default function BottomNav() {
       }}
     >
       {tabs.map(({ href, label, Icon }) => {
-        const isKanaStudyTab = href === "/study?view=learnkana" && pathname === "/study";
-        const isActive = href === "/"
-          ? pathname === "/"
-          : isKanaStudyTab || pathname === href || pathname.startsWith(href + "/");
+        const isActive = href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
         const color = isActive ? "#FFFFFF" : "#9CA3AF";
 
         return (

@@ -7,8 +7,6 @@ import { getDueKanaCount } from "@/lib/kana-due";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
 
-const OFFICIAL_KANA_PATH = "/study?view=learnkana";
-
 function getGreeting(): string {
   const h = new Date().getHours();
   if (h >= 6 && h < 12) return "おはようございます";
@@ -155,7 +153,7 @@ export default function InicioPage() {
       {/* Dismissible banner */}
       {showBanner && (
         <Link
-          href={OFFICIAL_KANA_PATH}
+          href="/kana/quiz?mode=smart&difficulty=automatico&count=20"
           style={{
             display: "flex",
             alignItems: "center",
@@ -224,7 +222,7 @@ export default function InicioPage() {
             Tienes repasos vencidos
           </p>
           <Link
-            href={OFFICIAL_KANA_PATH}
+            href="/kana/quiz?mode=smart&difficulty=automatico&count=20"
             style={{
               display: "block",
               background: "#FFFFFF",
@@ -263,10 +261,10 @@ export default function InicioPage() {
           Continuar
         </p>
         <p style={{ fontSize: "15px", color: "#9CA3AF", margin: "4px 0 18px" }}>
-          {lastActivity?.label ?? "Empieza por Aprender Kana"}
+          {lastActivity?.label ?? "Empieza por Kana"}
         </p>
         <Link
-          href={lastActivity?.path ?? OFFICIAL_KANA_PATH}
+          href={lastActivity?.path ?? "/kana"}
           style={{
             display: "flex",
             alignItems: "center",
