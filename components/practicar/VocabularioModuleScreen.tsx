@@ -7,12 +7,20 @@ import type { GenkiVocabItem } from "@/lib/genki-vocab-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
 import {
   getVocabLessonSummary,
+  getVocabProgressId,
   loadVocabProgress,
   recordVocabExposure,
   recordVocabResult,
   saveVocabProgress,
   type VocabProgressMap,
 } from "@/lib/vocab-progress";
+import {
+  getPracticeNextAction,
+  isPracticeDifficult,
+  isPracticeDominated,
+  isPracticeDue,
+  type PracticeNextAction,
+} from "@/lib/practice-srs";
 
 const LESSONS = Object.keys(GENKI_VOCAB_BY_LESSON)
   .map(Number)
@@ -74,6 +82,57 @@ function getOptions(correct: QuizItem, pool: QuizItem[]): string[] {
   return shuffle([correctEs, ...wrong3]);
 }
 
+function sortLessonItemsForPractice(
+  items: GenkiVocabItem[],
+  progress: VocabProgressMap,
+  lesson: number,
+  actionKey: PracticeNextAction["key"],
+) {
+  const shuffled = shuffle(items);
+
+  function getRank(item: GenkiVocabItem) {
+    const id = getVocabProgressId(lesson, item);
+    const entry = progress[id];
+    const exposedOnly = Boolean(entry && entry.exposure_count > 0 && entry.times_seen === 0);
+    const due = isPracticeDue(entry);
+    const weak = isPracticeDifficult(entry);
+    const dominated = isPracticeDominated(entry);
+    const practiced = Boolean(entry && entry.times_seen > 0);
+
+    if (actionKey === "practice_due") {
+      if (due) return 0;
+      if (weak) return 1;
+      if (exposedOnly) return 2;
+      if (practiced && !dominated) return 3;
+      return 4;
+    }
+
+    if (actionKey === "practice_weak") {
+      if (weak) return 0;
+      if (due) return 1;
+      if (exposedOnly) return 2;
+      if (practiced && !dominated) return 3;
+      return 4;
+    }
+
+    if (actionKey === "practice_now") {
+      if (exposedOnly) return 0;
+      if (!practiced) return 1;
+      if (due) return 2;
+      if (weak) return 3;
+      return 4;
+    }
+
+    if (due) return 0;
+    if (weak) return 1;
+    if (practiced && !dominated) return 2;
+    if (exposedOnly) return 3;
+    return 4;
+  }
+
+  return [...shuffled].sort((a, b) => getRank(a) - getRank(b));
+}
+
 export default function VocabularioModuleScreen() {
   const router = useRouter();
   const learnExposureIdsRef = useRef<Set<string>>(new Set());
@@ -100,6 +159,7 @@ export default function VocabularioModuleScreen() {
     () => getVocabLessonSummary(lesson, lessonItems, progress),
     [lesson, lessonItems, progress],
   );
+  const nextAction = useMemo(() => getPracticeNextAction(lessonSummary), [lessonSummary]);
   const currentCard = cards[currentCardIndex];
   const currentQuestion = questions[currentQuestionIndex];
   const learnProgressPct = cards.length > 0 ? (currentCardIndex / cards.length) * 100 : 0;
@@ -189,9 +249,37 @@ export default function VocabularioModuleScreen() {
 
   function restartPracticeSession() {
     const items = toQuizItems(lessonItems);
-    const shuffled = shuffle(lessonItems);
+    const shuffled = sortLessonItemsForPractice(lessonItems, progress, lesson, nextAction.key);
     setQuestions(
       shuffled.map((source) => {
+        const item = {
+          display: source.kanji || source.hira,
+          reading: source.hira,
+          es: source.es,
+        };
+        return { item, source, options: getOptions(item, items) };
+      }),
+    );
+    setCurrentQuestionIndex(0);
+    setQuizPhase("question");
+    setSelectedOption(null);
+    setCorrect(0);
+  }
+
+  function handleNextAction() {
+    if (nextAction.targetMode === "aprender") {
+      setMode("aprender");
+      learnExposureIdsRef.current = new Set();
+      setCurrentCardIndex(0);
+      setFlipped(false);
+      return;
+    }
+
+    setMode("practicar");
+    const items = toQuizItems(lessonItems);
+    const sortedSources = sortLessonItemsForPractice(lessonItems, progress, lesson, nextAction.key);
+    setQuestions(
+      sortedSources.map((source) => {
         const item = {
           display: source.kanji || source.hira,
           reading: source.hira,
@@ -466,6 +554,29 @@ export default function VocabularioModuleScreen() {
           <p style={{ margin: "10px 2px 0", fontSize: "13px", color: "#6B7280", lineHeight: 1.35 }}>
             {lessonHelper}
           </p>
+
+          <div style={{ marginTop: "12px" }}>
+            <button
+              onClick={handleNextAction}
+              style={{
+                width: "100%",
+                border: "none",
+                cursor: "pointer",
+                borderRadius: "16px",
+                padding: "15px 16px",
+                background: nextAction.targetMode === "aprender" ? "#E63946" : "#1A1A2E",
+                color: "#FFFFFF",
+                fontSize: "16px",
+                fontWeight: 800,
+                boxShadow: "0 6px 18px rgba(26,26,46,0.12)",
+              }}
+            >
+              {nextAction.label}
+            </button>
+            <p style={{ margin: "8px 2px 0", fontSize: "13px", color: "#6B7280", lineHeight: 1.35 }}>
+              {nextAction.helper}
+            </p>
+          </div>
         </div>
       </div>
 

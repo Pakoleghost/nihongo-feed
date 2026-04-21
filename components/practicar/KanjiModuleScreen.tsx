@@ -7,12 +7,20 @@ import type { GenkiKanjiItem } from "@/lib/genki-kanji-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
 import {
   getKanjiLessonSummary,
+  getKanjiProgressId,
   loadKanjiProgress,
   recordKanjiExposure,
   recordKanjiResult,
   saveKanjiProgress,
   type KanjiProgressMap,
 } from "@/lib/kanji-progress";
+import {
+  getPracticeNextAction,
+  isPracticeDifficult,
+  isPracticeDominated,
+  isPracticeDue,
+  type PracticeNextAction,
+} from "@/lib/practice-srs";
 
 const LESSONS = Object.keys(GENKI_KANJI_BY_LESSON)
   .map(Number)
@@ -67,6 +75,57 @@ function getReadingOptions(correct: GenkiKanjiItem, pool: GenkiKanjiItem[]): str
   return shuffle([correctReading, ...wrong3]);
 }
 
+function sortLessonItemsForPractice(
+  items: GenkiKanjiItem[],
+  progress: KanjiProgressMap,
+  lesson: number,
+  actionKey: PracticeNextAction["key"],
+) {
+  const shuffled = shuffle(items);
+
+  function getRank(item: GenkiKanjiItem) {
+    const id = getKanjiProgressId(lesson, item);
+    const entry = progress[id];
+    const exposedOnly = Boolean(entry && entry.exposure_count > 0 && entry.times_seen === 0);
+    const due = isPracticeDue(entry);
+    const weak = isPracticeDifficult(entry);
+    const dominated = isPracticeDominated(entry);
+    const practiced = Boolean(entry && entry.times_seen > 0);
+
+    if (actionKey === "practice_due") {
+      if (due) return 0;
+      if (weak) return 1;
+      if (exposedOnly) return 2;
+      if (practiced && !dominated) return 3;
+      return 4;
+    }
+
+    if (actionKey === "practice_weak") {
+      if (weak) return 0;
+      if (due) return 1;
+      if (exposedOnly) return 2;
+      if (practiced && !dominated) return 3;
+      return 4;
+    }
+
+    if (actionKey === "practice_now") {
+      if (exposedOnly) return 0;
+      if (!practiced) return 1;
+      if (due) return 2;
+      if (weak) return 3;
+      return 4;
+    }
+
+    if (due) return 0;
+    if (weak) return 1;
+    if (practiced && !dominated) return 2;
+    if (exposedOnly) return 3;
+    return 4;
+  }
+
+  return [...shuffled].sort((a, b) => getRank(a) - getRank(b));
+}
+
 export default function KanjiModuleScreen() {
   const router = useRouter();
   const learnExposureIdsRef = useRef<Set<string>>(new Set());
@@ -90,6 +149,7 @@ export default function KanjiModuleScreen() {
     () => getKanjiLessonSummary(lesson, lessonItems, progress),
     [lesson, lessonItems, progress],
   );
+  const nextAction = useMemo(() => getPracticeNextAction(lessonSummary), [lessonSummary]);
   const currentStudyItem = studyItems[currentStudyIndex];
   const currentQuestion = questions[currentQuestionIndex];
   const studyProgressPct = studyItems.length > 0 ? (currentStudyIndex / studyItems.length) * 100 : 0;
@@ -143,8 +203,25 @@ export default function KanjiModuleScreen() {
   }, [lessonItems]);
 
   function restartPracticeSession() {
-    const shuffled = shuffle(lessonItems);
+    const shuffled = sortLessonItemsForPractice(lessonItems, progress, lesson, nextAction.key);
     setQuestions(shuffled.map((item) => ({ item, options: getReadingOptions(item, lessonItems) })));
+    setCurrentQuestionIndex(0);
+    setQuizPhase("question");
+    setSelectedOption(null);
+    setCorrectCount(0);
+  }
+
+  function handleNextAction() {
+    if (nextAction.targetMode === "aprender") {
+      setMode("aprender");
+      learnExposureIdsRef.current = new Set();
+      setCurrentStudyIndex(0);
+      return;
+    }
+
+    setMode("practicar");
+    const sorted = sortLessonItemsForPractice(lessonItems, progress, lesson, nextAction.key);
+    setQuestions(sorted.map((item) => ({ item, options: getReadingOptions(item, lessonItems) })));
     setCurrentQuestionIndex(0);
     setQuizPhase("question");
     setSelectedOption(null);
@@ -412,6 +489,29 @@ export default function KanjiModuleScreen() {
           <p style={{ margin: "10px 2px 0", fontSize: "13px", color: "#6B7280", lineHeight: 1.35 }}>
             {lessonHelper}
           </p>
+
+          <div style={{ marginTop: "12px" }}>
+            <button
+              onClick={handleNextAction}
+              style={{
+                width: "100%",
+                border: "none",
+                cursor: "pointer",
+                borderRadius: "16px",
+                padding: "15px 16px",
+                background: nextAction.targetMode === "aprender" ? "#E63946" : "#1A1A2E",
+                color: "#FFFFFF",
+                fontSize: "16px",
+                fontWeight: 800,
+                boxShadow: "0 6px 18px rgba(26,26,46,0.12)",
+              }}
+            >
+              {nextAction.label}
+            </button>
+            <p style={{ margin: "8px 2px 0", fontSize: "13px", color: "#6B7280", lineHeight: 1.35 }}>
+              {nextAction.helper}
+            </p>
+          </div>
         </div>
       </div>
 

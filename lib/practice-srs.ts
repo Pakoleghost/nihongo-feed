@@ -48,6 +48,13 @@ export type PracticeProgressSummary = {
   debiles: number;
 };
 
+export type PracticeNextAction = {
+  key: "practice_due" | "practice_weak" | "practice_now" | "learn_now" | "review_lesson";
+  label: string;
+  helper: string;
+  targetMode: "aprender" | "practicar";
+};
+
 const MS = {
   m10: 10 * 60 * 1000,
   h4: 4 * 60 * 60 * 1000,
@@ -227,4 +234,58 @@ export function buildPracticeSummary<T extends PracticeProgressEntry>(
   }
 
   return summary;
+}
+
+export function getPracticeNextAction(summary: PracticeProgressSummary): PracticeNextAction {
+  if (summary.pendientes > 0) {
+    return {
+      key: "practice_due",
+      label: "Practicar pendientes",
+      helper: `${summary.pendientes} por repasar ahora.`,
+      targetMode: "practicar",
+    };
+  }
+
+  if (summary.debiles > 0) {
+    return {
+      key: "practice_weak",
+      label: "Reforzar débiles",
+      helper: `${summary.debiles} necesitan más práctica.`,
+      targetMode: "practicar",
+    };
+  }
+
+  if (summary.solo_expuestos > 0) {
+    return {
+      key: "practice_now",
+      label: "Practicar ahora",
+      helper: `${summary.solo_expuestos} ya se vieron en Aprender.`,
+      targetMode: "practicar",
+    };
+  }
+
+  if (summary.total > 0 && summary.nuevos >= Math.ceil(summary.total / 2)) {
+    return {
+      key: "learn_now",
+      label: "Empezar a aprender",
+      helper: `${summary.nuevos} siguen nuevas en esta lección.`,
+      targetMode: "aprender",
+    };
+  }
+
+  if (summary.dominados === summary.total && summary.total > 0) {
+    return {
+      key: "review_lesson",
+      label: "Repasar lección",
+      helper: "La lección va muy bien. Haz un repaso corto.",
+      targetMode: "practicar",
+    };
+  }
+
+  return {
+    key: "review_lesson",
+    label: "Seguir practicando",
+    helper: `${summary.aprendiendo + summary.en_repaso} siguen en progreso.`,
+    targetMode: "practicar",
+  };
 }
