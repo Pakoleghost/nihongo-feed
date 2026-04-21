@@ -2,11 +2,11 @@
 
 import VocabularioFlashcardsScreen from "@/components/practicar/VocabularioFlashcardsScreen";
 
-export default function FlashcardsPage() {
+export default function VocabularioPage() {
   return (
     <VocabularioFlashcardsScreen
-      activityPath="/practicar/flashcards"
-      activityLabelPrefix="Flashcards"
+      activityPath="/practicar/vocabulario"
+      activityLabelPrefix="Vocabulario"
     />
   );
 }

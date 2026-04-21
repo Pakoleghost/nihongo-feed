@@ -16,8 +16,8 @@ const CARDS = [
     shadow: "0 8px 28px rgba(26,26,46,0.35)",
   },
   {
-    href: "/practicar/flashcards",
-    title: "Flashcards",
+    href: "/practicar/vocabulario",
+    title: "Vocabulario",
     sub: "Vocabulario por lección",
     bg: "#E63946",
     color: "#FFFFFF",
@@ -25,9 +25,9 @@ const CARDS = [
     shadow: "0 8px 28px rgba(230,57,70,0.28)",
   },
   {
-    href: "/practicar/vocab",
-    title: "Vocab y Kanji",
-    sub: "Quiz por lección",
+    href: "/practicar/kanji",
+    title: "Kanji",
+    sub: "Kanji por lección",
     bg: "#4ECDC4",
     color: "#1A1A2E",
     subColor: "rgba(26,26,46,0.65)",
