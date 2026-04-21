@@ -1,12 +1,7 @@
 "use client";
 
-import VocabularioFlashcardsScreen from "@/components/practicar/VocabularioFlashcardsScreen";
+import VocabularioModuleScreen from "@/components/practicar/VocabularioModuleScreen";
 
 export default function VocabularioPage() {
-  return (
-    <VocabularioFlashcardsScreen
-      activityPath="/practicar/vocabulario"
-      activityLabelPrefix="Vocabulario"
-    />
-  );
+  return <VocabularioModuleScreen />;
 }
