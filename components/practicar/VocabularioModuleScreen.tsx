@@ -74,20 +74,44 @@ function toQuizItems(items: GenkiVocabItem[]): QuizItem[] {
   }));
 }
 
-function getOptions(correct: QuizItem, pool: QuizItem[]): string[] {
+function hasKanji(item: GenkiVocabItem) {
+  return item.kanji.trim().length > 0;
+}
+
+function getMeaningShape(meaning: string) {
+  if (meaning.includes(";")) return "multi";
+  if (meaning.includes("(") || meaning.includes("[")) return "annotated";
+  return "simple";
+}
+
+function getOptions(correct: QuizItem, source: GenkiVocabItem, lessonPool: GenkiVocabItem[], allPool: GenkiVocabItem[]): string[] {
   const correctEs = correct.es;
-  const others = [...new Set(pool.map((item) => item.es).filter((es) => es !== correctEs))];
-  const supplemented =
-    others.length < 3
-      ? [
-          ...new Set(
-            toQuizItems(Object.values(GENKI_VOCAB_BY_LESSON).flat())
-              .map((item) => item.es)
-              .filter((es) => es !== correctEs),
-          ),
-        ]
-      : others;
-  const wrong3 = shuffle(supplemented).slice(0, 3);
+  const correctHasKanji = hasKanji(source);
+  const correctMeaningShape = getMeaningShape(correctEs);
+  const seen = new Set<string>([correctEs]);
+
+  const rankedCandidates = [...lessonPool, ...allPool]
+    .filter((candidate) => candidate !== source)
+    .map((candidate) => {
+      const candidateMeaning = candidate.es;
+      return {
+        meaning: candidateMeaning,
+        rank:
+          (lessonPool.includes(candidate) ? 0 : 10) +
+          (hasKanji(candidate) === correctHasKanji ? 0 : 2) +
+          (getMeaningShape(candidateMeaning) === correctMeaningShape ? 0 : 1),
+      };
+    })
+    .sort((a, b) => a.rank - b.rank);
+
+  const wrong3: string[] = [];
+  for (const candidate of rankedCandidates) {
+    if (seen.has(candidate.meaning)) continue;
+    seen.add(candidate.meaning);
+    wrong3.push(candidate.meaning);
+    if (wrong3.length === 3) break;
+  }
+
   return shuffle([correctEs, ...wrong3]);
 }
 
@@ -165,6 +189,7 @@ export default function VocabularioModuleScreen() {
   const [practiceResult, setPracticeResult] = useState<PracticeSessionResult | null>(null);
 
   const lessonItems = useMemo(() => GENKI_VOCAB_BY_LESSON[lesson] ?? [], [lesson]);
+  const allVocabItems = useMemo(() => Object.values(GENKI_VOCAB_BY_LESSON).flat(), []);
   const lessonTitle = LESSON_LABELS[lesson] ?? `Lección ${lesson}`;
   const lessonSummary = useMemo(
     () => getVocabLessonSummary(lesson, lessonItems, progress),
@@ -223,7 +248,6 @@ export default function VocabularioModuleScreen() {
   }, [mode, lesson, currentCard]);
 
   useEffect(() => {
-    const items = toQuizItems(lessonItems);
     const shuffled = shuffle(lessonItems);
     setQuestions(
       shuffled.map((source) => {
@@ -232,7 +256,7 @@ export default function VocabularioModuleScreen() {
           reading: source.hira,
           es: source.es,
         };
-        return { item, source, options: getOptions(item, items) };
+        return { item, source, options: getOptions(item, source, lessonItems, allVocabItems) };
       }),
     );
     setCurrentQuestionIndex(0);
@@ -241,7 +265,7 @@ export default function VocabularioModuleScreen() {
     setCorrect(0);
     setActivePracticeSession(null);
     setPracticeResult(null);
-  }, [lessonItems]);
+  }, [allVocabItems, lessonItems]);
 
   function handleKnow(knows: boolean) {
     if (cardsDone) return;
@@ -265,7 +289,6 @@ export default function VocabularioModuleScreen() {
   }
 
   function restartPracticeSessionWithContext(sessionContext: PracticeSessionContext) {
-    const items = toQuizItems(lessonItems);
     const shuffled = sortLessonItemsForPractice(lessonItems, progress, lesson, sessionContext.sortKey);
     setQuestions(
       shuffled.map((source) => {
@@ -274,7 +297,7 @@ export default function VocabularioModuleScreen() {
           reading: source.hira,
           es: source.es,
         };
-        return { item, source, options: getOptions(item, items) };
+        return { item, source, options: getOptions(item, source, lessonItems, allVocabItems) };
       }),
     );
     setCurrentQuestionIndex(0);
@@ -1085,15 +1108,49 @@ export default function VocabularioModuleScreen() {
                 style={{
                   background: "#FFFFFF",
                   borderRadius: "24px",
-                  padding: "32px 24px",
+                  padding: "28px 24px",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
                   boxShadow: "0 4px 20px rgba(26,26,46,0.08)",
                   minHeight: "220px",
+                  textAlign: "center",
                 }}
               >
+                <div
+                  style={{
+                    alignSelf: "stretch",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "16px",
+                    gap: "12px",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: 800,
+                      letterSpacing: "0.08em",
+                      color: "#9CA3AF",
+                    }}
+                  >
+                    PALABRA
+                  </span>
+                  <span
+                    style={{
+                      background: currentQuestion.source.kanji ? "#FFF8E7" : "#F5FCFB",
+                      color: "#6B7280",
+                      borderRadius: "999px",
+                      padding: "7px 10px",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {currentQuestion.source.kanji ? "Con kanji" : "Solo en kana"}
+                  </span>
+                </div>
                 <p
                   style={{
                     fontSize: "64px",
@@ -1108,17 +1165,49 @@ export default function VocabularioModuleScreen() {
                   {currentQuestion.item.display}
                 </p>
                 {currentQuestion.item.reading !== currentQuestion.item.display && (
-                  <p
+                  <div
                     style={{
-                      fontSize: "18px",
-                      color: "#9CA3AF",
-                      margin: "10px 0 0",
-                      fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                      marginTop: "16px",
+                      background: "#FFF8E7",
+                      borderRadius: "18px",
+                      padding: "12px 16px",
+                      minWidth: "min(100%, 240px)",
                     }}
                   >
-                    {currentQuestion.item.reading}
-                  </p>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: "11px",
+                        fontWeight: 800,
+                        letterSpacing: "0.08em",
+                        color: "#9CA3AF",
+                      }}
+                    >
+                      LECTURA
+                    </p>
+                    <p
+                      style={{
+                        margin: "6px 0 0",
+                        fontSize: "22px",
+                        fontWeight: 800,
+                        color: "#1A1A2E",
+                        fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                      }}
+                    >
+                      {currentQuestion.item.reading}
+                    </p>
+                  </div>
                 )}
+                <p
+                  style={{
+                    margin: "16px 0 0",
+                    fontSize: "13px",
+                    color: "#9CA3AF",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Elige el significado más preciso para esta palabra.
+                </p>
               </div>
 
               <div
@@ -1129,7 +1218,7 @@ export default function VocabularioModuleScreen() {
                   paddingTop: "16px",
                 }}
               >
-                {currentQuestion.options.map((option) => {
+                {currentQuestion.options.map((option, index) => {
                   const isSelected = selectedOption === option;
                   const isCorrectOption = option === currentQuestion.item.es;
                   let background = "#FFFFFF";
@@ -1151,20 +1240,44 @@ export default function VocabularioModuleScreen() {
                       onClick={() => handleOption(option)}
                       disabled={quizPhase === "feedback"}
                       style={{
-                        padding: "18px 12px",
+                        padding: "16px 14px",
                         borderRadius: "18px",
                         border: "none",
                         cursor: quizPhase === "feedback" ? "default" : "pointer",
                         background,
                         color,
-                        fontSize: "16px",
+                        fontSize: "15px",
                         fontWeight: 700,
                         boxShadow: "0 4px 14px rgba(26,26,46,0.08)",
                         transition: "background 0.15s",
-                        textAlign: "center",
+                        textAlign: "left",
+                        minHeight: "88px",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: "12px",
                       }}
                     >
-                      {option}
+                      <span
+                        style={{
+                          width: "26px",
+                          height: "26px",
+                          borderRadius: "50%",
+                          background:
+                            quizPhase === "feedback" && isCorrectOption
+                              ? "rgba(255,255,255,0.22)"
+                              : "rgba(26,26,46,0.08)",
+                          color,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "13px",
+                          fontWeight: 800,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {String.fromCharCode(65 + index)}
+                      </span>
+                      <span style={{ lineHeight: 1.35 }}>{option}</span>
                     </button>
                   );
                 })}
