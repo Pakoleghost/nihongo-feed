@@ -5058,7 +5058,7 @@ function getStudyActivityLabel(tool: StudyActivityTool) {
   if (tool === "kana") return "Kana Sprint";
   if (tool === "sprint") return "Vocab + Kanji Sprint";
   if (tool === "flashcards") return "Flashcards";
-  return "Repaso mixto";
+  return "Práctica";
 }
 
 function formatStudyActivityTime(iso: string) {
@@ -5865,7 +5865,7 @@ function StudyContent() {
   const recordStudyActivity = (tool: StudyActivityTool, detail?: string) => {
     const occurredAt = new Date().toISOString();
     const label = getStudyActivityLabel(tool);
-    const href = tool === "exam" ? "/study?view=exam" : `/study?view=${tool}`;
+    const href = tool === "exam" ? "/study?view=practice" : `/study?view=${tool}`;
     setStudyActivity((prev) => [
       { id: `${tool}-${Date.now()}`, tool, label, href, detail, occurredAt },
       ...prev,
@@ -6884,7 +6884,6 @@ function StudyContent() {
     { key: "kana", href: "/study?view=kana", title: "Kana Sprint", accent: "var(--color-accent)", surface: "var(--color-accent-soft)" },
     { key: "sprint", href: "/study?view=sprint", title: "Vocab + Kanji", accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
     { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", accent: "#F4A261", surface: "rgba(244, 162, 97, 0.12)" },
-    { key: "exam", href: "/study?view=exam", title: "Repaso mixto", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
   ];
   const renderToolPill = (tool: { key: string; href: string; title: string; accent: string; surface: string }) => {
     const selected = activeTab === tool.key;

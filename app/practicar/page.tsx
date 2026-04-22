@@ -33,15 +33,6 @@ const CARDS = [
     subColor: "rgba(26,26,46,0.65)",
     shadow: "0 8px 28px rgba(78,205,196,0.28)",
   },
-  {
-    href: "/practicar/repaso",
-    title: "Repaso mixto",
-    sub: "Banco de preguntas por lección",
-    bg: "#FFFFFF",
-    color: "#1A1A2E",
-    subColor: "#9CA3AF",
-    shadow: "0 4px 20px rgba(26,26,46,0.09)",
-  },
 ] as const;
 
 export default function PracticarPage() {

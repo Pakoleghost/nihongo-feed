@@ -288,7 +288,6 @@ export default function InicioPage() {
         {[
           { label: "Kana Sprint", href: "/practicar/sprint" },
           { label: "Vocabulario", href: "/practicar/vocabulario" },
-          { label: "Repaso", href: "/practicar/repaso" },
         ].map(({ label, href }) => (
           <Link
             key={href}
