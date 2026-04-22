@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import type { GenkiVocabItem } from "@/lib/genki-vocab-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
@@ -22,6 +22,7 @@ import {
   isPracticeDue,
   type PracticeNextAction,
   type PracticeSessionContext,
+  type PracticeSessionSortKey,
 } from "@/lib/practice-srs";
 
 const LESSONS = Object.keys(GENKI_VOCAB_BY_LESSON)
@@ -168,6 +169,7 @@ function sortLessonItemsForPractice(
 
 export default function VocabularioModuleScreen() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const learnExposureIdsRef = useRef<Set<string>>(new Set());
   const [lesson, setLesson] = useState(1);
   const [mode, setMode] = useState<Mode>("aprender");
@@ -219,6 +221,12 @@ export default function VocabularioModuleScreen() {
     setStreak(getStreak());
     setProgress(loadVocabProgress(USER_KEY));
   }, []);
+
+  useEffect(() => {
+    const lessonParam = Number(searchParams.get("lesson"));
+    if (!Number.isFinite(lessonParam) || !LESSONS.includes(lessonParam) || lessonParam === lesson) return;
+    setLesson(lessonParam);
+  }, [lesson, searchParams]);
 
   useEffect(() => {
     const modeLabel = mode === "aprender" ? "Aprender" : "Practicar";
@@ -312,6 +320,12 @@ export default function VocabularioModuleScreen() {
     restartPracticeSessionWithContext(practiceSessionContext);
   }
 
+  function goToPracticeSession(sortKey?: PracticeSessionSortKey) {
+    const params = new URLSearchParams({ lesson: String(lesson) });
+    if (sortKey) params.set("focus", sortKey);
+    router.push(`/practicar/vocabulario/practicar?${params.toString()}`);
+  }
+
   function handleNextAction() {
     if (nextAction.targetMode === "aprender") {
       setMode("aprender");
@@ -321,8 +335,7 @@ export default function VocabularioModuleScreen() {
       return;
     }
 
-    setMode("practicar");
-    restartPracticeSessionWithContext(practiceSessionContext);
+    goToPracticeSession(practiceSessionContext.sortKey);
   }
 
   function handleOption(option: string) {
@@ -521,8 +534,7 @@ export default function VocabularioModuleScreen() {
                 key={value}
                 onClick={() => {
                   if (value === "practicar") {
-                    setMode("practicar");
-                    restartPracticeSessionWithContext(practiceSessionContext);
+                    goToPracticeSession(practiceSessionContext.sortKey);
                     return;
                   }
                   setMode("aprender");
@@ -710,8 +722,7 @@ export default function VocabularioModuleScreen() {
                 </button>
                 <button
                   onClick={() => {
-                    setMode("practicar");
-                    restartPracticeSessionWithContext(practiceSessionContext);
+                    goToPracticeSession(practiceSessionContext.sortKey);
                   }}
                   style={{
                     padding: "14px 18px",

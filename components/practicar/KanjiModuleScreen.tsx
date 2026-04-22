@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 import type { GenkiKanjiItem } from "@/lib/genki-kanji-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
@@ -22,6 +22,7 @@ import {
   isPracticeDue,
   type PracticeNextAction,
   type PracticeSessionContext,
+  type PracticeSessionSortKey,
 } from "@/lib/practice-srs";
 
 const LESSONS = Object.keys(GENKI_KANJI_BY_LESSON)
@@ -166,6 +167,7 @@ function sortLessonItemsForPractice(
 
 export default function KanjiModuleScreen() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const learnExposureIdsRef = useRef<Set<string>>(new Set());
   const [lesson, setLesson] = useState(LESSONS[0] ?? 3);
   const [mode, setMode] = useState<Mode>("aprender");
@@ -216,6 +218,12 @@ export default function KanjiModuleScreen() {
   }, []);
 
   useEffect(() => {
+    const lessonParam = Number(searchParams.get("lesson"));
+    if (!Number.isFinite(lessonParam) || !LESSONS.includes(lessonParam) || lessonParam === lesson) return;
+    setLesson(lessonParam);
+  }, [lesson, searchParams]);
+
+  useEffect(() => {
     const modeLabel = mode === "aprender" ? "Aprender" : "Practicar";
     setLastActivity(`Kanji · ${modeLabel} · L${lesson}`, "/practicar/kanji");
   }, [lesson, mode]);
@@ -263,6 +271,12 @@ export default function KanjiModuleScreen() {
     restartPracticeSessionWithContext(practiceSessionContext);
   }
 
+  function goToPracticeSession(sortKey?: PracticeSessionSortKey) {
+    const params = new URLSearchParams({ lesson: String(lesson) });
+    if (sortKey) params.set("focus", sortKey);
+    router.push(`/practicar/kanji/practicar?${params.toString()}`);
+  }
+
   function handleNextAction() {
     if (nextAction.targetMode === "aprender") {
       setMode("aprender");
@@ -271,8 +285,7 @@ export default function KanjiModuleScreen() {
       return;
     }
 
-    setMode("practicar");
-    restartPracticeSessionWithContext(practiceSessionContext);
+    goToPracticeSession(practiceSessionContext.sortKey);
   }
 
   function handleOption(option: string) {
@@ -472,8 +485,7 @@ export default function KanjiModuleScreen() {
                 key={value}
                 onClick={() => {
                   if (value === "practicar") {
-                    setMode("practicar");
-                    restartPracticeSessionWithContext(practiceSessionContext);
+                    goToPracticeSession(practiceSessionContext.sortKey);
                     return;
                   }
                   setMode("aprender");

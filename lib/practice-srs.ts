@@ -61,6 +61,8 @@ export type PracticeSessionContext = {
   helper: string;
 };
 
+export type PracticeSessionSortKey = PracticeSessionContext["sortKey"];
+
 const MS = {
   m10: 10 * 60 * 1000,
   h4: 4 * 60 * 60 * 1000,
@@ -298,40 +300,56 @@ export function getPracticeNextAction(summary: PracticeProgressSummary): Practic
 
 export function getPracticeSessionContext(summary: PracticeProgressSummary): PracticeSessionContext {
   if (summary.pendientes > 0) {
-    return {
-      sortKey: "practice_due",
-      label: "Pendientes de la lección",
-      helper: "Estás repasando lo que ya toca reforzar.",
-    };
+    return getPracticeSessionContextForSortKey("practice_due");
   }
 
   if (summary.debiles > 0) {
-    return {
-      sortKey: "practice_weak",
-      label: "Reforzando débiles",
-      helper: "Esta sesión prioriza lo que más cuesta recordar.",
-    };
+    return getPracticeSessionContextForSortKey("practice_weak");
   }
 
   if (summary.solo_expuestos > 0) {
-    return {
-      sortKey: "practice_now",
-      label: "Practicando lo que ya viste",
-      helper: "Sirve para convertir exposición en práctica real.",
-    };
+    return getPracticeSessionContextForSortKey("practice_now");
   }
 
   if (summary.practicados > 0) {
-    return {
+    return getPracticeSessionContextForSortKey("review_lesson");
+  }
+
+  return getPracticeSessionContextForSortKey("review_lesson", {
+    label: "Práctica inicial de la lección",
+    helper: "Primera práctica objetiva de esta lección.",
+  });
+}
+
+export function getPracticeSessionContextForSortKey(
+  sortKey: PracticeSessionSortKey,
+  override?: Pick<PracticeSessionContext, "label" | "helper">,
+): PracticeSessionContext {
+  const base: Record<PracticeSessionSortKey, PracticeSessionContext> = {
+    practice_due: {
+      sortKey: "practice_due",
+      label: "Pendientes de la lección",
+      helper: "Estás repasando lo que ya toca reforzar.",
+    },
+    practice_weak: {
+      sortKey: "practice_weak",
+      label: "Reforzando débiles",
+      helper: "Esta sesión prioriza lo que más cuesta recordar.",
+    },
+    practice_now: {
+      sortKey: "practice_now",
+      label: "Practicando lo que ya viste",
+      helper: "Sirve para convertir exposición en práctica real.",
+    },
+    review_lesson: {
       sortKey: "review_lesson",
       label: "Repaso general de la lección",
       helper: "Combinando ítems en progreso de esta lección.",
-    };
-  }
+    },
+  };
 
   return {
-    sortKey: "review_lesson",
-    label: "Práctica inicial de la lección",
-    helper: "Primera práctica objetiva de esta lección.",
+    ...base[sortKey],
+    ...override,
   };
 }
