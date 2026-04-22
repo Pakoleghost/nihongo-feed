@@ -106,7 +106,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
       style={{
         minHeight: "100dvh",
         background: "#FFF8E7",
-        padding: "56px 24px 40px",
+        padding: "32px 16px 16px",
         fontFamily: "var(--font-study), var(--font-latin), sans-serif",
       }}
     >
@@ -115,7 +115,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: "16px",
+          gap: "12px",
         }}
       >
         <button
@@ -142,40 +142,39 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
           style={{
             borderRadius: "999px",
             background: "rgba(230,57,70,0.10)",
-            padding: "12px 22px",
+            padding: "8px 14px",
             display: "flex",
             alignItems: "center",
-            gap: "10px",
+            gap: "8px",
             color: "#E63946",
-            fontWeight: 800,
-            fontSize: "15px",
+            fontWeight: 700,
+            fontSize: "12px",
           }}
         >
-          <span style={{ fontSize: "22px", lineHeight: 1 }}>🔥</span>
+          <span style={{ fontSize: "16px", lineHeight: 1 }}>🔥</span>
           <span>Racha de {streak} días</span>
         </div>
       </div>
 
-      <div style={{ marginTop: "28px" }}>
+      <div style={{ marginTop: "12px" }}>
         <h1
           style={{
             margin: 0,
-            fontSize: "30px",
-            lineHeight: 1.05,
-            fontWeight: 800,
+            fontSize: "24px",
+            lineHeight: 1.1,
+            fontWeight: 700,
             color: "#1A1A2E",
-            letterSpacing: "-0.03em",
           }}
         >
           Vocabulario
         </h1>
         <p
           style={{
-            margin: "14px 0 0",
-            fontSize: "28px",
-            lineHeight: 1.15,
-            color: "#6B7280",
-            fontWeight: 500,
+            margin: "6px 0 0",
+            fontSize: "14px",
+            lineHeight: 1.35,
+            color: "#9CA3AF",
+            fontWeight: 400,
           }}
         >
           Vocabulario por lección.
@@ -184,9 +183,9 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
 
       <div
         style={{
-          marginTop: "28px",
+          marginTop: "12px",
           display: "flex",
-          gap: "14px",
+          gap: "8px",
           overflowX: "auto",
           scrollbarWidth: "none",
         }}
@@ -199,15 +198,15 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
               onClick={() => selectLesson(value)}
               style={{
                 flexShrink: 0,
-                minWidth: "96px",
-                height: "60px",
+                minWidth: "80px",
+                height: "48px",
                 borderRadius: "999px",
                 border: "none",
                 boxShadow: active ? "none" : "inset 0 0 0 2px rgba(26,26,46,0.05)",
                 background: active ? "#1A1A2E" : "#FFF5E6",
                 color: active ? "#FFFFFF" : "#1A1A2E",
-                fontWeight: 800,
-                fontSize: "22px",
+                fontWeight: 700,
+                fontSize: "16px",
                 cursor: "pointer",
               }}
             >
@@ -219,21 +218,21 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
 
       <div
         style={{
-          marginTop: "18px",
+          marginTop: "12px",
           background: "#FFFFFF",
           borderRadius: "2rem",
-          padding: "24px",
+          padding: "12px",
           boxShadow: "0 16px 40px rgba(26,26,46,0.08)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
           <div style={{ minWidth: 0, flex: 1 }}>
             <p
               style={{
                 margin: 0,
-                fontSize: "20px",
-                letterSpacing: "0.08em",
-                fontWeight: 800,
+                fontSize: "12px",
+                letterSpacing: "0.18em",
+                fontWeight: 600,
                 color: "#9CA3AF",
               }}
             >
@@ -241,10 +240,10 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
             </p>
             <p
               style={{
-                margin: "12px 0 0",
-                fontSize: "20px",
+                margin: "8px 0 0",
+                fontSize: "16px",
                 lineHeight: 1.2,
-                fontWeight: 800,
+                fontWeight: 700,
                 color: "#1A1A2E",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
@@ -260,9 +259,9 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
               borderRadius: "999px",
               background: "rgba(78,205,196,0.18)",
               color: "#1A1A2E",
-              padding: "14px 18px",
-              fontSize: "16px",
-              fontWeight: 800,
+              padding: "10px 14px",
+              fontSize: "12px",
+              fontWeight: 600,
               whiteSpace: "nowrap",
               flexShrink: 0,
             }}
@@ -273,17 +272,17 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
 
         <div
           style={{
-            marginTop: "24px",
+            marginTop: "8px",
             background: "#FFF5E6",
             borderRadius: "2rem",
-            padding: "18px",
+            padding: "8px",
           }}
         >
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-              gap: "16px",
+              gap: "8px",
             }}
           >
             {[
@@ -296,7 +295,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                 style={{
                   background: "#FFFFFF",
                   borderRadius: "2rem",
-                  padding: "18px 12px",
+                  padding: "8px",
                   boxShadow: "0 8px 24px rgba(26,26,46,0.06)",
                   textAlign: "center",
                 }}
@@ -304,9 +303,9 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                 <p
                   style={{
                     margin: 0,
-                    fontSize: "13px",
-                    fontWeight: 800,
-                    letterSpacing: "0.06em",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    letterSpacing: "0.04em",
                     color: "#9CA3AF",
                     textTransform: "uppercase",
                   }}
@@ -315,10 +314,10 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                 </p>
                 <p
                   style={{
-                    margin: "10px 0 0",
-                    fontSize: "32px",
+                    margin: "6px 0 0",
+                    fontSize: "20px",
                     lineHeight: 1,
-                    fontWeight: 800,
+                    fontWeight: 700,
                     color: stat.color,
                   }}
                 >
@@ -332,10 +331,10 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
 
       <div
         style={{
-          marginTop: "28px",
+          marginTop: "12px",
           background: "#FFFFFF",
           borderRadius: "2rem",
-          padding: "24px",
+          padding: "12px",
           boxShadow: "0 16px 40px rgba(26,26,46,0.08)",
         }}
       >
@@ -343,7 +342,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: "16px",
+            gap: "8px",
           }}
         >
           {actionCards.map((card) => (
@@ -353,8 +352,8 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                 background: card.background,
                 color: card.color,
                 borderRadius: "2rem",
-                padding: "24px",
-                minHeight: "220px",
+                padding: "12px",
+                minHeight: "170px",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
@@ -364,10 +363,9 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                 <p
                   style={{
                     margin: 0,
-                    fontSize: "34px",
+                    fontSize: "18px",
                     lineHeight: 1,
-                    fontWeight: 800,
-                    letterSpacing: "-0.05em",
+                    fontWeight: 700,
                     color: card.color,
                   }}
                 >
@@ -375,12 +373,12 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                 </p>
                 <p
                   style={{
-                    margin: "16px 0 0",
-                    fontSize: "18px",
+                    margin: "8px 0 0",
+                    fontSize: "12px",
                     lineHeight: 1.2,
-                    fontWeight: 500,
+                    fontWeight: 400,
                     color: card.color,
-                    opacity: 0.92,
+                    opacity: 0.8,
                     maxWidth: "100%",
                   }}
                 >
@@ -396,9 +394,9 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                   borderRadius: "3rem",
                   background: card.buttonBackground,
                   color: card.buttonColor,
-                  padding: "16px 24px",
-                  fontWeight: 800,
-                  fontSize: "20px",
+                  padding: "6px 16px",
+                  fontWeight: 600,
+                  fontSize: "12px",
                   cursor: "pointer",
                 }}
               >
