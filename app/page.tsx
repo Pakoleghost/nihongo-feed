@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { markActiveToday, getStreak, getLastActivity } from "@/lib/streak";
-import { getDueKanaCount } from "@/lib/kana-due";
+import { markActiveToday, getStreak } from "@/lib/streak";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
+import { getDailyPhrase } from "@/lib/daily-phrases";
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -71,21 +71,17 @@ function HomeSectionTitle({ children }: { children: React.ReactNode }) {
 
 export default function InicioPage() {
   const [streak, setStreak] = useState(0);
-  const [dueCount, setDueCount] = useState(0);
-  const [lastActivity, setLastActivityState] = useState<{ label: string; path: string } | null>(null);
   const [profile, setProfile] = useState<MiniProfile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const phrase = getDailyPhrase();
 
   useEffect(() => {
     markActiveToday();
     setStreak(getStreak());
-    setLastActivityState(getLastActivity());
 
     async function init() {
       const { data } = await supabase.auth.getUser();
       const uid = data.user?.id;
-      const userKey = uid ?? "anon";
-      setDueCount(getDueKanaCount(userKey));
 
       if (uid) {
         const { data: p } = await supabase
@@ -101,34 +97,6 @@ export default function InicioPage() {
     }
     init();
   }, []);
-
-  const primaryAction = useMemo(() => {
-    if (dueCount > 0) {
-      return {
-        eyebrow: "Ahora mismo",
-        title: `${dueCount} kana pendientes`,
-        body: "Haz tu repaso de hoy antes de seguir con otra cosa.",
-        href: "/kana/quiz?mode=smart&difficulty=automatico&count=20",
-        buttonLabel: "Repasar kana",
-        accent: "#E63946",
-        surface: "#1A1A2E",
-        bodyColor: "rgba(255,255,255,0.78)",
-        pill: `${dueCount} pendientes`,
-      };
-    }
-
-    return {
-      eyebrow: "Sigue desde aquí",
-      title: lastActivity?.label ?? "Empieza a practicar",
-      body: lastActivity ? "Retoma tu última actividad sin perder el hilo." : "Kana, vocabulario y kanji en un solo lugar.",
-      href: lastActivity?.path ?? "/kana",
-      buttonLabel: lastActivity ? "Continuar" : "Empezar",
-      accent: "#4ECDC4",
-      surface: "#1A1A2E",
-      bodyColor: "rgba(255,255,255,0.78)",
-      pill: lastActivity ? "Última actividad" : "Listo para empezar",
-    };
-  }, [dueCount, lastActivity]);
 
   const destinations = [
     {
@@ -222,7 +190,7 @@ export default function InicioPage() {
       <div
         style={{
           marginTop: "22px",
-          background: primaryAction.surface,
+          background: "#1A1A2E",
           borderRadius: "28px",
           padding: "22px",
           boxShadow: "0 18px 44px rgba(26,26,46,0.14)",
@@ -230,10 +198,10 @@ export default function InicioPage() {
       >
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "14px" }}>
           <div style={{ minWidth: 0 }}>
-            <HomeSectionTitle>{primaryAction.eyebrow}</HomeSectionTitle>
+            <HomeSectionTitle>Frase del día</HomeSectionTitle>
             <p
               style={{
-                fontSize: "28px",
+                fontSize: "30px",
                 fontWeight: 800,
                 color: "#FFFFFF",
                 margin: "10px 0 0",
@@ -241,25 +209,48 @@ export default function InicioPage() {
                 letterSpacing: "-0.04em",
               }}
             >
-              {primaryAction.title}
+              {phrase.japanese}
+            </p>
+            <p
+              style={{
+                fontSize: "15px",
+                color: "rgba(78,205,196,0.92)",
+                margin: "10px 0 0",
+                fontWeight: 700,
+                letterSpacing: "0.01em",
+              }}
+            >
+              {phrase.reading}
             </p>
             <p
               style={{
                 fontSize: "14px",
-                color: primaryAction.bodyColor,
-                margin: "10px 0 0",
+                color: "rgba(255,255,255,0.78)",
+                margin: "12px 0 0",
                 lineHeight: 1.45,
                 maxWidth: 320,
               }}
             >
-              {primaryAction.body}
+              {phrase.meaning_es}
             </p>
+            {phrase.note ? (
+              <p
+                style={{
+                  fontSize: "12px",
+                  color: "rgba(255,255,255,0.56)",
+                  margin: "8px 0 0",
+                  lineHeight: 1.4,
+                }}
+              >
+                {phrase.note}
+              </p>
+            ) : null}
           </div>
 
           <div
             style={{
-              background: "rgba(255,255,255,0.10)",
-              color: "#FFFFFF",
+              background: "rgba(78,205,196,0.14)",
+              color: "#4ECDC4",
               borderRadius: "999px",
               padding: "8px 12px",
               fontSize: "12px",
@@ -268,30 +259,9 @@ export default function InicioPage() {
               flexShrink: 0,
             }}
           >
-            {primaryAction.pill}
+            Hoy
           </div>
         </div>
-
-        <Link
-          href={primaryAction.href}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "10px",
-            background: primaryAction.accent,
-            color: primaryAction.accent === "#E63946" ? "#FFFFFF" : "#1A1A2E",
-            borderRadius: "999px",
-            padding: "14px 18px",
-            fontWeight: 700,
-            fontSize: "15px",
-            textDecoration: "none",
-            marginTop: "18px",
-          }}
-        >
-          <span>{primaryAction.buttonLabel}</span>
-          <span>→</span>
-        </Link>
       </div>
 
       <div style={{ marginTop: "24px" }}>
