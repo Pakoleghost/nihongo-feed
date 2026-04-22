@@ -355,7 +355,7 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
                 color: card.color,
                 borderRadius: "2rem",
                 padding: "12px",
-                minHeight: "170px",
+                height: "120px",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
