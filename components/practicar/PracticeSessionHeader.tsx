@@ -35,7 +35,6 @@ export default function PracticeSessionHeader({
     <>
       <div
         style={{
-          paddingTop: "28px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",

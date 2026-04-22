@@ -25,6 +25,7 @@ import {
   type PracticeSessionSortKey,
 } from "@/lib/practice-srs";
 import PracticeSessionHeader from "@/components/practicar/PracticeSessionHeader";
+import PracticeSessionLayout from "@/components/practicar/PracticeSessionLayout";
 
 const USER_KEY = "anon";
 
@@ -251,7 +252,7 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
 
   if (lessonItems.length === 0) {
     return (
-      <div style={{ background: "#FFF8E7", minHeight: "100vh", padding: "24px 20px 40px" }}>
+      <PracticeSessionLayout>
         <PracticeSessionHeader
           moduleName="Vocabulario"
           lesson={lesson}
@@ -267,20 +268,12 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
           accentSurface="rgba(78,205,196,0.14)"
           onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
         />
-      </div>
+      </PracticeSessionLayout>
     );
   }
 
   return (
-    <div
-      style={{
-        background: "#FFF8E7",
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        padding: "24px 20px 40px",
-      }}
-    >
+    <PracticeSessionLayout>
       <PracticeSessionHeader
         moduleName="Vocabulario"
         lesson={lesson}
@@ -297,7 +290,7 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
         onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
       />
 
-      <div style={{ marginTop: "18px", flex: 1, display: "flex", flexDirection: "column" }}>
+      <div style={{ marginTop: "18px", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
         {practiceResult ? (
           <div
             style={{
@@ -308,6 +301,8 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
               display: "flex",
               flexDirection: "column",
               gap: "14px",
+              flex: 1,
+              justifyContent: "center",
             }}
           >
             <div>
@@ -396,7 +391,7 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
                 alignItems: "center",
                 justifyContent: "center",
                 boxShadow: "0 4px 20px rgba(26,26,46,0.08)",
-                minHeight: "260px",
+                minHeight: "min(36dvh, 340px)",
                 textAlign: "center",
               }}
             >
@@ -476,6 +471,7 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
                 gridTemplateColumns: "1fr 1fr",
                 gap: "12px",
                 paddingTop: "16px",
+                paddingBottom: "4px",
               }}
             >
               {currentQuestion.options.map((option, index) => {
@@ -545,6 +541,6 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
           </>
         ) : null}
       </div>
-    </div>
+    </PracticeSessionLayout>
   );
 }
