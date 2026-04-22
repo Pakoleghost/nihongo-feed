@@ -55,6 +55,12 @@ export type PracticeNextAction = {
   targetMode: "aprender" | "practicar";
 };
 
+export type PracticeSessionContext = {
+  sortKey: "practice_due" | "practice_weak" | "practice_now" | "review_lesson";
+  label: string;
+  helper: string;
+};
+
 const MS = {
   m10: 10 * 60 * 1000,
   h4: 4 * 60 * 60 * 1000,
@@ -287,5 +293,45 @@ export function getPracticeNextAction(summary: PracticeProgressSummary): Practic
     label: "Seguir practicando",
     helper: `${summary.aprendiendo + summary.en_repaso} siguen en progreso.`,
     targetMode: "practicar",
+  };
+}
+
+export function getPracticeSessionContext(summary: PracticeProgressSummary): PracticeSessionContext {
+  if (summary.pendientes > 0) {
+    return {
+      sortKey: "practice_due",
+      label: "Pendientes de la lección",
+      helper: "Estás repasando lo que ya toca reforzar.",
+    };
+  }
+
+  if (summary.debiles > 0) {
+    return {
+      sortKey: "practice_weak",
+      label: "Reforzando débiles",
+      helper: "Esta sesión prioriza lo que más cuesta recordar.",
+    };
+  }
+
+  if (summary.solo_expuestos > 0) {
+    return {
+      sortKey: "practice_now",
+      label: "Practicando lo que ya viste",
+      helper: "Sirve para convertir exposición en práctica real.",
+    };
+  }
+
+  if (summary.practicados > 0) {
+    return {
+      sortKey: "review_lesson",
+      label: "Repaso general de la lección",
+      helper: "Combinando ítems en progreso de esta lección.",
+    };
+  }
+
+  return {
+    sortKey: "review_lesson",
+    label: "Práctica inicial de la lección",
+    helper: "Primera práctica objetiva de esta lección.",
   };
 }

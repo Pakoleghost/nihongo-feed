@@ -16,10 +16,12 @@ import {
 } from "@/lib/kanji-progress";
 import {
   getPracticeNextAction,
+  getPracticeSessionContext,
   isPracticeDifficult,
   isPracticeDominated,
   isPracticeDue,
   type PracticeNextAction,
+  type PracticeSessionContext,
 } from "@/lib/practice-srs";
 
 const LESSONS = Object.keys(GENKI_KANJI_BY_LESSON)
@@ -44,6 +46,13 @@ type QuizPhase = "question" | "feedback";
 type ReadingQuestion = {
   item: GenkiKanjiItem;
   options: string[];
+};
+type PracticeSessionResult = {
+  practiced: number;
+  correct: number;
+  incorrect: number;
+  label: string;
+  helper: string;
 };
 
 const USER_KEY = "anon";
@@ -142,6 +151,8 @@ export default function KanjiModuleScreen() {
   const [quizPhase, setQuizPhase] = useState<QuizPhase>("question");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
+  const [activePracticeSession, setActivePracticeSession] = useState<PracticeSessionContext | null>(null);
+  const [practiceResult, setPracticeResult] = useState<PracticeSessionResult | null>(null);
 
   const lessonItems = useMemo(() => GENKI_KANJI_BY_LESSON[lesson] ?? [], [lesson]);
   const lessonTitle = LESSON_LABELS[lesson] ?? `Lección ${lesson}`;
@@ -150,6 +161,10 @@ export default function KanjiModuleScreen() {
     [lesson, lessonItems, progress],
   );
   const nextAction = useMemo(() => getPracticeNextAction(lessonSummary), [lessonSummary]);
+  const practiceSessionContext = useMemo(
+    () => getPracticeSessionContext(lessonSummary),
+    [lessonSummary],
+  );
   const currentStudyItem = studyItems[currentStudyIndex];
   const currentQuestion = questions[currentQuestionIndex];
   const studyProgressPct = studyItems.length > 0 ? (currentStudyIndex / studyItems.length) * 100 : 0;
@@ -200,15 +215,23 @@ export default function KanjiModuleScreen() {
     setQuizPhase("question");
     setSelectedOption(null);
     setCorrectCount(0);
+    setActivePracticeSession(null);
+    setPracticeResult(null);
   }, [lessonItems]);
 
-  function restartPracticeSession() {
-    const shuffled = sortLessonItemsForPractice(lessonItems, progress, lesson, nextAction.key);
+  function restartPracticeSessionWithContext(sessionContext: PracticeSessionContext) {
+    const shuffled = sortLessonItemsForPractice(lessonItems, progress, lesson, sessionContext.sortKey);
     setQuestions(shuffled.map((item) => ({ item, options: getReadingOptions(item, lessonItems) })));
     setCurrentQuestionIndex(0);
     setQuizPhase("question");
     setSelectedOption(null);
     setCorrectCount(0);
+    setActivePracticeSession(sessionContext);
+    setPracticeResult(null);
+  }
+
+  function restartPracticeSession() {
+    restartPracticeSessionWithContext(practiceSessionContext);
   }
 
   function handleNextAction() {
@@ -220,12 +243,7 @@ export default function KanjiModuleScreen() {
     }
 
     setMode("practicar");
-    const sorted = sortLessonItemsForPractice(lessonItems, progress, lesson, nextAction.key);
-    setQuestions(sorted.map((item) => ({ item, options: getReadingOptions(item, lessonItems) })));
-    setCurrentQuestionIndex(0);
-    setQuizPhase("question");
-    setSelectedOption(null);
-    setCorrectCount(0);
+    restartPracticeSessionWithContext(practiceSessionContext);
   }
 
   function handleOption(option: string) {
@@ -233,6 +251,7 @@ export default function KanjiModuleScreen() {
     setSelectedOption(option);
     setQuizPhase("feedback");
     const isCorrect = option === currentQuestion.item.hira;
+    const nextCorrectCount = correctCount + (isCorrect ? 1 : 0);
     if (isCorrect) setCorrectCount((value) => value + 1);
     setProgress((previous) => {
       const next = recordKanjiResult(previous, lesson, currentQuestion.item, isCorrect ? "correct" : "wrong");
@@ -243,7 +262,17 @@ export default function KanjiModuleScreen() {
 
     setTimeout(() => {
       if (currentQuestionIndex + 1 >= questions.length) {
-        restartPracticeSession();
+        const sessionContext = activePracticeSession ?? practiceSessionContext;
+        setPracticeResult({
+          practiced: questions.length,
+          correct: nextCorrectCount,
+          incorrect: Math.max(questions.length - nextCorrectCount, 0),
+          label: sessionContext.label,
+          helper: sessionContext.helper,
+        });
+        setCurrentQuestionIndex(questions.length);
+        setQuizPhase("question");
+        setSelectedOption(null);
       } else {
         setCurrentQuestionIndex((value) => value + 1);
         setQuizPhase("question");
@@ -412,7 +441,15 @@ export default function KanjiModuleScreen() {
             return (
               <button
                 key={value}
-                onClick={() => setMode(value)}
+                onClick={() => {
+                  if (value === "practicar") {
+                    setMode("practicar");
+                    restartPracticeSessionWithContext(practiceSessionContext);
+                    return;
+                  }
+                  setMode("aprender");
+                  setPracticeResult(null);
+                }}
                 style={{
                   border: "none",
                   cursor: "pointer",
@@ -738,59 +775,167 @@ export default function KanjiModuleScreen() {
                 Lee la palabra con kanji y elige su lectura correcta.
               </p>
             </div>
+            {!practiceResult && (
+              <div
+                style={{
+                  background: "#FFFFFF",
+                  borderRadius: "999px",
+                  padding: "8px 12px",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#1A1A2E",
+                  boxShadow: "0 2px 10px rgba(26,26,46,0.06)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {Math.min(currentQuestionIndex + 1, questions.length || 0)}/{questions.length || 0}
+              </div>
+            )}
+          </div>
+
+          {practiceResult ? (
             <div
               style={{
                 background: "#FFFFFF",
-                borderRadius: "999px",
-                padding: "8px 12px",
-                fontSize: "13px",
-                fontWeight: 700,
-                color: "#1A1A2E",
-                boxShadow: "0 2px 10px rgba(26,26,46,0.06)",
-                whiteSpace: "nowrap",
+                borderRadius: "24px",
+                padding: "28px 24px",
+                boxShadow: "0 8px 28px rgba(26,26,46,0.08)",
+                display: "flex",
+                flexDirection: "column",
+                gap: "14px",
               }}
             >
-              {currentQuestionIndex + 1}/{questions.length || 0}
+              <div>
+                <p style={{ margin: 0, fontSize: "24px", fontWeight: 800, color: "#1A1A2E" }}>Sesión completada</p>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    marginTop: "10px",
+                    background: "#F5FCFB",
+                    color: "#0F766E",
+                    borderRadius: "999px",
+                    padding: "8px 12px",
+                    fontSize: "13px",
+                    fontWeight: 800,
+                  }}
+                >
+                  {practiceResult.label} · L{lesson}
+                </div>
+              </div>
+              <p style={{ margin: 0, fontSize: "15px", color: "#1A1A2E", lineHeight: 1.45 }}>
+                Practicaste {practiceResult.practiced} · {practiceResult.correct} correctas ·{" "}
+                {practiceResult.incorrect} incorrectas
+              </p>
+              <p style={{ margin: 0, fontSize: "14px", color: "#6B7280", lineHeight: 1.45 }}>
+                {practiceResult.helper}
+              </p>
+              <div
+                style={{
+                  background: "#FFF8E7",
+                  borderRadius: "18px",
+                  padding: "14px 16px",
+                }}
+              >
+                <p style={{ margin: 0, fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
+                  QUÉ SIGUE
+                </p>
+                <p style={{ margin: "6px 0 0", fontSize: "16px", fontWeight: 800, color: "#1A1A2E" }}>
+                  {nextAction.label}
+                </p>
+                <p style={{ margin: "4px 0 0", fontSize: "14px", color: "#6B7280", lineHeight: 1.4 }}>
+                  {nextAction.helper}
+                </p>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <button
+                  onClick={() => restartPracticeSessionWithContext(practiceSessionContext)}
+                  style={{
+                    padding: "14px 18px",
+                    borderRadius: "999px",
+                    border: "none",
+                    cursor: "pointer",
+                    background: "#1A1A2E",
+                    color: "#FFFFFF",
+                    fontWeight: 800,
+                    fontSize: "15px",
+                  }}
+                >
+                  Otra sesión
+                </button>
+                <button
+                  onClick={handleNextAction}
+                  style={{
+                    padding: "14px 18px",
+                    borderRadius: "999px",
+                    border: "none",
+                    cursor: "pointer",
+                    background: "#4ECDC4",
+                    color: "#1A1A2E",
+                    fontWeight: 800,
+                    fontSize: "15px",
+                  }}
+                >
+                  {nextAction.label}
+                </button>
+              </div>
             </div>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "8px",
-            }}
-          >
-            <span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.1em", color: "#9CA3AF" }}>
-              PRÁCTICA
-            </span>
-            <span style={{ fontSize: "13px", fontWeight: 700, color: "#4ECDC4" }}>
-              {correctCount} correctas
-            </span>
-          </div>
-          <div
-            style={{
-              height: "5px",
-              background: "#E5E7EB",
-              borderRadius: "999px",
-              overflow: "hidden",
-              marginBottom: "16px",
-            }}
-          >
-            <div
-              style={{
-                height: "100%",
-                width: `${practiceProgressPct}%`,
-                background: "#4ECDC4",
-                borderRadius: "999px",
-                transition: "width 0.3s ease",
-              }}
-            />
-          </div>
-
-          {currentQuestion ? (
+          ) : currentQuestion ? (
             <>
+              <div
+                style={{
+                  background: "#FFFFFF",
+                  borderRadius: "18px",
+                  padding: "14px 16px",
+                  boxShadow: "0 4px 14px rgba(26,26,46,0.06)",
+                  marginBottom: "12px",
+                }}
+              >
+                <p style={{ margin: 0, fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
+                  TIPO DE SESIÓN
+                </p>
+                <p style={{ margin: "6px 0 0", fontSize: "17px", fontWeight: 800, color: "#1A1A2E" }}>
+                  {(activePracticeSession ?? practiceSessionContext).label} · L{lesson}
+                </p>
+                <p style={{ margin: "4px 0 0", fontSize: "14px", color: "#6B7280", lineHeight: 1.4 }}>
+                  {(activePracticeSession ?? practiceSessionContext).helper}
+                </p>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "8px",
+                }}
+              >
+                <span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.1em", color: "#9CA3AF" }}>
+                  PRÁCTICA
+                </span>
+                <span style={{ fontSize: "13px", fontWeight: 700, color: "#4ECDC4" }}>
+                  {correctCount} correctas
+                </span>
+              </div>
+              <div
+                style={{
+                  height: "5px",
+                  background: "#E5E7EB",
+                  borderRadius: "999px",
+                  overflow: "hidden",
+                  marginBottom: "16px",
+                }}
+              >
+                <div
+                  style={{
+                    height: "100%",
+                    width: `${practiceProgressPct}%`,
+                    background: "#4ECDC4",
+                    borderRadius: "999px",
+                    transition: "width 0.3s ease",
+                  }}
+                />
+              </div>
+
               <div
                 style={{
                   background: "#FFFFFF",
