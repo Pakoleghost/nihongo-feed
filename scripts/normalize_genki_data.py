@@ -81,10 +81,6 @@ def classify_kanji_entry(written_form: str, kana_reading: str, meaning_es: str) 
 def should_keep_kanji_entry(written_form: str, entry_type: str) -> bool:
     if entry_type == "proper_name":
         return False
-    if BARE_NUMERAL_PATTERN.match(written_form):
-        return False
-    if CLOCK_HOUR_PATTERN.match(written_form):
-        return False
     return True
 
 
