@@ -84,14 +84,39 @@ function getReadingOptions(correct: GenkiKanjiItem, pool: GenkiKanjiItem[]): str
   return shuffle([correctReading, ...wrong3]);
 }
 
+const KANJI_ENTRY_TYPE_PRIORITY: Record<GenkiKanjiItem["entry_type"], number> = {
+  word: 0,
+  verb: 1,
+  adjective_i: 2,
+  na_adjective: 3,
+  suru_verb: 4,
+  single_kanji_word: 5,
+  weekday: 6,
+  phrase: 7,
+  time_expression: 8,
+  proper_name: 9,
+};
+
+function compareByKanjiPriority(a: GenkiKanjiItem, b: GenkiKanjiItem) {
+  const rankDiff = KANJI_ENTRY_TYPE_PRIORITY[a.entry_type] - KANJI_ENTRY_TYPE_PRIORITY[b.entry_type];
+  if (rankDiff !== 0) return rankDiff;
+
+  const rowDiff = a.source_row - b.source_row;
+  if (rowDiff !== 0) return rowDiff;
+
+  return a.kanji.localeCompare(b.kanji, "ja");
+}
+
+function sortLessonItemsByEntryType(items: GenkiKanjiItem[]) {
+  return [...items].sort(compareByKanjiPriority);
+}
+
 function sortLessonItemsForPractice(
   items: GenkiKanjiItem[],
   progress: KanjiProgressMap,
   lesson: number,
   actionKey: PracticeNextAction["key"],
 ) {
-  const shuffled = shuffle(items);
-
   function getRank(item: GenkiKanjiItem) {
     const id = getKanjiProgressId(lesson, item);
     const entry = progress[id];
@@ -132,7 +157,11 @@ function sortLessonItemsForPractice(
     return 4;
   }
 
-  return [...shuffled].sort((a, b) => getRank(a) - getRank(b));
+  return [...items].sort((a, b) => {
+    const rankDiff = getRank(a) - getRank(b);
+    if (rankDiff !== 0) return rankDiff;
+    return compareByKanjiPriority(a, b);
+  });
 }
 
 export default function KanjiModuleScreen() {
@@ -155,6 +184,7 @@ export default function KanjiModuleScreen() {
   const [practiceResult, setPracticeResult] = useState<PracticeSessionResult | null>(null);
 
   const lessonItems = useMemo(() => GENKI_KANJI_BY_LESSON[lesson] ?? [], [lesson]);
+  const orderedLessonItems = useMemo(() => sortLessonItemsByEntryType(lessonItems), [lessonItems]);
   const lessonTitle = LESSON_LABELS[lesson] ?? `Lección ${lesson}`;
   const lessonSummary = useMemo(
     () => getKanjiLessonSummary(lesson, lessonItems, progress),
@@ -192,9 +222,9 @@ export default function KanjiModuleScreen() {
 
   useEffect(() => {
     learnExposureIdsRef.current = new Set();
-    setStudyItems(lessonItems);
+    setStudyItems(orderedLessonItems);
     setCurrentStudyIndex(0);
-  }, [lessonItems]);
+  }, [orderedLessonItems]);
 
   useEffect(() => {
     if (mode !== "aprender" || !currentStudyItem) return;
@@ -209,19 +239,18 @@ export default function KanjiModuleScreen() {
   }, [mode, lesson, currentStudyItem]);
 
   useEffect(() => {
-    const shuffled = shuffle(lessonItems);
-    setQuestions(shuffled.map((item) => ({ item, options: getReadingOptions(item, lessonItems) })));
+    setQuestions(orderedLessonItems.map((item) => ({ item, options: getReadingOptions(item, lessonItems) })));
     setCurrentQuestionIndex(0);
     setQuizPhase("question");
     setSelectedOption(null);
     setCorrectCount(0);
     setActivePracticeSession(null);
     setPracticeResult(null);
-  }, [lessonItems]);
+  }, [lessonItems, orderedLessonItems]);
 
   function restartPracticeSessionWithContext(sessionContext: PracticeSessionContext) {
-    const shuffled = sortLessonItemsForPractice(lessonItems, progress, lesson, sessionContext.sortKey);
-    setQuestions(shuffled.map((item) => ({ item, options: getReadingOptions(item, lessonItems) })));
+    const prioritized = sortLessonItemsForPractice(orderedLessonItems, progress, lesson, sessionContext.sortKey);
+    setQuestions(prioritized.map((item) => ({ item, options: getReadingOptions(item, lessonItems) })));
     setCurrentQuestionIndex(0);
     setQuizPhase("question");
     setSelectedOption(null);
