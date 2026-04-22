@@ -341,8 +341,8 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
       >
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            display: "flex",
+            flexDirection: "column",
             gap: "16px",
           }}
         >
@@ -356,7 +356,7 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
                 color: card.color,
                 borderRadius: "2rem",
                 padding: "24px",
-                minHeight: "300px",
+                minHeight: "220px",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
@@ -367,8 +367,8 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
                 style={{
                   position: "absolute",
                   right: "16px",
-                  top: "8px",
-                  fontSize: "108px",
+                  top: "14px",
+                  fontSize: "92px",
                   fontWeight: 800,
                   lineHeight: 1,
                   opacity: 0.12,
@@ -383,8 +383,8 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
                 <p
                   style={{
                     margin: 0,
-                    fontSize: "48px",
-                    lineHeight: 0.98,
+                    fontSize: "34px",
+                    lineHeight: 1,
                     fontWeight: 800,
                     letterSpacing: "-0.05em",
                     color: card.color,
@@ -395,12 +395,12 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
                 <p
                   style={{
                     margin: "16px 0 0",
-                    fontSize: "24px",
+                    fontSize: "18px",
                     lineHeight: 1.2,
                     fontWeight: 500,
                     color: card.color,
                     opacity: 0.92,
-                    maxWidth: "280px",
+                    maxWidth: "220px",
                   }}
                 >
                   {card.subtitle}
@@ -417,9 +417,9 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
                   borderRadius: "3rem",
                   background: card.buttonBackground,
                   color: card.buttonColor,
-                  padding: "18px 28px",
+                  padding: "16px 24px",
                   fontWeight: 800,
-                  fontSize: "24px",
+                  fontSize: "20px",
                   cursor: "pointer",
                 }}
               >

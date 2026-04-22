@@ -341,8 +341,8 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
       >
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            display: "flex",
+            flexDirection: "column",
             gap: "16px",
           }}
         >
@@ -354,7 +354,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                 color: card.color,
                 borderRadius: "2rem",
                 padding: "24px",
-                minHeight: "300px",
+                minHeight: "220px",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
@@ -364,8 +364,8 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                 <p
                   style={{
                     margin: 0,
-                    fontSize: "48px",
-                    lineHeight: 0.98,
+                    fontSize: "34px",
+                    lineHeight: 1,
                     fontWeight: 800,
                     letterSpacing: "-0.05em",
                     color: card.color,
@@ -376,12 +376,12 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                 <p
                   style={{
                     margin: "16px 0 0",
-                    fontSize: "24px",
+                    fontSize: "18px",
                     lineHeight: 1.2,
                     fontWeight: 500,
                     color: card.color,
                     opacity: 0.92,
-                    maxWidth: "280px",
+                    maxWidth: "100%",
                   }}
                 >
                   {card.subtitle}
@@ -396,9 +396,9 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                   borderRadius: "3rem",
                   background: card.buttonBackground,
                   color: card.buttonColor,
-                  padding: "18px 28px",
+                  padding: "16px 24px",
                   fontWeight: 800,
-                  fontSize: "24px",
+                  fontSize: "20px",
                   cursor: "pointer",
                 }}
               >
