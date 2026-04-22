@@ -85,22 +85,7 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
     router.push(`/practicar/kanji/practicar?${params.toString()}`);
   }
 
-  const secondaryAction =
-    nextAction.targetMode === "aprender"
-      ? {
-          label: "Practicar lección",
-          helper: "Haz una sesión de lectura objetiva para esta lección.",
-          onClick: goToPracticeSession,
-          background: "#4ECDC4",
-          color: "#1A1A2E",
-        }
-      : {
-          label: "Abrir Aprender",
-          helper: "Repasa forma, lectura y significado antes de practicar.",
-          onClick: goToLearnSession,
-          background: "#FFFFFF",
-          color: "#1A1A2E",
-        };
+  const recommendedMode = nextAction.targetMode;
 
   return (
     <div
@@ -300,70 +285,113 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
           borderRadius: "24px",
           padding: "18px",
           boxShadow: "0 8px 28px rgba(26,26,46,0.08)",
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
         }}
       >
         <div>
           <p style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF", margin: 0 }}>
-            SIGUIENTE PASO
+            ELIGE CÓMO CONTINUAR
           </p>
-          <p style={{ fontSize: "20px", fontWeight: 800, color: "#1A1A2E", margin: "6px 0 0" }}>{nextAction.label}</p>
-          <p style={{ fontSize: "14px", color: "#6B7280", margin: "4px 0 0", lineHeight: 1.45 }}>{nextAction.helper}</p>
+          <p style={{ fontSize: "20px", fontWeight: 800, color: "#1A1A2E", margin: "6px 0 0" }}>
+            Estudia nuevas lecturas o practica las que ya has visto
+          </p>
+          <p style={{ fontSize: "14px", color: "#6B7280", margin: "4px 0 0", lineHeight: 1.45 }}>
+            La app te recomienda un camino según el estado real de esta lección.
+          </p>
         </div>
-
-        <button
-          onClick={nextAction.targetMode === "aprender" ? goToLearnSession : goToPracticeSession}
-          style={{
-            width: "100%",
-            border: "none",
-            cursor: "pointer",
-            borderRadius: "16px",
-            padding: "15px 16px",
-            background: nextAction.targetMode === "aprender" ? "#E63946" : "#1A1A2E",
-            color: "#FFFFFF",
-            fontSize: "16px",
-            fontWeight: 800,
-            boxShadow: "0 6px 18px rgba(26,26,46,0.12)",
-          }}
-        >
-          {nextAction.label}
-        </button>
 
         <div
           style={{
-            background: "#FFF8E7",
-            borderRadius: "18px",
-            padding: "14px 16px",
+            marginTop: "14px",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "12px",
           }}
         >
-          <p style={{ margin: 0, fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
-            OTRA OPCIÓN
-          </p>
-          <p style={{ margin: "6px 0 0", fontSize: "16px", fontWeight: 800, color: "#1A1A2E" }}>
-            {secondaryAction.label}
-          </p>
-          <p style={{ margin: "4px 0 0", fontSize: "14px", color: "#6B7280", lineHeight: 1.45 }}>
-            {secondaryAction.helper}
-          </p>
-          <button
-            onClick={secondaryAction.onClick}
-            style={{
-              marginTop: "12px",
-              width: "100%",
-              border: "none",
-              cursor: "pointer",
-              borderRadius: "14px",
-              padding: "14px 16px",
-              background: secondaryAction.background,
-              color: secondaryAction.color,
-              fontSize: "15px",
-              fontWeight: 800,
-            }}
-          >
-            {secondaryAction.label}
-          </button>
+          {[
+            {
+              key: "aprender" as const,
+              title: "Aprender",
+              body: "Estudia forma, lectura y significado para familiarizarte con las palabras de la lección.",
+              buttonLabel: "Abrir Aprender",
+              onClick: goToLearnSession,
+              background: recommendedMode === "aprender" ? "#FFF1F2" : "#FFF8E7",
+              border: recommendedMode === "aprender" ? "1px solid rgba(230,57,70,0.22)" : "1px solid rgba(26,26,46,0.06)",
+              buttonBackground: "#E63946",
+              buttonColor: "#FFFFFF",
+              accent: "#E63946",
+              recommended: recommendedMode === "aprender",
+            },
+            {
+              key: "practicar" as const,
+              title: "Practicar",
+              body: "Elige la lectura correcta y refuerza las palabras con kanji que ya has visto.",
+              buttonLabel: nextAction.targetMode === "practicar" ? nextAction.label : "Abrir Practicar",
+              onClick: goToPracticeSession,
+              background: recommendedMode === "practicar" ? "#F5FCFB" : "#FFF8E7",
+              border: recommendedMode === "practicar" ? "1px solid rgba(78,205,196,0.28)" : "1px solid rgba(26,26,46,0.06)",
+              buttonBackground: recommendedMode === "practicar" ? "#1A1A2E" : "#4ECDC4",
+              buttonColor: recommendedMode === "practicar" ? "#FFFFFF" : "#1A1A2E",
+              accent: "#0F766E",
+              recommended: recommendedMode === "practicar",
+            },
+          ].map((action) => (
+            <div
+              key={action.key}
+              style={{
+                background: action.background,
+                borderRadius: "18px",
+                padding: "14px 16px",
+                border: action.border,
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
+                <p style={{ margin: 0, fontSize: "18px", fontWeight: 800, color: "#1A1A2E" }}>{action.title}</p>
+                {action.recommended ? (
+                  <span
+                    style={{
+                      background: "#FFFFFF",
+                      color: action.accent,
+                      borderRadius: "999px",
+                      padding: "6px 10px",
+                      fontSize: "11px",
+                      fontWeight: 800,
+                      letterSpacing: "0.04em",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Recomendado
+                  </span>
+                ) : null}
+              </div>
+              <p style={{ margin: 0, fontSize: "14px", color: "#6B7280", lineHeight: 1.45 }}>{action.body}</p>
+              {action.recommended && action.key === "practicar" ? (
+                <p style={{ margin: 0, fontSize: "13px", color: "#0F766E", lineHeight: 1.4 }}>{nextAction.helper}</p>
+              ) : null}
+              {action.recommended && action.key === "aprender" ? (
+                <p style={{ margin: 0, fontSize: "13px", color: "#E63946", lineHeight: 1.4 }}>{nextAction.helper}</p>
+              ) : null}
+              <button
+                onClick={action.onClick}
+                style={{
+                  marginTop: "auto",
+                  width: "100%",
+                  border: "none",
+                  cursor: "pointer",
+                  borderRadius: "14px",
+                  padding: "14px 16px",
+                  background: action.buttonBackground,
+                  color: action.buttonColor,
+                  fontSize: "15px",
+                  fontWeight: 800,
+                }}
+              >
+                {action.buttonLabel}
+              </button>
+            </div>
+          ))}
         </div>
       </div>
     </div>
