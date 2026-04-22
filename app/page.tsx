@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { markActiveToday, getStreak, getLastActivity } from "@/lib/streak";
 import { getDueKanaCount } from "@/lib/kana-due";
@@ -17,7 +17,7 @@ function getGreeting(): string {
 type MiniProfile = { username: string | null; avatar_url: string | null; is_admin: boolean | null };
 
 function AvatarCircle({ url, name }: { url: string | null; name: string | null }) {
-  const size = 36;
+  const size = 40;
   if (url) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -52,13 +52,29 @@ function AvatarCircle({ url, name }: { url: string | null; name: string | null }
   );
 }
 
+function HomeSectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <p
+      style={{
+        fontSize: "13px",
+        fontWeight: 800,
+        letterSpacing: "0.08em",
+        color: "#9CA3AF",
+        textTransform: "uppercase",
+        margin: 0,
+      }}
+    >
+      {children}
+    </p>
+  );
+}
+
 export default function InicioPage() {
   const [streak, setStreak] = useState(0);
   const [dueCount, setDueCount] = useState(0);
   const [lastActivity, setLastActivityState] = useState<{ label: string; path: string } | null>(null);
   const [profile, setProfile] = useState<MiniProfile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
     markActiveToday();
@@ -69,14 +85,7 @@ export default function InicioPage() {
       const { data } = await supabase.auth.getUser();
       const uid = data.user?.id;
       const userKey = uid ?? "anon";
-      const count = getDueKanaCount(userKey);
-      setDueCount(count);
-      if (count > 0) {
-        const today = new Date().toDateString();
-        if (localStorage.getItem("banner-seen-date") !== today) {
-          setShowBanner(true);
-        }
-      }
+      setDueCount(getDueKanaCount(userKey));
 
       if (uid) {
         const { data: p } = await supabase
@@ -93,6 +102,69 @@ export default function InicioPage() {
     init();
   }, []);
 
+  const primaryAction = useMemo(() => {
+    if (dueCount > 0) {
+      return {
+        eyebrow: "Ahora mismo",
+        title: `${dueCount} kana pendientes`,
+        body: "Haz tu repaso de hoy antes de seguir con otra cosa.",
+        href: "/kana/quiz?mode=smart&difficulty=automatico&count=20",
+        buttonLabel: "Repasar kana",
+        accent: "#E63946",
+        surface: "#1A1A2E",
+        bodyColor: "rgba(255,255,255,0.78)",
+        pill: `${dueCount} pendientes`,
+      };
+    }
+
+    return {
+      eyebrow: "Sigue desde aquí",
+      title: lastActivity?.label ?? "Empieza a practicar",
+      body: lastActivity ? "Retoma tu última actividad sin perder el hilo." : "Kana, vocabulario y kanji en un solo lugar.",
+      href: lastActivity?.path ?? "/kana",
+      buttonLabel: lastActivity ? "Continuar" : "Empezar",
+      accent: "#4ECDC4",
+      surface: "#1A1A2E",
+      bodyColor: "rgba(255,255,255,0.78)",
+      pill: lastActivity ? "Última actividad" : "Listo para empezar",
+    };
+  }, [dueCount, lastActivity]);
+
+  const destinations = [
+    {
+      href: "/kana",
+      title: "Kana",
+      body: "Hiragana y katakana",
+      bg: "#FFFFFF",
+      titleColor: "#1A1A2E",
+      bodyColor: "#9CA3AF",
+    },
+    {
+      href: "/practicar",
+      title: "Practicar",
+      body: "Sprint, vocabulario y kanji",
+      bg: "#1A1A2E",
+      titleColor: "#FFFFFF",
+      bodyColor: "rgba(255,255,255,0.72)",
+    },
+    {
+      href: "/practicar/vocabulario",
+      title: "Vocabulario",
+      body: "Por lección",
+      bg: "#E63946",
+      titleColor: "#FFFFFF",
+      bodyColor: "rgba(255,255,255,0.78)",
+    },
+    {
+      href: "/practicar/kanji",
+      title: "Kanji",
+      body: "Lectura por lección",
+      bg: "#4ECDC4",
+      titleColor: "#1A1A2E",
+      bodyColor: "rgba(26,26,46,0.68)",
+    },
+  ] as const;
+
   return (
     <div
       style={{
@@ -100,10 +172,9 @@ export default function InicioPage() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        padding: "20px 20px 100px",
+        padding: "24px 20px 104px",
       }}
     >
-      {/* Header row */}
       <div
         style={{
           display: "flex",
@@ -113,24 +184,22 @@ export default function InicioPage() {
         }}
       >
         <div>
-          <p style={{ fontSize: "15px", color: "#9CA3AF", margin: 0, lineHeight: 1.3 }}>
-            {getGreeting()}
-          </p>
+          <p style={{ fontSize: "14px", color: "#9CA3AF", margin: 0, lineHeight: 1.3 }}>{getGreeting()}</p>
           <h1
             style={{
-              fontSize: "30px",
+              fontSize: "34px",
               fontWeight: 800,
               color: "#1A1A2E",
-              margin: "2px 0 0",
-              lineHeight: 1.15,
+              margin: "6px 0 0",
+              lineHeight: 1.05,
+              letterSpacing: "-0.04em",
             }}
           >
-            ¿Qué hacemos hoy?
+            ¿Qué sigue?
           </h1>
         </div>
 
-        {/* Avatar + streak */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0, marginTop: "4px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
           <Link href="/perfil" style={{ display: "block", flexShrink: 0 }}>
             <AvatarCircle url={profile?.avatar_url ?? null} name={profile?.username ?? null} />
           </Link>
@@ -141,7 +210,7 @@ export default function InicioPage() {
               padding: "8px 14px",
               display: "flex",
               alignItems: "center",
-              gap: "5px",
+              gap: "6px",
             }}
           >
             <span style={{ fontSize: "16px" }}>🔥</span>
@@ -150,225 +219,194 @@ export default function InicioPage() {
         </div>
       </div>
 
-      {/* Dismissible banner */}
-      {showBanner && (
-        <Link
-          href="/kana/quiz?mode=smart&difficulty=automatico&count=20"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            background: "#4ECDC4",
-            borderRadius: "1.5rem",
-            padding: "14px 16px",
-            marginTop: "16px",
-            textDecoration: "none",
-          }}
-        >
-          <span style={{ fontSize: "15px", fontWeight: 700, color: "#1A1A2E" }}>
-            🔔 Tienes {dueCount} kana por repasar hoy
-          </span>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setShowBanner(false);
-              localStorage.setItem("banner-seen-date", new Date().toDateString());
-            }}
-            style={{
-              background: "rgba(26,26,46,0.12)",
-              border: "none",
-              borderRadius: "50%",
-              width: "28px",
-              height: "28px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              marginLeft: "8px",
-              fontSize: "14px",
-              color: "#1A1A2E",
-            }}
-            aria-label="Cerrar"
-          >
-            ×
-          </button>
-        </Link>
-      )}
-
-      {/* Urgent kana card — only when dueCount > 0 */}
-      {dueCount > 0 && (
-        <div
-          style={{
-            background: "#E63946",
-            borderRadius: "24px",
-            padding: "24px",
-            marginTop: "20px",
-          }}
-        >
-          <p
-            style={{
-              fontSize: "22px",
-              fontWeight: 800,
-              color: "#FFFFFF",
-              margin: 0,
-              lineHeight: 1.1,
-            }}
-          >
-            {dueCount} kana por repasar
-          </p>
-          <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.82)", margin: "6px 0 18px" }}>
-            Tienes repasos vencidos
-          </p>
-          <Link
-            href="/kana/quiz?mode=smart&difficulty=automatico&count=20"
-            style={{
-              display: "block",
-              background: "#FFFFFF",
-              color: "#E63946",
-              borderRadius: "999px",
-              padding: "14px",
-              fontWeight: 700,
-              fontSize: "16px",
-              textDecoration: "none",
-              textAlign: "center",
-            }}
-          >
-            Repasar ahora
-          </Link>
-        </div>
-      )}
-
-      {/* Continue card */}
       <div
         style={{
-          background: "#1A1A2E",
-          borderRadius: "24px",
-          padding: "24px",
-          marginTop: dueCount > 0 ? "12px" : "20px",
+          marginTop: "22px",
+          background: primaryAction.surface,
+          borderRadius: "28px",
+          padding: "22px",
+          boxShadow: "0 18px 44px rgba(26,26,46,0.14)",
         }}
       >
-        <p
-          style={{
-            fontSize: "24px",
-            fontWeight: 800,
-            color: "#FFFFFF",
-            margin: 0,
-            lineHeight: 1.1,
-          }}
-        >
-          Continuar
-        </p>
-        <p style={{ fontSize: "15px", color: "#9CA3AF", margin: "4px 0 18px" }}>
-          {lastActivity?.label ?? "Empieza por Kana"}
-        </p>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "14px" }}>
+          <div style={{ minWidth: 0 }}>
+            <HomeSectionTitle>{primaryAction.eyebrow}</HomeSectionTitle>
+            <p
+              style={{
+                fontSize: "28px",
+                fontWeight: 800,
+                color: "#FFFFFF",
+                margin: "10px 0 0",
+                lineHeight: 1.05,
+                letterSpacing: "-0.04em",
+              }}
+            >
+              {primaryAction.title}
+            </p>
+            <p
+              style={{
+                fontSize: "14px",
+                color: primaryAction.bodyColor,
+                margin: "10px 0 0",
+                lineHeight: 1.45,
+                maxWidth: 320,
+              }}
+            >
+              {primaryAction.body}
+            </p>
+          </div>
+
+          <div
+            style={{
+              background: "rgba(255,255,255,0.10)",
+              color: "#FFFFFF",
+              borderRadius: "999px",
+              padding: "8px 12px",
+              fontSize: "12px",
+              fontWeight: 700,
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}
+          >
+            {primaryAction.pill}
+          </div>
+        </div>
+
         <Link
-          href={lastActivity?.path ?? "/kana"}
+          href={primaryAction.href}
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            background: "#4ECDC4",
-            color: "#1A1A2E",
+            gap: "10px",
+            background: primaryAction.accent,
+            color: primaryAction.accent === "#E63946" ? "#FFFFFF" : "#1A1A2E",
             borderRadius: "999px",
-            padding: "14px 20px",
+            padding: "14px 18px",
             fontWeight: 700,
-            fontSize: "16px",
+            fontSize: "15px",
             textDecoration: "none",
+            marginTop: "18px",
           }}
         >
-          <span>Continuar</span>
+          <span>{primaryAction.buttonLabel}</span>
           <span>→</span>
         </Link>
       </div>
 
-      {/* Quick chips */}
-      <div style={{ display: "flex", gap: "10px", marginTop: "20px", flexWrap: "wrap" }}>
-        {[
-          { label: "Kana Sprint", href: "/practicar/sprint" },
-          { label: "Vocabulario", href: "/practicar/vocabulario" },
-        ].map(({ label, href }) => (
-          <Link
-            key={href}
-            href={href}
-            style={{
-              background: "#FFFFFF",
-              color: "#1A1A2E",
-              borderRadius: "999px",
-              padding: "10px 18px",
-              fontWeight: 600,
-              fontSize: "15px",
-              textDecoration: "none",
-              boxShadow: "0 2px 10px rgba(26,26,46,0.08)",
-            }}
-          >
-            {label}
-          </Link>
-        ))}
-      </div>
-
-      {/* Recursos del curso */}
-      <div style={{ marginTop: "28px" }}>
-        <p
+      <div style={{ marginTop: "24px" }}>
+        <HomeSectionTitle>Ir a</HomeSectionTitle>
+        <div
           style={{
-            fontSize: "17px",
-            fontWeight: 700,
-            color: "#1A1A2E",
-            margin: "0 0 12px",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "12px",
+            marginTop: "12px",
           }}
         >
-          Recursos del curso
-        </p>
+          {destinations.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              style={{
+                background: item.bg,
+                borderRadius: "24px",
+                padding: "18px",
+                textDecoration: "none",
+                boxShadow: "0 10px 26px rgba(26,26,46,0.08)",
+                minHeight: "122px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}
+            >
+              <div>
+                <p
+                  style={{
+                    fontSize: "22px",
+                    fontWeight: 800,
+                    color: item.titleColor,
+                    margin: 0,
+                    lineHeight: 1.05,
+                    letterSpacing: "-0.03em",
+                  }}
+                >
+                  {item.title}
+                </p>
+                <p
+                  style={{
+                    fontSize: "13px",
+                    color: item.bodyColor,
+                    margin: "8px 0 0",
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {item.body}
+                </p>
+              </div>
+              <div
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: item.titleColor,
+                  opacity: 0.9,
+                }}
+              >
+                Abrir →
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginTop: "24px", display: "grid", gap: "12px" }}>
+        <Link
+          href="/comunidad"
+          style={{
+            background: "#FFFFFF",
+            borderRadius: "24px",
+            padding: "18px 18px 16px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "12px",
+            textDecoration: "none",
+            boxShadow: "0 10px 26px rgba(26,26,46,0.08)",
+          }}
+        >
+          <div>
+            <HomeSectionTitle>Comunidad</HomeSectionTitle>
+            <p style={{ fontSize: "20px", fontWeight: 800, color: "#1A1A2E", margin: "8px 0 0", lineHeight: 1.1 }}>
+              Habla con otros estudiantes
+            </p>
+          </div>
+          <span style={{ fontSize: "18px", color: "#C4BAB0", flexShrink: 0 }}>→</span>
+        </Link>
+
         <Link
           href="/recursos"
           style={{
             background: "#FFFFFF",
-            borderRadius: "20px",
-            padding: "16px",
+            borderRadius: "24px",
+            padding: "16px 18px",
             display: "flex",
             alignItems: "center",
-            gap: "14px",
+            justifyContent: "space-between",
+            gap: "12px",
             textDecoration: "none",
-            boxShadow: "0 2px 12px rgba(26,26,46,0.07)",
+            boxShadow: "0 10px 26px rgba(26,26,46,0.08)",
           }}
         >
-          <div
-            style={{
-              width: "44px",
-              height: "44px",
-              borderRadius: "50%",
-              background: "rgba(230,57,70,0.10)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "20px",
-              flexShrink: 0,
-            }}
-          >
-            📚
-          </div>
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: "15px", fontWeight: 700, color: "#1A1A2E", margin: 0 }}>
+          <div>
+            <HomeSectionTitle>Recursos</HomeSectionTitle>
+            <p style={{ fontSize: "16px", fontWeight: 700, color: "#1A1A2E", margin: "8px 0 0", lineHeight: 1.2 }}>
               Ver material del curso
             </p>
-            <p style={{ fontSize: "13px", color: "#9CA3AF", margin: "2px 0 0" }}>
-              Apuntes, lecturas y links
-            </p>
           </div>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M9 18l6-6-6-6"
-              stroke="#C4BAB0"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <span style={{ fontSize: "18px", color: "#C4BAB0", flexShrink: 0 }}>→</span>
         </Link>
       </div>
 
-      {/* Admin pill — only for admins */}
       {isAdmin && (
         <div style={{ marginTop: "20px" }}>
           <Link
@@ -380,9 +418,9 @@ export default function InicioPage() {
               background: "#1A1A2E",
               color: "#FFFFFF",
               borderRadius: "3rem",
-              padding: "12px 22px",
+              padding: "12px 18px",
               textDecoration: "none",
-              fontSize: "15px",
+              fontSize: "14px",
               fontWeight: 700,
             }}
           >
