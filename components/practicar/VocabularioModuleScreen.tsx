@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import type { GenkiVocabItem } from "@/lib/genki-vocab-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
@@ -167,11 +167,16 @@ function sortLessonItemsForPractice(
   return [...shuffled].sort((a, b) => getRank(a) - getRank(b));
 }
 
-export default function VocabularioModuleScreen() {
+type VocabularioModuleScreenProps = {
+  initialLesson?: number;
+};
+
+export default function VocabularioModuleScreen({ initialLesson }: VocabularioModuleScreenProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const learnExposureIdsRef = useRef<Set<string>>(new Set());
-  const [lesson, setLesson] = useState(1);
+  const [lesson, setLesson] = useState(() =>
+    initialLesson && LESSONS.includes(initialLesson) ? initialLesson : 1,
+  );
   const [mode, setMode] = useState<Mode>("aprender");
   const [streak, setStreak] = useState(0);
 
@@ -223,10 +228,9 @@ export default function VocabularioModuleScreen() {
   }, []);
 
   useEffect(() => {
-    const lessonParam = Number(searchParams.get("lesson"));
-    if (!Number.isFinite(lessonParam) || !LESSONS.includes(lessonParam) || lessonParam === lesson) return;
-    setLesson(lessonParam);
-  }, [lesson, searchParams]);
+    if (!initialLesson || !LESSONS.includes(initialLesson) || initialLesson === lesson) return;
+    setLesson(initialLesson);
+  }, [initialLesson, lesson]);
 
   useEffect(() => {
     const modeLabel = mode === "aprender" ? "Aprender" : "Practicar";

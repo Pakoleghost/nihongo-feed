@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 import type { GenkiKanjiItem } from "@/lib/genki-kanji-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
@@ -165,11 +165,16 @@ function sortLessonItemsForPractice(
   });
 }
 
-export default function KanjiModuleScreen() {
+type KanjiModuleScreenProps = {
+  initialLesson?: number;
+};
+
+export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const learnExposureIdsRef = useRef<Set<string>>(new Set());
-  const [lesson, setLesson] = useState(LESSONS[0] ?? 3);
+  const [lesson, setLesson] = useState(() =>
+    initialLesson && LESSONS.includes(initialLesson) ? initialLesson : (LESSONS[0] ?? 3),
+  );
   const [mode, setMode] = useState<Mode>("aprender");
   const [streak, setStreak] = useState(0);
 
@@ -218,10 +223,9 @@ export default function KanjiModuleScreen() {
   }, []);
 
   useEffect(() => {
-    const lessonParam = Number(searchParams.get("lesson"));
-    if (!Number.isFinite(lessonParam) || !LESSONS.includes(lessonParam) || lessonParam === lesson) return;
-    setLesson(lessonParam);
-  }, [lesson, searchParams]);
+    if (!initialLesson || !LESSONS.includes(initialLesson) || initialLesson === lesson) return;
+    setLesson(initialLesson);
+  }, [initialLesson, lesson]);
 
   useEffect(() => {
     const modeLabel = mode === "aprender" ? "Aprender" : "Practicar";
