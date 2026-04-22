@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -49,6 +50,42 @@ def split_alt_meanings(meaning_es: str) -> list[str]:
 
 def contains_hiragana(text: str) -> bool:
     return any("\u3040" <= char <= "\u309f" for char in text)
+
+
+BARE_NUMERAL_PATTERN = re.compile(r"^[一二三四五六七八九十百千]$")
+CLOCK_HOUR_PATTERN = re.compile(r"^[一二三四五六七八九十]時$")
+
+
+def classify_kanji_entry(written_form: str, kana_reading: str, meaning_es: str) -> str:
+    if "さん" in written_form:
+        return "proper_name"
+    if written_form.endswith("曜日"):
+        return "weekday"
+    if CLOCK_HOUR_PATTERN.match(written_form):
+        return "time_expression"
+    if written_form.endswith("する"):
+        return "suru_verb"
+    if written_form.endswith("な"):
+        return "na_adjective"
+    if "の" in written_form:
+        return "phrase"
+    if len(written_form) == 1:
+        return "single_kanji_word"
+    if contains_hiragana(written_form) and written_form.endswith("い"):
+        return "adjective_i"
+    if contains_hiragana(written_form) and kana_reading.endswith(("う", "く", "ぐ", "す", "つ", "ぬ", "ぶ", "む", "る")):
+        return "verb"
+    return "word"
+
+
+def should_keep_kanji_entry(written_form: str, entry_type: str) -> bool:
+    if entry_type == "proper_name":
+        return False
+    if BARE_NUMERAL_PATTERN.match(written_form):
+        return False
+    if CLOCK_HOUR_PATTERN.match(written_form):
+        return False
+    return True
 
 
 def build_vocab_payload() -> dict[str, Any]:
@@ -99,12 +136,16 @@ def build_kanji_payload() -> dict[str, Any]:
         written_form = compact(written)
         kana_reading = compact(reading)
         meaning_es = compact(meaning)
+        entry_type = classify_kanji_entry(written_form, kana_reading, meaning_es)
+        if not should_keep_kanji_entry(written_form, entry_type):
+            continue
         item = {
             "id": make_id("kanji", lesson, written_form, kana_reading, meaning_es),
             "lesson": lesson,
             "written_form": written_form,
             "kana_reading": kana_reading,
             "meaning_es": meaning_es,
+            "entry_type": entry_type,
             "is_single_kanji": len(written_form) == 1,
             "contains_okurigana": contains_hiragana(written_form),
             "source_sheet": sheet.title,

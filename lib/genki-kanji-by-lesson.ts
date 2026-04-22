@@ -8,6 +8,17 @@ type NormalizedKanjiItem = {
   written_form: string;
   kana_reading: string;
   meaning_es: string;
+  entry_type:
+    | "word"
+    | "single_kanji_word"
+    | "time_expression"
+    | "weekday"
+    | "na_adjective"
+    | "suru_verb"
+    | "verb"
+    | "adjective_i"
+    | "phrase"
+    | "proper_name";
   is_single_kanji: boolean;
   contains_okurigana: boolean;
   source_sheet: string;
