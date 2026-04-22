@@ -48,16 +48,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
   );
   const nextAction = useMemo(() => getPracticeNextAction(lessonSummary), [lessonSummary]);
   const practiceSessionContext = useMemo(() => getPracticeSessionContext(lessonSummary), [lessonSummary]);
-  const lessonHelper =
-    lessonSummary.pendientes > 0
-      ? `Tienes ${lessonSummary.pendientes} pendientes en esta lección.`
-      : lessonSummary.debiles > 0
-        ? `Hay ${lessonSummary.debiles} palabras débiles por reforzar.`
-        : lessonSummary.solo_expuestos > 0
-          ? `Ya viste ${lessonSummary.solo_expuestos} en Aprender. Practica para reforzarlas.`
-          : lessonSummary.dominados > 0
-            ? `Ya dominaste ${lessonSummary.dominados} palabras en esta lección.`
-            : `Aún tienes ${lessonSummary.nuevos} palabras nuevas por trabajar.`;
+  const recommendedMode = nextAction.targetMode;
 
   useEffect(() => {
     setStreak(getStreak());
@@ -87,7 +78,34 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
     router.push(`/practicar/vocabulario/practicar?${params.toString()}`);
   }
 
-  const recommendedMode = nextAction.targetMode;
+  const actionCards = [
+    {
+      key: "aprender" as const,
+      title: "Aprender",
+      body: "Repasa palabras nuevas y familiarízate con su significado.",
+      buttonLabel: "Abrir Aprender",
+      onClick: goToLearnSession,
+      background: recommendedMode === "aprender" ? "#FFF1F2" : "#FFF8E7",
+      border: recommendedMode === "aprender" ? "1px solid rgba(230,57,70,0.22)" : "1px solid rgba(26,26,46,0.06)",
+      buttonBackground: "#E63946",
+      buttonColor: "#FFFFFF",
+      accent: "#E63946",
+      recommended: recommendedMode === "aprender",
+    },
+    {
+      key: "practicar" as const,
+      title: "Practicar",
+      body: "Reconoce significados y refuerza lo que ya has visto.",
+      buttonLabel: nextAction.targetMode === "practicar" ? nextAction.label : "Abrir Practicar",
+      onClick: goToPracticeSession,
+      background: recommendedMode === "practicar" ? "#F5FCFB" : "#FFF8E7",
+      border: recommendedMode === "practicar" ? "1px solid rgba(78,205,196,0.28)" : "1px solid rgba(26,26,46,0.06)",
+      buttonBackground: recommendedMode === "practicar" ? "#1A1A2E" : "#4ECDC4",
+      buttonColor: recommendedMode === "practicar" ? "#FFFFFF" : "#1A1A2E",
+      accent: "#0F766E",
+      recommended: recommendedMode === "practicar",
+    },
+  ];
 
   return (
     <div
@@ -148,7 +166,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
       <div style={{ paddingTop: "18px" }}>
         <p
           style={{
-            fontSize: "42px",
+            fontSize: "40px",
             fontWeight: 800,
             color: "#1A1A2E",
             margin: 0,
@@ -159,13 +177,13 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
         </p>
         <p
           style={{
-            fontSize: "15px",
+            fontSize: "14px",
             color: "#6B7280",
-            margin: "8px 0 0",
-            lineHeight: 1.45,
+            margin: "6px 0 0",
+            lineHeight: 1.4,
           }}
         >
-          Elige una lección, revisa tu progreso y entra a estudiar o practicar.
+          Vocabulario por lección.
         </p>
       </div>
 
@@ -181,7 +199,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
           <div>
             <p style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF", margin: 0 }}>
-              LECCIÓN ACTUAL
+              LECCIÓN
             </p>
             <p style={{ fontSize: "20px", fontWeight: 800, color: "#1A1A2E", margin: "6px 0 0" }}>
               L{lesson} · {lessonTitle}
@@ -217,7 +235,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
               onClick={() => selectLesson(value)}
               style={{
                 flexShrink: 0,
-                padding: "10px 18px",
+                padding: "10px 16px",
                 borderRadius: "999px",
                 border: "none",
                 cursor: "pointer",
@@ -239,31 +257,29 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
             marginTop: "16px",
             background: "#FFF8E7",
             borderRadius: "18px",
-            padding: "14px 14px 12px",
+            padding: "14px",
           }}
         >
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-              gap: "8px",
+              gap: "10px",
             }}
           >
             {[
-              { label: "Nuevos", value: lessonSummary.nuevos },
-              { label: "Aprendiendo", value: lessonSummary.aprendiendo },
-              { label: "En repaso", value: lessonSummary.en_repaso },
-              { label: "Dominados", value: lessonSummary.dominados },
+              { label: "Nuevas", value: lessonSummary.nuevos },
               { label: "Pendientes", value: lessonSummary.pendientes },
-              { label: "Débiles", value: lessonSummary.debiles },
+              { label: "Dominadas", value: lessonSummary.dominados },
             ].map((item) => (
               <div
                 key={item.label}
                 style={{
                   background: "#FFFFFF",
                   borderRadius: "14px",
-                  padding: "10px 10px 9px",
+                  padding: "12px 10px 10px",
                   boxShadow: "0 2px 8px rgba(26,26,46,0.05)",
+                  textAlign: "center",
                 }}
               >
                 <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, color: "#9CA3AF", lineHeight: 1.2 }}>
@@ -275,8 +291,6 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
               </div>
             ))}
           </div>
-
-          <p style={{ margin: "10px 2px 0", fontSize: "13px", color: "#6B7280", lineHeight: 1.35 }}>{lessonHelper}</p>
         </div>
       </div>
 
@@ -291,13 +305,10 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
       >
         <div>
           <p style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF", margin: 0 }}>
-            ELIGE CÓMO CONTINUAR
+            CÓMO QUIERES ESTUDIAR
           </p>
           <p style={{ fontSize: "20px", fontWeight: 800, color: "#1A1A2E", margin: "6px 0 0" }}>
-            Aprende vocabulario nuevo o practica lo que ya viste
-          </p>
-          <p style={{ fontSize: "14px", color: "#6B7280", margin: "4px 0 0", lineHeight: 1.45 }}>
-            La app te recomienda un camino según el estado real de esta lección.
+            Elige entre aprender o practicar esta lección
           </p>
         </div>
 
@@ -309,34 +320,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
             gap: "12px",
           }}
         >
-          {[
-            {
-              key: "aprender" as const,
-              title: "Aprender",
-              body: "Repasa tarjetas y familiarízate con palabras nuevas antes de ponerte a prueba.",
-              buttonLabel: "Abrir Aprender",
-              onClick: goToLearnSession,
-              background: recommendedMode === "aprender" ? "#FFF1F2" : "#FFF8E7",
-              border: recommendedMode === "aprender" ? "1px solid rgba(230,57,70,0.22)" : "1px solid rgba(26,26,46,0.06)",
-              buttonBackground: "#E63946",
-              buttonColor: "#FFFFFF",
-              accent: "#E63946",
-              recommended: recommendedMode === "aprender",
-            },
-            {
-              key: "practicar" as const,
-              title: "Practicar",
-              body: "Reconoce significados y refuerza lo que ya viste con una sesión objetiva.",
-              buttonLabel: nextAction.targetMode === "practicar" ? nextAction.label : "Abrir Practicar",
-              onClick: goToPracticeSession,
-              background: recommendedMode === "practicar" ? "#F5FCFB" : "#FFF8E7",
-              border: recommendedMode === "practicar" ? "1px solid rgba(78,205,196,0.28)" : "1px solid rgba(26,26,46,0.06)",
-              buttonBackground: recommendedMode === "practicar" ? "#1A1A2E" : "#4ECDC4",
-              buttonColor: recommendedMode === "practicar" ? "#FFFFFF" : "#1A1A2E",
-              accent: "#0F766E",
-              recommended: recommendedMode === "practicar",
-            },
-          ].map((action) => (
+          {actionCards.map((action) => (
             <div
               key={action.key}
               style={{
@@ -369,11 +353,10 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                 ) : null}
               </div>
               <p style={{ margin: 0, fontSize: "14px", color: "#6B7280", lineHeight: 1.45 }}>{action.body}</p>
-              {action.recommended && action.key === "practicar" ? (
-                <p style={{ margin: 0, fontSize: "13px", color: "#0F766E", lineHeight: 1.4 }}>{nextAction.helper}</p>
-              ) : null}
-              {action.recommended && action.key === "aprender" ? (
-                <p style={{ margin: 0, fontSize: "13px", color: "#E63946", lineHeight: 1.4 }}>{nextAction.helper}</p>
+              {action.recommended ? (
+                <p style={{ margin: 0, fontSize: "12px", color: action.accent, lineHeight: 1.35, fontWeight: 700 }}>
+                  {nextAction.label}
+                </p>
               ) : null}
               <button
                 onClick={action.onClick}
