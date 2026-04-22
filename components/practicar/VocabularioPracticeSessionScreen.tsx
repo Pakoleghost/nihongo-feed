@@ -159,6 +159,38 @@ type Props = {
   initialFocusKey?: PracticeSessionSortKey | null;
 };
 
+function getVocabPracticeTitle() {
+  return "Práctica de vocabulario";
+}
+
+function getVocabPracticeHelper(context: PracticeSessionContext) {
+  switch (context.sortKey) {
+    case "practice_due":
+      return "Repasa lo que ya toca reforzar.";
+    case "practice_weak":
+      return "Refuerza las palabras que más cuestan.";
+    case "practice_now":
+      return "Practica lo que ya viste en Aprender.";
+    case "review_lesson":
+    default:
+      return "Repaso breve de esta lección.";
+  }
+}
+
+function getVocabSessionTag(context: PracticeSessionContext) {
+  switch (context.sortKey) {
+    case "practice_due":
+      return "Pendientes";
+    case "practice_weak":
+      return "Débiles";
+    case "practice_now":
+      return "Lo visto";
+    case "review_lesson":
+    default:
+      return "Repaso";
+  }
+}
+
 export default function VocabularioPracticeSessionScreen({ initialLesson, initialFocusKey = null }: Props) {
   const router = useRouter();
   const [progress, setProgress] = useState<VocabProgressMap>(() =>
@@ -257,8 +289,8 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
           moduleName="Vocabulario"
           lesson={lesson}
           lessonTitle={lessonTitle}
-          sessionLabel="Práctica de la lección"
-          sessionHelper="No hay vocabulario disponible para esta sesión."
+          sessionLabel="Práctica de vocabulario"
+          sessionHelper="No hay vocabulario en esta sesión."
           progressCurrent={0}
           progressTotal={0}
           progressPct={0}
@@ -278,8 +310,8 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
         moduleName="Vocabulario"
         lesson={lesson}
         lessonTitle={lessonTitle}
-        sessionLabel={sessionContext.label}
-        sessionHelper={sessionContext.helper}
+        sessionLabel={getVocabPracticeTitle()}
+        sessionHelper={getVocabPracticeHelper(sessionContext)}
         progressCurrent={currentQuestionIndex + 1}
         progressTotal={questions.length}
         progressPct={practiceProgressPct}
@@ -290,59 +322,56 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
         onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
       />
 
-      <div style={{ marginTop: "18px", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+      <div style={{ marginTop: "12px", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
         {practiceResult ? (
           <div
             style={{
               background: "#FFFFFF",
               borderRadius: "24px",
-              padding: "28px 24px",
+              padding: "22px 20px",
               boxShadow: "0 8px 28px rgba(26,26,46,0.08)",
               display: "flex",
               flexDirection: "column",
-              gap: "14px",
+              gap: "12px",
               flex: 1,
               justifyContent: "center",
             }}
           >
             <div>
-              <p style={{ margin: 0, fontSize: "24px", fontWeight: 800, color: "#1A1A2E" }}>Sesión completada</p>
+              <p style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "#1A1A2E" }}>Sesión completada</p>
               <div
                 style={{
                   display: "inline-flex",
-                  marginTop: "10px",
+                  marginTop: "8px",
                   background: "#F5FCFB",
                   color: "#0F766E",
                   borderRadius: "999px",
-                  padding: "8px 12px",
-                  fontSize: "13px",
+                  padding: "7px 11px",
+                  fontSize: "12px",
                   fontWeight: 800,
                 }}
               >
-                {sessionContext.label} · L{lesson}
+                {getVocabSessionTag(sessionContext)} · L{lesson}
               </div>
             </div>
-            <p style={{ margin: 0, fontSize: "15px", color: "#1A1A2E", lineHeight: 1.45 }}>
-              Practicaste {practiceResult.practiced} · {practiceResult.correct} correctas ·{" "}
+            <p style={{ margin: 0, fontSize: "14px", color: "#1A1A2E", lineHeight: 1.4 }}>
+              {practiceResult.practiced} ítems · {practiceResult.correct} correctas ·{" "}
               {practiceResult.incorrect} incorrectas
-            </p>
-            <p style={{ margin: 0, fontSize: "14px", color: "#6B7280", lineHeight: 1.45 }}>
-              {sessionContext.helper}
             </p>
             <div
               style={{
                 background: "#FFF8E7",
                 borderRadius: "18px",
-                padding: "14px 16px",
+                padding: "12px 14px",
               }}
             >
-              <p style={{ margin: 0, fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
+              <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
                 QUÉ SIGUE
               </p>
-              <p style={{ margin: "6px 0 0", fontSize: "16px", fontWeight: 800, color: "#1A1A2E" }}>
+              <p style={{ margin: "5px 0 0", fontSize: "15px", fontWeight: 800, color: "#1A1A2E" }}>
                 {nextAction.label}
               </p>
-              <p style={{ margin: "4px 0 0", fontSize: "14px", color: "#6B7280", lineHeight: 1.4 }}>
+              <p style={{ margin: "3px 0 0", fontSize: "13px", color: "#6B7280", lineHeight: 1.35 }}>
                 {nextAction.helper}
               </p>
             </div>
@@ -350,14 +379,14 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
               <button
                 onClick={() => startSession(sessionContext)}
                 style={{
-                  padding: "14px 18px",
+                  padding: "13px 16px",
                   borderRadius: "999px",
                   border: "none",
                   cursor: "pointer",
                   background: "#1A1A2E",
                   color: "#FFFFFF",
                   fontWeight: 800,
-                  fontSize: "15px",
+                  fontSize: "14px",
                 }}
               >
                 Otra sesión
@@ -365,14 +394,14 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
               <button
                 onClick={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
                 style={{
-                  padding: "14px 18px",
+                  padding: "13px 16px",
                   borderRadius: "999px",
                   border: "none",
                   cursor: "pointer",
                   background: "#4ECDC4",
                   color: "#1A1A2E",
                   fontWeight: 800,
-                  fontSize: "15px",
+                  fontSize: "14px",
                 }}
               >
                 Volver al módulo
@@ -385,13 +414,13 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
               style={{
                 background: "#FFFFFF",
                 borderRadius: "24px",
-                padding: "28px 24px",
+                padding: "22px 20px",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 boxShadow: "0 4px 20px rgba(26,26,46,0.08)",
-                minHeight: "min(36dvh, 340px)",
+                minHeight: "min(30dvh, 270px)",
                 textAlign: "center",
               }}
             >
@@ -401,20 +430,20 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  marginBottom: "16px",
+                  marginBottom: "10px",
                   gap: "12px",
                 }}
               >
-                <span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
-                  PALABRA
-                </span>
+                  <span style={{ fontSize: "10px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
+                    PALABRA
+                  </span>
                 <span
                   style={{
                     background: currentQuestion.source.kanji ? "#FFF8E7" : "#F5FCFB",
                     color: "#6B7280",
                     borderRadius: "999px",
-                    padding: "7px 10px",
-                    fontSize: "12px",
+                    padding: "6px 9px",
+                    fontSize: "11px",
                     fontWeight: 700,
                   }}
                 >
@@ -423,7 +452,7 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
               </div>
               <p
                 style={{
-                  fontSize: "64px",
+                  fontSize: "56px",
                   fontWeight: 800,
                   color: "#1A1A2E",
                   margin: 0,
@@ -437,20 +466,20 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
               {currentQuestion.item.reading !== currentQuestion.item.display && (
                 <div
                   style={{
-                    marginTop: "16px",
+                    marginTop: "12px",
                     background: "#FFF8E7",
                     borderRadius: "18px",
-                    padding: "12px 16px",
+                    padding: "10px 14px",
                     minWidth: "min(100%, 240px)",
                   }}
                 >
-                  <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
+                  <p style={{ margin: 0, fontSize: "10px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
                     LECTURA
                   </p>
                   <p
                     style={{
                       margin: "6px 0 0",
-                      fontSize: "22px",
+                      fontSize: "20px",
                       fontWeight: 800,
                       color: "#1A1A2E",
                       fontFamily: "var(--font-noto-sans-jp), sans-serif",
@@ -460,8 +489,8 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
                   </p>
                 </div>
               )}
-              <p style={{ margin: "16px 0 0", fontSize: "13px", color: "#9CA3AF", lineHeight: 1.4 }}>
-                Elige el significado más preciso para esta palabra.
+              <p style={{ margin: "12px 0 0", fontSize: "12px", color: "#9CA3AF", lineHeight: 1.35 }}>
+                Elige el significado correcto.
               </p>
             </div>
 
@@ -469,8 +498,8 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-                paddingTop: "16px",
+                gap: "10px",
+                paddingTop: "12px",
                 paddingBottom: "4px",
               }}
             >
@@ -496,18 +525,18 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
                     onClick={() => handleOption(option)}
                     disabled={quizPhase === "feedback"}
                     style={{
-                      padding: "16px 14px",
+                      padding: "14px 12px",
                       borderRadius: "18px",
                       border: "none",
                       cursor: quizPhase === "feedback" ? "default" : "pointer",
                       background,
                       color,
-                      fontSize: "15px",
+                      fontSize: "14px",
                       fontWeight: 700,
                       boxShadow: "0 4px 14px rgba(26,26,46,0.08)",
                       transition: "background 0.15s",
                       textAlign: "left",
-                      minHeight: "88px",
+                      minHeight: "76px",
                       display: "flex",
                       alignItems: "flex-start",
                       gap: "12px",
@@ -515,8 +544,8 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
                   >
                     <span
                       style={{
-                        width: "26px",
-                        height: "26px",
+                        width: "24px",
+                        height: "24px",
                         borderRadius: "50%",
                         background:
                           quizPhase === "feedback" && isCorrectOption
@@ -526,7 +555,7 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        fontSize: "13px",
+                        fontSize: "12px",
                         fontWeight: 800,
                         flexShrink: 0,
                       }}

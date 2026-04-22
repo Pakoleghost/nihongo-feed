@@ -111,8 +111,8 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
           moduleName="Vocabulario"
           lesson={lesson}
           lessonTitle={lessonTitle}
-          sessionLabel="Aprender la lección"
-          sessionHelper="No hay vocabulario disponible para esta lección."
+          sessionLabel="Aprender vocabulario"
+          sessionHelper="No hay vocabulario en esta lección."
           progressCurrent={0}
           progressTotal={0}
           progressPct={0}
@@ -132,8 +132,8 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
         moduleName="Vocabulario"
         lesson={lesson}
         lessonTitle={lessonTitle}
-        sessionLabel="Aprender la lección"
-        sessionHelper="Repasa las tarjetas y familiarízate con el vocabulario antes de practicar."
+        sessionLabel="Aprender vocabulario"
+        sessionHelper="Mira las palabras nuevas antes de practicar."
         progressCurrent={currentCardIndex + 1}
         progressTotal={cards.length}
         progressPct={learnProgressPct}
@@ -144,40 +144,39 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
         onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
       />
 
-      <div style={{ marginTop: "18px", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+      <div style={{ marginTop: "12px", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
         {cardsDone ? (
           <div
             style={{
               background: "#FFFFFF",
               borderRadius: "24px",
-              padding: "28px 24px",
+              padding: "22px 20px",
               boxShadow: "0 8px 28px rgba(26,26,46,0.08)",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
               textAlign: "center",
-              gap: "12px",
+              gap: "10px",
               flex: 1,
             }}
           >
-            <p style={{ fontSize: "40px", margin: 0 }}>🎉</p>
-            <p style={{ fontSize: "24px", fontWeight: 800, color: "#1A1A2E", margin: 0 }}>Lección repasada</p>
-            <p style={{ fontSize: "15px", color: "#6B7280", margin: 0, lineHeight: 1.45 }}>
-              Marcaste {known} de {cards.length} como conocidas.
+            <p style={{ fontSize: "22px", fontWeight: 800, color: "#1A1A2E", margin: 0 }}>Lección repasada</p>
+            <p style={{ fontSize: "14px", color: "#6B7280", margin: 0, lineHeight: 1.4 }}>
+              Conocías {known} de {cards.length}.
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%", marginTop: "8px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%", marginTop: "4px" }}>
               <button
                 onClick={restartLearnSession}
                 style={{
-                  padding: "14px 18px",
+                  padding: "13px 16px",
                   borderRadius: "999px",
                   border: "none",
                   cursor: "pointer",
                   background: "#E63946",
                   color: "#FFFFFF",
                   fontWeight: 700,
-                  fontSize: "15px",
+                  fontSize: "14px",
                 }}
               >
                 Repetir lección
@@ -185,14 +184,14 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
               <button
                 onClick={() => router.push(`/practicar/vocabulario/practicar?lesson=${lesson}`)}
                 style={{
-                  padding: "14px 18px",
+                  padding: "13px 16px",
                   borderRadius: "999px",
                   border: "none",
                   cursor: "pointer",
                   background: "#4ECDC4",
                   color: "#1A1A2E",
                   fontWeight: 800,
-                  fontSize: "15px",
+                  fontSize: "14px",
                 }}
               >
                 Ir a practicar
@@ -201,15 +200,15 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
             <button
               onClick={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
               style={{
-                marginTop: "4px",
-                padding: "12px 18px",
+                marginTop: "2px",
+                padding: "11px 16px",
                 borderRadius: "999px",
                 border: "none",
                 cursor: "pointer",
                 background: "#FFFFFF",
                 color: "#1A1A2E",
                 fontWeight: 700,
-                fontSize: "14px",
+                fontSize: "13px",
                 boxShadow: "0 2px 10px rgba(26,26,46,0.08)",
               }}
             >
@@ -223,24 +222,23 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: "10px",
+                marginBottom: "8px",
               }}
             >
-              <span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.1em", color: "#9CA3AF" }}>
+              <span style={{ fontSize: "10px", fontWeight: 800, letterSpacing: "0.1em", color: "#9CA3AF" }}>
                 REPASO
               </span>
-              <span style={{ fontSize: "13px", fontWeight: 700, color: "#E63946" }}>
+              <span style={{ fontSize: "12px", fontWeight: 700, color: "#E63946" }}>
                 {known} conocidas
               </span>
             </div>
 
-            <div style={{ perspective: "1200px", flex: 1, cursor: "pointer" }} onClick={() => setFlipped((value) => !value)}>
+            <div style={{ perspective: "1200px", cursor: "pointer" }} onClick={() => setFlipped((value) => !value)}>
               <div
                 style={{
                   position: "relative",
                   width: "100%",
-                  minHeight: "320px",
-                  height: "100%",
+                  minHeight: "280px",
                   transformStyle: "preserve-3d",
                   transition: "transform 0.45s cubic-bezier(0.4,0,0.2,1)",
                   transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
@@ -257,14 +255,14 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: "8px",
-                    padding: "32px",
+                    gap: "6px",
+                    padding: "24px",
                     boxShadow: "0 8px 32px rgba(26,26,46,0.09)",
                   }}
                 >
                   <p
                     style={{
-                      fontSize: "60px",
+                      fontSize: "54px",
                       fontWeight: 800,
                       color: "#1A1A2E",
                       margin: 0,
@@ -278,7 +276,7 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                   {currentCard.kanji && (
                     <p
                       style={{
-                        fontSize: "20px",
+                        fontSize: "18px",
                         color: "#9CA3AF",
                         margin: 0,
                         fontFamily: "var(--font-noto-sans-jp), sans-serif",
@@ -287,7 +285,7 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                       {currentCard.hira}
                     </p>
                   )}
-                  <p style={{ fontSize: "13px", color: "#C4BAB0", margin: "24px 0 0" }}>Toca para ver el significado</p>
+                  <p style={{ fontSize: "12px", color: "#C4BAB0", margin: "16px 0 0" }}>Toca para ver el significado</p>
                 </div>
 
                 <div
@@ -302,13 +300,13 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    padding: "32px",
+                    padding: "24px",
                     boxShadow: "0 8px 32px rgba(26,26,46,0.09)",
                   }}
                 >
                   <p
                     style={{
-                      fontSize: "26px",
+                      fontSize: "24px",
                       fontWeight: 700,
                       color: "#1A1A2E",
                       margin: 0,
@@ -322,18 +320,18 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "16px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "12px" }}>
               <button
                 onClick={() => handleKnow(false)}
                 style={{
-                  padding: "18px 12px",
+                  padding: "16px 12px",
                   borderRadius: "999px",
                   border: "none",
                   cursor: "pointer",
                   background: "#E63946",
                   color: "#FFFFFF",
                   fontWeight: 700,
-                  fontSize: "16px",
+                  fontSize: "15px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -347,14 +345,14 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
               <button
                 onClick={() => handleKnow(true)}
                 style={{
-                  padding: "18px 12px",
+                  padding: "16px 12px",
                   borderRadius: "999px",
                   border: "none",
                   cursor: "pointer",
                   background: "#4ECDC4",
                   color: "#1A1A2E",
                   fontWeight: 700,
-                  fontSize: "16px",
+                  fontSize: "15px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

@@ -13,10 +13,10 @@ export default function PracticeSessionLayout({ children }: PracticeSessionLayou
           "radial-gradient(circle at top, rgba(255,255,255,0.72) 0%, rgba(255,248,231,0.98) 34%, #FFF8E7 100%)",
         display: "flex",
         flexDirection: "column",
-        paddingTop: "max(16px, env(safe-area-inset-top))",
-        paddingRight: "20px",
-        paddingBottom: "max(24px, calc(env(safe-area-inset-bottom) + 24px))",
-        paddingLeft: "20px",
+        paddingTop: "max(10px, env(safe-area-inset-top))",
+        paddingRight: "18px",
+        paddingBottom: "max(20px, calc(env(safe-area-inset-bottom) + 20px))",
+        paddingLeft: "18px",
         overscrollBehavior: "contain",
       }}
     >

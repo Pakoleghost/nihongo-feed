@@ -38,14 +38,14 @@ export default function PracticeSessionHeader({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: "16px",
+          gap: "12px",
         }}
       >
         <button
           onClick={onExit}
           style={{
-            width: "40px",
-            height: "40px",
+            width: "36px",
+            height: "36px",
             borderRadius: "50%",
             background: "#FFFFFF",
             border: "none",
@@ -67,37 +67,37 @@ export default function PracticeSessionHeader({
           style={{
             background: accentSurface,
             borderRadius: "999px",
-            padding: "7px 14px",
+            padding: "6px 12px",
             display: "flex",
             alignItems: "center",
             gap: "6px",
           }}
         >
-          <span style={{ fontSize: "13px", fontWeight: 800, color: accentColor }}>{moduleName}</span>
-          <span style={{ fontSize: "13px", color: "#6B7280" }}>
+          <span style={{ fontSize: "12px", fontWeight: 800, color: accentColor }}>{moduleName}</span>
+          <span style={{ fontSize: "12px", color: "#6B7280" }}>
             L{lesson} · {lessonTitle}
           </span>
         </div>
       </div>
 
-      <div style={{ marginTop: "18px" }}>
+      <div style={{ marginTop: "12px" }}>
         <p
           style={{
-            fontSize: "32px",
+            fontSize: "24px",
             fontWeight: 800,
             color: "#1A1A2E",
             margin: 0,
-            lineHeight: 1.05,
+            lineHeight: 1.08,
           }}
         >
           {sessionLabel}
         </p>
         <p
           style={{
-            fontSize: "14px",
+            fontSize: "13px",
             color: "#6B7280",
-            margin: "8px 0 0",
-            lineHeight: 1.45,
+            margin: "6px 0 0",
+            lineHeight: 1.4,
           }}
         >
           {sessionHelper}
@@ -106,10 +106,10 @@ export default function PracticeSessionHeader({
 
       <div
         style={{
-          marginTop: "16px",
+          marginTop: "12px",
           background: "#FFFFFF",
-          borderRadius: "18px",
-          padding: "14px 16px",
+          borderRadius: "16px",
+          padding: "12px 14px",
           boxShadow: "0 4px 14px rgba(26,26,46,0.06)",
         }}
       >
@@ -119,13 +119,13 @@ export default function PracticeSessionHeader({
             justifyContent: "space-between",
             alignItems: "center",
             gap: "12px",
-            marginBottom: "10px",
+            marginBottom: "8px",
           }}
         >
-          <span style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
+          <span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
             SESIÓN
           </span>
-          <span style={{ fontSize: "13px", fontWeight: 700, color: accentColor }}>
+          <span style={{ fontSize: "12px", fontWeight: 700, color: accentColor }}>
             {metricValue} {metricLabel}
           </span>
         </div>
@@ -134,18 +134,18 @@ export default function PracticeSessionHeader({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: "8px",
+            marginBottom: "6px",
             gap: "12px",
           }}
         >
-          <span style={{ fontSize: "14px", fontWeight: 700, color: "#1A1A2E" }}>
+          <span style={{ fontSize: "13px", fontWeight: 700, color: "#1A1A2E" }}>
             {Math.min(progressCurrent, progressTotal)}/{progressTotal || 0}
           </span>
-          <span style={{ fontSize: "13px", color: "#6B7280" }}>Progreso de la práctica</span>
+          <span style={{ fontSize: "12px", color: "#6B7280" }}>Progreso</span>
         </div>
         <div
           style={{
-            height: "5px",
+            height: "4px",
             background: "#E5E7EB",
             borderRadius: "999px",
             overflow: "hidden",

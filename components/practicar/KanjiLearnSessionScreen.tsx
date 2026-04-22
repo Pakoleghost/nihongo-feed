@@ -110,8 +110,8 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
           moduleName="Kanji"
           lesson={lesson}
           lessonTitle={lessonTitle}
-          sessionLabel="Aprender la lección"
-          sessionHelper="No hay palabras con kanji disponibles para esta lección."
+          sessionLabel="Aprender lectura"
+          sessionHelper="No hay palabras con kanji en esta lección."
           progressCurrent={0}
           progressTotal={0}
           progressPct={0}
@@ -131,8 +131,8 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
         moduleName="Kanji"
         lesson={lesson}
         lessonTitle={lessonTitle}
-        sessionLabel="Aprender la lección"
-        sessionHelper="Estudia forma, lectura y significado antes de practicar la lectura."
+        sessionLabel="Aprender lectura"
+        sessionHelper="Revisa lectura y significado antes de practicar."
         progressCurrent={currentStudyIndex + 1}
         progressTotal={studyItems.length}
         progressPct={studyProgressPct}
@@ -143,40 +143,39 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
         onExit={() => router.push(`/practicar/kanji?lesson=${lesson}`)}
       />
 
-      <div style={{ marginTop: "18px", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+      <div style={{ marginTop: "12px", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
         {studyComplete ? (
           <div
             style={{
               background: "#FFFFFF",
               borderRadius: "24px",
-              padding: "28px 24px",
+              padding: "22px 20px",
               boxShadow: "0 8px 28px rgba(26,26,46,0.08)",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
               textAlign: "center",
-              gap: "12px",
+              gap: "10px",
               flex: 1,
             }}
           >
-            <p style={{ fontSize: "40px", margin: 0 }}>🎉</p>
-            <p style={{ fontSize: "24px", fontWeight: 800, color: "#1A1A2E", margin: 0 }}>Lección repasada</p>
-            <p style={{ fontSize: "15px", color: "#6B7280", margin: 0, lineHeight: 1.45 }}>
-              Revisaste {studyItems.length} palabras con kanji de esta lección.
+            <p style={{ fontSize: "22px", fontWeight: 800, color: "#1A1A2E", margin: 0 }}>Lección repasada</p>
+            <p style={{ fontSize: "14px", color: "#6B7280", margin: 0, lineHeight: 1.4 }}>
+              Revisaste {studyItems.length} palabras.
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%", marginTop: "8px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%", marginTop: "4px" }}>
               <button
                 onClick={restartLearnSession}
                 style={{
-                  padding: "14px 18px",
+                  padding: "13px 16px",
                   borderRadius: "999px",
                   border: "none",
                   cursor: "pointer",
                   background: "#E63946",
                   color: "#FFFFFF",
                   fontWeight: 700,
-                  fontSize: "15px",
+                  fontSize: "14px",
                 }}
               >
                 Repetir lección
@@ -184,14 +183,14 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
               <button
                 onClick={() => router.push(`/practicar/kanji/practicar?lesson=${lesson}`)}
                 style={{
-                  padding: "14px 18px",
+                  padding: "13px 16px",
                   borderRadius: "999px",
                   border: "none",
                   cursor: "pointer",
                   background: "#4ECDC4",
                   color: "#1A1A2E",
                   fontWeight: 800,
-                  fontSize: "15px",
+                  fontSize: "14px",
                 }}
               >
                 Ir a practicar
@@ -200,15 +199,15 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
             <button
               onClick={() => router.push(`/practicar/kanji?lesson=${lesson}`)}
               style={{
-                marginTop: "4px",
-                padding: "12px 18px",
+                marginTop: "2px",
+                padding: "11px 16px",
                 borderRadius: "999px",
                 border: "none",
                 cursor: "pointer",
                 background: "#FFFFFF",
                 color: "#1A1A2E",
                 fontWeight: 700,
-                fontSize: "14px",
+                fontSize: "13px",
                 boxShadow: "0 2px 10px rgba(26,26,46,0.08)",
               }}
             >
@@ -222,32 +221,31 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: "8px",
+                marginBottom: "6px",
               }}
             >
-              <span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.1em", color: "#9CA3AF" }}>
+              <span style={{ fontSize: "10px", fontWeight: 800, letterSpacing: "0.1em", color: "#9CA3AF" }}>
                 ESTUDIO
               </span>
-              <span style={{ fontSize: "13px", fontWeight: 700, color: "#E63946" }}>Lectura + apoyo</span>
+              <span style={{ fontSize: "12px", fontWeight: 700, color: "#E63946" }}>Lectura + apoyo</span>
             </div>
 
             <div
               style={{
                 background: "#FFFFFF",
                 borderRadius: "24px",
-                padding: "30px 24px",
+                padding: "22px 20px",
                 boxShadow: "0 8px 28px rgba(26,26,46,0.08)",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 textAlign: "center",
-                flex: 1,
                 justifyContent: "center",
               }}
             >
               <p
                 style={{
-                  fontSize: "64px",
+                  fontSize: "56px",
                   fontWeight: 800,
                   color: "#1A1A2E",
                   margin: 0,
@@ -259,20 +257,20 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
               </p>
               <div
                 style={{
-                  marginTop: "18px",
+                  marginTop: "14px",
                   background: "#FFF8E7",
                   borderRadius: "18px",
-                  padding: "14px 16px",
+                  padding: "12px 14px",
                   width: "100%",
                 }}
               >
-                <p style={{ margin: 0, fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
+                <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
                   LECTURA
                 </p>
                 <p
                   style={{
                     margin: "6px 0 0",
-                    fontSize: "28px",
+                    fontSize: "24px",
                     fontWeight: 800,
                     color: "#1A1A2E",
                     fontFamily: "var(--font-noto-sans-jp), sans-serif",
@@ -283,35 +281,35 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
               </div>
               <div
                 style={{
-                  marginTop: "12px",
+                  marginTop: "10px",
                   background: "#F5FCFB",
                   borderRadius: "18px",
-                  padding: "14px 16px",
+                  padding: "12px 14px",
                   width: "100%",
                 }}
               >
-                <p style={{ margin: 0, fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
+                <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
                   SIGNIFICADO
                 </p>
-                <p style={{ margin: "6px 0 0", fontSize: "18px", fontWeight: 700, color: "#1A1A2E", lineHeight: 1.35 }}>
+                <p style={{ margin: "6px 0 0", fontSize: "16px", fontWeight: 700, color: "#1A1A2E", lineHeight: 1.35 }}>
                   {currentStudyItem.es}
                 </p>
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "16px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "12px" }}>
               <button
                 onClick={() => setCurrentStudyIndex((value) => Math.max(0, value - 1))}
                 disabled={currentStudyIndex === 0}
                 style={{
-                  padding: "16px 12px",
+                  padding: "14px 12px",
                   borderRadius: "999px",
                   border: "none",
                   cursor: currentStudyIndex === 0 ? "default" : "pointer",
                   background: currentStudyIndex === 0 ? "#E5E7EB" : "#FFFFFF",
                   color: currentStudyIndex === 0 ? "#9CA3AF" : "#1A1A2E",
                   fontWeight: 700,
-                  fontSize: "16px",
+                  fontSize: "15px",
                   boxShadow: currentStudyIndex === 0 ? "none" : "0 4px 16px rgba(26,26,46,0.08)",
                 }}
               >
@@ -320,14 +318,14 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
               <button
                 onClick={handleNext}
                 style={{
-                  padding: "16px 12px",
+                  padding: "14px 12px",
                   borderRadius: "999px",
                   border: "none",
                   cursor: "pointer",
                   background: "#4ECDC4",
                   color: "#1A1A2E",
                   fontWeight: 800,
-                  fontSize: "16px",
+                  fontSize: "15px",
                   boxShadow: "0 4px 16px rgba(78,205,196,0.28)",
                 }}
               >
