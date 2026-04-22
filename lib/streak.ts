@@ -4,6 +4,26 @@ const ACTIVITY_KEY = "app-last-activity";
 type StreakData = { count: number; lastActiveDate: string };
 type ActivityData = { label: string; path: string };
 
+function normalizeActivity(activity: ActivityData): ActivityData {
+  if (activity.path === "/practicar/flashcards") {
+    return { label: "Vocabulario", path: "/practicar/vocabulario" };
+  }
+
+  if (activity.path === "/practicar/vocab") {
+    return { label: "Kanji", path: "/practicar/kanji" };
+  }
+
+  if (activity.label === "Flashcards") {
+    return { ...activity, label: "Vocabulario" };
+  }
+
+  if (activity.label === "Vocab y Kanji") {
+    return { ...activity, label: "Kanji" };
+  }
+
+  return activity;
+}
+
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -49,7 +69,7 @@ export function getLastActivity(): ActivityData | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(ACTIVITY_KEY);
-    return raw ? (JSON.parse(raw) as ActivityData) : null;
+    return raw ? normalizeActivity(JSON.parse(raw) as ActivityData) : null;
   } catch {
     return null;
   }
@@ -58,6 +78,6 @@ export function getLastActivity(): ActivityData | null {
 export function setLastActivity(label: string, path: string): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(ACTIVITY_KEY, JSON.stringify({ label, path }));
+    localStorage.setItem(ACTIVITY_KEY, JSON.stringify(normalizeActivity({ label, path })));
   } catch {}
 }

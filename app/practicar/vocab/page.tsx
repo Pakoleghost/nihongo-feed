@@ -1,14 +1,5 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import KanjiQuizScreen from "@/components/practicar/KanjiQuizScreen";
-
-export default function VocabPage() {
-  return (
-    <KanjiQuizScreen
-      initialType="vocab"
-      allowTypeToggle
-      activityLabel="Vocab y Kanji"
-      activityPath="/practicar/vocab"
-    />
-  );
+export default function VocabLegacyPage() {
+  redirect("/practicar/kanji");
 }

@@ -287,7 +287,7 @@ export default function InicioPage() {
       <div style={{ display: "flex", gap: "10px", marginTop: "20px", flexWrap: "wrap" }}>
         {[
           { label: "Kana Sprint", href: "/practicar/sprint" },
-          { label: "Vocab", href: "/practicar/vocab" },
+          { label: "Vocabulario", href: "/practicar/vocabulario" },
           { label: "Repaso", href: "/practicar/repaso" },
         ].map(({ label, href }) => (
           <Link

@@ -1,12 +1,5 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import VocabularioFlashcardsScreen from "@/components/practicar/VocabularioFlashcardsScreen";
-
-export default function FlashcardsPage() {
-  return (
-    <VocabularioFlashcardsScreen
-      activityPath="/practicar/flashcards"
-      activityLabelPrefix="Flashcards"
-    />
-  );
+export default function FlashcardsLegacyPage() {
+  redirect("/practicar/vocabulario");
 }
