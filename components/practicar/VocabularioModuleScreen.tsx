@@ -106,7 +106,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
       style={{
         minHeight: "100dvh",
         background: "#FFF8E7",
-        padding: "24px 24px 40px",
+        padding: "56px 24px 40px",
         fontFamily: "var(--font-study), var(--font-latin), sans-serif",
       }}
     >
@@ -116,7 +116,6 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
           alignItems: "center",
           justifyContent: "space-between",
           gap: "16px",
-          paddingTop: "8px",
         }}
       >
         <button
@@ -161,11 +160,11 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
         <h1
           style={{
             margin: 0,
-            fontSize: "72px",
-            lineHeight: 0.94,
+            fontSize: "30px",
+            lineHeight: 1.05,
             fontWeight: 800,
             color: "#1A1A2E",
-            letterSpacing: "-0.06em",
+            letterSpacing: "-0.03em",
           }}
         >
           Vocabulario
@@ -186,14 +185,49 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
       <div
         style={{
           marginTop: "28px",
+          display: "flex",
+          gap: "14px",
+          overflowX: "auto",
+          scrollbarWidth: "none",
+        }}
+      >
+        {LESSONS.map((value) => {
+          const active = lesson === value;
+          return (
+            <button
+              key={value}
+              onClick={() => selectLesson(value)}
+              style={{
+                flexShrink: 0,
+                minWidth: "96px",
+                height: "60px",
+                borderRadius: "999px",
+                border: "none",
+                boxShadow: active ? "none" : "inset 0 0 0 2px rgba(26,26,46,0.05)",
+                background: active ? "#1A1A2E" : "#FFF5E6",
+                color: active ? "#FFFFFF" : "#1A1A2E",
+                fontWeight: 800,
+                fontSize: "22px",
+                cursor: "pointer",
+              }}
+            >
+              L{value}
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        style={{
+          marginTop: "18px",
           background: "#FFFFFF",
           borderRadius: "2rem",
           padding: "24px",
           boxShadow: "0 16px 40px rgba(26,26,46,0.08)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px" }}>
-          <div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
             <p
               style={{
                 margin: 0,
@@ -207,12 +241,14 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
             </p>
             <p
               style={{
-                margin: "16px 0 0",
-                fontSize: "56px",
-                lineHeight: 0.98,
+                margin: "12px 0 0",
+                fontSize: "20px",
+                lineHeight: 1.2,
                 fontWeight: 800,
                 color: "#1A1A2E",
-                letterSpacing: "-0.05em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
               L{lesson} · {lessonTitle}
@@ -224,49 +260,15 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
               borderRadius: "999px",
               background: "rgba(78,205,196,0.18)",
               color: "#1A1A2E",
-              padding: "16px 22px",
-              fontSize: "18px",
+              padding: "14px 18px",
+              fontSize: "16px",
               fontWeight: 800,
               whiteSpace: "nowrap",
+              flexShrink: 0,
             }}
           >
             {lessonItems.length} palabras
           </div>
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            gap: "14px",
-            overflowX: "auto",
-            paddingTop: "24px",
-            scrollbarWidth: "none",
-          }}
-        >
-          {LESSONS.map((value) => {
-            const active = lesson === value;
-            return (
-              <button
-                key={value}
-                onClick={() => selectLesson(value)}
-                style={{
-                  flexShrink: 0,
-                  minWidth: "112px",
-                  height: "78px",
-                  borderRadius: "999px",
-                  border: "none",
-                  boxShadow: active ? "none" : "inset 0 0 0 2px rgba(26,26,46,0.05)",
-                  background: active ? "#1A1A2E" : "#FFF5E6",
-                  color: active ? "#FFFFFF" : "#1A1A2E",
-                  fontWeight: 800,
-                  fontSize: "28px",
-                  cursor: "pointer",
-                }}
-              >
-                L{value}
-              </button>
-            );
-          })}
         </div>
 
         <div
@@ -285,9 +287,9 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
             }}
           >
             {[
-              { label: "Nuevas", value: lessonSummary.nuevos, color: "#9CA3AF" },
-              { label: "Pendientes", value: lessonSummary.pendientes, color: "#E63946" },
-              { label: "Dominadas", value: lessonSummary.dominados, color: "#4ECDC4" },
+              { label: "NUEVAS", value: lessonSummary.nuevos, color: "#9CA3AF" },
+              { label: "PEND.", value: lessonSummary.pendientes, color: "#E63946" },
+              { label: "DOM.", value: lessonSummary.dominados, color: "#4ECDC4" },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -302,7 +304,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                 <p
                   style={{
                     margin: 0,
-                    fontSize: "15px",
+                    fontSize: "13px",
                     fontWeight: 800,
                     letterSpacing: "0.06em",
                     color: "#9CA3AF",
