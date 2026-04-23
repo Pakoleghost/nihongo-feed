@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
 import { getKanjiLessonSummary, loadKanjiProgress, type KanjiProgressMap } from "@/lib/kanji-progress";
-import { getPracticeSessionContext } from "@/lib/practice-srs";
+import { getPracticeNextAction, getPracticeSessionContext } from "@/lib/practice-srs";
 
 const LESSONS = Object.keys(GENKI_KANJI_BY_LESSON)
   .map(Number)
@@ -44,7 +44,9 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
     () => getKanjiLessonSummary(lesson, lessonItems, progress),
     [lesson, lessonItems, progress],
   );
+  const nextAction = useMemo(() => getPracticeNextAction(lessonSummary), [lessonSummary]);
   const practiceSessionContext = useMemo(() => getPracticeSessionContext(lessonSummary), [lessonSummary]);
+  const recommendedMode = nextAction.targetMode;
 
   useEffect(() => {
     setStreak(getStreak());
@@ -77,6 +79,7 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
   const actionCards = [
     {
       key: "learn",
+      mode: "aprender",
       title: "Aprender",
       subtitle: "Repasa kanjis nuevos",
       background: "#4ECDC4",
@@ -89,6 +92,7 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
     },
     {
       key: "practice",
+      mode: "practicar",
       title: "Practicar",
       subtitle: "Pon a prueba tu lectura",
       background: "#1A1A2E",
@@ -332,12 +336,24 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
       <div
         style={{
           marginTop: "12px",
-          background: "#FFFFFF",
+          background: recommendedMode === "practicar" ? "rgba(26,26,46,0.05)" : "rgba(255,255,255,0.78)",
           borderRadius: "2rem",
           padding: "12px",
-          boxShadow: "0 16px 40px rgba(26,26,46,0.08)",
+          boxShadow: "0 12px 30px rgba(26,26,46,0.06)",
         }}
       >
+        <p
+          style={{
+            margin: "0 0 10px",
+            fontSize: "11px",
+            letterSpacing: "0.12em",
+            fontWeight: 700,
+            color: "#9CA3AF",
+            textTransform: "uppercase",
+          }}
+        >
+          Cómo quieres estudiar
+        </p>
         <div
           style={{
             display: "flex",
@@ -345,86 +361,128 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
             gap: "8px",
           }}
         >
-          {actionCards.map((card) => (
-            <div
-              key={card.key}
-              style={{
-                position: "relative",
-                overflow: "hidden",
-                background: card.background,
-                color: card.color,
-                borderRadius: "2rem",
-                padding: "12px",
-                height: "120px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-              }}
-            >
-              <span
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  right: "16px",
-                  top: "14px",
-                  fontSize: "72px",
-                  fontWeight: 800,
-                  lineHeight: 1,
-                  opacity: 0.12,
-                  color: card.color,
-                  pointerEvents: "none",
-                }}
-              >
-                {card.deco}
-              </span>
+          {actionCards.map((card) => {
+            const isRecommended = card.mode === recommendedMode;
+            const surface =
+              card.key === "learn"
+                ? isRecommended
+                  ? "#4ECDC4"
+                  : "rgba(255,255,255,0.84)"
+                : isRecommended
+                  ? "#1A1A2E"
+                  : "rgba(255,255,255,0.84)";
+            const textColor = isRecommended ? card.color : "#1A1A2E";
+            const subColor =
+              card.key === "practice" && isRecommended
+                ? "rgba(255,255,255,0.82)"
+                : card.key === "learn" && isRecommended
+                  ? "rgba(26,26,46,0.72)"
+                  : "#6B7280";
 
-              <div style={{ position: "relative", zIndex: 1 }}>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "18px",
-                    lineHeight: 1,
-                    fontWeight: 700,
-                    color: card.color,
-                  }}
-                >
-                  {card.title}
-                </p>
-                <p
-                  style={{
-                    margin: "8px 0 0",
-                    fontSize: "12px",
-                    lineHeight: 1.2,
-                    fontWeight: 400,
-                    color: card.color,
-                    opacity: 0.8,
-                    maxWidth: "180px",
-                  }}
-                >
-                  {card.subtitle}
-                </p>
-              </div>
-
-              <button
-                onClick={card.onClick}
+            return (
+              <div
+                key={card.key}
                 style={{
                   position: "relative",
-                  zIndex: 1,
-                  alignSelf: "flex-start",
-                  border: "none",
-                  borderRadius: "3rem",
-                  background: card.buttonBackground,
-                  color: card.buttonColor,
-                  padding: "6px 16px",
-                  fontWeight: 600,
-                  fontSize: "12px",
-                  cursor: "pointer",
+                  overflow: "hidden",
+                  background: surface,
+                  color: textColor,
+                  borderRadius: "2rem",
+                  padding: isRecommended ? "14px" : "12px",
+                  height: isRecommended ? "124px" : "112px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  boxShadow: isRecommended
+                    ? "0 16px 36px rgba(26,26,46,0.12)"
+                    : "0 8px 18px rgba(26,26,46,0.05)",
+                  transform: isRecommended ? "translateY(-1px)" : "none",
                 }}
               >
-                {card.buttonLabel}
-              </button>
-            </div>
-          ))}
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    right: "16px",
+                    top: "14px",
+                    fontSize: isRecommended ? "78px" : "66px",
+                    fontWeight: 800,
+                    lineHeight: 1,
+                    opacity: isRecommended ? 0.14 : 0.08,
+                    color: textColor,
+                    pointerEvents: "none",
+                  }}
+                >
+                  {card.deco}
+                </span>
+
+                <div style={{ position: "relative", zIndex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: isRecommended ? "19px" : "17px",
+                        lineHeight: 1,
+                        fontWeight: 700,
+                        color: textColor,
+                      }}
+                    >
+                      {card.title}
+                    </p>
+                    {isRecommended ? (
+                      <span
+                        style={{
+                          borderRadius: "999px",
+                          background:
+                            card.key === "practice" ? "rgba(255,255,255,0.14)" : "rgba(26,26,46,0.12)",
+                          color: card.key === "practice" ? "#FFFFFF" : "#1A1A2E",
+                          padding: "4px 8px",
+                          fontSize: "10px",
+                          fontWeight: 800,
+                          letterSpacing: "0.04em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Recomendado
+                      </span>
+                    ) : null}
+                  </div>
+                  <p
+                    style={{
+                      margin: "8px 0 0",
+                      fontSize: "12px",
+                      lineHeight: 1.2,
+                      fontWeight: 400,
+                      color: subColor,
+                      maxWidth: "180px",
+                    }}
+                  >
+                    {card.subtitle}
+                  </p>
+                </div>
+
+                <button
+                  onClick={card.onClick}
+                  style={{
+                    position: "relative",
+                    zIndex: 1,
+                    alignSelf: "flex-start",
+                    border: "none",
+                    borderRadius: "3rem",
+                    background: isRecommended ? card.buttonBackground : "#1A1A2E",
+                    color: isRecommended ? card.buttonColor : "#FFFFFF",
+                    padding: isRecommended ? "7px 16px" : "6px 14px",
+                    fontWeight: 700,
+                    fontSize: "12px",
+                    cursor: "pointer",
+                    opacity: isRecommended ? 1 : 0.92,
+                  }}
+                >
+                  {card.buttonLabel}
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
