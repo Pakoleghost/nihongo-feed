@@ -743,7 +743,7 @@ function QuizContent() {
                 borderRadius: "20px",
                 background: "#F7F3ED",
                 border: `2px solid ${
-                  phase === "feedback" ? (feedbackIsHardCorrect ? "#4ECDC4" : "#E63946") : "transparent"
+                  phase === "feedback" ? (feedbackIsInputCorrect ? "#4ECDC4" : "#E63946") : "transparent"
                 }`,
                 padding: "6px 16px",
                 transition: "border-color 0.2s",
