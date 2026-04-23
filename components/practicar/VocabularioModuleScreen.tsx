@@ -124,7 +124,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
       >
         <button
           onClick={() => router.push("/practicar")}
-          aria-label="Cerrar"
+          aria-label="Volver"
           style={{
             width: "56px",
             height: "56px",
@@ -132,14 +132,23 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
             border: "none",
             background: "#FFFFFF",
             color: "#1A1A2E",
-            fontSize: "34px",
-            lineHeight: 1,
             cursor: "pointer",
             boxShadow: "0 10px 24px rgba(26,26,46,0.08)",
             flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          ×
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M15 18l-6-6 6-6"
+              stroke="#1A1A2E"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
 
         <div
@@ -363,20 +372,23 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
         >
           {actionCards.map((card) => {
             const isRecommended = card.mode === recommendedMode;
+            const isLearn = card.key === "learn";
             const surface =
-              card.key === "learn"
+              isLearn
                 ? isRecommended
-                  ? "#1A1A2E"
-                  : "rgba(255,255,255,0.84)"
+                  ? "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(245,252,251,0.96) 100%)"
+                  : "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,248,231,0.96) 100%)"
                 : isRecommended
                   ? "#E63946"
                   : "rgba(255,255,255,0.84)";
-            const textColor = isRecommended ? card.color : "#1A1A2E";
+            const textColor = isLearn ? "#1A1A2E" : isRecommended ? card.color : "#1A1A2E";
             const subColor =
-              card.key === "practice" && isRecommended
+              !isLearn && card.key === "practice" && isRecommended
                 ? "rgba(255,255,255,0.84)"
-                : card.key === "learn" && isRecommended
-                  ? "rgba(255,255,255,0.78)"
+                : isLearn && isRecommended
+                  ? "#5F6B7A"
+                  : isLearn
+                    ? "#6B7280"
                   : "#6B7280";
 
             return (
@@ -391,12 +403,29 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
+                  position: "relative",
+                  overflow: "hidden",
                   boxShadow: isRecommended
                     ? "0 16px 36px rgba(26,26,46,0.12)"
                     : "0 8px 18px rgba(26,26,46,0.05)",
                   transform: isRecommended ? "translateY(-1px)" : "none",
                 }}
               >
+                {isLearn ? (
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      right: "16px",
+                      top: "14px",
+                      width: "72px",
+                      height: "72px",
+                      borderRadius: "22px",
+                      background: isRecommended ? "rgba(78,205,196,0.18)" : "rgba(26,26,46,0.05)",
+                      transform: "rotate(14deg)",
+                    }}
+                  />
+                ) : null}
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <p
@@ -415,8 +444,8 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                         style={{
                           borderRadius: "999px",
                           background:
-                            card.key === "practice" ? "rgba(255,255,255,0.16)" : "rgba(78,205,196,0.18)",
-                          color: card.key === "practice" ? "#FFFFFF" : "#4ECDC4",
+                            card.key === "practice" ? "rgba(255,255,255,0.16)" : "rgba(78,205,196,0.14)",
+                          color: card.key === "practice" ? "#FFFFFF" : "#0F766E",
                           padding: "4px 8px",
                           fontSize: "10px",
                           fontWeight: 800,
@@ -448,8 +477,20 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                     alignSelf: "flex-start",
                     border: "none",
                     borderRadius: "3rem",
-                    background: isRecommended ? card.buttonBackground : "#1A1A2E",
-                    color: isRecommended ? card.buttonColor : "#FFFFFF",
+                    background: isLearn
+                      ? isRecommended
+                        ? "#1A1A2E"
+                        : "#4ECDC4"
+                      : isRecommended
+                        ? card.buttonBackground
+                        : "#1A1A2E",
+                    color: isLearn
+                      ? isRecommended
+                        ? "#FFFFFF"
+                        : "#1A1A2E"
+                      : isRecommended
+                        ? card.buttonColor
+                        : "#FFFFFF",
                     padding: isRecommended ? "7px 16px" : "6px 14px",
                     fontWeight: 700,
                     fontSize: "12px",

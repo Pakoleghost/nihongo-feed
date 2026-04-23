@@ -124,7 +124,7 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
       >
         <button
           onClick={() => router.push("/practicar")}
-          aria-label="Cerrar"
+          aria-label="Volver"
           style={{
             width: "56px",
             height: "56px",
@@ -132,14 +132,23 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
             border: "none",
             background: "#FFFFFF",
             color: "#1A1A2E",
-            fontSize: "34px",
-            lineHeight: 1,
             cursor: "pointer",
             boxShadow: "0 10px 24px rgba(26,26,46,0.08)",
             flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          ×
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M15 18l-6-6 6-6"
+              stroke="#1A1A2E"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
 
         <div
@@ -363,20 +372,23 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
         >
           {actionCards.map((card) => {
             const isRecommended = card.mode === recommendedMode;
+            const isLearn = card.key === "learn";
             const surface =
-              card.key === "learn"
+              isLearn
                 ? isRecommended
-                  ? "#4ECDC4"
-                  : "rgba(255,255,255,0.84)"
+                  ? "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(245,252,251,0.98) 100%)"
+                  : "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(245,252,251,0.94) 100%)"
                 : isRecommended
                   ? "#1A1A2E"
                   : "rgba(255,255,255,0.84)";
-            const textColor = isRecommended ? card.color : "#1A1A2E";
+            const textColor = isLearn ? "#1A1A2E" : isRecommended ? card.color : "#1A1A2E";
             const subColor =
-              card.key === "practice" && isRecommended
+              !isLearn && card.key === "practice" && isRecommended
                 ? "rgba(255,255,255,0.82)"
-                : card.key === "learn" && isRecommended
-                  ? "rgba(26,26,46,0.72)"
+                : isLearn && isRecommended
+                  ? "#5F6B7A"
+                  : isLearn
+                    ? "#6B7280"
                   : "#6B7280";
 
             return (
@@ -405,11 +417,11 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
                     position: "absolute",
                     right: "16px",
                     top: "14px",
-                    fontSize: isRecommended ? "78px" : "66px",
+                    fontSize: isLearn ? (isRecommended ? "68px" : "56px") : isRecommended ? "78px" : "66px",
                     fontWeight: 800,
                     lineHeight: 1,
-                    opacity: isRecommended ? 0.14 : 0.08,
-                    color: textColor,
+                    opacity: isLearn ? (isRecommended ? 0.16 : 0.08) : isRecommended ? 0.14 : 0.08,
+                    color: isLearn ? "#4ECDC4" : textColor,
                     pointerEvents: "none",
                   }}
                 >
@@ -434,8 +446,8 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
                         style={{
                           borderRadius: "999px",
                           background:
-                            card.key === "practice" ? "rgba(255,255,255,0.14)" : "rgba(26,26,46,0.12)",
-                          color: card.key === "practice" ? "#FFFFFF" : "#1A1A2E",
+                            card.key === "practice" ? "rgba(255,255,255,0.14)" : "rgba(78,205,196,0.14)",
+                          color: card.key === "practice" ? "#FFFFFF" : "#0F766E",
                           padding: "4px 8px",
                           fontSize: "10px",
                           fontWeight: 800,
@@ -469,8 +481,20 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
                     alignSelf: "flex-start",
                     border: "none",
                     borderRadius: "3rem",
-                    background: isRecommended ? card.buttonBackground : "#1A1A2E",
-                    color: isRecommended ? card.buttonColor : "#FFFFFF",
+                    background: isLearn
+                      ? isRecommended
+                        ? "#1A1A2E"
+                        : "#4ECDC4"
+                      : isRecommended
+                        ? card.buttonBackground
+                        : "#1A1A2E",
+                    color: isLearn
+                      ? isRecommended
+                        ? "#FFFFFF"
+                        : "#1A1A2E"
+                      : isRecommended
+                        ? card.buttonColor
+                        : "#FFFFFF",
                     padding: isRecommended ? "7px 16px" : "6px 14px",
                     fontWeight: 700,
                     fontSize: "12px",
