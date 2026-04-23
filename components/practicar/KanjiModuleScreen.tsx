@@ -6,6 +6,7 @@ import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
 import { getKanjiLessonSummary, loadKanjiProgress, type KanjiProgressMap } from "@/lib/kanji-progress";
 import { getPracticeNextAction, getPracticeSessionContext } from "@/lib/practice-srs";
+import ModuleActionChoices from "@/components/practicar/ModuleActionChoices";
 
 const LESSONS = Object.keys(GENKI_KANJI_BY_LESSON)
   .map(Number)
@@ -78,29 +79,19 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
 
   const actionCards = [
     {
-      key: "learn",
-      mode: "aprender",
       title: "Aprender",
       subtitle: "Repasa kanjis nuevos",
-      background: "#4ECDC4",
-      color: "#1A1A2E",
-      buttonBackground: "#1A1A2E",
-      buttonColor: "#FFFFFF",
       buttonLabel: "Empezar",
-      deco: "字",
+      accent: "teal" as const,
+      watermark: "字",
       onClick: goToLearnSession,
     },
     {
-      key: "practice",
-      mode: "practicar",
       title: "Practicar",
       subtitle: "Pon a prueba tu lectura",
-      background: "#1A1A2E",
-      color: "#FFFFFF",
-      buttonBackground: "#E63946",
-      buttonColor: "#FFFFFF",
       buttonLabel: "Empezar",
-      deco: "読",
+      accent: "red" as const,
+      watermark: "読",
       onClick: goToPracticeSession,
     },
   ] as const;
@@ -342,173 +333,11 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
         </div>
       </div>
 
-      <div
-        style={{
-          marginTop: "12px",
-          background: recommendedMode === "practicar" ? "rgba(26,26,46,0.05)" : "rgba(255,255,255,0.78)",
-          borderRadius: "2rem",
-          padding: "12px",
-          boxShadow: "0 12px 30px rgba(26,26,46,0.06)",
-        }}
-      >
-        <p
-          style={{
-            margin: "0 0 10px",
-            fontSize: "11px",
-            letterSpacing: "0.12em",
-            fontWeight: 700,
-            color: "#9CA3AF",
-            textTransform: "uppercase",
-          }}
-        >
-          Cómo quieres estudiar
-        </p>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px",
-          }}
-        >
-          {actionCards.map((card) => {
-            const isRecommended = card.mode === recommendedMode;
-            const isLearn = card.key === "learn";
-            const surface =
-              isLearn
-                ? isRecommended
-                  ? "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(245,252,251,0.98) 100%)"
-                  : "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(245,252,251,0.94) 100%)"
-                : isRecommended
-                  ? "#1A1A2E"
-                  : "rgba(255,255,255,0.84)";
-            const textColor = isLearn ? "#1A1A2E" : isRecommended ? card.color : "#1A1A2E";
-            const subColor =
-              !isLearn && card.key === "practice" && isRecommended
-                ? "rgba(255,255,255,0.82)"
-                : isLearn && isRecommended
-                  ? "#5F6B7A"
-                  : isLearn
-                    ? "#6B7280"
-                  : "#6B7280";
-
-            return (
-              <div
-                key={card.key}
-                style={{
-                  position: "relative",
-                  overflow: "hidden",
-                  background: surface,
-                  color: textColor,
-                  borderRadius: "2rem",
-                  padding: isRecommended ? "14px" : "12px",
-                  height: isRecommended ? "124px" : "112px",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  boxShadow: isRecommended
-                    ? "0 16px 36px rgba(26,26,46,0.12)"
-                    : "0 8px 18px rgba(26,26,46,0.05)",
-                  transform: isRecommended ? "translateY(-1px)" : "none",
-                }}
-              >
-                <span
-                  aria-hidden="true"
-                  style={{
-                    position: "absolute",
-                    right: "16px",
-                    top: "14px",
-                    fontSize: isLearn ? (isRecommended ? "68px" : "56px") : isRecommended ? "78px" : "66px",
-                    fontWeight: 800,
-                    lineHeight: 1,
-                    opacity: isLearn ? (isRecommended ? 0.16 : 0.08) : isRecommended ? 0.14 : 0.08,
-                    color: isLearn ? "#4ECDC4" : textColor,
-                    pointerEvents: "none",
-                  }}
-                >
-                  {card.deco}
-                </span>
-
-                <div style={{ position: "relative", zIndex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: isRecommended ? "19px" : "17px",
-                        lineHeight: 1,
-                        fontWeight: 700,
-                        color: textColor,
-                      }}
-                    >
-                      {card.title}
-                    </p>
-                    {isRecommended ? (
-                      <span
-                        style={{
-                          borderRadius: "999px",
-                          background:
-                            card.key === "practice" ? "rgba(255,255,255,0.14)" : "rgba(78,205,196,0.14)",
-                          color: card.key === "practice" ? "#FFFFFF" : "#0F766E",
-                          padding: "4px 8px",
-                          fontSize: "10px",
-                          fontWeight: 800,
-                          letterSpacing: "0.04em",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Recomendado
-                      </span>
-                    ) : null}
-                  </div>
-                  <p
-                    style={{
-                      margin: "8px 0 0",
-                      fontSize: "12px",
-                      lineHeight: 1.2,
-                      fontWeight: 400,
-                      color: subColor,
-                      maxWidth: "180px",
-                    }}
-                  >
-                    {card.subtitle}
-                  </p>
-                </div>
-
-                <button
-                  onClick={card.onClick}
-                  style={{
-                    position: "relative",
-                    zIndex: 1,
-                    alignSelf: "flex-start",
-                    border: "none",
-                    borderRadius: "3rem",
-                    background: isLearn
-                      ? isRecommended
-                        ? "#1A1A2E"
-                        : "#4ECDC4"
-                      : isRecommended
-                        ? card.buttonBackground
-                        : "#1A1A2E",
-                    color: isLearn
-                      ? isRecommended
-                        ? "#FFFFFF"
-                        : "#1A1A2E"
-                      : isRecommended
-                        ? card.buttonColor
-                        : "#FFFFFF",
-                    padding: isRecommended ? "7px 16px" : "6px 14px",
-                    fontWeight: 700,
-                    fontSize: "12px",
-                    cursor: "pointer",
-                    opacity: isRecommended ? 1 : 0.92,
-                  }}
-                >
-                  {card.buttonLabel}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      <ModuleActionChoices
+        recommendedMode={recommendedMode}
+        learnCard={actionCards[0]}
+        practiceCard={actionCards[1]}
+      />
     </div>
   );
 }
