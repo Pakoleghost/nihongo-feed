@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
+import { optimizeImageFile, validateImageFile } from "@/lib/client-image-upload";
 
 type Post = {
   id: string;
@@ -179,6 +180,13 @@ export default function ComunidadPage() {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    try {
+      validateImageFile(file);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "No se pudo usar esta imagen.");
+      e.target.value = "";
+      return;
+    }
     setComposeImage(file);
     setComposePreview(URL.createObjectURL(file));
     e.target.value = "";
@@ -190,11 +198,16 @@ export default function ComunidadPage() {
     try {
       let imageUrl: string | null = null;
       if (composeImage) {
-        const ext = composeImage.name.split(".").pop() ?? "jpg";
+        const optimizedImage = await optimizeImageFile(composeImage, {
+          maxWidth: 1600,
+          maxHeight: 1600,
+          quality: 0.8,
+        });
+        const ext = optimizedImage.name.split(".").pop() ?? "jpg";
         const path = `${userId}/${Date.now()}.${ext}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("comunidad-images")
-          .upload(path, composeImage, { upsert: false });
+          .upload(path, optimizedImage, { upsert: false });
         if (uploadError) {
           console.error("Upload error:", uploadError.message);
           alert(`Error al subir imagen: ${uploadError.message}`);

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { optimizeImageFile, validateImageFile } from "@/lib/client-image-upload";
 
 export default function PublicarPage() {
   const router = useRouter();
@@ -15,8 +16,16 @@ export default function PublicarPage() {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    try {
+      validateImageFile(file);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "No se pudo usar esta imagen.");
+      e.target.value = "";
+      return;
+    }
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
+    e.target.value = "";
   }
 
   async function handleSubmit() {
@@ -36,11 +45,16 @@ export default function PublicarPage() {
       let imageUrl: string | null = null;
 
       if (imageFile) {
-        const ext = imageFile.name.split(".").pop() ?? "jpg";
+        const optimizedImage = await optimizeImageFile(imageFile, {
+          maxWidth: 1600,
+          maxHeight: 1600,
+          quality: 0.8,
+        });
+        const ext = optimizedImage.name.split(".").pop() ?? "jpg";
         const path = `${user.id}/${Date.now()}.${ext}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("comunidad-images")
-          .upload(path, imageFile, { upsert: false });
+          .upload(path, optimizedImage, { upsert: false });
 
         if (!uploadError && uploadData) {
           const { data: urlData } = supabase.storage
