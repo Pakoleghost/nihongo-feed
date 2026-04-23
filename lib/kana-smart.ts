@@ -125,6 +125,10 @@ function getUndominatedItems(group: KanaGroup, progress: KanaProgressMap) {
   return group.items.filter((item) => !isDominated(item, progress));
 }
 
+function getUnseenItems(group: KanaGroup, progress: KanaProgressMap) {
+  return group.items.filter((item) => !isSeen(progress[item.id]));
+}
+
 type SmartBucket = "due" | "weak" | "learning" | "fresh" | "stable";
 
 function getSmartBucket(item: KanaItem, progress: KanaProgressMap): SmartBucket {
@@ -260,6 +264,24 @@ export function getKanaSmartRecommendation(
       ],
       contextPrimary: reviewGroup.primary,
       contextSecondary: reviewGroup.secondary ?? "",
+    };
+  }
+
+  const nextFreshGroup = KANA_GROUPS.find((group) => getUnseenItems(group, progress).length > 0) ?? null;
+
+  if (nextFreshGroup) {
+    const remainingItems = getUnseenItems(nextFreshGroup, progress);
+    return {
+      itemIds: nextFreshGroup.items.map((item) => item.id),
+      kind: "learn",
+      title: `Sigue con ${nextFreshGroup.secondary?.toLowerCase() || nextFreshGroup.primary.toLowerCase()}`,
+      detail: formatContext(nextFreshGroup),
+      chips: [
+        `${remainingItems.length} nuevas en esta sesión`,
+        `${counts.dominados} dominados`,
+      ],
+      contextPrimary: nextFreshGroup.primary,
+      contextSecondary: nextFreshGroup.secondary ?? "",
     };
   }
 
