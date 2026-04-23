@@ -38,7 +38,6 @@ function getModeLabel(mode: string) {
 }
 
 function getTaskModeLabel(taskMode?: string, difficulty?: string) {
-  if (taskMode === "trace") return "Trazar";
   if (taskMode === "mixed") return "Mixto";
   if (difficulty === "automatico") return "Mixto";
   return "Mixto";
@@ -87,13 +86,13 @@ export default function ResultadosPage() {
 
   if (!results || !summary) return null;
 
-  const { total, correct, missed, taskMode } = results;
+  const { total, correct, missed } = results;
   const { errors, headline, headlineColor, modeLabel, taskModeLabel, nextStep } = summary;
 
   function handleRepeatErrors() {
     if (missed.length === 0) return;
     const ids = missed.map((m) => m.id).join(",");
-    router.push(`/kana/quiz?mode=repeat&items=${ids}&taskMode=${taskMode || "mixed"}&count=${missed.length}`);
+    router.push(`/kana/quiz?mode=repeat&items=${ids}&taskMode=mixed&count=${missed.length}`);
   }
 
   return (

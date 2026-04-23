@@ -2,9 +2,8 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { KANA_ITEMS, KANA_SESSION_MODE_OPTIONS } from "@/lib/kana-data";
+import { KANA_ITEMS } from "@/lib/kana-data";
 import type { KanaItem } from "@/lib/kana-data";
-import type { KanaSessionMode } from "@/lib/kana-data";
 import { getKanaProgressSummary, getKanaStateCounts, loadKanaProgress } from "@/lib/kana-progress";
 import { getKanaSmartRecommendation } from "@/lib/kana-smart";
 
@@ -47,13 +46,9 @@ function ConfigurarContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialMode = (searchParams.get("mode") as Mode) ?? "smart";
-  const legacyDifficulty = searchParams.get("difficulty");
-  const initialTaskMode = (searchParams.get("taskMode") as KanaSessionMode | null)
-    ?? (legacyDifficulty ? "mixed" : "mixed");
 
   const [mode, setMode] = useState<Mode>(initialMode);
   const [selectedSets, setSelectedSets] = useState<ChipKey[]>(["hiragana"]);
-  const [taskMode, setTaskMode] = useState<KanaSessionMode>(initialTaskMode);
   const [questionCount, setQuestionCount] = useState(20);
   const [validationMsg, setValidationMsg] = useState(false);
   const validationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -113,7 +108,7 @@ function ConfigurarContent() {
   function handleStart() {
     const params = new URLSearchParams({
       mode,
-      taskMode,
+      taskMode: "mixed",
       count: String(questionCount),
     });
     if (mode === "libre") {
@@ -305,99 +300,6 @@ function ConfigurarContent() {
           </div>
         )}
 
-        {/* Practice mode */}
-        <div style={{ marginBottom: "28px" }}>
-          <p
-            style={{
-              fontSize: "16px",
-              fontWeight: 700,
-              color: "#1A1A2E",
-              margin: "0 0 14px",
-            }}
-          >
-            Modo de práctica
-          </p>
-          <div style={{ display: "grid", gap: "10px" }}>
-            {KANA_SESSION_MODE_OPTIONS.map(({ key, label, description }) => {
-              const active = taskMode === key;
-              const isTrace = key === "trace";
-
-              return (
-                <button
-                key={key}
-                onClick={() => setTaskMode(key)}
-                style={{
-                  width: "100%",
-                  padding: "16px 18px",
-                  borderRadius: "24px",
-                  border: "none",
-                  cursor: "pointer",
-                  background: active ? "#FFFFFF" : "#F4EEE5",
-                  color: "#1A1A2E",
-                  textAlign: "left",
-                  boxShadow: active ? "0 10px 24px rgba(26,26,46,0.08)" : "none",
-                  transition: "background 0.15s, box-shadow 0.15s",
-                  display: "grid",
-                  gap: "8px",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
-                  <span
-                    style={{
-                      fontSize: "17px",
-                      fontWeight: 800,
-                      color: "#1A1A2E",
-                    }}
-                  >
-                    {label}
-                  </span>
-                  <span
-                    style={{
-                      borderRadius: "999px",
-                      padding: "6px 10px",
-                      background: active
-                        ? isTrace ? "rgba(26,26,46,0.10)" : "rgba(230,57,70,0.10)"
-                        : "rgba(26,26,46,0.06)",
-                      color: active
-                        ? isTrace ? "#1A1A2E" : "#C53340"
-                        : "#7A7F8D",
-                      fontSize: "11px",
-                      fontWeight: 800,
-                      letterSpacing: "0.04em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {isTrace ? "Separado" : "Principal"}
-                  </span>
-                </div>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "14px",
-                    lineHeight: 1.4,
-                    color: "#5E6472",
-                  }}
-                >
-                  {description}
-                </p>
-                {isTrace ? (
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: "13px",
-                      lineHeight: 1.35,
-                      color: "#8A8F9B",
-                    }}
-                  >
-                    Se prepara aparte y no se mezcla con Mixto por ahora.
-                  </p>
-                ) : null}
-              </button>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Number of questions */}
         <div
           style={{
@@ -518,7 +420,7 @@ function ConfigurarContent() {
             boxShadow: "0 4px 20px rgba(230,57,70,0.35)",
           }}
         >
-          {taskMode === "trace" ? "Abrir Trazar" : "Empezar Mixto"}
+          Empezar Mixto
         </button>
       </div>
     </div>

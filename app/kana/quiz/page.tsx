@@ -21,6 +21,8 @@ type QuizQuestion = {
   item: KanaItem;
   taskType: KanaQuestionType;
   options: string[];
+  matchPairs?: MatchPair[];
+  matchRightItems?: KanaItem[];
 };
 
 type QuestionResult = {
@@ -29,13 +31,27 @@ type QuestionResult = {
   userAnswer: string;
 };
 
+type MatchPair = {
+  key: string;
+  hiragana: KanaItem;
+  katakana: KanaItem;
+};
+
+type MatchSelection = {
+  side: "hiragana" | "katakana";
+  pairKey: string;
+  id: string;
+};
+
 type Phase = "question" | "traceReview" | "feedback";
 type KanaAnim = "idle" | "bounce" | "shake";
 type TraceCompletion = { retries: number; strokes: number };
-const MIXED_TASK_TYPES: KanaQuestionType[] = [
-  "kana_to_romaji_choice",
-  "romaji_to_kana_choice",
-  "kana_to_romaji_input",
+const MIXED_TASK_WEIGHTS: Array<{ type: KanaQuestionType; weight: number }> = [
+  { type: "kana_to_romaji_choice", weight: 0.3 },
+  { type: "romaji_to_kana_choice", weight: 0.25 },
+  { type: "kana_to_romaji_input", weight: 0.25 },
+  { type: "hiragana_katakana_match", weight: 0.1 },
+  { type: "romaji_to_kana_trace", weight: 0.1 },
 ];
 
 function formatQuizContext(primary: string, secondary: string, sets: string[]) {
@@ -103,30 +119,94 @@ function getKanaOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
   return shuffle([correct, ...wrong3]);
 }
 
-function getTraceReadingOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
+function getTraceKanaOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
   const sameScriptPool = pool.filter((item) => item.script === correctItem.script);
   const sameSetPool = sameScriptPool.filter((item) => item.set === correctItem.set);
   const preferredPool = sameSetPool.length >= 4 ? sameSetPool : sameScriptPool;
-  return getOptions(correctItem, preferredPool.length > 0 ? preferredPool : KANA_ITEMS);
+  return getKanaOptions(correctItem, preferredPool.length > 0 ? preferredPool : KANA_ITEMS);
 }
 
-function buildMixedTaskSequence(length: number): KanaQuestionType[] {
+function isProgressSeen(progress: KanaProgressMap, item: KanaItem) {
+  return (progress[item.id]?.timesSeen ?? 0) > 0;
+}
+
+function getBasicItem(script: "hiragana" | "katakana", romaji: string) {
+  return KANA_ITEMS.find((item) => item.script === script && item.set === "basic" && item.romaji === romaji) ?? null;
+}
+
+function getIntroducedBasicPairs(progress: KanaProgressMap, pool: KanaItem[], mode: string): MatchPair[] {
+  const poolIds = new Set(pool.map((item) => item.id));
+  const hiraganaBasic = KANA_ITEMS.filter((item) => item.script === "hiragana" && item.set === "basic");
+  const hiraganaBasicComplete = hiraganaBasic.every((item) => isProgressSeen(progress, item));
+  const katakanaBasicStarted = KANA_ITEMS.some(
+    (item) => item.script === "katakana" && item.set === "basic" && isProgressSeen(progress, item),
+  );
+
+  if (!hiraganaBasicComplete || !katakanaBasicStarted) return [];
+
+  return hiraganaBasic
+    .map((hiragana) => {
+      const katakana = getBasicItem("katakana", hiragana.romaji);
+      if (!katakana) return null;
+      if (!isProgressSeen(progress, hiragana) || !isProgressSeen(progress, katakana)) return null;
+      if (mode !== "smart" && (!poolIds.has(hiragana.id) || !poolIds.has(katakana.id))) return null;
+      return {
+        key: hiragana.romaji,
+        hiragana,
+        katakana,
+      } satisfies MatchPair;
+    })
+    .filter((pair): pair is MatchPair => Boolean(pair));
+}
+
+function buildWeightedTaskSequence(length: number, availableTypes: KanaQuestionType[]): KanaQuestionType[] {
+  if (length <= 0) return [];
+  const available = MIXED_TASK_WEIGHTS.filter((entry) => availableTypes.includes(entry.type));
+  if (available.length === 0) return Array.from({ length }, () => "kana_to_romaji_choice");
+
+  const totalWeight = available.reduce((sum, entry) => sum + entry.weight, 0);
+  const counts = new Map<KanaQuestionType, number>();
+  const fractions = available.map((entry) => {
+    const exact = (length * entry.weight) / totalWeight;
+    const base = Math.floor(exact);
+    counts.set(entry.type, base);
+    return { type: entry.type, fraction: exact - base };
+  });
+
+  let remaining = length - [...counts.values()].reduce((sum, count) => sum + count, 0);
+  for (const entry of fractions.sort((a, b) => b.fraction - a.fraction)) {
+    if (remaining <= 0) break;
+    counts.set(entry.type, (counts.get(entry.type) ?? 0) + 1);
+    remaining -= 1;
+  }
+
   const tasks: KanaQuestionType[] = [];
   let previous: KanaQuestionType | null = null;
 
-  while (tasks.length < length) {
-    const cycle = shuffle(MIXED_TASK_TYPES);
-    if (previous && cycle[0] === previous && cycle.length > 1) {
-      [cycle[0], cycle[1]] = [cycle[1], cycle[0]];
-    }
-    for (const taskType of cycle) {
-      if (tasks.length >= length) break;
-      tasks.push(taskType);
-      previous = taskType;
-    }
+  while (tasks.length < length && [...counts.values()].some((count) => count > 0)) {
+    const candidates = [...counts.entries()]
+      .filter(([, count]) => count > 0)
+      .sort((left, right) => right[1] - left[1])
+      .map(([type]) => type);
+    const nonRepeating = candidates.find((type) => type !== previous);
+    const nextType = nonRepeating ?? candidates[0];
+    tasks.push(nextType);
+    counts.set(nextType, (counts.get(nextType) ?? 0) - 1);
+    previous = nextType;
   }
 
   return tasks;
+}
+
+function takeMatchPairs(deck: MatchPair[], cursor: number) {
+  const pairs: MatchPair[] = [];
+  if (deck.length < 4) return { pairs, cursor };
+  let nextCursor = cursor;
+  while (pairs.length < 4) {
+    pairs.push(deck[nextCursor % deck.length]);
+    nextCursor += 1;
+  }
+  return { pairs, cursor: nextCursor };
 }
 
 function getLegacyTaskMode(rawDifficulty: string | null): KanaSessionMode {
@@ -138,6 +218,7 @@ function getQuestionTaskLabel(taskType: KanaQuestionType) {
   if (taskType === "kana_to_romaji_choice") return "Kana -> romaji";
   if (taskType === "romaji_to_kana_choice") return "Romaji -> kana";
   if (taskType === "kana_to_romaji_input") return "Escribir romaji";
+  if (taskType === "hiragana_katakana_match") return "Pares kana";
   return "Trazar";
 }
 
@@ -145,6 +226,7 @@ function getQuestionInstruction(taskType: KanaQuestionType) {
   if (taskType === "kana_to_romaji_choice") return "Toca el romaji correcto.";
   if (taskType === "romaji_to_kana_choice") return "Toca el kana correcto.";
   if (taskType === "kana_to_romaji_input") return "Escribe su lectura en romaji.";
+  if (taskType === "hiragana_katakana_match") return "Conecta cada hiragana con su katakana.";
   return "Traza el kana siguiendo la guía.";
 }
 
@@ -152,10 +234,12 @@ function getQuestionPromptValue(question: QuizQuestion) {
   if (question.taskType === "romaji_to_kana_choice" || question.taskType === "romaji_to_kana_trace") {
     return question.item.romaji;
   }
+  if (question.taskType === "hiragana_katakana_match") return "かな ⇄ カナ";
   return question.item.kana;
 }
 
 function getQuestionPromptKind(taskType: KanaQuestionType) {
+  if (taskType === "hiragana_katakana_match") return "text";
   if (taskType === "romaji_to_kana_choice" || taskType === "romaji_to_kana_trace") return "romaji";
   return "kana";
 }
@@ -165,11 +249,13 @@ function isInputTask(taskType: KanaQuestionType) {
 }
 
 function getCorrectChoiceValue(question: QuizQuestion) {
-  return question.taskType === "romaji_to_kana_choice" ? question.item.kana : question.item.romaji;
+  return question.taskType === "romaji_to_kana_choice" || question.taskType === "romaji_to_kana_trace"
+    ? question.item.kana
+    : question.item.romaji;
 }
 
 function isCorrectChoiceAnswer(question: QuizQuestion, answer: string) {
-  if (question.taskType === "romaji_to_kana_choice") {
+  if (question.taskType === "romaji_to_kana_choice" || question.taskType === "romaji_to_kana_trace") {
     return answer === question.item.kana;
   }
   return isCorrectAnswer(question.item, answer);
@@ -203,26 +289,54 @@ function buildQuiz(
     items = shuffle(pool).slice(0, Math.min(count, pool.length));
   }
 
-  if (taskMode === "trace") {
-    const effectivePool = pool.length > 0 ? pool : KANA_ITEMS;
-    const traceItems = items.filter((item) => hasKanaTraceData(item.kana));
-    return traceItems.map((item) => ({
-      item,
-      taskType: "romaji_to_kana_trace",
-      options: getTraceReadingOptions(item, effectivePool),
-    }));
+  const effectivePool = pool.length > 0 ? pool : KANA_ITEMS;
+  const traceItems = items.filter((item) => hasKanaTraceData(item.kana));
+  const matchDeck = shuffle(getIntroducedBasicPairs(progress, effectivePool, mode));
+  const availableTaskTypes: KanaQuestionType[] = [
+    "kana_to_romaji_choice",
+    "romaji_to_kana_choice",
+    "kana_to_romaji_input",
+  ];
+
+  if (traceItems.length > 0) {
+    availableTaskTypes.push("romaji_to_kana_trace");
   }
 
-  const effectivePool = pool.length > 0 ? pool : KANA_ITEMS;
-  const taskSequence = buildMixedTaskSequence(items.length);
+  if (matchDeck.length >= 4) {
+    availableTaskTypes.push("hiragana_katakana_match");
+  }
 
-  return items.map((item, index) => {
-    const taskType = taskSequence[index] ?? "kana_to_romaji_choice";
+  const taskSequence = buildWeightedTaskSequence(items.length, availableTaskTypes);
+  let itemCursor = 0;
+  let traceCursor = 0;
+  let matchCursor = 0;
+
+  return taskSequence.map((taskType) => {
+    if (taskType === "hiragana_katakana_match") {
+      const matchResult = takeMatchPairs(matchDeck, matchCursor);
+      matchCursor = matchResult.cursor;
+      const matchPairs = matchResult.pairs;
+      const item = matchPairs[0]?.hiragana ?? items[itemCursor % items.length];
+      return {
+        item,
+        taskType,
+        options: [],
+        matchPairs,
+        matchRightItems: shuffle(matchPairs.map((pair) => pair.katakana)),
+      };
+    }
+
+    const item =
+      taskType === "romaji_to_kana_trace"
+        ? traceItems[traceCursor++ % traceItems.length]
+        : items[itemCursor++ % items.length];
     const options =
       taskType === "romaji_to_kana_choice"
         ? getKanaOptions(item, effectivePool)
         : taskType === "kana_to_romaji_choice"
           ? getOptions(item, effectivePool)
+          : taskType === "romaji_to_kana_trace"
+            ? getTraceKanaOptions(item, effectivePool)
           : [];
 
     return {
@@ -262,8 +376,9 @@ function QuizContent() {
 
   const mode = searchParams.get("mode") ?? "smart";
   const sets = (searchParams.get("sets") ?? "hiragana").split(",");
-  const taskMode = ((searchParams.get("taskMode") as KanaSessionMode | null)
-    ?? getLegacyTaskMode(searchParams.get("difficulty")));
+  const taskMode: KanaSessionMode = getLegacyTaskMode(
+    searchParams.get("taskMode") ?? searchParams.get("difficulty"),
+  );
   const count = parseInt(searchParams.get("count") ?? "20", 10);
   const itemIds = (searchParams.get("items") ?? "").split(",").filter(Boolean);
   const contextPrimary = searchParams.get("contextPrimary") ?? "";
@@ -280,6 +395,10 @@ function QuizContent() {
   const [results, setResults] = useState<QuestionResult[]>([]);
   const [progressMap, setProgressMap] = useState<KanaProgressMap>({});
   const [traceCompletion, setTraceCompletion] = useState<TraceCompletion | null>(null);
+  const [matchSelection, setMatchSelection] = useState<MatchSelection | null>(null);
+  const [matchedPairKeys, setMatchedPairKeys] = useState<string[]>([]);
+  const [matchMistakes, setMatchMistakes] = useState(0);
+  const [matchWrongPairKey, setMatchWrongPairKey] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -291,8 +410,13 @@ function QuizContent() {
     setIsReady(true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const currentQ = questions[currentIndex];
+  const isTraceQuestion = currentQ?.taskType === "romaji_to_kana_trace";
+  const isMatchQuestion = currentQ?.taskType === "hiragana_katakana_match";
+  const progressPct = questions.length > 0 ? (currentIndex / questions.length) * 100 : 0;
+
   useEffect(() => {
-    if (taskMode !== "trace") return;
+    if (!isTraceQuestion) return;
 
     const html = document.documentElement;
     const body = document.body;
@@ -312,10 +436,7 @@ function QuizContent() {
       body.style.overflow = previousBodyOverflow;
       body.style.overscrollBehavior = previousBodyOverscroll;
     };
-  }, [taskMode]);
-
-  const currentQ = questions[currentIndex];
-  const progressPct = questions.length > 0 ? (currentIndex / questions.length) * 100 : 0;
+  }, [isTraceQuestion]);
 
   useEffect(() => {
     if (!currentQ || !isInputTask(currentQ.taskType) || phase !== "question") return;
@@ -358,6 +479,10 @@ function QuizContent() {
         setKanaAnim("idle");
         setTextAnswer("");
         setTraceCompletion(null);
+        setMatchSelection(null);
+        setMatchedPairKeys([]);
+        setMatchMistakes(0);
+        setMatchWrongPairKey(null);
       }
     },
     [results, currentIndex, questions.length, mode, taskMode, router]
@@ -418,7 +543,7 @@ function QuizContent() {
     setSelectedOption(option);
     setPhase("feedback");
 
-    const correct = isCorrectAnswer(currentQ.item, option);
+    const correct = option === currentQ.item.kana;
     const rating = correct && traceCompletion.retries === 0 ? "correct" : correct ? "almost" : "wrong";
     const updated = applyKanaRating(progressMap, currentQ.item, rating);
     setProgressMap(updated);
@@ -430,6 +555,66 @@ function QuizContent() {
       () => advance({ item: currentQ.item, correct, userAnswer: option }, updated),
       correct ? 720 : 1050,
     );
+  }
+
+  function completeMatchQuestion(nextMistakes: number) {
+    if (!currentQ?.matchPairs?.length || phase !== "question") return;
+
+    const rating = nextMistakes === 0 ? "correct" : "almost";
+    const updated = currentQ.matchPairs.reduce((nextProgress, pair) => {
+      const afterHiragana = applyKanaRating(nextProgress, pair.hiragana, rating);
+      return applyKanaRating(afterHiragana, pair.katakana, rating);
+    }, progressMap);
+
+    setProgressMap(updated);
+    saveKanaProgress("anon", updated);
+    setKanaAnim(nextMistakes === 0 ? "bounce" : "shake");
+    setPhase("feedback");
+
+    window.setTimeout(
+      () =>
+        advance(
+          {
+            item: currentQ.item,
+            correct: nextMistakes === 0,
+            userAnswer: nextMistakes === 0 ? "pares completos" : `${nextMistakes} errores`,
+          },
+          updated,
+        ),
+      nextMistakes === 0 ? 850 : 1050,
+    );
+  }
+
+  function handleMatchSelect(side: "hiragana" | "katakana", item: KanaItem) {
+    if (!isMatchQuestion || !currentQ?.matchPairs || phase !== "question") return;
+
+    const pair = currentQ.matchPairs.find((entry) =>
+      side === "hiragana" ? entry.hiragana.id === item.id : entry.katakana.id === item.id,
+    );
+    if (!pair || matchedPairKeys.includes(pair.key)) return;
+
+    const nextSelection: MatchSelection = { side, pairKey: pair.key, id: item.id };
+    if (!matchSelection || matchSelection.side === side) {
+      setMatchSelection(nextSelection);
+      return;
+    }
+
+    if (matchSelection.pairKey !== pair.key) {
+      const nextMistakes = matchMistakes + 1;
+      setMatchMistakes(nextMistakes);
+      setMatchWrongPairKey(pair.key);
+      setMatchSelection(null);
+      window.setTimeout(() => setMatchWrongPairKey(null), 420);
+      return;
+    }
+
+    const nextMatched = [...matchedPairKeys, pair.key];
+    setMatchedPairKeys(nextMatched);
+    setMatchSelection(null);
+
+    if (nextMatched.length >= currentQ.matchPairs.length) {
+      completeMatchQuestion(matchMistakes);
+    }
   }
 
   function handleExit() {
@@ -451,108 +636,6 @@ function QuizContent() {
         }}
       >
         <p style={{ color: "#53596B", fontSize: "16px" }}>Preparando sesión…</p>
-      </div>
-    );
-  }
-
-  if (taskMode === "trace" && questions.length === 0) {
-    return (
-      <div
-        style={{
-          background: "#FFF8E7",
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          padding: "52px 20px 32px",
-        }}
-      >
-        <button
-          onClick={() => router.push("/kana/configurar")}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "4px",
-            alignSelf: "flex-start",
-            marginBottom: "24px",
-          }}
-          aria-label="Volver"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M19 12H5M12 5l-7 7 7 7"
-              stroke="#1A1A2E"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-
-        <div
-          style={{
-            background: "#FFFFFF",
-            borderRadius: "28px",
-            padding: "24px 22px",
-            boxShadow: "0 10px 28px rgba(26,26,46,0.08)",
-            display: "grid",
-            gap: "14px",
-          }}
-        >
-          <div
-            style={{
-              borderRadius: "999px",
-              background: "rgba(26,26,46,0.06)",
-              color: "#53596B",
-              fontSize: "12px",
-              fontWeight: 800,
-              padding: "8px 12px",
-              justifySelf: "flex-start",
-            }}
-          >
-            Trazar
-          </div>
-          <div style={{ fontSize: "32px", lineHeight: 1.05, fontWeight: 800, color: "#1A1A2E" }}>
-            No hay trazos listos
-          </div>
-          <p style={{ margin: 0, fontSize: "16px", lineHeight: 1.45, color: "#5E6472" }}>
-            Esta selección no tiene suficientes kana con guía de trazos. Prueba otra selección o usa Mixto.
-          </p>
-          <div style={{ display: "grid", gap: "10px", marginTop: "8px" }}>
-            <button
-              onClick={() => router.push(`/kana/configurar?mode=${mode}&taskMode=mixed`)}
-              style={{
-                width: "100%",
-                padding: "16px",
-                borderRadius: "999px",
-                border: "none",
-                cursor: "pointer",
-                background: "#1A1A2E",
-                color: "#FFFFFF",
-                fontSize: "16px",
-                fontWeight: 800,
-              }}
-            >
-              Usar Mixto por ahora
-            </button>
-            <button
-              onClick={() => router.push("/kana")}
-              style={{
-                width: "100%",
-                padding: "14px",
-                borderRadius: "999px",
-                border: "none",
-                cursor: "pointer",
-                background: "transparent",
-                color: "#1A1A2E",
-                fontSize: "16px",
-                fontWeight: 700,
-              }}
-            >
-              Volver a Kana
-            </button>
-          </div>
-        </div>
       </div>
     );
   }
@@ -584,7 +667,9 @@ function QuizContent() {
   const correctChoiceValue = getCorrectChoiceValue(currentQ);
   const feedbackIsCorrect = isInputTask(currentQ.taskType)
     ? feedbackIsInputCorrect
-    : selectedOption === correctChoiceValue;
+    : isMatchQuestion
+      ? phase === "feedback" && matchMistakes === 0
+      : selectedOption === correctChoiceValue;
   const feedbackLabel = feedbackIsCorrect ? "Correcto" : "No era esa";
   const feedbackBg = feedbackIsCorrect ? "rgba(78,205,196,0.14)" : "rgba(230,57,70,0.12)";
   const feedbackColor = feedbackIsCorrect ? "#178A83" : "#C53340";
@@ -594,7 +679,7 @@ function QuizContent() {
     boxShadow: "0 10px 28px rgba(26,26,46,0.08)",
   } as const;
 
-  if (taskMode === "trace") {
+  if (isTraceQuestion) {
     return (
       <div
         style={{
@@ -832,7 +917,7 @@ function QuizContent() {
                       lineHeight: 1.1,
                     }}
                   >
-                    ¿Cómo se lee?
+                    ¿Cuál trazaste?
                   </div>
                   <div
                     style={{
@@ -850,7 +935,7 @@ function QuizContent() {
                       justifySelf: "center",
                     }}
                   >
-                    {phase === "feedback" ? feedbackLabel : "Elige la lectura"}
+                    {phase === "feedback" ? feedbackLabel : "Elige el kana"}
                   </div>
                 </div>
 
@@ -863,7 +948,7 @@ function QuizContent() {
                 >
                   {currentQ.options.map((option) => {
                     const isSelected = selectedOption === option;
-                    const isCorrect = isCorrectAnswer(currentQ.item, option);
+                    const isCorrect = option === currentQ.item.kana;
                     const showCorrect = phase === "feedback" && isCorrect;
                     const showWrong = phase === "feedback" && isSelected && !isCorrect;
                     return (
@@ -885,8 +970,9 @@ function QuizContent() {
                           color: showCorrect || showWrong ? "#FFFFFF" : "#1A1A2E",
                           minHeight: "72px",
                           padding: "12px",
-                          fontSize: "22px",
+                          fontSize: "34px",
                           fontWeight: 800,
+                          fontFamily: "var(--font-noto-sans-jp), sans-serif",
                           cursor: phase === "traceReview" ? "pointer" : "default",
                           boxShadow: "0 8px 20px rgba(26,26,46,0.07)",
                         }}
@@ -1083,11 +1169,12 @@ function QuizContent() {
                 variants={kanaAnim === "bounce" ? bounceVariants : shakeVariants}
                 animate={kanaAnim}
                 style={{
-                  fontSize: promptKind === "kana" ? "112px" : "64px",
+                  fontSize: isMatchQuestion ? "42px" : promptKind === "kana" ? "112px" : "64px",
                   fontWeight: 700,
                   color: "#1A1A2E",
                   lineHeight: 1,
-                  fontFamily: promptKind === "kana" ? "var(--font-noto-sans-jp), sans-serif" : "inherit",
+                  fontFamily:
+                    promptKind === "kana" || isMatchQuestion ? "var(--font-noto-sans-jp), sans-serif" : "inherit",
                   userSelect: "none",
                   textAlign: "center",
                 }}
@@ -1128,7 +1215,107 @@ function QuizContent() {
       </div>
 
       {/* Answer area */}
-      {isInputTask(currentQ.taskType) ? (
+      {isMatchQuestion ? (
+        <div style={{ padding: "0 20px 40px" }}>
+          <div
+            style={{
+              ...sharedCardStyle,
+              padding: "16px",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "12px",
+            }}
+          >
+            <div style={{ display: "grid", gap: "10px" }}>
+              {(currentQ.matchPairs ?? []).map((pair) => {
+                const matched = matchedPairKeys.includes(pair.key);
+                const selected = matchSelection?.id === pair.hiragana.id;
+                return (
+                  <button
+                    key={pair.hiragana.id}
+                    type="button"
+                    onClick={() => handleMatchSelect("hiragana", pair.hiragana)}
+                    disabled={phase !== "question" || matched}
+                    style={{
+                      minHeight: "66px",
+                      border: "none",
+                      borderRadius: "20px",
+                      background: matched ? "rgba(78,205,196,0.18)" : selected ? "#1A1A2E" : "#F7F3ED",
+                      color: matched ? "#178A83" : selected ? "#FFFFFF" : "#1A1A2E",
+                      fontSize: "30px",
+                      fontWeight: 800,
+                      fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                      cursor: phase === "question" && !matched ? "pointer" : "default",
+                      transition: "background 0.16s, color 0.16s, transform 0.16s",
+                      transform: matched ? "scale(0.98)" : "scale(1)",
+                    }}
+                  >
+                    {pair.hiragana.kana}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ display: "grid", gap: "10px" }}>
+              {(currentQ.matchRightItems ?? []).map((item) => {
+                const pair = currentQ.matchPairs?.find((entry) => entry.katakana.id === item.id);
+                const pairKey = pair?.key ?? item.id;
+                const matched = matchedPairKeys.includes(pairKey);
+                const selected = matchSelection?.id === item.id;
+                const wrong = matchWrongPairKey === pairKey;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleMatchSelect("katakana", item)}
+                    disabled={phase !== "question" || matched}
+                    style={{
+                      minHeight: "66px",
+                      border: "none",
+                      borderRadius: "20px",
+                      background: matched
+                        ? "rgba(78,205,196,0.18)"
+                        : wrong
+                          ? "rgba(230,57,70,0.16)"
+                          : selected
+                            ? "#1A1A2E"
+                            : "#FFFFFF",
+                      color: matched ? "#178A83" : selected ? "#FFFFFF" : "#1A1A2E",
+                      fontSize: "30px",
+                      fontWeight: 800,
+                      fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                      cursor: phase === "question" && !matched ? "pointer" : "default",
+                      boxShadow: matched ? "none" : "0 4px 14px rgba(26,26,46,0.06)",
+                      transition: "background 0.16s, color 0.16s, transform 0.16s",
+                      transform: wrong ? "translateX(2px)" : matched ? "scale(0.98)" : "scale(1)",
+                    }}
+                  >
+                    {item.kana}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div
+            style={{
+              minHeight: "24px",
+              textAlign: "center",
+              fontSize: "14px",
+              fontWeight: 700,
+              color: phase === "feedback" ? feedbackColor : "#8A8F9B",
+              marginTop: "12px",
+            }}
+          >
+            {phase === "feedback"
+              ? matchMistakes === 0
+                ? "Pares completos"
+                : "Pares completos con errores"
+              : matchSelection
+                ? "Ahora toca su pareja"
+                : "Toca un hiragana y su katakana"}
+          </div>
+        </div>
+      ) : isInputTask(currentQ.taskType) ? (
         /* Kana -> romaji input */
         <div style={{ padding: "0 20px 40px" }}>
           <div
