@@ -279,6 +279,29 @@ function QuizContent() {
     setIsReady(true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (taskMode !== "trace") return;
+
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlOverflow = html.style.overflow;
+    const previousHtmlOverscroll = html.style.overscrollBehavior;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyOverscroll = body.style.overscrollBehavior;
+
+    html.style.overflow = "hidden";
+    html.style.overscrollBehavior = "none";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+
+    return () => {
+      html.style.overflow = previousHtmlOverflow;
+      html.style.overscrollBehavior = previousHtmlOverscroll;
+      body.style.overflow = previousBodyOverflow;
+      body.style.overscrollBehavior = previousBodyOverscroll;
+    };
+  }, [taskMode]);
+
   const currentQ = questions[currentIndex];
   const progressPct = questions.length > 0 ? (currentIndex / questions.length) * 100 : 0;
 
@@ -551,16 +574,18 @@ function QuizContent() {
       <div
         style={{
           background: "#FFF8E7",
-          minHeight: "100vh",
+          height: "100dvh",
           display: "flex",
           flexDirection: "column",
+          overflow: "hidden",
         }}
       >
         <div
           style={{
-            padding: "52px 20px 0",
+            padding: "44px 20px 0",
             display: "grid",
-            gap: "14px",
+            gap: "12px",
+            flexShrink: 0,
           }}
         >
           <div
@@ -683,9 +708,9 @@ function QuizContent() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
             flex: 1,
-            padding: "18px 20px 24px",
+            minHeight: 0,
+            padding: "12px 20px 20px",
             overflow: "hidden",
           }}
         >
@@ -694,9 +719,12 @@ function QuizContent() {
               ...sharedCardStyle,
               width: "100%",
               maxWidth: "420px",
-              padding: "22px 18px 18px",
+              height: "100%",
+              maxHeight: "100%",
+              padding: "18px 18px 16px",
               display: "grid",
-              gap: "14px",
+              gridTemplateRows: "auto auto 1fr auto",
+              gap: "12px",
             }}
           >
             <div style={{ display: "grid", gap: "8px", textAlign: "center" }}>

@@ -49,6 +49,17 @@ function nearestSampleIndex(samples: TracePoint[], point: TracePoint) {
   return bestIndex;
 }
 
+function nearestSampleDistance(samples: TracePoint[], point: TracePoint) {
+  let bestDistance = Number.POSITIVE_INFINITY;
+  for (let i = 0; i < samples.length; i += 1) {
+    const nextDistance = distance(samples[i], point);
+    if (nextDistance < bestDistance) {
+      bestDistance = nextDistance;
+    }
+  }
+  return bestDistance;
+}
+
 function createSvgPath(d: string) {
   if (typeof document === "undefined") return null;
   const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -120,13 +131,14 @@ export function evaluateTraceStroke(
 
   const userLength = polylineLength(userPoints);
   const startDistance = distance(userPoints[0], template.start);
+  const endDistance = distance(userPoints[userPoints.length - 1], template.end);
 
-  if (startDistance > 22) {
-    return { ok: false, reason: "Empieza cerca del punto de inicio.", coverage: 0 };
+  if (startDistance > 26) {
+    return { ok: false, reason: "Empieza más cerca del inicio.", coverage: 0 };
   }
 
   if (userLength < Math.max(10, template.length * 0.18)) {
-    return { ok: false, reason: "Recorre un poco más el trazo.", coverage: 0 };
+    return { ok: false, reason: "Trazo demasiado corto.", coverage: 0 };
   }
 
   const maxProgressIndex = userPoints.reduce(
@@ -139,13 +151,24 @@ export function evaluateTraceStroke(
     userPoints.some((point) => distance(sample, point) <= 12),
   ).length;
   const coverage = coveredSamples / Math.max(1, template.samples.length);
+  const averagePathDistance =
+    userPoints.reduce((sum, point) => sum + nearestSampleDistance(template.samples, point), 0) /
+    Math.max(1, userPoints.length);
 
   if (progressRatio < 0.68) {
-    return { ok: false, reason: "Sigue el trazo hasta el final.", coverage };
+    return { ok: false, reason: "Llega un poco más al final.", coverage };
+  }
+
+  if (endDistance > 26) {
+    return { ok: false, reason: "Termina más cerca del final.", coverage };
   }
 
   if (coverage < 0.38) {
-    return { ok: false, reason: "Intenta seguir más de cerca la guía.", coverage };
+    return { ok: false, reason: "Intenta seguir mejor la guía.", coverage };
+  }
+
+  if (averagePathDistance > 16) {
+    return { ok: false, reason: "Mantente más cerca del trazo.", coverage };
   }
 
   return { ok: true, coverage };

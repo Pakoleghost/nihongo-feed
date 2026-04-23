@@ -35,7 +35,7 @@ type StatusMessage = {
 
 const DEFAULT_STATUS: StatusMessage = {
   tone: "neutral",
-  text: "Sigue el trazo marcado, uno por uno.",
+  text: "Dibuja sobre el trazo marcado.",
 };
 
 export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete }: Props) {
@@ -49,8 +49,6 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
   const [currentPoints, setCurrentPoints] = useState<TracePoint[]>([]);
   const [status, setStatus] = useState<StatusMessage>(DEFAULT_STATUS);
   const [retryCount, setRetryCount] = useState(0);
-  const [hasStartedNearGuide, setHasStartedNearGuide] = useState(false);
-
   const traceAvailable = hasKanaTraceData(kana) && templates.length > 0;
   const activeStroke = templates[activeStrokeIndex] ?? null;
 
@@ -60,7 +58,6 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
     pointsRef.current = [];
     setRetryCount(0);
     setStatus(DEFAULT_STATUS);
-    setHasStartedNearGuide(false);
     isDrawingRef.current = false;
     completionSentRef.current = false;
   }, [kana]);
@@ -69,7 +66,6 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
     pointsRef.current = [];
     setCurrentPoints([]);
     isDrawingRef.current = false;
-    setHasStartedNearGuide(false);
     if (statusOverride) setStatus(statusOverride);
   }
 
@@ -89,14 +85,8 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
     pointsRef.current = [point];
     setCurrentPoints([point]);
     if (activeStroke) {
-      const startNearGuide =
-        Math.hypot(point.x - activeStroke.start.x, point.y - activeStroke.start.y) <= 20;
-      setHasStartedNearGuide(startNearGuide);
-      setStatus(
-        startNearGuide
-          ? { tone: "neutral", text: "Bien. Sigue el trazo." }
-          : { tone: "neutral", text: "Empieza cerca del punto marcado." },
-      );
+      const startNearGuide = Math.hypot(point.x - activeStroke.start.x, point.y - activeStroke.start.y) <= 26;
+      setStatus(startNearGuide ? { tone: "neutral", text: "Bien. Sigue el trazo." } : DEFAULT_STATUS);
     } else {
       setStatus(DEFAULT_STATUS);
     }
@@ -137,7 +127,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
     const evaluation = evaluateTraceStroke(activeStroke, pointsRef.current);
     if (!evaluation.ok) {
       setRetryCount((count) => count + 1);
-      resetCurrentStroke({ tone: "error", text: evaluation.reason });
+      resetCurrentStroke({ tone: "error", text: evaluation.reason || "Intenta otra vez." });
       return;
     }
 
@@ -155,7 +145,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
       return;
     }
 
-    setStatus({ tone: "success", text: "Buen trazo. Sigue con el siguiente." });
+    setStatus({ tone: "success", text: "Buen trazo. Siguiente." });
     setCurrentPoints([]);
     pointsRef.current = [];
     setActiveStrokeIndex((index) => index + 1);
@@ -168,6 +158,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
 
   const userPath = pointsToSvgPath(currentPoints);
   const completedStrokes = templates.slice(0, activeStrokeIndex);
+  const upcomingStrokes = templates.slice(activeStrokeIndex + 1);
   const statusColor =
     status.tone === "success" ? "#178A83" : status.tone === "error" ? "#C53340" : "#6E737F";
   const statusBg =
@@ -207,7 +198,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
   }
 
   return (
-    <div style={{ display: "grid", gap: "12px" }}>
+    <div style={{ display: "grid", gap: "12px", minHeight: 0 }}>
       <div
         style={{
           display: "flex",
@@ -255,6 +246,9 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
           background: "#FAF7F1",
           padding: "14px",
           boxShadow: "inset 0 0 0 1px rgba(26,26,46,0.05)",
+          width: "100%",
+          maxWidth: "320px",
+          justifySelf: "center",
         }}
       >
         <svg
@@ -278,6 +272,18 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
           <line x1="54.5" y1="6" x2="54.5" y2="103" stroke="#ECE4D9" strokeWidth="0.6" strokeDasharray="4 4" />
           <line x1="6" y1="54.5" x2="103" y2="54.5" stroke="#ECE4D9" strokeWidth="0.6" strokeDasharray="4 4" />
 
+          {upcomingStrokes.map((stroke) => (
+            <path
+              key={`upcoming-${stroke.d}`}
+              d={stroke.d}
+              fill="none"
+              stroke="rgba(26,26,46,0.08)"
+              strokeWidth="3.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ))}
+
           {completedStrokes.map((stroke) => (
             <path
               key={`done-${stroke.d}`}
@@ -299,19 +305,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
               strokeWidth="4.2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeOpacity={0.22}
-              />
-              <circle
-                cx={activeStroke.start.x}
-                cy={activeStroke.start.y}
-                r="6.5"
-                fill={hasStartedNearGuide ? "rgba(78,205,196,0.18)" : "rgba(26,26,46,0.08)"}
-              />
-              <circle
-                cx={activeStroke.start.x}
-                cy={activeStroke.start.y}
-                r="2.8"
-                fill={hasStartedNearGuide ? "#4ECDC4" : "#1A1A2E"}
+              strokeOpacity={0.28}
               />
             </>
           )}
