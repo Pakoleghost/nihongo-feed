@@ -7,6 +7,7 @@ import type { Variants } from "framer-motion";
 import { KANA_ITEMS } from "@/lib/kana-data";
 import type { KanaItem } from "@/lib/kana-data";
 import type { KanaQuestionType, KanaSessionMode } from "@/lib/kana-data";
+import KanaTraceCanvas from "@/components/KanaTraceCanvas";
 import {
   loadKanaProgress,
   saveKanaProgress,
@@ -14,6 +15,7 @@ import {
 } from "@/lib/kana-progress";
 import type { KanaProgressMap } from "@/lib/kana-progress";
 import { buildKanaSmartSessionItems } from "@/lib/kana-smart";
+import { hasKanaTraceData } from "@/lib/kana-trace";
 
 type QuizQuestion = {
   item: KanaItem;
@@ -135,7 +137,7 @@ function getQuestionInstruction(taskType: KanaQuestionType) {
   if (taskType === "kana_to_romaji_choice") return "Toca el romaji correcto.";
   if (taskType === "romaji_to_kana_choice") return "Toca el kana correcto.";
   if (taskType === "kana_to_romaji_input") return "Escribe su lectura en romaji.";
-  return "Traza el kana que corresponde a este romaji.";
+  return "Traza el kana siguiendo la guía.";
 }
 
 function getQuestionPromptValue(question: QuizQuestion) {
@@ -176,8 +178,6 @@ function buildQuiz(
   itemIds: string[],
   progress: KanaProgressMap
 ): QuizQuestion[] {
-  if (taskMode === "trace") return [];
-
   let items: KanaItem[];
   const smartPool = mode === "smart" && itemIds.length > 0
     ? KANA_ITEMS.filter((item) => itemIds.includes(item.id))
@@ -191,6 +191,15 @@ function buildQuiz(
     items = buildKanaSmartSessionItems(pool, progress, count);
   } else {
     items = shuffle(pool).slice(0, Math.min(count, pool.length));
+  }
+
+  if (taskMode === "trace") {
+    const traceItems = items.filter((item) => hasKanaTraceData(item.kana));
+    return traceItems.map((item) => ({
+      item,
+      taskType: "romaji_to_kana_trace",
+      options: [],
+    }));
   }
 
   const effectivePool = pool.length > 0 ? pool : KANA_ITEMS;
@@ -259,6 +268,7 @@ function QuizContent() {
   const [textAnswer, setTextAnswer] = useState("");
   const [results, setResults] = useState<QuestionResult[]>([]);
   const [progressMap, setProgressMap] = useState<KanaProgressMap>({});
+  const [isReady, setIsReady] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -266,6 +276,7 @@ function QuizContent() {
     setProgressMap(prog);
     const quiz = buildQuiz(mode, sets, taskMode, count, itemIds, prog);
     setQuestions(quiz);
+    setIsReady(true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const currentQ = questions[currentIndex];
@@ -357,6 +368,22 @@ function QuizContent() {
     );
   }
 
+  function handleTraceComplete(result: { retries: number; strokes: number }) {
+    if (!currentQ || phase !== "question") return;
+    setPhase("feedback");
+
+    const rating = result.retries > 0 ? "almost" : "correct";
+    const updated = applyKanaRating(progressMap, currentQ.item, rating);
+    setProgressMap(updated);
+    saveKanaProgress("anon", updated);
+    setKanaAnim("bounce");
+
+    setTimeout(
+      () => advance({ item: currentQ.item, correct: true, userAnswer: currentQ.item.kana }, updated),
+      700,
+    );
+  }
+
   function handleExit() {
     saveKanaProgress("anon", progressMap);
     if (confirm("Puedes salir ahora. Guardaremos lo que ya practicaste.")) {
@@ -364,7 +391,23 @@ function QuizContent() {
     }
   }
 
-  if (taskMode === "trace") {
+  if (!isReady && questions.length === 0) {
+    return (
+      <div
+        style={{
+          background: "#FFF8E7",
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <p style={{ color: "#53596B", fontSize: "16px" }}>Preparando sesión…</p>
+      </div>
+    );
+  }
+
+  if (taskMode === "trace" && questions.length === 0) {
     return (
       <div
         style={{
@@ -422,10 +465,10 @@ function QuizContent() {
             Trazar
           </div>
           <div style={{ fontSize: "32px", lineHeight: 1.05, fontWeight: 800, color: "#1A1A2E" }}>
-            Modo Trazar
+            No hay trazos listos
           </div>
           <p style={{ margin: 0, fontSize: "16px", lineHeight: 1.45, color: "#5E6472" }}>
-            Este modo quedará separado para practicar romaji -&gt; trazar kana a mano. En esta pasada solo preparamos su lugar en el producto.
+            Esta selección no tiene suficientes kana con guía de trazos. Prueba otra selección o usa Mixto.
           </p>
           <div style={{ display: "grid", gap: "10px", marginTop: "8px" }}>
             <button
@@ -502,6 +545,222 @@ function QuizContent() {
     borderRadius: "28px",
     boxShadow: "0 10px 28px rgba(26,26,46,0.08)",
   } as const;
+
+  if (taskMode === "trace") {
+    return (
+      <div
+        style={{
+          background: "#FFF8E7",
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <div
+          style={{
+            padding: "52px 20px 0",
+            display: "grid",
+            gap: "14px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "14px",
+            }}
+          >
+            <button
+              onClick={handleExit}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "4px",
+                flexShrink: 0,
+              }}
+              aria-label="Salir"
+              title="Salir y guardar progreso"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M19 12H5M12 5l-7 7 7 7"
+                  stroke="#1A1A2E"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <div style={{ flex: 1, display: "grid", gap: "8px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "12px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    color: "#53596B",
+                  }}
+                >
+                  Trazando
+                </div>
+                <div
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    color: "#7A7F8D",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {currentIndex + 1} / {questions.length}
+                </div>
+              </div>
+              <div
+                style={{
+                  height: "6px",
+                  background: "#E5E7EB",
+                  borderRadius: "999px",
+                  overflow: "hidden",
+                }}
+              >
+                <motion.div
+                  animate={{ width: `${progressPct}%` }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  style={{
+                    height: "100%",
+                    background: "#4ECDC4",
+                    borderRadius: "999px",
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "8px",
+              flexWrap: "wrap",
+            }}
+          >
+            <div
+              style={{
+                borderRadius: "999px",
+                background: "#FFFFFF",
+                color: "#53596B",
+                fontSize: "12px",
+                fontWeight: 700,
+                padding: "8px 12px",
+                boxShadow: "0 2px 10px rgba(26,26,46,0.08)",
+              }}
+            >
+              {quizContext}
+            </div>
+            <div
+              style={{
+                borderRadius: "999px",
+                background: "rgba(78,205,196,0.12)",
+                color: "#178A83",
+                fontSize: "12px",
+                fontWeight: 700,
+                padding: "8px 12px",
+              }}
+            >
+              Trazar
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            flex: 1,
+            padding: "18px 20px 24px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              ...sharedCardStyle,
+              width: "100%",
+              maxWidth: "420px",
+              padding: "22px 18px 18px",
+              display: "grid",
+              gap: "14px",
+            }}
+          >
+            <div style={{ display: "grid", gap: "8px", textAlign: "center" }}>
+              <div
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 800,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: "#8A8F9B",
+                }}
+              >
+                {questionModeLabel}
+              </div>
+              <div
+                style={{
+                  fontSize: "54px",
+                  fontWeight: 800,
+                  color: "#1A1A2E",
+                  lineHeight: 1,
+                }}
+              >
+                {currentQ.item.romaji}
+              </div>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "#6E737F",
+                  margin: 0,
+                  lineHeight: 1.35,
+                }}
+              >
+                {questionInstruction}
+              </p>
+            </div>
+
+            <KanaTraceCanvas
+              key={`${currentQ.item.id}-${currentIndex}`}
+              kana={currentQ.item.kana}
+              disabled={phase === "feedback"}
+              onKanaComplete={handleTraceComplete}
+            />
+
+            {phase === "feedback" && (
+              <div
+                style={{
+                  borderRadius: "999px",
+                  background: "rgba(78,205,196,0.14)",
+                  color: "#178A83",
+                  padding: "10px 14px",
+                  fontSize: "13px",
+                  fontWeight: 800,
+                  letterSpacing: "0.02em",
+                  textAlign: "center",
+                }}
+              >
+                Kana completado
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
