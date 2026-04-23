@@ -49,6 +49,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
   const [currentPoints, setCurrentPoints] = useState<TracePoint[]>([]);
   const [status, setStatus] = useState<StatusMessage>(DEFAULT_STATUS);
   const [retryCount, setRetryCount] = useState(0);
+  const [isCompletingKana, setIsCompletingKana] = useState(false);
   const traceAvailable = hasKanaTraceData(kana) && templates.length > 0;
   const activeStroke = templates[activeStrokeIndex] ?? null;
 
@@ -57,6 +58,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
     setCurrentPoints([]);
     pointsRef.current = [];
     setRetryCount(0);
+    setIsCompletingKana(false);
     setStatus(DEFAULT_STATUS);
     isDrawingRef.current = false;
     completionSentRef.current = false;
@@ -82,6 +84,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
     if (!point) return;
     svgRef.current?.setPointerCapture?.(event.pointerId);
     isDrawingRef.current = true;
+    setIsCompletingKana(false);
     pointsRef.current = [point];
     setCurrentPoints([point]);
     if (activeStroke) {
@@ -132,6 +135,8 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
     }
 
     if (activeStrokeIndex + 1 >= templates.length) {
+      setIsCompletingKana(true);
+      setActiveStrokeIndex(templates.length);
       setStatus({ tone: "success", text: "Kana completo." });
       setCurrentPoints([]);
       pointsRef.current = [];
@@ -140,7 +145,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
         completionSentRef.current = true;
         window.setTimeout(() => {
           onKanaComplete({ retries: retryCount, strokes: templates.length });
-        }, 360);
+        }, 420);
       }
       return;
     }
@@ -269,55 +274,72 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
           onPointerCancel={handlePointerLeave}
           onPointerLeave={handlePointerLeave}
         >
-          <line x1="54.5" y1="6" x2="54.5" y2="103" stroke="#ECE4D9" strokeWidth="0.6" strokeDasharray="4 4" />
-          <line x1="6" y1="54.5" x2="103" y2="54.5" stroke="#ECE4D9" strokeWidth="0.6" strokeDasharray="4 4" />
-
-          {upcomingStrokes.map((stroke) => (
-            <path
-              key={`upcoming-${stroke.d}`}
-              d={stroke.d}
-              fill="none"
-              stroke="rgba(26,26,46,0.08)"
-              strokeWidth="3.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          <g pointerEvents="none">
+            <line
+              x1="54.5"
+              y1="6"
+              x2="54.5"
+              y2="103"
+              stroke="#ECE4D9"
+              strokeWidth="0.6"
+              strokeDasharray="4 4"
             />
-          ))}
-
-          {completedStrokes.map((stroke) => (
-            <path
-              key={`done-${stroke.d}`}
-              d={stroke.d}
-              fill="none"
-              stroke="rgba(78,205,196,0.42)"
-              strokeWidth="4.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <line
+              x1="6"
+              y1="54.5"
+              x2="103"
+              y2="54.5"
+              stroke="#ECE4D9"
+              strokeWidth="0.6"
+              strokeDasharray="4 4"
             />
-          ))}
 
-          {activeStroke && (
-            <>
+            {upcomingStrokes.map((stroke) => (
               <path
-              d={activeStroke.d}
-              fill="none"
-              stroke="#1A1A2E"
-              strokeWidth="4.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeOpacity={0.28}
+                key={`upcoming-${stroke.d}`}
+                d={stroke.d}
+                fill="none"
+                stroke="rgba(26,26,46,0.08)"
+                strokeWidth="3.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
-            </>
-          )}
+            ))}
+
+            {completedStrokes.map((stroke) => (
+              <path
+                key={`done-${stroke.d}`}
+                d={stroke.d}
+                fill="none"
+                stroke={isCompletingKana ? "#2DBBB2" : "rgba(78,205,196,0.52)"}
+                strokeWidth="4.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            ))}
+
+            {activeStroke && (
+              <path
+                d={activeStroke.d}
+                fill="none"
+                stroke="#1A1A2E"
+                strokeWidth="4.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeOpacity={0.2}
+              />
+            )}
+          </g>
 
           {userPath && (
             <path
               d={userPath}
               fill="none"
-              stroke="#1A1A2E"
-              strokeWidth="5.2"
+              stroke="#178A83"
+              strokeWidth="5"
               strokeLinecap="round"
               strokeLinejoin="round"
+              pointerEvents="none"
             />
           )}
         </svg>
@@ -326,13 +348,15 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
       <div
         style={{
           borderRadius: "18px",
-          background: statusBg,
+          background: isCompletingKana ? "rgba(78,205,196,0.16)" : statusBg,
           color: statusColor,
           padding: "10px 12px",
           fontSize: "13px",
           fontWeight: 700,
           textAlign: "center",
           lineHeight: 1.35,
+          transform: isCompletingKana ? "scale(1.01)" : "scale(1)",
+          transition: "transform 180ms ease, background-color 180ms ease",
         }}
       >
         {status.text}

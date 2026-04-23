@@ -20,6 +20,11 @@ export type TraceEvaluation =
 export const TRACE_VIEWBOX_SIZE = 109;
 export const TRACE_MIN_JUDGABLE_POINTS = 4;
 export const TRACE_MIN_JUDGABLE_LENGTH = 8;
+export const TRACE_START_TOLERANCE = 30;
+export const TRACE_END_TOLERANCE = 30;
+export const TRACE_COVERAGE_THRESHOLD = 0.3;
+export const TRACE_AVERAGE_DISTANCE_THRESHOLD = 18;
+export const TRACE_PROGRESS_THRESHOLD = 0.6;
 
 function distance(a: TracePoint, b: TracePoint) {
   const dx = a.x - b.x;
@@ -133,7 +138,7 @@ export function evaluateTraceStroke(
   const startDistance = distance(userPoints[0], template.start);
   const endDistance = distance(userPoints[userPoints.length - 1], template.end);
 
-  if (startDistance > 26) {
+  if (startDistance > TRACE_START_TOLERANCE) {
     return { ok: false, reason: "Empieza más cerca del inicio.", coverage: 0 };
   }
 
@@ -155,19 +160,19 @@ export function evaluateTraceStroke(
     userPoints.reduce((sum, point) => sum + nearestSampleDistance(template.samples, point), 0) /
     Math.max(1, userPoints.length);
 
-  if (progressRatio < 0.68) {
+  if (progressRatio < TRACE_PROGRESS_THRESHOLD) {
     return { ok: false, reason: "Llega un poco más al final.", coverage };
   }
 
-  if (endDistance > 26) {
+  if (endDistance > TRACE_END_TOLERANCE) {
     return { ok: false, reason: "Termina más cerca del final.", coverage };
   }
 
-  if (coverage < 0.38) {
+  if (coverage < TRACE_COVERAGE_THRESHOLD) {
     return { ok: false, reason: "Intenta seguir mejor la guía.", coverage };
   }
 
-  if (averagePathDistance > 16) {
+  if (averagePathDistance > TRACE_AVERAGE_DISTANCE_THRESHOLD) {
     return { ok: false, reason: "Mantente más cerca del trazo.", coverage };
   }
 

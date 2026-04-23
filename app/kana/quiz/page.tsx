@@ -767,23 +767,6 @@ function QuizContent() {
               disabled={phase === "feedback"}
               onKanaComplete={handleTraceComplete}
             />
-
-            {phase === "feedback" && (
-              <div
-                style={{
-                  borderRadius: "999px",
-                  background: "rgba(78,205,196,0.14)",
-                  color: "#178A83",
-                  padding: "10px 14px",
-                  fontSize: "13px",
-                  fontWeight: 800,
-                  letterSpacing: "0.02em",
-                  textAlign: "center",
-                }}
-              >
-                Kana completado
-              </div>
-            )}
           </div>
         </div>
       </div>
