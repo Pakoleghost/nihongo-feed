@@ -29,8 +29,9 @@ type QuestionResult = {
   userAnswer: string;
 };
 
-type Phase = "question" | "feedback";
+type Phase = "question" | "traceReview" | "feedback";
 type KanaAnim = "idle" | "bounce" | "shake";
+type TraceCompletion = { retries: number; strokes: number };
 const MIXED_TASK_TYPES: KanaQuestionType[] = [
   "kana_to_romaji_choice",
   "romaji_to_kana_choice",
@@ -102,6 +103,13 @@ function getKanaOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
   return shuffle([correct, ...wrong3]);
 }
 
+function getTraceKanaOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
+  const sameScriptPool = pool.filter((item) => item.script === correctItem.script);
+  const sameSetPool = sameScriptPool.filter((item) => item.set === correctItem.set);
+  const preferredPool = sameSetPool.length >= 4 ? sameSetPool : sameScriptPool;
+  return getKanaOptions(correctItem, preferredPool.length > 0 ? preferredPool : KANA_ITEMS);
+}
+
 function buildMixedTaskSequence(length: number): KanaQuestionType[] {
   const tasks: KanaQuestionType[] = [];
   let previous: KanaQuestionType | null = null;
@@ -157,11 +165,15 @@ function isInputTask(taskType: KanaQuestionType) {
 }
 
 function getCorrectChoiceValue(question: QuizQuestion) {
-  return question.taskType === "romaji_to_kana_choice" ? question.item.kana : question.item.romaji;
+  return question.taskType === "romaji_to_kana_choice" || question.taskType === "romaji_to_kana_trace"
+    ? question.item.kana
+    : question.item.romaji;
 }
 
 function isCorrectChoiceAnswer(question: QuizQuestion, answer: string) {
-  if (question.taskType === "romaji_to_kana_choice") return answer === question.item.kana;
+  if (question.taskType === "romaji_to_kana_choice" || question.taskType === "romaji_to_kana_trace") {
+    return answer === question.item.kana;
+  }
   return isCorrectAnswer(question.item, answer);
 }
 
@@ -194,11 +206,12 @@ function buildQuiz(
   }
 
   if (taskMode === "trace") {
+    const effectivePool = pool.length > 0 ? pool : KANA_ITEMS;
     const traceItems = items.filter((item) => hasKanaTraceData(item.kana));
     return traceItems.map((item) => ({
       item,
       taskType: "romaji_to_kana_trace",
-      options: [],
+      options: getTraceKanaOptions(item, effectivePool),
     }));
   }
 
@@ -268,6 +281,7 @@ function QuizContent() {
   const [textAnswer, setTextAnswer] = useState("");
   const [results, setResults] = useState<QuestionResult[]>([]);
   const [progressMap, setProgressMap] = useState<KanaProgressMap>({});
+  const [traceCompletion, setTraceCompletion] = useState<TraceCompletion | null>(null);
   const [isReady, setIsReady] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -345,6 +359,7 @@ function QuizContent() {
         setScaledOption(null);
         setKanaAnim("idle");
         setTextAnswer("");
+        setTraceCompletion(null);
       }
     },
     [results, currentIndex, questions.length, mode, taskMode, router]
@@ -391,19 +406,31 @@ function QuizContent() {
     );
   }
 
-  function handleTraceComplete(result: { retries: number; strokes: number }) {
+  function handleTraceComplete(result: TraceCompletion) {
     if (!currentQ || phase !== "question") return;
+    setTraceCompletion(result);
+    setSelectedOption(null);
+    setScaledOption(null);
+    setKanaAnim("bounce");
+    setPhase("traceReview");
+  }
+
+  function handleTraceReviewSelect(option: string) {
+    if (!currentQ || phase !== "traceReview" || !traceCompletion) return;
+    setSelectedOption(option);
     setPhase("feedback");
 
-    const rating = result.retries > 0 ? "almost" : "correct";
+    const correct = option === currentQ.item.kana;
+    const rating = correct && traceCompletion.retries === 0 ? "correct" : correct ? "almost" : "wrong";
     const updated = applyKanaRating(progressMap, currentQ.item, rating);
     setProgressMap(updated);
     saveKanaProgress("anon", updated);
-    setKanaAnim("bounce");
+    setKanaAnim(correct ? "bounce" : "shake");
+    if (correct) setScaledOption(option);
 
     setTimeout(
-      () => advance({ item: currentQ.item, correct: true, userAnswer: currentQ.item.kana }, updated),
-      700,
+      () => advance({ item: currentQ.item, correct, userAnswer: option }, updated),
+      correct ? 720 : 1050,
     );
   }
 
@@ -761,12 +788,119 @@ function QuizContent() {
               </p>
             </div>
 
-            <KanaTraceCanvas
-              key={`${currentQ.item.id}-${currentIndex}`}
-              kana={currentQ.item.kana}
-              disabled={phase === "feedback"}
-              onKanaComplete={handleTraceComplete}
-            />
+            {phase === "question" ? (
+              <KanaTraceCanvas
+                key={`${currentQ.item.id}-${currentIndex}`}
+                kana={currentQ.item.kana}
+                disabled={false}
+                onKanaComplete={handleTraceComplete}
+              />
+            ) : (
+              <div
+                style={{
+                  display: "grid",
+                  gap: "12px",
+                  minHeight: 0,
+                  alignSelf: "stretch",
+                }}
+              >
+                <div
+                  style={{
+                    borderRadius: "24px",
+                    background: "#FAF7F1",
+                    padding: "16px",
+                    display: "grid",
+                    gap: "8px",
+                    textAlign: "center",
+                    boxShadow: "inset 0 0 0 1px rgba(26,26,46,0.05)",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 800,
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                      color: "#8A8F9B",
+                    }}
+                  >
+                    Reconocimiento
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: 800,
+                      color: "#1A1A2E",
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    ¿Cuál escribiste?
+                  </div>
+                  <div
+                    style={{
+                      borderRadius: "999px",
+                      background:
+                        phase === "feedback"
+                          ? feedbackIsCorrect
+                            ? "rgba(78,205,196,0.16)"
+                            : "rgba(230,57,70,0.12)"
+                          : "rgba(78,205,196,0.12)",
+                      color: phase === "feedback" ? feedbackColor : "#178A83",
+                      padding: "8px 12px",
+                      fontSize: "13px",
+                      fontWeight: 800,
+                      justifySelf: "center",
+                    }}
+                  >
+                    {phase === "feedback" ? feedbackLabel : "Elige el kana correcto"}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                    gap: "10px",
+                  }}
+                >
+                  {currentQ.options.map((option) => {
+                    const isSelected = selectedOption === option;
+                    const isCorrect = option === currentQ.item.kana;
+                    const showCorrect = phase === "feedback" && isCorrect;
+                    const showWrong = phase === "feedback" && isSelected && !isCorrect;
+                    return (
+                      <motion.button
+                        key={option}
+                        type="button"
+                        onClick={() => handleTraceReviewSelect(option)}
+                        disabled={phase !== "traceReview"}
+                        animate={{ scale: scaledOption === option ? [1, 1.04, 1] : 1 }}
+                        transition={{ duration: 0.24 }}
+                        style={{
+                          border: "none",
+                          borderRadius: "22px",
+                          background: showCorrect
+                            ? "#4ECDC4"
+                            : showWrong
+                              ? "#E63946"
+                              : "#FFFFFF",
+                          color: showCorrect || showWrong ? "#FFFFFF" : "#1A1A2E",
+                          minHeight: "72px",
+                          padding: "12px",
+                          fontSize: "34px",
+                          fontWeight: 800,
+                          fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                          cursor: phase === "traceReview" ? "pointer" : "default",
+                          boxShadow: "0 8px 20px rgba(26,26,46,0.07)",
+                        }}
+                      >
+                        {option}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
