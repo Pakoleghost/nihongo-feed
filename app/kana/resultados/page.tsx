@@ -14,7 +14,8 @@ type QuizResults = {
   correct: number;
   missed: MissedKana[];
   mode: string;
-  difficulty: string;
+  taskMode?: string;
+  difficulty?: string;
 };
 
 function getHeadline(pct: number, errors: number) {
@@ -36,10 +37,11 @@ function getModeLabel(mode: string) {
   return "Libre";
 }
 
-function getDifficultyLabel(difficulty: string) {
-  if (difficulty === "dificil") return "Escribir romaji";
-  if (difficulty === "automatico") return "Modo mixto";
-  return "Opcion multiple";
+function getTaskModeLabel(taskMode?: string, difficulty?: string) {
+  if (taskMode === "trace") return "Trazar";
+  if (taskMode === "mixed") return "Mixto";
+  if (difficulty === "automatico") return "Mixto";
+  return "Mixto";
 }
 
 function getNextStepText(results: QuizResults) {
@@ -78,20 +80,20 @@ export default function ResultadosPage() {
       headline: getHeadline(pct, errors),
       headlineColor: getHeadlineColor(pct, errors),
       modeLabel: getModeLabel(results.mode),
-      difficultyLabel: getDifficultyLabel(results.difficulty),
+      taskModeLabel: getTaskModeLabel(results.taskMode, results.difficulty),
       nextStep: getNextStepText(results),
     };
   }, [results]);
 
   if (!results || !summary) return null;
 
-  const { total, correct, missed, mode, difficulty } = results;
-  const { errors, pct, headline, headlineColor, modeLabel, difficultyLabel, nextStep } = summary;
+  const { total, correct, missed, taskMode } = results;
+  const { errors, headline, headlineColor, modeLabel, taskModeLabel, nextStep } = summary;
 
   function handleRepeatErrors() {
     if (missed.length === 0) return;
     const ids = missed.map((m) => m.id).join(",");
-    router.push(`/kana/quiz?mode=repeat&items=${ids}&difficulty=${difficulty || "facil"}&count=${missed.length}`);
+    router.push(`/kana/quiz?mode=repeat&items=${ids}&taskMode=${taskMode || "mixed"}&count=${missed.length}`);
   }
 
   return (
@@ -159,8 +161,8 @@ export default function ResultadosPage() {
               fontSize: "12px",
               fontWeight: 800,
             }}
-          >
-            {difficultyLabel}
+            >
+            {taskModeLabel}
           </div>
         </div>
 

@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { KANA_ITEMS } from "@/lib/kana-data";
 import type { KanaItem } from "@/lib/kana-data";
+import type { KanaQuestionType, KanaSessionMode } from "@/lib/kana-data";
 import {
   loadKanaProgress,
   saveKanaProgress,
@@ -16,7 +17,7 @@ import { buildKanaSmartSessionItems } from "@/lib/kana-smart";
 
 type QuizQuestion = {
   item: KanaItem;
-  isHard: boolean;
+  taskType: KanaQuestionType;
   options: string[];
 };
 
@@ -28,6 +29,11 @@ type QuestionResult = {
 
 type Phase = "question" | "feedback";
 type KanaAnim = "idle" | "bounce" | "shake";
+const MIXED_TASK_TYPES: KanaQuestionType[] = [
+  "kana_to_romaji_choice",
+  "romaji_to_kana_choice",
+  "kana_to_romaji_input",
+];
 
 function formatQuizContext(primary: string, secondary: string, sets: string[]) {
   if (primary || secondary) {
@@ -83,12 +89,78 @@ function getOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
   return shuffle([correct, ...wrong3]);
 }
 
-function getIsHard(item: KanaItem, progress: KanaProgressMap, difficulty: string): boolean {
-  if (difficulty === "facil") return false;
-  if (difficulty === "dificil") return true;
-  const entry = progress[item.id];
-  if (!entry || entry.timesSeen === 0) return false;
-  return entry.timesCorrect > entry.timesWrong;
+function getKanaOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
+  const correct = correctItem.kana;
+  const uniqueWrong = [...new Set(pool.map((i) => i.kana).filter((kana) => kana !== correct))];
+  const finalPool =
+    uniqueWrong.length < 3
+      ? [...new Set(KANA_ITEMS.map((i) => i.kana).filter((kana) => kana !== correct))]
+      : uniqueWrong;
+  const wrong3 = shuffle(finalPool).slice(0, 3);
+  return shuffle([correct, ...wrong3]);
+}
+
+function buildMixedTaskSequence(length: number): KanaQuestionType[] {
+  const tasks: KanaQuestionType[] = [];
+  let previous: KanaQuestionType | null = null;
+
+  while (tasks.length < length) {
+    const cycle = shuffle(MIXED_TASK_TYPES);
+    if (previous && cycle[0] === previous && cycle.length > 1) {
+      [cycle[0], cycle[1]] = [cycle[1], cycle[0]];
+    }
+    for (const taskType of cycle) {
+      if (tasks.length >= length) break;
+      tasks.push(taskType);
+      previous = taskType;
+    }
+  }
+
+  return tasks;
+}
+
+function getLegacyTaskMode(rawDifficulty: string | null): KanaSessionMode {
+  if (!rawDifficulty) return "mixed";
+  return "mixed";
+}
+
+function getQuestionTaskLabel(taskType: KanaQuestionType) {
+  if (taskType === "kana_to_romaji_choice") return "Kana -> romaji";
+  if (taskType === "romaji_to_kana_choice") return "Romaji -> kana";
+  if (taskType === "kana_to_romaji_input") return "Escribir romaji";
+  return "Trazar";
+}
+
+function getQuestionInstruction(taskType: KanaQuestionType) {
+  if (taskType === "kana_to_romaji_choice") return "Toca el romaji correcto.";
+  if (taskType === "romaji_to_kana_choice") return "Toca el kana correcto.";
+  if (taskType === "kana_to_romaji_input") return "Escribe su lectura en romaji.";
+  return "Traza el kana que corresponde a este romaji.";
+}
+
+function getQuestionPromptValue(question: QuizQuestion) {
+  if (question.taskType === "romaji_to_kana_choice" || question.taskType === "romaji_to_kana_trace") {
+    return question.item.romaji;
+  }
+  return question.item.kana;
+}
+
+function getQuestionPromptKind(taskType: KanaQuestionType) {
+  if (taskType === "romaji_to_kana_choice" || taskType === "romaji_to_kana_trace") return "romaji";
+  return "kana";
+}
+
+function isInputTask(taskType: KanaQuestionType) {
+  return taskType === "kana_to_romaji_input";
+}
+
+function getCorrectChoiceValue(question: QuizQuestion) {
+  return question.taskType === "romaji_to_kana_choice" ? question.item.kana : question.item.romaji;
+}
+
+function isCorrectChoiceAnswer(question: QuizQuestion, answer: string) {
+  if (question.taskType === "romaji_to_kana_choice") return answer === question.item.kana;
+  return isCorrectAnswer(question.item, answer);
 }
 
 function isCorrectAnswer(item: KanaItem, answer: string): boolean {
@@ -99,11 +171,13 @@ function isCorrectAnswer(item: KanaItem, answer: string): boolean {
 function buildQuiz(
   mode: string,
   sets: string[],
-  difficulty: string,
+  taskMode: KanaSessionMode,
   count: number,
   itemIds: string[],
   progress: KanaProgressMap
 ): QuizQuestion[] {
+  if (taskMode === "trace") return [];
+
   let items: KanaItem[];
   const smartPool = mode === "smart" && itemIds.length > 0
     ? KANA_ITEMS.filter((item) => itemIds.includes(item.id))
@@ -119,11 +193,24 @@ function buildQuiz(
     items = shuffle(pool).slice(0, Math.min(count, pool.length));
   }
 
-  return items.map((item) => ({
-    item,
-    isHard: getIsHard(item, progress, difficulty),
-    options: getOptions(item, pool.length > 0 ? pool : KANA_ITEMS),
-  }));
+  const effectivePool = pool.length > 0 ? pool : KANA_ITEMS;
+  const taskSequence = buildMixedTaskSequence(items.length);
+
+  return items.map((item, index) => {
+    const taskType = taskSequence[index] ?? "kana_to_romaji_choice";
+    const options =
+      taskType === "romaji_to_kana_choice"
+        ? getKanaOptions(item, effectivePool)
+        : taskType === "kana_to_romaji_choice"
+          ? getOptions(item, effectivePool)
+          : [];
+
+    return {
+      item,
+      taskType,
+      options,
+    };
+  });
 }
 
 // Framer Motion variants — use `Variants` type so TypeScript accepts easing strings
@@ -155,7 +242,8 @@ function QuizContent() {
 
   const mode = searchParams.get("mode") ?? "smart";
   const sets = (searchParams.get("sets") ?? "hiragana").split(",");
-  const difficulty = searchParams.get("difficulty") ?? "facil";
+  const taskMode = ((searchParams.get("taskMode") as KanaSessionMode | null)
+    ?? getLegacyTaskMode(searchParams.get("difficulty")));
   const count = parseInt(searchParams.get("count") ?? "20", 10);
   const itemIds = (searchParams.get("items") ?? "").split(",").filter(Boolean);
   const contextPrimary = searchParams.get("contextPrimary") ?? "";
@@ -176,7 +264,7 @@ function QuizContent() {
   useEffect(() => {
     const prog = loadKanaProgress("anon");
     setProgressMap(prog);
-    const quiz = buildQuiz(mode, sets, difficulty, count, itemIds, prog);
+    const quiz = buildQuiz(mode, sets, taskMode, count, itemIds, prog);
     setQuestions(quiz);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -184,7 +272,7 @@ function QuizContent() {
   const progressPct = questions.length > 0 ? (currentIndex / questions.length) * 100 : 0;
 
   useEffect(() => {
-    if (!currentQ?.isHard || phase !== "question") return;
+    if (!currentQ || !isInputTask(currentQ.taskType) || phase !== "question") return;
 
     const frame = window.requestAnimationFrame(() => {
       inputRef.current?.focus();
@@ -193,7 +281,7 @@ function QuizContent() {
     return () => {
       window.cancelAnimationFrame(frame);
     };
-  }, [currentQ?.item.id, currentQ?.isHard, phase]);
+  }, [currentQ?.item.id, currentQ?.taskType, phase]);
 
   const advance = useCallback(
     (result: QuestionResult, updatedProgress: KanaProgressMap) => {
@@ -211,7 +299,7 @@ function QuizContent() {
             correct: newResults.filter((r) => r.correct).length,
             missed,
             mode,
-            difficulty,
+            taskMode,
           })
         );
         router.push("/kana/resultados");
@@ -225,7 +313,7 @@ function QuizContent() {
         setTextAnswer("");
       }
     },
-    [results, currentIndex, questions.length, mode, difficulty, router]
+    [results, currentIndex, questions.length, mode, taskMode, router]
   );
 
   function handleOptionSelect(option: string) {
@@ -233,7 +321,7 @@ function QuizContent() {
     setSelectedOption(option);
     setPhase("feedback");
 
-    const correct = isCorrectAnswer(currentQ.item, option);
+    const correct = isCorrectChoiceAnswer(currentQ, option);
     const updated = applyKanaRating(progressMap, currentQ.item, correct ? "correct" : "wrong");
     setProgressMap(updated);
     saveKanaProgress("anon", updated);
@@ -276,6 +364,108 @@ function QuizContent() {
     }
   }
 
+  if (taskMode === "trace") {
+    return (
+      <div
+        style={{
+          background: "#FFF8E7",
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          padding: "52px 20px 32px",
+        }}
+      >
+        <button
+          onClick={() => router.push("/kana/configurar")}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: "4px",
+            alignSelf: "flex-start",
+            marginBottom: "24px",
+          }}
+          aria-label="Volver"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M19 12H5M12 5l-7 7 7 7"
+              stroke="#1A1A2E"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+
+        <div
+          style={{
+            background: "#FFFFFF",
+            borderRadius: "28px",
+            padding: "24px 22px",
+            boxShadow: "0 10px 28px rgba(26,26,46,0.08)",
+            display: "grid",
+            gap: "14px",
+          }}
+        >
+          <div
+            style={{
+              borderRadius: "999px",
+              background: "rgba(26,26,46,0.06)",
+              color: "#53596B",
+              fontSize: "12px",
+              fontWeight: 800,
+              padding: "8px 12px",
+              justifySelf: "flex-start",
+            }}
+          >
+            Trazar
+          </div>
+          <div style={{ fontSize: "32px", lineHeight: 1.05, fontWeight: 800, color: "#1A1A2E" }}>
+            Modo Trazar
+          </div>
+          <p style={{ margin: 0, fontSize: "16px", lineHeight: 1.45, color: "#5E6472" }}>
+            Este modo quedará separado para practicar romaji -&gt; trazar kana a mano. En esta pasada solo preparamos su lugar en el producto.
+          </p>
+          <div style={{ display: "grid", gap: "10px", marginTop: "8px" }}>
+            <button
+              onClick={() => router.push(`/kana/configurar?mode=${mode}&taskMode=mixed`)}
+              style={{
+                width: "100%",
+                padding: "16px",
+                borderRadius: "999px",
+                border: "none",
+                cursor: "pointer",
+                background: "#1A1A2E",
+                color: "#FFFFFF",
+                fontSize: "16px",
+                fontWeight: 800,
+              }}
+            >
+              Usar Mixto por ahora
+            </button>
+            <button
+              onClick={() => router.push("/kana")}
+              style={{
+                width: "100%",
+                padding: "14px",
+                borderRadius: "999px",
+                border: "none",
+                cursor: "pointer",
+                background: "transparent",
+                color: "#1A1A2E",
+                fontSize: "16px",
+                fontWeight: 700,
+              }}
+            >
+              Volver a Kana
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (questions.length === 0) {
     return (
       <div
@@ -294,10 +484,16 @@ function QuizContent() {
 
   if (!currentQ) return null;
 
-  const feedbackIsHardCorrect = phase === "feedback" && isCorrectAnswer(currentQ.item, textAnswer);
+  const feedbackIsInputCorrect = phase === "feedback" && isCorrectAnswer(currentQ.item, textAnswer);
   const quizContext = formatQuizContext(contextPrimary, contextSecondary, sets);
-  const questionModeLabel = currentQ.isHard ? "Escribe en romaji" : "Elige la lectura";
-  const feedbackIsCorrect = currentQ.isHard ? feedbackIsHardCorrect : selectedOption === currentQ.item.romaji;
+  const questionModeLabel = getQuestionTaskLabel(currentQ.taskType);
+  const questionInstruction = getQuestionInstruction(currentQ.taskType);
+  const promptKind = getQuestionPromptKind(currentQ.taskType);
+  const promptValue = getQuestionPromptValue(currentQ);
+  const correctChoiceValue = getCorrectChoiceValue(currentQ);
+  const feedbackIsCorrect = isInputTask(currentQ.taskType)
+    ? feedbackIsInputCorrect
+    : selectedOption === correctChoiceValue;
   const feedbackLabel = feedbackIsCorrect ? "Correcto" : "No era esa";
   const feedbackBg = feedbackIsCorrect ? "rgba(78,205,196,0.14)" : "rgba(230,57,70,0.12)";
   const feedbackColor = feedbackIsCorrect ? "#178A83" : "#C53340";
@@ -486,16 +682,16 @@ function QuizContent() {
                 variants={kanaAnim === "bounce" ? bounceVariants : shakeVariants}
                 animate={kanaAnim}
                 style={{
-                  fontSize: "112px",
+                  fontSize: promptKind === "kana" ? "112px" : "64px",
                   fontWeight: 700,
                   color: "#1A1A2E",
                   lineHeight: 1,
-                  fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                  fontFamily: promptKind === "kana" ? "var(--font-noto-sans-jp), sans-serif" : "inherit",
                   userSelect: "none",
                   textAlign: "center",
                 }}
               >
-                {currentQ.item.kana}
+                {promptValue}
               </motion.div>
             </motion.div>
           </AnimatePresence>
@@ -508,7 +704,7 @@ function QuizContent() {
               textAlign: "center",
             }}
           >
-            {currentQ.isHard ? "Escribe su lectura en romaji." : "Toca la lectura correcta."}
+            {questionInstruction}
           </p>
         </div>
 
@@ -531,8 +727,8 @@ function QuizContent() {
       </div>
 
       {/* Answer area */}
-      {currentQ.isHard ? (
-        /* Hard mode — text input */
+      {isInputTask(currentQ.taskType) ? (
+        /* Kana -> romaji input */
         <div style={{ padding: "0 20px 40px" }}>
           <div
             style={{
@@ -591,7 +787,7 @@ function QuizContent() {
             }}
           >
             {phase === "feedback"
-              ? feedbackIsHardCorrect
+              ? feedbackIsInputCorrect
                 ? "Respuesta correcta"
                 : `Respuesta: ${currentQ.item.romaji}`
               : "Pulsa Enter o toca comprobar"}
@@ -607,7 +803,7 @@ function QuizContent() {
               cursor: phase === "feedback" || !textAnswer.trim() ? "not-allowed" : "pointer",
               background:
                 phase === "feedback"
-                  ? feedbackIsHardCorrect
+                  ? feedbackIsInputCorrect
                     ? "#4ECDC4"
                     : "#E63946"
                   : "#1A1A2E",
@@ -622,7 +818,7 @@ function QuizContent() {
           </div>
         </div>
       ) : (
-        /* Easy mode — 2×2 grid */
+        /* Choice tasks */
         <div
           style={{
             padding: "0 20px 40px",
@@ -639,7 +835,7 @@ function QuizContent() {
           >
             {currentQ.options.map((option) => {
               const isSelected = selectedOption === option;
-              const isCorrectOpt = option === currentQ.item.romaji;
+              const isCorrectOpt = option === correctChoiceValue;
               let bg = "#FFFFFF";
               let color = "#1A1A2E";
               let borderColor = "rgba(26,26,46,0.08)";
@@ -674,7 +870,7 @@ function QuizContent() {
                     cursor: phase === "feedback" ? "default" : "pointer",
                     background: bg,
                     color,
-                    fontSize: "22px",
+                    fontSize: currentQ.taskType === "romaji_to_kana_choice" ? "34px" : "22px",
                     fontWeight: 700,
                     boxShadow: phase === "feedback" ? "none" : "0 4px 14px rgba(26,26,46,0.06)",
                     transition: "background 0.2s, color 0.2s, border-color 0.2s",
@@ -682,7 +878,11 @@ function QuizContent() {
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "8px",
-                    textTransform: "lowercase",
+                    textTransform: currentQ.taskType === "romaji_to_kana_choice" ? "none" : "lowercase",
+                    fontFamily:
+                      currentQ.taskType === "romaji_to_kana_choice"
+                        ? "var(--font-noto-sans-jp), sans-serif"
+                        : "inherit",
                   }}
                 >
                   {option}
@@ -713,7 +913,7 @@ function QuizContent() {
             {phase === "feedback"
               ? feedbackIsCorrect
                 ? "Respuesta correcta"
-                : `Correcta: ${currentQ.item.romaji}`
+                : `Correcta: ${correctChoiceValue}`
               : "Toca una opción para responder"}
           </div>
         </div>

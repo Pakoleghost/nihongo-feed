@@ -8,6 +8,12 @@ export type KanaPracticeSetKey =
   | "mixed";
 export type KanaTableFilter = KanaSet | "mixed";
 export type KanaPracticeMode = "multiple_choice" | "romaji_input" | "handwriting";
+export type KanaSessionMode = "mixed" | "trace";
+export type KanaQuestionType =
+  | "kana_to_romaji_choice"
+  | "romaji_to_kana_choice"
+  | "kana_to_romaji_input"
+  | "romaji_to_kana_trace";
 export type KanaQuestionCount = 10 | 20 | 30;
 
 export type KanaItem = {
@@ -164,6 +170,23 @@ export const KANA_PRACTICE_MODE_OPTIONS: Array<{ key: KanaPracticeMode; label: s
   { key: "multiple_choice", label: "Opción múltiple" },
   { key: "romaji_input", label: "Escribir romaji" },
   { key: "handwriting", label: "Escritura manual" },
+];
+
+export const KANA_SESSION_MODE_OPTIONS: Array<{
+  key: KanaSessionMode;
+  label: string;
+  description: string;
+}> = [
+  {
+    key: "mixed",
+    label: "Mixto",
+    description: "Mezcla elegir romaji, elegir kana y escribir romaji.",
+  },
+  {
+    key: "trace",
+    label: "Trazar",
+    description: "Muestra romaji y te pide trazar el kana a mano.",
+  },
 ];
 
 export const KANA_QUESTION_COUNT_OPTIONS: KanaQuestionCount[] = [10, 20, 30];
