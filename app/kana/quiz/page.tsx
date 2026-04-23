@@ -103,11 +103,11 @@ function getKanaOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
   return shuffle([correct, ...wrong3]);
 }
 
-function getTraceKanaOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
+function getTraceReadingOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
   const sameScriptPool = pool.filter((item) => item.script === correctItem.script);
   const sameSetPool = sameScriptPool.filter((item) => item.set === correctItem.set);
   const preferredPool = sameSetPool.length >= 4 ? sameSetPool : sameScriptPool;
-  return getKanaOptions(correctItem, preferredPool.length > 0 ? preferredPool : KANA_ITEMS);
+  return getOptions(correctItem, preferredPool.length > 0 ? preferredPool : KANA_ITEMS);
 }
 
 function buildMixedTaskSequence(length: number): KanaQuestionType[] {
@@ -165,13 +165,11 @@ function isInputTask(taskType: KanaQuestionType) {
 }
 
 function getCorrectChoiceValue(question: QuizQuestion) {
-  return question.taskType === "romaji_to_kana_choice" || question.taskType === "romaji_to_kana_trace"
-    ? question.item.kana
-    : question.item.romaji;
+  return question.taskType === "romaji_to_kana_choice" ? question.item.kana : question.item.romaji;
 }
 
 function isCorrectChoiceAnswer(question: QuizQuestion, answer: string) {
-  if (question.taskType === "romaji_to_kana_choice" || question.taskType === "romaji_to_kana_trace") {
+  if (question.taskType === "romaji_to_kana_choice") {
     return answer === question.item.kana;
   }
   return isCorrectAnswer(question.item, answer);
@@ -211,7 +209,7 @@ function buildQuiz(
     return traceItems.map((item) => ({
       item,
       taskType: "romaji_to_kana_trace",
-      options: getTraceKanaOptions(item, effectivePool),
+      options: getTraceReadingOptions(item, effectivePool),
     }));
   }
 
@@ -420,7 +418,7 @@ function QuizContent() {
     setSelectedOption(option);
     setPhase("feedback");
 
-    const correct = option === currentQ.item.kana;
+    const correct = isCorrectAnswer(currentQ.item, option);
     const rating = correct && traceCompletion.retries === 0 ? "correct" : correct ? "almost" : "wrong";
     const updated = applyKanaRating(progressMap, currentQ.item, rating);
     setProgressMap(updated);
@@ -768,13 +766,13 @@ function QuizContent() {
               </div>
               <div
                 style={{
-                  fontSize: "54px",
+                  fontSize: "24px",
                   fontWeight: 800,
                   color: "#1A1A2E",
-                  lineHeight: 1,
+                  lineHeight: 1.1,
                 }}
               >
-                {currentQ.item.romaji}
+                Sigue la guía
               </div>
               <p
                 style={{
@@ -834,7 +832,7 @@ function QuizContent() {
                       lineHeight: 1.1,
                     }}
                   >
-                    ¿Cuál escribiste?
+                    ¿Cómo se lee?
                   </div>
                   <div
                     style={{
@@ -852,7 +850,7 @@ function QuizContent() {
                       justifySelf: "center",
                     }}
                   >
-                    {phase === "feedback" ? feedbackLabel : "Elige el kana correcto"}
+                    {phase === "feedback" ? feedbackLabel : "Elige la lectura"}
                   </div>
                 </div>
 
@@ -865,7 +863,7 @@ function QuizContent() {
                 >
                   {currentQ.options.map((option) => {
                     const isSelected = selectedOption === option;
-                    const isCorrect = option === currentQ.item.kana;
+                    const isCorrect = isCorrectAnswer(currentQ.item, option);
                     const showCorrect = phase === "feedback" && isCorrect;
                     const showWrong = phase === "feedback" && isSelected && !isCorrect;
                     return (
@@ -887,9 +885,8 @@ function QuizContent() {
                           color: showCorrect || showWrong ? "#FFFFFF" : "#1A1A2E",
                           minHeight: "72px",
                           padding: "12px",
-                          fontSize: "34px",
+                          fontSize: "22px",
                           fontWeight: 800,
-                          fontFamily: "var(--font-noto-sans-jp), sans-serif",
                           cursor: phase === "traceReview" ? "pointer" : "default",
                           boxShadow: "0 8px 20px rgba(26,26,46,0.07)",
                         }}
