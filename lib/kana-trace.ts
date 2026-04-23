@@ -18,6 +18,8 @@ export type TraceEvaluation =
   | { ok: false; reason: string; coverage: number };
 
 export const TRACE_VIEWBOX_SIZE = 109;
+export const TRACE_MIN_JUDGABLE_POINTS = 4;
+export const TRACE_MIN_JUDGABLE_LENGTH = 8;
 
 function distance(a: TracePoint, b: TracePoint) {
   const dx = a.x - b.x;
@@ -92,6 +94,10 @@ export function pointsToSvgPath(points: TracePoint[]) {
   return points.map((point, index) => `${index === 0 ? "M" : "L"}${point.x},${point.y}`).join(" ");
 }
 
+export function getTraceInputLength(points: TracePoint[]) {
+  return polylineLength(points);
+}
+
 export function mapClientPointToViewBox(
   clientX: number,
   clientY: number,
@@ -108,7 +114,7 @@ export function evaluateTraceStroke(
   template: TraceStrokeTemplate,
   userPoints: TracePoint[],
 ): TraceEvaluation {
-  if (userPoints.length < 4) {
+  if (userPoints.length < TRACE_MIN_JUDGABLE_POINTS) {
     return { ok: false, reason: "Traza el movimiento completo.", coverage: 0 };
   }
 
