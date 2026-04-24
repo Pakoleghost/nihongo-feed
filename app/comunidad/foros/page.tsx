@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -70,6 +70,12 @@ export default function ComunidadForosPage() {
   const [loading, setLoading] = useState(true);
   const [setupMissing, setSetupMissing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [createForumId, setCreateForumId] = useState<string | null>(null);
+  const [newThreadTitle, setNewThreadTitle] = useState("");
+  const [newThreadBody, setNewThreadBody] = useState("");
+  const [newThreadTag, setNewThreadTag] = useState("");
+  const [creatingThread, setCreatingThread] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadForums() {
@@ -202,6 +208,44 @@ export default function ComunidadForosPage() {
     forum,
     threads: threads.filter((thread) => thread.forum_id === forum.id),
   }));
+
+  function openCreateForm(forumId: string) {
+    setCreateForumId((current) => (current === forumId ? null : forumId));
+    setCreateError(null);
+    setNewThreadTitle("");
+    setNewThreadBody("");
+    setNewThreadTag("");
+  }
+
+  async function handleCreateThread(event: FormEvent<HTMLFormElement>, forum: ClassForum) {
+    event.preventDefault();
+    if (!profile || creatingThread || !newThreadTitle.trim() || !newThreadBody.trim()) return;
+
+    setCreatingThread(true);
+    setCreateError(null);
+
+    const { data, error } = await supabase
+      .from("forum_threads")
+      .insert({
+        forum_id: forum.id,
+        group_name: forum.group_name,
+        author_id: profile.id,
+        title: newThreadTitle.trim(),
+        body: newThreadBody.trim(),
+        tag: newThreadTag || null,
+      })
+      .select("id")
+      .single();
+
+    setCreatingThread(false);
+
+    if (error || !data) {
+      setCreateError("No pudimos crear el tema. Revisa tu grupo o intenta otra vez.");
+      return;
+    }
+
+    router.push(`/comunidad/foros/${(data as { id: string }).id}`);
+  }
 
   return (
     <div
@@ -346,6 +390,117 @@ export default function ComunidadForosPage() {
                 </div>
               </div>
 
+              {profile && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => openCreateForm(forum.id)}
+                    style={{
+                      border: "none",
+                      borderRadius: 999,
+                      background: createForumId === forum.id ? "#F8F4EE" : "#1A1A2E",
+                      color: createForumId === forum.id ? "#53596B" : "#FFFFFF",
+                      padding: "11px 16px",
+                      fontSize: 14,
+                      fontWeight: 800,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {createForumId === forum.id ? "Cancelar" : "Nuevo tema"}
+                  </button>
+                </div>
+              )}
+
+              {createForumId === forum.id && (
+                <form
+                  onSubmit={(event) => handleCreateThread(event, forum)}
+                  style={{
+                    borderRadius: 24,
+                    background: "#F8F4EE",
+                    padding: 16,
+                    display: "grid",
+                    gap: 10,
+                  }}
+                >
+                  <input
+                    value={newThreadTitle}
+                    onChange={(event) => setNewThreadTitle(event.target.value)}
+                    placeholder="Título del tema"
+                    maxLength={120}
+                    style={{
+                      border: "none",
+                      borderRadius: 16,
+                      background: "#FFFFFF",
+                      color: "#1A1A2E",
+                      padding: "13px 14px",
+                      fontSize: 15,
+                      fontWeight: 800,
+                      outline: "none",
+                    }}
+                  />
+                  <textarea
+                    value={newThreadBody}
+                    onChange={(event) => setNewThreadBody(event.target.value)}
+                    placeholder="Escribe el primer mensaje..."
+                    rows={4}
+                    style={{
+                      border: "none",
+                      borderRadius: 16,
+                      background: "#FFFFFF",
+                      color: "#1A1A2E",
+                      padding: "13px 14px",
+                      fontSize: 15,
+                      lineHeight: 1.45,
+                      resize: "vertical",
+                      outline: "none",
+                      fontFamily: "inherit",
+                    }}
+                  />
+                  <select
+                    value={newThreadTag}
+                    onChange={(event) => setNewThreadTag(event.target.value)}
+                    style={{
+                      border: "none",
+                      borderRadius: 999,
+                      background: "#FFFFFF",
+                      color: newThreadTag ? "#1A1A2E" : "#7A7F8D",
+                      padding: "12px 14px",
+                      fontSize: 14,
+                      fontWeight: 800,
+                      outline: "none",
+                    }}
+                  >
+                    <option value="">Sin etiqueta</option>
+                    <option value="General">General</option>
+                    <option value="Kana">Kana</option>
+                    <option value="Vocabulario">Vocabulario</option>
+                    <option value="Kanji">Kanji</option>
+                    <option value="Tarea">Tarea</option>
+                  </select>
+
+                  {createError && <p style={{ color: "#C53340", fontSize: 13, margin: 0 }}>{createError}</p>}
+
+                  <button
+                    type="submit"
+                    disabled={creatingThread || !newThreadTitle.trim() || !newThreadBody.trim()}
+                    style={{
+                      border: "none",
+                      borderRadius: 999,
+                      background:
+                        creatingThread || !newThreadTitle.trim() || !newThreadBody.trim() ? "#C4BAB0" : "#E63946",
+                      color: "#FFFFFF",
+                      padding: "13px 16px",
+                      fontSize: 15,
+                      fontWeight: 800,
+                      cursor:
+                        creatingThread || !newThreadTitle.trim() || !newThreadBody.trim() ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {creatingThread ? "Creando..." : "Crear tema"}
+                  </button>
+                </form>
+              )}
+
               {forumThreads.length === 0 ? (
                 <div
                   style={{
@@ -362,14 +517,16 @@ export default function ComunidadForosPage() {
               ) : (
                 <div style={{ display: "grid", gap: 10 }}>
                   {forumThreads.map((thread) => (
-                    <article
+                    <Link
                       key={thread.id}
+                      href={`/comunidad/foros/${thread.id}`}
                       style={{
                         borderRadius: 22,
                         background: thread.is_pinned ? "rgba(78,205,196,0.10)" : "#F8F4EE",
                         padding: 16,
                         display: "grid",
                         gap: 10,
+                        textDecoration: "none",
                       }}
                     >
                       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -443,7 +600,7 @@ export default function ComunidadForosPage() {
                           {thread.replyCount} respuestas · {timeAgo(getThreadActivity(thread))}
                         </span>
                       </div>
-                    </article>
+                    </Link>
                   ))}
                 </div>
               )}
