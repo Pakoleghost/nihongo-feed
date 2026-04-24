@@ -142,7 +142,7 @@ export default function ScoreboardPage() {
         }}
       >
         <button
-          onClick={() => router.push("/practicar/sprint")}
+          onClick={() => router.push("/practicar")}
           style={{
             width: "40px",
             height: "40px",
