@@ -327,6 +327,62 @@ export default function KanaPage() {
         </Link>
 
         <Link
+          href="/kana/palabras"
+          style={{
+            background: "#1A1A2E",
+            borderRadius: "22px",
+            padding: "18px 18px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 14,
+            textDecoration: "none",
+            boxShadow: "0 8px 26px rgba(26,26,46,0.16)",
+          }}
+        >
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: "24px",
+                fontWeight: 800,
+                color: "#FFFFFF",
+                lineHeight: 1,
+              }}
+            >
+              Leer palabras
+            </div>
+            <div
+              style={{
+                fontSize: "14px",
+                color: "rgba(255,255,255,0.76)",
+                marginTop: 8,
+                lineHeight: 1.35,
+              }}
+            >
+              Lee vocabulario Genki en kana y escribe su romaji.
+            </div>
+          </div>
+
+          <div
+            aria-hidden="true"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: "rgba(78,205,196,0.18)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <svg width="15" height="11" viewBox="0 0 15 11" fill="none">
+              <path d="M1 5.5h12m0 0L8.5 1M13 5.5 8.5 10" stroke="#4ECDC4" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </Link>
+
+        <Link
           href="/kana/configurar?mode=libre"
           style={{
             background: "#FFFFFF",
