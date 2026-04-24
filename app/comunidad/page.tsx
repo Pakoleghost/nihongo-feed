@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
@@ -345,6 +346,34 @@ export default function ComunidadPage() {
         <h1 style={{ fontSize: "36px", fontWeight: 800, color: "#1A1A2E", margin: 0, lineHeight: 1 }}>
           Comunidad
         </h1>
+      </div>
+
+      <div style={{ padding: "0 16px 16px" }}>
+        <Link
+          href="/comunidad/foros"
+          style={{
+            background: "#1A1A2E",
+            borderRadius: "24px",
+            padding: "16px 18px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 14,
+            color: "#FFFFFF",
+            textDecoration: "none",
+            boxShadow: "0 6px 22px rgba(26,26,46,0.16)",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 800, lineHeight: 1 }}>Foros de clase</div>
+            <div style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", marginTop: 6 }}>
+              Temas por grupo y respuestas de clase.
+            </div>
+          </div>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none" aria-hidden="true">
+            <path d="M1 6h13m0 0-5-5m5 5-5 5" stroke="#4ECDC4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </Link>
       </div>
 
       {/* Inline compose box */}
