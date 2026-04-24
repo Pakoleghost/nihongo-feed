@@ -9,6 +9,7 @@ type KanaGroup = {
 
 export type KanaSmartRecommendation = {
   itemIds: string[];
+  focusItemIds: string[];
   kind: "review" | "learn" | "review_all";
   title: string;
   detail: string;
@@ -117,6 +118,38 @@ function formatContext(group: KanaGroup) {
   return group.secondary ? `${group.primary} · ${group.secondary}` : group.primary;
 }
 
+function uniqueItems(items: KanaItem[]) {
+  const seen = new Set<string>();
+  const unique: KanaItem[] = [];
+  for (const item of items) {
+    if (seen.has(item.id)) continue;
+    seen.add(item.id);
+    unique.push(item);
+  }
+  return unique;
+}
+
+function getGroupsBefore(group: KanaGroup) {
+  const index = KANA_GROUPS.indexOf(group);
+  return index <= 0 ? [] : KANA_GROUPS.slice(0, index);
+}
+
+function getPreviousReviewItems(group: KanaGroup, progress: KanaProgressMap) {
+  return getGroupsBefore(group).flatMap((previousGroup) =>
+    previousGroup.items.filter((item) => {
+      const entry = progress[item.id];
+      if (!isSeen(entry)) return false;
+      return isKanaDue(entry) || entry?.difficult || !isDominated(item, progress);
+    }),
+  );
+}
+
+function buildRecommendationItemIds(group: KanaGroup, progress: KanaProgressMap) {
+  const focusItems = group.items;
+  const reviewItems = getPreviousReviewItems(group, progress);
+  return uniqueItems([...focusItems, ...reviewItems]).map((item) => item.id);
+}
+
 function getDueItems(group: KanaGroup, progress: KanaProgressMap) {
   return group.items.filter((item) => isKanaDue(progress[item.id]));
 }
@@ -222,6 +255,57 @@ function buildRepeatPass(items: KanaItem[], progress: KanaProgressMap, previousI
 }
 
 export function buildKanaSmartSessionItems(items: KanaItem[], progress: KanaProgressMap, count: number) {
+  return buildKanaSmartSessionItemsWithFocus(items, progress, count);
+}
+
+export function buildKanaSmartSessionItemsWithFocus(
+  items: KanaItem[],
+  progress: KanaProgressMap,
+  count: number,
+  focusItemIds: string[] = [],
+) {
+  const focusIdSet = new Set(focusItemIds);
+  const focusItems = focusItemIds.length > 0 ? items.filter((item) => focusIdSet.has(item.id)) : [];
+  const reviewItems = focusItemIds.length > 0 ? items.filter((item) => !focusIdSet.has(item.id)) : [];
+
+  if (focusItems.length > 0 && reviewItems.length > 0) {
+    const focusOrdered = prioritizeSmartGroup(focusItems, progress);
+    const reviewOrdered = prioritizeSmartGroup(reviewItems, progress);
+    const focusQuota = Math.min(count, Math.max(Math.ceil(count * 0.65), Math.min(focusOrdered.length, count)));
+    const reviewQuota = Math.max(0, count - focusQuota);
+    const sessionItems: KanaItem[] = [];
+    const pushUnique = (item: KanaItem | undefined) => {
+      if (!item || sessionItems.some((entry) => entry.id === item.id)) return;
+      sessionItems.push(item);
+    };
+
+    let focusIndex = 0;
+    let reviewIndex = 0;
+
+    while (sessionItems.length < count && (focusIndex < focusQuota || reviewIndex < reviewQuota)) {
+      pushUnique(focusOrdered[focusIndex]);
+      focusIndex += 1;
+      if (reviewIndex < reviewQuota) {
+        pushUnique(reviewOrdered[reviewIndex]);
+        reviewIndex += 1;
+      }
+      if (focusIndex < focusQuota) {
+        pushUnique(focusOrdered[focusIndex]);
+        focusIndex += 1;
+      }
+    }
+
+    const fillPool = [...focusOrdered, ...reviewOrdered];
+    let fillIndex = 0;
+    while (sessionItems.length < count && fillPool.length > 0) {
+      sessionItems.push(fillPool[fillIndex % fillPool.length]);
+      fillIndex += 1;
+      if (fillIndex > count * 4) break;
+    }
+
+    return sessionItems.slice(0, count);
+  }
+
   const ordered = prioritizeSmartGroup(items, progress);
   if (ordered.length >= count) {
     return ordered.slice(0, count);
@@ -254,7 +338,6 @@ export function getKanaSmartRecommendation(
   if (reviewGroup) {
     const dueItems = getDueItems(reviewGroup, progress);
     return {
-      itemIds: reviewGroup.items.map((item) => item.id),
       kind: "review",
       title: `Repasa ${dueItems.length} pendientes`,
       detail: formatContext(reviewGroup),
@@ -264,6 +347,8 @@ export function getKanaSmartRecommendation(
       ],
       contextPrimary: reviewGroup.primary,
       contextSecondary: reviewGroup.secondary ?? "",
+      focusItemIds: reviewGroup.items.map((item) => item.id),
+      itemIds: buildRecommendationItemIds(reviewGroup, progress),
     };
   }
 
@@ -272,7 +357,6 @@ export function getKanaSmartRecommendation(
   if (nextFreshGroup) {
     const remainingItems = getUnseenItems(nextFreshGroup, progress);
     return {
-      itemIds: nextFreshGroup.items.map((item) => item.id),
       kind: "learn",
       title: `Sigue con ${nextFreshGroup.secondary?.toLowerCase() || nextFreshGroup.primary.toLowerCase()}`,
       detail: formatContext(nextFreshGroup),
@@ -282,6 +366,8 @@ export function getKanaSmartRecommendation(
       ],
       contextPrimary: nextFreshGroup.primary,
       contextSecondary: nextFreshGroup.secondary ?? "",
+      focusItemIds: nextFreshGroup.items.map((item) => item.id),
+      itemIds: buildRecommendationItemIds(nextFreshGroup, progress),
     };
   }
 
@@ -290,7 +376,6 @@ export function getKanaSmartRecommendation(
   if (nextGroup) {
     const remainingItems = getUndominatedItems(nextGroup, progress);
     return {
-      itemIds: nextGroup.items.map((item) => item.id),
       kind: "learn",
       title: `Sigue con ${nextGroup.secondary?.toLowerCase() || nextGroup.primary.toLowerCase()}`,
       detail: formatContext(nextGroup),
@@ -300,12 +385,13 @@ export function getKanaSmartRecommendation(
       ],
       contextPrimary: nextGroup.primary,
       contextSecondary: nextGroup.secondary ?? "",
+      focusItemIds: nextGroup.items.map((item) => item.id),
+      itemIds: buildRecommendationItemIds(nextGroup, progress),
     };
   }
 
   const fallbackGroup = KANA_GROUPS[0];
   return {
-    itemIds: fallbackGroup.items.map((item) => item.id),
     kind: "review_all",
     title: "Repasa vocales",
     detail: formatContext(fallbackGroup),
@@ -315,5 +401,7 @@ export function getKanaSmartRecommendation(
     ],
     contextPrimary: fallbackGroup.primary,
     contextSecondary: fallbackGroup.secondary ?? "",
+    focusItemIds: fallbackGroup.items.map((item) => item.id),
+    itemIds: buildRecommendationItemIds(fallbackGroup, progress),
   };
 }

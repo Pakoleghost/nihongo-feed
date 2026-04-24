@@ -14,7 +14,7 @@ import {
   applyKanaRating,
 } from "@/lib/kana-progress";
 import type { KanaProgressMap } from "@/lib/kana-progress";
-import { buildKanaSmartSessionItems } from "@/lib/kana-smart";
+import { buildKanaSmartSessionItemsWithFocus } from "@/lib/kana-smart";
 import { hasKanaTraceData } from "@/lib/kana-trace";
 
 type QuizQuestion = {
@@ -78,14 +78,28 @@ function formatQuizContext(primary: string, secondary: string, sets: string[]) {
 function buildPool(mode: string, sets: string[]): KanaItem[] {
   if (mode === "smart" || mode === "repeat") return KANA_ITEMS;
   const pool: KanaItem[] = [];
+  const includesHiragana = sets.includes("hiragana");
+  const includesKatakana = sets.includes("katakana");
+  const hasScriptFilter = includesHiragana || includesKatakana;
+  const matchesSelectedScript = (item: KanaItem) => {
+    if (!hasScriptFilter) return true;
+    if (item.script === "hiragana") return includesHiragana;
+    if (item.script === "katakana") return includesKatakana;
+    return true;
+  };
   for (const key of sets) {
     if (key === "hiragana") pool.push(...KANA_ITEMS.filter((i) => i.script === "hiragana" && i.set === "basic"));
     else if (key === "katakana") pool.push(...KANA_ITEMS.filter((i) => i.script === "katakana" && i.set === "basic"));
-    else if (key === "dakuon") pool.push(...KANA_ITEMS.filter((i) => i.set === "dakuten"));
-    else if (key === "handakuon") pool.push(...KANA_ITEMS.filter((i) => i.set === "handakuten"));
-    else if (key === "yoon") pool.push(...KANA_ITEMS.filter((i) => i.set === "yoon"));
+    else if (key === "dakuon") pool.push(...KANA_ITEMS.filter((i) => i.set === "dakuten" && matchesSelectedScript(i)));
+    else if (key === "handakuon") pool.push(...KANA_ITEMS.filter((i) => i.set === "handakuten" && matchesSelectedScript(i)));
+    else if (key === "yoon") pool.push(...KANA_ITEMS.filter((i) => i.set === "yoon" && matchesSelectedScript(i)));
   }
-  return pool;
+  const seen = new Set<string>();
+  return pool.filter((item) => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
 }
 
 function shuffle<T>(arr: T[]): T[] {
@@ -100,9 +114,18 @@ function shuffle<T>(arr: T[]): T[] {
 function getOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
   const correct = correctItem.romaji;
   const uniqueWrong = [...new Set(pool.map((i) => i.romaji).filter((r) => r !== correct))];
+  const sameScriptWrong = [
+    ...new Set(
+      KANA_ITEMS.filter((i) => i.script === correctItem.script)
+        .map((i) => i.romaji)
+        .filter((r) => r !== correct),
+    ),
+  ];
   const finalPool =
     uniqueWrong.length < 3
-      ? [...new Set(KANA_ITEMS.map((i) => i.romaji).filter((r) => r !== correct))]
+      ? sameScriptWrong.length >= 3
+        ? sameScriptWrong
+        : [...new Set(KANA_ITEMS.map((i) => i.romaji).filter((r) => r !== correct))]
       : uniqueWrong;
   const wrong3 = shuffle(finalPool).slice(0, 3);
   return shuffle([correct, ...wrong3]);
@@ -111,19 +134,28 @@ function getOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
 function getKanaOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
   const correct = correctItem.kana;
   const uniqueWrong = [...new Set(pool.map((i) => i.kana).filter((kana) => kana !== correct))];
+  const sameScriptWrong = [
+    ...new Set(
+      KANA_ITEMS.filter((i) => i.script === correctItem.script)
+        .map((i) => i.kana)
+        .filter((kana) => kana !== correct),
+    ),
+  ];
   const finalPool =
     uniqueWrong.length < 3
-      ? [...new Set(KANA_ITEMS.map((i) => i.kana).filter((kana) => kana !== correct))]
+      ? sameScriptWrong.length >= 3
+        ? sameScriptWrong
+        : [...new Set(KANA_ITEMS.map((i) => i.kana).filter((kana) => kana !== correct))]
       : uniqueWrong;
   const wrong3 = shuffle(finalPool).slice(0, 3);
   return shuffle([correct, ...wrong3]);
 }
 
-function getTraceKanaOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
+function getTraceReadingOptions(correctItem: KanaItem, pool: KanaItem[]): string[] {
   const sameScriptPool = pool.filter((item) => item.script === correctItem.script);
   const sameSetPool = sameScriptPool.filter((item) => item.set === correctItem.set);
   const preferredPool = sameSetPool.length >= 4 ? sameSetPool : sameScriptPool;
-  return getKanaOptions(correctItem, preferredPool.length > 0 ? preferredPool : KANA_ITEMS);
+  return getOptions(correctItem, preferredPool.length > 0 ? preferredPool : KANA_ITEMS);
 }
 
 function isProgressSeen(progress: KanaProgressMap, item: KanaItem) {
@@ -249,13 +281,11 @@ function isInputTask(taskType: KanaQuestionType) {
 }
 
 function getCorrectChoiceValue(question: QuizQuestion) {
-  return question.taskType === "romaji_to_kana_choice" || question.taskType === "romaji_to_kana_trace"
-    ? question.item.kana
-    : question.item.romaji;
+  return question.taskType === "romaji_to_kana_choice" ? question.item.kana : question.item.romaji;
 }
 
 function isCorrectChoiceAnswer(question: QuizQuestion, answer: string) {
-  if (question.taskType === "romaji_to_kana_choice" || question.taskType === "romaji_to_kana_trace") {
+  if (question.taskType === "romaji_to_kana_choice") {
     return answer === question.item.kana;
   }
   return isCorrectAnswer(question.item, answer);
@@ -272,6 +302,7 @@ function buildQuiz(
   taskMode: KanaSessionMode,
   count: number,
   itemIds: string[],
+  focusItemIds: string[],
   progress: KanaProgressMap
 ): QuizQuestion[] {
   let items: KanaItem[];
@@ -284,7 +315,7 @@ function buildQuiz(
     const idSet = new Set(itemIds);
     items = KANA_ITEMS.filter((i) => idSet.has(i.id));
   } else if (mode === "smart") {
-    items = buildKanaSmartSessionItems(pool, progress, count);
+    items = buildKanaSmartSessionItemsWithFocus(pool, progress, count, focusItemIds);
   } else {
     items = shuffle(pool).slice(0, Math.min(count, pool.length));
   }
@@ -336,7 +367,7 @@ function buildQuiz(
         : taskType === "kana_to_romaji_choice"
           ? getOptions(item, effectivePool)
           : taskType === "romaji_to_kana_trace"
-            ? getTraceKanaOptions(item, effectivePool)
+            ? getTraceReadingOptions(item, effectivePool)
           : [];
 
     return {
@@ -381,6 +412,7 @@ function QuizContent() {
   );
   const count = parseInt(searchParams.get("count") ?? "20", 10);
   const itemIds = (searchParams.get("items") ?? "").split(",").filter(Boolean);
+  const focusItemIds = (searchParams.get("focusItems") ?? "").split(",").filter(Boolean);
   const contextPrimary = searchParams.get("contextPrimary") ?? "";
   const contextSecondary = searchParams.get("contextSecondary") ?? "";
 
@@ -405,7 +437,7 @@ function QuizContent() {
   useEffect(() => {
     const prog = loadKanaProgress("anon");
     setProgressMap(prog);
-    const quiz = buildQuiz(mode, sets, taskMode, count, itemIds, prog);
+    const quiz = buildQuiz(mode, sets, taskMode, count, itemIds, focusItemIds, prog);
     setQuestions(quiz);
     setIsReady(true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -543,7 +575,7 @@ function QuizContent() {
     setSelectedOption(option);
     setPhase("feedback");
 
-    const correct = option === currentQ.item.kana;
+    const correct = isCorrectAnswer(currentQ.item, option);
     const rating = correct && traceCompletion.retries === 0 ? "correct" : correct ? "almost" : "wrong";
     const updated = applyKanaRating(progressMap, currentQ.item, rating);
     setProgressMap(updated);
@@ -917,7 +949,7 @@ function QuizContent() {
                       lineHeight: 1.1,
                     }}
                   >
-                    ¿Cuál trazaste?
+                    ¿Cómo se lee?
                   </div>
                   <div
                     style={{
@@ -935,7 +967,7 @@ function QuizContent() {
                       justifySelf: "center",
                     }}
                   >
-                    {phase === "feedback" ? feedbackLabel : "Elige el kana"}
+                    {phase === "feedback" ? feedbackLabel : "Elige la lectura"}
                   </div>
                 </div>
 
@@ -948,7 +980,7 @@ function QuizContent() {
                 >
                   {currentQ.options.map((option) => {
                     const isSelected = selectedOption === option;
-                    const isCorrect = option === currentQ.item.kana;
+                    const isCorrect = isCorrectAnswer(currentQ.item, option);
                     const showCorrect = phase === "feedback" && isCorrect;
                     const showWrong = phase === "feedback" && isSelected && !isCorrect;
                     return (
@@ -970,9 +1002,8 @@ function QuizContent() {
                           color: showCorrect || showWrong ? "#FFFFFF" : "#1A1A2E",
                           minHeight: "72px",
                           padding: "12px",
-                          fontSize: "34px",
+                          fontSize: "22px",
                           fontWeight: 800,
-                          fontFamily: "var(--font-noto-sans-jp), sans-serif",
                           cursor: phase === "traceReview" ? "pointer" : "default",
                           boxShadow: "0 8px 20px rgba(26,26,46,0.07)",
                         }}

@@ -7,12 +7,13 @@ import type { KanaItem } from "@/lib/kana-data";
 import { getKanaProgressSummary, getKanaStateCounts, loadKanaProgress } from "@/lib/kana-progress";
 import { getKanaSmartRecommendation } from "@/lib/kana-smart";
 
-type ChipKey = "hiragana" | "katakana" | "tenten" | "maru" | "combinaciones";
+type ChipKey = "hiragana" | "katakana" | "ambos" | "tenten" | "maru" | "combinaciones";
 type Mode = "smart" | "libre";
 
 const CHIPS: { key: ChipKey; label: string }[] = [
   { key: "hiragana", label: "Hiragana" },
   { key: "katakana", label: "Katakana" },
+  { key: "ambos", label: "Ambos" },
   { key: "tenten", label: "Dakuten" },
   { key: "maru", label: "Handakuten" },
   { key: "combinaciones", label: "Combinaciones" },
@@ -21,34 +22,69 @@ const CHIPS: { key: ChipKey; label: string }[] = [
 const DEPENDENT_CHIPS: ChipKey[] = ["tenten", "maru", "combinaciones"];
 const BASE_CHIPS: ChipKey[] = ["hiragana", "katakana"];
 
+function uniqueById(items: KanaItem[]) {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+}
+
+function matchesSelectedScript(item: KanaItem, selectedSets: ChipKey[]) {
+  const includesHiragana = selectedSets.includes("hiragana");
+  const includesKatakana = selectedSets.includes("katakana");
+  const hasScriptFilter = includesHiragana || includesKatakana;
+  if (!hasScriptFilter) return true;
+  if (item.script === "hiragana") return includesHiragana;
+  if (item.script === "katakana") return includesKatakana;
+  return true;
+}
+
 // Map new chip keys to pool filter logic
 function getPool(selectedSets: ChipKey[]): KanaItem[] {
   const pool: KanaItem[] = [];
   for (const key of selectedSets) {
     if (key === "hiragana") pool.push(...KANA_ITEMS.filter((i) => i.script === "hiragana" && i.set === "basic"));
     if (key === "katakana") pool.push(...KANA_ITEMS.filter((i) => i.script === "katakana" && i.set === "basic"));
-    if (key === "tenten") pool.push(...KANA_ITEMS.filter((i) => i.set === "dakuten"));
-    if (key === "maru") pool.push(...KANA_ITEMS.filter((i) => i.set === "handakuten"));
-    if (key === "combinaciones") pool.push(...KANA_ITEMS.filter((i) => i.set === "yoon"));
+    if (key === "tenten") pool.push(...KANA_ITEMS.filter((i) => i.set === "dakuten" && matchesSelectedScript(i, selectedSets)));
+    if (key === "maru") pool.push(...KANA_ITEMS.filter((i) => i.set === "handakuten" && matchesSelectedScript(i, selectedSets)));
+    if (key === "combinaciones") pool.push(...KANA_ITEMS.filter((i) => i.set === "yoon" && matchesSelectedScript(i, selectedSets)));
   }
-  return pool;
+  return uniqueById(pool);
 }
 
 // Map chip keys to quiz URL param values (quiz/page.tsx uses old names internally)
 function chipToUrlParam(key: ChipKey): string {
+  if (key === "ambos") return "hiragana,katakana";
   if (key === "tenten") return "dakuon";
   if (key === "maru") return "handakuon";
   if (key === "combinaciones") return "yoon";
   return key;
 }
 
+function urlParamToChip(value: string): ChipKey | null {
+  if (value === "hiragana") return "hiragana";
+  if (value === "katakana") return "katakana";
+  if (value === "dakuon") return "tenten";
+  if (value === "handakuon") return "maru";
+  if (value === "yoon") return "combinaciones";
+  return null;
+}
+
 function ConfigurarContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialMode = (searchParams.get("mode") as Mode) ?? "smart";
+  const initialSets = (searchParams.get("sets") ?? "")
+    .split(",")
+    .map(urlParamToChip)
+    .filter((key): key is ChipKey => Boolean(key));
 
   const [mode, setMode] = useState<Mode>(initialMode);
-  const [selectedSets, setSelectedSets] = useState<ChipKey[]>(["hiragana"]);
+  const [selectedSets, setSelectedSets] = useState<ChipKey[]>(
+    initialSets.length > 0 ? initialSets : ["hiragana"],
+  );
   const [questionCount, setQuestionCount] = useState(20);
   const [validationMsg, setValidationMsg] = useState(false);
   const validationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -71,6 +107,11 @@ function ConfigurarContent() {
     const isBase = BASE_CHIPS.includes(key);
 
     setSelectedSets((prev) => {
+      if (key === "ambos") {
+        const dependents = prev.filter((k) => DEPENDENT_CHIPS.includes(k));
+        return ["hiragana", "katakana", ...dependents];
+      }
+
       if (prev.includes(key)) {
         // Deselecting
         if (!isDependent && prev.length === 1) return prev; // must keep at least one base
@@ -90,6 +131,10 @@ function ConfigurarContent() {
       }
 
       // Selecting
+      if (isBase) {
+        return [key, ...prev.filter((k) => !BASE_CHIPS.includes(k))];
+      }
+
       if (isDependent) {
         const hasBase = prev.some((k) => BASE_CHIPS.includes(k));
         if (!hasBase) {
@@ -123,6 +168,7 @@ function ConfigurarContent() {
         dominados: stateCounts.fijado,
       });
       params.set("items", recommendation.itemIds.join(","));
+      params.set("focusItems", recommendation.focusItemIds.join(","));
       params.set("contextPrimary", recommendation.contextPrimary);
       if (recommendation.contextSecondary) {
         params.set("contextSecondary", recommendation.contextSecondary);
@@ -239,7 +285,10 @@ function ConfigurarContent() {
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
               {CHIPS.map(({ key, label }) => {
-                const active = selectedSets.includes(key);
+                const active =
+                  key === "ambos"
+                    ? selectedSets.includes("hiragana") && selectedSets.includes("katakana")
+                    : selectedSets.includes(key);
                 const isDependent = DEPENDENT_CHIPS.includes(key);
                 const hasBase = selectedSets.some((k) => BASE_CHIPS.includes(k));
                 const dimmed = isDependent && !hasBase;
