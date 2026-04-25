@@ -23,6 +23,8 @@ type Profile = {
   avatar_url: string | null;
 };
 
+const POSTS_PAGE_SIZE = 10;
+
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -85,6 +87,10 @@ export default function ComunidadPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [myProfile, setMyProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMorePosts, setHasMorePosts] = useState(false);
+  const [nextPostsCursor, setNextPostsCursor] = useState<string | null>(null);
+  const [feedError, setFeedError] = useState<string | null>(null);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -108,8 +114,81 @@ export default function ComunidadPage() {
   // Lightbox swipe-down to close
   const lbTouchStartY = useRef(0);
 
+  async function loadPostsBatch({
+    uid,
+    cursor,
+    reset,
+  }: {
+    uid: string | null;
+    cursor: string | null;
+    reset: boolean;
+  }) {
+    let postQuery = supabase
+      .from("comunidad_posts")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(POSTS_PAGE_SIZE + 1);
+
+    if (cursor) {
+      postQuery = postQuery.lt("created_at", cursor);
+    }
+
+    const { data: postData, error: postError } = await postQuery;
+
+    if (postError) {
+      throw new Error(postError.message);
+    }
+
+    const batch = (postData as Post[] | null) ?? [];
+    const visiblePosts = batch.slice(0, POSTS_PAGE_SIZE);
+    setHasMorePosts(batch.length > POSTS_PAGE_SIZE);
+    setNextPostsCursor(visiblePosts.at(-1)?.created_at ?? null);
+
+    setPosts((current) => {
+      if (reset) return visiblePosts;
+      const seen = new Set(current.map((post) => post.id));
+      return [...current, ...visiblePosts.filter((post) => !seen.has(post.id))];
+    });
+
+    const userIds = [
+      ...new Set([
+        ...visiblePosts.map((post) => post.user_id),
+        ...(uid ? [uid] : []),
+      ]),
+    ];
+
+    if (userIds.length > 0) {
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("id, username, avatar_url")
+        .in("id", userIds);
+      const profileMap: Record<string, Profile> = {};
+      (profileData as Profile[] | null)?.forEach((profile) => {
+        profileMap[profile.id] = profile;
+      });
+      setProfiles((current) => ({ ...current, ...profileMap }));
+      if (uid && profileMap[uid]) setMyProfile(profileMap[uid]);
+    }
+
+    if (uid && visiblePosts.length > 0) {
+      const { data: likesData } = await supabase
+        .from("comunidad_likes")
+        .select("post_id")
+        .eq("user_id", uid)
+        .in("post_id", visiblePosts.map((post) => post.id));
+      const pageLikedIds = (likesData as { post_id: string }[] | null)?.map((like) => like.post_id) ?? [];
+      setLikedIds((current) => {
+        const next = new Set(current);
+        pageLikedIds.forEach((postId) => next.add(postId));
+        return next;
+      });
+    }
+  }
+
   useEffect(() => {
     async function load() {
+      setLoading(true);
+      setFeedError(null);
       // getSession() reads from localStorage immediately (no network call).
       // This ensures the compose box and user-specific UI appear on first
       // render even before the token is validated against the server.
@@ -119,55 +198,51 @@ export default function ComunidadPage() {
       const uid = session?.user?.id ?? null;
       setUserId(uid);
 
-      const { data: postData } = await supabase
-        .from("comunidad_posts")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      const fetchedPosts = (postData as Post[] | null) ?? [];
-      setPosts(fetchedPosts);
-
-      const userIds = [...new Set([
-        ...fetchedPosts.map((p) => p.user_id),
-        ...(uid ? [uid] : []),
-      ])];
-      if (userIds.length > 0) {
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("id, username, avatar_url")
-          .in("id", userIds);
-        const profileMap: Record<string, Profile> = {};
-        (profileData as Profile[] | null)?.forEach((p) => {
-          profileMap[p.id] = p;
-        });
-        setProfiles(profileMap);
-        if (uid && profileMap[uid]) {
-          setMyProfile(profileMap[uid]);
-          // Check admin flag separately
-          const { data: adminRow } = await supabase
-            .from("profiles")
-            .select("is_admin")
-            .eq("id", uid)
-            .single();
-          setIsAdmin((adminRow as { is_admin: boolean | null } | null)?.is_admin === true);
-        }
-      }
-
       if (uid) {
-        const { data: likesData } = await supabase
-          .from("comunidad_likes")
-          .select("post_id")
-          .eq("user_id", uid);
-        const likedSet = new Set<string>(
-          (likesData as { post_id: string }[] | null)?.map((l) => l.post_id) ?? []
-        );
-        setLikedIds(likedSet);
+        const { data: adminRow } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", uid)
+          .single();
+        setIsAdmin((adminRow as { is_admin: boolean | null } | null)?.is_admin === true);
       }
 
-      setLoading(false);
+      try {
+        await loadPostsBatch({ uid, cursor: null, reset: true });
+      } catch {
+        setFeedError("No pudimos cargar la comunidad. Intenta otra vez.");
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);
+
+  async function loadMorePosts() {
+    if (loadingMore || !hasMorePosts || !nextPostsCursor) return;
+    setLoadingMore(true);
+    setFeedError(null);
+    try {
+      await loadPostsBatch({ uid: userId, cursor: nextPostsCursor, reset: false });
+    } catch {
+      setFeedError("No pudimos cargar más publicaciones. Intenta otra vez.");
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
+  async function reloadFeed() {
+    if (loading) return;
+    setLoading(true);
+    setFeedError(null);
+    try {
+      await loadPostsBatch({ uid: userId, cursor: null, reset: true });
+    } catch {
+      setFeedError("No pudimos cargar la comunidad. Intenta otra vez.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     return () => {
@@ -496,24 +571,45 @@ export default function ComunidadPage() {
       <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: "16px" }}>
         {loading ? (
           <div style={{ textAlign: "center", color: "#9CA3AF", padding: "40px 0" }}>Cargando...</div>
+        ) : feedError && posts.length === 0 ? (
+          <div style={{ background: "#FFFFFF", borderRadius: "24px", padding: "28px", textAlign: "center", boxShadow: "0 4px 20px rgba(26,26,46,0.07)" }}>
+            <p style={{ fontSize: "16px", color: "#C53340", fontWeight: 800, margin: "0 0 14px" }}>{feedError}</p>
+            <button
+              type="button"
+              onClick={reloadFeed}
+              style={{
+                border: "none",
+                borderRadius: 999,
+                background: "#1A1A2E",
+                color: "#FFFFFF",
+                padding: "10px 18px",
+                fontSize: 14,
+                fontWeight: 800,
+                cursor: "pointer",
+              }}
+            >
+              Reintentar
+            </button>
+          </div>
         ) : posts.length === 0 ? (
           <div style={{ background: "#FFFFFF", borderRadius: "24px", padding: "32px", textAlign: "center", boxShadow: "0 4px 20px rgba(26,26,46,0.07)" }}>
             <p style={{ fontSize: "28px", margin: "0 0 8px" }}>💬</p>
             <p style={{ fontSize: "16px", color: "#9CA3AF", margin: 0 }}>Sé el primero en publicar.</p>
           </div>
         ) : (
-          posts.map((post) => {
-            const profile = profiles[post.user_id];
-            const liked = likedIds.has(post.id);
-            const isOwn = post.user_id === userId;
-            const isEditing = editingPostId === post.id;
-            const isConfirmDelete = confirmDeleteId === post.id;
+          <>
+            {posts.map((post) => {
+              const profile = profiles[post.user_id];
+              const liked = likedIds.has(post.id);
+              const isOwn = post.user_id === userId;
+              const isEditing = editingPostId === post.id;
+              const isConfirmDelete = confirmDeleteId === post.id;
 
-            return (
-              <div
-                key={post.id}
-                style={{ background: "#FFFFFF", borderRadius: "24px", padding: "20px", boxShadow: "0 4px 20px rgba(26,26,46,0.07)" }}
-              >
+              return (
+                <div
+                  key={post.id}
+                  style={{ background: "#FFFFFF", borderRadius: "24px", padding: "20px", boxShadow: "0 4px 20px rgba(26,26,46,0.07)" }}
+                >
                 {/* Author row */}
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
                   {/* Clickable author area */}
@@ -713,9 +809,51 @@ export default function ComunidadPage() {
                     </button>
                   )}
                 </div>
+                </div>
+              );
+            })}
+
+            {feedError && (
+              <div
+                style={{
+                  borderRadius: 18,
+                  background: "rgba(230,57,70,0.10)",
+                  color: "#C53340",
+                  padding: 14,
+                  fontSize: 13,
+                  fontWeight: 800,
+                  textAlign: "center",
+                }}
+              >
+                {feedError}
               </div>
-            );
-          })
+            )}
+
+            {hasMorePosts ? (
+              <button
+                type="button"
+                onClick={loadMorePosts}
+                disabled={loadingMore}
+                style={{
+                  border: "none",
+                  borderRadius: 999,
+                  background: loadingMore ? "#C4BAB0" : "#1A1A2E",
+                  color: "#FFFFFF",
+                  padding: "13px 18px",
+                  fontSize: 15,
+                  fontWeight: 800,
+                  cursor: loadingMore ? "not-allowed" : "pointer",
+                  boxShadow: loadingMore ? "none" : "0 6px 18px rgba(26,26,46,0.12)",
+                }}
+              >
+                {loadingMore ? "Cargando..." : "Cargar más"}
+              </button>
+            ) : (
+              <p style={{ color: "#9CA3AF", fontSize: 13, fontWeight: 700, textAlign: "center", margin: "4px 0 0" }}>
+                Ya viste todas las publicaciones.
+              </p>
+            )}
+          </>
         )}
       </div>
 
