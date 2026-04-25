@@ -92,6 +92,7 @@ export default function ComunidadPage() {
   const [composeText, setComposeText] = useState("");
   const [composeImage, setComposeImage] = useState<File | null>(null);
   const [composePreview, setComposePreview] = useState<string | null>(null);
+  const [publishError, setPublishError] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -168,6 +169,12 @@ export default function ComunidadPage() {
     load();
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (composePreview) URL.revokeObjectURL(composePreview);
+    };
+  }, [composePreview]);
+
   // Auto-resize textarea
   function handleTextareaInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setComposeText(e.target.value);
@@ -181,6 +188,7 @@ export default function ComunidadPage() {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    setPublishError(null);
     try {
       validateImageFile(file);
     } catch (error) {
@@ -188,14 +196,22 @@ export default function ComunidadPage() {
       e.target.value = "";
       return;
     }
+    if (composePreview) URL.revokeObjectURL(composePreview);
     setComposeImage(file);
     setComposePreview(URL.createObjectURL(file));
     e.target.value = "";
   }
 
+  function clearComposeImage() {
+    if (composePreview) URL.revokeObjectURL(composePreview);
+    setComposeImage(null);
+    setComposePreview(null);
+  }
+
   async function handlePublish() {
     if (!composeText.trim() || publishing || !userId) return;
     setPublishing(true);
+    setPublishError(null);
     try {
       let imageUrl: string | null = null;
       if (composeImage) {
@@ -210,18 +226,18 @@ export default function ComunidadPage() {
           .from("comunidad-images")
           .upload(path, optimizedImage, { upsert: false });
         if (uploadError) {
-          console.error("Upload error:", uploadError.message);
-          alert(`Error al subir imagen: ${uploadError.message}`);
+          throw new Error(uploadError.message);
         } else if (uploadData) {
           const { data: urlData } = supabase.storage
             .from("comunidad-images")
             .getPublicUrl(uploadData.path);
           imageUrl = urlData.publicUrl;
-          console.log("Upload OK, public URL:", imageUrl);
+        } else {
+          throw new Error("No se pudo subir la imagen.");
         }
       }
 
-      const { data: inserted } = await supabase
+      const { data: inserted, error: insertError } = await supabase
         .from("comunidad_posts")
         .insert({
           user_id: userId,
@@ -233,15 +249,24 @@ export default function ComunidadPage() {
         .select()
         .single();
 
+      if (insertError) {
+        throw new Error(insertError.message);
+      }
+
       if (inserted) {
         setPosts((prev) => [inserted as Post, ...prev]);
         if (myProfile) setProfiles((prev) => ({ ...prev, [userId]: myProfile }));
       }
 
       setComposeText("");
-      setComposeImage(null);
-      setComposePreview(null);
+      clearComposeImage();
       if (textareaRef.current) textareaRef.current.style.height = "auto";
+    } catch (error) {
+      setPublishError(
+        composeImage
+          ? `No se publicó. No pudimos completar la publicación con imagen: ${error instanceof Error ? error.message : "intenta otra vez."}`
+          : "No pudimos publicar. Intenta otra vez.",
+      );
     } finally {
       setPublishing(false);
     }
@@ -413,7 +438,7 @@ export default function ComunidadPage() {
                   style={{ width: "56px", height: "56px", borderRadius: "12px", objectFit: "cover", display: "block" }}
                 />
                 <button
-                  onClick={() => { setComposeImage(null); setComposePreview(null); }}
+                  onClick={clearComposeImage}
                   style={{
                     position: "absolute", top: "-6px", right: "-6px",
                     width: "20px", height: "20px", borderRadius: "50%",
@@ -426,6 +451,12 @@ export default function ComunidadPage() {
                   ×
                 </button>
               </div>
+            )}
+
+            {publishError && (
+              <p style={{ color: "#C53340", fontSize: 13, fontWeight: 700, margin: "10px 0 0 50px", lineHeight: 1.35 }}>
+                {publishError}
+              </p>
             )}
 
             <div

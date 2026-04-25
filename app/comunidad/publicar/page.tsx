@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { optimizeImageFile, validateImageFile } from "@/lib/client-image-upload";
@@ -10,12 +10,20 @@ export default function PublicarPage() {
   const [content, setContent] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    setSubmitError(null);
     try {
       validateImageFile(file);
     } catch (error) {
@@ -23,14 +31,22 @@ export default function PublicarPage() {
       e.target.value = "";
       return;
     }
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
     e.target.value = "";
   }
 
+  function clearImage() {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+  }
+
   async function handleSubmit() {
     if (!content.trim() || submitting) return;
     setSubmitting(true);
+    setSubmitError(null);
 
     try {
       const {
@@ -56,15 +72,21 @@ export default function PublicarPage() {
           .from("comunidad-images")
           .upload(path, optimizedImage, { upsert: false });
 
-        if (!uploadError && uploadData) {
-          const { data: urlData } = supabase.storage
-            .from("comunidad-images")
-            .getPublicUrl(uploadData.path);
-          imageUrl = urlData.publicUrl;
+        if (uploadError) {
+          throw new Error(uploadError.message);
         }
+
+        if (!uploadData) {
+          throw new Error("No se pudo subir la imagen.");
+        }
+
+        const { data: urlData } = supabase.storage
+          .from("comunidad-images")
+          .getPublicUrl(uploadData.path);
+        imageUrl = urlData.publicUrl;
       }
 
-      await supabase.from("comunidad_posts").insert({
+      const { error: insertError } = await supabase.from("comunidad_posts").insert({
         user_id: user.id,
         content: content.trim(),
         image_url: imageUrl,
@@ -72,8 +94,17 @@ export default function PublicarPage() {
         created_at: new Date().toISOString(),
       });
 
+      if (insertError) {
+        throw new Error(insertError.message);
+      }
+
       router.push("/comunidad");
-    } catch {
+    } catch (error) {
+      setSubmitError(
+        imageFile
+          ? `No se publicó. No pudimos completar la publicación con imagen: ${error instanceof Error ? error.message : "intenta otra vez."}`
+          : "No pudimos publicar. Intenta otra vez.",
+      );
       setSubmitting(false);
     }
   }
@@ -173,10 +204,7 @@ export default function PublicarPage() {
               }}
             />
             <button
-              onClick={() => {
-                setImageFile(null);
-                setImagePreview(null);
-              }}
+              onClick={clearImage}
               style={{
                 position: "absolute",
                 top: "10px",
@@ -214,6 +242,12 @@ export default function PublicarPage() {
           >
             ＋ Agregar imagen
           </button>
+        )}
+
+        {submitError && (
+          <p style={{ color: "#C53340", fontSize: 14, fontWeight: 700, margin: "14px 0 0", lineHeight: 1.4 }}>
+            {submitError}
+          </p>
         )}
 
         <input
