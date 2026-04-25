@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
+import ModerationConfirmDialog from "@/components/comunidad/ModerationConfirmDialog";
 
 type Profile = {
   id: string;
@@ -42,6 +43,14 @@ type ReplyView = ForumReply & {
   authorName: string;
 };
 
+type PendingModerationAction =
+  | { type: "pin-thread" }
+  | { type: "unpin-thread" }
+  | { type: "lock-thread" }
+  | { type: "unlock-thread" }
+  | { type: "delete-thread" }
+  | { type: "delete-reply"; reply: ReplyView };
+
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -68,6 +77,53 @@ const moderationButtonStyle = {
   cursor: "pointer",
 };
 
+function getModerationDialogCopy(action: PendingModerationAction) {
+  switch (action.type) {
+    case "pin-thread":
+      return {
+        title: "Fijar tema",
+        description: "Este tema aparecerá arriba en el foro del grupo.",
+        confirmLabel: "Fijar",
+        tone: "neutral" as const,
+      };
+    case "unpin-thread":
+      return {
+        title: "Desfijar tema",
+        description: "El tema volverá al orden normal por actividad reciente.",
+        confirmLabel: "Desfijar",
+        tone: "neutral" as const,
+      };
+    case "lock-thread":
+      return {
+        title: "Cerrar tema",
+        description: "El grupo podrá leerlo, pero ya no podrá agregar respuestas.",
+        confirmLabel: "Cerrar tema",
+        tone: "neutral" as const,
+      };
+    case "unlock-thread":
+      return {
+        title: "Abrir tema",
+        description: "El grupo podrá volver a responder en este tema.",
+        confirmLabel: "Abrir tema",
+        tone: "neutral" as const,
+      };
+    case "delete-thread":
+      return {
+        title: "Eliminar tema",
+        description: "El tema se ocultará del foro. Esta acción es de moderación y no se mostrará al grupo.",
+        confirmLabel: "Eliminar",
+        tone: "danger" as const,
+      };
+    case "delete-reply":
+      return {
+        title: "Eliminar respuesta",
+        description: `La respuesta de ${action.reply.authorName} se ocultará del tema.`,
+        confirmLabel: "Eliminar",
+        tone: "danger" as const,
+      };
+  }
+}
+
 export default function ForumThreadPage() {
   const router = useRouter();
   const params = useParams<{ threadId: string }>();
@@ -84,6 +140,8 @@ export default function ForumThreadPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [replyError, setReplyError] = useState<string | null>(null);
   const [moderationError, setModerationError] = useState<string | null>(null);
+  const [moderationNotice, setModerationNotice] = useState<string | null>(null);
+  const [pendingModerationAction, setPendingModerationAction] = useState<PendingModerationAction | null>(null);
 
   useEffect(() => {
     async function loadThread() {
@@ -219,6 +277,7 @@ export default function ForumThreadPage() {
 
     setModerating(true);
     setModerationError(null);
+    setModerationNotice(null);
 
     const { error } = await supabase.from("forum_threads").update(changes).eq("id", thread.id);
 
@@ -230,16 +289,15 @@ export default function ForumThreadPage() {
     }
 
     setThread((current) => (current ? { ...current, ...changes, updated_at: new Date().toISOString() } : current));
+    setModerationNotice("Tema actualizado.");
   }
 
   async function deleteThread() {
     if (!thread || !profile?.is_admin || moderating) return;
 
-    const confirmed = window.confirm("¿Eliminar este tema del foro?");
-    if (!confirmed) return;
-
     setModerating(true);
     setModerationError(null);
+    setModerationNotice(null);
 
     const { error } = await supabase
       .from("forum_threads")
@@ -259,11 +317,9 @@ export default function ForumThreadPage() {
   async function deleteReply(replyId: string) {
     if (!profile?.is_admin || moderating) return;
 
-    const confirmed = window.confirm("¿Eliminar esta respuesta?");
-    if (!confirmed) return;
-
     setModerating(true);
     setModerationError(null);
+    setModerationNotice(null);
 
     const { error } = await supabase
       .from("forum_replies")
@@ -278,7 +334,31 @@ export default function ForumThreadPage() {
     }
 
     setReplies((current) => current.filter((reply) => reply.id !== replyId));
+    setModerationNotice("Respuesta eliminada.");
   }
+
+  async function confirmPendingModerationAction() {
+    if (!pendingModerationAction) return;
+
+    const action = pendingModerationAction;
+    if (action.type === "pin-thread") {
+      await updateThreadModeration({ is_pinned: true });
+    } else if (action.type === "unpin-thread") {
+      await updateThreadModeration({ is_pinned: false });
+    } else if (action.type === "lock-thread") {
+      await updateThreadModeration({ is_locked: true });
+    } else if (action.type === "unlock-thread") {
+      await updateThreadModeration({ is_locked: false });
+    } else if (action.type === "delete-thread") {
+      await deleteThread();
+    } else {
+      await deleteReply(action.reply.id);
+    }
+
+    setPendingModerationAction(null);
+  }
+
+  const moderationDialogCopy = pendingModerationAction ? getModerationDialogCopy(pendingModerationAction) : null;
 
   return (
     <div
@@ -455,10 +535,11 @@ export default function ForumThreadPage() {
             {profile.is_admin && (
               <div style={{ display: "grid", gap: 8 }}>
                 {moderationError && <p style={{ color: "#C53340", fontSize: 13, fontWeight: 800, margin: 0 }}>{moderationError}</p>}
+                {moderationNotice && <p style={{ color: "#178A83", fontSize: 13, fontWeight: 800, margin: 0 }}>{moderationNotice}</p>}
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <button
                     type="button"
-                    onClick={() => updateThreadModeration({ is_pinned: !thread.is_pinned })}
+                    onClick={() => setPendingModerationAction({ type: thread.is_pinned ? "unpin-thread" : "pin-thread" })}
                     disabled={moderating}
                     style={moderationButtonStyle}
                   >
@@ -466,7 +547,7 @@ export default function ForumThreadPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => updateThreadModeration({ is_locked: !thread.is_locked })}
+                    onClick={() => setPendingModerationAction({ type: thread.is_locked ? "unlock-thread" : "lock-thread" })}
                     disabled={moderating}
                     style={moderationButtonStyle}
                   >
@@ -474,7 +555,7 @@ export default function ForumThreadPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={deleteThread}
+                    onClick={() => setPendingModerationAction({ type: "delete-thread" })}
                     disabled={moderating}
                     style={{ ...moderationButtonStyle, color: "#C53340" }}
                   >
@@ -524,7 +605,7 @@ export default function ForumThreadPage() {
                   {profile.is_admin && (
                     <button
                       type="button"
-                      onClick={() => deleteReply(reply.id)}
+                      onClick={() => setPendingModerationAction({ type: "delete-reply", reply })}
                       disabled={moderating}
                       style={{ ...moderationButtonStyle, justifySelf: "start", color: "#C53340" }}
                     >
@@ -603,6 +684,19 @@ export default function ForumThreadPage() {
             </form>
           )}
         </div>
+      )}
+
+      {pendingModerationAction && moderationDialogCopy && (
+        <ModerationConfirmDialog
+          open
+          title={moderationDialogCopy.title}
+          description={moderationDialogCopy.description}
+          confirmLabel={moderationDialogCopy.confirmLabel}
+          tone={moderationDialogCopy.tone}
+          busy={moderating}
+          onCancel={() => setPendingModerationAction(null)}
+          onConfirm={confirmPendingModerationAction}
+        />
       )}
 
       <BottomNav />

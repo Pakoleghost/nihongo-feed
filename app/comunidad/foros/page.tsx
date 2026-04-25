@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
+import ModerationConfirmDialog from "@/components/comunidad/ModerationConfirmDialog";
 
 type Profile = {
   id: string;
@@ -42,6 +43,13 @@ type ThreadView = ForumThread & {
   replyCount: number;
 };
 
+type PendingModerationAction =
+  | { type: "pin"; thread: ThreadView }
+  | { type: "unpin"; thread: ThreadView }
+  | { type: "lock"; thread: ThreadView }
+  | { type: "unlock"; thread: ThreadView }
+  | { type: "delete-thread"; thread: ThreadView };
+
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -73,6 +81,46 @@ const moderationButtonStyle = {
   cursor: "pointer",
 };
 
+function getModerationDialogCopy(action: PendingModerationAction) {
+  switch (action.type) {
+    case "pin":
+      return {
+        title: "Fijar tema",
+        description: "Este tema aparecerá arriba en el foro del grupo.",
+        confirmLabel: "Fijar",
+        tone: "neutral" as const,
+      };
+    case "unpin":
+      return {
+        title: "Desfijar tema",
+        description: "El tema volverá al orden normal por actividad reciente.",
+        confirmLabel: "Desfijar",
+        tone: "neutral" as const,
+      };
+    case "lock":
+      return {
+        title: "Cerrar tema",
+        description: "El grupo podrá leerlo, pero ya no podrá agregar respuestas.",
+        confirmLabel: "Cerrar tema",
+        tone: "neutral" as const,
+      };
+    case "unlock":
+      return {
+        title: "Abrir tema",
+        description: "El grupo podrá volver a responder en este tema.",
+        confirmLabel: "Abrir tema",
+        tone: "neutral" as const,
+      };
+    case "delete-thread":
+      return {
+        title: "Eliminar tema",
+        description: "El tema se ocultará del foro. Esta acción es de moderación y no se mostrará al grupo.",
+        confirmLabel: "Eliminar",
+        tone: "danger" as const,
+      };
+  }
+}
+
 export default function ComunidadForosPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -89,6 +137,8 @@ export default function ComunidadForosPage() {
   const [createError, setCreateError] = useState<string | null>(null);
   const [moderatingThreadId, setModeratingThreadId] = useState<string | null>(null);
   const [moderationError, setModerationError] = useState<string | null>(null);
+  const [moderationNotice, setModerationNotice] = useState<string | null>(null);
+  const [pendingModerationAction, setPendingModerationAction] = useState<PendingModerationAction | null>(null);
 
   useEffect(() => {
     async function loadForums() {
@@ -265,6 +315,7 @@ export default function ComunidadForosPage() {
 
     setModeratingThreadId(threadId);
     setModerationError(null);
+    setModerationNotice(null);
 
     const { error } = await supabase.from("forum_threads").update(changes).eq("id", threadId);
 
@@ -280,16 +331,15 @@ export default function ComunidadForosPage() {
         .map((thread) => (thread.id === threadId ? { ...thread, ...changes, updated_at: new Date().toISOString() } : thread))
         .sort(sortThreads),
     );
+    setModerationNotice("Tema actualizado.");
   }
 
   async function deleteThread(threadId: string) {
     if (!profile?.is_admin || moderatingThreadId) return;
 
-    const confirmed = window.confirm("¿Eliminar este tema del foro?");
-    if (!confirmed) return;
-
     setModeratingThreadId(threadId);
     setModerationError(null);
+    setModerationNotice(null);
 
     const { error } = await supabase.from("forum_threads").update({ deleted_at: new Date().toISOString() }).eq("id", threadId);
 
@@ -301,7 +351,29 @@ export default function ComunidadForosPage() {
     }
 
     setThreads((current) => current.filter((thread) => thread.id !== threadId));
+    setModerationNotice("Tema eliminado.");
   }
+
+  async function confirmPendingModerationAction() {
+    if (!pendingModerationAction) return;
+
+    const action = pendingModerationAction;
+    if (action.type === "pin") {
+      await updateThreadModeration(action.thread.id, { is_pinned: true });
+    } else if (action.type === "unpin") {
+      await updateThreadModeration(action.thread.id, { is_pinned: false });
+    } else if (action.type === "lock") {
+      await updateThreadModeration(action.thread.id, { is_locked: true });
+    } else if (action.type === "unlock") {
+      await updateThreadModeration(action.thread.id, { is_locked: false });
+    } else {
+      await deleteThread(action.thread.id);
+    }
+
+    setPendingModerationAction(null);
+  }
+
+  const moderationDialogCopy = pendingModerationAction ? getModerationDialogCopy(pendingModerationAction) : null;
 
   return (
     <div
@@ -421,6 +493,20 @@ export default function ComunidadForosPage() {
               }}
             >
               {moderationError}
+            </div>
+          )}
+          {moderationNotice && (
+            <div
+              style={{
+                borderRadius: 20,
+                background: "rgba(78,205,196,0.14)",
+                color: "#178A83",
+                padding: 14,
+                fontSize: 13,
+                fontWeight: 800,
+              }}
+            >
+              {moderationNotice}
             </div>
           )}
 
@@ -679,7 +765,7 @@ export default function ComunidadForosPage() {
                         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", paddingTop: 2 }}>
                           <button
                             type="button"
-                            onClick={() => updateThreadModeration(thread.id, { is_pinned: !thread.is_pinned })}
+                            onClick={() => setPendingModerationAction({ type: thread.is_pinned ? "unpin" : "pin", thread })}
                             disabled={moderatingThreadId === thread.id}
                             style={moderationButtonStyle}
                           >
@@ -687,7 +773,7 @@ export default function ComunidadForosPage() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => updateThreadModeration(thread.id, { is_locked: !thread.is_locked })}
+                            onClick={() => setPendingModerationAction({ type: thread.is_locked ? "unlock" : "lock", thread })}
                             disabled={moderatingThreadId === thread.id}
                             style={moderationButtonStyle}
                           >
@@ -695,7 +781,7 @@ export default function ComunidadForosPage() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => deleteThread(thread.id)}
+                            onClick={() => setPendingModerationAction({ type: "delete-thread", thread })}
                             disabled={moderatingThreadId === thread.id}
                             style={{ ...moderationButtonStyle, color: "#C53340" }}
                           >
@@ -710,6 +796,19 @@ export default function ComunidadForosPage() {
             </section>
           ))}
         </div>
+      )}
+
+      {pendingModerationAction && moderationDialogCopy && (
+        <ModerationConfirmDialog
+          open
+          title={moderationDialogCopy.title}
+          description={moderationDialogCopy.description}
+          confirmLabel={moderationDialogCopy.confirmLabel}
+          tone={moderationDialogCopy.tone}
+          busy={moderatingThreadId === pendingModerationAction.thread.id}
+          onCancel={() => setPendingModerationAction(null)}
+          onConfirm={confirmPendingModerationAction}
+        />
       )}
 
       <BottomNav />
