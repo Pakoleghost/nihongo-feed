@@ -19,7 +19,7 @@ type QuizResults = {
 };
 
 function getHeadline(pct: number, errors: number) {
-  if (errors === 0) return "Sesion limpia";
+  if (errors === 0) return "Sesión limpia";
   if (pct >= 80) return "Buen avance";
   if (pct >= 50) return "Vas tomando ritmo";
   return "Sigue practicando";
@@ -88,11 +88,12 @@ export default function ResultadosPage() {
 
   const { total, correct, missed } = results;
   const { errors, headline, headlineColor, modeLabel, taskModeLabel, nextStep } = summary;
+  const uniqueMissed = [...new Map(missed.map((item) => [item.id, item])).values()];
 
   function handleRepeatErrors() {
-    if (missed.length === 0) return;
-    const ids = missed.map((m) => m.id).join(",");
-    router.push(`/kana/quiz?mode=repeat&items=${ids}&taskMode=mixed&count=${missed.length}`);
+    if (uniqueMissed.length === 0) return;
+    const ids = uniqueMissed.map((m) => m.id).join(",");
+    router.push(`/kana/quiz?mode=repeat&items=${ids}&taskMode=mixed&count=${uniqueMissed.length}`);
   }
 
   return (
@@ -196,7 +197,7 @@ export default function ResultadosPage() {
               lineHeight: 1.4,
             }}
           >
-            Acertaste {correct} de {total} en esta practica.
+            Acertaste {correct} de {total} en esta práctica.
           </p>
         </div>
 
@@ -248,13 +249,13 @@ export default function ResultadosPage() {
             Lo importante
           </div>
           <p style={{ fontSize: "14px", color: "#5E6472", margin: 0, lineHeight: 1.45 }}>
-            Esta pantalla resume lo que practicaste hoy. Los aciertos ayudan a tu progreso, pero no significan por si solos que esos kana ya esten dominados.
+            Esta pantalla resume tu sesión Mixto. Los aciertos ayudan a tu progreso, pero no significan por sí solos que esos kana ya estén dominados.
           </p>
         </div>
       </div>
 
       <div style={{ flex: 1, marginTop: "20px", display: "grid", gap: "14px" }}>
-        {missed.length > 0 ? (
+        {uniqueMissed.length > 0 ? (
           <div
             style={{
               background: "#FFFFFF",
@@ -270,12 +271,12 @@ export default function ResultadosPage() {
                 Repasar errores
               </div>
               <div style={{ fontSize: "14px", color: "#5E6472", lineHeight: 1.4 }}>
-                Estos kana necesitan otra vuelta antes de seguir.
+                Estos kana salieron de respuestas incorrectas o pares que necesitaron revisión.
               </div>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {missed.map((m) => (
+              {uniqueMissed.map((m) => (
                 <div
                   key={m.id}
                   style={{
@@ -332,10 +333,10 @@ export default function ResultadosPage() {
             }}
           >
             <div style={{ fontSize: "20px", fontWeight: 800, color: "#178A83" }}>
-              Sin errores en esta sesion
+              Sin errores en esta sesión
             </div>
             <div style={{ fontSize: "14px", color: "#5E6472", lineHeight: 1.45 }}>
-              Buen momento para seguir con Smart o volver a Kana y empezar otra practica.
+              Buen momento para seguir con Smart o volver a Kana y empezar otra práctica.
             </div>
           </div>
         )}

@@ -25,10 +25,17 @@ type QuizQuestion = {
   matchRightItems?: KanaItem[];
 };
 
+type MissedKana = {
+  kana: string;
+  romaji: string;
+  id: string;
+};
+
 type QuestionResult = {
   item: KanaItem;
   correct: boolean;
   userAnswer: string;
+  missedItems?: MissedKana[];
 };
 
 type MatchPair = {
@@ -247,10 +254,10 @@ function getLegacyTaskMode(rawDifficulty: string | null): KanaSessionMode {
 }
 
 function getQuestionTaskLabel(taskType: KanaQuestionType) {
-  if (taskType === "kana_to_romaji_choice") return "Kana -> romaji";
-  if (taskType === "romaji_to_kana_choice") return "Romaji -> kana";
+  if (taskType === "kana_to_romaji_choice") return "Kana → romaji";
+  if (taskType === "romaji_to_kana_choice") return "Romaji → kana";
   if (taskType === "kana_to_romaji_input") return "Escribir romaji";
-  if (taskType === "hiragana_katakana_match") return "Pares kana";
+  if (taskType === "hiragana_katakana_match") return "Pares de kana";
   return "Trazar";
 }
 
@@ -431,6 +438,7 @@ function QuizContent() {
   const [matchedPairKeys, setMatchedPairKeys] = useState<string[]>([]);
   const [matchMistakes, setMatchMistakes] = useState(0);
   const [matchWrongPairKey, setMatchWrongPairKey] = useState<string | null>(null);
+  const [matchMistakePairKeys, setMatchMistakePairKeys] = useState<string[]>([]);
   const [isReady, setIsReady] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -488,9 +496,14 @@ function QuizContent() {
       setResults(newResults);
 
       if (currentIndex + 1 >= questions.length) {
-        const missed = newResults
-          .filter((r) => !r.correct)
-          .map((r) => ({ kana: r.item.kana, romaji: r.item.romaji, id: r.item.id }));
+        const missedMap = new Map<string, MissedKana>();
+        newResults.forEach((result) => {
+          const missedItems =
+            result.missedItems ??
+            (!result.correct ? [{ kana: result.item.kana, romaji: result.item.romaji, id: result.item.id }] : []);
+          missedItems.forEach((item) => missedMap.set(item.id, item));
+        });
+        const missed = [...missedMap.values()];
         sessionStorage.setItem(
           "kana-quiz-results",
           JSON.stringify({
@@ -515,6 +528,7 @@ function QuizContent() {
         setMatchedPairKeys([]);
         setMatchMistakes(0);
         setMatchWrongPairKey(null);
+        setMatchMistakePairKeys([]);
       }
     },
     [results, currentIndex, questions.length, mode, taskMode, router]
@@ -576,7 +590,7 @@ function QuizContent() {
     setPhase("feedback");
 
     const correct = isCorrectAnswer(currentQ.item, option);
-    const rating = correct && traceCompletion.retries === 0 ? "correct" : correct ? "almost" : "wrong";
+    const rating = correct && traceCompletion.retries === 0 ? "correct" : "almost";
     const updated = applyKanaRating(progressMap, currentQ.item, rating);
     setProgressMap(updated);
     saveKanaProgress("anon", updated);
@@ -592,8 +606,16 @@ function QuizContent() {
   function completeMatchQuestion(nextMistakes: number) {
     if (!currentQ?.matchPairs?.length || phase !== "question") return;
 
-    const rating = nextMistakes === 0 ? "correct" : "almost";
+    const mistakeKeySet = new Set(matchMistakePairKeys);
+    const missedPairs =
+      mistakeKeySet.size > 0
+        ? currentQ.matchPairs.filter((pair) => mistakeKeySet.has(pair.key))
+        : nextMistakes > 0
+          ? currentQ.matchPairs
+          : [];
     const updated = currentQ.matchPairs.reduce((nextProgress, pair) => {
+      const pairHadMistake = mistakeKeySet.size > 0 ? mistakeKeySet.has(pair.key) : nextMistakes > 0;
+      const rating = pairHadMistake ? "almost" : "correct";
       const afterHiragana = applyKanaRating(nextProgress, pair.hiragana, rating);
       return applyKanaRating(afterHiragana, pair.katakana, rating);
     }, progressMap);
@@ -610,6 +632,10 @@ function QuizContent() {
             item: currentQ.item,
             correct: nextMistakes === 0,
             userAnswer: nextMistakes === 0 ? "pares completos" : `${nextMistakes} errores`,
+            missedItems: missedPairs.flatMap((pair) => [
+              { kana: pair.hiragana.kana, romaji: pair.hiragana.romaji, id: pair.hiragana.id },
+              { kana: pair.katakana.kana, romaji: pair.katakana.romaji, id: pair.katakana.id },
+            ]),
           },
           updated,
         ),
@@ -633,7 +659,9 @@ function QuizContent() {
 
     if (matchSelection.pairKey !== pair.key) {
       const nextMistakes = matchMistakes + 1;
+      const nextMistakePairKeys = [...new Set([...matchMistakePairKeys, matchSelection.pairKey, pair.key])];
       setMatchMistakes(nextMistakes);
+      setMatchMistakePairKeys(nextMistakePairKeys);
       setMatchWrongPairKey(pair.key);
       setMatchSelection(null);
       window.setTimeout(() => setMatchWrongPairKey(null), 420);
@@ -702,9 +730,21 @@ function QuizContent() {
     : isMatchQuestion
       ? phase === "feedback" && matchMistakes === 0
       : selectedOption === correctChoiceValue;
-  const feedbackLabel = feedbackIsCorrect ? "Correcto" : "No era esa";
-  const feedbackBg = feedbackIsCorrect ? "rgba(78,205,196,0.14)" : "rgba(230,57,70,0.12)";
-  const feedbackColor = feedbackIsCorrect ? "#178A83" : "#C53340";
+  const feedbackLabel = feedbackIsCorrect
+    ? "Correcto"
+    : isMatchQuestion && phase === "feedback"
+      ? "Revisa los pares marcados"
+    : isTraceQuestion && phase === "feedback"
+      ? "Trazo guardado · revisa lectura"
+      : "No era esa";
+  const feedbackNeedsSoftReview = isTraceQuestion && phase === "feedback" && !feedbackIsCorrect;
+  const feedbackBg = feedbackIsCorrect
+    ? "rgba(78,205,196,0.14)"
+    : feedbackNeedsSoftReview
+      ? "rgba(245,158,11,0.14)"
+      : "rgba(230,57,70,0.12)";
+  const feedbackColor = feedbackIsCorrect ? "#178A83" : feedbackNeedsSoftReview ? "#9A5B00" : "#C53340";
+  const matchReviewCount = new Set(matchMistakePairKeys).size;
   const sharedCardStyle = {
     background: "#FFFFFF",
     borderRadius: "28px",
@@ -1261,6 +1301,7 @@ function QuizContent() {
               {(currentQ.matchPairs ?? []).map((pair) => {
                 const matched = matchedPairKeys.includes(pair.key);
                 const selected = matchSelection?.id === pair.hiragana.id;
+                const needsReview = phase === "feedback" && matchMistakePairKeys.includes(pair.key);
                 return (
                   <button
                     key={pair.hiragana.id}
@@ -1271,8 +1312,14 @@ function QuizContent() {
                       minHeight: "66px",
                       border: "none",
                       borderRadius: "20px",
-                      background: matched ? "rgba(78,205,196,0.18)" : selected ? "#1A1A2E" : "#F7F3ED",
-                      color: matched ? "#178A83" : selected ? "#FFFFFF" : "#1A1A2E",
+                      background: needsReview
+                        ? "rgba(230,57,70,0.12)"
+                        : matched
+                          ? "rgba(78,205,196,0.18)"
+                          : selected
+                            ? "#1A1A2E"
+                            : "#F7F3ED",
+                      color: needsReview ? "#C53340" : matched ? "#178A83" : selected ? "#FFFFFF" : "#1A1A2E",
                       fontSize: "30px",
                       fontWeight: 800,
                       fontFamily: "var(--font-noto-sans-jp), sans-serif",
@@ -1294,6 +1341,7 @@ function QuizContent() {
                 const matched = matchedPairKeys.includes(pairKey);
                 const selected = matchSelection?.id === item.id;
                 const wrong = matchWrongPairKey === pairKey;
+                const needsReview = phase === "feedback" && matchMistakePairKeys.includes(pairKey);
                 return (
                   <button
                     key={item.id}
@@ -1305,13 +1353,15 @@ function QuizContent() {
                       border: "none",
                       borderRadius: "20px",
                       background: matched
-                        ? "rgba(78,205,196,0.18)"
+                        ? needsReview
+                          ? "rgba(230,57,70,0.12)"
+                          : "rgba(78,205,196,0.18)"
                         : wrong
                           ? "rgba(230,57,70,0.16)"
                           : selected
                             ? "#1A1A2E"
                             : "#FFFFFF",
-                      color: matched ? "#178A83" : selected ? "#FFFFFF" : "#1A1A2E",
+                      color: needsReview ? "#C53340" : matched ? "#178A83" : selected ? "#FFFFFF" : "#1A1A2E",
                       fontSize: "30px",
                       fontWeight: 800,
                       fontFamily: "var(--font-noto-sans-jp), sans-serif",
@@ -1339,8 +1389,8 @@ function QuizContent() {
           >
             {phase === "feedback"
               ? matchMistakes === 0
-                ? "Pares completos"
-                : "Pares completos con errores"
+                ? "Pares completados sin errores"
+                : `${matchReviewCount || matchMistakes} ${matchReviewCount === 1 ? "par necesita" : "pares necesitan"} otra vuelta`
               : matchSelection
                 ? "Ahora toca su pareja"
                 : "Toca un hiragana y su katakana"}
