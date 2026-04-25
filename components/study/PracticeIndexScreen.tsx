@@ -14,8 +14,8 @@ type PracticeMode = {
 
 const MODES: PracticeMode[] = [
   { key: "sprint",     title: "Sprint de Kana",  kana: "速", desc: "Lee todos los kana que puedas en 60 segundos.", tag: "Velocidad" },
-  { key: "flashcards", title: "Tarjetas",         kana: "札", desc: "Repaso clásico con autoevaluación.", tag: "Memoria" },
-  { key: "vocabkanji", title: "Vocab + Kanji",    kana: "語", desc: "Practica vocabulario y lecturas de kanji.", tag: "Vocab" },
+  { key: "flashcards", title: "Vocabulario",      kana: "語", desc: "Estudia palabras por lección.", tag: "Léxico" },
+  { key: "vocabkanji", title: "Kanji",            kana: "読", desc: "Practica lectura de palabras con kanji.", tag: "Lectura" },
 ];
 
 type PracticeIndexScreenProps = {

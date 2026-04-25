@@ -101,8 +101,8 @@ export default function InicioPage() {
   const destinations = [
     {
       href: "/kana",
-      title: "Kana",
-      body: "Hiragana y katakana",
+      title: "Aprender",
+      body: "Kana y lectura",
       bg: "#FFFFFF",
       titleColor: "#1A1A2E",
       bodyColor: "#9CA3AF",
@@ -114,22 +114,6 @@ export default function InicioPage() {
       bg: "#1A1A2E",
       titleColor: "#FFFFFF",
       bodyColor: "rgba(255,255,255,0.72)",
-    },
-    {
-      href: "/practicar/vocabulario",
-      title: "Vocabulario",
-      body: "Por lección",
-      bg: "#E63946",
-      titleColor: "#FFFFFF",
-      bodyColor: "rgba(255,255,255,0.78)",
-    },
-    {
-      href: "/practicar/kanji",
-      title: "Kanji",
-      body: "Lectura por lección",
-      bg: "#4ECDC4",
-      titleColor: "#1A1A2E",
-      bodyColor: "rgba(26,26,46,0.68)",
     },
   ] as const;
 

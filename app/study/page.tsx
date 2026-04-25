@@ -5056,8 +5056,8 @@ function getStudyActivityStorageKey(userKey: string) {
 function getStudyActivityLabel(tool: StudyActivityTool) {
   if (tool === "learnkana") return "Aprender Kana";
   if (tool === "kana") return "Kana Sprint";
-  if (tool === "sprint") return "Vocab + Kanji Sprint";
-  if (tool === "flashcards") return "Flashcards";
+  if (tool === "sprint") return "Kanji";
+  if (tool === "flashcards") return "Vocabulario";
   return "Práctica";
 }
 
@@ -6882,8 +6882,8 @@ function StudyContent() {
   const toolCards = [
     { key: "learnkana", href: "/study?view=learnkana", title: "Aprender Kana", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
     { key: "kana", href: "/study?view=kana", title: "Kana Sprint", accent: "var(--color-accent)", surface: "var(--color-accent-soft)" },
-    { key: "sprint", href: "/study?view=sprint", title: "Vocab + Kanji", accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
-    { key: "flashcards", href: "/study?view=flashcards", title: "Flashcards", accent: "#F4A261", surface: "rgba(244, 162, 97, 0.12)" },
+    { key: "sprint", href: "/study?view=sprint", title: "Kanji", accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
+    { key: "flashcards", href: "/study?view=flashcards", title: "Vocabulario", accent: "#F4A261", surface: "rgba(244, 162, 97, 0.12)" },
   ];
   const renderToolPill = (tool: { key: string; href: string; title: string; accent: string; surface: string }) => {
     const selected = activeTab === tool.key;
@@ -7023,7 +7023,7 @@ function StudyContent() {
             </button>
           </div>
           <div style={{ padding: "16px 24px 24px" }}>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Vocab + Kanji</div>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Kanji</div>
           </div>
           <div style={{ padding: "0 24px 24px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -7101,7 +7101,7 @@ function StudyContent() {
         <PracticeShell
           open={activeTab === "practice" && practiceSubView === "vocabkanji" && vkSessionOpen}
           visible={vkSessionOpen}
-          title="Vocab + Kanji"
+          title="Kanji"
           subtitle={`${vkBucketConfig.label} · ${vkTime}s · ${vkScore} pts`}
           onClose={closeVkSession}
         >
@@ -7155,7 +7155,7 @@ function StudyContent() {
             </button>
           </div>
           <div style={{ padding: "16px 24px 24px" }}>
-            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Tarjetas</div>
+            <div style={{ fontFamily: DS.fontHead, fontSize: 28, fontWeight: 700, color: DS.ink, letterSpacing: -0.6 }}>Vocabulario</div>
           </div>
           <div style={{ padding: "0 24px" }}>
             {(flashLessonFolder !== null || Boolean(activeFlashSet?.isCustom)) && (
@@ -7367,7 +7367,7 @@ function StudyContent() {
                         Cambiar set
                       </button>
                       <button type="button" onClick={startFlashCards} style={primaryButtonStyle}>
-                        Empezar flashcards
+                        Empezar práctica
                       </button>
                       <button type="button" onClick={startFlashLearn} style={secondaryButtonStyle}>
                         Aprender
