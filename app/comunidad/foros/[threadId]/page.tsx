@@ -57,6 +57,17 @@ function displayName(profile: Pick<Profile, "username" | "is_admin"> | null | un
   return profile?.username ?? (profile?.is_admin ? "Sensei" : "Usuario");
 }
 
+const moderationButtonStyle = {
+  border: "none",
+  borderRadius: 999,
+  background: "#F8F4EE",
+  color: "#53596B",
+  padding: "8px 11px",
+  fontSize: 12,
+  fontWeight: 800,
+  cursor: "pointer",
+};
+
 export default function ForumThreadPage() {
   const router = useRouter();
   const params = useParams<{ threadId: string }>();
@@ -69,8 +80,10 @@ export default function ForumThreadPage() {
   const [replyBody, setReplyBody] = useState("");
   const [loading, setLoading] = useState(true);
   const [postingReply, setPostingReply] = useState(false);
+  const [moderating, setModerating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [replyError, setReplyError] = useState<string | null>(null);
+  const [moderationError, setModerationError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadThread() {
@@ -199,6 +212,72 @@ export default function ForumThreadPage() {
       },
     ]);
     setReplyBody("");
+  }
+
+  async function updateThreadModeration(changes: Partial<Pick<ForumThread, "is_pinned" | "is_locked">>) {
+    if (!thread || !profile?.is_admin || moderating) return;
+
+    setModerating(true);
+    setModerationError(null);
+
+    const { error } = await supabase.from("forum_threads").update(changes).eq("id", thread.id);
+
+    setModerating(false);
+
+    if (error) {
+      setModerationError("No pudimos actualizar este tema.");
+      return;
+    }
+
+    setThread((current) => (current ? { ...current, ...changes, updated_at: new Date().toISOString() } : current));
+  }
+
+  async function deleteThread() {
+    if (!thread || !profile?.is_admin || moderating) return;
+
+    const confirmed = window.confirm("¿Eliminar este tema del foro?");
+    if (!confirmed) return;
+
+    setModerating(true);
+    setModerationError(null);
+
+    const { error } = await supabase
+      .from("forum_threads")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", thread.id);
+
+    setModerating(false);
+
+    if (error) {
+      setModerationError("No pudimos eliminar este tema.");
+      return;
+    }
+
+    router.push("/comunidad/foros");
+  }
+
+  async function deleteReply(replyId: string) {
+    if (!profile?.is_admin || moderating) return;
+
+    const confirmed = window.confirm("¿Eliminar esta respuesta?");
+    if (!confirmed) return;
+
+    setModerating(true);
+    setModerationError(null);
+
+    const { error } = await supabase
+      .from("forum_replies")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", replyId);
+
+    setModerating(false);
+
+    if (error) {
+      setModerationError("No pudimos eliminar la respuesta.");
+      return;
+    }
+
+    setReplies((current) => current.filter((reply) => reply.id !== replyId));
   }
 
   return (
@@ -372,6 +451,38 @@ export default function ForumThreadPage() {
             >
               {thread.body}
             </p>
+
+            {profile.is_admin && (
+              <div style={{ display: "grid", gap: 8 }}>
+                {moderationError && <p style={{ color: "#C53340", fontSize: 13, fontWeight: 800, margin: 0 }}>{moderationError}</p>}
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={() => updateThreadModeration({ is_pinned: !thread.is_pinned })}
+                    disabled={moderating}
+                    style={moderationButtonStyle}
+                  >
+                    {thread.is_pinned ? "Desfijar" : "Fijar"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateThreadModeration({ is_locked: !thread.is_locked })}
+                    disabled={moderating}
+                    style={moderationButtonStyle}
+                  >
+                    {thread.is_locked ? "Abrir tema" : "Cerrar tema"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={deleteThread}
+                    disabled={moderating}
+                    style={{ ...moderationButtonStyle, color: "#C53340" }}
+                  >
+                    Eliminar tema
+                  </button>
+                </div>
+              </div>
+            )}
           </article>
 
           <section style={{ display: "grid", gap: 10 }}>
@@ -410,6 +521,16 @@ export default function ForumThreadPage() {
                   <p style={{ margin: 0, color: "#1A1A2E", fontSize: 15, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
                     {reply.body}
                   </p>
+                  {profile.is_admin && (
+                    <button
+                      type="button"
+                      onClick={() => deleteReply(reply.id)}
+                      disabled={moderating}
+                      style={{ ...moderationButtonStyle, justifySelf: "start", color: "#C53340" }}
+                    >
+                      Eliminar respuesta
+                    </button>
+                  )}
                 </article>
               ))
             )}

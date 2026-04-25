@@ -62,6 +62,17 @@ function sortThreads(left: ThreadView, right: ThreadView) {
   return new Date(getThreadActivity(right)).getTime() - new Date(getThreadActivity(left)).getTime();
 }
 
+const moderationButtonStyle = {
+  border: "none",
+  borderRadius: 999,
+  background: "#FFFFFF",
+  color: "#53596B",
+  padding: "7px 10px",
+  fontSize: 12,
+  fontWeight: 800,
+  cursor: "pointer",
+};
+
 export default function ComunidadForosPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -76,6 +87,8 @@ export default function ComunidadForosPage() {
   const [newThreadTag, setNewThreadTag] = useState("");
   const [creatingThread, setCreatingThread] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [moderatingThreadId, setModeratingThreadId] = useState<string | null>(null);
+  const [moderationError, setModerationError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadForums() {
@@ -247,6 +260,49 @@ export default function ComunidadForosPage() {
     router.push(`/comunidad/foros/${(data as { id: string }).id}`);
   }
 
+  async function updateThreadModeration(threadId: string, changes: Partial<Pick<ForumThread, "is_pinned" | "is_locked">>) {
+    if (!profile?.is_admin || moderatingThreadId) return;
+
+    setModeratingThreadId(threadId);
+    setModerationError(null);
+
+    const { error } = await supabase.from("forum_threads").update(changes).eq("id", threadId);
+
+    setModeratingThreadId(null);
+
+    if (error) {
+      setModerationError("No pudimos actualizar el tema.");
+      return;
+    }
+
+    setThreads((current) =>
+      current
+        .map((thread) => (thread.id === threadId ? { ...thread, ...changes, updated_at: new Date().toISOString() } : thread))
+        .sort(sortThreads),
+    );
+  }
+
+  async function deleteThread(threadId: string) {
+    if (!profile?.is_admin || moderatingThreadId) return;
+
+    const confirmed = window.confirm("¿Eliminar este tema del foro?");
+    if (!confirmed) return;
+
+    setModeratingThreadId(threadId);
+    setModerationError(null);
+
+    const { error } = await supabase.from("forum_threads").update({ deleted_at: new Date().toISOString() }).eq("id", threadId);
+
+    setModeratingThreadId(null);
+
+    if (error) {
+      setModerationError("No pudimos eliminar el tema.");
+      return;
+    }
+
+    setThreads((current) => current.filter((thread) => thread.id !== threadId));
+  }
+
   return (
     <div
       style={{
@@ -353,6 +409,21 @@ export default function ComunidadForosPage() {
         </div>
       ) : (
         <div style={{ display: "grid", gap: 16 }}>
+          {moderationError && (
+            <div
+              style={{
+                borderRadius: 20,
+                background: "rgba(230,57,70,0.10)",
+                color: "#C53340",
+                padding: 14,
+                fontSize: 13,
+                fontWeight: 800,
+              }}
+            >
+              {moderationError}
+            </div>
+          )}
+
           {groupedThreads.map(({ forum, threads: forumThreads }) => (
             <section
               key={forum.id}
@@ -517,90 +588,122 @@ export default function ComunidadForosPage() {
               ) : (
                 <div style={{ display: "grid", gap: 10 }}>
                   {forumThreads.map((thread) => (
-                    <Link
+                    <article
                       key={thread.id}
-                      href={`/comunidad/foros/${thread.id}`}
                       style={{
                         borderRadius: 22,
                         background: thread.is_pinned ? "rgba(78,205,196,0.10)" : "#F8F4EE",
                         padding: 16,
                         display: "grid",
                         gap: 10,
-                        textDecoration: "none",
                       }}
                     >
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        {thread.is_pinned && (
-                          <span
-                            style={{
-                              borderRadius: 999,
-                              background: "#4ECDC4",
-                              color: "#1A1A2E",
-                              padding: "5px 9px",
-                              fontSize: 11,
-                              fontWeight: 900,
-                            }}
-                          >
-                            FIJADO
-                          </span>
-                        )}
-                        {thread.tag && (
-                          <span
-                            style={{
-                              borderRadius: 999,
-                              background: "#FFFFFF",
-                              color: "#53596B",
-                              padding: "5px 9px",
-                              fontSize: 11,
-                              fontWeight: 800,
-                            }}
-                          >
-                            {thread.tag}
-                          </span>
-                        )}
-                        {thread.is_locked && (
-                          <span
-                            style={{
-                              borderRadius: 999,
-                              background: "rgba(230,57,70,0.10)",
-                              color: "#C53340",
-                              padding: "5px 9px",
-                              fontSize: 11,
-                              fontWeight: 800,
-                            }}
-                          >
-                            CERRADO
-                          </span>
-                        )}
-                      </div>
+                      <Link
+                        href={`/comunidad/foros/${thread.id}`}
+                        style={{ display: "grid", gap: 10, textDecoration: "none" }}
+                      >
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                          {thread.is_pinned && (
+                            <span
+                              style={{
+                                borderRadius: 999,
+                                background: "#4ECDC4",
+                                color: "#1A1A2E",
+                                padding: "5px 9px",
+                                fontSize: 11,
+                                fontWeight: 900,
+                              }}
+                            >
+                              FIJADO
+                            </span>
+                          )}
+                          {thread.tag && (
+                            <span
+                              style={{
+                                borderRadius: 999,
+                                background: "#FFFFFF",
+                                color: "#53596B",
+                                padding: "5px 9px",
+                                fontSize: 11,
+                                fontWeight: 800,
+                              }}
+                            >
+                              {thread.tag}
+                            </span>
+                          )}
+                          {thread.is_locked && (
+                            <span
+                              style={{
+                                borderRadius: 999,
+                                background: "rgba(230,57,70,0.10)",
+                                color: "#C53340",
+                                padding: "5px 9px",
+                                fontSize: 11,
+                                fontWeight: 800,
+                              }}
+                            >
+                              CERRADO
+                            </span>
+                          )}
+                        </div>
 
-                      <div>
-                        <h3 style={{ fontSize: 17, fontWeight: 800, color: "#1A1A2E", margin: "0 0 5px" }}>
-                          {thread.title}
-                        </h3>
-                        <p
-                          style={{
-                            fontSize: 14,
-                            color: "#6E737F",
-                            lineHeight: 1.4,
-                            margin: 0,
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                          }}
-                        >
-                          {thread.body}
-                        </p>
-                      </div>
+                        <div>
+                          <h3 style={{ fontSize: 17, fontWeight: 800, color: "#1A1A2E", margin: "0 0 5px" }}>
+                            {thread.title}
+                          </h3>
+                          <p
+                            style={{
+                              fontSize: 14,
+                              color: "#6E737F",
+                              lineHeight: 1.4,
+                              margin: 0,
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                            }}
+                          >
+                            {thread.body}
+                          </p>
+                        </div>
 
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, color: "#9CA3AF", fontSize: 12, fontWeight: 700 }}>
-                        <span>{thread.authorName}</span>
-                        <span>
-                          {thread.replyCount} respuestas · {timeAgo(getThreadActivity(thread))}
-                        </span>
-                      </div>
-                    </Link>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, color: "#9CA3AF", fontSize: 12, fontWeight: 700 }}>
+                          <span>{thread.authorName}</span>
+                          <span>
+                            {thread.replyCount} respuestas · {timeAgo(getThreadActivity(thread))}
+                          </span>
+                        </div>
+                      </Link>
+
+                      {profile.is_admin && (
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", paddingTop: 2 }}>
+                          <button
+                            type="button"
+                            onClick={() => updateThreadModeration(thread.id, { is_pinned: !thread.is_pinned })}
+                            disabled={moderatingThreadId === thread.id}
+                            style={moderationButtonStyle}
+                          >
+                            {thread.is_pinned ? "Desfijar" : "Fijar"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => updateThreadModeration(thread.id, { is_locked: !thread.is_locked })}
+                            disabled={moderatingThreadId === thread.id}
+                            style={moderationButtonStyle}
+                          >
+                            {thread.is_locked ? "Abrir" : "Cerrar"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteThread(thread.id)}
+                            disabled={moderatingThreadId === thread.id}
+                            style={{ ...moderationButtonStyle, color: "#C53340" }}
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      )}
+                    </article>
                   ))}
                 </div>
               )}

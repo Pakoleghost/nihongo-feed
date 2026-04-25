@@ -207,29 +207,15 @@ begin
       );
   end if;
 
-  if not exists (
-    select 1 from pg_policies
-    where schemaname = 'public' and tablename = 'forum_threads' and policyname = 'forum_threads_update_owner_or_admin'
-  ) then
-    create policy forum_threads_update_owner_or_admin
-      on public.forum_threads
-      for update
-      to authenticated
-      using (
-        public.is_current_user_admin()
-        or (
-          author_id = auth.uid()
-          and group_name = public.current_user_group_name()
-        )
-      )
-      with check (
-        public.is_current_user_admin()
-        or (
-          author_id = auth.uid()
-          and group_name = public.current_user_group_name()
-        )
-      );
-  end if;
+  drop policy if exists forum_threads_update_owner_or_admin on public.forum_threads;
+  drop policy if exists forum_threads_update_admin on public.forum_threads;
+
+  create policy forum_threads_update_admin
+    on public.forum_threads
+    for update
+    to authenticated
+    using (public.is_current_user_admin())
+    with check (public.is_current_user_admin());
 
   if not exists (
     select 1 from pg_policies
@@ -278,23 +264,15 @@ begin
       );
   end if;
 
-  if not exists (
-    select 1 from pg_policies
-    where schemaname = 'public' and tablename = 'forum_replies' and policyname = 'forum_replies_update_owner_or_admin'
-  ) then
-    create policy forum_replies_update_owner_or_admin
-      on public.forum_replies
-      for update
-      to authenticated
-      using (
-        public.is_current_user_admin()
-        or author_id = auth.uid()
-      )
-      with check (
-        public.is_current_user_admin()
-        or author_id = auth.uid()
-      );
-  end if;
+  drop policy if exists forum_replies_update_owner_or_admin on public.forum_replies;
+  drop policy if exists forum_replies_update_admin on public.forum_replies;
+
+  create policy forum_replies_update_admin
+    on public.forum_replies
+    for update
+    to authenticated
+    using (public.is_current_user_admin())
+    with check (public.is_current_user_admin());
 end $$;
 
 create index if not exists class_forums_group_name_idx
