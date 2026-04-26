@@ -34,7 +34,8 @@ export default function AdminGroupsPage() {
   const [newGroupName, setNewGroupName] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
   const [isCurrentAdmin, setIsCurrentAdmin] = useState(false);
-  const { studentViewActive, setStudentViewActive } = useStudentViewMode(isCurrentAdmin);
+  const { studentViewActive, studentViewGroupName, setStudentViewActive, setStudentViewGroupName } =
+    useStudentViewMode(isCurrentAdmin);
 
   const fetchData = useCallback(async () => {
     const { data: sessionData } = await supabase.auth.getSession();
@@ -201,8 +202,43 @@ export default function AdminGroupsPage() {
             </p>
             <h2 style={{ margin: "8px 0 0", color: "#1A1A2E", fontSize: 22, fontWeight: 900 }}>Vista de estudiante</h2>
             <p style={{ margin: "10px 0 16px", color: "#53596B", fontSize: 14, lineHeight: 1.4 }}>
-              Oculta controles admin para revisar la experiencia real.
+              Elige un grupo y revisa la app sin controles admin.
             </p>
+            <label
+              style={{
+                display: "grid",
+                gap: 6,
+                marginBottom: 12,
+                color: "#53596B",
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              Grupo de vista
+              <select
+                value={studentViewGroupName ?? ""}
+                disabled={!isCurrentAdmin}
+                onChange={(event) => setStudentViewGroupName(event.target.value || null)}
+                style={{
+                  width: "100%",
+                  border: "none",
+                  borderRadius: 14,
+                  background: "#F8F4EE",
+                  color: "#1A1A2E",
+                  padding: "10px 12px",
+                  fontSize: 13,
+                  fontWeight: 800,
+                  cursor: isCurrentAdmin ? "pointer" : "not-allowed",
+                }}
+              >
+                <option value="">Usar mi grupo</option>
+                {groups.map((group) => (
+                  <option key={group.name} value={group.name}>
+                    {group.name}
+                  </option>
+                ))}
+              </select>
+            </label>
             <button
               type="button"
               disabled={!isCurrentAdmin}

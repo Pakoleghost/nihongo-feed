@@ -6,7 +6,8 @@ import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 export default function StudentViewBanner() {
   const [isAdmin, setIsAdmin] = useState(false);
-  const { studentViewActive, setStudentViewActive } = useStudentViewMode(isAdmin);
+  const [profileGroupName, setProfileGroupName] = useState<string | null>(null);
+  const { studentViewActive, studentViewGroupName, setStudentViewActive } = useStudentViewMode(isAdmin);
 
   useEffect(() => {
     let alive = true;
@@ -21,8 +22,11 @@ export default function StudentViewBanner() {
         return;
       }
 
-      const { data } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
-      if (alive) setIsAdmin(Boolean(data?.is_admin));
+      const { data } = await supabase.from("profiles").select("is_admin, group_name").eq("id", user.id).maybeSingle();
+      if (alive) {
+        setIsAdmin(Boolean(data?.is_admin));
+        setProfileGroupName(data?.group_name ?? null);
+      }
     }
 
     void loadAdminState();
@@ -65,7 +69,24 @@ export default function StudentViewBanner() {
           fontWeight: 800,
         }}
       >
-        <span>Vista de estudiante activada</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+          <span>Vista de estudiante activada</span>
+          <span
+            style={{
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.12)",
+              color: "#D9F7F4",
+              padding: "4px 8px",
+              fontSize: 11,
+              fontWeight: 900,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {studentViewGroupName || profileGroupName ? `Grupo: ${studentViewGroupName || profileGroupName}` : "Sin grupo"}
+          </span>
+        </span>
         <button
           type="button"
           onClick={() => setStudentViewActive(false)}

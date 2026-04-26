@@ -43,7 +43,7 @@ export default function NuevoForoTemaPage() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { studentViewActive } = useStudentViewMode(Boolean(profile?.is_admin));
+  const { studentViewActive, studentViewGroupName } = useStudentViewMode(Boolean(profile?.is_admin));
 
   useEffect(() => {
     async function loadCreateContext() {
@@ -76,8 +76,10 @@ export default function NuevoForoTemaPage() {
 
       const forumFromUrl = new URLSearchParams(window.location.search).get("forum") ?? "";
       const canSeeAllGroups = Boolean(currentProfile.is_admin && !studentViewActive);
+      const previewGroupName = currentProfile.is_admin && studentViewActive ? studentViewGroupName : null;
+      const visibleGroupName = canSeeAllGroups ? null : previewGroupName || currentProfile.group_name;
 
-      if (!canSeeAllGroups && !currentProfile.group_name) {
+      if (!canSeeAllGroups && !visibleGroupName) {
         setForums([]);
         setLoading(false);
         return;
@@ -90,7 +92,7 @@ export default function NuevoForoTemaPage() {
         .order("group_name", { ascending: true });
 
       if (!canSeeAllGroups) {
-        forumsQuery = forumsQuery.eq("group_name", currentProfile.group_name);
+        forumsQuery = forumsQuery.eq("group_name", visibleGroupName);
       }
 
       const { data: forumData, error: forumError } = await forumsQuery;
@@ -109,7 +111,7 @@ export default function NuevoForoTemaPage() {
     }
 
     void loadCreateContext();
-  }, [studentViewActive]);
+  }, [studentViewActive, studentViewGroupName]);
 
   const selectedForum = useMemo(
     () => forums.find((forum) => forum.id === selectedForumId) ?? null,

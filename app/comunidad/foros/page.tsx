@@ -134,7 +134,7 @@ export default function ComunidadForosPage() {
   const [moderationError, setModerationError] = useState<string | null>(null);
   const [moderationNotice, setModerationNotice] = useState<string | null>(null);
   const [pendingModerationAction, setPendingModerationAction] = useState<PendingModerationAction | null>(null);
-  const { studentViewActive, effectiveIsAdmin } = useStudentViewMode(Boolean(profile?.is_admin));
+  const { studentViewActive, studentViewGroupName, effectiveIsAdmin } = useStudentViewMode(Boolean(profile?.is_admin));
 
   useEffect(() => {
     async function loadForums() {
@@ -165,8 +165,10 @@ export default function ComunidadForosPage() {
       const currentProfile = profileData as Profile;
       setProfile(currentProfile);
       const canSeeAllGroups = Boolean(currentProfile.is_admin && !studentViewActive);
+      const previewGroupName = currentProfile.is_admin && studentViewActive ? studentViewGroupName : null;
+      const visibleGroupName = canSeeAllGroups ? null : previewGroupName || currentProfile.group_name;
 
-      if (!canSeeAllGroups && !currentProfile.group_name) {
+      if (!canSeeAllGroups && !visibleGroupName) {
         setForums([]);
         setThreads([]);
         setLoading(false);
@@ -180,7 +182,7 @@ export default function ComunidadForosPage() {
         .order("group_name", { ascending: true });
 
       if (!canSeeAllGroups) {
-        forumsQuery = forumsQuery.eq("group_name", currentProfile.group_name);
+        forumsQuery = forumsQuery.eq("group_name", visibleGroupName);
       }
 
       const { data: forumData, error: forumError } = await forumsQuery;
@@ -262,7 +264,7 @@ export default function ComunidadForosPage() {
     }
 
     loadForums();
-  }, [studentViewActive]);
+  }, [studentViewActive, studentViewGroupName]);
 
   const groupedThreads = forums.map((forum) => ({
     forum,
@@ -430,13 +432,14 @@ export default function ComunidadForosPage() {
         </div>
       ) : errorMessage ? (
         <div style={{ background: "#FFFFFF", borderRadius: 26, padding: 24, color: "#C53340" }}>{errorMessage}</div>
-      ) : !effectiveIsAdmin && !profile.group_name ? (
+      ) : !effectiveIsAdmin && !(studentViewActive ? studentViewGroupName || profile.group_name : profile.group_name) ? (
         <div style={{ background: "#FFFFFF", borderRadius: 26, padding: 24, color: "#53596B" }}>
           Aún no tienes grupo asignado. Cuando tu cuenta tenga grupo, aquí aparecerá tu foro de clase.
         </div>
       ) : groupedThreads.length === 0 ? (
         <div style={{ background: "#FFFFFF", borderRadius: 26, padding: 24, color: "#53596B" }}>
-          Todavía no hay un foro activo para {effectiveIsAdmin ? "los grupos" : profile.group_name}.
+          Todavía no hay un foro activo para{" "}
+          {effectiveIsAdmin ? "los grupos" : studentViewActive ? studentViewGroupName || profile.group_name : profile.group_name}.
         </div>
       ) : (
         <div style={{ display: "grid", gap: 16 }}>

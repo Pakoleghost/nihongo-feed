@@ -143,7 +143,7 @@ export default function ForumThreadPage() {
   const [moderationError, setModerationError] = useState<string | null>(null);
   const [moderationNotice, setModerationNotice] = useState<string | null>(null);
   const [pendingModerationAction, setPendingModerationAction] = useState<PendingModerationAction | null>(null);
-  const { studentViewActive, effectiveIsAdmin } = useStudentViewMode(Boolean(profile?.is_admin));
+  const { studentViewActive, studentViewGroupName, effectiveIsAdmin } = useStudentViewMode(Boolean(profile?.is_admin));
 
   useEffect(() => {
     async function loadThread() {
@@ -188,7 +188,8 @@ export default function ForumThreadPage() {
       }
 
       const loadedThread = threadData as ForumThread;
-      if (currentProfile.is_admin && studentViewActive && loadedThread.group_name !== currentProfile.group_name) {
+      const previewGroupName = studentViewGroupName || currentProfile.group_name;
+      if (currentProfile.is_admin && studentViewActive && loadedThread.group_name !== previewGroupName) {
         setErrorMessage("Este tema no pertenece a tu vista de estudiante.");
         setLoading(false);
         return;
@@ -243,7 +244,7 @@ export default function ForumThreadPage() {
     }
 
     loadThread();
-  }, [studentViewActive, threadId]);
+  }, [studentViewActive, studentViewGroupName, threadId]);
 
   async function handleReplySubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
