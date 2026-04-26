@@ -19,6 +19,14 @@ function buildSession() {
   return getKanaWordPracticeSession(12);
 }
 
+function getKanaWordFontSize(kana: string) {
+  const length = [...kana].length;
+  if (length >= 12) return "clamp(30px, 9vw, 46px)";
+  if (length >= 9) return "clamp(36px, 11vw, 58px)";
+  if (length >= 6) return "clamp(44px, 14vw, 70px)";
+  return "clamp(52px, 17vw, 82px)";
+}
+
 export default function KanaWordsPage() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -169,6 +177,9 @@ export default function KanaWordsPage() {
               display: "grid",
               gap: 18,
               alignSelf: "center",
+              width: "100%",
+              maxWidth: 480,
+              boxSizing: "border-box",
             }}
           >
             <div>
@@ -228,9 +239,12 @@ export default function KanaWordsPage() {
               display: "grid",
               gap: 18,
               alignSelf: "center",
+              width: "100%",
+              maxWidth: 480,
+              boxSizing: "border-box",
             }}
           >
-            <div style={{ textAlign: "center", display: "grid", gap: 10 }}>
+            <div style={{ textAlign: "center", display: "grid", gap: 10, minWidth: 0 }}>
               <div
                 style={{
                   justifySelf: "center",
@@ -247,11 +261,15 @@ export default function KanaWordsPage() {
               <div
                 style={{
                   fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                  fontSize: "clamp(52px, 17vw, 82px)",
+                  fontSize: getKanaWordFontSize(currentItem.kana),
                   fontWeight: 800,
                   color: "#1A1A2E",
-                  lineHeight: 1.05,
-                  wordBreak: "keep-all",
+                  lineHeight: 1.08,
+                  maxWidth: "100%",
+                  overflowWrap: "anywhere",
+                  wordBreak: "normal",
+                  lineBreak: "strict",
+                  whiteSpace: "normal",
                 }}
               >
                 {currentItem.kana}
