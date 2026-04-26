@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
+import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 const FOLDER_MARKER_TITLE = "__folder__";
 
@@ -62,6 +63,7 @@ export default function RecursosPage() {
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const { effectiveIsAdmin } = useStudentViewMode(isAdmin);
 
   async function load() {
     setLoading(true);
@@ -118,8 +120,8 @@ export default function RecursosPage() {
       folder,
       visibleResources.filter((resource) => getCategory(resource) === folder),
     ] as [string, ResourceRow[]]);
-    return isAdmin ? groups : groups.filter(([, items]) => items.length > 0);
-  }, [folders, isAdmin, resources]);
+    return effectiveIsAdmin ? groups : groups.filter(([, items]) => items.length > 0);
+  }, [effectiveIsAdmin, folders, resources]);
 
   function resetForm() {
     setTitle("");
@@ -154,7 +156,7 @@ export default function RecursosPage() {
 
   async function handleAdminSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!isAdmin || saving) return;
+    if (!effectiveIsAdmin || saving) return;
 
     setSaving(true);
     setErrorMessage(null);
@@ -272,7 +274,7 @@ export default function RecursosPage() {
           </p>
         </div>
 
-        {isAdmin ? (
+        {effectiveIsAdmin ? (
           <button
             type="button"
             onClick={() => setShowAdminPanel((value) => !value)}
@@ -294,7 +296,7 @@ export default function RecursosPage() {
       </div>
 
       <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: "18px" }}>
-        {isAdmin && showAdminPanel ? (
+        {effectiveIsAdmin && showAdminPanel ? (
           <form
             onSubmit={handleAdminSubmit}
             style={{
@@ -467,7 +469,7 @@ export default function RecursosPage() {
                 >
                   {folder}
                 </p>
-                {isAdmin ? (
+                {effectiveIsAdmin ? (
                   <span
                     style={{
                       borderRadius: "999px",

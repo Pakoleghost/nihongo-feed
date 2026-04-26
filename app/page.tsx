@@ -6,6 +6,7 @@ import { markActiveToday, getStreak } from "@/lib/streak";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
 import { getDailyPhrase } from "@/lib/daily-phrases";
+import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -73,6 +74,7 @@ export default function InicioPage() {
   const [streak, setStreak] = useState(0);
   const [profile, setProfile] = useState<MiniProfile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const { studentViewActive, effectiveIsAdmin, setStudentViewActive } = useStudentViewMode(isAdmin);
   const phrase = getDailyPhrase();
 
   useEffect(() => {
@@ -361,8 +363,8 @@ export default function InicioPage() {
         </Link>
       </div>
 
-      {isAdmin && (
-        <div style={{ marginTop: "20px" }}>
+      {isAdmin && !studentViewActive && (
+        <div style={{ marginTop: "20px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <Link
             href="/admin/usuarios"
             style={{
@@ -381,6 +383,27 @@ export default function InicioPage() {
             <span>⚙️</span>
             <span>Panel de administrador</span>
           </Link>
+          {effectiveIsAdmin ? (
+            <button
+              type="button"
+              onClick={() => setStudentViewActive(true)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                border: "none",
+                background: "#FFFFFF",
+                color: "#1A1A2E",
+                borderRadius: "3rem",
+                padding: "12px 18px",
+                fontSize: "14px",
+                fontWeight: 800,
+                boxShadow: "0 8px 22px rgba(26,26,46,0.08)",
+                cursor: "pointer",
+              }}
+            >
+              Vista de estudiante
+            </button>
+          ) : null}
         </div>
       )}
 

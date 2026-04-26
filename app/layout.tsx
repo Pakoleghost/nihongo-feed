@@ -3,6 +3,7 @@ import { Noto_Sans_JP, Noto_Serif_JP, Plus_Jakarta_Sans, Poppins } from "next/fo
 import type { Viewport } from "next";
 import Script from "next/script";
 import PushInit from "@/components/PushInit";
+import StudentViewBanner from "@/components/StudentViewBanner";
 
 const noto = Noto_Sans_JP({
   subsets: ["latin"],
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={jakarta.className}>
         {children}
+        <StudentViewBanner />
         <Script id="sw-register" strategy="afterInteractive">{`
           if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js');

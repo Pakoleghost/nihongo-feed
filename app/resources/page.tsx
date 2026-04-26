@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import AppTopNav from "@/components/AppTopNav";
+import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 type ResourceRow = {
   id: number | string;
@@ -114,6 +115,7 @@ function IconNote() {
 export default function ResourcesPage() {
   const [resources, setResources] = useState<ResourceRow[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const { effectiveIsAdmin } = useStudentViewMode(isAdmin);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -275,7 +277,7 @@ export default function ResourcesPage() {
   };
 
   const saveResource = async () => {
-    if (!isAdmin || saving || uploading) return;
+    if (!effectiveIsAdmin || saving || uploading) return;
     setSaving(true);
     try {
       const payload = await buildPayload();
@@ -308,7 +310,7 @@ export default function ResourcesPage() {
   };
 
   const deleteResource = async (resourceId: number | string) => {
-    if (!isAdmin) return;
+    if (!effectiveIsAdmin) return;
     if (!confirm("¿Eliminar este recurso?")) return;
     const { error } = await supabase.from("resources").delete().eq("id", resourceId);
     if (error) {
@@ -343,7 +345,7 @@ export default function ResourcesPage() {
                 </div>
                 <div className="contentHeroMeta">
                   <span className="countPill">{resourcesInFolder.length} recursos</span>
-                  {isAdmin && (
+                  {effectiveIsAdmin && (
                     <button type="button" onClick={() => startCreateInFolder(selectedFolder)} className="secondaryBtn">
                       + Nuevo recurso
                     </button>
@@ -351,7 +353,7 @@ export default function ResourcesPage() {
                 </div>
               </div>
 
-              {showComposer && isAdmin && (
+              {showComposer && effectiveIsAdmin && (
                 <div className="composerCard">
                   <div className="composerHeader">
                     <strong>{editingId ? "Editar recurso" : "Nuevo recurso"}</strong>
@@ -447,7 +449,7 @@ export default function ResourcesPage() {
               ) : resourcesInFolder.length === 0 ? (
                 <div className="emptyBox">
                   <p>No hay recursos en esta carpeta.</p>
-                  {isAdmin && (
+                  {effectiveIsAdmin && (
                     <button type="button" className="secondaryBtn" onClick={() => startCreateInFolder(selectedFolder)}>
                       Agregar primer recurso
                     </button>
@@ -499,7 +501,7 @@ export default function ResourcesPage() {
                             )
                           )}
 
-                          {isAdmin && (
+                          {effectiveIsAdmin && (
                             <>
                               <button type="button" className="miniGhost" onClick={() => startEdit(resource)}>
                                 Editar
@@ -535,7 +537,7 @@ export default function ResourcesPage() {
                 <span className="countPill">{folders.length}</span>
               </div>
 
-              {isAdmin && (
+              {effectiveIsAdmin && (
                 <div className="folderCreator">
                   <input
                     value={newFolderName}

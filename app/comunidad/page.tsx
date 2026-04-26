@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
 import { optimizeImageFile, validateImageFile } from "@/lib/client-image-upload";
+import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 type Post = {
   id: string;
@@ -93,6 +94,7 @@ export default function ComunidadPage() {
   const [feedError, setFeedError] = useState<string | null>(null);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const { effectiveIsAdmin } = useStudentViewMode(isAdmin);
 
   // Compose state
   const [composeText, setComposeText] = useState("");
@@ -795,7 +797,7 @@ export default function ComunidadPage() {
                   </button>
 
                   {/* Admin delete — non-own posts */}
-                  {isAdmin && !isOwn && (
+                  {effectiveIsAdmin && !isOwn && (
                     <button
                       onClick={() => setConfirmDeleteId(confirmDeleteId === post.id ? null : post.id)}
                       style={{

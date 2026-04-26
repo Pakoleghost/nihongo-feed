@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
 import ModerationConfirmDialog from "@/components/comunidad/ModerationConfirmDialog";
+import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 type Profile = {
   id: string;
@@ -142,6 +143,7 @@ export default function ForumThreadPage() {
   const [moderationError, setModerationError] = useState<string | null>(null);
   const [moderationNotice, setModerationNotice] = useState<string | null>(null);
   const [pendingModerationAction, setPendingModerationAction] = useState<PendingModerationAction | null>(null);
+  const { studentViewActive, effectiveIsAdmin } = useStudentViewMode(Boolean(profile?.is_admin));
 
   useEffect(() => {
     async function loadThread() {
@@ -186,6 +188,12 @@ export default function ForumThreadPage() {
       }
 
       const loadedThread = threadData as ForumThread;
+      if (currentProfile.is_admin && studentViewActive && loadedThread.group_name !== currentProfile.group_name) {
+        setErrorMessage("Este tema no pertenece a tu vista de estudiante.");
+        setLoading(false);
+        return;
+      }
+
       setThread(loadedThread);
 
       const { data: authorData } = await supabase
@@ -235,7 +243,7 @@ export default function ForumThreadPage() {
     }
 
     loadThread();
-  }, [threadId]);
+  }, [studentViewActive, threadId]);
 
   async function handleReplySubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -273,7 +281,7 @@ export default function ForumThreadPage() {
   }
 
   async function updateThreadModeration(changes: Partial<Pick<ForumThread, "is_pinned" | "is_locked">>) {
-    if (!thread || !profile?.is_admin || moderating) return;
+    if (!thread || !effectiveIsAdmin || moderating) return;
 
     setModerating(true);
     setModerationError(null);
@@ -293,7 +301,7 @@ export default function ForumThreadPage() {
   }
 
   async function deleteThread() {
-    if (!thread || !profile?.is_admin || moderating) return;
+    if (!thread || !effectiveIsAdmin || moderating) return;
 
     setModerating(true);
     setModerationError(null);
@@ -315,7 +323,7 @@ export default function ForumThreadPage() {
   }
 
   async function deleteReply(replyId: string) {
-    if (!profile?.is_admin || moderating) return;
+    if (!effectiveIsAdmin || moderating) return;
 
     setModerating(true);
     setModerationError(null);
@@ -532,7 +540,7 @@ export default function ForumThreadPage() {
               {thread.body}
             </p>
 
-            {profile.is_admin && (
+            {effectiveIsAdmin && (
               <div style={{ display: "grid", gap: 8 }}>
                 {moderationError && <p style={{ color: "#C53340", fontSize: 13, fontWeight: 800, margin: 0 }}>{moderationError}</p>}
                 {moderationNotice && <p style={{ color: "#178A83", fontSize: 13, fontWeight: 800, margin: 0 }}>{moderationNotice}</p>}
@@ -602,7 +610,7 @@ export default function ForumThreadPage() {
                   <p style={{ margin: 0, color: "#1A1A2E", fontSize: 15, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
                     {reply.body}
                   </p>
-                  {profile.is_admin && (
+                  {effectiveIsAdmin && (
                     <button
                       type="button"
                       onClick={() => setPendingModerationAction({ type: "delete-reply", reply })}

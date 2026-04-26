@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
 import ModerationConfirmDialog from "@/components/comunidad/ModerationConfirmDialog";
+import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 type Profile = {
   id: string;
@@ -139,6 +140,7 @@ export default function ComunidadForosPage() {
   const [moderationError, setModerationError] = useState<string | null>(null);
   const [moderationNotice, setModerationNotice] = useState<string | null>(null);
   const [pendingModerationAction, setPendingModerationAction] = useState<PendingModerationAction | null>(null);
+  const { studentViewActive, effectiveIsAdmin } = useStudentViewMode(Boolean(profile?.is_admin));
 
   useEffect(() => {
     async function loadForums() {
@@ -168,8 +170,9 @@ export default function ComunidadForosPage() {
 
       const currentProfile = profileData as Profile;
       setProfile(currentProfile);
+      const canSeeAllGroups = Boolean(currentProfile.is_admin && !studentViewActive);
 
-      if (!currentProfile.is_admin && !currentProfile.group_name) {
+      if (!canSeeAllGroups && !currentProfile.group_name) {
         setForums([]);
         setThreads([]);
         setLoading(false);
@@ -182,7 +185,7 @@ export default function ComunidadForosPage() {
         .eq("is_active", true)
         .order("group_name", { ascending: true });
 
-      if (!currentProfile.is_admin) {
+      if (!canSeeAllGroups) {
         forumsQuery = forumsQuery.eq("group_name", currentProfile.group_name);
       }
 
@@ -265,7 +268,7 @@ export default function ComunidadForosPage() {
     }
 
     loadForums();
-  }, []);
+  }, [studentViewActive]);
 
   const groupedThreads = forums.map((forum) => ({
     forum,
@@ -311,7 +314,7 @@ export default function ComunidadForosPage() {
   }
 
   async function updateThreadModeration(threadId: string, changes: Partial<Pick<ForumThread, "is_pinned" | "is_locked">>) {
-    if (!profile?.is_admin || moderatingThreadId) return;
+    if (!effectiveIsAdmin || moderatingThreadId) return;
 
     setModeratingThreadId(threadId);
     setModerationError(null);
@@ -335,7 +338,7 @@ export default function ComunidadForosPage() {
   }
 
   async function deleteThread(threadId: string) {
-    if (!profile?.is_admin || moderatingThreadId) return;
+    if (!effectiveIsAdmin || moderatingThreadId) return;
 
     setModeratingThreadId(threadId);
     setModerationError(null);
@@ -471,13 +474,13 @@ export default function ComunidadForosPage() {
         </div>
       ) : errorMessage ? (
         <div style={{ background: "#FFFFFF", borderRadius: 26, padding: 24, color: "#C53340" }}>{errorMessage}</div>
-      ) : !profile.is_admin && !profile.group_name ? (
+      ) : !effectiveIsAdmin && !profile.group_name ? (
         <div style={{ background: "#FFFFFF", borderRadius: 26, padding: 24, color: "#53596B" }}>
           Aún no tienes grupo asignado. Cuando tu cuenta tenga grupo, aquí aparecerá tu foro de clase.
         </div>
       ) : groupedThreads.length === 0 ? (
         <div style={{ background: "#FFFFFF", borderRadius: 26, padding: 24, color: "#53596B" }}>
-          Todavía no hay un foro activo para {profile.is_admin ? "los grupos" : profile.group_name}.
+          Todavía no hay un foro activo para {effectiveIsAdmin ? "los grupos" : profile.group_name}.
         </div>
       ) : (
         <div style={{ display: "grid", gap: 16 }}>
@@ -761,7 +764,7 @@ export default function ComunidadForosPage() {
                         </div>
                       </Link>
 
-                      {profile.is_admin && (
+                      {effectiveIsAdmin && (
                         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", paddingTop: 2 }}>
                           <button
                             type="button"

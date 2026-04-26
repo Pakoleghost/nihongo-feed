@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 type AppTopNavProps = {
   primary?: "study" | "resources" | null;
@@ -17,6 +18,7 @@ export default function AppTopNav({ primary = null, secondary = null, tone = "de
   const [menuOpen, setMenuOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const { studentViewActive, effectiveIsAdmin, setStudentViewActive } = useStudentViewMode(isAdmin);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -53,14 +55,21 @@ export default function AppTopNav({ primary = null, secondary = null, tone = "de
   const menuItems = useMemo(() => {
     const items: Array<{ key: string; label: string; href?: string; action?: () => void }> = [];
     if (userId) {
-      items.push({ key: "profile", label: "Profile", href: `/profile/${userId}` });
+      items.push({ key: "profile", label: "Perfil", href: `/profile/${userId}` });
     }
     if (isAdmin) {
-      items.push({ key: "admin", label: "Admin", href: "/admin/groups" });
+      items.push({
+        key: "student-view",
+        label: studentViewActive ? "Salir de vista de estudiante" : "Vista de estudiante",
+        action: () => setStudentViewActive(!studentViewActive),
+      });
+    }
+    if (effectiveIsAdmin) {
+      items.push({ key: "admin", label: "Administración", href: "/admin/groups" });
     }
     items.push({
       key: "logout",
-      label: userId ? "Log out" : "Log in",
+      label: userId ? "Cerrar sesión" : "Iniciar sesión",
       action: async () => {
         if (userId) {
           await supabase.auth.signOut();
@@ -70,7 +79,7 @@ export default function AppTopNav({ primary = null, secondary = null, tone = "de
       },
     });
     return items;
-  }, [isAdmin, router, userId]);
+  }, [effectiveIsAdmin, isAdmin, router, setStudentViewActive, studentViewActive, userId]);
 
   const navLinkClass = (key: "study" | "resources") =>
     `appNavLink${primary === key ? " active" : ""}`;
@@ -79,17 +88,17 @@ export default function AppTopNav({ primary = null, secondary = null, tone = "de
     <div className={`appTopNav${tone === "study" ? " studyTone" : ""}`}>
       <div className="ds-container appTopNavInner">
         <div className={`appTopNavBar${tone === "study" ? " studyTone" : " ds-card"}`}>
-          <Link href="/study" className="appNavBrand" aria-label="Ir a Study">
+          <Link href="/study" className="appNavBrand" aria-label="Ir a estudiar">
             <span className="appNavMark" aria-hidden="true" />
             Nihongo
           </Link>
 
-          <div className="appPrimaryNav" aria-label="Primary navigation">
+          <div className="appPrimaryNav" aria-label="Navegación principal">
             <Link href="/study" className={navLinkClass("study")}>
-              Study
+              Inicio
             </Link>
             <Link href="/resources" className={navLinkClass("resources")}>
-              Resources
+              Recursos
             </Link>
             <button
               type="button"
@@ -98,7 +107,7 @@ export default function AppTopNav({ primary = null, secondary = null, tone = "de
               aria-haspopup="menu"
               onClick={() => setMenuOpen((value) => !value)}
             >
-              Menu
+              Menú
             </button>
           </div>
         </div>
@@ -106,7 +115,7 @@ export default function AppTopNav({ primary = null, secondary = null, tone = "de
         {menuOpen && <button type="button" className="appMenuBackdrop" aria-label="Cerrar menú" onClick={() => setMenuOpen(false)} />}
 
         {menuOpen && (
-          <div className="appMenuPanel ds-card" role="menu" aria-label="Secondary navigation">
+          <div className="appMenuPanel ds-card" role="menu" aria-label="Navegación secundaria">
             {menuItems.map((item) => {
               const active = item.key === secondary;
               if (item.href) {
