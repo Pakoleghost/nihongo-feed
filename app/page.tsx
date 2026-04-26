@@ -126,7 +126,7 @@ export default function InicioPage() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        padding: "24px 20px 104px",
+        padding: "24px 20px calc(112px + env(safe-area-inset-bottom, 0px))",
       }}
     >
       <div

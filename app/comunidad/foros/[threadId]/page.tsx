@@ -376,7 +376,7 @@ export default function ForumThreadPage() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        padding: "20px 20px 100px",
+        padding: "20px 20px calc(112px + env(safe-area-inset-bottom, 0px))",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>

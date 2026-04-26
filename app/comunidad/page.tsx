@@ -440,7 +440,7 @@ export default function ComunidadPage() {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        paddingBottom: "100px",
+        paddingBottom: "calc(112px + env(safe-area-inset-bottom, 0px))",
       }}
     >
       {/* Header */}
