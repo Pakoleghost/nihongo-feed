@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
+
+const FOLDER_MARKER_TITLE = "__folder__";
 
 type ResourceRow = {
   id: number;
@@ -11,6 +13,16 @@ type ResourceRow = {
   url: string | null;
   category: string | null;
 };
+
+type AdminAction = "link" | "file" | "folder";
+
+function isFolderMarker(resource: ResourceRow) {
+  return resource.title === FOLDER_MARKER_TITLE && !resource.url;
+}
+
+function getCategory(resource: Pick<ResourceRow, "category">) {
+  return resource.category?.trim() || "General";
+}
 
 function isFile(url: string | null): boolean {
   if (!url) return false;
@@ -20,6 +32,15 @@ function isFile(url: string | null): boolean {
   return false;
 }
 
+function fileNameFromUrl(url: string | null) {
+  if (!url) return "Archivo";
+  try {
+    return decodeURIComponent(new URL(url).pathname.split("/").pop() || "Archivo");
+  } catch {
+    return decodeURIComponent(url.split("/").pop() || "Archivo");
+  }
+}
+
 function openResource(url: string | null) {
   if (!url) return;
   window.open(url, "_blank", "noopener,noreferrer");
@@ -27,29 +48,166 @@ function openResource(url: string | null) {
 
 export default function RecursosPage() {
   const router = useRouter();
-  const [grouped, setGrouped] = useState<[string, ResourceRow[]][]>([]);
+  const [resources, setResources] = useState<ResourceRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [adminAction, setAdminAction] = useState<AdminAction>("link");
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+  const [folderName, setFolderName] = useState("");
+  const [category, setCategory] = useState("General");
+  const [file, setFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  async function load() {
+    setLoading(true);
+    setErrorMessage(null);
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token ?? null;
+    setAccessToken(token);
+
+    if (sessionData.session?.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", sessionData.session.user.id)
+        .maybeSingle();
+      setIsAdmin(Boolean(profile?.is_admin));
+    } else {
+      setIsAdmin(false);
+    }
+
+    const { data, error } = await supabase
+      .from("resources")
+      .select("id, title, url, category")
+      .order("category", { ascending: true })
+      .order("title", { ascending: true });
+
+    if (error) {
+      setResources([]);
+      setErrorMessage("No se pudieron cargar los recursos.");
+    } else {
+      setResources((data as ResourceRow[] | null) ?? []);
+    }
+
+    setLoading(false);
+  }
 
   useEffect(() => {
-    async function load() {
-      const { data } = await supabase
-        .from("resources")
-        .select("id, title, url, category")
-        .order("category", { ascending: true })
-        .order("title", { ascending: true });
-      const rows = (data as ResourceRow[] | null) ?? [];
-      // Group by category
-      const map = new Map<string, ResourceRow[]>();
-      rows.forEach((r) => {
-        const cat = r.category ?? "General";
-        if (!map.has(cat)) map.set(cat, []);
-        map.get(cat)!.push(r);
-      });
-      setGrouped([...map.entries()]);
-      setLoading(false);
-    }
-    load();
+    void load();
   }, []);
+
+  const folders = useMemo(() => {
+    const names = new Set<string>(["General"]);
+    resources.forEach((resource) => names.add(getCategory(resource)));
+    return [...names].sort((a, b) => a.localeCompare(b, "es"));
+  }, [resources]);
+
+  useEffect(() => {
+    if (!folders.includes(category)) setCategory(folders[0] ?? "General");
+  }, [category, folders]);
+
+  const grouped = useMemo(() => {
+    const visibleResources = resources.filter((resource) => !isFolderMarker(resource));
+    const groups = folders.map((folder) => [
+      folder,
+      visibleResources.filter((resource) => getCategory(resource) === folder),
+    ] as [string, ResourceRow[]]);
+    return isAdmin ? groups : groups.filter(([, items]) => items.length > 0);
+  }, [folders, isAdmin, resources]);
+
+  function resetForm() {
+    setTitle("");
+    setUrl("");
+    setFolderName("");
+    setCategory(folders[0] ?? "General");
+    setFile(null);
+  }
+
+  async function postAdminResource(payload: Record<string, unknown>) {
+    if (!accessToken) throw new Error("AUTH");
+    const response = await fetch("/api/resources", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) throw new Error("SAVE");
+    return response.json();
+  }
+
+  async function uploadFileForResource(selectedFile: File) {
+    const ext = selectedFile.name.split(".").pop() || "bin";
+    const safeExt = ext.replace(/[^a-z0-9]/gi, "").slice(0, 12) || "bin";
+    const path = `resources/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${safeExt}`;
+    const { data, error } = await supabase.storage.from("uploads").upload(path, selectedFile);
+    if (error || !data?.path) throw new Error("UPLOAD");
+    return supabase.storage.from("uploads").getPublicUrl(data.path).data.publicUrl;
+  }
+
+  async function handleAdminSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!isAdmin || saving) return;
+
+    setSaving(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      if (adminAction === "folder") {
+        const cleanFolder = folderName.trim();
+        if (!cleanFolder) {
+          setErrorMessage("Escribe el nombre de la carpeta.");
+          return;
+        }
+        await postAdminResource({ action: "create_folder", category: cleanFolder });
+        setSuccessMessage("Carpeta creada.");
+      } else if (adminAction === "link") {
+        if (!title.trim() || !url.trim()) {
+          setErrorMessage("Escribe título y enlace.");
+          return;
+        }
+        await postAdminResource({
+          action: "create_resource",
+          title: title.trim(),
+          url: url.trim(),
+          category,
+        });
+        setSuccessMessage("Enlace agregado.");
+      } else {
+        if (!file) {
+          setErrorMessage("Selecciona un archivo.");
+          return;
+        }
+        const publicUrl = await uploadFileForResource(file);
+        await postAdminResource({
+          action: "create_resource",
+          title: title.trim() || file.name,
+          url: publicUrl,
+          category,
+        });
+        setSuccessMessage("Archivo agregado.");
+      }
+
+      resetForm();
+      await load();
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error && error.message === "UPLOAD"
+          ? "No se pudo subir el archivo."
+          : "No se pudo guardar el material.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div
@@ -61,13 +219,12 @@ export default function RecursosPage() {
         paddingBottom: "100px",
       }}
     >
-      {/* Header */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           gap: "12px",
-          padding: "56px 20px 24px",
+          padding: "56px 20px 20px",
         }}
       >
         <button
@@ -97,21 +254,184 @@ export default function RecursosPage() {
             />
           </svg>
         </button>
-        <h1
-          style={{
-            fontSize: "32px",
-            fontWeight: 800,
-            color: "#1A1A2E",
-            margin: 0,
-            lineHeight: 1,
-          }}
-        >
-          Recursos
-        </h1>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1
+            style={{
+              fontSize: "32px",
+              fontWeight: 800,
+              color: "#1A1A2E",
+              margin: 0,
+              lineHeight: 1,
+            }}
+          >
+            Recursos
+          </h1>
+          <p style={{ margin: "6px 0 0", fontSize: "14px", color: "#9CA3AF", lineHeight: 1.25 }}>
+            Materiales del curso.
+          </p>
+        </div>
+
+        {isAdmin ? (
+          <button
+            type="button"
+            onClick={() => setShowAdminPanel((value) => !value)}
+            style={{
+              border: "none",
+              borderRadius: "999px",
+              background: "#1A1A2E",
+              color: "#FFFFFF",
+              padding: "10px 14px",
+              fontSize: "13px",
+              fontWeight: 800,
+              cursor: "pointer",
+              flexShrink: 0,
+            }}
+          >
+            {showAdminPanel ? "Cerrar" : "Agregar"}
+          </button>
+        ) : null}
       </div>
 
-      {/* Content */}
-      <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: "28px" }}>
+      <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: "18px" }}>
+        {isAdmin && showAdminPanel ? (
+          <form
+            onSubmit={handleAdminSubmit}
+            style={{
+              background: "#FFFFFF",
+              borderRadius: "24px",
+              padding: "16px",
+              boxShadow: "0 8px 24px rgba(26,26,46,0.08)",
+              display: "grid",
+              gap: "14px",
+            }}
+          >
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              {[
+                ["link", "Enlace"],
+                ["file", "Archivo"],
+                ["folder", "Carpeta"],
+              ].map(([key, label]) => {
+                const active = adminAction === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setAdminAction(key as AdminAction)}
+                    style={{
+                      border: "none",
+                      borderRadius: "999px",
+                      background: active ? "#4ECDC4" : "#F7F3ED",
+                      color: active ? "#1A1A2E" : "#53596B",
+                      padding: "8px 12px",
+                      fontSize: "13px",
+                      fontWeight: 800,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {adminAction === "folder" ? (
+              <label style={{ display: "grid", gap: "6px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 800, color: "#9CA3AF" }}>Nombre de carpeta</span>
+                <input
+                  value={folderName}
+                  onChange={(event) => setFolderName(event.target.value)}
+                  placeholder="Ej. Lección 4"
+                  style={fieldStyle}
+                />
+              </label>
+            ) : (
+              <>
+                <label style={{ display: "grid", gap: "6px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 800, color: "#9CA3AF" }}>Título</span>
+                  <input
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    placeholder={adminAction === "file" ? "Nombre visible del archivo" : "Nombre del enlace"}
+                    style={fieldStyle}
+                  />
+                </label>
+
+                <label style={{ display: "grid", gap: "6px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 800, color: "#9CA3AF" }}>Carpeta</span>
+                  <select
+                    value={category}
+                    onChange={(event) => setCategory(event.target.value)}
+                    style={fieldStyle}
+                  >
+                    {folders.map((folder) => (
+                      <option key={folder} value={folder}>
+                        {folder}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                {adminAction === "link" ? (
+                  <label style={{ display: "grid", gap: "6px" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 800, color: "#9CA3AF" }}>URL</span>
+                    <input
+                      value={url}
+                      onChange={(event) => setUrl(event.target.value)}
+                      placeholder="https://..."
+                      style={fieldStyle}
+                    />
+                  </label>
+                ) : (
+                  <label style={{ display: "grid", gap: "6px" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 800, color: "#9CA3AF" }}>Archivo</span>
+                    <input
+                      type="file"
+                      onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+                      style={{
+                        ...fieldStyle,
+                        padding: "10px",
+                      }}
+                    />
+                  </label>
+                )}
+              </>
+            )}
+
+            {errorMessage ? (
+              <div style={{ borderRadius: "16px", background: "rgba(230,57,70,0.10)", color: "#C53340", padding: "10px 12px", fontSize: "13px", fontWeight: 700 }}>
+                {errorMessage}
+              </div>
+            ) : null}
+            {successMessage ? (
+              <div style={{ borderRadius: "16px", background: "rgba(78,205,196,0.16)", color: "#178A83", padding: "10px 12px", fontSize: "13px", fontWeight: 700 }}>
+                {successMessage}
+              </div>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={saving}
+              style={{
+                border: "none",
+                borderRadius: "999px",
+                background: saving ? "#E5E7EB" : "#E63946",
+                color: saving ? "#9CA3AF" : "#FFFFFF",
+                padding: "13px 16px",
+                fontSize: "15px",
+                fontWeight: 800,
+                cursor: saving ? "not-allowed" : "pointer",
+              }}
+            >
+              {saving ? "Guardando..." : adminAction === "folder" ? "Crear carpeta" : "Guardar material"}
+            </button>
+          </form>
+        ) : errorMessage && !loading ? (
+          <div style={{ borderRadius: "18px", background: "rgba(230,57,70,0.10)", color: "#C53340", padding: "12px 14px", fontSize: "14px", fontWeight: 700 }}>
+            {errorMessage}
+          </div>
+        ) : null}
+
         {loading ? (
           <div style={{ textAlign: "center", color: "#9CA3AF", padding: "40px 0" }}>
             Cargando...
@@ -132,104 +452,134 @@ export default function RecursosPage() {
             </p>
           </div>
         ) : (
-          grouped.map(([category, items]) => (
-            <div key={category}>
-              {/* Section title */}
-              <p
-                style={{
-                  fontSize: "15px",
-                  fontWeight: 700,
-                  color: "#53596B",
-                  margin: "0 0 10px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                }}
-              >
-                {category}
-              </p>
+          grouped.map(([folder, items]) => (
+            <section key={folder}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "10px" }}>
+                <p
+                  style={{
+                    fontSize: "15px",
+                    fontWeight: 800,
+                    color: "#53596B",
+                    margin: 0,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                  }}
+                >
+                  {folder}
+                </p>
+                {isAdmin ? (
+                  <span
+                    style={{
+                      borderRadius: "999px",
+                      background: "rgba(78,205,196,0.16)",
+                      color: "#178A83",
+                      padding: "5px 9px",
+                      fontSize: "11px",
+                      fontWeight: 800,
+                    }}
+                  >
+                    {items.length} {items.length === 1 ? "item" : "items"}
+                  </span>
+                ) : null}
+              </div>
 
-              {/* Item cards */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                {items.map((item) => {
-                  const file = isFile(item.url);
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => openResource(item.url)}
-                      disabled={!item.url}
-                      style={{
-                        background: "#FFFFFF",
-                        borderRadius: "1.5rem",
-                        padding: "14px 16px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "14px",
-                        border: "none",
-                        cursor: item.url ? "pointer" : "default",
-                        textAlign: "left",
-                        boxShadow: "0 2px 12px rgba(26,26,46,0.07)",
-                        width: "100%",
-                        opacity: item.url ? 1 : 0.5,
-                      }}
-                    >
-                      {/* Icon circle */}
-                      <div
+              {items.length === 0 ? (
+                <div
+                  style={{
+                    background: "rgba(255,255,255,0.62)",
+                    borderRadius: "20px",
+                    padding: "18px",
+                    color: "#9CA3AF",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    textAlign: "center",
+                  }}
+                >
+                  Carpeta vacía.
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  {items.map((item) => {
+                    const fileResource = isFile(item.url);
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => openResource(item.url)}
+                        disabled={!item.url}
                         style={{
-                          width: "48px",
-                          height: "48px",
-                          borderRadius: "50%",
-                          background: "rgba(230,57,70,0.10)",
+                          background: "#FFFFFF",
+                          borderRadius: "1.5rem",
+                          padding: "14px 16px",
                           display: "flex",
                           alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "22px",
-                          flexShrink: 0,
+                          gap: "14px",
+                          border: "none",
+                          cursor: item.url ? "pointer" : "default",
+                          textAlign: "left",
+                          boxShadow: "0 2px 12px rgba(26,26,46,0.07)",
+                          width: "100%",
+                          opacity: item.url ? 1 : 0.5,
                         }}
                       >
-                        {file ? "📄" : "🔗"}
-                      </div>
-
-                      {/* Text */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p
+                        <div
                           style={{
-                            fontSize: "15px",
-                            fontWeight: 700,
-                            color: "#1A1A2E",
-                            margin: 0,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
+                            width: "48px",
+                            height: "48px",
+                            borderRadius: "50%",
+                            background: fileResource ? "rgba(230,57,70,0.10)" : "rgba(78,205,196,0.14)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "22px",
+                            flexShrink: 0,
                           }}
                         >
-                          {item.title}
-                        </p>
-                        <p
-                          style={{
-                            fontSize: "12px",
-                            color: "#9CA3AF",
-                            margin: "2px 0 0",
-                          }}
-                        >
-                          {file ? "Archivo" : "Enlace"}
-                        </p>
-                      </div>
+                          {fileResource ? "📄" : "🔗"}
+                        </div>
 
-                      {/* Chevron */}
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                        <path
-                          d="M9 18l6-6-6-6"
-                          stroke="#C4BAB0"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p
+                            style={{
+                              fontSize: "15px",
+                              fontWeight: 700,
+                              color: "#1A1A2E",
+                              margin: 0,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {item.title}
+                          </p>
+                          <p
+                            style={{
+                              fontSize: "12px",
+                              color: "#9CA3AF",
+                              margin: "2px 0 0",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {fileResource ? fileNameFromUrl(item.url) : "Enlace"}
+                          </p>
+                        </div>
+
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                          <path
+                            d="M9 18l6-6-6-6"
+                            stroke="#C4BAB0"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
           ))
         )}
       </div>
@@ -238,3 +588,16 @@ export default function RecursosPage() {
     </div>
   );
 }
+
+const fieldStyle = {
+  width: "100%",
+  boxSizing: "border-box",
+  border: "none",
+  borderRadius: "16px",
+  background: "#F7F3ED",
+  color: "#1A1A2E",
+  padding: "12px 13px",
+  fontSize: "15px",
+  fontWeight: 700,
+  outline: "none",
+} satisfies React.CSSProperties;
