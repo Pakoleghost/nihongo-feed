@@ -477,9 +477,9 @@ export default function ComunidadForosPage() {
               key={forum.id}
               style={{
                 background: "#FFFFFF",
-                borderRadius: 28,
-                padding: 18,
-                boxShadow: "0 6px 22px rgba(26,26,46,0.08)",
+                borderRadius: 16,
+                padding: 16,
+                boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
                 display: "grid",
                 gap: 14,
               }}
@@ -489,12 +489,12 @@ export default function ComunidadForosPage() {
                   <div
                     style={{
                       display: "inline-flex",
-                      borderRadius: 999,
-                      padding: "6px 10px",
-                      background: "rgba(78,205,196,0.14)",
+                      borderRadius: 6,
+                      padding: "3px 8px",
+                      background: "rgba(78,205,196,0.12)",
                       color: "#178A83",
-                      fontSize: 12,
-                      fontWeight: 800,
+                      fontSize: 11,
+                      fontWeight: 700,
                       marginBottom: 8,
                     }}
                   >
@@ -514,12 +514,12 @@ export default function ComunidadForosPage() {
                   href={`/comunidad/foros/nuevo?forum=${forum.id}`}
                   style={{
                     justifySelf: "start",
-                    borderRadius: 999,
+                    borderRadius: 8,
                     background: "#1A1A2E",
                     color: "#FFFFFF",
-                    padding: "11px 16px",
-                    fontSize: 14,
-                    fontWeight: 800,
+                    padding: "8px 14px",
+                    fontSize: 13,
+                    fontWeight: 700,
                     textDecoration: "none",
                   }}
                 >
@@ -530,11 +530,11 @@ export default function ComunidadForosPage() {
               {forumThreads.length === 0 ? (
                 <div
                   style={{
-                    borderRadius: 22,
+                    borderRadius: 10,
                     background: "#F8F4EE",
-                    padding: 18,
-                    color: "#6E737F",
-                    fontSize: 15,
+                    padding: "12px 14px",
+                    color: "#9CA3AF",
+                    fontSize: 13,
                     lineHeight: 1.4,
                   }}
                 >
@@ -546,9 +546,9 @@ export default function ComunidadForosPage() {
                     <article
                       key={thread.id}
                       style={{
-                        borderRadius: 22,
-                        background: thread.is_pinned ? "rgba(78,205,196,0.10)" : "#F8F4EE",
-                        padding: 16,
+                        borderRadius: 10,
+                        background: thread.is_pinned ? "rgba(78,205,196,0.08)" : "#F8F4EE",
+                        padding: 14,
                         display: "grid",
                         gap: 10,
                       }}
@@ -561,12 +561,12 @@ export default function ComunidadForosPage() {
                           {thread.is_pinned && (
                             <span
                               style={{
-                                borderRadius: 999,
-                                background: "#4ECDC4",
-                                color: "#1A1A2E",
-                                padding: "5px 9px",
-                                fontSize: 11,
-                                fontWeight: 900,
+                                borderRadius: 6,
+                                background: "rgba(78,205,196,0.18)",
+                                color: "#178A83",
+                                padding: "3px 7px",
+                                fontSize: 10,
+                                fontWeight: 700,
                               }}
                             >
                               FIJADO
@@ -575,12 +575,12 @@ export default function ComunidadForosPage() {
                           {thread.tag && (
                             <span
                               style={{
-                                borderRadius: 999,
+                                borderRadius: 6,
                                 background: "#FFFFFF",
-                                color: "#53596B",
-                                padding: "5px 9px",
-                                fontSize: 11,
-                                fontWeight: 800,
+                                color: "#7A7F8D",
+                                padding: "3px 7px",
+                                fontSize: 10,
+                                fontWeight: 700,
                               }}
                             >
                               {thread.tag}
@@ -589,12 +589,12 @@ export default function ComunidadForosPage() {
                           {thread.is_locked && (
                             <span
                               style={{
-                                borderRadius: 999,
-                                background: "rgba(230,57,70,0.10)",
+                                borderRadius: 6,
+                                background: "rgba(230,57,70,0.08)",
                                 color: "#C53340",
-                                padding: "5px 9px",
-                                fontSize: 11,
-                                fontWeight: 800,
+                                padding: "3px 7px",
+                                fontSize: 10,
+                                fontWeight: 700,
                               }}
                             >
                               CERRADO

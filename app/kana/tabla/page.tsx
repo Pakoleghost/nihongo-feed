@@ -378,8 +378,8 @@ export default function TablaPage() {
           style={{
             display: "inline-flex",
             background: "#E8E3DC",
-            borderRadius: "999px",
-            padding: "4px",
+            borderRadius: "10px",
+            padding: "3px",
           }}
         >
           {(["hiragana", "katakana"] as Script[]).map((s) => (
@@ -387,14 +387,14 @@ export default function TablaPage() {
               key={s}
               onClick={() => { setScript(s); setSelected(null); }}
               style={{
-                padding: "9px 22px",
-                borderRadius: "999px",
+                padding: "7px 18px",
+                borderRadius: "8px",
                 border: "none",
                 cursor: "pointer",
                 background: script === s ? "#E63946" : "transparent",
                 color: script === s ? "#FFFFFF" : "#9CA3AF",
                 fontWeight: 700,
-                fontSize: "14px",
+                fontSize: "13px",
                 transition: "background 0.15s, color 0.15s",
               }}
             >
@@ -409,8 +409,8 @@ export default function TablaPage() {
         <div
           style={{
             background: "#FFFFFF",
-            borderRadius: "1.5rem",
-            padding: "16px",
+            borderRadius: "14px",
+            padding: "14px",
             boxShadow: "0 2px 12px rgba(26,26,46,0.06)",
           }}
         >
@@ -553,8 +553,8 @@ export default function TablaPage() {
                 onClick={(e) => e.stopPropagation()}
                 style={{
                   background: "#FFFFFF",
-                  borderRadius: "2rem",
-                  padding: "28px 24px 24px",
+                  borderRadius: "20px",
+                  padding: "24px 20px 20px",
                   width: "100%",
                   maxWidth: "320px",
                   display: "flex",

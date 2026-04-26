@@ -455,15 +455,15 @@ export default function ComunidadPage() {
           href="/comunidad/foros"
           style={{
             background: "#1A1A2E",
-            borderRadius: "24px",
-            padding: "16px 18px",
+            borderRadius: "14px",
+            padding: "14px 16px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             gap: 14,
             color: "#FFFFFF",
             textDecoration: "none",
-            boxShadow: "0 6px 22px rgba(26,26,46,0.16)",
+            boxShadow: "0 4px 14px rgba(26,26,46,0.12)",
           }}
         >
           <div>
@@ -484,9 +484,9 @@ export default function ComunidadPage() {
           <div
             style={{
               background: "#FFFFFF",
-              borderRadius: "2rem",
-              padding: "16px",
-              boxShadow: "0 4px 20px rgba(26,26,46,0.07)",
+              borderRadius: "16px",
+              padding: "14px",
+              boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
             }}
           >
             <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
@@ -544,20 +544,23 @@ export default function ComunidadPage() {
             >
               <button
                 onClick={() => fileInputRef.current?.click()}
-                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "22px", padding: "4px", lineHeight: 1 }}
+                style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", lineHeight: 1, display: "flex", alignItems: "center", color: "#9CA3AF" }}
                 aria-label="Agregar imagen"
               >
-                🖼️
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.8" />
+                  <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+                  <path d="M21 15l-5-5L5 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
               <button
                 onClick={handlePublish}
                 disabled={!canPublish}
                 style={{
                   background: canPublish ? "#E63946" : "#C4BAB0",
-                  color: "#FFFFFF", borderRadius: "999px", padding: "8px 20px",
+                  color: "#FFFFFF", borderRadius: "8px", padding: "7px 16px",
                   border: "none", cursor: canPublish ? "pointer" : "not-allowed",
-                  fontSize: "14px", fontWeight: 700, transition: "background 0.15s",
-                  boxShadow: canPublish ? "0 4px 14px rgba(230,57,70,0.28)" : "none",
+                  fontSize: "13px", fontWeight: 700, transition: "background 0.15s",
                 }}
               >
                 {publishing ? "Publicando…" : "Publicar"}
@@ -786,8 +789,8 @@ export default function ComunidadPage() {
                     style={{
                       display: "flex", alignItems: "center", gap: "6px",
                       background: liked ? "rgba(230,57,70,0.10)" : "rgba(26,26,46,0.06)",
-                      borderRadius: "999px", padding: "7px 14px",
-                      border: "none", cursor: "pointer", fontSize: "14px",
+                      borderRadius: "8px", padding: "5px 10px",
+                      border: "none", cursor: "pointer", fontSize: "13px",
                       fontWeight: 600, color: liked ? "#E63946" : "#53596B",
                       transition: "background 0.15s",
                     }}
