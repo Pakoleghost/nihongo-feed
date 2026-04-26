@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
+import { readStudentViewPreference } from "@/lib/student-view";
 import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 type Profile = {
@@ -43,7 +44,8 @@ export default function NuevoForoTemaPage() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { studentViewActive, studentViewGroupName } = useStudentViewMode(Boolean(profile?.is_admin));
+  const [forbidden, setForbidden] = useState(false);
+  const { studentViewActive } = useStudentViewMode(Boolean(profile?.is_admin));
 
   useEffect(() => {
     async function loadCreateContext() {
@@ -73,27 +75,24 @@ export default function NuevoForoTemaPage() {
 
       const currentProfile = profileData as Profile;
       setProfile(currentProfile);
+      const activeStudentPreview = currentProfile.is_admin ? readStudentViewPreference() : false;
 
-      const forumFromUrl = new URLSearchParams(window.location.search).get("forum") ?? "";
-      const canSeeAllGroups = Boolean(currentProfile.is_admin && !studentViewActive);
-      const previewGroupName = currentProfile.is_admin && studentViewActive ? studentViewGroupName : null;
-      const visibleGroupName = canSeeAllGroups ? null : previewGroupName || currentProfile.group_name;
-
-      if (!canSeeAllGroups && !visibleGroupName) {
+      if (!currentProfile.is_admin || activeStudentPreview) {
+        setForbidden(true);
         setForums([]);
         setLoading(false);
         return;
       }
+
+      setForbidden(false);
+
+      const forumFromUrl = new URLSearchParams(window.location.search).get("forum") ?? "";
 
       let forumsQuery = supabase
         .from("class_forums")
         .select("id, group_name, title, is_active")
         .eq("is_active", true)
         .order("group_name", { ascending: true });
-
-      if (!canSeeAllGroups) {
-        forumsQuery = forumsQuery.eq("group_name", visibleGroupName);
-      }
 
       const { data: forumData, error: forumError } = await forumsQuery;
       if (forumError) {
@@ -111,7 +110,7 @@ export default function NuevoForoTemaPage() {
     }
 
     void loadCreateContext();
-  }, [studentViewActive, studentViewGroupName]);
+  }, [studentViewActive]);
 
   const selectedForum = useMemo(
     () => forums.find((forum) => forum.id === selectedForumId) ?? null,
@@ -120,7 +119,7 @@ export default function NuevoForoTemaPage() {
 
   async function handleCreateThread(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!profile || !selectedForum || creating || !title.trim() || !body.trim()) return;
+    if (!profile?.is_admin || forbidden || !selectedForum || creating || !title.trim() || !body.trim()) return;
 
     setCreating(true);
     setErrorMessage(null);
@@ -201,6 +200,41 @@ export default function NuevoForoTemaPage() {
       ) : !profile ? (
         <div style={{ background: "#FFFFFF", borderRadius: 26, padding: 24, color: "#53596B" }}>
           Inicia sesión para crear un tema.
+        </div>
+      ) : forbidden ? (
+        <div
+          style={{
+            background: "#FFFFFF",
+            borderRadius: 26,
+            padding: 24,
+            color: "#53596B",
+            display: "grid",
+            gap: 14,
+          }}
+        >
+          <div>
+            <strong style={{ color: "#1A1A2E" }}>Solo profesores pueden crear temas.</strong>
+            <p style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
+              Puedes leer los temas de tu grupo y responder en conversaciones abiertas.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => router.push("/comunidad/foros")}
+            style={{
+              justifySelf: "start",
+              border: "none",
+              borderRadius: 999,
+              background: "#1A1A2E",
+              color: "#FFFFFF",
+              padding: "11px 16px",
+              fontSize: 14,
+              fontWeight: 800,
+              cursor: "pointer",
+            }}
+          >
+            Volver a foros
+          </button>
         </div>
       ) : forums.length === 0 ? (
         <div style={{ background: "#FFFFFF", borderRadius: 26, padding: 24, color: "#53596B" }}>

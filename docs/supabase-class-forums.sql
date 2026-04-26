@@ -183,29 +183,24 @@ begin
       );
   end if;
 
-  if not exists (
-    select 1 from pg_policies
-    where schemaname = 'public' and tablename = 'forum_threads' and policyname = 'forum_threads_insert_own_group_or_admin'
-  ) then
-    create policy forum_threads_insert_own_group_or_admin
-      on public.forum_threads
-      for insert
-      to authenticated
-      with check (
-        author_id = auth.uid()
-        and (
-          public.is_current_user_admin()
-          or group_name = public.current_user_group_name()
-        )
-        and exists (
-          select 1
-          from public.class_forums
-          where class_forums.id = forum_id
-            and class_forums.group_name = forum_threads.group_name
-            and class_forums.is_active is true
-        )
-      );
-  end if;
+  drop policy if exists forum_threads_insert_own_group_or_admin on public.forum_threads;
+  drop policy if exists forum_threads_insert_admin on public.forum_threads;
+
+  create policy forum_threads_insert_admin
+    on public.forum_threads
+    for insert
+    to authenticated
+    with check (
+      author_id = auth.uid()
+      and public.is_current_user_admin()
+      and exists (
+        select 1
+        from public.class_forums
+        where class_forums.id = forum_id
+          and class_forums.group_name = forum_threads.group_name
+          and class_forums.is_active is true
+      )
+    );
 
   drop policy if exists forum_threads_update_owner_or_admin on public.forum_threads;
   drop policy if exists forum_threads_update_admin on public.forum_threads;

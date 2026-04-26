@@ -509,7 +509,7 @@ export default function ComunidadForosPage() {
                 </div>
               </div>
 
-              {profile ? (
+              {effectiveIsAdmin ? (
                 <Link
                   href={`/comunidad/foros/nuevo?forum=${forum.id}`}
                   style={{
