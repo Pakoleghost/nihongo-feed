@@ -37,28 +37,30 @@ export default function StudentViewBanner() {
   return (
     <div
       role="status"
+      className="studentViewModeBar"
       style={{
-        position: "fixed",
-        top: "calc(env(safe-area-inset-top, 0px) + 10px)",
-        left: 12,
-        right: 12,
-        zIndex: 1000,
+        position: "sticky",
+        top: 0,
+        zIndex: 70,
         display: "flex",
         justifyContent: "center",
-        pointerEvents: "none",
+        padding: "calc(env(safe-area-inset-top, 0px) + 8px) 12px 8px",
+        background: "linear-gradient(to bottom, #FFF8E7 0%, rgba(255,248,231,0.96) 100%)",
+        borderBottom: "1px solid rgba(26,26,46,0.06)",
       }}
     >
       <div
         style={{
-          pointerEvents: "auto",
           display: "flex",
           alignItems: "center",
+          justifyContent: "space-between",
           gap: 10,
+          width: "min(100%, 760px)",
           borderRadius: 999,
           background: "#1A1A2E",
           color: "#FFFFFF",
-          padding: "8px 10px 8px 14px",
-          boxShadow: "0 10px 28px rgba(26,26,46,0.18)",
+          padding: "7px 8px 7px 14px",
+          boxShadow: "0 6px 18px rgba(26,26,46,0.10)",
           fontSize: 12,
           fontWeight: 800,
         }}
