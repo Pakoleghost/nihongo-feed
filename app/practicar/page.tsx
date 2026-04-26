@@ -49,12 +49,15 @@ export default function PracticarPage() {
           fontSize: "42px",
           fontWeight: 800,
           color: "#1A1A2E",
-          margin: "0 0 28px",
+          margin: 0,
           lineHeight: 1,
         }}
       >
         Practicar
       </h1>
+      <p style={{ fontSize: "14px", color: "#7A7F8D", margin: "8px 0 24px", lineHeight: 1.4 }}>
+        Pon a prueba lo que aprendes.
+      </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {CARDS.map(({ href, title, sub, accent, scoreboard }) => (
@@ -64,7 +67,7 @@ export default function PracticarPage() {
               style={{
                 background: "#FFFFFF",
                 borderRadius: "18px",
-                padding: "20px 20px 20px 24px",
+                padding: "22px 20px 22px 24px",
                 display: "flex",
                 alignItems: "center",
                 gap: "16px",

@@ -266,34 +266,33 @@ export default function InicioPage() {
               href={item.href}
               style={{
                 background: item.bg,
-                borderRadius: "24px",
-                padding: "18px",
+                borderRadius: "20px",
+                padding: "16px",
                 textDecoration: "none",
-                boxShadow: "0 10px 26px rgba(26,26,46,0.08)",
-                minHeight: "122px",
+                boxShadow: "0 4px 16px rgba(26,26,46,0.08)",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-between",
+                gap: "20px",
               }}
             >
               <div>
                 <p
                   style={{
-                    fontSize: "22px",
+                    fontSize: "20px",
                     fontWeight: 800,
                     color: item.titleColor,
                     margin: 0,
                     lineHeight: 1.05,
-                    letterSpacing: "-0.03em",
+                    letterSpacing: "-0.02em",
                   }}
                 >
                   {item.title}
                 </p>
                 <p
                   style={{
-                    fontSize: "13px",
+                    fontSize: "12px",
                     color: item.bodyColor,
-                    margin: "8px 0 0",
+                    margin: "6px 0 0",
                     lineHeight: 1.35,
                   }}
                 >
@@ -302,10 +301,10 @@ export default function InicioPage() {
               </div>
               <div
                 style={{
-                  fontSize: "13px",
+                  fontSize: "12px",
                   fontWeight: 700,
                   color: item.titleColor,
-                  opacity: 0.9,
+                  opacity: 0.7,
                 }}
               >
                 Abrir →

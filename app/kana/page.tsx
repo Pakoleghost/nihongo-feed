@@ -329,113 +329,53 @@ export default function KanaPage() {
         <Link
           href="/kana/palabras"
           style={{
-            background: "#1A1A2E",
-            borderRadius: "22px",
-            padding: "18px 18px",
+            background: "#FFFFFF",
+            borderRadius: "18px",
+            padding: "18px 20px 18px 22px",
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
             gap: 14,
             textDecoration: "none",
-            boxShadow: "0 8px 26px rgba(26,26,46,0.16)",
+            boxShadow: "inset 4px 0 0 #1A1A2E, 0 2px 10px rgba(26,26,46,0.07)",
           }}
         >
-          <div style={{ minWidth: 0 }}>
-            <div
-              style={{
-                fontSize: "24px",
-                fontWeight: 800,
-                color: "#FFFFFF",
-                lineHeight: 1,
-              }}
-            >
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: "18px", fontWeight: 800, color: "#1A1A2E", lineHeight: 1.1 }}>
               Leer palabras
             </div>
-            <div
-              style={{
-                fontSize: "14px",
-                color: "rgba(255,255,255,0.76)",
-                marginTop: 8,
-                lineHeight: 1.35,
-              }}
-            >
+            <div style={{ fontSize: "13px", color: "#7A7F8D", marginTop: 5, lineHeight: 1.35 }}>
               Lee vocabulario Genki en kana y escribe su romaji.
             </div>
           </div>
-
-          <div
-            aria-hidden="true"
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              background: "rgba(78,205,196,0.18)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <svg width="15" height="11" viewBox="0 0 15 11" fill="none">
-              <path d="M1 5.5h12m0 0L8.5 1M13 5.5 8.5 10" stroke="#4ECDC4" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+            <path d="M9 18l6-6-6-6" stroke="#C4BAB0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </Link>
 
         <Link
           href="/kana/configurar?mode=libre"
           style={{
             background: "#FFFFFF",
-            borderRadius: "22px",
-            padding: "18px 18px",
+            borderRadius: "18px",
+            padding: "18px 20px 18px 22px",
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
             gap: 14,
             textDecoration: "none",
-            boxShadow: "0 6px 22px rgba(26,26,46,0.08)",
+            boxShadow: "inset 4px 0 0 #C4BAB0, 0 2px 10px rgba(26,26,46,0.07)",
           }}
         >
-          <div style={{ minWidth: 0 }}>
-            <div
-              style={{
-                fontSize: "24px",
-                fontWeight: 800,
-                color: "#1A1A2E",
-                lineHeight: 1,
-              }}
-            >
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: "18px", fontWeight: 800, color: "#1A1A2E", lineHeight: 1.1 }}>
               Libre
             </div>
-            <div
-              style={{
-                fontSize: "14px",
-                color: "#53596B",
-                marginTop: 8,
-                lineHeight: 1.35,
-              }}
-            >
+            <div style={{ fontSize: "13px", color: "#7A7F8D", marginTop: 5, lineHeight: 1.35 }}>
               Elige script, bloques y número de preguntas.
             </div>
           </div>
-
-          <div
-            aria-hidden="true"
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              background: "#F7F3EC",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <svg width="15" height="11" viewBox="0 0 15 11" fill="none">
-              <path d="M1 5.5h12m0 0L8.5 1M13 5.5 8.5 10" stroke="#1A1A2E" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+            <path d="M9 18l6-6-6-6" stroke="#C4BAB0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </Link>
       </div>
 
