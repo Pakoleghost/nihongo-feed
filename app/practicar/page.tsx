@@ -10,28 +10,22 @@ const CARDS = [
     href: "/practicar/sprint",
     title: "Kana Sprint",
     sub: "¿Cuántos adivinas en 60 segundos?",
-    bg: "#1A1A2E",
-    color: "#FFFFFF",
-    subColor: "rgba(255,255,255,0.62)",
-    shadow: "0 6px 20px rgba(26,26,46,0.14)",
+    accent: "#1A1A2E",
+    scoreboard: true,
   },
   {
     href: "/practicar/vocabulario",
     title: "Vocabulario",
     sub: "Vocabulario por lección",
-    bg: "#E63946",
-    color: "#FFFFFF",
-    subColor: "rgba(255,255,255,0.78)",
-    shadow: "0 6px 20px rgba(26,26,46,0.10)",
+    accent: "#E63946",
+    scoreboard: false,
   },
   {
     href: "/practicar/kanji",
     title: "Kanji",
     sub: "Kanji por lección",
-    bg: "#4ECDC4",
-    color: "#1A1A2E",
-    subColor: "rgba(26,26,46,0.60)",
-    shadow: "0 6px 20px rgba(26,26,46,0.10)",
+    accent: "#4ECDC4",
+    scoreboard: false,
   },
 ] as const;
 
@@ -62,41 +56,77 @@ export default function PracticarPage() {
         Practicar
       </h1>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
-        {CARDS.map(({ href, title, sub, bg, color, subColor, shadow }) => (
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {CARDS.map(({ href, title, sub, accent, scoreboard }) => (
           <div key={href}>
             <Link
               href={href}
               style={{
-                background: bg,
-                borderRadius: "22px",
-                padding: "24px 22px",
+                background: "#FFFFFF",
+                borderRadius: "18px",
+                padding: "20px 20px 20px 24px",
                 display: "flex",
-                flexDirection: "column",
-                justifyContent: "flex-end",
+                alignItems: "center",
+                gap: "16px",
                 textDecoration: "none",
-                minHeight: "130px",
-                boxShadow: shadow,
+                boxShadow: `inset 4px 0 0 ${accent}, 0 2px 10px rgba(26,26,46,0.07)`,
               }}
             >
-              <p style={{ fontSize: "26px", fontWeight: 800, color, margin: 0, lineHeight: 1.1 }}>
-                {title}
-              </p>
-              <p style={{ fontSize: "14px", color: subColor, margin: "5px 0 0" }}>{sub}</p>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: 800,
+                    color: "#1A1A2E",
+                    margin: 0,
+                    lineHeight: 1.1,
+                  }}
+                >
+                  {title}
+                </p>
+                <p
+                  style={{
+                    fontSize: "13px",
+                    color: "#7A7F8D",
+                    margin: "5px 0 0",
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {sub}
+                </p>
+              </div>
+
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                style={{ flexShrink: 0 }}
+              >
+                <path
+                  d="M9 18l6-6-6-6"
+                  stroke="#C4BAB0"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </Link>
 
-            {/* Scoreboard link — only below Kana Sprint */}
-            {href === "/practicar/sprint" && (
+            {scoreboard && (
               <Link
                 href="/practicar/sprint/scoreboard"
                 style={{
-                  display: "inline-block",
-                  marginTop: "10px",
-                  marginLeft: "8px",
-                  fontSize: "13px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  marginTop: "8px",
+                  marginLeft: "24px",
+                  fontSize: "12px",
                   fontWeight: 700,
-                  color: "#4ECDC4",
+                  color: "#9CA3AF",
                   textDecoration: "none",
+                  letterSpacing: "0.01em",
                 }}
               >
                 🏆 Ver scoreboard

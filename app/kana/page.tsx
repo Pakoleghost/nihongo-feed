@@ -242,7 +242,7 @@ export default function KanaPage() {
             display: "grid",
             gap: 14,
             textDecoration: "none",
-            boxShadow: "0 10px 34px rgba(230,57,70,0.28)",
+            boxShadow: "0 8px 24px rgba(26,26,46,0.12)",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
