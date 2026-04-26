@@ -95,7 +95,7 @@ export default function KanaPage() {
             style={{
               fontSize: "42px",
               fontWeight: 800,
-              color: "#E63946",
+              color: "#1A1A2E",
               margin: 0,
               lineHeight: 1,
             }}
