@@ -33,13 +33,31 @@ function isFile(url: string | null): boolean {
   return false;
 }
 
-function fileNameFromUrl(url: string | null) {
-  if (!url) return "Archivo";
+function getFileExtension(url: string | null) {
+  if (!url) return "";
   try {
-    return decodeURIComponent(new URL(url).pathname.split("/").pop() || "Archivo");
+    const fileName = decodeURIComponent(new URL(url).pathname.split("/").pop() || "");
+    return fileName.split(".").pop()?.toUpperCase() || "";
   } catch {
-    return decodeURIComponent(url.split("/").pop() || "Archivo");
+    const fileName = decodeURIComponent(url.split("/").pop() || "");
+    return fileName.split(".").pop()?.toUpperCase() || "";
   }
+}
+
+function looksLikeStorageFileName(value: string | null | undefined) {
+  const text = value?.trim() ?? "";
+  return /^\d{10,}-[a-z0-9]+\.[a-z0-9]+$/i.test(text);
+}
+
+function getResourceTitle(resource: ResourceRow) {
+  const title = resource.title?.trim();
+  if (title && !looksLikeStorageFileName(title)) return title;
+  const extension = getFileExtension(resource.url);
+  return extension ? `Archivo ${extension}` : "Material del curso";
+}
+
+function getResourceSubtitle(url: string | null) {
+  return isFile(url) ? "Archivo" : "Enlace";
 }
 
 function openResource(url: string | null) {
@@ -551,7 +569,7 @@ export default function RecursosPage() {
                               whiteSpace: "nowrap",
                             }}
                           >
-                            {item.title}
+                            {getResourceTitle(item)}
                           </p>
                           <p
                             style={{
@@ -563,7 +581,7 @@ export default function RecursosPage() {
                               whiteSpace: "nowrap",
                             }}
                           >
-                            {fileResource ? fileNameFromUrl(item.url) : "Enlace"}
+                            {getResourceSubtitle(item.url)}
                           </p>
                         </div>
 

@@ -67,6 +67,22 @@ function fileLabelFromUrl(url?: string | null): string {
   }
 }
 
+function fileExtensionFromUrl(url?: string | null): string {
+  const fileName = fileLabelFromUrl(url);
+  return fileName.includes(".") ? fileName.split(".").pop()?.toUpperCase() || "" : "";
+}
+
+function looksLikeStorageFileName(value?: string | null): boolean {
+  return /^\d{10,}-[a-z0-9]+\.[a-z0-9]+$/i.test(value?.trim() ?? "");
+}
+
+function displayResourceTitle(resource: ResourceRow): string {
+  const title = resource.title?.trim();
+  if (title && !looksLikeStorageFileName(title)) return title;
+  const extension = fileExtensionFromUrl(resource.url);
+  return extension ? `Archivo ${extension}` : "Material del curso";
+}
+
 function domainLabelFromUrl(url?: string | null): string {
   if (!url) return "Enlace";
   try {
@@ -469,7 +485,7 @@ export default function ResourcesPage() {
                           </div>
                           <div className="resourceText">
                             <div className="resourceTitleRow">
-                              <strong>{resource.title}</strong>
+                              <strong>{displayResourceTitle(resource)}</strong>
                               <span className="typeTag quietTag">
                                 {kind === "link" ? domainLabelFromUrl(resource.url) : kind === "file" ? "Archivo" : "Nota"}
                               </span>
@@ -478,7 +494,7 @@ export default function ResourcesPage() {
                               {kind === "note"
                                 ? decodeNoteUrl(resource.url).slice(0, 120) || "Nota de texto"
                                 : kind === "file"
-                                  ? fileLabelFromUrl(resource.url)
+                                  ? "Archivo"
                                   : resource.url || "Sin URL"}
                             </p>
                           </div>
@@ -516,7 +532,7 @@ export default function ResourcesPage() {
                         {isSelectedNote && (
                           <div className="noteViewer">
                             <div className="noteViewerHeader">
-                              <strong>{resource.title}</strong>
+                              <strong>{displayResourceTitle(resource)}</strong>
                             </div>
                             <pre>{decodeNoteUrl(resource.url)}</pre>
                           </div>
