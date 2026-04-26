@@ -289,15 +289,15 @@ export default function RecursosPage() {
             onClick={() => setShowAdminPanel((value) => !value)}
             style={{
               border: "none",
-              borderRadius: "999px",
+              borderRadius: "10px",
               background: "#1A1A2E",
               color: "#FFFFFF",
-              padding: "10px 18px",
-              fontSize: "14px",
+              padding: "8px 14px",
+              fontSize: "13px",
               fontWeight: 700,
               cursor: "pointer",
               flexShrink: 0,
-              marginTop: "6px",
+              marginTop: "8px",
             }}
           >
             {showAdminPanel ? "Cerrar" : "Agregar"}
@@ -481,12 +481,12 @@ export default function RecursosPage() {
                 {effectiveIsAdmin ? (
                   <span
                     style={{
-                      borderRadius: "999px",
-                      background: "rgba(78,205,196,0.16)",
+                      borderRadius: "6px",
+                      background: "rgba(78,205,196,0.12)",
                       color: "#178A83",
-                      padding: "5px 9px",
-                      fontSize: "11px",
-                      fontWeight: 800,
+                      padding: "3px 7px",
+                      fontSize: "10px",
+                      fontWeight: 700,
                     }}
                   >
                     {items.length} {items.length === 1 ? "item" : "items"}
@@ -519,8 +519,8 @@ export default function RecursosPage() {
                         disabled={!item.url}
                         style={{
                           background: "#FFFFFF",
-                          borderRadius: "1.5rem",
-                          padding: "14px 16px",
+                          borderRadius: "12px",
+                          padding: "12px 14px",
                           display: "flex",
                           alignItems: "center",
                           gap: "14px",

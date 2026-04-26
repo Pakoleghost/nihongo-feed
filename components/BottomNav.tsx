@@ -105,10 +105,10 @@ export default function BottomNav() {
               alignItems: "center",
               gap: "3px",
               textDecoration: "none",
-              padding: "6px 18px",
-              borderRadius: "999px",
+              padding: "5px 14px",
+              borderRadius: "10px",
               background: isActive ? "#E63946" : "transparent",
-              minWidth: "64px",
+              minWidth: "56px",
               transition: "background 0.15s",
             }}
           >

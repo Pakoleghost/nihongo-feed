@@ -117,13 +117,13 @@ export default function KanaPage() {
           href="/kana/tabla"
           style={{
             background: "#FFFFFF",
-            borderRadius: "999px",
-            padding: "10px 18px",
-            fontSize: "14px",
+            borderRadius: "10px",
+            padding: "8px 14px",
+            fontSize: "13px",
             fontWeight: 700,
             color: "#1A1A2E",
             textDecoration: "none",
-            boxShadow: "0 2px 10px rgba(26,26,46,0.08)",
+            boxShadow: "0 2px 8px rgba(26,26,46,0.08)",
             whiteSpace: "nowrap",
           }}
         >
@@ -134,10 +134,10 @@ export default function KanaPage() {
       <div
         style={{
           background: "#FFFFFF",
-          borderRadius: "24px",
-          padding: "18px",
+          borderRadius: "16px",
+          padding: "16px",
           marginTop: "18px",
-          boxShadow: "0 8px 28px rgba(26,26,46,0.08)",
+          boxShadow: "0 4px 16px rgba(26,26,46,0.07)",
           display: "grid",
           gap: "14px",
         }}
@@ -152,8 +152,8 @@ export default function KanaPage() {
               key={stat.label}
               style={{
                 background: stat.tint,
-                borderRadius: 18,
-                padding: "14px 10px",
+                borderRadius: 10,
+                padding: "12px 8px",
                 textAlign: "center",
                 display: "grid",
                 gap: 4,
@@ -237,8 +237,8 @@ export default function KanaPage() {
           href="/kana/configurar?mode=smart"
           style={{
             background: "#E63946",
-            borderRadius: "26px",
-            padding: "20px 20px 18px",
+            borderRadius: "18px",
+            padding: "18px 18px 16px",
             display: "grid",
             gap: 14,
             textDecoration: "none",
@@ -251,12 +251,12 @@ export default function KanaPage() {
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  borderRadius: 999,
+                  borderRadius: 6,
                   background: "rgba(255,255,255,0.16)",
-                  padding: "6px 10px",
-                  fontSize: "11px",
+                  padding: "4px 8px",
+                  fontSize: "10px",
                   fontWeight: 800,
-                  letterSpacing: "0.04em",
+                  letterSpacing: "0.05em",
                   color: "#FFFFFF",
                   textTransform: "uppercase",
                 }}
@@ -311,11 +311,11 @@ export default function KanaPage() {
               <span
                 key={chip}
                 style={{
-                  borderRadius: 999,
-                  padding: "8px 12px",
+                  borderRadius: 6,
+                  padding: "5px 10px",
                   background: "rgba(255,255,255,0.14)",
                   color: "#FFFFFF",
-                  fontSize: "13px",
+                  fontSize: "12px",
                   fontWeight: 700,
                   lineHeight: 1,
                 }}
@@ -330,7 +330,7 @@ export default function KanaPage() {
           href="/kana/palabras"
           style={{
             background: "#FFFFFF",
-            borderRadius: "18px",
+            borderRadius: "12px",
             padding: "18px 20px 18px 22px",
             display: "flex",
             alignItems: "center",
@@ -356,7 +356,7 @@ export default function KanaPage() {
           href="/kana/configurar?mode=libre"
           style={{
             background: "#FFFFFF",
-            borderRadius: "18px",
+            borderRadius: "12px",
             padding: "18px 20px 18px 22px",
             display: "flex",
             alignItems: "center",

@@ -66,8 +66,8 @@ export default function PracticarPage() {
               href={href}
               style={{
                 background: "#FFFFFF",
-                borderRadius: "18px",
-                padding: "22px 20px 22px 24px",
+                borderRadius: "12px",
+                padding: "20px 18px 20px 22px",
                 display: "flex",
                 alignItems: "center",
                 gap: "16px",
@@ -124,15 +124,15 @@ export default function PracticarPage() {
                   alignItems: "center",
                   gap: "5px",
                   marginTop: "8px",
-                  marginLeft: "24px",
+                  marginLeft: "22px",
                   fontSize: "12px",
-                  fontWeight: 700,
+                  fontWeight: 600,
                   color: "#9CA3AF",
                   textDecoration: "none",
-                  letterSpacing: "0.01em",
+                  letterSpacing: "0.02em",
                 }}
               >
-                🏆 Ver scoreboard
+                Ver scoreboard
               </Link>
             )}
           </div>

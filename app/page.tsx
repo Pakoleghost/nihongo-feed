@@ -177,9 +177,9 @@ export default function InicioPage() {
         style={{
           marginTop: "22px",
           background: "#1A1A2E",
-          borderRadius: "28px",
-          padding: "22px",
-          boxShadow: "0 18px 44px rgba(26,26,46,0.14)",
+          borderRadius: "20px",
+          padding: "20px",
+          boxShadow: "0 8px 28px rgba(26,26,46,0.12)",
         }}
       >
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "14px" }}>
@@ -266,10 +266,10 @@ export default function InicioPage() {
               href={item.href}
               style={{
                 background: item.bg,
-                borderRadius: "20px",
-                padding: "16px",
+                borderRadius: "14px",
+                padding: "14px",
                 textDecoration: "none",
-                boxShadow: "0 4px 16px rgba(26,26,46,0.08)",
+                boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
                 display: "flex",
                 flexDirection: "column",
                 gap: "20px",
@@ -319,14 +319,14 @@ export default function InicioPage() {
           href="/comunidad"
           style={{
             background: "#FFFFFF",
-            borderRadius: "24px",
-            padding: "18px",
+            borderRadius: "14px",
+            padding: "16px 18px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             gap: "12px",
             textDecoration: "none",
-            boxShadow: "0 10px 26px rgba(26,26,46,0.08)",
+            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
           }}
         >
           <div>
@@ -342,14 +342,14 @@ export default function InicioPage() {
           href="/recursos"
           style={{
             background: "#FFFFFF",
-            borderRadius: "24px",
-            padding: "18px",
+            borderRadius: "14px",
+            padding: "16px 18px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             gap: "12px",
             textDecoration: "none",
-            boxShadow: "0 10px 26px rgba(26,26,46,0.08)",
+            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
           }}
         >
           <div>
