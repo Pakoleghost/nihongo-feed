@@ -321,7 +321,7 @@ export default function InicioPage() {
           style={{
             background: "#FFFFFF",
             borderRadius: "24px",
-            padding: "18px 18px 16px",
+            padding: "18px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -332,7 +332,7 @@ export default function InicioPage() {
         >
           <div>
             <HomeSectionTitle>Comunidad</HomeSectionTitle>
-            <p style={{ fontSize: "20px", fontWeight: 800, color: "#1A1A2E", margin: "8px 0 0", lineHeight: 1.1 }}>
+            <p style={{ fontSize: "17px", fontWeight: 700, color: "#1A1A2E", margin: "6px 0 0", lineHeight: 1.2 }}>
               Habla con otros estudiantes
             </p>
           </div>
@@ -344,7 +344,7 @@ export default function InicioPage() {
           style={{
             background: "#FFFFFF",
             borderRadius: "24px",
-            padding: "16px 18px",
+            padding: "18px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -355,7 +355,7 @@ export default function InicioPage() {
         >
           <div>
             <HomeSectionTitle>Recursos</HomeSectionTitle>
-            <p style={{ fontSize: "16px", fontWeight: 700, color: "#1A1A2E", margin: "8px 0 0", lineHeight: 1.2 }}>
+            <p style={{ fontSize: "17px", fontWeight: 700, color: "#1A1A2E", margin: "6px 0 0", lineHeight: 1.2 }}>
               Ver material del curso
             </p>
           </div>

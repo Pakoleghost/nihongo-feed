@@ -198,7 +198,7 @@ export default function KanaPage() {
                 width: `${Math.max(summary.progressPct, summary.vistos > 0 ? 6 : 0)}%`,
                 height: "100%",
                 borderRadius: 999,
-                background: "linear-gradient(90deg, #E63946 0%, #F08A5D 100%)",
+                background: "#E63946",
               }}
             />
           </div>

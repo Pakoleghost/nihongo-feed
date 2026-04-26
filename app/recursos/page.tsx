@@ -1,10 +1,29 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
 import { useStudentViewMode } from "@/lib/use-student-view-mode";
+
+function FileIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="#E63946" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points="14 2 14 8 20 8" stroke="#E63946" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="16" y1="13" x2="8" y2="13" stroke="#E63946" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="16" y1="17" x2="8" y2="17" stroke="#E63946" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function LinkIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="#4ECDC4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="#4ECDC4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 const FOLDER_MARKER_TITLE = "__folder__";
 
@@ -66,7 +85,6 @@ function openResource(url: string | null) {
 }
 
 export default function RecursosPage() {
-  const router = useRouter();
   const [resources, setResources] = useState<ResourceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -242,43 +260,16 @@ export default function RecursosPage() {
       <div
         style={{
           display: "flex",
-          alignItems: "center",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
           gap: "12px",
-          padding: "56px 20px 20px",
+          padding: "20px 20px 16px",
         }}
       >
-        <button
-          onClick={() => router.push("/")}
-          style={{
-            width: "40px",
-            height: "40px",
-            borderRadius: "50%",
-            background: "#FFFFFF",
-            border: "none",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 2px 10px rgba(26,26,46,0.10)",
-            flexShrink: 0,
-          }}
-          aria-label="Volver"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M19 12H5M12 5l-7 7 7 7"
-              stroke="#1A1A2E"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div>
           <h1
             style={{
-              fontSize: "32px",
+              fontSize: "42px",
               fontWeight: 800,
               color: "#1A1A2E",
               margin: 0,
@@ -287,8 +278,8 @@ export default function RecursosPage() {
           >
             Recursos
           </h1>
-          <p style={{ margin: "6px 0 0", fontSize: "14px", color: "#9CA3AF", lineHeight: 1.25 }}>
-            Materiales del curso.
+          <p style={{ margin: "8px 0 0", fontSize: "14px", color: "#7A7F8D", lineHeight: 1.35 }}>
+            Materiales del curso
           </p>
         </div>
 
@@ -301,11 +292,12 @@ export default function RecursosPage() {
               borderRadius: "999px",
               background: "#1A1A2E",
               color: "#FFFFFF",
-              padding: "10px 14px",
-              fontSize: "13px",
-              fontWeight: 800,
+              padding: "10px 18px",
+              fontSize: "14px",
+              fontWeight: 700,
               cursor: "pointer",
               flexShrink: 0,
+              marginTop: "6px",
             }}
           >
             {showAdminPanel ? "Cerrar" : "Agregar"}
@@ -466,7 +458,6 @@ export default function RecursosPage() {
               boxShadow: "0 4px 20px rgba(26,26,46,0.07)",
             }}
           >
-            <p style={{ fontSize: "28px", margin: "0 0 8px" }}>📂</p>
             <p style={{ fontSize: "16px", color: "#9CA3AF", margin: 0 }}>
               El profesor aún no ha subido material.
             </p>
@@ -543,18 +534,17 @@ export default function RecursosPage() {
                       >
                         <div
                           style={{
-                            width: "48px",
-                            height: "48px",
-                            borderRadius: "50%",
-                            background: fileResource ? "rgba(230,57,70,0.10)" : "rgba(78,205,196,0.14)",
+                            width: "44px",
+                            height: "44px",
+                            borderRadius: "14px",
+                            background: fileResource ? "rgba(230,57,70,0.08)" : "rgba(78,205,196,0.12)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            fontSize: "22px",
                             flexShrink: 0,
                           }}
                         >
-                          {fileResource ? "📄" : "🔗"}
+                          {fileResource ? <FileIcon /> : <LinkIcon />}
                         </div>
 
                         <div style={{ flex: 1, minWidth: 0 }}>

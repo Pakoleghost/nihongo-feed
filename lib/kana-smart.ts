@@ -339,7 +339,7 @@ export function getKanaSmartRecommendation(
     const dueItems = getDueItems(reviewGroup, progress);
     return {
       kind: "review",
-      title: `Repasa ${dueItems.length} pendientes`,
+      title: `Repasa ${dueItems.length} ${dueItems.length === 1 ? "pendiente" : "pendientes"}`,
       detail: formatContext(reviewGroup),
       chips: [
         `${dueItems.length} en esta sesión`,
