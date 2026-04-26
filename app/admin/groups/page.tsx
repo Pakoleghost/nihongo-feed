@@ -5,6 +5,23 @@ import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import AppTopNav from "@/components/AppTopNav";
+import { useStudentViewMode } from "@/lib/use-student-view-mode";
+
+const cardStyle = {
+  background: "#FFFFFF",
+  borderRadius: 24,
+  padding: 18,
+  boxShadow: "0 8px 24px rgba(26,26,46,0.08)",
+} satisfies React.CSSProperties;
+
+const pillButtonStyle = {
+  border: "none",
+  borderRadius: 999,
+  padding: "10px 14px",
+  fontSize: 13,
+  fontWeight: 800,
+  cursor: "pointer",
+} satisfies React.CSSProperties;
 
 export default function AdminGroupsPage() {
   const [activeTab, setActiveTab] = useState<'groups' | 'approvals'>('groups');
@@ -16,13 +33,27 @@ export default function AdminGroupsPage() {
   const [pendingGroupByUser, setPendingGroupByUser] = useState<Record<string, string>>({});
   const [newGroupName, setNewGroupName] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
+  const [isCurrentAdmin, setIsCurrentAdmin] = useState(false);
+  const { studentViewActive, setStudentViewActive } = useStudentViewMode(isCurrentAdmin);
 
   const fetchData = useCallback(async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const currentUserId = sessionData.session?.user.id;
+    if (currentUserId) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", currentUserId)
+        .maybeSingle();
+      setIsCurrentAdmin(Boolean(profile?.is_admin));
+    } else {
+      setIsCurrentAdmin(false);
+    }
+
     const { data: grps } = await supabase.from("groups").select("name").order("name");
     setGroups(grps || []);
     
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
       const response = await fetch("/api/admin/requests", {
         headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
@@ -114,100 +145,206 @@ export default function AdminGroupsPage() {
 
   return (
     <>
-    <div style={{ maxWidth: "800px", margin: "40px auto", padding: "0 20px", fontFamily: "sans-serif" }}>
-      <AppTopNav secondary="admin" />
-      <nav style={{ marginBottom: "20px", marginTop: "16px", display: "flex", gap: "20px", borderBottom: "1px solid #eee", paddingBottom: "10px" }}>
-        <button onClick={() => setActiveTab('groups')} style={{ border: "none", background: "none", fontWeight: activeTab === 'groups' ? "bold" : "normal", color: activeTab === 'groups' ? "#2cb696" : "#888", cursor: "pointer" }}>Grupos</button>
-        <button onClick={() => setActiveTab('approvals')} style={{ border: "none", background: "none", fontWeight: activeTab === 'approvals' ? "bold" : "normal", color: activeTab === 'approvals' ? "#d9534f" : "#888", cursor: "pointer" }}>Solicitudes ({pendingUsers.length})</button>
-      </nav>
+    <div style={{ background: "#FFF8E7", minHeight: "100vh", padding: "18px 16px 48px" }}>
+      <div style={{ maxWidth: "860px", margin: "0 auto" }}>
+        <AppTopNav secondary="admin" />
 
-      {activeTab === 'approvals' ? (
-        <div>
-          {pendingUsers.length === 0 ? <p style={{color: "#999", textAlign: "center"}}>No hay solicitudes pendientes.</p> : 
-            pendingUsers.map(u => (
-              <div key={u.id} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "15px", border: "1px solid #eee", borderRadius: "10px", marginBottom: "10px", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontWeight: 700, color: "#333" }}>{u.full_name || u.username || "Sin nombre"}</div>
-                  {u.username && <div style={{ fontSize: "12px", color: "#888" }}>@{u.username}</div>}
-                  {u.email && <div style={{ fontSize: "12px", color: "#888" }}>{u.email}</div>}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                  <select
-                    value={pendingGroupByUser[u.id] || ""}
-                    onChange={(e) => setPendingGroupByUser((prev) => ({ ...prev, [u.id]: e.target.value }))}
-                    style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ddd" }}
-                  >
-                    <option value="">Elegir grupo…</option>
-                    {groups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
-                  </select>
-                  <button onClick={() => handleApprove(u.id)} style={{ backgroundColor: "#2cb696", color: "#fff", border: "none", padding: "8px 15px", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>Aprobar</button>
-                  <button onClick={() => handleDeleteUser(u.id)} style={{ backgroundColor: "#fff", color: "#b42318", border: "1px solid #f3c7c1", padding: "8px 12px", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>Borrar</button>
+        <header style={{ marginTop: 18, marginBottom: 18 }}>
+          <p style={{ margin: 0, color: "#9CA3AF", fontSize: 12, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+            Administración
+          </p>
+          <h1 style={{ margin: "6px 0 0", color: "#1A1A2E", fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
+            Panel de control
+          </h1>
+          <p style={{ margin: "8px 0 0", color: "#53596B", fontSize: 15, lineHeight: 1.4 }}>
+            Gestiona acceso, grupos, foros y revisa cómo se ve la app para estudiantes.
+          </p>
+        </header>
+
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12, marginBottom: 18 }}>
+          <div style={cardStyle}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
+              <div>
+                <p style={{ margin: 0, color: "#9CA3AF", fontSize: 12, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  Acceso
+                </p>
+                <h2 style={{ margin: "8px 0 0", color: "#1A1A2E", fontSize: 22, fontWeight: 900 }}>Solicitudes</h2>
+              </div>
+              <span style={{ borderRadius: 999, background: pendingUsers.length ? "rgba(230,57,70,0.12)" : "rgba(78,205,196,0.14)", color: pendingUsers.length ? "#C53340" : "#178A83", padding: "7px 10px", fontSize: 13, fontWeight: 900 }}>
+                {pendingUsers.length}
+              </span>
+            </div>
+            <p style={{ margin: "10px 0 16px", color: "#53596B", fontSize: 14, lineHeight: 1.4 }}>
+              Aprueba estudiantes nuevos y asígnales grupo.
+            </p>
+            <button type="button" onClick={() => setActiveTab("approvals")} style={{ ...pillButtonStyle, background: "#E63946", color: "#FFFFFF" }}>
+              Revisar solicitudes
+            </button>
+          </div>
+
+          <div style={cardStyle}>
+            <p style={{ margin: 0, color: "#9CA3AF", fontSize: 12, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              Comunidad
+            </p>
+            <h2 style={{ margin: "8px 0 0", color: "#1A1A2E", fontSize: 22, fontWeight: 900 }}>Foros de clase</h2>
+            <p style={{ margin: "10px 0 16px", color: "#53596B", fontSize: 14, lineHeight: 1.4 }}>
+              Entra a los foros para moderar, fijar o cerrar temas.
+            </p>
+            <Link href="/comunidad/foros" style={{ ...pillButtonStyle, display: "inline-flex", textDecoration: "none", background: "#1A1A2E", color: "#FFFFFF" }}>
+              Abrir foros
+            </Link>
+          </div>
+
+          <div style={cardStyle}>
+            <p style={{ margin: 0, color: "#9CA3AF", fontSize: 12, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              Vista
+            </p>
+            <h2 style={{ margin: "8px 0 0", color: "#1A1A2E", fontSize: 22, fontWeight: 900 }}>Vista de estudiante</h2>
+            <p style={{ margin: "10px 0 16px", color: "#53596B", fontSize: 14, lineHeight: 1.4 }}>
+              Oculta controles admin para revisar la experiencia real.
+            </p>
+            <button
+              type="button"
+              disabled={!isCurrentAdmin}
+              onClick={() => setStudentViewActive(!studentViewActive)}
+              style={{ ...pillButtonStyle, background: studentViewActive ? "#4ECDC4" : "#FFFFFF", color: !isCurrentAdmin ? "#9CA3AF" : "#1A1A2E", boxShadow: "inset 0 0 0 1px rgba(26,26,46,0.10)", cursor: isCurrentAdmin ? "pointer" : "not-allowed" }}
+            >
+              {!isCurrentAdmin ? "Solo admin" : studentViewActive ? "Salir de vista" : "Activar vista"}
+            </button>
+          </div>
+
+          <div style={cardStyle}>
+            <p style={{ margin: 0, color: "#9CA3AF", fontSize: 12, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              Curso
+            </p>
+            <h2 style={{ margin: "8px 0 0", color: "#1A1A2E", fontSize: 22, fontWeight: 900 }}>Recursos</h2>
+            <p style={{ margin: "10px 0 16px", color: "#53596B", fontSize: 14, lineHeight: 1.4 }}>
+              Los materiales se administran directamente desde Recursos.
+            </p>
+            <Link href="/recursos" style={{ ...pillButtonStyle, display: "inline-flex", textDecoration: "none", background: "#FFFFFF", color: "#1A1A2E", boxShadow: "inset 0 0 0 1px rgba(26,26,46,0.10)" }}>
+              Ir a Recursos
+            </Link>
+          </div>
+        </section>
+
+        <section style={{ ...cardStyle, padding: 0, overflow: "hidden" }}>
+          <div style={{ padding: 18, borderBottom: "1px solid rgba(26,26,46,0.08)" }}>
+            <p style={{ margin: 0, color: "#9CA3AF", fontSize: 12, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              Gestión rápida
+            </p>
+            <h2 style={{ margin: "6px 0 0", color: "#1A1A2E", fontSize: 24, fontWeight: 900 }}>
+              Usuarios y grupos
+            </h2>
+          </div>
+
+          <nav style={{ display: "flex", gap: 8, padding: 14, background: "#F8F4EE", overflowX: "auto" }}>
+            <button
+              type="button"
+              onClick={() => setActiveTab("groups")}
+              style={{ ...pillButtonStyle, background: activeTab === "groups" ? "#1A1A2E" : "#FFFFFF", color: activeTab === "groups" ? "#FFFFFF" : "#53596B", flexShrink: 0 }}
+            >
+              Usuarios y grupos
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("approvals")}
+              style={{ ...pillButtonStyle, background: activeTab === "approvals" ? "#1A1A2E" : "#FFFFFF", color: activeTab === "approvals" ? "#FFFFFF" : "#53596B", flexShrink: 0 }}
+            >
+              Solicitudes ({pendingUsers.length})
+            </button>
+          </nav>
+
+          <div style={{ padding: 18 }}>
+            {activeTab === 'approvals' ? (
+              <div>
+                {pendingUsers.length === 0 ? <p style={{color: "#9CA3AF", textAlign: "center", padding: "16px 0"}}>No hay solicitudes pendientes.</p> :
+                  pendingUsers.map(u => (
+                    <div key={u.id} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "14px 0", borderBottom: "1px solid rgba(26,26,46,0.08)", alignItems: "center", flexWrap: "wrap" }}>
+                      <div>
+                        <div style={{ fontWeight: 800, color: "#1A1A2E" }}>{u.full_name || u.username || "Sin nombre"}</div>
+                        {u.username && <div style={{ fontSize: "12px", color: "#888" }}>@{u.username}</div>}
+                        {u.email && <div style={{ fontSize: "12px", color: "#888" }}>{u.email}</div>}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                        <select
+                          value={pendingGroupByUser[u.id] || ""}
+                          onChange={(e) => setPendingGroupByUser((prev) => ({ ...prev, [u.id]: e.target.value }))}
+                          style={{ padding: "9px 10px", borderRadius: "12px", border: "none", background: "#F8F4EE", width: "auto" }}
+                        >
+                          <option value="">Elegir grupo…</option>
+                          {groups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
+                        </select>
+                        <button onClick={() => handleApprove(u.id)} style={{ ...pillButtonStyle, background: "#4ECDC4", color: "#1A1A2E" }}>Aprobar</button>
+                        <button onClick={() => handleDeleteUser(u.id)} style={{ ...pillButtonStyle, background: "rgba(230,57,70,0.10)", color: "#C53340" }}>Borrar</button>
+                      </div>
+                    </div>
+                  ))
+                }
+
+                <div style={{ marginTop: 24 }}>
+                  <h3 style={{ fontSize: 16, marginBottom: 10, color: "#1A1A2E" }}>Solicitudes pasadas</h3>
+                  {pastRequests.length === 0 ? (
+                    <p style={{ color: "#9CA3AF" }}>Aún no hay solicitudes aprobadas registradas.</p>
+                  ) : (
+                    <div style={{ display: "grid", gap: 8 }}>
+                      {pastRequests.map((u) => (
+                        <div key={u.id} style={{ display: "flex", justifyContent: "space-between", gap: 10, padding: "12px 0", borderBottom: "1px solid rgba(26,26,46,0.06)" }}>
+                          <div>
+                            <div style={{ fontWeight: 800, color: "#1A1A2E" }}>{u.full_name || u.username || "Sin nombre"}</div>
+                            {u.username && <div style={{ fontSize: "12px", color: "#888" }}>@{u.username}</div>}
+                            {u.email && <div style={{ fontSize: "12px", color: "#888" }}>{u.email}</div>}
+                          </div>
+                          <button onClick={() => handleDeleteUser(u.id)} style={{ ...pillButtonStyle, background: "rgba(230,57,70,0.10)", color: "#C53340", height: "fit-content" }}>Borrar</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-            ))
-          }
-
-          <div style={{ marginTop: 24 }}>
-            <h3 style={{ fontSize: 16, marginBottom: 10, color: "#555" }}>Solicitudes pasadas</h3>
-            {pastRequests.length === 0 ? (
-              <p style={{ color: "#999" }}>Aún no hay solicitudes aprobadas registradas.</p>
             ) : (
-              <div style={{ display: "grid", gap: 8 }}>
-                {pastRequests.map((u) => (
-                  <div key={u.id} style={{ display: "flex", justifyContent: "space-between", gap: 10, padding: "12px 14px", border: "1px solid #f0f0f0", borderRadius: 10, background: "#fafafa" }}>
-                    <div>
-                      <div style={{ fontWeight: 700, color: "#333" }}>{u.full_name || u.username || "Sin nombre"}</div>
-                      {u.username && <div style={{ fontSize: "12px", color: "#888" }}>@{u.username}</div>}
-                      {u.email && <div style={{ fontSize: "12px", color: "#888" }}>{u.email}</div>}
+              <div>
+                <div style={{ backgroundColor: "#F8F4EE", padding: "14px", borderRadius: "18px", marginBottom: "16px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                  <input
+                    type="text"
+                    placeholder="Nombre del nuevo grupo..."
+                    value={newGroupName}
+                    onChange={e => setNewGroupName(e.target.value)}
+                    style={{ flex: "1 1 180px", padding: "10px 12px", borderRadius: "12px", border: "none" }}
+                  />
+                  <button onClick={handleCreateGroup} style={{ ...pillButtonStyle, background: "#1A1A2E", color: "#FFFFFF" }}>Crear grupo</button>
+                </div>
+
+                <select value={selectedGroup} onChange={e => setSelectedGroup(e.target.value)} style={{ marginBottom: "16px", padding: "11px 12px", borderRadius: "14px", width: "100%", border: "none", background: "#F8F4EE" }}>
+                  <option value="Todos">Ver todos los alumnos</option>
+                  {groups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
+                </select>
+
+                {students.map(s => {
+                  return (
+                    <div key={s.id} style={{ display: "flex", justifyContent: "space-between", padding: "14px 0", borderBottom: "1px solid rgba(26,26,46,0.08)", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                      <div style={{ flex: 1, minWidth: 160 }}>
+                        <Link href={`/profile/${s.id}`} style={{ fontWeight: "bold", textDecoration: "none", color: "#1A1A2E", display: "block" }}>
+                          {s.full_name || s.username || "Sin nombre"}
+                        </Link>
+                        {s.username && <div style={{ fontSize: "12px", color: "#888" }}>@{s.username}</div>}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                        <select value={s.group_name || ""} onChange={e => handleUpdateGroup(s.id, e.target.value)} style={{ padding: "8px 10px", borderRadius: "12px", border: "none", background: "#F8F4EE", width: "auto" }}>
+                          <option value="">Sin grupo</option>
+                          {groups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
+                        </select>
+                        <button onClick={() => handleDeleteUser(s.id)} style={{ ...pillButtonStyle, background: "rgba(230,57,70,0.10)", color: "#C53340" }}>
+                          Borrar
+                        </button>
+                      </div>
                     </div>
-                    <button onClick={() => handleDeleteUser(u.id)} style={{ backgroundColor: "#fff", color: "#b42318", border: "1px solid #f3c7c1", padding: "8px 12px", borderRadius: "5px", cursor: "pointer", fontWeight: "bold", height: "fit-content" }}>Borrar</button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
-        </div>
-      ) : (
-        <div>
-          <div style={{ backgroundColor: "#f9f9f9", padding: "15px", borderRadius: "10px", marginBottom: "20px", display: "flex", gap: "10px" }}>
-            <input 
-              type="text" 
-              placeholder="Nombre del nuevo grupo..." 
-              value={newGroupName} 
-              onChange={e => setNewGroupName(e.target.value)}
-              style={{ flex: 1, padding: "8px", borderRadius: "5px", border: "1px solid #ddd" }}
-            />
-            <button onClick={handleCreateGroup} style={{ backgroundColor: "#333", color: "#fff", border: "none", padding: "8px 15px", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>+ Crear Grupo</button>
-          </div>
-
-          <select value={selectedGroup} onChange={e => setSelectedGroup(e.target.value)} style={{ marginBottom: "20px", padding: "10px", borderRadius: "8px", width: "100%", border: "1px solid #ddd" }}>
-            <option value="Todos">Ver todos los alumnos</option>
-            {groups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
-          </select>
-
-          {students.map(s => {
-            return (
-              <div key={s.id} style={{ display: "flex", justifyContent: "space-between", padding: "15px", borderBottom: "1px solid #eee", alignItems: "center" }}>
-                <div style={{ flex: 1 }}>
-                  <Link href={`/profile/${s.id}`} style={{ fontWeight: "bold", textDecoration: "none", color: "#333", display: "block" }}>
-                    {s.full_name || s.username || "Sin nombre"}
-                  </Link>
-                  {s.username && <div style={{ fontSize: "12px", color: "#888" }}>@{s.username}</div>}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                  <select value={s.group_name || ""} onChange={e => handleUpdateGroup(s.id, e.target.value)} style={{ padding: "5px", borderRadius: "5px", border: "1px solid #ddd" }}>
-                    <option value="">Sin grupo</option>
-                    {groups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
-                  </select>
-                  <button onClick={() => handleDeleteUser(s.id)} style={{ backgroundColor: "#fff", color: "#b42318", border: "1px solid #f3c7c1", padding: "8px 10px", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>
-                    Borrar
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+        </section>
+      </div>
     </div>
     <ConfirmDialog
       open={Boolean(deleteTarget)}

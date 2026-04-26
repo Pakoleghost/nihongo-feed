@@ -366,7 +366,7 @@ export default function InicioPage() {
       {isAdmin && !studentViewActive && (
         <div style={{ marginTop: "20px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <Link
-            href="/admin/usuarios"
+            href="/admin/groups"
             style={{
               display: "inline-flex",
               alignItems: "center",
