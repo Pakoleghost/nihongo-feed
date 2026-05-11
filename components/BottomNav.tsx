@@ -7,12 +7,12 @@ function HomeIcon({ color }: { color: string }) {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
       <path
-        d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"
+        d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"
         stroke={color}
         strokeWidth="2"
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path d="M9 21V13h6v8" stroke={color} strokeWidth="2" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -66,7 +66,7 @@ function RecursosIcon({ color }: { color: string }) {
 }
 
 const tabs = [
-  { href: "/", label: "Inicio", Icon: HomeIcon },
+  { href: "/", label: "Comunidad", Icon: HomeIcon },
   { href: "/kana", label: "Aprender", Icon: KanaIcon },
   { href: "/practicar", label: "Practicar", Icon: PracticarIcon },
   { href: "/recursos", label: "Recursos", Icon: RecursosIcon },
