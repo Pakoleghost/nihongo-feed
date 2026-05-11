@@ -54,10 +54,9 @@ type Phase = "question" | "traceReview" | "feedback";
 type KanaAnim = "idle" | "bounce" | "shake";
 type TraceCompletion = { retries: number; strokes: number };
 const MIXED_TASK_WEIGHTS: Array<{ type: KanaQuestionType; weight: number }> = [
-  { type: "kana_to_romaji_choice", weight: 0.3 },
-  { type: "romaji_to_kana_choice", weight: 0.25 },
-  { type: "kana_to_romaji_input", weight: 0.25 },
-  { type: "hiragana_katakana_match", weight: 0.1 },
+  { type: "kana_to_romaji_choice", weight: 0.4 },
+  { type: "romaji_to_kana_choice", weight: 0.35 },
+  { type: "hiragana_katakana_match", weight: 0.15 },
   { type: "romaji_to_kana_trace", weight: 0.1 },
 ];
 
@@ -283,9 +282,6 @@ function getQuestionPromptKind(taskType: KanaQuestionType) {
   return "kana";
 }
 
-function isInputTask(taskType: KanaQuestionType) {
-  return taskType === "kana_to_romaji_input";
-}
 
 function getCorrectChoiceValue(question: QuizQuestion) {
   return question.taskType === "romaji_to_kana_choice" ? question.item.kana : question.item.romaji;
@@ -333,7 +329,6 @@ function buildQuiz(
   const availableTaskTypes: KanaQuestionType[] = [
     "kana_to_romaji_choice",
     "romaji_to_kana_choice",
-    "kana_to_romaji_input",
   ];
 
   if (traceItems.length > 0) {
@@ -430,7 +425,6 @@ function QuizContent() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [scaledOption, setScaledOption] = useState<string | null>(null); // for correct-button scale
   const [kanaAnim, setKanaAnim] = useState<KanaAnim>("idle");
-  const [textAnswer, setTextAnswer] = useState("");
   const [results, setResults] = useState<QuestionResult[]>([]);
   const [progressMap, setProgressMap] = useState<KanaProgressMap>({});
   const [traceCompletion, setTraceCompletion] = useState<TraceCompletion | null>(null);
@@ -440,7 +434,6 @@ function QuizContent() {
   const [matchWrongPairKey, setMatchWrongPairKey] = useState<string | null>(null);
   const [matchMistakePairKeys, setMatchMistakePairKeys] = useState<string[]>([]);
   const [isReady, setIsReady] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const prog = loadKanaProgress("anon");
@@ -478,17 +471,6 @@ function QuizContent() {
     };
   }, [isTraceQuestion]);
 
-  useEffect(() => {
-    if (!currentQ || !isInputTask(currentQ.taskType) || phase !== "question") return;
-
-    const frame = window.requestAnimationFrame(() => {
-      inputRef.current?.focus();
-    });
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-    };
-  }, [currentQ?.item.id, currentQ?.taskType, phase]);
 
   const advance = useCallback(
     (result: QuestionResult, updatedProgress: KanaProgressMap) => {
@@ -522,7 +504,6 @@ function QuizContent() {
         setSelectedOption(null);
         setScaledOption(null);
         setKanaAnim("idle");
-        setTextAnswer("");
         setTraceCompletion(null);
         setMatchSelection(null);
         setMatchedPairKeys([]);
@@ -552,27 +533,6 @@ function QuizContent() {
       setKanaAnim("shake");
       setTimeout(() => advance({ item: currentQ.item, correct, userAnswer: option }, updated), 1200);
     }
-  }
-
-  function handleConfirm() {
-    if (phase !== "question" || !currentQ || !textAnswer.trim()) return;
-    setPhase("feedback");
-
-    const correct = isCorrectAnswer(currentQ.item, textAnswer);
-    const updated = applyKanaRating(progressMap, currentQ.item, correct ? "correct" : "wrong");
-    setProgressMap(updated);
-    saveKanaProgress("anon", updated);
-
-    if (correct) {
-      setKanaAnim("bounce");
-    } else {
-      setKanaAnim("shake");
-    }
-
-    setTimeout(
-      () => advance({ item: currentQ.item, correct, userAnswer: textAnswer.trim() }, updated),
-      correct ? 800 : 1200
-    );
   }
 
   function handleTraceComplete(result: TraceCompletion) {
@@ -718,18 +678,15 @@ function QuizContent() {
 
   if (!currentQ) return null;
 
-  const feedbackIsInputCorrect = phase === "feedback" && isCorrectAnswer(currentQ.item, textAnswer);
   const quizContext = formatQuizContext(contextPrimary, contextSecondary, sets);
   const questionModeLabel = getQuestionTaskLabel(currentQ.taskType);
   const questionInstruction = getQuestionInstruction(currentQ.taskType);
   const promptKind = getQuestionPromptKind(currentQ.taskType);
   const promptValue = getQuestionPromptValue(currentQ);
   const correctChoiceValue = getCorrectChoiceValue(currentQ);
-  const feedbackIsCorrect = isInputTask(currentQ.taskType)
-    ? feedbackIsInputCorrect
-    : isMatchQuestion
-      ? phase === "feedback" && matchMistakes === 0
-      : selectedOption === correctChoiceValue;
+  const feedbackIsCorrect = isMatchQuestion
+    ? phase === "feedback" && matchMistakes === 0
+    : selectedOption === correctChoiceValue;
   const feedbackLabel = feedbackIsCorrect
     ? "Correcto"
     : isMatchQuestion && phase === "feedback"
@@ -1394,96 +1351,6 @@ function QuizContent() {
               : matchSelection
                 ? "Ahora toca su pareja"
                 : "Toca un hiragana y su katakana"}
-          </div>
-        </div>
-      ) : isInputTask(currentQ.taskType) ? (
-        /* Kana -> romaji input */
-        <div style={{ padding: "0 20px 40px" }}>
-          <div
-            style={{
-              ...sharedCardStyle,
-              padding: "20px 18px 18px",
-              display: "grid",
-              gap: "14px",
-            }}
-          >
-            <div
-              style={{
-                borderRadius: "20px",
-                background: "#F7F3ED",
-                border: `2px solid ${
-                  phase === "feedback" ? (feedbackIsInputCorrect ? "#4ECDC4" : "#E63946") : "transparent"
-                }`,
-                padding: "6px 16px",
-                transition: "border-color 0.2s",
-              }}
-            >
-            <input
-              ref={inputRef}
-              type="text"
-              value={textAnswer}
-              onChange={(e) => setTextAnswer(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleConfirm(); }}
-              disabled={phase === "feedback"}
-              placeholder="Escribe el romaji"
-              autoFocus
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              style={{
-                width: "100%",
-                background: "transparent",
-                border: "none",
-                outline: "none",
-                fontSize: "22px",
-                fontWeight: 600,
-                color: "#1A1A2E",
-                textAlign: "center",
-                padding: "14px 0",
-                fontFamily: "inherit",
-                boxSizing: "border-box",
-              }}
-            />
-          </div>
-          <div
-            style={{
-              minHeight: "24px",
-              textAlign: "center",
-              fontSize: "14px",
-              fontWeight: 700,
-              color: phase === "feedback" ? feedbackColor : "#8A8F9B",
-            }}
-          >
-            {phase === "feedback"
-              ? feedbackIsInputCorrect
-                ? "Respuesta correcta"
-                : `Respuesta: ${currentQ.item.romaji}`
-              : "Pulsa Enter o toca comprobar"}
-          </div>
-          <button
-            onClick={handleConfirm}
-            disabled={phase === "feedback" || !textAnswer.trim()}
-            style={{
-              width: "100%",
-              padding: "18px",
-              borderRadius: "999px",
-              border: "none",
-              cursor: phase === "feedback" || !textAnswer.trim() ? "not-allowed" : "pointer",
-              background:
-                phase === "feedback"
-                  ? feedbackIsInputCorrect
-                    ? "#4ECDC4"
-                    : "#E63946"
-                  : "#1A1A2E",
-              color: "#FFFFFF",
-              fontSize: "18px",
-              fontWeight: 700,
-              transition: "background 0.2s",
-            }}
-          >
-            {phase === "feedback" ? feedbackLabel : "Comprobar"}
-          </button>
           </div>
         </div>
       ) : (

@@ -77,6 +77,13 @@ export function saveKanaProgress(userKey: string, progress: KanaProgressMap) {
   } catch {}
 }
 
+export function resetKanaProgress(userKey: string) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(getKanaProgressStorageKey(userKey));
+  } catch {}
+}
+
 function createInitialEntry(item: KanaItem): KanaProgressEntry {
   return {
     kana: item.kana,
