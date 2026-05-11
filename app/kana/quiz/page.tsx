@@ -16,6 +16,8 @@ import {
 import type { KanaProgressMap } from "@/lib/kana-progress";
 import { buildKanaSmartSessionItemsWithFocus } from "@/lib/kana-smart";
 import { hasKanaTraceData } from "@/lib/kana-trace";
+import { saveKanaProgressToSupabase } from "@/lib/kana-progress-sync";
+import { supabase } from "@/lib/supabase";
 
 type QuizQuestion = {
   item: KanaItem;
@@ -496,6 +498,11 @@ function QuizContent() {
             taskMode,
           })
         );
+        // Persist to Supabase in background (fire-and-forget)
+        supabase.auth.getUser().then(({ data }) => {
+          const userId = data?.user?.id;
+          if (userId) saveKanaProgressToSupabase(userId, "anon");
+        });
         router.push("/kana/resultados");
       } else {
         setCurrentIndex((i) => i + 1);

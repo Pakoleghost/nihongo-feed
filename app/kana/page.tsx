@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { KANA_ITEMS } from "@/lib/kana-data";
 import { getKanaStateCounts, loadKanaProgress, resetKanaProgress } from "@/lib/kana-progress";
 import { getKanaSmartRecommendation } from "@/lib/kana-smart";
+import { syncKanaProgressOnLoad } from "@/lib/kana-progress-sync";
+import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
 
 const TOTAL = KANA_ITEMS.length;
@@ -26,6 +28,17 @@ export default function KanaPage() {
   const router = useRouter();
   const [summary, setSummary] = useState(() => buildSummary());
   const [confirmReset, setConfirmReset] = useState(false);
+
+  // Sync with Supabase on mount (background, non-blocking)
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const userId = data?.user?.id;
+      if (!userId) return;
+      syncKanaProgressOnLoad(userId, "anon", () => {
+        setSummary(buildSummary());
+      });
+    });
+  }, []);
 
   useEffect(() => {
     const refresh = () => setSummary(buildSummary());
