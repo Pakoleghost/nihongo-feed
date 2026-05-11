@@ -1,6 +1,6 @@
 {
-  "name": "Nihongo",
-  "short_name": "Nihongo",
+  "name": "フィード",
+  "short_name": "フィード",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFF8E7",
