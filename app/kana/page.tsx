@@ -15,7 +15,7 @@ const TOTAL = KANA_ITEMS.length;
 function buildSummary() {
   const progress = loadKanaProgress("anon");
   const counts = getKanaStateCounts(KANA_ITEMS, progress);
-  const dominados = counts.fijado;
+  const dominados = counts.fijado + counts.quemado;
   const smartPlan = getKanaSmartRecommendation(progress, {
     vistos: counts.aprendiendo + counts.en_repaso + counts.fijado,
     aprendiendo: counts.aprendiendo + counts.en_repaso,

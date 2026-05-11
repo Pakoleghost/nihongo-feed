@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { KANA_ITEMS } from "@/lib/kana-data";
 import type { KanaItem } from "@/lib/kana-data";
 import KanaStrokeAnimation from "@/components/KanaStrokeAnimation";
+import { loadKanaProgress, getKanaItemState } from "@/lib/kana-progress";
+import type { KanaProgressMap, KanaItemState } from "@/lib/kana-progress";
 
 // ─── lookup: kana character → KanaItem ───────────────────────────────────────
 const KANA_MAP = new Map<string, KanaItem>(KANA_ITEMS.map((i) => [i.kana, i]));
@@ -106,14 +108,24 @@ const YOON_COL_LABELS = ["ya", "yu", "yo"];
 
 // ─── sub-components ──────────────────────────────────────────────────────────
 
+const STATE_STYLE: Record<KanaItemState, { bg: string; dot: string | null; badge: string | null }> = {
+  nuevo:      { bg: "#FFFFFF",  dot: null,      badge: null },
+  aprendiendo:{ bg: "#FFFFFF",  dot: "#E63946", badge: null },
+  en_repaso:  { bg: "#FFFFFF",  dot: "#4ECDC4", badge: null },
+  fijado:     { bg: "#F0FFFE",  dot: "#4ECDC4", badge: null },
+  quemado:    { bg: "#FFFBEB",  dot: null,      badge: "★" },
+};
+
 function KanaCell({
   kana,
   selected,
   onSelect,
+  progress,
 }: {
   kana: string | null;
   selected: string | null;
   onSelect: (k: string) => void;
+  progress: KanaProgressMap;
 }) {
   if (!kana) {
     return (
@@ -128,11 +140,16 @@ function KanaCell({
   }
   const item = KANA_MAP.get(kana);
   const isSelected = selected === kana;
+
+  const entry = item ? progress[item.id] : undefined;
+  const state = getKanaItemState(entry);
+  const { bg, dot, badge } = STATE_STYLE[state];
+
   return (
     <button
       onClick={() => onSelect(kana)}
       style={{
-        background: isSelected ? "#4ECDC4" : "#FFFFFF",
+        background: isSelected ? "#4ECDC4" : bg,
         borderRadius: "10px",
         border: "none",
         cursor: "pointer",
@@ -143,12 +160,41 @@ function KanaCell({
         justifyContent: "center",
         minHeight: "54px",
         width: "100%",
+        position: "relative",
         boxShadow: isSelected
           ? "0 2px 8px rgba(78,205,196,0.35)"
           : "0 1px 4px rgba(26,26,46,0.07)",
         transition: "background 0.12s, box-shadow 0.12s",
       }}
     >
+      {/* Progress badge: star for quemado, dot for others */}
+      {!isSelected && badge && (
+        <span
+          style={{
+            position: "absolute",
+            top: "4px",
+            right: "5px",
+            fontSize: "8px",
+            color: "#D97706",
+            lineHeight: 1,
+          }}
+        >
+          {badge}
+        </span>
+      )}
+      {!isSelected && dot && !badge && (
+        <span
+          style={{
+            position: "absolute",
+            top: "5px",
+            right: "5px",
+            width: "5px",
+            height: "5px",
+            borderRadius: "50%",
+            background: dot,
+          }}
+        />
+      )}
       <span
         style={{
           fontSize: "22px",
@@ -181,12 +227,14 @@ function TableGrid({
   colLabels,
   selected,
   onSelect,
+  progress,
 }: {
   rows: Row[];
   rowLabels: string[];
   colLabels: string[];
   selected: string | null;
   onSelect: (k: string) => void;
+  progress: KanaProgressMap;
 }) {
   const cols = colLabels.length;
   const gridCols = `28px repeat(${cols}, 1fr)`;
@@ -227,7 +275,7 @@ function TableGrid({
             {rowLabels[ri]}
           </div>
           {row.map((kana, ci) => (
-            <KanaCell key={ci} kana={kana} selected={selected} onSelect={onSelect} />
+            <KanaCell key={ci} kana={kana} selected={selected} onSelect={onSelect} progress={progress} />
           ))}
         </div>
       ))}
@@ -298,6 +346,14 @@ export default function TablaPage() {
   const [modalKana, setModalKana] = useState<string | null>(null);
   const [replayKey, setReplayKey] = useState(0);
   const [strokeSpeed, setStrokeSpeed] = useState<StrokeSpeed>("normal");
+  const [progress, setProgress] = useState<KanaProgressMap>({});
+
+  useEffect(() => {
+    setProgress(loadKanaProgress("anon"));
+    const refresh = () => setProgress(loadKanaProgress("anon"));
+    window.addEventListener("focus", refresh);
+    return () => window.removeEventListener("focus", refresh);
+  }, []);
 
   function handleSelect(kana: string) {
     setSelected(kana);
@@ -420,6 +476,7 @@ export default function TablaPage() {
             colLabels={MAIN_COL_LABELS}
             selected={selected}
             onSelect={handleSelect}
+            progress={progress}
           />
 
           {/* ん / ン — full-width */}
@@ -474,6 +531,27 @@ export default function TablaPage() {
         </div>
       </div>
 
+      {/* Progress legend */}
+      <div style={{ padding: "16px 16px 0", display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
+        {([
+          { dot: "#E63946", badge: null, label: "Aprendiendo" },
+          { dot: "#4ECDC4", badge: null, label: "En repaso" },
+          { dot: "#4ECDC4", badge: null, bg: "#F0FFFE", label: "Fijado" },
+          { dot: null, badge: "★", label: "Quemado" },
+        ] as Array<{ dot: string | null; badge: string | null; bg?: string; label: string }>).map(({ dot, badge, label }) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <span style={{ position: "relative", display: "inline-flex", width: 16, height: 16, alignItems: "center", justifyContent: "center" }}>
+              {badge ? (
+                <span style={{ fontSize: "11px", color: "#D97706", lineHeight: 1 }}>{badge}</span>
+              ) : (
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: dot ?? "#ccc", display: "inline-block" }} />
+              )}
+            </span>
+            <span style={{ fontSize: "11px", color: "#9CA3AF", fontWeight: 600 }}>{label}</span>
+          </div>
+        ))}
+      </div>
+
       {/* Collapsible sections */}
       <div style={{ padding: "16px 16px 0", display: "flex", flexDirection: "column", gap: "10px" }}>
 
@@ -488,6 +566,7 @@ export default function TablaPage() {
             colLabels={MAIN_COL_LABELS}
             selected={selected}
             onSelect={handleSelect}
+            progress={progress}
           />
         </CollapsibleSection>
 
@@ -502,6 +581,7 @@ export default function TablaPage() {
             colLabels={MAIN_COL_LABELS}
             selected={selected}
             onSelect={handleSelect}
+            progress={progress}
           />
         </CollapsibleSection>
 
@@ -516,6 +596,7 @@ export default function TablaPage() {
             colLabels={YOON_COL_LABELS}
             selected={selected}
             onSelect={handleSelect}
+            progress={progress}
           />
         </CollapsibleSection>
 
@@ -525,6 +606,15 @@ export default function TablaPage() {
       <AnimatePresence>
         {modalKana && (() => {
           const item = KANA_MAP.get(modalKana);
+          const modalEntry = item ? progress[item.id] : undefined;
+          const modalState = getKanaItemState(modalEntry);
+          const STATE_LABEL: Record<KanaItemState, { text: string; color: string }> = {
+            nuevo:      { text: "Nuevo",       color: "#9CA3AF" },
+            aprendiendo:{ text: "Aprendiendo", color: "#E63946" },
+            en_repaso:  { text: "En repaso",   color: "#4ECDC4" },
+            fijado:     { text: "Fijado",      color: "#178A83" },
+            quemado:    { text: "★ Quemado",   color: "#D97706" },
+          };
           return (
             <motion.div
               key="modal-overlay"
@@ -609,12 +699,26 @@ export default function TablaPage() {
                     fontSize: "20px",
                     fontWeight: 700,
                     color: "#9CA3AF",
-                    margin: "0 0 12px",
+                    margin: "0 0 4px",
                     letterSpacing: "0.04em",
                   }}
                 >
                   {item?.romaji ?? ""}
                 </p>
+
+                {/* Progress state */}
+                {modalState !== "nuevo" && (
+                  <p style={{
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    color: STATE_LABEL[modalState].color,
+                    margin: "0 0 10px",
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                  }}>
+                    {STATE_LABEL[modalState].text}
+                  </p>
+                )}
 
                 {/* Stroke animation */}
                 <KanaStrokeAnimation

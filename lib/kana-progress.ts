@@ -29,6 +29,9 @@ const MS = {
   h24: 24 * 60 * 60 * 1000,
   d3:  3  * 24 * 60 * 60 * 1000,
   d7:  7  * 24 * 60 * 60 * 1000,
+  d14: 14 * 24 * 60 * 60 * 1000,
+  d30: 30 * 24 * 60 * 60 * 1000,
+  d90: 90 * 24 * 60 * 60 * 1000,
 } as const;
 
 function leitnerNextDueAt(level: number): number {
@@ -36,7 +39,10 @@ function leitnerNextDueAt(level: number): number {
   if (level === 1) return Date.now() + MS.h4;
   if (level === 2) return Date.now() + MS.h24;
   if (level === 3) return Date.now() + MS.d3;
-  return Date.now() + MS.d7; // level 4+
+  if (level === 4) return Date.now() + MS.d7;
+  if (level === 5) return Date.now() + MS.d14;
+  if (level === 6) return Date.now() + MS.d30;
+  return Date.now() + MS.d90; // level 7 = quemado
 }
 
 /** True when the item should appear in a review session. */
@@ -115,7 +121,7 @@ export function applyKanaRating(progress: KanaProgressMap, item: KanaItem, ratin
 
   if (rating === "correct") {
     // Advance one level, schedule according to Leitner intervals
-    level = Math.min(current.level + 1, 6);
+    level = Math.min(current.level + 1, 7);
     next_due_at = leitnerNextDueAt(level);
   } else if (rating === "almost") {
     // Keep level, review again in 4 hours
@@ -157,17 +163,18 @@ function isDue(entry?: KanaProgressEntry | null) {
   return isKanaDue(entry);
 }
 
-export type KanaItemState = "nuevo" | "aprendiendo" | "en_repaso" | "fijado";
+export type KanaItemState = "nuevo" | "aprendiendo" | "en_repaso" | "fijado" | "quemado";
 
 export function getKanaItemState(entry: KanaProgressEntry | undefined): KanaItemState {
   if (!entry || entry.timesSeen === 0) return "nuevo";
   if (entry.level <= 2) return "aprendiendo";
   if (entry.level === 3) return "en_repaso";
-  return "fijado"; // level >= 4
+  if (entry.level >= 7) return "quemado"; // 90-day interval — effectively mastered
+  return "fijado"; // level 4–6
 }
 
 export function getKanaStateCounts(items: KanaItem[], progress: KanaProgressMap) {
-  const counts = { nuevo: 0, aprendiendo: 0, en_repaso: 0, fijado: 0 };
+  const counts = { nuevo: 0, aprendiendo: 0, en_repaso: 0, fijado: 0, quemado: 0 };
   for (const item of items) {
     const state = getKanaItemState(progress[item.id]);
     counts[state]++;
