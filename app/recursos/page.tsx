@@ -445,145 +445,106 @@ export default function RecursosPage() {
         ) : null}
 
         {loading ? (
-          <div style={{ textAlign: "center", color: "#9CA3AF", padding: "40px 0" }}>
-            Cargando...
+          <div style={{ textAlign: "center", color: "#9CA3AF", padding: "48px 0", fontSize: 14 }}>
+            Cargando…
           </div>
         ) : grouped.length === 0 ? (
-          <div
-            style={{
-              background: "#FFFFFF",
-              borderRadius: "20px",
-              padding: "32px",
-              textAlign: "center",
-              boxShadow: "0 4px 20px rgba(26,26,46,0.07)",
-            }}
-          >
-            <p style={{ fontSize: "16px", color: "#9CA3AF", margin: 0 }}>
-              El profesor aún no ha subido material.
-            </p>
+          <div style={{ background: "#FFFFFF", borderRadius: "16px", padding: "40px 24px", textAlign: "center", boxShadow: "0 2px 10px rgba(26,26,46,0.07)" }}>
+            <p style={{ fontSize: "32px", margin: "0 0 12px" }}>📂</p>
+            <p style={{ fontSize: "16px", fontWeight: 700, color: "#1A1A2E", margin: "0 0 6px" }}>Sin material aún</p>
+            <p style={{ fontSize: "13px", color: "#9CA3AF", margin: 0 }}>El profesor subirá los archivos aquí.</p>
           </div>
         ) : (
           grouped.map(([folder, items]) => (
             <section key={folder}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "10px" }}>
-                <p
-                  style={{
-                    fontSize: "15px",
-                    fontWeight: 800,
-                    color: "#53596B",
-                    margin: 0,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.06em",
-                  }}
-                >
-                  {folder}
-                </p>
-                {effectiveIsAdmin ? (
-                  <span
-                    style={{
-                      borderRadius: "6px",
-                      background: "rgba(78,205,196,0.12)",
-                      color: "#178A83",
-                      padding: "3px 7px",
-                      fontSize: "10px",
-                      fontWeight: 700,
-                    }}
-                  >
+              {/* Folder header */}
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: "7px",
+                  background: "#FFFFFF",
+                  borderRadius: "999px",
+                  padding: "5px 12px 5px 8px",
+                  boxShadow: "0 1px 6px rgba(26,26,46,0.07)",
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke="#4ECDC4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span style={{ fontSize: "12px", fontWeight: 800, color: "#1A1A2E", letterSpacing: "0.02em" }}>{folder}</span>
+                </div>
+                {effectiveIsAdmin && (
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "#9CA3AF" }}>
                     {items.length} {items.length === 1 ? "item" : "items"}
                   </span>
-                ) : null}
+                )}
               </div>
 
               {items.length === 0 ? (
-                <div
-                  style={{
-                    background: "rgba(255,255,255,0.62)",
-                    borderRadius: "20px",
-                    padding: "18px",
-                    color: "#9CA3AF",
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    textAlign: "center",
-                  }}
-                >
-                  Carpeta vacía.
+                <div style={{ background: "rgba(255,255,255,0.5)", borderRadius: "12px", padding: "16px", color: "#C4BAB0", fontSize: "13px", fontWeight: 600, textAlign: "center" }}>
+                  Carpeta vacía
                 </div>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "20px" }}>
                   {items.map((item) => {
                     const fileResource = isFile(item.url);
+                    const ext = fileResource ? getFileExtension(item.url) : null;
+                    const domain = !fileResource && item.url
+                      ? (() => { try { return new URL(item.url).hostname.replace("www.", ""); } catch { return null; } })()
+                      : null;
+
                     return (
                       <button
                         key={item.id}
                         onClick={() => openResource(item.url)}
                         disabled={!item.url}
                         style={{
+                          position: "relative",
                           background: "#FFFFFF",
-                          borderRadius: "12px",
-                          padding: "12px 14px",
+                          borderRadius: "14px",
+                          padding: "14px 16px",
                           display: "flex",
                           alignItems: "center",
                           gap: "14px",
                           border: "none",
                           cursor: item.url ? "pointer" : "default",
                           textAlign: "left",
-                          boxShadow: "0 2px 12px rgba(26,26,46,0.07)",
+                          boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
                           width: "100%",
-                          opacity: item.url ? 1 : 0.5,
+                          overflow: "hidden",
+                          opacity: item.url ? 1 : 0.45,
                         }}
                       >
-                        <div
-                          style={{
-                            width: "44px",
-                            height: "44px",
-                            borderRadius: "14px",
-                            background: fileResource ? "rgba(230,57,70,0.08)" : "rgba(78,205,196,0.12)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            flexShrink: 0,
-                          }}
-                        >
+                        {/* Corner fold */}
+                        <div style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, background: fileResource ? "#E63946" : "#4ECDC4", borderBottomLeftRadius: 28, opacity: 0.15 }} />
+
+                        {/* Icon */}
+                        <div style={{
+                          width: 46, height: 46, borderRadius: "12px", flexShrink: 0,
+                          background: fileResource ? "rgba(230,57,70,0.07)" : "rgba(78,205,196,0.10)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
                           {fileResource ? <FileIcon /> : <LinkIcon />}
                         </div>
 
+                        {/* Text */}
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p
-                            style={{
-                              fontSize: "15px",
-                              fontWeight: 700,
-                              color: "#1A1A2E",
-                              margin: 0,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
+                          <p style={{ fontSize: "15px", fontWeight: 700, color: "#1A1A2E", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {getResourceTitle(item)}
                           </p>
-                          <p
-                            style={{
-                              fontSize: "12px",
-                              color: "#9CA3AF",
-                              margin: "2px 0 0",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {getResourceSubtitle(item.url)}
+                          <p style={{ fontSize: "12px", color: "#9CA3AF", margin: "3px 0 0", fontWeight: 500 }}>
+                            {ext ? ext : domain ?? "Enlace"}
                           </p>
                         </div>
 
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                          <path
-                            d="M9 18l6-6-6-6"
-                            stroke="#C4BAB0"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
+                        {/* Open icon */}
+                        {fileResource ? (
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="#C4BAB0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        ) : (
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" stroke="#C4BAB0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
                       </button>
                     );
                   })}

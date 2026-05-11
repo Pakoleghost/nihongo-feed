@@ -65,54 +65,32 @@ export default function PracticarPage() {
             <Link
               href={href}
               style={{
+                position: "relative",
                 background: "#FFFFFF",
-                borderRadius: "12px",
-                padding: "20px 18px 20px 22px",
+                borderRadius: "14px",
+                padding: "18px 18px 20px 20px",
                 display: "flex",
                 alignItems: "center",
                 gap: "16px",
                 textDecoration: "none",
-                boxShadow: `inset 4px 0 0 ${accent}, 0 2px 10px rgba(26,26,46,0.07)`,
+                boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+                overflow: "hidden",
               }}
             >
+              {/* Corner fold */}
+              <div style={{ position: "absolute", top: 0, right: 0, width: 36, height: 36, background: accent, borderBottomLeftRadius: 36 }} />
+
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: 800,
-                    color: "#1A1A2E",
-                    margin: 0,
-                    lineHeight: 1.1,
-                  }}
-                >
+                <p style={{ fontSize: "20px", fontWeight: 800, color: "#1A1A2E", margin: 0, lineHeight: 1.1 }}>
                   {title}
                 </p>
-                <p
-                  style={{
-                    fontSize: "13px",
-                    color: "#7A7F8D",
-                    margin: "5px 0 0",
-                    lineHeight: 1.35,
-                  }}
-                >
+                <p style={{ fontSize: "13px", color: "#7A7F8D", margin: "5px 0 0", lineHeight: 1.35 }}>
                   {sub}
                 </p>
               </div>
 
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                style={{ flexShrink: 0 }}
-              >
-                <path
-                  d="M9 18l6-6-6-6"
-                  stroke="#C4BAB0"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, marginRight: 6 }}>
+                <path d="M9 18l6-6-6-6" stroke="#C4BAB0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>
 
@@ -124,7 +102,7 @@ export default function PracticarPage() {
                   alignItems: "center",
                   gap: "5px",
                   marginTop: "8px",
-                  marginLeft: "22px",
+                  marginLeft: "20px",
                   fontSize: "12px",
                   fontWeight: 600,
                   color: "#9CA3AF",

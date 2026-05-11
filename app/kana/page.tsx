@@ -136,21 +136,25 @@ export default function KanaPage() {
         <Link
           href="/kana/configurar?mode=libre"
           style={{
+            position: "relative",
             background: "#FFFFFF",
-            borderRadius: "12px",
-            padding: "16px 18px",
+            borderRadius: "14px",
+            padding: "16px 18px 18px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             textDecoration: "none",
             boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+            overflow: "hidden",
           }}
         >
+          {/* Corner fold */}
+          <div style={{ position: "absolute", top: 0, right: 0, width: 36, height: 36, background: "#4ECDC4", borderBottomLeftRadius: 36 }} />
           <div>
             <p style={{ fontSize: "16px", fontWeight: 700, color: "#1A1A2E", margin: 0 }}>Modo libre</p>
             <p style={{ fontSize: "13px", color: "#9CA3AF", margin: "3px 0 0" }}>Elige script y bloques</p>
           </div>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginRight: 8 }}>
             <path d="M9 18l6-6-6-6" stroke="#C4BAB0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </Link>
