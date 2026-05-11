@@ -57,7 +57,16 @@ export default function KanaPage() {
     setConfirmReset(false);
   }
 
-  const smartHref = `/kana/configurar?mode=smart&ids=${summary.smartPlan.itemIds.join(",")}&focus=${summary.smartPlan.focusItemIds.join(",")}&primary=${encodeURIComponent(summary.smartPlan.contextPrimary)}&secondary=${encodeURIComponent(summary.smartPlan.contextSecondary)}`;
+  // Smart mode goes directly to quiz — no need for configurar middleman
+  const smartCount = Math.min(Math.max(summary.smartPlan.itemIds.length, 5), 20);
+  const _sp = new URLSearchParams({
+    mode: "smart", taskMode: "mixed", count: String(smartCount),
+    items: summary.smartPlan.itemIds.join(","),
+    focusItems: summary.smartPlan.focusItemIds.join(","),
+    contextPrimary: summary.smartPlan.contextPrimary,
+  });
+  if (summary.smartPlan.contextSecondary) _sp.set("contextSecondary", summary.smartPlan.contextSecondary);
+  const smartHref = `/kana/quiz?${_sp.toString()}`;
 
   return (
     <div

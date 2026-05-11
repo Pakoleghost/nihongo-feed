@@ -241,57 +241,42 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
           </div>
         </div>
 
-        <div
-          style={{
-            marginTop: "8px",
-            background: "#FFF5E6",
-            borderRadius: "2rem",
-            padding: "8px",
-          }}
-        >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-              gap: "8px",
-            }}
-          >
+        {/* Progress bar — seen vs total */}
+        {lessonSummary.total > 0 && (
+          <div style={{ marginTop: "10px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", letterSpacing: "0.07em", textTransform: "uppercase" }}>
+                Repasadas
+              </span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#53596B" }}>
+                {lessonSummary.total - lessonSummary.nuevos}/{lessonSummary.total}
+              </span>
+            </div>
+            <div style={{ height: 6, background: "#F0EDE8", borderRadius: 999, overflow: "hidden" }}>
+              <div style={{
+                height: "100%",
+                width: `${Math.round(((lessonSummary.total - lessonSummary.nuevos) / lessonSummary.total) * 100)}%`,
+                background: "#4ECDC4", borderRadius: 999, transition: "width 0.4s ease",
+              }} />
+            </div>
+          </div>
+        )}
+
+        <div style={{ marginTop: "10px", background: "#FFF5E6", borderRadius: "2rem", padding: "8px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "8px" }}>
             {[
-              { label: "NUEVAS", value: lessonSummary.nuevos, color: "#9CA3AF" },
-              { label: "PEND.", value: lessonSummary.pendientes, color: "#E63946" },
-              { label: "DOM.", value: lessonSummary.dominados, color: "#4ECDC4" },
+              { label: "Sin ver", value: lessonSummary.nuevos, color: "#9CA3AF" },
+              { label: "Por repasar", value: lessonSummary.pendientes, color: "#E63946" },
+              { label: "Dominadas", value: lessonSummary.dominados, color: "#4ECDC4" },
             ].map((stat) => (
               <div
                 key={stat.label}
-                style={{
-                  background: "#FFFFFF",
-                  borderRadius: "2rem",
-                  padding: "8px",
-                  boxShadow: "0 8px 24px rgba(26,26,46,0.06)",
-                  textAlign: "center",
-                }}
+                style={{ background: "#FFFFFF", borderRadius: "2rem", padding: "8px", boxShadow: "0 8px 24px rgba(26,26,46,0.06)", textAlign: "center" }}
               >
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    letterSpacing: "0.04em",
-                    color: "#9CA3AF",
-                    textTransform: "uppercase",
-                  }}
-                >
+                <p style={{ margin: 0, fontSize: "10px", fontWeight: 700, letterSpacing: "0.04em", color: "#9CA3AF", textTransform: "uppercase" }}>
                   {stat.label}
                 </p>
-                <p
-                  style={{
-                    margin: "6px 0 0",
-                    fontSize: "20px",
-                    lineHeight: 1,
-                    fontWeight: 700,
-                    color: stat.color,
-                  }}
-                >
+                <p style={{ margin: "6px 0 0", fontSize: "20px", lineHeight: 1, fontWeight: 700, color: stat.color }}>
                   {stat.value}
                 </p>
               </div>
