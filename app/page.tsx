@@ -123,8 +123,7 @@ export default function HomePage() {
   const [savingEdit, setSavingEdit] = useState(false);
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
 
-  // Lightbox swipe-down
-  const lbTouchStartY = useRef(0);
+  // Lightbox — no extra refs needed (framer-motion drag handles it)
 
   async function loadPostsBatch({ uid, cursor, reset }: { uid: string | null; cursor: string | null; reset: boolean }) {
     let q = supabase
@@ -271,10 +270,8 @@ export default function HomePage() {
 
   async function handleShare(post: Post, profile: Profile | undefined) {
     const username = profile?.username ?? "Anónimo";
-    const params = new URLSearchParams({
-      content: post.content,
-      username,
-    });
+    const params = new URLSearchParams({ content: post.content, username });
+    if (post.image_url) params.set("imageUrl", post.image_url);
     const cardUrl = `/api/share-card?${params.toString()}`;
     const fullUrl = `${window.location.origin}${cardUrl}`;
 
@@ -420,11 +417,6 @@ export default function HomePage() {
     if (error) { alert("No se pudo eliminar. Inténtalo de nuevo."); return; }
     setPosts((prev) => prev.filter((p) => p.id !== postId));
     setConfirmDeleteId(null);
-  }
-
-  function handleLbTouchStart(e: React.TouchEvent) { lbTouchStartY.current = e.touches[0].clientY; }
-  function handleLbTouchEnd(e: React.TouchEvent) {
-    if (e.changedTouches[0].clientY - lbTouchStartY.current > 80) setLightboxUrl(null);
   }
 
   const canPublish = composeText.trim().length > 0 && !publishing && !!userId;
@@ -747,16 +739,23 @@ export default function HomePage() {
 
                   {/* Footer */}
                   <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative" }}>
-                    <button onClick={() => toggleLike(post)}
-                      style={{ display: "flex", alignItems: "center", gap: 6, background: liked ? "rgba(230,57,70,0.10)" : "rgba(26,26,46,0.06)", borderRadius: "8px", padding: "5px 10px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: liked ? "#E63946" : "#53596B", transition: "background 0.15s" }}>
-                      <span style={{ fontSize: 15 }}>{liked ? "❤️" : "🤍"}</span>
-                      いいね！
-                    </button>
+                    {/* Like button — SVG heart + pop animation */}
+                    <motion.button
+                      onClick={() => toggleLike(post)}
+                      whileTap={{ scale: 1.28 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 18 }}
+                      style={{ display: "flex", alignItems: "center", gap: 6, background: liked ? "rgba(230,57,70,0.10)" : "rgba(26,26,46,0.06)", borderRadius: "8px", padding: "5px 10px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: liked ? "#E63946" : "#53596B", transition: "background 0.15s" }}
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill={liked ? "#E63946" : "none"} style={{ flexShrink: 0, transition: "fill 0.15s" }}>
+                        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke={liked ? "#E63946" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      いいね
+                    </motion.button>
                     {/* Like count — tap to see who liked */}
                     {post.likes > 0 && (
                       <button
-                        onClick={() => fetchLikers(post.id)}
-                        style={{ fontSize: 13, fontWeight: 700, color: liked ? "#E63946" : "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "5px 2px" }}
+                        onClick={(e) => { e.stopPropagation(); fetchLikers(post.id); }}
+                        style={{ fontSize: 13, fontWeight: 700, color: liked ? "#E63946" : "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "5px 4px" }}
                       >
                         {post.likes}
                       </button>
@@ -836,67 +835,74 @@ export default function HomePage() {
       {/* ── Lightbox ── */}
       <AnimatePresence>
         {lightboxUrl && (
-          <motion.div
-            key="lightbox"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.22, ease: "easeIn" } }}
-            transition={{ duration: 0.18 }}
-            onClick={() => setLightboxUrl(null)}
-            onTouchStart={handleLbTouchStart}
-            onTouchEnd={handleLbTouchEnd}
-            style={{
-              position: "fixed", inset: 0,
-              background: "rgba(0,0,0,0.92)",
-              zIndex: 200,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-            }}
-          >
-            {/* Swipe-down hint */}
-            <div style={{ position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)", width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.25)" }} />
-
-            {/* Close button */}
-            <button
+          <>
+            {/* Backdrop — tap to close, stays fixed */}
+            <motion.div
+              key="lb-bg"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.22 } }}
+              transition={{ duration: 0.18 }}
               onClick={() => setLightboxUrl(null)}
               style={{
-                position: "absolute", top: 28, right: 20,
-                width: 36, height: 36, borderRadius: "50%",
-                background: "rgba(255,255,255,0.12)",
-                border: "1px solid rgba(255,255,255,0.18)",
-                cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                zIndex: 201,
-                backdropFilter: "blur(4px)",
+                position: "fixed", inset: 0, zIndex: 200,
+                background: "rgba(0,0,0,0.88)",
+                backdropFilter: "blur(10px)",
+                WebkitBackdropFilter: "blur(10px)",
               }}
-              aria-label="Cerrar"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M18 6L6 18M6 6l12 12" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
-              </svg>
-            </button>
+            />
 
-            {/* Image */}
+            {/* Image — full-screen drag container */}
             <motion.div
-              initial={{ scale: 0.88, opacity: 0, y: 24 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.92, opacity: 0, y: 16, transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } }}
-              transition={{ type: "spring", damping: 28, stiffness: 320, mass: 0.8 }}
-              onClick={(e) => e.stopPropagation()}
-              style={{ display: "flex", maxWidth: "92%", maxHeight: "80dvh", borderRadius: 16, overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,0.6)" }}
+              key="lb-img"
+              initial={{ opacity: 0, scale: 0.88, y: 32 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, y: 500, transition: { duration: 0.28, ease: [0.4, 0, 1, 1] } }}
+              transition={{ type: "spring", damping: 30, stiffness: 340, mass: 0.85 }}
+              drag="y"
+              dragConstraints={{ top: 0 }}
+              dragElastic={{ top: 0, bottom: 0.35 }}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 90 || info.velocity.y > 500) setLightboxUrl(null);
+              }}
+              onClick={() => setLightboxUrl(null)}
+              style={{
+                position: "fixed", inset: 0, zIndex: 201,
+                display: "flex", flexDirection: "column",
+                alignItems: "center", justifyContent: "center",
+                cursor: "grab",
+                touchAction: "pan-y",
+              }}
             >
+              {/* Drag handle pill */}
+              <div
+                style={{
+                  position: "absolute", top: 14, left: "50%",
+                  transform: "translateX(-50%)",
+                  width: 40, height: 4, borderRadius: 2,
+                  background: "rgba(255,255,255,0.3)",
+                  pointerEvents: "none",
+                }}
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={lightboxUrl}
                 alt="imagen ampliada"
-                style={{ maxWidth: "100%", maxHeight: "80dvh", objectFit: "contain", display: "block" }}
+                draggable={false}
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  maxWidth: "92%", maxHeight: "80dvh",
+                  objectFit: "contain", borderRadius: 16,
+                  display: "block",
+                  boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
+                  pointerEvents: "auto",
+                  userSelect: "none",
+                  WebkitUserSelect: "none",
+                }}
               />
             </motion.div>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
 
