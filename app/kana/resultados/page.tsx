@@ -38,8 +38,10 @@ function getModeLabel(mode: string) {
 }
 
 function getTaskModeLabel(taskMode?: string, difficulty?: string) {
+  if (taskMode === "recognition") return "Reconocimiento";
+  if (taskMode === "production") return "Escritura";
   if (taskMode === "mixed") return "Mixto";
-  if (difficulty === "automatico") return "Mixto";
+  if (difficulty === "automatico") return "Automático";
   return "Mixto";
 }
 
@@ -87,7 +89,7 @@ export default function ResultadosPage() {
   if (!results || !summary) return null;
 
   const { total, correct, missed } = results;
-  const { errors, headline, headlineColor, modeLabel, taskModeLabel, nextStep } = summary;
+  const { errors, pct, headline, headlineColor, modeLabel, taskModeLabel } = summary;
   const uniqueMissed = [...new Map(missed.map((item) => [item.id, item])).values()];
 
   function handleRepeatErrors() {
@@ -96,11 +98,17 @@ export default function ResultadosPage() {
     router.push(`/kana/quiz?mode=repeat&items=${ids}&taskMode=mixed&count=${uniqueMissed.length}`);
   }
 
+  // SVG arc for score ring
+  const R = 52;
+  const circ = 2 * Math.PI * R;
+  const arcLen = (pct / 100) * circ;
+  const arcColor = errors === 0 ? "#4ECDC4" : pct >= 50 ? "#1A1A2E" : "#E63946";
+
   return (
     <div
       style={{
         background: "#FFF8E7",
-        minHeight: "100vh",
+        minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
         padding: "52px 20px 40px",
@@ -114,258 +122,152 @@ export default function ResultadosPage() {
           cursor: "pointer",
           padding: "4px",
           alignSelf: "flex-start",
-          marginBottom: "24px",
-          color: "#E63946",
+          marginBottom: "20px",
+          color: "#9CA3AF",
         }}
         aria-label="Cerrar"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path
             d="M18 6L6 18M6 6l12 12"
-            stroke="#E63946"
+            stroke="#9CA3AF"
             strokeWidth="2.5"
             strokeLinecap="round"
           />
         </svg>
       </button>
 
+      {/* Hero card */}
       <div
         style={{
           background: "#FFFFFF",
-          borderRadius: "30px",
-          boxShadow: "0 10px 30px rgba(26,26,46,0.08)",
-          padding: "24px 20px 22px",
-          display: "grid",
-          gap: "18px",
+          borderRadius: "24px",
+          boxShadow: "0 4px 20px rgba(26,26,46,0.08)",
+          padding: "28px 20px 24px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "20px",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
-          <div
-            style={{
-              borderRadius: "999px",
-              padding: "8px 12px",
-              background: "#F6F1EA",
-              color: "#5E6472",
-              fontSize: "12px",
-              fontWeight: 800,
-            }}
-          >
+        {/* Mode badges */}
+        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", justifyContent: "center" }}>
+          <span style={{ borderRadius: "6px", padding: "4px 10px", background: "#F3F0EB", color: "#53596B", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
             {modeLabel}
-          </div>
-          <div
-            style={{
-              borderRadius: "999px",
-              padding: "8px 12px",
-              background: "rgba(230,57,70,0.10)",
-              color: "#C53340",
-              fontSize: "12px",
-              fontWeight: 800,
-            }}
-            >
+          </span>
+          <span style={{ borderRadius: "6px", padding: "4px 10px", background: "rgba(26,26,46,0.06)", color: "#53596B", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
             {taskModeLabel}
+          </span>
+        </div>
+
+        {/* Score ring */}
+        <div style={{ position: "relative", width: 128, height: 128, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width="128" height="128" style={{ position: "absolute", inset: 0, transform: "rotate(-90deg)" }}>
+            <circle cx="64" cy="64" r={R} fill="none" stroke="rgba(26,26,46,0.07)" strokeWidth="10" />
+            <circle
+              cx="64" cy="64" r={R} fill="none"
+              stroke={arcColor}
+              strokeWidth="10"
+              strokeLinecap="round"
+              strokeDasharray={`${arcLen} ${circ}`}
+              style={{ transition: "stroke-dasharray 0.6s cubic-bezier(0.4,0,0.2,1)" }}
+            />
+          </svg>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "32px", fontWeight: 800, color: "#1A1A2E", lineHeight: 1 }}>{pct}%</div>
+            <div style={{ fontSize: "12px", fontWeight: 600, color: "#9CA3AF", marginTop: 2 }}>{correct}/{total}</div>
           </div>
         </div>
 
-        <div style={{ textAlign: "center", display: "grid", gap: "10px" }}>
-          <p
-            style={{
-              fontSize: "15px",
-              fontWeight: 700,
-              color: headlineColor,
-              margin: 0,
-              letterSpacing: "0.02em",
-            }}
-          >
+        {/* Headline */}
+        <div style={{ textAlign: "center", display: "grid", gap: "6px" }}>
+          <p style={{ fontSize: "22px", fontWeight: 800, color: headlineColor, margin: 0, letterSpacing: "-0.03em" }}>
             {headline}
           </p>
-          <p
-            style={{
-              fontSize: "60px",
-              fontWeight: 800,
-              color: "#1A1A2E",
-              margin: 0,
-              lineHeight: 1,
-            }}
-          >
-            {correct}/{total}
-          </p>
-          <p
-            style={{
-              fontSize: "15px",
-              color: "#5E6472",
-              margin: 0,
-              lineHeight: 1.4,
-            }}
-          >
-            Acertaste {correct} de {total} en esta práctica.
+          <p style={{ fontSize: "14px", color: "#7A7F8D", margin: 0, lineHeight: 1.4 }}>
+            {errors === 0
+              ? "Cero errores en esta sesión. ¡Sesión perfecta!"
+              : `Acertaste ${correct} de ${total}. Te quedan ${errors} ${errors === 1 ? "kana" : "kana"} por repasar.`
+            }
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "10px" }}>
+        {/* Stats row */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "8px", width: "100%" }}>
           {[
-            { label: "Practicados", value: total, bg: "rgba(26,26,46,0.06)", color: "#1A1A2E" },
-            { label: "Correctos", value: correct, bg: "rgba(78,205,196,0.14)", color: "#178A83" },
-            { label: "Por revisar", value: errors, bg: "rgba(230,57,70,0.12)", color: "#C53340" },
+            { label: "Practicados", value: total, bg: "rgba(26,26,46,0.05)", color: "#1A1A2E" },
+            { label: "Correctos", value: correct, bg: "rgba(78,205,196,0.12)", color: "#178A83" },
+            { label: "Por revisar", value: errors, bg: errors > 0 ? "rgba(230,57,70,0.10)" : "rgba(26,26,46,0.04)", color: errors > 0 ? "#C53340" : "#9CA3AF" },
           ].map((stat) => (
             <div
               key={stat.label}
               style={{
                 background: stat.bg,
-                borderRadius: "18px",
-                padding: "14px 8px",
+                borderRadius: "14px",
+                padding: "12px 8px",
                 display: "grid",
-                gap: "4px",
+                gap: "3px",
                 textAlign: "center",
               }}
             >
-              <div style={{ fontSize: "26px", fontWeight: 800, color: stat.color, lineHeight: 1 }}>
-                {stat.value}
-              </div>
-              <div
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
-                  color: "#6E737F",
-                }}
-              >
+              <div style={{ fontSize: "24px", fontWeight: 800, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
+              <div style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9CA3AF" }}>
                 {stat.label}
               </div>
             </div>
           ))}
         </div>
-
-        <div
-          style={{
-            borderRadius: "20px",
-            background: "#F8F4EE",
-            padding: "16px 16px 14px",
-            display: "grid",
-            gap: "6px",
-          }}
-        >
-          <div style={{ fontSize: "13px", fontWeight: 800, color: "#1A1A2E", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-            Lo importante
-          </div>
-          <p style={{ fontSize: "14px", color: "#5E6472", margin: 0, lineHeight: 1.45 }}>
-            Esta pantalla resume tu sesión Mixto. Los aciertos ayudan a tu progreso, pero no significan por sí solos que esos kana ya estén dominados.
-          </p>
-        </div>
       </div>
 
-      <div style={{ flex: 1, marginTop: "20px", display: "grid", gap: "14px" }}>
-        {uniqueMissed.length > 0 ? (
-          <div
-            style={{
-              background: "#FFFFFF",
-              borderRadius: "26px",
-              boxShadow: "0 10px 28px rgba(26,26,46,0.08)",
-              padding: "18px 18px 16px",
-              display: "grid",
-              gap: "14px",
-            }}
-          >
-            <div style={{ display: "grid", gap: "4px" }}>
-              <div style={{ fontSize: "17px", fontWeight: 800, color: "#1A1A2E" }}>
-                Repasar errores
-              </div>
-              <div style={{ fontSize: "14px", color: "#5E6472", lineHeight: 1.4 }}>
-                Estos kana salieron de respuestas incorrectas o pares que necesitaron revisión.
-              </div>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {uniqueMissed.map((m) => (
-                <div
-                  key={m.id}
-                  style={{
-                    background: "#FFF8F7",
-                    borderRadius: "18px",
-                    padding: "14px 16px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "14px",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "30px",
-                      fontWeight: 700,
-                      color: "#E63946",
-                      fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                      minWidth: "54px",
-                      textAlign: "center",
-                    }}
-                  >
-                    {m.kana}
-                  </span>
-                  <div
-                    style={{
-                      width: "1px",
-                      height: "30px",
-                      background: "#ECDDD8",
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontSize: "18px",
-                      fontWeight: 700,
-                      color: "#1A1A2E",
-                    }}
-                  >
-                    {m.romaji}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div
-            style={{
-              background: "#FFFFFF",
-              borderRadius: "26px",
-              boxShadow: "0 10px 28px rgba(26,26,46,0.08)",
-              padding: "22px 20px",
-              textAlign: "center",
-              display: "grid",
-              gap: "8px",
-            }}
-          >
-            <div style={{ fontSize: "20px", fontWeight: 800, color: "#178A83" }}>
-              Sin errores en esta sesión
-            </div>
-            <div style={{ fontSize: "14px", color: "#5E6472", lineHeight: 1.45 }}>
-              Buen momento para seguir con Smart o volver a Kana y empezar otra práctica.
-            </div>
-          </div>
-        )}
-
+      {/* Missed kana */}
+      {uniqueMissed.length > 0 && (
         <div
           style={{
+            marginTop: "16px",
             background: "#FFFFFF",
-            borderRadius: "24px",
-            boxShadow: "0 10px 28px rgba(26,26,46,0.08)",
-            padding: "18px",
-            display: "grid",
-            gap: "8px",
+            borderRadius: "20px",
+            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+            padding: "18px 18px 16px",
           }}
         >
-          <div style={{ fontSize: "16px", fontWeight: 800, color: "#1A1A2E" }}>
-            Siguiente paso
+          <div style={{ fontSize: "13px", fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "14px" }}>
+            Por repasar · {uniqueMissed.length}
           </div>
-          <div style={{ fontSize: "14px", color: "#5E6472", lineHeight: 1.45 }}>
-            {nextStep}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            {uniqueMissed.map((m) => (
+              <div
+                key={m.id}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "3px",
+                  background: "rgba(230,57,70,0.06)",
+                  borderRadius: "12px",
+                  padding: "10px 14px",
+                  minWidth: "54px",
+                }}
+              >
+                <span style={{ fontSize: "28px", fontWeight: 700, color: "#E63946", lineHeight: 1, fontFamily: "var(--font-noto-serif-jp), serif" }}>
+                  {m.kana}
+                </span>
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "#53596B" }}>
+                  {m.romaji}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
 
+      {/* Actions */}
       <div
         style={{
-          marginTop: "22px",
+          marginTop: "20px",
           display: "flex",
           flexDirection: "column",
-          gap: "12px",
+          gap: "10px",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
         {errors > 0 && (
@@ -373,32 +275,33 @@ export default function ResultadosPage() {
             onClick={handleRepeatErrors}
             style={{
               width: "100%",
-              padding: "18px",
-              borderRadius: "999px",
+              padding: "16px",
+              borderRadius: "14px",
               border: "none",
               cursor: "pointer",
               background: "#1A1A2E",
               color: "#FFFFFF",
-              fontSize: "17px",
+              fontSize: "16px",
               fontWeight: 800,
+              letterSpacing: "-0.01em",
             }}
           >
-            Repetir errores
+            Repetir {errors} {errors === 1 ? "error" : "errores"}
           </button>
         )}
         <button
           onClick={() => router.push("/kana/configurar?mode=smart")}
           style={{
             width: "100%",
-            padding: "18px",
-            borderRadius: "999px",
+            padding: "16px",
+            borderRadius: "14px",
             border: "none",
             cursor: "pointer",
             background: "#E63946",
             color: "#FFFFFF",
-            fontSize: "17px",
+            fontSize: "16px",
             fontWeight: 800,
-            boxShadow: "0 4px 20px rgba(230,57,70,0.24)",
+            letterSpacing: "-0.01em",
           }}
         >
           Seguir con Smart
@@ -407,14 +310,14 @@ export default function ResultadosPage() {
           onClick={() => router.push("/kana")}
           style={{
             width: "100%",
-            padding: "16px",
-            borderRadius: "999px",
+            padding: "14px",
+            borderRadius: "14px",
             border: "none",
             cursor: "pointer",
             background: "transparent",
-            color: "#1A1A2E",
-            fontSize: "17px",
-            fontWeight: 700,
+            color: "#9CA3AF",
+            fontSize: "15px",
+            fontWeight: 600,
           }}
         >
           Volver a Kana

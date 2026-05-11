@@ -10,6 +10,7 @@ import { useStudentViewMode } from "@/lib/use-student-view-mode";
 import { markActiveToday, getStreak } from "@/lib/streak";
 import { getWeeklyTopic } from "@/lib/weekly-topics";
 import Link from "next/link";
+import RepliesSheet from "@/components/RepliesSheet";
 
 type Post = {
   id: string;
@@ -101,6 +102,10 @@ export default function HomePage() {
   const [openLikersId, setOpenLikersId] = useState<string | null>(null);
   const [fetchingLikers, setFetchingLikers] = useState(false);
 
+  // Replies
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
+  const [replyPostId, setReplyPostId] = useState<string | null>(null);
+
   // Compose
   const [composeText, setComposeText] = useState("");
   const [composeImage, setComposeImage] = useState<File | null>(null);
@@ -157,6 +162,19 @@ export default function HomePage() {
         .in("post_id", visible.map((p) => p.id));
       const ids = (likesData as { post_id: string }[] | null)?.map((l) => l.post_id) ?? [];
       setLikedIds((cur) => { const next = new Set(cur); ids.forEach((id) => next.add(id)); return next; });
+    }
+
+    // Comment counts for this batch
+    if (visible.length > 0) {
+      const { data: counts } = await supabase
+        .from("comunidad_comments")
+        .select("post_id")
+        .in("post_id", visible.map((p) => p.id));
+      const countMap: Record<string, number> = {};
+      (counts as { post_id: string }[] | null)?.forEach(r => {
+        countMap[r.post_id] = (countMap[r.post_id] ?? 0) + 1;
+      });
+      setCommentCounts(prev => ({ ...prev, ...countMap }));
     }
   }
 
@@ -762,6 +780,17 @@ export default function HomePage() {
                         )}
                       </div>
                     )}
+                    {/* Reply button */}
+                    <button
+                      onClick={() => setReplyPostId(post.id)}
+                      style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(26,26,46,0.06)", borderRadius: "8px", padding: "5px 10px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#53596B" }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      {commentCounts[post.id] ? <span>{commentCounts[post.id]}</span> : null}
+                    </button>
+
                     {/* Share button */}
                     <button
                       onClick={() => handleShare(post, profiles[post.user_id])}
@@ -870,6 +899,23 @@ export default function HomePage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Replies sheet ── */}
+      {replyPostId && (() => {
+        const post = posts.find(p => p.id === replyPostId);
+        if (!post) return null;
+        const profile = profiles[post.user_id];
+        return (
+          <RepliesSheet
+            postId={replyPostId}
+            postContent={post.content}
+            postAuthorName={profile?.username ?? null}
+            userId={userId}
+            onClose={() => setReplyPostId(null)}
+            onCountChange={(pid, delta) => setCommentCounts(prev => ({ ...prev, [pid]: (prev[pid] ?? 0) + delta }))}
+          />
+        );
+      })()}
 
       <BottomNav />
     </div>

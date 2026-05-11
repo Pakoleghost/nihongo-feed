@@ -4,12 +4,21 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
+import { getStreak } from "@/lib/streak";
+import { loadKanaProgress, getKanaStateCounts } from "@/lib/kana-progress";
+import { KANA_ITEMS } from "@/lib/kana-data";
 
 type Profile = {
   id: string;
   username: string | null;
   avatar_url: string | null;
   group_name: string | null;
+};
+
+type RecentPost = {
+  id: string;
+  content: string;
+  created_at: string;
 };
 
 function AvatarCircle({
@@ -75,6 +84,15 @@ function PencilIcon() {
   );
 }
 
+function formatDate(iso: string): string {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" });
+  } catch {
+    return iso;
+  }
+}
+
 export default function PerfilPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -87,6 +105,12 @@ export default function PerfilPage() {
   const [editingUsername, setEditingUsername] = useState(false);
   const [usernameInput, setUsernameInput] = useState("");
   const [savingUsername, setSavingUsername] = useState(false);
+
+  // Stats (client-side)
+  const [streak, setStreak] = useState(0);
+  const [kanaCount, setKanaCount] = useState(0);
+  const [postCount, setPostCount] = useState(0);
+  const [recentPosts, setRecentPosts] = useState<RecentPost[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -104,6 +128,30 @@ export default function PerfilPage() {
         .single();
 
       if (data) setProfile(data as Profile);
+
+      // Streak from localStorage
+      setStreak(getStreak());
+
+      // Kana progress from localStorage
+      const progress = loadKanaProgress(user.id);
+      const counts = getKanaStateCounts(KANA_ITEMS, progress);
+      setKanaCount(counts.fijado + counts.quemado);
+
+      // Posts from Supabase
+      const { data: posts } = await supabase
+        .from("comunidad_posts")
+        .select("id, content, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(3);
+
+      const { count } = await supabase
+        .from("comunidad_posts")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
+      setPostCount(count ?? 0);
+      setRecentPosts((posts as RecentPost[]) ?? []);
     }
     load();
   }, [router]);
@@ -284,6 +332,113 @@ export default function PerfilPage() {
         />
       </div>
 
+      {/* Stats row */}
+      <div style={{ padding: "0 20px 20px", display: "flex", gap: "10px" }}>
+        {/* Streak */}
+        <div
+          style={{
+            flex: 1,
+            background: "#FFFFFF",
+            borderRadius: "14px",
+            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+            padding: "14px 10px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "4px",
+          }}
+        >
+          <span style={{ fontSize: "22px", lineHeight: 1 }}>🔥</span>
+          <span
+            style={{
+              fontSize: "26px",
+              fontWeight: 800,
+              color: "#E63946",
+              lineHeight: 1,
+              letterSpacing: "-0.04em",
+            }}
+          >
+            {streak}
+          </span>
+          <span style={{ fontSize: "11px", fontWeight: 600, color: "#7A7F8D", textAlign: "center" }}>
+            días de racha
+          </span>
+        </div>
+
+        {/* Kana */}
+        <div
+          style={{
+            flex: 1,
+            background: "#FFFFFF",
+            borderRadius: "14px",
+            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+            padding: "14px 10px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "4px",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "20px",
+              lineHeight: 1,
+              fontWeight: 700,
+              color: "#4ECDC4",
+              fontFamily: "Noto Serif JP, serif",
+            }}
+          >
+            学
+          </span>
+          <span
+            style={{
+              fontSize: "26px",
+              fontWeight: 800,
+              color: "#1A1A2E",
+              lineHeight: 1,
+              letterSpacing: "-0.04em",
+            }}
+          >
+            {kanaCount}
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "#7A7F8D" }}>/96</span>
+          </span>
+          <span style={{ fontSize: "11px", fontWeight: 600, color: "#7A7F8D", textAlign: "center" }}>
+            kana dominados
+          </span>
+        </div>
+
+        {/* Posts */}
+        <div
+          style={{
+            flex: 1,
+            background: "#FFFFFF",
+            borderRadius: "14px",
+            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+            padding: "14px 10px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "4px",
+          }}
+        >
+          <span style={{ fontSize: "22px", lineHeight: 1 }}>💬</span>
+          <span
+            style={{
+              fontSize: "26px",
+              fontWeight: 800,
+              color: "#1A1A2E",
+              lineHeight: 1,
+              letterSpacing: "-0.04em",
+            }}
+          >
+            {postCount}
+          </span>
+          <span style={{ fontSize: "11px", fontWeight: 600, color: "#7A7F8D", textAlign: "center" }}>
+            publicaciones
+          </span>
+        </div>
+      </div>
+
       {/* Info card */}
       <div style={{ padding: "0 20px" }}>
         <div
@@ -389,6 +544,74 @@ export default function PerfilPage() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Recent posts section */}
+      <div style={{ padding: "24px 20px 0" }}>
+        <h2
+          style={{
+            fontSize: "18px",
+            fontWeight: 800,
+            color: "#1A1A2E",
+            margin: "0 0 12px",
+            letterSpacing: "-0.03em",
+          }}
+        >
+          Mis publicaciones
+        </h2>
+
+        {recentPosts.length === 0 ? (
+          <div
+            style={{
+              background: "#FFFFFF",
+              borderRadius: "14px",
+              boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+              padding: "24px 20px",
+              textAlign: "center",
+            }}
+          >
+            <p style={{ fontSize: "15px", color: "#9CA3AF", margin: 0, fontWeight: 500 }}>
+              Todavía no has publicado nada.
+            </p>
+            <p style={{ fontSize: "13px", color: "#C4BAB0", margin: "6px 0 0", fontWeight: 400 }}>
+              Comparte algo con la comunidad.
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {recentPosts.map((post) => (
+              <div
+                key={post.id}
+                style={{
+                  background: "#FFFFFF",
+                  borderRadius: "14px",
+                  boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+                  padding: "14px 16px",
+                  boxSizing: "border-box",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#1A1A2E",
+                    margin: "0 0 8px",
+                    lineHeight: 1.5,
+                    fontWeight: 500,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {post.content}
+                </p>
+                <p style={{ fontSize: "11px", color: "#9CA3AF", margin: 0, fontWeight: 600 }}>
+                  {formatDate(post.created_at)}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Logout */}
