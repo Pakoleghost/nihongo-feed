@@ -127,16 +127,17 @@ export default function KanaPage() {
       {/* ── Smart CTA ── */}
       <Link
         href={smartHref}
-        style={{ background: "#E63946", borderRadius: 16, padding: "24px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, textDecoration: "none", boxShadow: "0 8px 24px rgba(26,26,46,0.12)" }}
+        style={{ background: "#E63946", borderRadius: 16, padding: "22px 20px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, textDecoration: "none", boxShadow: "0 8px 24px rgba(26,26,46,0.12)" }}
       >
-        <div>
-          <p style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.7)", margin: "0 0 8px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+        <div style={{ minWidth: 0 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", margin: "0 0 10px", letterSpacing: "0.08em", textTransform: "uppercase" }}>
             Recomendado
           </p>
-          <p style={{ fontSize: 26, fontWeight: 800, color: "#FFFFFF", margin: 0, lineHeight: 1.1 }}>
-            {smartPlan.title}
+          {/* Kana preview — the star of the card */}
+          <p style={{ fontSize: 42, color: "#FFFFFF", margin: "0 0 8px", lineHeight: 1, fontFamily: "var(--font-noto-serif-jp), serif", letterSpacing: "0.05em" }}>
+            {smartPlan.kanaChars}
           </p>
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.8)", margin: "6px 0 0" }}>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", margin: 0, lineHeight: 1.4 }}>
             {smartPlan.detail}
           </p>
         </div>

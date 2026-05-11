@@ -13,6 +13,7 @@ export type KanaSmartRecommendation = {
   kind: "review" | "learn" | "review_all";
   title: string;
   detail: string;
+  kanaChars: string;   // actual kana to display as hero in the hub card
   chips: string[];
   contextPrimary: string;
   contextSecondary: string;
@@ -337,14 +338,14 @@ export function getKanaSmartRecommendation(
 
   if (reviewGroup) {
     const dueItems = getDueItems(reviewGroup, progress);
+    const preview = dueItems.slice(0, 5).map((i) => i.kana).join("  ");
+    const extra = dueItems.length > 5 ? ` +${dueItems.length - 5}` : "";
     return {
       kind: "review",
-      title: `Repasa ${dueItems.length} ${dueItems.length === 1 ? "pendiente" : "pendientes"}`,
-      detail: formatContext(reviewGroup),
-      chips: [
-        `${dueItems.length} en esta sesión`,
-        `${counts.aprendiendo} en aprendizaje`,
-      ],
+      title: "Repaso",
+      kanaChars: preview + extra,
+      detail: `${dueItems.length} ${dueItems.length === 1 ? "kana listo" : "kana listos"} para repasar`,
+      chips: [`${dueItems.length} en esta sesión`, `${counts.aprendiendo} en aprendizaje`],
       contextPrimary: reviewGroup.primary,
       contextSecondary: reviewGroup.secondary ?? "",
       focusItemIds: reviewGroup.items.map((item) => item.id),
@@ -356,14 +357,13 @@ export function getKanaSmartRecommendation(
 
   if (nextFreshGroup) {
     const remainingItems = getUnseenItems(nextFreshGroup, progress);
+    const preview = nextFreshGroup.items.slice(0, 5).map((i) => i.kana).join("  ");
     return {
       kind: "learn",
-      title: `Sigue con ${nextFreshGroup.secondary?.toLowerCase() || nextFreshGroup.primary.toLowerCase()}`,
-      detail: formatContext(nextFreshGroup),
-      chips: [
-        `${remainingItems.length} nuevas en esta sesión`,
-        `${counts.dominados} dominados`,
-      ],
+      title: "Aprender",
+      kanaChars: preview,
+      detail: `${remainingItems.length} kana nuevos · ${nextFreshGroup.primary}`,
+      chips: [`${remainingItems.length} nuevas en esta sesión`, `${counts.dominados} dominados`],
       contextPrimary: nextFreshGroup.primary,
       contextSecondary: nextFreshGroup.secondary ?? "",
       focusItemIds: nextFreshGroup.items.map((item) => item.id),
@@ -375,14 +375,13 @@ export function getKanaSmartRecommendation(
 
   if (nextGroup) {
     const remainingItems = getUndominatedItems(nextGroup, progress);
+    const preview = nextGroup.items.slice(0, 5).map((i) => i.kana).join("  ");
     return {
       kind: "learn",
-      title: `Sigue con ${nextGroup.secondary?.toLowerCase() || nextGroup.primary.toLowerCase()}`,
-      detail: formatContext(nextGroup),
-      chips: [
-        `${remainingItems.length} en esta sesión`,
-        `${counts.dominados} dominados`,
-      ],
+      title: "Seguir",
+      kanaChars: preview,
+      detail: `${remainingItems.length} kana por dominar · ${nextGroup.primary}`,
+      chips: [`${remainingItems.length} en esta sesión`, `${counts.dominados} dominados`],
       contextPrimary: nextGroup.primary,
       contextSecondary: nextGroup.secondary ?? "",
       focusItemIds: nextGroup.items.map((item) => item.id),
@@ -391,14 +390,13 @@ export function getKanaSmartRecommendation(
   }
 
   const fallbackGroup = KANA_GROUPS[0];
+  const preview = fallbackGroup.items.slice(0, 5).map((i) => i.kana).join("  ");
   return {
     kind: "review_all",
-    title: "Repasa vocales",
-    detail: formatContext(fallbackGroup),
-    chips: [
-      `${counts.vistos} vistos`,
-      `${counts.dominados} dominados`,
-    ],
+    title: "Repaso",
+    kanaChars: preview,
+    detail: "Mantén tu nivel · repaso general",
+    chips: [`${counts.vistos} vistos`, `${counts.dominados} dominados`],
     contextPrimary: fallbackGroup.primary,
     contextSecondary: fallbackGroup.secondary ?? "",
     focusItemIds: fallbackGroup.items.map((item) => item.id),
