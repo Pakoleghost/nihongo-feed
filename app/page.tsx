@@ -344,20 +344,21 @@ export default function HomePage() {
           gap: 12,
         }}
       >
-        <div>
-          <p style={{ fontSize: "13px", color: "#9CA3AF", margin: 0, fontWeight: 500 }}>{getGreeting()}</p>
-          <h1
-            style={{
-              fontSize: "28px",
-              fontWeight: 800,
-              color: "#1A1A2E",
-              margin: "2px 0 0",
-              lineHeight: 1.05,
-              letterSpacing: "-0.04em",
-            }}
-          >
-            みんなのにほんご
-          </h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/branding/logo-small.png"
+            alt="Nihongo Feed"
+            width={44}
+            height={44}
+            style={{ borderRadius: "12px", flexShrink: 0 }}
+          />
+          <div>
+            <p style={{ fontSize: "11px", color: "#9CA3AF", margin: 0, fontWeight: 500 }}>{getGreeting()}</p>
+            <p style={{ fontSize: "18px", fontWeight: 800, color: "#1A1A2E", margin: "1px 0 0", lineHeight: 1, letterSpacing: "-0.03em" }}>
+              Nihongo Feed
+            </p>
+          </div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>

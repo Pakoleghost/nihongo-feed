@@ -4,7 +4,7 @@ export type WeeklyTopic = {
 };
 
 const TOPICS: WeeklyTopic[] = [
-  { kana: "きょうのたべもの",    prompt: "¿Qué comiste hoy? Escríbelo en hiragana." },
+  { kana: "きょうのたべもの",    prompt: "¿Qué comiste hoy?" },
   { kana: "すきなもの",          prompt: "¿Qué te gusta? Usa「〜がすきです」" },
   { kana: "いまなんじ",          prompt: "Di qué hora es ahora y qué estás haciendo." },
   { kana: "わたしのかぞく",      prompt: "Describe a un miembro de tu familia en una oración." },
