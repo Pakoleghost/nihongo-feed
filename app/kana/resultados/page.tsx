@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { KANA_ITEMS } from "@/lib/kana-data";
+import { loadKanaProgress, getKanaStateCounts, getKanaProgressSummary } from "@/lib/kana-progress";
+import { getKanaSmartRecommendation } from "@/lib/kana-smart";
 
 type MissedKana = {
   kana: string;
@@ -290,7 +293,20 @@ export default function ResultadosPage() {
           </button>
         )}
         <button
-          onClick={() => router.push("/kana/configurar?mode=smart")}
+          onClick={() => {
+            const prog = loadKanaProgress("anon");
+            const counts = getKanaStateCounts(KANA_ITEMS, prog);
+            const summary = getKanaProgressSummary(KANA_ITEMS, prog);
+            const rec = getKanaSmartRecommendation(prog, {
+              vistos: summary.practiced,
+              aprendiendo: counts.aprendiendo + counts.en_repaso,
+              dominados: counts.fijado + counts.quemado,
+            });
+            const count = Math.min(Math.max(rec.itemIds.length, 5), 20);
+            const sp = new URLSearchParams({ mode: "smart", taskMode: "mixed", count: String(count), items: rec.itemIds.join(","), focusItems: rec.focusItemIds.join(","), contextPrimary: rec.contextPrimary });
+            if (rec.contextSecondary) sp.set("contextSecondary", rec.contextSecondary);
+            router.push(`/kana/quiz?${sp.toString()}`);
+          }}
           style={{
             width: "100%",
             padding: "16px",
