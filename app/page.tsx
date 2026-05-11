@@ -381,20 +381,36 @@ export default function HomePage() {
       <div style={{ padding: "0 16px 16px" }}>
         <div
           style={{
+            position: "relative",
             background: "#FFFFFF",
             borderRadius: "14px",
-            padding: "16px 18px",
-            boxShadow: "inset 4px 0 0 #4ECDC4, 0 2px 10px rgba(26,26,46,0.07)",
+            padding: "16px 18px 18px",
+            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+            overflow: "hidden",
           }}
         >
+          {/* Esquina doblada */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              width: 40,
+              height: 40,
+              background: "#4ECDC4",
+              borderBottomLeftRadius: 40,
+            }}
+          />
+
           <p
             style={{
               fontSize: "11px",
               fontWeight: 700,
               letterSpacing: "0.08em",
-              color: "#4ECDC4",
+              color: "#9CA3AF",
               textTransform: "uppercase",
-              margin: "0 0 8px",
+              margin: "0 0 10px",
+              paddingRight: 48,
             }}
           >
             Tema de la semana
