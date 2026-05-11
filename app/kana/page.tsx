@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { KANA_ITEMS } from "@/lib/kana-data";
-import { getKanaStateCounts, loadKanaProgress, resetKanaProgress } from "@/lib/kana-progress";
+import {
+  getKanaItemState,
+  getKanaStateCounts,
+  loadKanaProgress,
+  resetKanaProgress,
+  getKanaProgressSummary,
+  type KanaProgressMap,
+} from "@/lib/kana-progress";
 import { getKanaSmartRecommendation } from "@/lib/kana-smart";
 import { syncKanaProgressOnLoad } from "@/lib/kana-progress-sync";
 import { supabase } from "@/lib/supabase";
@@ -12,16 +19,50 @@ import BottomNav from "@/components/BottomNav";
 
 const TOTAL = KANA_ITEMS.length;
 
+type GroupStat = { label: string; symbol: string; total: number; seen: number; dominated: number };
+
+const GROUP_DEFS = [
+  { label: "Hiragana",      symbol: "あ",  filter: (s: string, g: string) => s === "hiragana"  && g === "basic"     },
+  { label: "Katakana",      symbol: "ア",  filter: (s: string, g: string) => s === "katakana"  && g === "basic"     },
+  { label: "Dakuten",       symbol: "が",  filter: (_: string, g: string) => g === "dakuten"                        },
+  { label: "Handakuten",    symbol: "ぱ",  filter: (_: string, g: string) => g === "handakuten"                     },
+  { label: "Combinaciones", symbol: "きゃ", filter: (_: string, g: string) => g === "yoon"                          },
+] as const;
+
+function buildGroupStats(progress: KanaProgressMap): GroupStat[] {
+  return GROUP_DEFS.map(({ label, symbol, filter }) => {
+    const items = KANA_ITEMS.filter(i => filter(i.script, i.set));
+    let seen = 0, dominated = 0;
+    items.forEach(item => {
+      const entry = progress[item.id];
+      if (entry && entry.level > 0) seen++;
+      const st = getKanaItemState(entry);
+      if (st === "fijado" || st === "quemado") dominated++;
+    });
+    return { label, symbol, total: items.length, seen, dominated };
+  });
+}
+
 function buildSummary() {
   const progress = loadKanaProgress("anon");
   const counts = getKanaStateCounts(KANA_ITEMS, progress);
+  const summary = getKanaProgressSummary(KANA_ITEMS, progress);
   const dominados = counts.fijado + counts.quemado;
   const smartPlan = getKanaSmartRecommendation(progress, {
     vistos: counts.aprendiendo + counts.en_repaso + counts.fijado,
     aprendiendo: counts.aprendiendo + counts.en_repaso,
     dominados,
   });
-  return { dominados, smartPlan };
+  const groups = buildGroupStats(progress);
+  const smartCount = Math.min(Math.max(smartPlan.itemIds.length, 5), 20);
+  const sp = new URLSearchParams({
+    mode: "smart", taskMode: "mixed", count: String(smartCount),
+    items: smartPlan.itemIds.join(","),
+    focusItems: smartPlan.focusItemIds.join(","),
+    contextPrimary: smartPlan.contextPrimary,
+  });
+  if (smartPlan.contextSecondary) sp.set("contextSecondary", smartPlan.contextSecondary);
+  return { dominados, smartPlan, groups, smartHref: `/kana/quiz?${sp.toString()}`, practiced: summary.practiced };
 }
 
 export default function KanaPage() {
@@ -29,14 +70,11 @@ export default function KanaPage() {
   const [summary, setSummary] = useState(() => buildSummary());
   const [confirmReset, setConfirmReset] = useState(false);
 
-  // Sync with Supabase on mount (background, non-blocking)
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       const userId = data?.user?.id;
       if (!userId) return;
-      syncKanaProgressOnLoad(userId, "anon", () => {
-        setSummary(buildSummary());
-      });
+      syncKanaProgressOnLoad(userId, "anon", () => setSummary(buildSummary()));
     });
   }, []);
 
@@ -57,16 +95,8 @@ export default function KanaPage() {
     setConfirmReset(false);
   }
 
-  // Smart mode goes directly to quiz — no need for configurar middleman
-  const smartCount = Math.min(Math.max(summary.smartPlan.itemIds.length, 5), 20);
-  const _sp = new URLSearchParams({
-    mode: "smart", taskMode: "mixed", count: String(smartCount),
-    items: summary.smartPlan.itemIds.join(","),
-    focusItems: summary.smartPlan.focusItemIds.join(","),
-    contextPrimary: summary.smartPlan.contextPrimary,
-  });
-  if (summary.smartPlan.contextSecondary) _sp.set("contextSecondary", summary.smartPlan.contextSecondary);
-  const smartHref = `/kana/quiz?${_sp.toString()}`;
+  const { dominados, smartPlan, groups, smartHref } = summary;
+  const overallPct = Math.round((dominados / TOTAL) * 100);
 
   return (
     <div
@@ -78,59 +108,36 @@ export default function KanaPage() {
         padding: "24px 20px calc(80px + env(safe-area-inset-bottom, 0px))",
       }}
     >
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      {/* ── Header ── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: "42px", fontWeight: 800, color: "#1A1A2E", margin: 0, lineHeight: 1 }}>
-            Kana
-          </h1>
-          <p style={{ fontSize: "14px", color: "#9CA3AF", margin: "8px 0 0" }}>
-            {summary.dominados} de {TOTAL} dominados
+          <h1 style={{ fontSize: 42, fontWeight: 800, color: "#1A1A2E", margin: 0, lineHeight: 1 }}>Kana</h1>
+          <p style={{ fontSize: 14, color: "#9CA3AF", margin: "6px 0 0" }}>
+            {dominados} de {TOTAL} dominados
           </p>
         </div>
         <Link
           href="/kana/tabla"
-          style={{
-            background: "#FFFFFF",
-            borderRadius: "10px",
-            padding: "8px 14px",
-            fontSize: "13px",
-            fontWeight: 700,
-            color: "#1A1A2E",
-            textDecoration: "none",
-            boxShadow: "0 2px 8px rgba(26,26,46,0.08)",
-            whiteSpace: "nowrap",
-          }}
+          style={{ background: "#FFFFFF", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, color: "#1A1A2E", textDecoration: "none", boxShadow: "0 2px 8px rgba(26,26,46,0.08)", whiteSpace: "nowrap", alignSelf: "center" }}
         >
           Ver tabla
         </Link>
       </div>
 
-      {/* Main CTA */}
+      {/* ── Smart CTA ── */}
       <Link
         href={smartHref}
-        style={{
-          marginTop: "28px",
-          background: "#E63946",
-          borderRadius: "16px",
-          padding: "24px 20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 16,
-          textDecoration: "none",
-          boxShadow: "0 8px 24px rgba(26,26,46,0.12)",
-        }}
+        style={{ background: "#E63946", borderRadius: 16, padding: "24px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, textDecoration: "none", boxShadow: "0 8px 24px rgba(26,26,46,0.12)" }}
       >
         <div>
-          <p style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.7)", margin: "0 0 8px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.7)", margin: "0 0 8px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
             Recomendado
           </p>
-          <p style={{ fontSize: "26px", fontWeight: 800, color: "#FFFFFF", margin: 0, lineHeight: 1.1 }}>
-            {summary.smartPlan.title}
+          <p style={{ fontSize: 26, fontWeight: 800, color: "#FFFFFF", margin: 0, lineHeight: 1.1 }}>
+            {smartPlan.title}
           </p>
-          <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.8)", margin: "6px 0 0" }}>
-            {summary.smartPlan.detail}
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.8)", margin: "6px 0 0" }}>
+            {smartPlan.detail}
           </p>
         </div>
         <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -140,58 +147,108 @@ export default function KanaPage() {
         </div>
       </Link>
 
-      {/* Secondary options */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
-        <Link
-          href="/kana/configurar?mode=libre"
-          style={{
-            position: "relative",
-            background: "#FFFFFF",
-            borderRadius: "14px",
-            padding: "16px 18px 18px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            textDecoration: "none",
-            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
-            overflow: "hidden",
-          }}
-        >
-          {/* Corner fold */}
-          <div style={{ position: "absolute", top: 0, right: 0, width: 36, height: 36, background: "#4ECDC4", borderBottomLeftRadius: 36 }} />
-          <div>
-            <p style={{ fontSize: "16px", fontWeight: 700, color: "#1A1A2E", margin: 0 }}>Modo libre</p>
-            <p style={{ fontSize: "13px", color: "#9CA3AF", margin: "3px 0 0" }}>Elige script y bloques</p>
+      {/* ── Modo libre ── */}
+      <Link
+        href="/kana/configurar?mode=libre"
+        style={{ position: "relative", background: "#FFFFFF", borderRadius: 14, padding: "16px 18px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", textDecoration: "none", boxShadow: "0 2px 10px rgba(26,26,46,0.07)", overflow: "hidden", marginTop: 10 }}
+      >
+        <div style={{ position: "absolute", top: 0, right: 0, width: 36, height: 36, background: "#4ECDC4", borderBottomLeftRadius: 36 }} />
+        <div>
+          <p style={{ fontSize: 16, fontWeight: 700, color: "#1A1A2E", margin: 0 }}>Modo libre</p>
+          <p style={{ fontSize: 13, color: "#9CA3AF", margin: "3px 0 0" }}>Elige script y bloques</p>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginRight: 8 }}>
+          <path d="M9 18l6-6-6-6" stroke="#C4BAB0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </Link>
+
+      {/* ── Progress breakdown ── */}
+      <div
+        style={{ background: "#FFFFFF", borderRadius: 16, padding: "18px 18px 14px", boxShadow: "0 2px 10px rgba(26,26,46,0.07)", marginTop: 16 }}
+      >
+        {/* Section header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E", margin: 0 }}>Tu progreso</p>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {/* Mini overall ring */}
+            <svg width="32" height="32" style={{ transform: "rotate(-90deg)" }}>
+              <circle cx="16" cy="16" r="12" fill="none" stroke="rgba(26,26,46,0.07)" strokeWidth="4" />
+              <circle
+                cx="16" cy="16" r="12" fill="none"
+                stroke={overallPct >= 80 ? "#4ECDC4" : overallPct >= 40 ? "#1A1A2E" : "#E63946"}
+                strokeWidth="4" strokeLinecap="round"
+                strokeDasharray={`${(overallPct / 100) * 75.4} 75.4`}
+              />
+            </svg>
+            <span style={{ fontSize: 13, fontWeight: 800, color: "#1A1A2E" }}>{overallPct}%</span>
           </div>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginRight: 8 }}>
-            <path d="M9 18l6-6-6-6" stroke="#C4BAB0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </Link>
+        </div>
+
+        {/* Group rows */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {groups.map((g) => {
+            const domPct = g.total > 0 ? (g.dominated / g.total) * 100 : 0;
+            const seenPct = g.total > 0 ? (g.seen / g.total) * 100 : 0;
+            const allDone = g.dominated === g.total;
+            return (
+              <div key={g.label}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 15, fontFamily: "var(--font-noto-serif-jp), serif", lineHeight: 1, minWidth: 24, display: "inline-block" }}>
+                      {g.symbol}
+                    </span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: allDone ? "#178A83" : "#1A1A2E" }}>
+                      {g.label}
+                    </span>
+                    {allDone && (
+                      <span style={{ fontSize: 10, fontWeight: 700, color: "#178A83", background: "rgba(78,205,196,0.14)", borderRadius: 5, padding: "1px 6px", letterSpacing: "0.04em" }}>
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#9CA3AF" }}>
+                    {g.dominated}/{g.total}
+                  </span>
+                </div>
+                {/* Double-layer progress bar: seen (light) + dominated (solid) */}
+                <div style={{ height: 5, background: "#F0EDE8", borderRadius: 999, overflow: "hidden", position: "relative" }}>
+                  {/* Seen layer */}
+                  <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${seenPct}%`, background: "rgba(26,26,46,0.10)", borderRadius: 999 }} />
+                  {/* Dominated layer */}
+                  <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${domPct}%`, background: allDone ? "#4ECDC4" : "#1A1A2E", borderRadius: 999, transition: "width 0.4s ease" }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Legend */}
+        <div style={{ display: "flex", gap: 16, marginTop: 14, paddingTop: 12, borderTop: "1px solid #F0EDE8" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{ width: 10, height: 4, borderRadius: 2, background: "rgba(26,26,46,0.12)" }} />
+            <span style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 600 }}>Vistas</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{ width: 10, height: 4, borderRadius: 2, background: "#1A1A2E" }} />
+            <span style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 600 }}>Dominadas</span>
+          </div>
+        </div>
       </div>
 
-      {/* Reset — small, at the bottom */}
-      <div style={{ marginTop: "auto", paddingTop: 32, display: "flex", justifyContent: "center" }}>
+      {/* ── Reset ── */}
+      <div style={{ marginTop: 20, display: "flex", justifyContent: "center" }}>
         {confirmReset ? (
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: 13, color: "#9CA3AF" }}>¿Reiniciar todo tu progreso?</span>
-            <button
-              onClick={handleReset}
-              style={{ fontSize: 13, fontWeight: 700, color: "#E63946", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}
-            >
+            <button onClick={handleReset} style={{ fontSize: 13, fontWeight: 700, color: "#E63946", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}>
               Sí, reiniciar
             </button>
-            <button
-              onClick={() => setConfirmReset(false)}
-              style={{ fontSize: 13, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}
-            >
+            <button onClick={() => setConfirmReset(false)} style={{ fontSize: 13, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}>
               Cancelar
             </button>
           </div>
         ) : (
-          <button
-            onClick={() => setConfirmReset(true)}
-            style={{ fontSize: 12, color: "#C4BAB0", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}
-          >
+          <button onClick={() => setConfirmReset(true)} style={{ fontSize: 12, color: "#C4BAB0", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}>
             Reiniciar progreso
           </button>
         )}
