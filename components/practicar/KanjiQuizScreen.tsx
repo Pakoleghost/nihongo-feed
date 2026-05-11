@@ -7,21 +7,7 @@ import type { GenkiVocabItem } from "@/lib/genki-vocab-by-lesson";
 import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 import type { GenkiKanjiItem } from "@/lib/genki-kanji-by-lesson";
 import { setLastActivity } from "@/lib/streak";
-
-const LESSON_LABELS: Record<number, string> = {
-  1: "Saludos",
-  2: "Números",
-  3: "Familia",
-  4: "Horario",
-  5: "Mi día",
-  6: "Deportes",
-  7: "Ciudad",
-  8: "Fin de semana",
-  9: "Viajes",
-  10: "Invierno",
-  11: "Recuerdos",
-  12: "Festivales",
-};
+import { GENKI_LESSON_NAMES } from "@/lib/genki-lesson-names";
 
 const VOCAB_LESSONS = Object.keys(GENKI_VOCAB_BY_LESSON)
   .map(Number)
@@ -232,7 +218,7 @@ export default function KanjiQuizScreen({
               whiteSpace: "nowrap",
             }}
           >
-            L{l}: {LESSON_LABELS[l] ?? `Lección ${l}`}
+            L{l}: {GENKI_LESSON_NAMES[l] ?? `Lección ${l}`}
           </button>
         ))}
       </div>

@@ -26,23 +26,9 @@ import {
 } from "@/lib/practice-srs";
 import PracticeSessionHeader from "@/components/practicar/PracticeSessionHeader";
 import PracticeSessionLayout from "@/components/practicar/PracticeSessionLayout";
+import { GENKI_LESSON_NAMES } from "@/lib/genki-lesson-names";
 
 const USER_KEY = "anon";
-
-const LESSON_LABELS: Record<number, string> = {
-  1: "Saludos",
-  2: "Números",
-  3: "Familia",
-  4: "Horario",
-  5: "Mi día",
-  6: "Deportes",
-  7: "Ciudad",
-  8: "Fin de semana",
-  9: "Viajes",
-  10: "Invierno",
-  11: "Recuerdos",
-  12: "Festivales",
-};
 
 type QuizPhase = "question" | "feedback";
 type QuizItem = { display: string; reading: string; es: string };
@@ -204,7 +190,7 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
   const [practiceResult, setPracticeResult] = useState<PracticeSessionResult | null>(null);
 
   const lesson = initialLesson;
-  const lessonTitle = LESSON_LABELS[lesson] ?? `Lección ${lesson}`;
+  const lessonTitle = GENKI_LESSON_NAMES[lesson] ?? `Lección ${lesson}`;
   const lessonItems = useMemo(() => GENKI_VOCAB_BY_LESSON[lesson] ?? [], [lesson]);
   const allVocabItems = useMemo(() => Object.values(GENKI_VOCAB_BY_LESSON).flat(), []);
   const lessonSummary = useMemo(

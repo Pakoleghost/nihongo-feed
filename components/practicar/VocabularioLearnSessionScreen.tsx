@@ -8,23 +8,9 @@ import { setLastActivity } from "@/lib/streak";
 import { loadVocabProgress, recordVocabExposure, saveVocabProgress, type VocabProgressMap } from "@/lib/vocab-progress";
 import PracticeSessionHeader from "@/components/practicar/PracticeSessionHeader";
 import PracticeSessionLayout from "@/components/practicar/PracticeSessionLayout";
+import { GENKI_LESSON_NAMES } from "@/lib/genki-lesson-names";
 
 const USER_KEY = "anon";
-
-const LESSON_LABELS: Record<number, string> = {
-  1: "Saludos",
-  2: "Números",
-  3: "Familia",
-  4: "Horario",
-  5: "Mi día",
-  6: "Deportes",
-  7: "Ciudad",
-  8: "Fin de semana",
-  9: "Viajes",
-  10: "Invierno",
-  11: "Recuerdos",
-  12: "Festivales",
-};
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -52,7 +38,7 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
   const [cardsDone, setCardsDone] = useState(false);
 
   const lesson = initialLesson;
-  const lessonTitle = LESSON_LABELS[lesson] ?? `Lección ${lesson}`;
+  const lessonTitle = GENKI_LESSON_NAMES[lesson] ?? `Lección ${lesson}`;
   const lessonItems = useMemo(() => GENKI_VOCAB_BY_LESSON[lesson] ?? [], [lesson]);
   const currentCard = cards[currentCardIndex];
   const learnProgressPct = cards.length > 0 ? (currentCardIndex / cards.length) * 100 : 0;

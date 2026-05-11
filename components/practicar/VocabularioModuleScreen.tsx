@@ -5,27 +5,12 @@ import { useRouter } from "next/navigation";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
 import { getVocabLessonSummary, loadVocabProgress, type VocabProgressMap } from "@/lib/vocab-progress";
-import { getPracticeNextAction, getPracticeSessionContext } from "@/lib/practice-srs";
-import ModuleActionChoices from "@/components/practicar/ModuleActionChoices";
+import { getPracticeSessionContext } from "@/lib/practice-srs";
+import { GENKI_LESSON_NAMES } from "@/lib/genki-lesson-names";
 
 const LESSONS = Object.keys(GENKI_VOCAB_BY_LESSON)
   .map(Number)
   .sort((a, b) => a - b);
-
-const LESSON_LABELS: Record<number, string> = {
-  1: "Saludos",
-  2: "Números",
-  3: "Familia",
-  4: "Horario",
-  5: "Mi día",
-  6: "Deportes",
-  7: "Ciudad",
-  8: "Fin de semana",
-  9: "Viajes",
-  10: "Invierno",
-  11: "Recuerdos",
-  12: "Festivales",
-};
 
 const USER_KEY = "anon";
 
@@ -42,14 +27,12 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
   const [progress, setProgress] = useState<VocabProgressMap>({});
 
   const lessonItems = useMemo(() => GENKI_VOCAB_BY_LESSON[lesson] ?? [], [lesson]);
-  const lessonTitle = LESSON_LABELS[lesson] ?? `Lección ${lesson}`;
+  const lessonTitle = GENKI_LESSON_NAMES[lesson] ?? `Lección ${lesson}`;
   const lessonSummary = useMemo(
     () => getVocabLessonSummary(lesson, lessonItems, progress),
     [lesson, lessonItems, progress],
   );
-  const nextAction = useMemo(() => getPracticeNextAction(lessonSummary), [lessonSummary]);
   const practiceSessionContext = useMemo(() => getPracticeSessionContext(lessonSummary), [lessonSummary]);
-  const recommendedMode = nextAction.targetMode;
 
   useEffect(() => {
     setStreak(getStreak());
@@ -70,31 +53,14 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
     router.replace(`/practicar/vocabulario?lesson=${nextLesson}`, { scroll: false });
   }
 
-  function goToLearnSession() {
-    router.push(`/practicar/vocabulario/aprender?lesson=${lesson}`);
+  function goToFlashcards() {
+    router.push(`/practicar/vocabulario/flashcards?lesson=${lesson}`);
   }
 
   function goToPracticeSession() {
     const params = new URLSearchParams({ lesson: String(lesson), focus: practiceSessionContext.sortKey });
     router.push(`/practicar/vocabulario/practicar?${params.toString()}`);
   }
-
-  const actionCards = [
-    {
-      title: "Aprender",
-      subtitle: "Repasa palabras nuevas",
-      buttonLabel: "Empezar",
-      accent: "teal" as const,
-      onClick: goToLearnSession,
-    },
-    {
-      title: "Practicar",
-      subtitle: "Pon a prueba lo que sabes",
-      buttonLabel: "Empezar",
-      accent: "red" as const,
-      onClick: goToPracticeSession,
-    },
-  ] as const;
 
   return (
     <div
@@ -192,6 +158,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
           gap: "8px",
           overflowX: "auto",
           scrollbarWidth: "none",
+          paddingBottom: "2px",
         }}
       >
         {LESSONS.map((value) => {
@@ -202,19 +169,19 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
               onClick={() => selectLesson(value)}
               style={{
                 flexShrink: 0,
-                minWidth: "80px",
-                height: "48px",
+                padding: "9px 16px",
                 borderRadius: "999px",
                 border: "none",
-                boxShadow: active ? "none" : "inset 0 0 0 2px rgba(26,26,46,0.05)",
+                boxShadow: active ? "none" : "inset 0 0 0 2px rgba(26,26,46,0.07)",
                 background: active ? "#1A1A2E" : "#FFF5E6",
                 color: active ? "#FFFFFF" : "#1A1A2E",
                 fontWeight: 700,
-                fontSize: "16px",
+                fontSize: "13px",
                 cursor: "pointer",
+                whiteSpace: "nowrap",
               }}
             >
-              L{value}
+              L{value} · {GENKI_LESSON_NAMES[value] ?? `Lección ${value}`}
             </button>
           );
         })}
@@ -333,11 +300,65 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
         </div>
       </div>
 
-      <ModuleActionChoices
-        recommendedMode={recommendedMode}
-        learnCard={actionCards[0]}
-        practiceCard={actionCards[1]}
-      />
+      {/* CTAs */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
+        {/* Primary: Repasar (flashcards) */}
+        <button
+          onClick={goToFlashcards}
+          style={{
+            background: "#E63946",
+            borderRadius: "14px",
+            border: "none",
+            cursor: "pointer",
+            padding: "20px 22px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            boxShadow: "0 6px 20px rgba(230,57,70,0.22)",
+          }}
+        >
+          <div style={{ textAlign: "left" }}>
+            <p style={{ margin: 0, fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.65)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              Repasar
+            </p>
+            <p style={{ margin: "4px 0 0", fontSize: "20px", fontWeight: 800, color: "#FFFFFF", lineHeight: 1.1 }}>
+              Flashcards
+            </p>
+            <p style={{ margin: "4px 0 0", fontSize: "13px", color: "rgba(255,255,255,0.75)" }}>
+              {lessonItems.length} palabras · toca para voltear
+            </p>
+          </div>
+          <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
+              <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </button>
+
+        {/* Secondary: Quiz */}
+        <button
+          onClick={goToPracticeSession}
+          style={{
+            background: "#FFFFFF",
+            borderRadius: "14px",
+            border: "none",
+            cursor: "pointer",
+            padding: "16px 22px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+          }}
+        >
+          <div style={{ textAlign: "left" }}>
+            <p style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "#1A1A2E" }}>Quiz</p>
+            <p style={{ margin: "3px 0 0", fontSize: "13px", color: "#9CA3AF" }}>Elige la traducción correcta</p>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M9 18l6-6-6-6" stroke="#C4BAB0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }

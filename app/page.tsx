@@ -92,6 +92,15 @@ export default function HomePage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const { effectiveIsAdmin } = useStudentViewMode(isAdmin);
 
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadingMoreRef = useRef(false); // shadow for IntersectionObserver closure
+
+  // Who liked
+  const [likerNames, setLikerNames] = useState<Record<string, string[]>>({});
+  const [openLikersId, setOpenLikersId] = useState<string | null>(null);
+  const [fetchingLikers, setFetchingLikers] = useState(false);
+
   // Compose
   const [composeText, setComposeText] = useState("");
   const [composeImage, setComposeImage] = useState<File | null>(null);
@@ -183,14 +192,62 @@ export default function HomePage() {
   }, [composePreview]);
 
   async function loadMorePosts() {
-    if (loadingMore || !hasMorePosts || !nextPostsCursor) return;
+    if (loadingMoreRef.current || !hasMorePosts || !nextPostsCursor) return;
+    loadingMoreRef.current = true;
     setLoadingMore(true);
     try {
       await loadPostsBatch({ uid: userId, cursor: nextPostsCursor, reset: false });
     } catch {
       setFeedError("No pudimos cargar más. Intenta otra vez.");
     } finally {
+      loadingMoreRef.current = false;
       setLoadingMore(false);
+    }
+  }
+
+  // IntersectionObserver — auto-load when sentinel enters viewport
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMorePosts && !loadingMoreRef.current) {
+          loadMorePosts();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasMorePosts, nextPostsCursor]);
+
+  async function fetchLikers(postId: string) {
+    if (likerNames[postId] !== undefined) {
+      setOpenLikersId(openLikersId === postId ? null : postId);
+      return;
+    }
+    setFetchingLikers(true);
+    setOpenLikersId(postId);
+    try {
+      const { data } = await supabase
+        .from("comunidad_likes")
+        .select("user_id")
+        .eq("post_id", postId);
+      const userIds = (data as { user_id: string }[] | null)?.map((r) => r.user_id) ?? [];
+      if (userIds.length === 0) {
+        setLikerNames((prev) => ({ ...prev, [postId]: [] }));
+        return;
+      }
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("id, username")
+        .in("id", userIds);
+      const names = (profileData as { id: string; username: string | null }[] | null)
+        ?.map((p) => p.username ?? "Anónimo") ?? [];
+      setLikerNames((prev) => ({ ...prev, [postId]: names }));
+    } finally {
+      setFetchingLikers(false);
     }
   }
 
@@ -515,7 +572,10 @@ export default function HomePage() {
       )}
 
       {/* ── Feed ── */}
-      <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: 12 }}>
+      <div
+        style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: 12 }}
+        onClick={() => { setOpenMenuId(null); setOpenLikersId(null); }}
+      >
         {loading ? (
           <div style={{ textAlign: "center", color: "#9CA3AF", padding: "48px 0", fontSize: 14 }}>Cargando…</div>
         ) : feedError && posts.length === 0 ? (
@@ -638,12 +698,40 @@ export default function HomePage() {
                   )}
 
                   {/* Footer */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative" }}>
                     <button onClick={() => toggleLike(post)}
                       style={{ display: "flex", alignItems: "center", gap: 6, background: liked ? "rgba(230,57,70,0.10)" : "rgba(26,26,46,0.06)", borderRadius: "8px", padding: "5px 10px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: liked ? "#E63946" : "#53596B", transition: "background 0.15s" }}>
                       <span style={{ fontSize: 15 }}>{liked ? "❤️" : "🤍"}</span>
-                      いいね！ {post.likes}
+                      いいね！
                     </button>
+                    {/* Like count — tap to see who liked */}
+                    {post.likes > 0 && (
+                      <button
+                        onClick={() => fetchLikers(post.id)}
+                        style={{ fontSize: 13, fontWeight: 700, color: liked ? "#E63946" : "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "5px 2px" }}
+                      >
+                        {post.likes}
+                      </button>
+                    )}
+                    {/* Likers bubble */}
+                    {openLikersId === post.id && (
+                      <div
+                        style={{ position: "absolute", bottom: "calc(100% + 8px)", left: 0, background: "#1A1A2E", borderRadius: 10, padding: "8px 12px", zIndex: 50, minWidth: 120, maxWidth: 220, boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }}
+                        onClick={(e) => { e.stopPropagation(); setOpenLikersId(null); }}
+                      >
+                        {fetchingLikers ? (
+                          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Cargando…</span>
+                        ) : (likerNames[post.id] ?? []).length === 0 ? (
+                          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Sin likes aún</span>
+                        ) : (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                            {(likerNames[post.id] ?? []).map((name, i) => (
+                              <span key={i} style={{ fontSize: 13, fontWeight: 600, color: "#FFFFFF" }}>❤️ {name}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                     {effectiveIsAdmin && !isOwn && (
                       <button onClick={() => setConfirmDeleteId(confirmDeleteId === post.id ? null : post.id)}
                         style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: "4px 8px", borderRadius: 8, opacity: 0.5 }}
@@ -660,16 +748,18 @@ export default function HomePage() {
               </div>
             )}
 
-            {hasMorePosts ? (
-              <button onClick={loadMorePosts} disabled={loadingMore}
-                style={{ border: "none", borderRadius: "10px", background: loadingMore ? "#C4BAB0" : "#1A1A2E", color: "#FFFFFF", padding: "13px 18px", fontSize: 14, fontWeight: 700, cursor: loadingMore ? "not-allowed" : "pointer" }}>
-                {loadingMore ? "Cargando…" : "Cargar más"}
-              </button>
-            ) : posts.length > 0 ? (
-              <p style={{ color: "#9CA3AF", fontSize: 12, fontWeight: 600, textAlign: "center", margin: "4px 0 0" }}>
-                Ya viste todas las publicaciones.
+            {/* Infinite scroll sentinel */}
+            <div ref={sentinelRef} style={{ height: 1 }} />
+            {loadingMore && (
+              <p style={{ color: "#9CA3AF", fontSize: 13, fontWeight: 600, textAlign: "center", margin: "4px 0 0" }}>
+                Cargando…
               </p>
-            ) : null}
+            )}
+            {!hasMorePosts && posts.length > 0 && (
+              <p style={{ color: "#C4BAB0", fontSize: 12, fontWeight: 600, textAlign: "center", margin: "4px 0 16px" }}>
+                · fin ·
+              </p>
+            )}
           </>
         )}
       </div>

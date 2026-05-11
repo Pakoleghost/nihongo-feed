@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import type { GenkiVocabItem } from "@/lib/genki-vocab-by-lesson";
 import { getStreak, setLastActivity } from "@/lib/streak";
+import { GENKI_LESSON_NAMES } from "@/lib/genki-lesson-names";
 
 const LESSONS = Object.keys(GENKI_VOCAB_BY_LESSON)
   .map(Number)
@@ -19,25 +20,188 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+// ── Proyectar overlay ─────────────────────────────────────────────────────────
+
+function ProyectarOverlay({
+  card,
+  lesson,
+  currentIndex,
+  total,
+  onClose,
+  onNext,
+}: {
+  card: GenkiVocabItem;
+  lesson: number;
+  currentIndex: number;
+  total: number;
+  onClose: () => void;
+  onNext: () => void;
+}) {
+  const [revealed, setRevealed] = useState(false);
+
+  function handleTap() {
+    if (!revealed) {
+      setRevealed(true);
+    } else {
+      setRevealed(false);
+      onNext();
+    }
+  }
+
+  return (
+    <div
+      onClick={handleTap}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "#1A1A2E",
+        zIndex: 300,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+        userSelect: "none",
+      }}
+    >
+      {/* Close button */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        style={{
+          position: "absolute",
+          top: 24,
+          right: 24,
+          width: 40,
+          height: 40,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.12)",
+          border: "none",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "rgba(255,255,255,0.7)",
+          fontSize: 20,
+          zIndex: 1,
+        }}
+        aria-label="Salir del modo proyectar"
+      >
+        ×
+      </button>
+
+      {/* Counter */}
+      <p style={{
+        position: "absolute",
+        top: 32,
+        left: "50%",
+        transform: "translateX(-50%)",
+        fontSize: 13,
+        fontWeight: 700,
+        color: "rgba(255,255,255,0.35)",
+        letterSpacing: "0.08em",
+        margin: 0,
+      }}>
+        L{lesson} · {currentIndex + 1}/{total}
+      </p>
+
+      {/* Japanese */}
+      <div style={{ textAlign: "center" }}>
+        <p style={{
+          fontSize: "clamp(64px, 12vw, 120px)",
+          fontWeight: 800,
+          color: "#FFFFFF",
+          margin: 0,
+          lineHeight: 1,
+          fontFamily: "var(--font-noto-serif-jp), serif",
+        }}>
+          {card.kanji || card.hira}
+        </p>
+        {card.kanji && (
+          <p style={{
+            fontSize: "clamp(24px, 4vw, 40px)",
+            color: "rgba(255,255,255,0.45)",
+            margin: "12px 0 0",
+            fontFamily: "var(--font-noto-sans-jp), sans-serif",
+          }}>
+            {card.hira}
+          </p>
+        )}
+      </div>
+
+      {/* Spanish — revealed on tap */}
+      <div style={{
+        marginTop: 40,
+        minHeight: 60,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}>
+        {revealed ? (
+          <p style={{
+            fontSize: "clamp(28px, 5vw, 52px)",
+            fontWeight: 700,
+            color: "#4ECDC4",
+            margin: 0,
+            textAlign: "center",
+            padding: "0 32px",
+          }}>
+            {card.es}
+          </p>
+        ) : (
+          <p style={{
+            fontSize: 14,
+            color: "rgba(255,255,255,0.25)",
+            margin: 0,
+            letterSpacing: "0.06em",
+            fontWeight: 600,
+          }}>
+            toca para revelar
+          </p>
+        )}
+      </div>
+
+      {/* Next hint */}
+      {revealed && (
+        <p style={{
+          position: "absolute",
+          bottom: 48,
+          fontSize: 13,
+          color: "rgba(255,255,255,0.3)",
+          margin: 0,
+          letterSpacing: "0.04em",
+          fontWeight: 600,
+        }}>
+          toca de nuevo para continuar →
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Main component ─────────────────────────────────────────────────────────────
+
 type VocabularioFlashcardsScreenProps = {
   activityPath: string;
   activityLabelPrefix: string;
   backHref?: string;
+  initialLesson?: number;
 };
 
 export default function VocabularioFlashcardsScreen({
   activityPath,
   activityLabelPrefix,
   backHref = "/practicar",
+  initialLesson,
 }: VocabularioFlashcardsScreenProps) {
   const router = useRouter();
-  const [lesson, setLesson] = useState(1);
+  const [lesson, setLesson] = useState(initialLesson && LESSONS.includes(initialLesson) ? initialLesson : 1);
   const [cards, setCards] = useState<GenkiVocabItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState(0);
   const [streak, setStreak] = useState(0);
   const [done, setDone] = useState(false);
+  const [proyectar, setProyectar] = useState(false);
   const lessonRowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -128,7 +292,29 @@ export default function VocabularioFlashcardsScreen({
           </span>
         </div>
 
-        <div style={{ width: "40px" }} />
+        {/* Proyectar toggle */}
+        <button
+          onClick={() => setProyectar(true)}
+          title="Modo proyectar"
+          style={{
+            width: "40px",
+            height: "40px",
+            borderRadius: "50%",
+            background: "#FFFFFF",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 2px 10px rgba(26,26,46,0.10)",
+          }}
+          aria-label="Modo proyectar"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <rect x="2" y="4" width="20" height="14" rx="2" stroke="#1A1A2E" strokeWidth="2" strokeLinecap="round"/>
+            <path d="M8 20h8M12 18v2" stroke="#1A1A2E" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
       </div>
 
       <div
@@ -147,19 +333,19 @@ export default function VocabularioFlashcardsScreen({
             onClick={() => setLesson(l)}
             style={{
               flexShrink: 0,
-              padding: "10px 18px",
+              padding: "9px 16px",
               borderRadius: "999px",
               border: "none",
               cursor: "pointer",
               background: lesson === l ? "#1A1A2E" : "#FFFFFF",
               color: lesson === l ? "#FFFFFF" : "#1A1A2E",
               fontWeight: 700,
-              fontSize: "14px",
+              fontSize: "13px",
               boxShadow: lesson === l ? "none" : "0 2px 8px rgba(26,26,46,0.08)",
               whiteSpace: "nowrap",
             }}
           >
-            L{l}
+            L{l} · {GENKI_LESSON_NAMES[l] ?? `Lección ${l}`}
           </button>
         ))}
       </div>
@@ -315,6 +501,26 @@ export default function VocabularioFlashcardsScreen({
           </div>
         ) : null}
       </div>
+
+      {/* ── Proyectar mode overlay ─────────────────────────────────────── */}
+      {proyectar && card && (
+        <ProyectarOverlay
+          card={card}
+          lesson={lesson}
+          currentIndex={currentIndex}
+          total={total}
+          onClose={() => setProyectar(false)}
+          onNext={() => {
+            setFlipped(false);
+            if (currentIndex + 1 >= cards.length) {
+              setDone(true);
+              setProyectar(false);
+            } else {
+              setCurrentIndex((i) => i + 1);
+            }
+          }}
+        />
+      )}
 
       {!done && (
         <div style={{ padding: "16px 20px", paddingBottom: "max(32px, env(safe-area-inset-bottom, 32px))" }}>
