@@ -251,6 +251,36 @@ export default function HomePage() {
     }
   }
 
+  async function handleShare(post: Post, profile: Profile | undefined) {
+    const username = profile?.username ?? "Anónimo";
+    const params = new URLSearchParams({
+      content: post.content,
+      username,
+    });
+    const cardUrl = `/api/share-card?${params.toString()}`;
+    const fullUrl = `${window.location.origin}${cardUrl}`;
+
+    // Web Share API (iOS/Android native sheet)
+    if (navigator.share) {
+      try {
+        // Fetch the image blob so we can share it as a file
+        const res = await fetch(cardUrl);
+        const blob = await res.blob();
+        const file = new File([blob], "feed-post.png", { type: "image/png" });
+        if (navigator.canShare?.({ files: [file] })) {
+          await navigator.share({ files: [file], title: "フィード" });
+          return;
+        }
+        // Fall back to sharing URL
+        await navigator.share({ url: fullUrl, title: "フィード" });
+        return;
+      } catch {/* user cancelled or share failed */}
+    }
+
+    // Fallback: open image in new tab so user can long-press to save
+    window.open(fullUrl, "_blank");
+  }
+
   async function reloadFeed() {
     if (loading) return;
     setLoading(true);
@@ -732,9 +762,19 @@ export default function HomePage() {
                         )}
                       </div>
                     )}
+                    {/* Share button */}
+                    <button
+                      onClick={() => handleShare(post, profiles[post.user_id])}
+                      style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(26,26,46,0.06)", borderRadius: "8px", padding: "5px 10px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#53596B", marginLeft: "auto" }}
+                      aria-label="Compartir"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
                     {effectiveIsAdmin && !isOwn && (
                       <button onClick={() => setConfirmDeleteId(confirmDeleteId === post.id ? null : post.id)}
-                        style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: "4px 8px", borderRadius: 8, opacity: 0.5 }}
+                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: "4px 8px", borderRadius: 8, opacity: 0.5 }}
                         aria-label="Eliminar (admin)">🗑️</button>
                     )}
                   </div>
@@ -769,29 +809,63 @@ export default function HomePage() {
         {lightboxUrl && (
           <motion.div
             key="lightbox"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.15 } }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.22, ease: "easeIn" } }}
+            transition={{ duration: 0.18 }}
             onClick={() => setLightboxUrl(null)}
-            onTouchStart={handleLbTouchStart} onTouchEnd={handleLbTouchEnd}
-            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.95)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center" }}
+            onTouchStart={handleLbTouchStart}
+            onTouchEnd={handleLbTouchEnd}
+            style={{
+              position: "fixed", inset: 0,
+              background: "rgba(0,0,0,0.92)",
+              zIndex: 200,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+            }}
           >
-            <button onClick={() => setLightboxUrl(null)}
-              style={{ position: "absolute", top: 20, right: 20, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 201 }}
-              aria-label="Cerrar">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            {/* Swipe-down hint */}
+            <div style={{ position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)", width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.25)" }} />
+
+            {/* Close button */}
+            <button
+              onClick={() => setLightboxUrl(null)}
+              style={{
+                position: "absolute", top: 28, right: 20,
+                width: 36, height: 36, borderRadius: "50%",
+                background: "rgba(255,255,255,0.12)",
+                border: "1px solid rgba(255,255,255,0.18)",
+                cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                zIndex: 201,
+                backdropFilter: "blur(4px)",
+              }}
+              aria-label="Cerrar"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <path d="M18 6L6 18M6 6l12 12" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
               </svg>
             </button>
+
+            {/* Image */}
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0, transition: { duration: 0.15 } }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              initial={{ scale: 0.88, opacity: 0, y: 24 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.92, opacity: 0, y: 16, transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } }}
+              transition={{ type: "spring", damping: 28, stiffness: 320, mass: 0.8 }}
               onClick={(e) => e.stopPropagation()}
-              style={{ display: "flex", maxWidth: "100%", maxHeight: "100dvh" }}
+              style={{ display: "flex", maxWidth: "92%", maxHeight: "80dvh", borderRadius: 16, overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,0.6)" }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={lightboxUrl} alt="imagen ampliada"
-                style={{ maxWidth: "100%", maxHeight: "100dvh", objectFit: "contain" }} />
+              <img
+                src={lightboxUrl}
+                alt="imagen ampliada"
+                style={{ maxWidth: "100%", maxHeight: "80dvh", objectFit: "contain", display: "block" }}
+              />
             </motion.div>
           </motion.div>
         )}

@@ -532,20 +532,18 @@ export default function TablaPage() {
       </div>
 
       {/* Progress legend */}
-      <div style={{ padding: "16px 16px 0", display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
+      <div style={{ padding: "14px 16px 0", display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
         {([
-          { dot: "#E63946", badge: null, label: "Aprendiendo" },
-          { dot: "#4ECDC4", badge: null, label: "En repaso" },
-          { dot: "#4ECDC4", badge: null, bg: "#F0FFFE", label: "Fijado" },
-          { dot: null, badge: "★", label: "Quemado" },
-        ] as Array<{ dot: string | null; badge: string | null; bg?: string; label: string }>).map(({ dot, badge, label }) => (
+          { dot: "#E63946", badge: null, label: "Practicando" },
+          { dot: "#4ECDC4", badge: null, label: "Aprendido" },
+          { dot: null,      badge: "★",  label: "Dominado" },
+        ] as Array<{ dot: string | null; badge: string | null; label: string }>).map(({ dot, badge, label }) => (
           <div key={label} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <span style={{ position: "relative", display: "inline-flex", width: 16, height: 16, alignItems: "center", justifyContent: "center" }}>
-              {badge ? (
-                <span style={{ fontSize: "11px", color: "#D97706", lineHeight: 1 }}>{badge}</span>
-              ) : (
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: dot ?? "#ccc", display: "inline-block" }} />
-              )}
+            <span style={{ display: "inline-flex", width: 14, height: 14, alignItems: "center", justifyContent: "center" }}>
+              {badge
+                ? <span style={{ fontSize: "10px", color: "#D97706", lineHeight: 1 }}>{badge}</span>
+                : <span style={{ width: 6, height: 6, borderRadius: "50%", background: dot ?? "#ccc", display: "inline-block" }} />
+              }
             </span>
             <span style={{ fontSize: "11px", color: "#9CA3AF", fontWeight: 600 }}>{label}</span>
           </div>
@@ -609,11 +607,11 @@ export default function TablaPage() {
           const modalEntry = item ? progress[item.id] : undefined;
           const modalState = getKanaItemState(modalEntry);
           const STATE_LABEL: Record<KanaItemState, { text: string; color: string }> = {
-            nuevo:      { text: "Nuevo",       color: "#9CA3AF" },
-            aprendiendo:{ text: "Aprendiendo", color: "#E63946" },
-            en_repaso:  { text: "En repaso",   color: "#4ECDC4" },
-            fijado:     { text: "Fijado",      color: "#178A83" },
-            quemado:    { text: "★ Quemado",   color: "#D97706" },
+            nuevo:      { text: "Sin practicar", color: "#9CA3AF" },
+            aprendiendo:{ text: "Practicando",   color: "#E63946" },
+            en_repaso:  { text: "Aprendido",     color: "#4ECDC4" },
+            fijado:     { text: "Bien aprendido",color: "#178A83" },
+            quemado:    { text: "★ Dominado",    color: "#D97706" },
           };
           return (
             <motion.div
