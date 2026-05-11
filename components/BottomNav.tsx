@@ -67,8 +67,8 @@ function RecursosIcon({ color }: { color: string }) {
 
 const tabs = [
   { href: "/", label: "Comunidad", Icon: HomeIcon },
-  { href: "/kana", label: "Aprender", Icon: KanaIcon },
-  { href: "/practicar", label: "Practicar", Icon: PracticarIcon },
+  { href: "/kana", label: "Kana", Icon: KanaIcon },
+  { href: "/practicar", label: "Vocab", Icon: PracticarIcon },
   { href: "/recursos", label: "Recursos", Icon: RecursosIcon },
 ] as const;
 
