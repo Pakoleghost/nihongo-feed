@@ -572,7 +572,7 @@ export default function HomePage() {
             </div>
           ) : (
             <>
-              <p style={{ fontSize: "28px", fontWeight: 500, color: "#1A1A2E", margin: "0 0 8px", fontFamily: "var(--font-noto-serif-jp), serif", lineHeight: 1.15, letterSpacing: "0.04em" }}>
+              <p style={{ fontSize: "28px", fontWeight: 700, color: "#1A1A2E", margin: "0 0 8px", fontFamily: "var(--font-noto-sans-jp), sans-serif", lineHeight: 1.15, letterSpacing: "0.01em" }}>
                 {topic.kana}
               </p>
               <p style={{ fontSize: "14px", color: "#7A7F8D", margin: 0, lineHeight: 1.5, maxWidth: 280 }}>
