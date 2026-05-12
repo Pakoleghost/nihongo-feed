@@ -300,7 +300,7 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
         onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
       />
 
-      <div style={{ marginTop: "12px", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+      <div style={{ marginTop: 12, flex: 1, display: "flex", flexDirection: "column", minHeight: 0, paddingBottom: "max(24px, env(safe-area-inset-bottom, 24px))" }}>
         {practiceResult ? (
           <div
             style={{
@@ -388,29 +388,36 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
           </div>
         ) : currentQuestion ? (
           <>
+            {/* Question card — grows to fill space */}
             <div
               style={{
+                position: "relative",
+                overflow: "hidden",
                 background: "#FFFFFF",
-                borderRadius: "24px",
-                padding: "22px 20px",
+                borderRadius: 20,
+                flex: 1,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 4px 20px rgba(26,26,46,0.08)",
-                minHeight: "min(30dvh, 270px)",
+                boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
                 textAlign: "center",
+                padding: "24px 20px",
               }}
             >
+              {/* Corner fold */}
+              <div style={{ position: "absolute", top: 0, right: 0, width: 40, height: 40, background: "#4ECDC4", borderBottomLeftRadius: 40 }} />
+
               <p
                 style={{
-                  fontSize: "56px",
+                  fontSize: "clamp(28px, 11vw, 60px)",
                   fontWeight: 800,
                   color: "#1A1A2E",
                   margin: 0,
                   fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                  lineHeight: 1,
+                  lineHeight: 1.1,
                   textAlign: "center",
+                  wordBreak: "break-word",
                 }}
               >
                 {currentQuestion.item.display}
@@ -418,8 +425,8 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
               {currentQuestion.item.reading !== currentQuestion.item.display && (
                 <p
                   style={{
-                    margin: "8px 0 0",
-                    fontSize: 18,
+                    margin: "10px 0 0",
+                    fontSize: 20,
                     color: "#9CA3AF",
                     fontFamily: "var(--font-noto-sans-jp), sans-serif",
                   }}
@@ -427,18 +434,18 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
                   {currentQuestion.item.reading}
                 </p>
               )}
-              <p style={{ margin: "14px 0 0", fontSize: 12, color: "#C4BAB0" }}>
+              <p style={{ margin: "16px 0 0", fontSize: 12, color: "#C4BAB0", letterSpacing: "0.02em" }}>
                 Elige el significado correcto
               </p>
             </div>
 
+            {/* Answer grid — anchored to bottom */}
             <div
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
-                gap: "10px",
-                paddingTop: "12px",
-                paddingBottom: "4px",
+                gap: 10,
+                paddingTop: 12,
               }}
             >
               {currentQuestion.options.map((option, index) => {
@@ -448,13 +455,8 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
                 let color = "#1A1A2E";
 
                 if (quizPhase === "feedback") {
-                  if (isCorrectOption) {
-                    background = "#4ECDC4";
-                    color = "#FFFFFF";
-                  } else if (isSelected) {
-                    background = "#E63946";
-                    color = "#FFFFFF";
-                  }
+                  if (isCorrectOption) { background = "#4ECDC4"; color = "#FFFFFF"; }
+                  else if (isSelected) { background = "#E63946"; color = "#FFFFFF"; }
                 }
 
                 return (
@@ -463,44 +465,41 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
                     onClick={() => handleOption(option)}
                     disabled={quizPhase === "feedback"}
                     style={{
-                      padding: "14px 12px",
-                      borderRadius: "18px",
+                      padding: "18px 14px",
+                      borderRadius: 16,
                       border: "none",
                       cursor: quizPhase === "feedback" ? "default" : "pointer",
                       background,
                       color,
-                      fontSize: "14px",
+                      fontSize: 15,
                       fontWeight: 700,
-                      boxShadow: "0 4px 14px rgba(26,26,46,0.08)",
+                      boxShadow: "0 2px 8px rgba(26,26,46,0.08)",
                       transition: "background 0.15s",
                       textAlign: "left",
-                      minHeight: "76px",
+                      minHeight: 72,
                       display: "flex",
-                      alignItems: "flex-start",
-                      gap: "12px",
+                      alignItems: "center",
+                      gap: 10,
                     }}
                   >
                     <span
                       style={{
-                        width: "24px",
-                        height: "24px",
+                        width: 22,
+                        height: 22,
                         borderRadius: "50%",
-                        background:
-                          quizPhase === "feedback" && isCorrectOption
-                            ? "rgba(255,255,255,0.22)"
-                            : "rgba(26,26,46,0.08)",
+                        background: quizPhase === "feedback" && isCorrectOption ? "rgba(255,255,255,0.22)" : "rgba(26,26,46,0.08)",
                         color,
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        fontSize: "12px",
+                        fontSize: 11,
                         fontWeight: 800,
                         flexShrink: 0,
                       }}
                     >
                       {String.fromCharCode(65 + index)}
                     </span>
-                    <span style={{ lineHeight: 1.35 }}>{option}</span>
+                    <span style={{ lineHeight: 1.3 }}>{option}</span>
                   </button>
                 );
               })}

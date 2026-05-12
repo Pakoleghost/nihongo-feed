@@ -271,7 +271,7 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
         onExit={() => router.push(`/practicar/kanji?lesson=${lesson}`)}
       />
 
-      <div style={{ marginTop: "12px", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+      <div style={{ marginTop: 12, flex: 1, display: "flex", flexDirection: "column", minHeight: 0, paddingBottom: "max(24px, env(safe-area-inset-bottom, 24px))" }}>
         {practiceResult ? (
           <div
             style={{
@@ -359,57 +359,53 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
           </div>
         ) : currentQuestion ? (
           <>
+            {/* Question card — grows to fill space */}
             <div
               style={{
+                position: "relative",
+                overflow: "hidden",
                 background: "#FFFFFF",
-                borderRadius: "24px",
-                padding: "22px 20px",
+                borderRadius: 20,
+                flex: 1,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 4px 20px rgba(26,26,46,0.08)",
-                minHeight: "min(28dvh, 250px)",
+                boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
                 textAlign: "center",
+                padding: "24px 20px",
               }}
             >
+              {/* Corner fold */}
+              <div style={{ position: "absolute", top: 0, right: 0, width: 40, height: 40, background: "#4ECDC4", borderBottomLeftRadius: 40 }} />
+
               <p
                 style={{
-                  fontSize: "58px",
+                  fontSize: "clamp(32px, 12vw, 72px)",
                   fontWeight: 800,
                   color: "#1A1A2E",
                   margin: 0,
                   fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                  lineHeight: 1,
+                  lineHeight: 1.1,
                 }}
               >
                 {currentQuestion.item.kanji}
               </p>
-              <div
-                style={{
-                  marginTop: "10px",
-                  background: "#FFF8E7",
-                  borderRadius: "999px",
-                  padding: "7px 10px",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  color: "#6B7280",
-                }}
-              >
-                Apoyo: {currentQuestion.item.es}
-              </div>
-              <p style={{ margin: "12px 0 0", fontSize: "12px", color: "#9CA3AF", lineHeight: 1.35 }}>
-                Elige la lectura correcta.
+              <p style={{ margin: "16px 0 0", fontSize: 13, color: "#9CA3AF", fontStyle: "italic" }}>
+                {currentQuestion.item.es}
+              </p>
+              <p style={{ margin: "12px 0 0", fontSize: 11, color: "#C4BAB0", letterSpacing: "0.02em" }}>
+                Elige la lectura correcta
               </p>
             </div>
 
+            {/* Answer grid — anchored to bottom */}
             <div
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
-                gap: "10px",
-                paddingTop: "12px",
-                paddingBottom: "4px",
+                gap: 10,
+                paddingTop: 12,
               }}
             >
               {currentQuestion.options.map((option) => {
@@ -419,13 +415,8 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
                 let color = "#1A1A2E";
 
                 if (quizPhase === "feedback") {
-                  if (isCorrectOption) {
-                    background = "#4ECDC4";
-                    color = "#FFFFFF";
-                  } else if (isSelected) {
-                    background = "#E63946";
-                    color = "#FFFFFF";
-                  }
+                  if (isCorrectOption) { background = "#4ECDC4"; color = "#FFFFFF"; }
+                  else if (isSelected) { background = "#E63946"; color = "#FFFFFF"; }
                 }
 
                 return (
@@ -434,19 +425,19 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
                     onClick={() => handleOption(option)}
                     disabled={quizPhase === "feedback"}
                     style={{
-                      padding: "15px 10px",
-                      borderRadius: "18px",
+                      padding: "18px 10px",
+                      borderRadius: 16,
                       border: "none",
                       cursor: quizPhase === "feedback" ? "default" : "pointer",
                       background,
                       color,
-                      fontSize: "20px",
+                      fontSize: 22,
                       fontWeight: 800,
-                      boxShadow: "0 4px 14px rgba(26,26,46,0.08)",
+                      boxShadow: "0 2px 8px rgba(26,26,46,0.08)",
                       transition: "background 0.15s",
                       textAlign: "center",
                       fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                      minHeight: "72px",
+                      minHeight: 72,
                     }}
                   >
                     {option}

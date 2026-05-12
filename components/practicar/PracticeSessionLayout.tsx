@@ -8,16 +8,16 @@ export default function PracticeSessionLayout({ children }: PracticeSessionLayou
   return (
     <div
       style={{
-        minHeight: "100dvh",
-        background:
-          "radial-gradient(circle at top, rgba(255,255,255,0.72) 0%, rgba(255,248,231,0.98) 34%, #FFF8E7 100%)",
+        height: "100dvh",
+        background: "#FFF8E7",
         display: "flex",
         flexDirection: "column",
-        paddingTop: "max(10px, env(safe-area-inset-top))",
-        paddingRight: "18px",
-        paddingBottom: "max(20px, calc(env(safe-area-inset-bottom) + 20px))",
-        paddingLeft: "18px",
+        paddingTop: "max(48px, env(safe-area-inset-top, 48px))",
+        paddingRight: "20px",
+        paddingBottom: 0,
+        paddingLeft: "20px",
         overscrollBehavior: "contain",
+        overflow: "hidden",
       }}
     >
       <div

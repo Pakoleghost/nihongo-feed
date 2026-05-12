@@ -252,25 +252,24 @@ export default function VocabularioFlashcardsScreen({
         </button>
       </div>
 
-      {/* Lesson selector */}
+      {/* Lesson selector — compact, just L# */}
       <div
         ref={lessonRowRef}
-        style={{ display: "flex", gap: 10, overflowX: "auto", padding: "16px 20px 0", scrollbarWidth: "none" }}
+        style={{ display: "flex", gap: 8, overflowX: "auto", padding: "10px 20px 0", scrollbarWidth: "none" }}
       >
         {LESSONS.map((l) => (
           <button
             key={l}
             onClick={() => setLesson(l)}
             style={{
-              flexShrink: 0, padding: "9px 16px", borderRadius: "999px", border: "none", cursor: "pointer",
+              flexShrink: 0, padding: "6px 12px", borderRadius: 999, border: "none", cursor: "pointer",
               background: lesson === l ? "#1A1A2E" : "#FFFFFF",
-              color: lesson === l ? "#FFFFFF" : "#1A1A2E",
-              fontWeight: 700, fontSize: 13,
-              boxShadow: lesson === l ? "none" : "0 2px 8px rgba(26,26,46,0.08)",
-              whiteSpace: "nowrap",
+              color: lesson === l ? "#FFFFFF" : "#9CA3AF",
+              fontWeight: 700, fontSize: 12,
+              boxShadow: lesson === l ? "none" : "0 1px 4px rgba(26,26,46,0.07)",
             }}
           >
-            L{l} · {GENKI_LESSON_NAMES[l] ?? `Lección ${l}`}
+            L{l}
           </button>
         ))}
       </div>
@@ -347,26 +346,30 @@ export default function VocabularioFlashcardsScreen({
               }}
             >
               {/* Front */}
-              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", background: "#FFFFFF", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: 32, boxShadow: "0 8px 32px rgba(26,26,46,0.09)" }}>
-                <p style={{ fontSize: 60, fontWeight: 800, color: "#1A1A2E", margin: 0, fontFamily: "var(--font-noto-sans-jp), sans-serif", lineHeight: 1 }}>
+              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", background: "#FFFFFF", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: 28, overflow: "hidden", boxShadow: "0 4px 16px rgba(26,26,46,0.08)" }}>
+                {/* Corner fold */}
+                <div style={{ position: "absolute", top: 0, right: 0, width: 44, height: 44, background: "#4ECDC4", borderBottomLeftRadius: 44 }} />
+                <p style={{ fontSize: "clamp(28px, 11vw, 64px)", fontWeight: 800, color: "#1A1A2E", margin: 0, fontFamily: "var(--font-noto-sans-jp), sans-serif", lineHeight: 1.1, textAlign: "center", wordBreak: "break-word" }}>
                   {card.kanji || card.hira}
                 </p>
                 {card.kanji && (
-                  <p style={{ fontSize: 20, color: "#9CA3AF", margin: 0, fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
+                  <p style={{ fontSize: 18, color: "#9CA3AF", margin: 0, fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
                     {card.hira}
                   </p>
                 )}
-                <p style={{ fontSize: 13, color: "#C4BAB0", margin: "24px 0 0", display: "flex", alignItems: "center", gap: 5 }}>
+                <p style={{ fontSize: 12, color: "#C4BAB0", margin: "20px 0 0" }}>
                   ↻ toca para voltear
                 </p>
               </div>
 
               {/* Back */}
-              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", background: "#FFFFFF", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 32, boxShadow: "0 8px 32px rgba(26,26,46,0.09)" }}>
-                <p style={{ fontSize: 26, fontWeight: 700, color: "#1A1A2E", margin: 0, textAlign: "center", lineHeight: 1.3 }}>
+              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", background: "#1A1A2E", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 28, overflow: "hidden", boxShadow: "0 4px 16px rgba(26,26,46,0.18)" }}>
+                {/* Corner fold */}
+                <div style={{ position: "absolute", top: 0, right: 0, width: 44, height: 44, background: "#E63946", borderBottomLeftRadius: 44 }} />
+                <p style={{ fontSize: 28, fontWeight: 800, color: "#FFFFFF", margin: 0, textAlign: "center", lineHeight: 1.3 }}>
                   {card.es}
                 </p>
-                <p style={{ fontSize: 16, color: "#9CA3AF", margin: "12px 0 0", fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
+                <p style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", margin: "12px 0 0", fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
                   {card.hira}
                 </p>
               </div>
@@ -390,34 +393,31 @@ export default function VocabularioFlashcardsScreen({
 
       {/* Progress + action buttons */}
       {!done && (
-        <div style={{ padding: "16px 20px", paddingBottom: "max(32px, env(safe-area-inset-bottom, 32px))" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", letterSpacing: "0.1em" }}>
-              PROGRESO
-            </span>
-            <span style={{ fontSize: 14, fontWeight: 700, color: "#E63946" }}>
+        <div style={{ padding: "12px 20px", paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+            <div style={{ flex: 1, height: 3, background: "#E5E7EB", borderRadius: 999, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${progressPct}%`, background: "#1A1A2E", borderRadius: 999, transition: "width 0.3s ease" }} />
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#9CA3AF", flexShrink: 0 }}>
               {currentIndex + 1}/{total}
             </span>
           </div>
-          <div style={{ height: 5, background: "#E5E7EB", borderRadius: 999, overflow: "hidden", marginBottom: 20 }}>
-            <div style={{ height: "100%", width: `${progressPct}%`, background: "#E63946", borderRadius: 999, transition: "width 0.3s ease" }} />
-          </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <button
               onClick={() => handleKnow(false)}
-              style={{ padding: "18px 12px", borderRadius: 14, border: "none", cursor: "pointer", background: "#F3F0EB", color: "#53596B", fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+              style={{ padding: "18px 12px", borderRadius: 14, border: "none", cursor: "pointer", background: "#FFFFFF", color: "#53596B", fontWeight: 700, fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 2px 8px rgba(26,26,46,0.08)" }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
               </svg>
               No lo sé
             </button>
             <button
               onClick={() => handleKnow(true)}
-              style={{ padding: "18px 12px", borderRadius: 14, border: "none", cursor: "pointer", background: "#4ECDC4", color: "#1A1A2E", fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+              style={{ padding: "18px 12px", borderRadius: 14, border: "none", cursor: "pointer", background: "#1A1A2E", color: "#FFFFFF", fontWeight: 700, fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 4px 14px rgba(26,26,46,0.18)" }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               Lo sé
