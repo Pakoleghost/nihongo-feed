@@ -497,9 +497,7 @@ export default function HomePage() {
 
       {/* ── Tema de la semana ── */}
       <div style={{ padding: "0 16px 12px" }}>
-        <motion.div
-          animate={{ boxShadow: ["0 0 0 0px rgba(78,205,196,0)", "0 0 0 3px rgba(78,205,196,0.18)", "0 0 0 0px rgba(78,205,196,0)"] }}
-          transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+        <div
           style={{
             position: "relative",
             background: "#1A1A2E",
@@ -508,21 +506,33 @@ export default function HomePage() {
             overflow: "hidden",
           }}
         >
-          {/* Animated kana watermark */}
-          <motion.div
+          {/* Kana watermark — estático, muy sutil */}
+          <div
             aria-hidden="true"
-            animate={{ y: [0, -10, 0], opacity: [0.05, 0.10, 0.05] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
             style={{
               position: "absolute", right: -12, top: -12,
               fontFamily: "var(--font-noto-serif-jp), serif",
               fontSize: 120, lineHeight: 1,
-              color: "rgba(255,255,255,1)",
+              color: "rgba(255,255,255,0.05)",
               userSelect: "none", pointerEvents: "none",
             }}
           >
             {topic.kana.charAt(0)}
-          </motion.div>
+          </div>
+
+          {/* Sheen — destello diagonal que barre la card cada 4s */}
+          <motion.div
+            aria-hidden="true"
+            initial={{ x: "-100%" }}
+            animate={{ x: "260%" }}
+            transition={{ duration: 1.1, repeat: Infinity, repeatDelay: 3.8, ease: "easeInOut" }}
+            style={{
+              position: "absolute", top: 0, left: 0,
+              width: "40%", height: "100%",
+              background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.06) 50%, transparent 70%)",
+              pointerEvents: "none",
+            }}
+          />
 
           {/* Header row */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
@@ -589,7 +599,7 @@ export default function HomePage() {
               </p>
             </>
           )}
-        </motion.div>
+        </div>
       </div>
 
       {/* ── Compose box ── */}
