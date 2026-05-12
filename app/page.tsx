@@ -510,9 +510,9 @@ export default function HomePage() {
           {/* Corner fold teal */}
           <motion.div
             aria-hidden="true"
-            animate={{ opacity: [1, 0.6, 1] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            style={{ position: "absolute", top: 0, right: 0, width: 44, height: 44, background: "#4ECDC4", borderBottomLeftRadius: 44, pointerEvents: "none" }}
+            animate={{ scale: [1, 1.18, 1] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+            style={{ position: "absolute", top: 0, right: 0, width: 44, height: 44, background: "#4ECDC4", borderBottomLeftRadius: 44, pointerEvents: "none", transformOrigin: "top right" }}
           />
 
           {/* Header row */}
@@ -572,7 +572,7 @@ export default function HomePage() {
             </div>
           ) : (
             <>
-              <p style={{ fontSize: "28px", fontWeight: 700, color: "#1A1A2E", margin: "0 0 8px", fontFamily: "var(--font-noto-serif-jp), serif", lineHeight: 1.15, letterSpacing: "0.02em" }}>
+              <p style={{ fontSize: "28px", fontWeight: 500, color: "#1A1A2E", margin: "0 0 8px", fontFamily: "var(--font-noto-serif-jp), serif", lineHeight: 1.15, letterSpacing: "0.04em" }}>
                 {topic.kana}
               </p>
               <p style={{ fontSize: "14px", color: "#7A7F8D", margin: 0, lineHeight: 1.5, maxWidth: 280 }}>

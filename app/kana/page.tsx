@@ -136,7 +136,7 @@ export default function KanaPage() {
           </p>
           {/* Action label */}
           <p style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.45)", margin: 0, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-            {smartPlan.title} · 20 preguntas
+            Smart Kana · {smartPlan.title} · 20 preguntas
           </p>
         </div>
         <div style={{ width: 44, height: 44, borderRadius: 12, background: "#E63946", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
