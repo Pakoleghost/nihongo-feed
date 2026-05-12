@@ -500,38 +500,19 @@ export default function HomePage() {
         <div
           style={{
             position: "relative",
-            background: "#1A1A2E",
+            background: "#FFFFFF",
             borderRadius: "16px",
             padding: "20px 20px 20px",
             overflow: "hidden",
+            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
           }}
         >
-          {/* Kana watermark — estático, muy sutil */}
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute", right: -12, top: -12,
-              fontFamily: "var(--font-noto-serif-jp), serif",
-              fontSize: 120, lineHeight: 1,
-              color: "rgba(255,255,255,0.05)",
-              userSelect: "none", pointerEvents: "none",
-            }}
-          >
-            {topic.kana.charAt(0)}
-          </div>
-
-          {/* Sheen — destello diagonal que barre la card cada 4s */}
+          {/* Corner fold teal */}
           <motion.div
             aria-hidden="true"
-            initial={{ x: "-100%" }}
-            animate={{ x: "260%" }}
-            transition={{ duration: 1.1, repeat: Infinity, repeatDelay: 3.8, ease: "easeInOut" }}
-            style={{
-              position: "absolute", top: 0, left: 0,
-              width: "40%", height: "100%",
-              background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.06) 50%, transparent 70%)",
-              pointerEvents: "none",
-            }}
+            animate={{ opacity: [1, 0.6, 1] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            style={{ position: "absolute", top: 0, right: 0, width: 44, height: 44, background: "#4ECDC4", borderBottomLeftRadius: 44, pointerEvents: "none" }}
           />
 
           {/* Header row */}
@@ -542,7 +523,7 @@ export default function HomePage() {
             {effectiveIsAdmin && !editingTopic && (
               <button
                 onClick={() => { setTopicDraft({ kana: topic.kana, prompt: topic.prompt }); setEditingTopic(true); }}
-                style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 8, padding: "4px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}
+                style={{ background: "rgba(26,26,46,0.06)", border: "none", borderRadius: 8, padding: "4px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, marginRight: 32 }}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                   <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -559,13 +540,13 @@ export default function HomePage() {
                 value={topicDraft.kana}
                 onChange={e => setTopicDraft(d => ({ ...d, kana: e.target.value }))}
                 placeholder="Texto en kana (ej. きょうのてんき)"
-                style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, padding: "10px 14px", color: "#FFFFFF", fontSize: 16, fontFamily: "var(--font-noto-serif-jp), serif", outline: "none", width: "100%", boxSizing: "border-box" }}
+                style={{ background: "rgba(26,26,46,0.04)", border: "1px solid rgba(26,26,46,0.12)", borderRadius: 10, padding: "10px 14px", color: "#1A1A2E", fontSize: 16, fontFamily: "var(--font-noto-serif-jp), serif", outline: "none", width: "100%", boxSizing: "border-box" }}
               />
               <input
                 value={topicDraft.prompt}
                 onChange={e => setTopicDraft(d => ({ ...d, prompt: e.target.value }))}
                 placeholder="Prompt en español"
-                style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, padding: "10px 14px", color: "#FFFFFF", fontSize: 14, outline: "none", width: "100%", boxSizing: "border-box" }}
+                style={{ background: "rgba(26,26,46,0.04)", border: "1px solid rgba(26,26,46,0.12)", borderRadius: 10, padding: "10px 14px", color: "#1A1A2E", fontSize: 14, outline: "none", width: "100%", boxSizing: "border-box" }}
               />
               <div style={{ display: "flex", gap: 8 }}>
                 <button
@@ -583,7 +564,7 @@ export default function HomePage() {
                 </button>
                 <button
                   onClick={() => setEditingTopic(false)}
-                  style={{ background: "rgba(255,255,255,0.08)", color: "#9CA3AF", border: "none", borderRadius: 10, padding: "10px 16px", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
+                  style={{ background: "rgba(26,26,46,0.06)", color: "#9CA3AF", border: "none", borderRadius: 10, padding: "10px 16px", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
                 >
                   Cancelar
                 </button>
@@ -591,10 +572,10 @@ export default function HomePage() {
             </div>
           ) : (
             <>
-              <p style={{ fontSize: "28px", fontWeight: 700, color: "#FFFFFF", margin: "0 0 8px", fontFamily: "var(--font-noto-serif-jp), serif", lineHeight: 1.15, letterSpacing: "0.02em" }}>
+              <p style={{ fontSize: "28px", fontWeight: 700, color: "#1A1A2E", margin: "0 0 8px", fontFamily: "var(--font-noto-serif-jp), serif", lineHeight: 1.15, letterSpacing: "0.02em" }}>
                 {topic.kana}
               </p>
-              <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.65)", margin: 0, lineHeight: 1.5, maxWidth: 280 }}>
+              <p style={{ fontSize: "14px", color: "#7A7F8D", margin: 0, lineHeight: 1.5, maxWidth: 280 }}>
                 {topic.prompt}
               </p>
             </>
@@ -762,9 +743,9 @@ export default function HomePage() {
                   <div style={{ padding: "14px 16px" }}>
                     {/* Author row */}
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: post.content || isEditing || isConfirmDelete ? 10 : 0 }}>
-                      <div
+                      <button
                         onClick={() => router.push(`/perfil/${post.user_id}`)}
-                        style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, cursor: "pointer" }}
+                        style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, cursor: "pointer", background: "none", border: "none", padding: 0, textAlign: "left" }}
                       >
                         <AvatarCircle url={profile?.avatar_url ?? null} name={profile?.username ?? null} size={36} />
                         <div>
@@ -773,7 +754,7 @@ export default function HomePage() {
                           </p>
                           <p style={{ fontSize: 11, color: "#C4BAB0", margin: "2px 0 0", fontWeight: 500 }}>{timeAgo(post.created_at)}</p>
                         </div>
-                      </div>
+                      </button>
 
                       {isOwn && (
                         <div style={{ position: "relative", flexShrink: 0 }}>
