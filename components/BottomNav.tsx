@@ -17,20 +17,7 @@ function HomeIcon({ color }: { color: string }) {
   );
 }
 
-function KanaIcon({ color }: { color: string }) {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <text x="1" y="16" fontSize="13" fontWeight="700" fill={color} fontFamily="system-ui, sans-serif">
-        文
-      </text>
-      <text x="13" y="20" fontSize="9" fontWeight="700" fill={color} fontFamily="system-ui, sans-serif">
-        A
-      </text>
-    </svg>
-  );
-}
-
-function PracticarIcon({ color }: { color: string }) {
+function EstudiarIcon({ color }: { color: string }) {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
       <path
@@ -67,8 +54,7 @@ function RecursosIcon({ color }: { color: string }) {
 
 const tabs = [
   { href: "/", label: "Comunidad", Icon: HomeIcon },
-  { href: "/kana", label: "Kana", Icon: KanaIcon },
-  { href: "/practicar", label: "Vocab", Icon: PracticarIcon },
+  { href: "/practicar", label: "Estudiar", Icon: EstudiarIcon },
   { href: "/recursos", label: "Recursos", Icon: RecursosIcon },
 ] as const;
 
@@ -92,7 +78,10 @@ export default function BottomNav() {
       }}
     >
       {tabs.map(({ href, label, Icon }) => {
-        const isActive = href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
+        const isActive =
+          href === "/" ? pathname === "/" :
+          href === "/practicar" ? (pathname === "/practicar" || pathname.startsWith("/practicar/") || pathname === "/kana" || pathname.startsWith("/kana/")) :
+          pathname === href || pathname.startsWith(href + "/");
         const color = isActive ? "#FFFFFF" : "#9CA3AF";
 
         return (

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { setLastActivity } from "@/lib/streak";
 import { loadVocabProgress } from "@/lib/vocab-progress";
+import { loadKanaProgress, getKanaStateCounts } from "@/lib/kana-progress";
+import { KANA_ITEMS } from "@/lib/kana-data";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import BottomNav from "@/components/BottomNav";
 
@@ -11,11 +13,16 @@ const TOTAL_VOCAB = Object.values(GENKI_VOCAB_BY_LESSON).flat().length;
 
 export default function PracticarPage() {
   const [vocabReviewed, setVocabReviewed] = useState<number | null>(null);
+  const [kanaDominados, setKanaDominados] = useState<number | null>(null);
+  const TOTAL_KANA = KANA_ITEMS.length;
 
   useEffect(() => {
     setLastActivity("Practicar", "/practicar");
-    const progress = loadVocabProgress("anon");
-    setVocabReviewed(Object.keys(progress).length);
+    const vocabProgress = loadVocabProgress("anon");
+    setVocabReviewed(Object.keys(vocabProgress).length);
+    const kanaProgress = loadKanaProgress("anon");
+    const counts = getKanaStateCounts(KANA_ITEMS, kanaProgress);
+    setKanaDominados(counts.fijado + counts.quemado);
   }, []);
 
   const vocabPct =
@@ -56,133 +63,50 @@ export default function PracticarPage() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
 
-        {/* ── Kana Sprint ── */}
-        <div>
-          <Link
-            href="/practicar/sprint"
-            style={{
-              position: "relative",
-              background: "#FFFFFF",
-              borderRadius: "14px",
-              padding: "20px 20px 22px",
-              display: "block",
-              textDecoration: "none",
-              boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
-              overflow: "hidden",
-            }}
-          >
-            {/* Corner fold */}
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                right: 0,
-                width: 40,
-                height: 40,
-                background: "#1A1A2E",
-                borderBottomLeftRadius: 40,
-              }}
-            />
-
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-              <div style={{ flex: 1, minWidth: 0, paddingRight: 48 }}>
-                <p
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: 800,
-                    color: "#1A1A2E",
-                    margin: 0,
-                    lineHeight: 1.1,
-                    letterSpacing: "-0.03em",
-                  }}
-                >
-                  Kana Sprint
-                </p>
-                <p
-                  style={{
-                    fontSize: "13px",
-                    color: "#7A7F8D",
-                    margin: "5px 0 0",
-                    lineHeight: 1.35,
-                  }}
-                >
-                  ¿Cuántos adivinas en 60 segundos?
-                </p>
-              </div>
+        {/* ── Kana ── */}
+        <Link
+          href="/kana"
+          style={{
+            position: "relative",
+            background: "#1A1A2E",
+            borderRadius: "14px",
+            padding: "20px 20px 22px",
+            display: "block",
+            textDecoration: "none",
+            boxShadow: "0 4px 16px rgba(26,26,46,0.18)",
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: "20px", fontWeight: 800, color: "#FFFFFF", margin: 0, lineHeight: 1.1, letterSpacing: "-0.03em" }}>
+                Kana
+              </p>
+              <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", margin: "5px 0 0", lineHeight: 1.35 }}>
+                Hiragana · Katakana · Smart SRS
+              </p>
             </div>
-
-            {/* Score row */}
-            <div
-              style={{
-                marginTop: 16,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              <div
-                style={{
-                  background: "#1A1A2E",
-                  borderRadius: 6,
-                  padding: "4px 10px",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
-                }}
-              >
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"
-                    stroke="#FFF8E7"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: 700,
-                    color: "#FFF8E7",
-                    letterSpacing: "0.06em",
-                  }}
-                >
-                  MODO JUEGO
-                </span>
-              </div>
-              <span style={{ fontSize: "12px", color: "#9CA3AF" }}>
-                Hiragana · Katakana
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "#E63946", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="16" height="11" viewBox="0 0 18 12" fill="none">
+                <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          {/* Progress bar */}
+          <div style={{ marginTop: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <span style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Dominados
+              </span>
+              <span style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.6)" }}>
+                {kanaDominados ?? "—"} / {TOTAL_KANA}
               </span>
             </div>
-          </Link>
-
-          <Link
-            href="/practicar/sprint/scoreboard"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 5,
-              marginTop: 8,
-              marginLeft: 20,
-              fontSize: "12px",
-              fontWeight: 600,
-              color: "#9CA3AF",
-              textDecoration: "none",
-              letterSpacing: "0.02em",
-            }}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"
-                stroke="#9CA3AF"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Ver scoreboard
-          </Link>
-        </div>
+            <div style={{ height: 4, background: "rgba(255,255,255,0.1)", borderRadius: 999 }}>
+              <div style={{ height: "100%", width: `${kanaDominados !== null ? Math.min(100, (kanaDominados / TOTAL_KANA) * 100) : 0}%`, background: "#4ECDC4", borderRadius: 999, transition: "width 0.4s ease" }} />
+            </div>
+          </div>
+        </Link>
 
         {/* ── Vocabulario ── */}
         <Link
