@@ -247,55 +247,29 @@ export default function PracticarPage() {
             }}
           />
 
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-            <div style={{ flex: 1, minWidth: 0, paddingRight: 48 }}>
-              <p
-                style={{
-                  fontSize: "20px",
-                  fontWeight: 800,
-                  color: "#1A1A2E",
-                  margin: 0,
-                  lineHeight: 1.1,
-                  letterSpacing: "-0.03em",
-                }}
-              >
-                Kanji
-              </p>
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#7A7F8D",
-                  margin: "5px 0 0",
-                  lineHeight: 1.35,
-                }}
-              >
-                Kanji por lección
-              </p>
-            </div>
-          </div>
-
-          <div style={{ marginTop: 16 }}>
-            <div
+          <div style={{ paddingRight: 48 }}>
+            <p
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-                background: "#F0EDE8",
-                borderRadius: 6,
-                padding: "4px 10px",
+                fontSize: "20px",
+                fontWeight: 800,
+                color: "#1A1A2E",
+                margin: 0,
+                lineHeight: 1.1,
+                letterSpacing: "-0.03em",
               }}
             >
-              <span
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  color: "#9CA3AF",
-                  letterSpacing: "0.06em",
-                }}
-              >
-                PRÓXIMAMENTE
-              </span>
-            </div>
+              Kanji
+            </p>
+            <p
+              style={{
+                fontSize: "13px",
+                color: "#7A7F8D",
+                margin: "5px 0 0",
+                lineHeight: 1.35,
+              }}
+            >
+              Genki I · lecciones 3–23
+            </p>
           </div>
         </Link>
 

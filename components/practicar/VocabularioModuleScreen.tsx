@@ -7,6 +7,7 @@ import { getStreak, setLastActivity } from "@/lib/streak";
 import { getVocabLessonSummary, loadVocabProgress, type VocabProgressMap } from "@/lib/vocab-progress";
 import { getPracticeSessionContext } from "@/lib/practice-srs";
 import { GENKI_LESSON_NAMES } from "@/lib/genki-lesson-names";
+import BottomNav from "@/components/BottomNav";
 
 const LESSONS = Object.keys(GENKI_VOCAB_BY_LESSON)
   .map(Number)
@@ -67,7 +68,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
       style={{
         minHeight: "100dvh",
         background: "#FFF8E7",
-        padding: "32px 16px 16px",
+        padding: "32px 16px calc(100px + env(safe-area-inset-bottom, 0px))",
         fontFamily: "var(--font-study), var(--font-latin), sans-serif",
       }}
     >
@@ -115,13 +116,15 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
             padding: "8px 14px",
             display: "flex",
             alignItems: "center",
-            gap: "8px",
+            gap: "6px",
             color: "#E63946",
             fontWeight: 700,
             fontSize: "12px",
           }}
         >
-          <span style={{ fontSize: "16px", lineHeight: 1 }}>🔥</span>
+          <svg width="13" height="16" viewBox="0 0 13 16" fill="none" aria-hidden="true">
+            <path d="M6.5 1C6.5 1 10 4.5 10 8a3.5 3.5 0 01-7 0c0-1.5.8-2.8 1.5-3.5C4.5 5.5 5 7 6.5 7c0 0 0-4 0-6z" fill="#E63946"/>
+          </svg>
           <span>Racha de {streak} días</span>
         </div>
       </div>
@@ -299,7 +302,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            boxShadow: "0 6px 20px rgba(230,57,70,0.22)",
+            boxShadow: "0 6px 20px rgba(26,26,46,0.14)",
           }}
         >
           <div style={{ textAlign: "left" }}>
@@ -344,6 +347,8 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
           </svg>
         </button>
       </div>
+
+      <BottomNav />
     </div>
   );
 }

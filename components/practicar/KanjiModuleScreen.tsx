@@ -8,6 +8,7 @@ import { getKanjiLessonSummary, loadKanjiProgress, type KanjiProgressMap } from 
 import { getPracticeNextAction, getPracticeSessionContext } from "@/lib/practice-srs";
 import ModuleActionChoices from "@/components/practicar/ModuleActionChoices";
 import { GENKI_LESSON_NAMES } from "@/lib/genki-lesson-names";
+import BottomNav from "@/components/BottomNav";
 
 const LESSONS = Object.keys(GENKI_KANJI_BY_LESSON)
   .map(Number)
@@ -89,7 +90,7 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
       style={{
         minHeight: "100dvh",
         background: "#FFF8E7",
-        padding: "32px 16px 16px",
+        padding: "32px 16px calc(100px + env(safe-area-inset-bottom, 0px))",
         fontFamily: "var(--font-study), var(--font-latin), sans-serif",
       }}
     >
@@ -143,7 +144,9 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
             fontSize: "12px",
           }}
         >
-          <span style={{ fontSize: "16px", lineHeight: 1 }}>🔥</span>
+          <svg width="13" height="16" viewBox="0 0 13 16" fill="none" aria-hidden="true">
+            <path d="M6.5 1C6.5 1 10 4.5 10 8a3.5 3.5 0 01-7 0c0-1.5.8-2.8 1.5-3.5C4.5 5.5 5 7 6.5 7c0 0 0-4 0-6z" fill="#1A1A2E"/>
+          </svg>
           <span>Racha de {streak} días</span>
         </div>
       </div>
@@ -326,6 +329,8 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
         learnCard={actionCards[0]}
         practiceCard={actionCards[1]}
       />
+
+      <BottomNav />
     </div>
   );
 }
