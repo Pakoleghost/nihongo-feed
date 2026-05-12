@@ -130,13 +130,11 @@ export default function KanaPage() {
         style={{ background: "#1A1A2E", borderRadius: 16, padding: "20px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, textDecoration: "none", boxShadow: "0 8px 24px rgba(26,26,46,0.18)", marginTop: 8 }}
       >
         <div style={{ minWidth: 0, flex: 1 }}>
-          {/* Kana preview */}
-          <p style={{ fontSize: 40, color: "#FFFFFF", margin: "0 0 10px", lineHeight: 1, fontFamily: "var(--font-noto-serif-jp), serif", letterSpacing: "0.1em" }}>
-            {smartPlan.kanaChars}
+          <p style={{ fontSize: 22, fontWeight: 800, color: "#FFFFFF", margin: "0 0 6px", letterSpacing: "-0.02em", lineHeight: 1 }}>
+            Smart Kana
           </p>
-          {/* Action label */}
-          <p style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.45)", margin: 0, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-            Smart Kana · {smartPlan.title} · 20 preguntas
+          <p style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.4)", margin: 0, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+            {smartPlan.title} · 20 preguntas
           </p>
         </div>
         <div style={{ width: 44, height: 44, borderRadius: 12, background: "#E63946", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
