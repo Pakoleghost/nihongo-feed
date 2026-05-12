@@ -59,7 +59,7 @@ const MIXED_TASK_WEIGHTS: Array<{ type: KanaQuestionType; weight: number }> = [
   { type: "kana_to_romaji_choice", weight: 0.4 },
   { type: "romaji_to_kana_choice", weight: 0.35 },
   { type: "hiragana_katakana_match", weight: 0.15 },
-  { type: "romaji_to_kana_trace", weight: 0.1 },
+  { type: "romaji_to_kana_trace", weight: 0.3 },
 ];
 
 function formatQuizContext(primary: string, secondary: string, sets: string[]) {
