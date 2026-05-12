@@ -106,6 +106,8 @@ export default function PerfilPage() {
   const [usernameInput, setUsernameInput] = useState("");
   const [savingUsername, setSavingUsername] = useState(false);
 
+  const [isAdmin, setIsAdmin] = useState(false);
+
   // Stats (client-side)
   const [streak, setStreak] = useState(0);
   const [kanaCount, setKanaCount] = useState(0);
@@ -123,11 +125,14 @@ export default function PerfilPage() {
 
       const { data } = await supabase
         .from("profiles")
-        .select("id, username, avatar_url, group_name")
+        .select("id, username, avatar_url, group_name, is_admin")
         .eq("id", user.id)
         .single();
 
-      if (data) setProfile(data as Profile);
+      if (data) {
+        setProfile(data as Profile);
+        setIsAdmin((data as { is_admin?: boolean | null }).is_admin === true);
+      }
 
       // Streak from localStorage
       setStreak(getStreak());
@@ -277,15 +282,15 @@ export default function PerfilPage() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          padding: "32px 20px 24px",
-          gap: "12px",
+          padding: "20px 20px 16px",
+          gap: "10px",
         }}
       >
         <div style={{ position: "relative" }}>
           <AvatarCircle
             url={profile?.avatar_url ?? null}
             name={profile?.username ?? null}
-            size={120}
+            size={100}
           />
           {uploading && (
             <div
@@ -305,23 +310,42 @@ export default function PerfilPage() {
               ...
             </div>
           )}
+          {/* Camera badge */}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            aria-label="Cambiar foto"
+            style={{
+              position: "absolute",
+              bottom: 2,
+              right: 2,
+              width: 28,
+              height: 28,
+              borderRadius: "50%",
+              background: "#4ECDC4",
+              border: "2px solid #FFF8E7",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: uploading ? "not-allowed" : "pointer",
+              padding: 0,
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+              <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#1A1A2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="12" cy="13" r="4" stroke="#1A1A2E" strokeWidth="2"/>
+            </svg>
+          </button>
         </div>
 
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: uploading ? "not-allowed" : "pointer",
-            color: "#4ECDC4",
-            fontSize: "14px",
-            fontWeight: 700,
-            padding: "4px 8px",
-          }}
-        >
-          {uploading ? "Subiendo…" : "Cambiar foto"}
-        </button>
+        <p style={{ fontSize: "18px", fontWeight: 800, color: "#1A1A2E", margin: 0, letterSpacing: "-0.03em" }}>
+          {profile?.username ?? "—"}
+        </p>
+        {profile?.group_name && (
+          <span style={{ fontSize: "12px", fontWeight: 600, color: "#9CA3AF", background: "rgba(26,26,46,0.06)", borderRadius: 6, padding: "3px 10px" }}>
+            {profile.group_name}
+          </span>
+        )}
 
         <input
           ref={fileInputRef}
@@ -333,7 +357,7 @@ export default function PerfilPage() {
       </div>
 
       {/* Stats row */}
-      <div style={{ padding: "0 20px 20px", display: "flex", gap: "10px" }}>
+      <div style={{ padding: "0 20px 16px", display: "flex", gap: "10px" }}>
         {/* Streak */}
         <div
           style={{
@@ -345,10 +369,14 @@ export default function PerfilPage() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: "4px",
+            gap: "5px",
           }}
         >
-          <span style={{ fontSize: "22px", lineHeight: 1 }}>🔥</span>
+          {/* Flame SVG */}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C12 2 7 8 7 13a5 5 0 0010 0c0-3-2-6-2-6s-1 2.5-2 3c-.5-2 .5-5-1-8z" fill="#E63946" opacity="0.9"/>
+            <path d="M12 14c0 1.1-.9 2-2 2 0-1.5 1-2.5 2-3v1z" fill="#FFF8E7"/>
+          </svg>
           <span
             style={{
               fontSize: "26px",
@@ -360,8 +388,8 @@ export default function PerfilPage() {
           >
             {streak}
           </span>
-          <span style={{ fontSize: "11px", fontWeight: 600, color: "#7A7F8D", textAlign: "center" }}>
-            días de racha
+          <span style={{ fontSize: "10px", fontWeight: 700, color: "#9CA3AF", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+            Racha
           </span>
         </div>
 
@@ -376,20 +404,14 @@ export default function PerfilPage() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: "4px",
+            gap: "5px",
           }}
         >
-          <span
-            style={{
-              fontSize: "20px",
-              lineHeight: 1,
-              fontWeight: 700,
-              color: "#4ECDC4",
-              fontFamily: "Noto Serif JP, serif",
-            }}
-          >
-            学
-          </span>
+          {/* Book/kana SVG */}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="#4ECDC4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="#4ECDC4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
           <span
             style={{
               fontSize: "26px",
@@ -400,10 +422,10 @@ export default function PerfilPage() {
             }}
           >
             {kanaCount}
-            <span style={{ fontSize: "13px", fontWeight: 600, color: "#7A7F8D" }}>/96</span>
+            <span style={{ fontSize: "12px", fontWeight: 600, color: "#9CA3AF" }}>/96</span>
           </span>
-          <span style={{ fontSize: "11px", fontWeight: 600, color: "#7A7F8D", textAlign: "center" }}>
-            kana dominados
+          <span style={{ fontSize: "10px", fontWeight: 700, color: "#9CA3AF", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+            Kana
           </span>
         </div>
 
@@ -418,10 +440,13 @@ export default function PerfilPage() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: "4px",
+            gap: "5px",
           }}
         >
-          <span style={{ fontSize: "22px", lineHeight: 1 }}>💬</span>
+          {/* Chat bubble SVG */}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="#1A1A2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
           <span
             style={{
               fontSize: "26px",
@@ -433,8 +458,8 @@ export default function PerfilPage() {
           >
             {postCount}
           </span>
-          <span style={{ fontSize: "11px", fontWeight: 600, color: "#7A7F8D", textAlign: "center" }}>
-            publicaciones
+          <span style={{ fontSize: "10px", fontWeight: 700, color: "#9CA3AF", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+            Posts
           </span>
         </div>
       </div>
@@ -444,19 +469,19 @@ export default function PerfilPage() {
         <div
           style={{
             background: "#FFFFFF",
-            borderRadius: "1.5rem",
-            boxShadow: "0 4px 20px rgba(26,26,46,0.07)",
+            borderRadius: "16px",
+            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
             overflow: "hidden",
           }}
         >
           {/* Username row */}
           <div
             style={{
-              padding: "18px 20px",
+              padding: "16px 18px",
               borderBottom: "1px solid #F0EDE8",
             }}
           >
-            <p style={{ fontSize: "12px", color: "#9CA3AF", margin: "0 0 4px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <p style={{ fontSize: "11px", color: "#9CA3AF", margin: "0 0 4px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>
               Usuario
             </p>
 
@@ -487,7 +512,7 @@ export default function PerfilPage() {
                     background: "#4ECDC4",
                     color: "#1A1A2E",
                     border: "none",
-                    borderRadius: "999px",
+                    borderRadius: "8px",
                     padding: "6px 14px",
                     fontWeight: 700,
                     fontSize: "13px",
@@ -535,8 +560,8 @@ export default function PerfilPage() {
           </div>
 
           {/* Group row */}
-          <div style={{ padding: "18px 20px" }}>
-            <p style={{ fontSize: "12px", color: "#9CA3AF", margin: "0 0 4px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <div style={{ padding: "16px 18px" }}>
+            <p style={{ fontSize: "11px", color: "#9CA3AF", margin: "0 0 4px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>
               Grupo
             </p>
             <p style={{ fontSize: "16px", fontWeight: 700, color: "#1A1A2E", margin: 0 }}>
@@ -613,6 +638,40 @@ export default function PerfilPage() {
           </div>
         )}
       </div>
+
+      {/* Admin panel */}
+      {isAdmin && (
+        <div style={{ padding: "24px 20px 0" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#1A1A2E", margin: "0 0 12px", letterSpacing: "-0.03em" }}>
+            Admin
+          </h2>
+          <div style={{ background: "#FFFFFF", borderRadius: 16, boxShadow: "0 2px 10px rgba(26,26,46,0.07)", overflow: "hidden" }}>
+            {[
+              { href: "/admin/usuarios", label: "Usuarios", desc: "Ver y gestionar alumnos" },
+              { href: "/admin/groups", label: "Grupos", desc: "Crear y editar grupos" },
+              { href: "/admin/assignments", label: "Asignaciones", desc: "Asignar recursos y tareas" },
+            ].map(({ href, label, desc }, i, arr) => (
+              <a
+                key={href}
+                href={href}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "16px 18px", textDecoration: "none",
+                  borderBottom: i < arr.length - 1 ? "1px solid #F0EDE8" : "none",
+                }}
+              >
+                <div>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", margin: 0 }}>{label}</p>
+                  <p style={{ fontSize: 12, color: "#9CA3AF", margin: "2px 0 0" }}>{desc}</p>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 18l6-6-6-6" stroke="#C4BAB0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Logout */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: "32px" }}>

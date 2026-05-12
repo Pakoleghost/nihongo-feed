@@ -8,7 +8,7 @@ import BottomNav from "@/components/BottomNav";
 import { optimizeImageFile, validateImageFile } from "@/lib/client-image-upload";
 import { useStudentViewMode } from "@/lib/use-student-view-mode";
 import { markActiveToday, getStreak } from "@/lib/streak";
-import { getWeeklyTopic } from "@/lib/weekly-topics";
+import { getWeeklyTopic, fetchTopicOverride, saveTopicOverride, type WeeklyTopic } from "@/lib/weekly-topics";
 import Link from "next/link";
 import RepliesSheet from "@/components/RepliesSheet";
 
@@ -76,7 +76,10 @@ function AvatarCircle({ url, name, size = 40 }: { url: string | null; name: stri
 
 export default function HomePage() {
   const router = useRouter();
-  const topic = getWeeklyTopic();
+  const [topic, setTopic] = useState<WeeklyTopic>(getWeeklyTopic());
+  const [editingTopic, setEditingTopic] = useState(false);
+  const [topicDraft, setTopicDraft] = useState<WeeklyTopic>({ kana: "", prompt: "" });
+  const [savingTopic, setSavingTopic] = useState(false);
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
@@ -122,6 +125,10 @@ export default function HomePage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+
+  // Like burst animation
+  const [justLikedId, setJustLikedId] = useState<string | null>(null);
+  const likeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Lightbox — no extra refs needed (framer-motion drag handles it)
 
@@ -192,6 +199,10 @@ export default function HomePage() {
         setIsAdmin((adminRow as { is_admin: boolean | null } | null)?.is_admin === true);
       }
 
+      // Fetch topic override (falls back to static if table empty)
+      const override = await fetchTopicOverride(supabase);
+      if (override) setTopic(override);
+
       try {
         await loadPostsBatch({ uid, cursor: null, reset: true });
       } catch {
@@ -207,6 +218,10 @@ export default function HomePage() {
   useEffect(() => {
     return () => { if (composePreview) URL.revokeObjectURL(composePreview); };
   }, [composePreview]);
+
+  useEffect(() => {
+    return () => { if (likeTimerRef.current) clearTimeout(likeTimerRef.current); };
+  }, []);
 
   async function loadMorePosts() {
     if (loadingMoreRef.current || !hasMorePosts || !nextPostsCursor) return;
@@ -377,6 +392,12 @@ export default function HomePage() {
     if (!userId) { router.push("/login"); return; }
     const liked = likedIds.has(post.id);
     const newCount = post.likes + (liked ? -1 : 1);
+    // Trigger heart burst only when liking (not unliking)
+    if (!liked) {
+      if (likeTimerRef.current) clearTimeout(likeTimerRef.current);
+      setJustLikedId(post.id);
+      likeTimerRef.current = setTimeout(() => setJustLikedId(null), 900);
+    }
     setLikedIds((prev) => { const next = new Set(prev); liked ? next.delete(post.id) : next.add(post.id); return next; });
     setPosts((prev) => prev.map((p) => (p.id === post.id ? { ...p, likes: newCount } : p)));
     if (liked) {
@@ -475,59 +496,100 @@ export default function HomePage() {
       </div>
 
       {/* ── Tema de la semana ── */}
-      <div style={{ padding: "0 16px 16px" }}>
-        <div
+      <div style={{ padding: "0 16px 12px" }}>
+        <motion.div
+          animate={{ boxShadow: ["0 0 0 0px rgba(78,205,196,0)", "0 0 0 3px rgba(78,205,196,0.18)", "0 0 0 0px rgba(78,205,196,0)"] }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
           style={{
             position: "relative",
-            background: "#FFFFFF",
-            borderRadius: "14px",
-            padding: "16px 18px 18px",
-            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+            background: "#1A1A2E",
+            borderRadius: "16px",
+            padding: "20px 20px 20px",
             overflow: "hidden",
           }}
         >
-          {/* Esquina doblada */}
-          <div
+          {/* Animated kana watermark */}
+          <motion.div
+            aria-hidden="true"
+            animate={{ y: [0, -10, 0], opacity: [0.05, 0.10, 0.05] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
             style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              width: 40,
-              height: 40,
-              background: "#4ECDC4",
-              borderBottomLeftRadius: 40,
-            }}
-          />
-
-          <p
-            style={{
-              fontSize: "11px",
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              color: "#9CA3AF",
-              textTransform: "uppercase",
-              margin: "0 0 10px",
-              paddingRight: 48,
-            }}
-          >
-            Tema de la semana
-          </p>
-          <p
-            style={{
-              fontSize: "22px",
-              fontWeight: 600,
-              color: "#1A1A2E",
-              margin: "0 0 6px",
+              position: "absolute", right: -12, top: -12,
               fontFamily: "var(--font-noto-serif-jp), serif",
-              lineHeight: 1.2,
+              fontSize: 120, lineHeight: 1,
+              color: "rgba(255,255,255,1)",
+              userSelect: "none", pointerEvents: "none",
             }}
           >
-            {topic.kana}
-          </p>
-          <p style={{ fontSize: "14px", color: "#53596B", margin: 0, lineHeight: 1.45 }}>
-            {topic.prompt}
-          </p>
-        </div>
+            {topic.kana.charAt(0)}
+          </motion.div>
+
+          {/* Header row */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", color: "#4ECDC4", textTransform: "uppercase", margin: 0 }}>
+              Tema de la semana
+            </p>
+            {effectiveIsAdmin && !editingTopic && (
+              <button
+                onClick={() => { setTopicDraft({ kana: topic.kana, prompt: topic.prompt }); setEditingTopic(true); }}
+                style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 8, padding: "4px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "#9CA3AF" }}>Editar</span>
+              </button>
+            )}
+          </div>
+
+          {editingTopic ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <input
+                value={topicDraft.kana}
+                onChange={e => setTopicDraft(d => ({ ...d, kana: e.target.value }))}
+                placeholder="Texto en kana (ej. きょうのてんき)"
+                style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, padding: "10px 14px", color: "#FFFFFF", fontSize: 16, fontFamily: "var(--font-noto-serif-jp), serif", outline: "none", width: "100%", boxSizing: "border-box" }}
+              />
+              <input
+                value={topicDraft.prompt}
+                onChange={e => setTopicDraft(d => ({ ...d, prompt: e.target.value }))}
+                placeholder="Prompt en español"
+                style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, padding: "10px 14px", color: "#FFFFFF", fontSize: 14, outline: "none", width: "100%", boxSizing: "border-box" }}
+              />
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  onClick={async () => {
+                    if (!userId || !topicDraft.kana.trim() || !topicDraft.prompt.trim()) return;
+                    setSavingTopic(true);
+                    const ok = await saveTopicOverride(supabase, topicDraft, userId);
+                    if (ok) { setTopic(topicDraft); setEditingTopic(false); }
+                    setSavingTopic(false);
+                  }}
+                  disabled={savingTopic}
+                  style={{ flex: 1, background: "#4ECDC4", color: "#1A1A2E", border: "none", borderRadius: 10, padding: "10px 0", fontWeight: 700, fontSize: 14, cursor: savingTopic ? "not-allowed" : "pointer" }}
+                >
+                  {savingTopic ? "Guardando…" : "Guardar"}
+                </button>
+                <button
+                  onClick={() => setEditingTopic(false)}
+                  style={{ background: "rgba(255,255,255,0.08)", color: "#9CA3AF", border: "none", borderRadius: 10, padding: "10px 16px", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p style={{ fontSize: "28px", fontWeight: 700, color: "#FFFFFF", margin: "0 0 8px", fontFamily: "var(--font-noto-serif-jp), serif", lineHeight: 1.15, letterSpacing: "0.02em" }}>
+                {topic.kana}
+              </p>
+              <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.65)", margin: 0, lineHeight: 1.5, maxWidth: 280 }}>
+                {topic.prompt}
+              </p>
+            </>
+          )}
+        </motion.div>
       </div>
 
       {/* ── Compose box ── */}
@@ -617,7 +679,29 @@ export default function HomePage() {
         onClick={() => { setOpenMenuId(null); setOpenLikersId(null); }}
       >
         {loading ? (
-          <div style={{ textAlign: "center", color: "#9CA3AF", padding: "48px 0", fontSize: 14 }}>Cargando…</div>
+          /* Skeleton cards */
+          <>
+            {[0, 1, 2].map((i) => (
+              <div key={i} style={{ background: "#FFFFFF", borderRadius: 16, overflow: "hidden", boxShadow: "0 2px 10px rgba(26,26,46,0.07)" }}>
+                {/* Shimmer image placeholder */}
+                {i < 2 && <div style={{ width: "100%", height: 200, background: "linear-gradient(90deg,#F0EDE8 25%,#FAF3E2 50%,#F0EDE8 75%)", backgroundSize: "400% 100%", animation: "shimmer 1.4s ease-in-out infinite" }} />}
+                <div style={{ padding: "14px 16px" }}>
+                  {/* Avatar + name skeleton */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                    <div style={{ width: 38, height: 38, borderRadius: "50%", background: "#F0EDE8" }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ width: "35%", height: 12, borderRadius: 6, background: "#F0EDE8", marginBottom: 6 }} />
+                      <div style={{ width: "20%", height: 10, borderRadius: 6, background: "#F5F2EE" }} />
+                    </div>
+                  </div>
+                  {/* Text lines */}
+                  <div style={{ width: "100%", height: 12, borderRadius: 6, background: "#F0EDE8", marginBottom: 7 }} />
+                  <div style={{ width: "80%", height: 12, borderRadius: 6, background: "#F5F2EE" }} />
+                </div>
+              </div>
+            ))}
+            <style>{`@keyframes shimmer { 0%{background-position:100% 50%} 100%{background-position:-100% 50%} }`}</style>
+          </>
         ) : feedError && posts.length === 0 ? (
           <div style={{ background: "#FFFFFF", borderRadius: "14px", padding: "28px", textAlign: "center", boxShadow: "0 2px 10px rgba(26,26,46,0.07)" }}>
             <p style={{ fontSize: 15, color: "#C53340", fontWeight: 700, margin: "0 0 14px" }}>{feedError}</p>
@@ -633,180 +717,211 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            {posts.map((post) => {
+            {posts.map((post, index) => {
               const profile = profiles[post.user_id];
               const liked = likedIds.has(post.id);
               const isOwn = post.user_id === userId;
               const isEditing = editingPostId === post.id;
               const isConfirmDelete = confirmDeleteId === post.id;
+              const showHeartBurst = justLikedId === post.id;
 
               return (
-                <div
+                <motion.div
                   key={post.id}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.32, delay: Math.min(index, 6) * 0.055, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     background: "#FFFFFF",
                     borderRadius: "16px",
-                    padding: "16px",
+                    overflow: "hidden",
                     boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
                   }}
                 >
-                  {/* Author row */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                    <div
-                      onClick={() => router.push(`/perfil/${post.user_id}`)}
-                      style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, cursor: "pointer" }}
-                    >
-                      <AvatarCircle url={profile?.avatar_url ?? null} name={profile?.username ?? null} size={38} />
-                      <div>
-                        <p style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", margin: 0 }}>
-                          {profile?.username ?? "Usuario"}
-                        </p>
-                        <p style={{ fontSize: 12, color: "#9CA3AF", margin: 0 }}>{timeAgo(post.created_at)}</p>
-                      </div>
-                    </div>
-
-                    {isOwn && (
-                      <div style={{ position: "relative", flexShrink: 0 }}>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === post.id ? null : post.id); }}
-                          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "#9CA3AF", padding: "4px 8px", borderRadius: 8, letterSpacing: 2 }}
-                          aria-label="Opciones"
-                        >···</button>
-                        {openMenuId === post.id && (
-                          <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 10, background: "#FFFFFF", borderRadius: "12px", boxShadow: "0 4px 20px rgba(26,26,46,0.15)", overflow: "hidden", minWidth: 130 }}>
-                            <button onClick={() => startEdit(post)}
-                              style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1A1A2E" }}>
-                              Editar
-                            </button>
-                            <button onClick={() => { setConfirmDeleteId(post.id); setOpenMenuId(null); }}
-                              style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#E63946", borderTop: "1px solid #F0EDE8" }}>
-                              Eliminar
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Content */}
-                  {isEditing ? (
-                    <div style={{ marginBottom: 12 }}>
-                      <textarea
-                        autoFocus value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Escape") { setEditingPostId(null); setEditContent(""); } }}
-                        style={{ width: "100%", border: "none", borderBottom: "2px solid #4ECDC4", background: "#F8F7F4", borderRadius: "8px 8px 0 0", padding: "8px 10px", fontSize: 15, fontFamily: "var(--font-noto-sans-jp), inherit", color: "#1A1A2E", resize: "none", outline: "none", lineHeight: 1.5, boxSizing: "border-box", minHeight: 72 }}
-                      />
-                      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                        <button onClick={() => handleSaveEdit(post.id)} disabled={savingEdit || !editContent.trim()}
-                          style={{ background: "#4ECDC4", color: "#1A1A2E", borderRadius: "8px", padding: "7px 16px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 700 }}>
-                          {savingEdit ? "…" : "Guardar"}
-                        </button>
-                        <button onClick={() => { setEditingPostId(null); setEditContent(""); }}
-                          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#9CA3AF", padding: "7px 8px" }}>
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  ) : isConfirmDelete ? (
-                    <div style={{ marginBottom: 12, padding: "12px 14px", background: "#FFF1F2", borderRadius: "10px" }}>
-                      <p style={{ fontSize: 14, fontWeight: 600, color: "#1A1A2E", margin: "0 0 10px" }}>¿Eliminar esta publicación?</p>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button onClick={() => handleDelete(post.id)} disabled={deletingPostId === post.id}
-                          style={{ background: deletingPostId === post.id ? "#C4BAB0" : "#E63946", color: "#FFFFFF", borderRadius: "8px", padding: "7px 14px", border: "none", cursor: deletingPostId === post.id ? "not-allowed" : "pointer", fontSize: 13, fontWeight: 700 }}>
-                          {deletingPostId === post.id ? "Eliminando…" : "Sí, eliminar"}
-                        </button>
-                        <button onClick={() => setConfirmDeleteId(null)}
-                          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#9CA3AF", padding: "7px 8px" }}>
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  ) : post.content ? (
-                    <p style={{ fontSize: 15, color: "#1A1A2E", margin: "0 0 12px", lineHeight: 1.55, fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
-                      {post.content}
-                    </p>
-                  ) : null}
-
-                  {/* Image */}
-                  {post.image_url && (
+                  {/* Image — full-bleed at top when present */}
+                  {post.image_url && !isEditing && !isConfirmDelete && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={post.image_url} alt="publicación"
+                    <img
+                      src={post.image_url}
+                      alt="publicación"
                       onClick={() => setLightboxUrl(post.image_url)}
-                      style={{ width: "100%", aspectRatio: "4/3", borderRadius: "10px", display: "block", marginBottom: 12, objectFit: "cover", cursor: "pointer" }}
+                      style={{ width: "100%", aspectRatio: "4/3", display: "block", objectFit: "cover", cursor: "pointer" }}
                     />
                   )}
 
-                  {/* Footer */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative" }}>
-                    {/* Like button — SVG heart + pop animation */}
-                    <motion.button
-                      onClick={() => toggleLike(post)}
-                      whileTap={{ scale: 1.28 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 18 }}
-                      style={{ display: "flex", alignItems: "center", gap: 6, background: liked ? "rgba(230,57,70,0.10)" : "rgba(26,26,46,0.06)", borderRadius: "8px", padding: "5px 10px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: liked ? "#E63946" : "#53596B", transition: "background 0.15s" }}
-                    >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill={liked ? "#E63946" : "none"} style={{ flexShrink: 0, transition: "fill 0.15s" }}>
-                        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke={liked ? "#E63946" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      いいね
-                    </motion.button>
-                    {/* Like count — tap to see who liked */}
-                    {post.likes > 0 && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); fetchLikers(post.id); }}
-                        style={{ fontSize: 13, fontWeight: 700, color: liked ? "#E63946" : "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "5px 4px" }}
-                      >
-                        {post.likes}
-                      </button>
-                    )}
-                    {/* Likers bubble */}
-                    {openLikersId === post.id && (
+                  <div style={{ padding: "14px 16px" }}>
+                    {/* Author row */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: post.content || isEditing || isConfirmDelete ? 10 : 0 }}>
                       <div
-                        style={{ position: "absolute", bottom: "calc(100% + 8px)", left: 0, background: "#1A1A2E", borderRadius: 10, padding: "8px 12px", zIndex: 50, minWidth: 120, maxWidth: 220, boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }}
-                        onClick={(e) => { e.stopPropagation(); setOpenLikersId(null); }}
+                        onClick={() => router.push(`/perfil/${post.user_id}`)}
+                        style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, cursor: "pointer" }}
                       >
-                        {fetchingLikers ? (
-                          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Cargando…</span>
-                        ) : (likerNames[post.id] ?? []).length === 0 ? (
-                          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Sin likes aún</span>
-                        ) : (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                            {(likerNames[post.id] ?? []).map((name, i) => (
-                              <span key={i} style={{ fontSize: 13, fontWeight: 600, color: "#FFFFFF" }}>❤️ {name}</span>
-                            ))}
-                          </div>
-                        )}
+                        <AvatarCircle url={profile?.avatar_url ?? null} name={profile?.username ?? null} size={36} />
+                        <div>
+                          <p style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", margin: 0, lineHeight: 1.2 }}>
+                            {profile?.username ?? "Usuario"}
+                          </p>
+                          <p style={{ fontSize: 11, color: "#C4BAB0", margin: "2px 0 0", fontWeight: 500 }}>{timeAgo(post.created_at)}</p>
+                        </div>
                       </div>
-                    )}
-                    {/* Reply button */}
-                    <button
-                      onClick={() => setReplyPostId(post.id)}
-                      style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(26,26,46,0.06)", borderRadius: "8px", padding: "5px 10px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#53596B" }}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      {commentCounts[post.id] ? <span>{commentCounts[post.id]}</span> : null}
-                    </button>
 
-                    {/* Share button */}
-                    <button
-                      onClick={() => handleShare(post, profiles[post.user_id])}
-                      style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(26,26,46,0.06)", borderRadius: "8px", padding: "5px 10px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#53596B", marginLeft: "auto" }}
-                      aria-label="Compartir"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                    {effectiveIsAdmin && !isOwn && (
-                      <button onClick={() => setConfirmDeleteId(confirmDeleteId === post.id ? null : post.id)}
-                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: "4px 8px", borderRadius: 8, opacity: 0.5 }}
-                        aria-label="Eliminar (admin)">🗑️</button>
-                    )}
+                      {isOwn && (
+                        <div style={{ position: "relative", flexShrink: 0 }}>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === post.id ? null : post.id); }}
+                            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "#9CA3AF", padding: "4px 8px", borderRadius: 8, letterSpacing: 2 }}
+                            aria-label="Opciones"
+                          >···</button>
+                          {openMenuId === post.id && (
+                            <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 10, background: "#FFFFFF", borderRadius: "12px", boxShadow: "0 4px 20px rgba(26,26,46,0.15)", overflow: "hidden", minWidth: 130 }}>
+                              <button onClick={() => startEdit(post)}
+                                style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1A1A2E" }}>
+                                Editar
+                              </button>
+                              <button onClick={() => { setConfirmDeleteId(post.id); setOpenMenuId(null); }}
+                                style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#E63946", borderTop: "1px solid #F0EDE8" }}>
+                                Eliminar
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    {isEditing ? (
+                      <div style={{ marginBottom: 10 }}>
+                        <textarea
+                          autoFocus value={editContent}
+                          onChange={(e) => setEditContent(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === "Escape") { setEditingPostId(null); setEditContent(""); } }}
+                          style={{ width: "100%", border: "none", borderBottom: "2px solid #4ECDC4", background: "#F8F7F4", borderRadius: "8px 8px 0 0", padding: "8px 10px", fontSize: 15, fontFamily: "var(--font-noto-sans-jp), inherit", color: "#1A1A2E", resize: "none", outline: "none", lineHeight: 1.5, boxSizing: "border-box", minHeight: 72 }}
+                        />
+                        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                          <button onClick={() => handleSaveEdit(post.id)} disabled={savingEdit || !editContent.trim()}
+                            style={{ background: "#4ECDC4", color: "#1A1A2E", borderRadius: "8px", padding: "7px 16px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 700 }}>
+                            {savingEdit ? "…" : "Guardar"}
+                          </button>
+                          <button onClick={() => { setEditingPostId(null); setEditContent(""); }}
+                            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#9CA3AF", padding: "7px 8px" }}>
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : isConfirmDelete ? (
+                      <div style={{ marginBottom: 10, padding: "12px 14px", background: "#FFF1F2", borderRadius: "10px" }}>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: "#1A1A2E", margin: "0 0 10px" }}>¿Eliminar esta publicación?</p>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button onClick={() => handleDelete(post.id)} disabled={deletingPostId === post.id}
+                            style={{ background: deletingPostId === post.id ? "#C4BAB0" : "#E63946", color: "#FFFFFF", borderRadius: "8px", padding: "7px 14px", border: "none", cursor: deletingPostId === post.id ? "not-allowed" : "pointer", fontSize: 13, fontWeight: 700 }}>
+                            {deletingPostId === post.id ? "Eliminando…" : "Sí, eliminar"}
+                          </button>
+                          <button onClick={() => setConfirmDeleteId(null)}
+                            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#9CA3AF", padding: "7px 8px" }}>
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : post.content ? (
+                      <p style={{ fontSize: 15, color: "#1A1A2E", margin: "0 0 10px", lineHeight: 1.6, fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
+                        {post.content}
+                      </p>
+                    ) : null}
+
+                    {/* Footer */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, position: "relative" }}>
+                      {/* Like button with heart burst */}
+                      <div style={{ position: "relative" }}>
+                        <motion.button
+                          onClick={() => toggleLike(post)}
+                          whileTap={{ scale: 1.22 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 18 }}
+                          style={{ display: "flex", alignItems: "center", gap: 6, background: liked ? "rgba(230,57,70,0.10)" : "rgba(26,26,46,0.05)", borderRadius: "8px", padding: "6px 10px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: liked ? "#E63946" : "#53596B", transition: "background 0.15s" }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill={liked ? "#E63946" : "none"} style={{ flexShrink: 0, transition: "fill 0.15s" }}>
+                            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke={liked ? "#E63946" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          いいね
+                        </motion.button>
+                        {/* Floating heart burst */}
+                        <AnimatePresence>
+                          {showHeartBurst && (
+                            <motion.div
+                              key="heart-burst"
+                              initial={{ opacity: 1, y: 0, scale: 1 }}
+                              animate={{ opacity: 0, y: -36, scale: 1.6 }}
+                              exit={{}}
+                              transition={{ duration: 0.7, ease: "easeOut" }}
+                              style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", pointerEvents: "none", zIndex: 10 }}
+                            >
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="#E63946">
+                                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                              </svg>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                      {/* Like count */}
+                      {post.likes > 0 && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); fetchLikers(post.id); }}
+                          style={{ fontSize: 13, fontWeight: 700, color: liked ? "#E63946" : "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "6px 4px" }}
+                        >
+                          {post.likes}
+                        </button>
+                      )}
+
+                      {/* Likers bubble */}
+                      {openLikersId === post.id && (
+                        <div
+                          style={{ position: "absolute", bottom: "calc(100% + 8px)", left: 0, background: "#1A1A2E", borderRadius: 10, padding: "8px 12px", zIndex: 50, minWidth: 120, maxWidth: 220, boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }}
+                          onClick={(e) => { e.stopPropagation(); setOpenLikersId(null); }}
+                        >
+                          {fetchingLikers ? (
+                            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Cargando…</span>
+                          ) : (likerNames[post.id] ?? []).length === 0 ? (
+                            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Sin likes aún</span>
+                          ) : (
+                            <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                              {(likerNames[post.id] ?? []).map((name, i) => (
+                                <span key={i} style={{ fontSize: 13, fontWeight: 600, color: "#FFFFFF" }}>♥ {name}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Reply button */}
+                      <button
+                        onClick={() => setReplyPostId(post.id)}
+                        style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(26,26,46,0.05)", borderRadius: "8px", padding: "6px 10px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#53596B" }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        {commentCounts[post.id] ? <span>{commentCounts[post.id]}</span> : null}
+                      </button>
+
+                      {/* Share button */}
+                      <button
+                        onClick={() => handleShare(post, profiles[post.user_id])}
+                        style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(26,26,46,0.05)", borderRadius: "8px", padding: "6px 10px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#53596B", marginLeft: "auto" }}
+                        aria-label="Compartir"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+
+                      {effectiveIsAdmin && !isOwn && (
+                        <button onClick={() => setConfirmDeleteId(confirmDeleteId === post.id ? null : post.id)}
+                          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: "4px 8px", borderRadius: 8, opacity: 0.5 }}
+                          aria-label="Eliminar (admin)">🗑️</button>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
 

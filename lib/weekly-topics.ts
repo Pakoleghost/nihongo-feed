@@ -36,3 +36,38 @@ export function getWeeklyTopic(): WeeklyTopic {
   const week = getISOWeekNumber(new Date());
   return TOPICS[week % TOPICS.length];
 }
+
+// Fetch the admin override from Supabase (returns null if table empty or missing)
+export async function fetchTopicOverride(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabaseClient: any,
+): Promise<WeeklyTopic | null> {
+  try {
+    const { data, error } = await supabaseClient
+      .from("weekly_topic_override")
+      .select("kana, prompt")
+      .eq("id", 1)
+      .single();
+    if (error || !data) return null;
+    return { kana: data.kana as string, prompt: data.prompt as string };
+  } catch {
+    return null;
+  }
+}
+
+// Upsert the admin override (id = 1 is the single row)
+export async function saveTopicOverride(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabaseClient: any,
+  topic: WeeklyTopic,
+  userId: string,
+): Promise<boolean> {
+  try {
+    const { error } = await supabaseClient
+      .from("weekly_topic_override")
+      .upsert({ id: 1, kana: topic.kana, prompt: topic.prompt, updated_by: userId, updated_at: new Date().toISOString() });
+    return !error;
+  } catch {
+    return false;
+  }
+}

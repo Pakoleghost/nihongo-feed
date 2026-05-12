@@ -76,6 +76,7 @@ function ConfigurarContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialMode = (searchParams.get("mode") as Mode) ?? "smart";
+  const forceLibre = initialMode === "libre";
   const initialSets = (searchParams.get("sets") ?? "")
     .split(",")
     .map(urlParamToChip)
@@ -238,37 +239,39 @@ function ConfigurarContent() {
           práctica
         </h1>
 
-        {/* Mode toggle */}
-        <div
-          style={{
-            background: "#E8E3DC",
-            borderRadius: "999px",
-            padding: "4px",
-            display: "flex",
-            marginBottom: "28px",
-          }}
-        >
-          {(["smart", "libre"] as Mode[]).map((m) => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              style={{
-                flex: 1,
-                padding: "12px 0",
-                borderRadius: "999px",
-                border: "none",
-                cursor: "pointer",
-                fontWeight: 700,
-                fontSize: "16px",
-                background: mode === m ? "#E63946" : "transparent",
-                color: mode === m ? "#FFFFFF" : "#9CA3AF",
-                transition: "background 0.2s, color 0.2s",
-              }}
-            >
-              {m === "smart" ? "Smart" : "Libre"}
-            </button>
-          ))}
-        </div>
+        {/* Mode toggle — oculto cuando se entra directamente en libre */}
+        {!forceLibre && (
+          <div
+            style={{
+              background: "#E8E3DC",
+              borderRadius: "999px",
+              padding: "4px",
+              display: "flex",
+              marginBottom: "28px",
+            }}
+          >
+            {(["smart", "libre"] as Mode[]).map((m) => (
+              <button
+                key={m}
+                onClick={() => setMode(m)}
+                style={{
+                  flex: 1,
+                  padding: "12px 0",
+                  borderRadius: "999px",
+                  border: "none",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                  fontSize: "16px",
+                  background: mode === m ? "#E63946" : "transparent",
+                  color: mode === m ? "#FFFFFF" : "#9CA3AF",
+                  transition: "background 0.2s, color 0.2s",
+                }}
+              >
+                {m === "smart" ? "Smart" : "Libre"}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Character selection — libre only */}
         {mode === "libre" && (

@@ -54,7 +54,7 @@ function buildSummary() {
     dominados,
   });
   const groups = buildGroupStats(progress);
-  const smartCount = Math.min(Math.max(smartPlan.itemIds.length, 5), 20);
+  const smartCount = 20;
   const sp = new URLSearchParams({
     mode: "smart", taskMode: "mixed", count: String(smartCount),
     items: smartPlan.itemIds.join(","),
@@ -127,41 +127,46 @@ export default function KanaPage() {
       {/* ── Smart CTA ── */}
       <Link
         href={smartHref}
-        style={{ background: "#E63946", borderRadius: 16, padding: "22px 20px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, textDecoration: "none", boxShadow: "0 8px 24px rgba(26,26,46,0.12)" }}
+        style={{ background: "#1A1A2E", borderRadius: 16, padding: "20px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, textDecoration: "none", boxShadow: "0 8px 24px rgba(26,26,46,0.18)", marginTop: 8 }}
       >
-        <div style={{ minWidth: 0 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", margin: "0 0 10px", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            Recomendado
-          </p>
-          {/* Kana preview — the star of the card */}
-          <p style={{ fontSize: 42, color: "#FFFFFF", margin: "0 0 8px", lineHeight: 1, fontFamily: "var(--font-noto-serif-jp), serif", letterSpacing: "0.05em" }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          {/* Kana preview */}
+          <p style={{ fontSize: 40, color: "#FFFFFF", margin: "0 0 10px", lineHeight: 1, fontFamily: "var(--font-noto-serif-jp), serif", letterSpacing: "0.1em" }}>
             {smartPlan.kanaChars}
           </p>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", margin: 0, lineHeight: 1.4 }}>
-            {smartPlan.detail}
+          {/* Action label */}
+          <p style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.45)", margin: 0, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+            {smartPlan.title} · 20 preguntas
           </p>
         </div>
-        <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <div style={{ width: 44, height: 44, borderRadius: 12, background: "#E63946", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
             <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
       </Link>
 
-      {/* ── Modo libre ── */}
-      <Link
-        href="/kana/configurar?mode=libre"
-        style={{ position: "relative", background: "#FFFFFF", borderRadius: 14, padding: "16px 18px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", textDecoration: "none", boxShadow: "0 2px 10px rgba(26,26,46,0.07)", overflow: "hidden", marginTop: 10 }}
-      >
-        <div style={{ position: "absolute", top: 0, right: 0, width: 36, height: 36, background: "#4ECDC4", borderBottomLeftRadius: 36 }} />
-        <div>
-          <p style={{ fontSize: 16, fontWeight: 700, color: "#1A1A2E", margin: 0 }}>Modo libre</p>
-          <p style={{ fontSize: 13, color: "#9CA3AF", margin: "3px 0 0" }}>Elige script y bloques</p>
-        </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ marginRight: 8 }}>
-          <path d="M9 18l6-6-6-6" stroke="#C4BAB0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </Link>
+      {/* ── Secondary CTAs row ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 }}>
+        {/* Modo libre */}
+        <Link
+          href="/kana/configurar?mode=libre"
+          style={{ position: "relative", background: "#FFFFFF", borderRadius: 14, padding: "16px 16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", boxShadow: "0 2px 10px rgba(26,26,46,0.07)", overflow: "hidden", minHeight: 80 }}
+        >
+          <div style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, background: "#4ECDC4", borderBottomLeftRadius: 28 }} />
+          <p style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", margin: 0 }}>Modo libre</p>
+          <p style={{ fontSize: 12, color: "#9CA3AF", margin: "4px 0 0" }}>Elige script y bloques</p>
+        </Link>
+        {/* Leer palabras */}
+        <Link
+          href="/kana/palabras"
+          style={{ position: "relative", background: "#FFFFFF", borderRadius: 14, padding: "16px 16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", boxShadow: "0 2px 10px rgba(26,26,46,0.07)", overflow: "hidden", minHeight: 80 }}
+        >
+          <div style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, background: "#E63946", borderBottomLeftRadius: 28 }} />
+          <p style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", margin: 0 }}>Leer palabras</p>
+          <p style={{ fontSize: 12, color: "#9CA3AF", margin: "4px 0 0" }}>Escribe el romaji</p>
+        </Link>
+      </div>
 
       {/* ── Progress breakdown ── */}
       <div

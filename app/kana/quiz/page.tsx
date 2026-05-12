@@ -646,9 +646,7 @@ function QuizContent() {
 
   function handleExit() {
     saveKanaProgress("anon", progressMap);
-    if (confirm("Puedes salir ahora. Guardaremos lo que ya practicaste.")) {
-      router.push("/kana");
-    }
+    router.push("/kana");
   }
 
   if (!isReady && questions.length === 0) {
