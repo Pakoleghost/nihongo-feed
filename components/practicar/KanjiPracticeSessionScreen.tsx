@@ -246,13 +246,9 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
           moduleName="Kanji"
           lesson={lesson}
           lessonTitle={lessonTitle}
-          sessionLabel="Práctica de lectura"
-          sessionHelper="No hay palabras con kanji en esta sesión."
           progressCurrent={0}
           progressTotal={0}
           progressPct={0}
-          metricLabel="correctas"
-          metricValue={0}
           accentColor="#4ECDC4"
           accentSurface="rgba(78,205,196,0.14)"
           onExit={() => router.push(`/practicar/kanji?lesson=${lesson}`)}
@@ -267,13 +263,9 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
         moduleName="Kanji"
         lesson={lesson}
         lessonTitle={lessonTitle}
-        sessionLabel={getKanjiPracticeTitle()}
-        sessionHelper={getKanjiPracticeHelper(sessionContext)}
         progressCurrent={currentQuestionIndex + 1}
         progressTotal={questions.length}
         progressPct={practiceProgressPct}
-        metricLabel="correctas"
-        metricValue={correctCount}
         accentColor="#4ECDC4"
         accentSurface="rgba(78,205,196,0.14)"
         onExit={() => router.push(`/practicar/kanji?lesson=${lesson}`)}

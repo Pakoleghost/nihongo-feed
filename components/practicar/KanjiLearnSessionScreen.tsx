@@ -98,13 +98,9 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
           moduleName="Kanji"
           lesson={lesson}
           lessonTitle={lessonTitle}
-          sessionLabel="Aprender lectura"
-          sessionHelper="No hay palabras con kanji en esta lección."
           progressCurrent={0}
           progressTotal={0}
           progressPct={0}
-          metricLabel="vistos"
-          metricValue={0}
           accentColor="#E63946"
           accentSurface="rgba(230,57,70,0.10)"
           onExit={() => router.push(`/practicar/kanji?lesson=${lesson}`)}
@@ -119,13 +115,9 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
         moduleName="Kanji"
         lesson={lesson}
         lessonTitle={lessonTitle}
-        sessionLabel="Aprender lectura"
-        sessionHelper="Revisa lectura y significado antes de practicar."
         progressCurrent={currentStudyIndex + 1}
         progressTotal={studyItems.length}
         progressPct={studyProgressPct}
-        metricLabel="vistos"
-        metricValue={Math.min(currentStudyIndex + 1, studyItems.length)}
         accentColor="#E63946"
         accentSurface="rgba(230,57,70,0.10)"
         onExit={() => router.push(`/practicar/kanji?lesson=${lesson}`)}
@@ -206,34 +198,20 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
           <>
             <div
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "6px",
-              }}
-            >
-              <span style={{ fontSize: "10px", fontWeight: 800, letterSpacing: "0.1em", color: "#9CA3AF" }}>
-                ESTUDIO
-              </span>
-              <span style={{ fontSize: "12px", fontWeight: 700, color: "#E63946" }}>Lectura + apoyo</span>
-            </div>
-
-            <div
-              style={{
                 background: "#FFFFFF",
-                borderRadius: "24px",
-                padding: "22px 20px",
-                boxShadow: "0 8px 28px rgba(26,26,46,0.08)",
+                borderRadius: 20,
+                padding: "28px 24px",
+                boxShadow: "0 4px 20px rgba(26,26,46,0.08)",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 textAlign: "center",
-                justifyContent: "center",
               }}
             >
+              {/* Big kanji */}
               <p
                 style={{
-                  fontSize: "56px",
+                  fontSize: 68,
                   fontWeight: 800,
                   color: "#1A1A2E",
                   margin: 0,
@@ -243,46 +221,26 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
               >
                 {currentStudyItem.kanji}
               </p>
-              <div
+
+              {/* Reading */}
+              <p
                 style={{
-                  marginTop: "14px",
-                  background: "#FFF8E7",
-                  borderRadius: "18px",
-                  padding: "12px 14px",
-                  width: "100%",
+                  margin: "14px 0 0",
+                  fontSize: 24,
+                  color: "#53596B",
+                  fontFamily: "var(--font-noto-sans-jp), sans-serif",
                 }}
               >
-                <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
-                  LECTURA
-                </p>
-                <p
-                  style={{
-                    margin: "6px 0 0",
-                    fontSize: "24px",
-                    fontWeight: 800,
-                    color: "#1A1A2E",
-                    fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                  }}
-                >
-                  {currentStudyItem.hira}
-                </p>
-              </div>
-              <div
-                style={{
-                  marginTop: "10px",
-                  background: "#F5FCFB",
-                  borderRadius: "18px",
-                  padding: "12px 14px",
-                  width: "100%",
-                }}
-              >
-                <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
-                  SIGNIFICADO
-                </p>
-                <p style={{ margin: "6px 0 0", fontSize: "16px", fontWeight: 700, color: "#1A1A2E", lineHeight: 1.35 }}>
-                  {currentStudyItem.es}
-                </p>
-              </div>
+                {currentStudyItem.hira}
+              </p>
+
+              {/* Divider */}
+              <div style={{ width: 40, height: 1, background: "#F0EDE8", margin: "16px 0" }} />
+
+              {/* Meaning */}
+              <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#1A1A2E", lineHeight: 1.4 }}>
+                {currentStudyItem.es}
+              </p>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "12px" }}>

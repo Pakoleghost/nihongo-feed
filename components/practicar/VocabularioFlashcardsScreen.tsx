@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import type { GenkiVocabItem } from "@/lib/genki-vocab-by-lesson";
-import { getStreak, setLastActivity } from "@/lib/streak";
+import { setLastActivity } from "@/lib/streak";
 import { GENKI_LESSON_NAMES } from "@/lib/genki-lesson-names";
 import {
   loadVocabProgress,
@@ -155,13 +155,11 @@ export default function VocabularioFlashcardsScreen({
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState(0);
   const [missed, setMissed] = useState<GenkiVocabItem[]>([]);
-  const [streak, setStreak] = useState(0);
   const [done, setDone] = useState(false);
   const [proyectar, setProyectar] = useState(false);
   const lessonRowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setStreak(getStreak());
     setLastActivity(`${activityLabelPrefix} · L${lesson}`, activityPath);
   }, [activityLabelPrefix, activityPath, lesson]);
 
@@ -226,31 +224,28 @@ export default function VocabularioFlashcardsScreen({
   return (
     <div style={{ background: "#FFF8E7", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {/* Header */}
-      <div style={{ padding: "52px 20px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ padding: "52px 20px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         <button
           onClick={() => router.push(backHref)}
-          style={{ width: 40, height: 40, borderRadius: "50%", background: "#FFFFFF", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 10px rgba(26,26,46,0.10)" }}
+          style={{ width: 36, height: 36, borderRadius: "50%", background: "#FFFFFF", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(26,26,46,0.10)", flexShrink: 0 }}
           aria-label="Volver"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path d="M18 6L6 18M6 6l12 12" stroke="#1A1A2E" strokeWidth="2.5" strokeLinecap="round" />
           </svg>
         </button>
 
-        {streak > 0 && (
-          <div style={{ background: "rgba(230,57,70,0.10)", borderRadius: "999px", padding: "7px 14px", display: "flex", alignItems: "center", gap: 5 }}>
-            <span style={{ fontSize: 14 }}>🔥</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#E63946" }}>Racha de {streak} días</span>
-          </div>
-        )}
+        <span style={{ fontSize: 13, fontWeight: 700, color: "#9CA3AF", flex: 1, textAlign: "center" }}>
+          Flashcards · L{lesson}
+        </span>
 
         <button
           onClick={() => setProyectar(true)}
-          title="Modo proyectar"
-          style={{ width: 40, height: 40, borderRadius: "50%", background: "#FFFFFF", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 10px rgba(26,26,46,0.10)" }}
+          title="Proyectar"
+          style={{ width: 36, height: 36, borderRadius: "50%", background: "#FFFFFF", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(26,26,46,0.10)", flexShrink: 0 }}
           aria-label="Modo proyectar"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <rect x="2" y="4" width="20" height="14" rx="2" stroke="#1A1A2E" strokeWidth="2" strokeLinecap="round"/>
             <path d="M8 20h8M12 18v2" stroke="#1A1A2E" strokeWidth="2" strokeLinecap="round"/>
           </svg>

@@ -4,13 +4,9 @@ type PracticeSessionHeaderProps = {
   moduleName: string;
   lesson: number;
   lessonTitle: string;
-  sessionLabel: string;
-  sessionHelper: string;
   progressCurrent: number;
   progressTotal: number;
   progressPct: number;
-  metricLabel: string;
-  metricValue: number;
   accentColor: string;
   accentSurface: string;
   onExit: () => void;
@@ -20,32 +16,22 @@ export default function PracticeSessionHeader({
   moduleName,
   lesson,
   lessonTitle,
-  sessionLabel,
-  sessionHelper,
   progressCurrent,
   progressTotal,
   progressPct,
-  metricLabel,
-  metricValue,
   accentColor,
   accentSurface,
   onExit,
 }: PracticeSessionHeaderProps) {
   return (
-    <>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "12px",
-        }}
-      >
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {/* Row: exit | badge | count */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <button
           onClick={onExit}
           style={{
-            width: "36px",
-            height: "36px",
+            width: 36,
+            height: 36,
             borderRadius: "50%",
             background: "#FFFFFF",
             border: "none",
@@ -53,115 +39,49 @@ export default function PracticeSessionHeader({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "0 2px 10px rgba(26,26,46,0.10)",
+            boxShadow: "0 2px 8px rgba(26,26,46,0.10)",
             flexShrink: 0,
           }}
           aria-label="Salir"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path d="M18 6L6 18M6 6l12 12" stroke="#1A1A2E" strokeWidth="2.5" strokeLinecap="round" />
           </svg>
         </button>
 
-        <div
-          style={{
-            background: accentSurface,
-            borderRadius: "999px",
-            padding: "6px 12px",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-          <span style={{ fontSize: "12px", fontWeight: 800, color: accentColor }}>{moduleName}</span>
-          <span style={{ fontSize: "12px", color: "#6B7280" }}>
-            L{lesson} · {lessonTitle}
-          </span>
-        </div>
-      </div>
-
-      <div style={{ marginTop: "12px" }}>
-        <p
-          style={{
-            fontSize: "24px",
-            fontWeight: 800,
-            color: "#1A1A2E",
-            margin: 0,
-            lineHeight: 1.08,
-          }}
-        >
-          {sessionLabel}
-        </p>
-        <p
-          style={{
-            fontSize: "13px",
-            color: "#6B7280",
-            margin: "6px 0 0",
-            lineHeight: 1.4,
-          }}
-        >
-          {sessionHelper}
-        </p>
-      </div>
-
-      <div
-        style={{
-          marginTop: "12px",
-          background: "#FFFFFF",
-          borderRadius: "16px",
-          padding: "12px 14px",
-          boxShadow: "0 4px 14px rgba(26,26,46,0.06)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "12px",
-            marginBottom: "8px",
-          }}
-        >
-          <span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
-            SESIÓN
-          </span>
-          <span style={{ fontSize: "12px", fontWeight: 700, color: accentColor }}>
-            {metricValue} {metricLabel}
-          </span>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "6px",
-            gap: "12px",
-          }}
-        >
-          <span style={{ fontSize: "13px", fontWeight: 700, color: "#1A1A2E" }}>
-            {Math.min(progressCurrent, progressTotal)}/{progressTotal || 0}
-          </span>
-          <span style={{ fontSize: "12px", color: "#6B7280" }}>Progreso</span>
-        </div>
-        <div
-          style={{
-            height: "4px",
-            background: "#E5E7EB",
-            borderRadius: "999px",
-            overflow: "hidden",
-          }}
-        >
+        <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
           <div
             style={{
-              height: "100%",
-              width: `${progressPct}%`,
-              background: accentColor,
-              borderRadius: "999px",
-              transition: "width 0.3s ease",
+              background: accentSurface,
+              borderRadius: 999,
+              padding: "5px 12px",
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
             }}
-          />
+          >
+            <span style={{ fontSize: 12, fontWeight: 800, color: accentColor }}>{moduleName}</span>
+            <span style={{ fontSize: 12, color: "#6B7280" }}>L{lesson} · {lessonTitle}</span>
+          </div>
         </div>
+
+        <span style={{ fontSize: 13, fontWeight: 700, color: "#9CA3AF", flexShrink: 0 }}>
+          {Math.min(progressCurrent, progressTotal)}/{progressTotal}
+        </span>
       </div>
-    </>
+
+      {/* Thin progress bar */}
+      <div style={{ height: 3, background: "#E5E7EB", borderRadius: 999, overflow: "hidden" }}>
+        <div
+          style={{
+            height: "100%",
+            width: `${progressPct}%`,
+            background: accentColor,
+            borderRadius: 999,
+            transition: "width 0.3s ease",
+          }}
+        />
+      </div>
+    </div>
   );
 }

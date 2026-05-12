@@ -275,13 +275,9 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
           moduleName="Vocabulario"
           lesson={lesson}
           lessonTitle={lessonTitle}
-          sessionLabel="Práctica de vocabulario"
-          sessionHelper="No hay vocabulario en esta sesión."
           progressCurrent={0}
           progressTotal={0}
           progressPct={0}
-          metricLabel="correctas"
-          metricValue={0}
           accentColor="#4ECDC4"
           accentSurface="rgba(78,205,196,0.14)"
           onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
@@ -296,13 +292,9 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
         moduleName="Vocabulario"
         lesson={lesson}
         lessonTitle={lessonTitle}
-        sessionLabel={getVocabPracticeTitle()}
-        sessionHelper={getVocabPracticeHelper(sessionContext)}
         progressCurrent={currentQuestionIndex + 1}
         progressTotal={questions.length}
         progressPct={practiceProgressPct}
-        metricLabel="correctas"
-        metricValue={correct}
         accentColor="#4ECDC4"
         accentSurface="rgba(78,205,196,0.14)"
         onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
@@ -410,32 +402,6 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
                 textAlign: "center",
               }}
             >
-              <div
-                style={{
-                  alignSelf: "stretch",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "10px",
-                  gap: "12px",
-                }}
-              >
-                  <span style={{ fontSize: "10px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
-                    PALABRA
-                  </span>
-                <span
-                  style={{
-                    background: currentQuestion.source.kanji ? "#FFF8E7" : "#F5FCFB",
-                    color: "#6B7280",
-                    borderRadius: "999px",
-                    padding: "6px 9px",
-                    fontSize: "11px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {currentQuestion.source.kanji ? "Con kanji" : "Solo en kana"}
-                </span>
-              </div>
               <p
                 style={{
                   fontSize: "56px",
@@ -450,33 +416,19 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
                 {currentQuestion.item.display}
               </p>
               {currentQuestion.item.reading !== currentQuestion.item.display && (
-                <div
+                <p
                   style={{
-                    marginTop: "12px",
-                    background: "#FFF8E7",
-                    borderRadius: "18px",
-                    padding: "10px 14px",
-                    minWidth: "min(100%, 240px)",
+                    margin: "8px 0 0",
+                    fontSize: 18,
+                    color: "#9CA3AF",
+                    fontFamily: "var(--font-noto-sans-jp), sans-serif",
                   }}
                 >
-                  <p style={{ margin: 0, fontSize: "10px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
-                    LECTURA
-                  </p>
-                  <p
-                    style={{
-                      margin: "6px 0 0",
-                      fontSize: "20px",
-                      fontWeight: 800,
-                      color: "#1A1A2E",
-                      fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                    }}
-                  >
-                    {currentQuestion.item.reading}
-                  </p>
-                </div>
+                  {currentQuestion.item.reading}
+                </p>
               )}
-              <p style={{ margin: "12px 0 0", fontSize: "12px", color: "#9CA3AF", lineHeight: 1.35 }}>
-                Elige el significado correcto.
+              <p style={{ margin: "14px 0 0", fontSize: 12, color: "#C4BAB0" }}>
+                Elige el significado correcto
               </p>
             </div>
 

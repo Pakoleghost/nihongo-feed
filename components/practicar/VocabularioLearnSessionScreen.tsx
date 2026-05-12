@@ -97,13 +97,9 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
           moduleName="Vocabulario"
           lesson={lesson}
           lessonTitle={lessonTitle}
-          sessionLabel="Aprender vocabulario"
-          sessionHelper="No hay vocabulario en esta lección."
           progressCurrent={0}
           progressTotal={0}
           progressPct={0}
-          metricLabel="marcadas"
-          metricValue={0}
           accentColor="#E63946"
           accentSurface="rgba(230,57,70,0.10)"
           onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
@@ -118,13 +114,9 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
         moduleName="Vocabulario"
         lesson={lesson}
         lessonTitle={lessonTitle}
-        sessionLabel="Aprender vocabulario"
-        sessionHelper="Mira las palabras nuevas antes de practicar."
         progressCurrent={currentCardIndex + 1}
         progressTotal={cards.length}
         progressPct={learnProgressPct}
-        metricLabel="recordadas"
-        metricValue={known}
         accentColor="#E63946"
         accentSurface="rgba(230,57,70,0.10)"
         onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
