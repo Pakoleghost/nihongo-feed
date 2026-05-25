@@ -52,10 +52,20 @@ function RecursosIcon({ color }: { color: string }) {
   );
 }
 
+function ClasesIcon({ color }: { color: string }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="6" width="14" height="12" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M16 10l5-3v10l-5-3V10z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 const tabs = [
   { href: "/", label: "Comunidad", Icon: HomeIcon },
   { href: "/practicar", label: "Estudiar", Icon: EstudiarIcon },
   { href: "/recursos", label: "Recursos", Icon: RecursosIcon },
+  { href: "/clases", label: "Clases", Icon: ClasesIcon },
 ] as const;
 
 export default function BottomNav() {
@@ -81,6 +91,7 @@ export default function BottomNav() {
         const isActive =
           href === "/" ? pathname === "/" :
           href === "/practicar" ? (pathname === "/practicar" || pathname.startsWith("/practicar/") || pathname === "/kana" || pathname.startsWith("/kana/")) :
+          href === "/clases" ? (pathname === "/clases" || pathname.startsWith("/clases/")) :
           pathname === href || pathname.startsWith(href + "/");
         const color = isActive ? "#FFFFFF" : "#9CA3AF";
 
@@ -94,10 +105,10 @@ export default function BottomNav() {
               alignItems: "center",
               gap: "3px",
               textDecoration: "none",
-              padding: "5px 14px",
+              padding: "5px 10px",
               borderRadius: "10px",
               background: isActive ? "#E63946" : "transparent",
-              minWidth: "56px",
+              minWidth: "52px",
               transition: "background 0.15s",
             }}
           >
