@@ -647,9 +647,8 @@ export default function PerfilPage() {
           </h2>
           <div style={{ background: "#FFFFFF", borderRadius: 16, boxShadow: "0 2px 10px rgba(26,26,46,0.07)", overflow: "hidden" }}>
             {[
-              { href: "/admin/usuarios", label: "Usuarios", desc: "Ver y gestionar alumnos" },
-              { href: "/admin/groups", label: "Grupos", desc: "Crear y editar grupos" },
-              { href: "/admin/assignments", label: "Asignaciones", desc: "Asignar recursos y tareas" },
+              { href: "/admin/usuarios", label: "Gestionar alumnos", desc: "Grupos, acceso y solicitudes" },
+              { href: "/admin/groups", label: "Panel de control", desc: "Vista de estudiante y configuración" },
             ].map(({ href, label, desc }, i, arr) => (
               <a
                 key={href}
