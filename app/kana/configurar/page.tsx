@@ -44,9 +44,12 @@ function matchesSelectedScript(item: KanaItem, selectedSets: ChipKey[]) {
 // Map new chip keys to pool filter logic
 function getPool(selectedSets: ChipKey[]): KanaItem[] {
   const pool: KanaItem[] = [];
+  // When dependent chips are selected, base chips act as script filters only.
+  // Mirrors the same logic in quiz/page.tsx buildPool.
+  const hasDependent = selectedSets.some((k) => DEPENDENT_CHIPS.includes(k));
   for (const key of selectedSets) {
-    if (key === "hiragana") pool.push(...KANA_ITEMS.filter((i) => i.script === "hiragana" && i.set === "basic"));
-    if (key === "katakana") pool.push(...KANA_ITEMS.filter((i) => i.script === "katakana" && i.set === "basic"));
+    if (key === "hiragana" && !hasDependent) pool.push(...KANA_ITEMS.filter((i) => i.script === "hiragana" && i.set === "basic"));
+    if (key === "katakana" && !hasDependent) pool.push(...KANA_ITEMS.filter((i) => i.script === "katakana" && i.set === "basic"));
     if (key === "tenten") pool.push(...KANA_ITEMS.filter((i) => i.set === "dakuten" && matchesSelectedScript(i, selectedSets)));
     if (key === "maru") pool.push(...KANA_ITEMS.filter((i) => i.set === "handakuten" && matchesSelectedScript(i, selectedSets)));
     if (key === "combinaciones") pool.push(...KANA_ITEMS.filter((i) => i.set === "yoon" && matchesSelectedScript(i, selectedSets)));

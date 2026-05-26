@@ -91,6 +91,9 @@ function buildPool(mode: string, sets: string[]): KanaItem[] {
   const includesHiragana = sets.includes("hiragana");
   const includesKatakana = sets.includes("katakana");
   const hasScriptFilter = includesHiragana || includesKatakana;
+  // If any dependent set is selected, base chips are script filters only — not pool contributors.
+  // "ambos + combinaciones" should yield only yoon items, not basic + yoon.
+  const hasDependent = sets.some((k) => k === "dakuon" || k === "handakuon" || k === "yoon");
   const matchesSelectedScript = (item: KanaItem) => {
     if (!hasScriptFilter) return true;
     if (item.script === "hiragana") return includesHiragana;
@@ -98,8 +101,8 @@ function buildPool(mode: string, sets: string[]): KanaItem[] {
     return true;
   };
   for (const key of sets) {
-    if (key === "hiragana") pool.push(...KANA_ITEMS.filter((i) => i.script === "hiragana" && i.set === "basic"));
-    else if (key === "katakana") pool.push(...KANA_ITEMS.filter((i) => i.script === "katakana" && i.set === "basic"));
+    if (key === "hiragana" && !hasDependent) pool.push(...KANA_ITEMS.filter((i) => i.script === "hiragana" && i.set === "basic"));
+    else if (key === "katakana" && !hasDependent) pool.push(...KANA_ITEMS.filter((i) => i.script === "katakana" && i.set === "basic"));
     else if (key === "dakuon") pool.push(...KANA_ITEMS.filter((i) => i.set === "dakuten" && matchesSelectedScript(i)));
     else if (key === "handakuon") pool.push(...KANA_ITEMS.filter((i) => i.set === "handakuten" && matchesSelectedScript(i)));
     else if (key === "yoon") pool.push(...KANA_ITEMS.filter((i) => i.set === "yoon" && matchesSelectedScript(i)));
@@ -304,6 +307,17 @@ function isCorrectAnswer(item: KanaItem, answer: string): boolean {
 }
 
 /**
+ * In smart/repeat mode, use same-script + same-set as distractor pool.
+ * Prevents yoon questions having basic kana as distractors (too easy to spot).
+ * Mirrors the logic already used in getTraceReadingOptions.
+ */
+function getSmartDistractorPool(item: KanaItem): KanaItem[] {
+  const sameScript = KANA_ITEMS.filter((i) => i.script === item.script);
+  const sameSet = sameScript.filter((i) => i.set === item.set);
+  return sameSet.length >= 4 ? sameSet : sameScript;
+}
+
+/**
  * In libre mode, distractors should come from the same "category" as the answer:
  * - basic: use the selected pool (same script, basic)
  * - yoon: only yoon from same script (combinations look alike)
@@ -398,9 +412,9 @@ function buildQuiz(
         : items[itemCursor++ % items.length];
     const options =
       taskType === "romaji_to_kana_choice"
-        ? getKanaOptions(item, effectivePool)
+        ? getKanaOptions(item, getSmartDistractorPool(item))
         : taskType === "kana_to_romaji_choice"
-          ? getOptions(item, effectivePool)
+          ? getOptions(item, getSmartDistractorPool(item))
           : taskType === "romaji_to_kana_trace"
             ? getTraceReadingOptions(item, effectivePool)
           : [];
