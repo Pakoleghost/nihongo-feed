@@ -6,7 +6,8 @@ const FLASK_URL = "https://pako-nihongo.tailcd0aee.ts.net/api/colecciones";
 export async function GET() {
   try {
     const res = await fetch(FLASK_URL, {
-      next: { revalidate: 60 }, // cache 60s on the server
+      next: { revalidate: 60 },
+      headers: { "X-Sensei-Key": "sensei-pako-2026" },
     });
     if (!res.ok) throw new Error(`upstream ${res.status}`);
     const data = await res.json();
