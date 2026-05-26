@@ -13,7 +13,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Called daily by Vercel Cron (see vercel.json) at 9am
+// Called daily by Vercel Cron (see vercel.json) at 15:00 UTC = 9am CST / 10am CDT (México)
 export async function GET() {
   try {
     const { data: subs, error } = await supabase

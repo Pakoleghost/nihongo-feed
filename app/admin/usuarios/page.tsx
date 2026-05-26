@@ -69,6 +69,14 @@ export default function AdminUsuariosPage() {
   const [pendingGroupFor, setPendingGroupFor] = useState<Record<string, string>>({});
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
 
+  // ── Notification broadcast ───────────────────────────────────────────────────
+  const [notifTitle, setNotifTitle] = useState("");
+  const [notifBody, setNotifBody] = useState("");
+  const [notifGroups, setNotifGroups] = useState<string[]>([]);
+  const [notifSending, setNotifSending] = useState(false);
+  const [notifResult, setNotifResult] = useState<{ sent: number; failed: number } | null>(null);
+  const [notifError, setNotifError] = useState<string | null>(null);
+
   const { studentViewActive, studentViewGroupName, setStudentViewActive, setStudentViewGroupName } =
     useStudentViewMode(isCurrentAdmin);
 
@@ -207,6 +215,36 @@ export default function AdminUsuariosPage() {
     await fetch(`/api/admin/users/${deleteTarget.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
     setApproved((prev) => prev.filter((u) => u.id !== deleteTarget.id));
     setDeleteTarget(null);
+  }
+
+  async function handleBroadcast() {
+    if (!token || !notifTitle.trim() || !notifBody.trim()) return;
+    setNotifSending(true);
+    setNotifResult(null);
+    setNotifError(null);
+    try {
+      const res = await fetch("/api/push/broadcast", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          title: notifTitle.trim(),
+          body: notifBody.trim(),
+          groups: notifGroups.length > 0 ? notifGroups : undefined,
+        }),
+      });
+      const data = await res.json() as { sent?: number; failed?: number; error?: string; note?: string };
+      if (!res.ok) {
+        setNotifError(data.error ?? "Error al enviar");
+      } else {
+        setNotifResult({ sent: data.sent ?? 0, failed: data.failed ?? 0 });
+        setNotifTitle("");
+        setNotifBody("");
+        setNotifGroups([]);
+      }
+    } catch {
+      setNotifError("Error de red");
+    }
+    setNotifSending(false);
   }
 
   // ── Derived ─────────────────────────────────────────────────────────────────
@@ -458,6 +496,68 @@ export default function AdminUsuariosPage() {
                 )}
               </section>
             ))}
+
+            {/* ── Notificaciones ───────────────────────────────────────── */}
+            <section>
+              <p style={sectionLabel}>Notificaciones</p>
+              <div style={{ ...cardStyle, padding: "14px", gap: "12px" }}>
+                <input
+                  type="text"
+                  placeholder="Título"
+                  value={notifTitle}
+                  onChange={(e) => setNotifTitle(e.target.value)}
+                  style={{ ...fieldStyle, width: "100%", boxSizing: "border-box" }}
+                />
+                <textarea
+                  placeholder="Mensaje"
+                  value={notifBody}
+                  onChange={(e) => setNotifBody(e.target.value)}
+                  rows={2}
+                  style={{ ...fieldStyle, width: "100%", boxSizing: "border-box", resize: "none", lineHeight: 1.5 }}
+                />
+                {/* Destinatarios */}
+                <div>
+                  <p style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 700, margin: "0 0 8px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                    Destinatarios
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    <button type="button"
+                      onClick={() => setNotifGroups([])}
+                      style={{ ...btnSmall, background: notifGroups.length === 0 ? "#1A1A2E" : "#F7F3ED", color: notifGroups.length === 0 ? "#FFFFFF" : "#53596B" }}>
+                      Todos
+                    </button>
+                    {groupNames.map((g) => {
+                      const sel = notifGroups.includes(g);
+                      return (
+                        <button type="button" key={g}
+                          onClick={() => setNotifGroups((prev) => sel ? prev.filter((x) => x !== g) : [...prev, g])}
+                          style={{ ...btnSmall, background: sel ? "#1A1A2E" : "#F7F3ED", color: sel ? "#FFFFFF" : "#53596B" }}>
+                          {g}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled={notifSending || !notifTitle.trim() || !notifBody.trim()}
+                  onClick={() => void handleBroadcast()}
+                  style={{ ...btnSmall, background: "#E63946", color: "#FFFFFF", padding: "11px 18px", fontSize: 14, opacity: (notifSending || !notifTitle.trim() || !notifBody.trim()) ? 0.5 : 1 }}>
+                  {notifSending ? "Enviando…" : "Enviar notificación"}
+                </button>
+                {notifResult && (
+                  <p style={{ fontSize: 13, color: "#178A83", fontWeight: 700, margin: 0 }}>
+                    ✓ Enviada a {notifResult.sent} {notifResult.sent === 1 ? "dispositivo" : "dispositivos"}
+                    {notifResult.failed > 0 ? ` · ${notifResult.failed} fallaron` : ""}
+                  </p>
+                )}
+                {notifError && (
+                  <p style={{ fontSize: 13, color: "#C53340", fontWeight: 700, margin: 0 }}>
+                    Error: {notifError}
+                  </p>
+                )}
+              </div>
+            </section>
 
           </div>
         )}
