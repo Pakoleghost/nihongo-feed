@@ -16,6 +16,13 @@ type UserRow = {
   is_approved: boolean | null;
 };
 
+type GroupRow = {
+  name: string;
+  coleccion_slug: string | null;
+};
+
+type ColeccionesMap = Record<string, { nombre: string }>;
+
 // ─── Avatar ────────────────────────────────────────────────────────────────────
 
 function Avatar({ url, name, size = 44 }: { url: string | null; name: string | null; size?: number }) {
@@ -45,30 +52,24 @@ function Avatar({ url, name, size = 44 }: { url: string | null; name: string | n
 export default function AdminUsuariosPage() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
-  const [groups, setGroups] = useState<string[]>([]);
+  const [groups, setGroups] = useState<GroupRow[]>([]);
+  const [colecciones, setColecciones] = useState<ColeccionesMap>({});
   const [pending, setPending] = useState<UserRow[]>([]);
   const [approved, setApproved] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // New group creation
   const [newGroup, setNewGroup] = useState("");
   const [creatingGroup, setCreatingGroup] = useState(false);
-
-  // Group rename: { old, draft }
   const [renaming, setRenaming] = useState<{ old: string; draft: string } | null>(null);
   const [savingRename, setSavingRename] = useState(false);
-
-  // Pending approval: userId → chosen group
   const [pendingGroupFor, setPendingGroupFor] = useState<Record<string, string>>({});
-
-  // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
 
-  // ── Data loading ────────────────────────────────────────────────────────────
+  // ── Loaders ─────────────────────────────────────────────────────────────────
 
-  const loadGroups = useCallback(async () => {
-    const { data } = await supabase.from("groups").select("name").order("name");
-    return (data ?? []).map((g: { name: string }) => g.name) as string[];
+  const loadGroups = useCallback(async (): Promise<GroupRow[]> => {
+    const { data } = await supabase.from("groups").select("name, coleccion_slug").order("name");
+    return (data ?? []) as GroupRow[];
   }, []);
 
   const loadUsers = useCallback(async (accessToken: string) => {
@@ -77,10 +78,7 @@ export default function AdminUsuariosPage() {
     });
     if (!res.ok) return { pending: [] as UserRow[], approved: [] as UserRow[] };
     const { pending: p, past: a } = await res.json();
-    return {
-      pending: (p ?? []) as UserRow[],
-      approved: (a ?? []) as UserRow[],
-    };
+    return { pending: (p ?? []) as UserRow[], approved: (a ?? []) as UserRow[] };
   }, []);
 
   useEffect(() => {
@@ -88,13 +86,24 @@ export default function AdminUsuariosPage() {
       const { data } = await supabase.auth.getSession();
       const t = data.session?.access_token ?? null;
       setToken(t);
-      const grps = await loadGroups();
+
+      const [grps, colRes] = await Promise.all([
+        loadGroups(),
+        fetch("/api/colecciones").then((r) => r.ok ? r.json() : {}).catch(() => ({})),
+      ]);
       setGroups(grps);
+      // Only need nombre for display
+      const slim: ColeccionesMap = {};
+      Object.entries(colRes as Record<string, { nombre: string }>).forEach(([slug, col]) => {
+        slim[slug] = { nombre: col.nombre };
+      });
+      setColecciones(slim);
+
       if (t) {
         const { pending: p, approved: a } = await loadUsers(t);
         setPending(p);
         setApproved(a);
-        const firstGroup = grps[0] ?? "";
+        const firstGroup = grps[0]?.name ?? "";
         setPendingGroupFor((prev) => {
           const next = { ...prev };
           p.forEach((u) => { if (!next[u.id]) next[u.id] = firstGroup; });
@@ -107,12 +116,11 @@ export default function AdminUsuariosPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Refresh pending selectors when groups change
   useEffect(() => {
     if (!groups.length) return;
     setPendingGroupFor((prev) => {
       const next = { ...prev };
-      pending.forEach((u) => { if (!next[u.id]) next[u.id] = groups[0]; });
+      pending.forEach((u) => { if (!next[u.id]) next[u.id] = groups[0]?.name ?? ""; });
       return next;
     });
   }, [groups, pending]);
@@ -123,12 +131,9 @@ export default function AdminUsuariosPage() {
     const name = newGroup.trim();
     if (!name) return;
     setCreatingGroup(true);
-    const { error } = await supabase.from("groups").insert([{ name }]);
-    if (!error) {
-      setNewGroup("");
-      const grps = await loadGroups();
-      setGroups(grps);
-    }
+    await supabase.from("groups").insert([{ name }]);
+    setNewGroup("");
+    setGroups(await loadGroups());
     setCreatingGroup(false);
   }
 
@@ -138,45 +143,38 @@ export default function AdminUsuariosPage() {
     const newName = draft.trim();
     if (!newName || newName === oldName) { setRenaming(null); return; }
     setSavingRename(true);
-    // Update groups table
     await supabase.from("groups").update({ name: newName }).eq("name", oldName);
-    // Update all profiles with this group
     await supabase.from("profiles").update({ group_name: newName }).eq("group_name", oldName);
-    // Update local state
-    setGroups((prev) => prev.map((g) => (g === oldName ? newName : g)));
-    setApproved((prev) =>
-      prev.map((u) => u.group_name === oldName ? { ...u, group_name: newName } : u)
-    );
+    setGroups((prev) => prev.map((g) => g.name === oldName ? { ...g, name: newName } : g));
+    setApproved((prev) => prev.map((u) => u.group_name === oldName ? { ...u, group_name: newName } : u));
     setSavingRename(false);
     setRenaming(null);
+  }
+
+  async function handleMapColeccion(groupName: string, slug: string) {
+    await supabase.from("groups").update({ coleccion_slug: slug || null }).eq("name", groupName);
+    setGroups((prev) => prev.map((g) => g.name === groupName ? { ...g, coleccion_slug: slug || null } : g));
   }
 
   // ── User actions ────────────────────────────────────────────────────────────
 
   async function handleApprove(user: UserRow) {
-    const group = pendingGroupFor[user.id] ?? groups[0] ?? "";
-    if (!group) { alert("Selecciona un grupo antes de aprobar."); return; }
-    await supabase.from("profiles")
-      .update({ is_approved: true, group_name: group })
-      .eq("id", user.id);
+    const group = pendingGroupFor[user.id] ?? groups[0]?.name ?? "";
+    if (!group) { alert("Selecciona un grupo."); return; }
+    await supabase.from("profiles").update({ is_approved: true, group_name: group }).eq("id", user.id);
     setPending((prev) => prev.filter((u) => u.id !== user.id));
     setApproved((prev) => [{ ...user, is_approved: true, group_name: group }, ...prev]);
   }
 
   async function handleReject(user: UserRow) {
     if (!token) return;
-    await fetch(`/api/admin/users/${user.id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await fetch(`/api/admin/users/${user.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
     setPending((prev) => prev.filter((u) => u.id !== user.id));
   }
 
   async function handleChangeGroup(userId: string, newGroupName: string) {
     await supabase.from("profiles").update({ group_name: newGroupName || null }).eq("id", userId);
-    setApproved((prev) =>
-      prev.map((u) => u.id === userId ? { ...u, group_name: newGroupName || null } : u)
-    );
+    setApproved((prev) => prev.map((u) => u.id === userId ? { ...u, group_name: newGroupName || null } : u));
   }
 
   function confirmDelete(user: UserRow) {
@@ -185,49 +183,41 @@ export default function AdminUsuariosPage() {
 
   async function executeDelete() {
     if (!deleteTarget || !token) return;
-    await fetch(`/api/admin/users/${deleteTarget.id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await fetch(`/api/admin/users/${deleteTarget.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
     setApproved((prev) => prev.filter((u) => u.id !== deleteTarget.id));
     setDeleteTarget(null);
   }
 
-  // ── Grouping ────────────────────────────────────────────────────────────────
+  // ── Derived ─────────────────────────────────────────────────────────────────
 
-  const ungrouped = approved.filter((u) => !u.group_name || !groups.includes(u.group_name));
+  const groupNames = groups.map((g) => g.name);
+  const ungrouped = approved.filter((u) => !u.group_name || !groupNames.includes(u.group_name));
   const groupedApproved = groups.map((g) => ({
-    name: g,
-    users: approved.filter((u) => u.group_name === g),
+    group: g,
+    users: approved.filter((u) => u.group_name === g.name),
   }));
+  const coleccionEntries = Object.entries(colecciones);
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <>
       <div style={{
-        background: "#FFF8E7",
-        minHeight: "100dvh",
-        display: "flex",
-        flexDirection: "column",
-        paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))",
+        background: "#FFF8E7", minHeight: "100dvh", display: "flex",
+        flexDirection: "column", paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))",
       }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: "14px", padding: "20px 20px 4px" }}>
-          <button
-            onClick={() => router.back()}
-            style={{
-              width: "40px", height: "40px", borderRadius: "50%", background: "#FFFFFF",
-              border: "none", cursor: "pointer", display: "flex", alignItems: "center",
-              justifyContent: "center", boxShadow: "0 2px 10px rgba(26,26,46,0.10)", flexShrink: 0,
-            }}
-            aria-label="Volver"
-          >
+          <button onClick={() => router.back()} aria-label="Volver" style={{
+            width: 40, height: 40, borderRadius: "50%", background: "#FFFFFF",
+            border: "none", cursor: "pointer", display: "flex", alignItems: "center",
+            justifyContent: "center", boxShadow: "0 2px 10px rgba(26,26,46,0.10)", flexShrink: 0,
+          }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
               <path d="M19 12H5M12 5l-7 7 7 7" stroke="#1A1A2E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <h1 style={{ fontSize: "32px", fontWeight: 800, color: "#1A1A2E", margin: 0, lineHeight: 1 }}>
+          <h1 style={{ fontSize: 32, fontWeight: 800, color: "#1A1A2E", margin: 0, lineHeight: 1 }}>
             Alumnos
           </h1>
         </div>
@@ -237,79 +227,84 @@ export default function AdminUsuariosPage() {
         ) : (
           <div style={{ padding: "20px 16px 0", display: "flex", flexDirection: "column", gap: "24px" }}>
 
-            {/* ── Groups ───────────────────────────────────────────────────── */}
+            {/* ── Groups + coleccion mapping ────────────────────────────────── */}
             <section>
               <p style={sectionLabel}>Grupos</p>
-              <div style={card}>
+              <div style={cardStyle}>
 
-                {/* Existing groups — with rename */}
-                {groups.length > 0 ? (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                    {groups.map((g) => (
-                      <button
-                        key={g}
-                        type="button"
-                        onClick={() => setRenaming({ old: g, draft: g })}
-                        style={{
-                          display: "flex", alignItems: "center", gap: "5px",
-                          background: "#F7F3ED",
-                          borderRadius: "999px",
-                          border: "none",
-                          padding: "6px 12px",
-                          fontSize: "13px",
-                          fontWeight: 700,
-                          color: "#1A1A2E",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {g}
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-                          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
-                            stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p style={{ fontSize: "13px", color: "#9CA3AF", margin: 0 }}>Sin grupos todavía.</p>
+                {groups.length === 0 && (
+                  <p style={{ fontSize: 13, color: "#9CA3AF", margin: 0 }}>Sin grupos todavía.</p>
                 )}
 
-                {/* Rename inline editor */}
+                {groups.map((g) => (
+                  <div key={g.name} style={{
+                    display: "flex", alignItems: "center", gap: "8px",
+                    padding: "10px 0",
+                    borderBottom: "1px solid rgba(26,26,46,0.06)",
+                  }}>
+                    {/* Group name / rename trigger */}
+                    <button
+                      type="button"
+                      onClick={() => setRenaming({ old: g.name, draft: g.name })}
+                      style={{
+                        flex: 1, textAlign: "left", background: "none", border: "none",
+                        cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 6,
+                        minWidth: 0,
+                      }}
+                    >
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {g.name}
+                      </span>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+                          stroke="#C4BAB0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+
+                    {/* Coleccion mapping */}
+                    {coleccionEntries.length > 0 && (
+                      <select
+                        value={g.coleccion_slug ?? ""}
+                        onChange={(e) => void handleMapColeccion(g.name, e.target.value)}
+                        title="Grabaciones Zoom asociadas"
+                        style={{
+                          border: "none", borderRadius: 10, background: g.coleccion_slug ? "rgba(78,205,196,0.12)" : "#F7F3ED",
+                          color: g.coleccion_slug ? "#178A83" : "#9CA3AF",
+                          padding: "7px 10px", fontSize: 12, fontWeight: 700,
+                          outline: "none", flexShrink: 0, maxWidth: 140, fontFamily: "inherit",
+                        }}
+                      >
+                        <option value="">Sin grabaciones</option>
+                        {coleccionEntries.map(([slug, col]) => (
+                          <option key={slug} value={slug}>{col.nombre}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                ))}
+
+                {/* Rename editor */}
                 {renaming && (
-                  <div style={{ display: "flex", gap: "8px", alignItems: "center", paddingTop: "4px" }}>
-                    <span style={{ fontSize: "12px", color: "#9CA3AF", fontWeight: 600, flexShrink: 0 }}>
-                      Renombrar:
-                    </span>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", paddingTop: 4 }}>
+                    <span style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 600, flexShrink: 0 }}>Renombrar:</span>
                     <input
                       autoFocus
                       value={renaming.draft}
                       onChange={(e) => setRenaming({ ...renaming, draft: e.target.value })}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") void handleRenameGroup();
-                        if (e.key === "Escape") setRenaming(null);
-                      }}
+                      onKeyDown={(e) => { if (e.key === "Enter") void handleRenameGroup(); if (e.key === "Escape") setRenaming(null); }}
                       style={{ ...fieldStyle, flex: 1 }}
                     />
-                    <button
-                      type="button"
-                      disabled={savingRename}
-                      onClick={() => void handleRenameGroup()}
-                      style={{ ...btnSmall, background: "#4ECDC4", color: "#1A1A2E" }}
-                    >
+                    <button type="button" disabled={savingRename} onClick={() => void handleRenameGroup()}
+                      style={{ ...btnSmall, background: "#4ECDC4", color: "#1A1A2E" }}>
                       {savingRename ? "…" : "✓"}
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setRenaming(null)}
-                      style={{ ...btnSmall, background: "#F7F3ED", color: "#9CA3AF" }}
-                    >
-                      ✕
-                    </button>
+                    <button type="button" onClick={() => setRenaming(null)}
+                      style={{ ...btnSmall, background: "#F7F3ED", color: "#9CA3AF" }}>✕</button>
                   </div>
                 )}
 
                 {/* New group */}
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div style={{ display: "flex", gap: 8, paddingTop: groups.length ? 4 : 0 }}>
                   <input
                     value={newGroup}
                     onChange={(e) => setNewGroup(e.target.value)}
@@ -317,22 +312,15 @@ export default function AdminUsuariosPage() {
                     placeholder="Nuevo grupo…"
                     style={{ ...fieldStyle, flex: 1 }}
                   />
-                  <button
-                    type="button"
-                    onClick={() => void handleCreateGroup()}
+                  <button type="button" onClick={() => void handleCreateGroup()}
                     disabled={creatingGroup || !newGroup.trim()}
                     style={{
-                      border: "none",
-                      borderRadius: "12px",
+                      border: "none", borderRadius: 12,
                       background: !newGroup.trim() ? "#E5E7EB" : "#1A1A2E",
                       color: !newGroup.trim() ? "#9CA3AF" : "#FFFFFF",
-                      padding: "0 16px",
-                      fontSize: "13px",
-                      fontWeight: 700,
-                      cursor: !newGroup.trim() ? "not-allowed" : "pointer",
-                      flexShrink: 0,
-                    }}
-                  >
+                      padding: "0 16px", fontSize: 13, fontWeight: 700,
+                      cursor: !newGroup.trim() ? "not-allowed" : "pointer", flexShrink: 0,
+                    }}>
                     {creatingGroup ? "…" : "Crear"}
                   </button>
                 </div>
@@ -344,15 +332,7 @@ export default function AdminUsuariosPage() {
               <p style={sectionLabel}>
                 Solicitudes
                 {pending.length > 0 && (
-                  <span style={{
-                    marginLeft: "8px",
-                    background: "rgba(230,57,70,0.12)",
-                    color: "#C53340",
-                    borderRadius: "999px",
-                    padding: "2px 8px",
-                    fontSize: "11px",
-                    fontWeight: 800,
-                  }}>
+                  <span style={{ marginLeft: 8, background: "rgba(230,57,70,0.12)", color: "#C53340", borderRadius: 999, padding: "2px 8px", fontSize: 11, fontWeight: 800 }}>
                     {pending.length}
                   </span>
                 )}
@@ -360,7 +340,7 @@ export default function AdminUsuariosPage() {
               {pending.length === 0 ? (
                 <div style={emptyCard}>Sin solicitudes pendientes</div>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {pending.map((user) => (
                     <div key={user.id} style={userCardStyle}>
                       <Avatar url={user.avatar_url} name={user.full_name ?? user.username} />
@@ -369,23 +349,18 @@ export default function AdminUsuariosPage() {
                         {user.username && <p style={userSub}>@{user.username}</p>}
                         {!user.username && user.email && <p style={userSub}>{user.email}</p>}
                       </div>
-                      {/* Group selector */}
-                      <select
-                        value={pendingGroupFor[user.id] ?? ""}
+                      <select value={pendingGroupFor[user.id] ?? ""}
                         onChange={(e) => setPendingGroupFor((prev) => ({ ...prev, [user.id]: e.target.value }))}
-                        style={groupSelect}
-                      >
+                        style={groupSelect}>
                         <option value="">Elegir…</option>
-                        {groups.map((g) => <option key={g} value={g}>{g}</option>)}
+                        {groups.map((g) => <option key={g.name} value={g.name}>{g.name}</option>)}
                       </select>
-                      {/* Approve */}
                       <button type="button" onClick={() => void handleApprove(user)}
                         style={iconBtn("rgba(78,205,196,0.15)")} aria-label="Aprobar">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                           <path d="M20 6L9 17l-5-5" stroke="#4ECDC4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </button>
-                      {/* Reject */}
                       <button type="button" onClick={() => void handleReject(user)}
                         style={iconBtn("rgba(230,57,70,0.12)")} aria-label="Rechazar">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -398,18 +373,16 @@ export default function AdminUsuariosPage() {
               )}
             </section>
 
-            {/* ── Sin grupo — ARRIBA ────────────────────────────────────────── */}
+            {/* ── Sin grupo — primero ───────────────────────────────────────── */}
             {ungrouped.length > 0 && (
               <section>
                 <p style={sectionLabel}>
                   Sin grupo
-                  <span style={{ marginLeft: "6px", fontSize: "11px", color: "#C4BAB0", fontWeight: 600 }}>
-                    {ungrouped.length}
-                  </span>
+                  <span style={{ marginLeft: 6, fontSize: 11, color: "#C4BAB0", fontWeight: 600 }}>{ungrouped.length}</span>
                 </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {ungrouped.map((user) => (
-                    <ApprovedUserRow key={user.id} user={user} groups={groups}
+                    <ApprovedUserRow key={user.id} user={user} groups={groupNames}
                       onChangeGroup={handleChangeGroup} onDelete={confirmDelete} />
                   ))}
                 </div>
@@ -417,20 +390,25 @@ export default function AdminUsuariosPage() {
             )}
 
             {/* ── By group ─────────────────────────────────────────────────── */}
-            {groupedApproved.map(({ name, users }) => (
-              <section key={name}>
+            {groupedApproved.map(({ group, users }) => (
+              <section key={group.name}>
                 <p style={sectionLabel}>
-                  {name}
-                  <span style={{ marginLeft: "6px", fontSize: "11px", color: "#C4BAB0", fontWeight: 600 }}>
+                  {group.name}
+                  <span style={{ marginLeft: 6, fontSize: 11, color: "#C4BAB0", fontWeight: 600 }}>
                     {users.length} {users.length === 1 ? "alumno" : "alumnos"}
                   </span>
+                  {group.coleccion_slug && (
+                    <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 700, color: "#4ECDC4", textTransform: "none", letterSpacing: 0 }}>
+                      ● grabaciones
+                    </span>
+                  )}
                 </p>
                 {users.length === 0 ? (
                   <div style={emptyCard}>Sin alumnos en este grupo</div>
                 ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                     {users.map((user) => (
-                      <ApprovedUserRow key={user.id} user={user} groups={groups}
+                      <ApprovedUserRow key={user.id} user={user} groups={groupNames}
                         onChangeGroup={handleChangeGroup} onDelete={confirmDelete} />
                     ))}
                   </div>
@@ -447,9 +425,7 @@ export default function AdminUsuariosPage() {
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         title="¿Eliminar alumno?"
-        description={deleteTarget
-          ? `Se eliminará a ${deleteTarget.label}. Perderá acceso a la app inmediatamente.`
-          : ""}
+        description={deleteTarget ? `Se eliminará a ${deleteTarget.label}. Perderá acceso a la app inmediatamente.` : ""}
         confirmLabel="Sí, eliminar"
         destructive
         onCancel={() => setDeleteTarget(null)}
@@ -461,12 +437,7 @@ export default function AdminUsuariosPage() {
 
 // ─── Approved user row ─────────────────────────────────────────────────────────
 
-function ApprovedUserRow({
-  user,
-  groups,
-  onChangeGroup,
-  onDelete,
-}: {
+function ApprovedUserRow({ user, groups, onChangeGroup, onDelete }: {
   user: UserRow;
   groups: string[];
   onChangeGroup: (id: string, group: string) => void;
@@ -479,11 +450,9 @@ function ApprovedUserRow({
         <p style={userName}>{user.full_name ?? user.username ?? "—"}</p>
         {user.username && <p style={userSub}>@{user.username}</p>}
       </div>
-      <select
-        value={user.group_name ?? ""}
+      <select value={user.group_name ?? ""}
         onChange={(e) => onChangeGroup(user.id, e.target.value)}
-        style={groupSelect}
-      >
+        style={groupSelect}>
         <option value="">Sin grupo</option>
         {groups.map((g) => <option key={g} value={g}>{g}</option>)}
       </select>
@@ -501,60 +470,51 @@ function ApprovedUserRow({
 // ─── Shared styles ─────────────────────────────────────────────────────────────
 
 const sectionLabel: React.CSSProperties = {
-  fontSize: "12px", fontWeight: 700, color: "#9CA3AF",
+  fontSize: 12, fontWeight: 700, color: "#9CA3AF",
   letterSpacing: "0.08em", textTransform: "uppercase",
   margin: "0 4px 10px", display: "flex", alignItems: "center",
 };
-
-const card: React.CSSProperties = {
-  background: "#FFFFFF", borderRadius: "16px", padding: "14px",
+const cardStyle: React.CSSProperties = {
+  background: "#FFFFFF", borderRadius: 16, padding: "4px 14px 14px",
   boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
-  display: "flex", flexDirection: "column", gap: "10px",
+  display: "flex", flexDirection: "column", gap: 0,
 };
-
 const userCardStyle: React.CSSProperties = {
-  background: "#FFFFFF", borderRadius: "16px", padding: "12px 14px",
-  display: "flex", alignItems: "center", gap: "10px",
+  background: "#FFFFFF", borderRadius: 16, padding: "12px 14px",
+  display: "flex", alignItems: "center", gap: 10,
   boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
 };
-
 const userName: React.CSSProperties = {
-  fontSize: "14px", fontWeight: 700, color: "#1A1A2E",
+  fontSize: 14, fontWeight: 700, color: "#1A1A2E",
   margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
 };
-
 const userSub: React.CSSProperties = {
-  fontSize: "11px", color: "#9CA3AF",
+  fontSize: 11, color: "#9CA3AF",
   margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
 };
-
 const emptyCard: React.CSSProperties = {
-  background: "#FFFFFF", borderRadius: "16px", padding: "20px",
+  background: "#FFFFFF", borderRadius: 16, padding: 20,
   textAlign: "center", boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
-  color: "#9CA3AF", fontSize: "14px",
+  color: "#9CA3AF", fontSize: 14,
 };
-
 const groupSelect: React.CSSProperties = {
-  border: "none", borderRadius: "10px", background: "#F7F3ED",
-  color: "#1A1A2E", padding: "8px 10px", fontSize: "13px",
+  border: "none", borderRadius: 10, background: "#F7F3ED",
+  color: "#1A1A2E", padding: "8px 10px", fontSize: 13,
   fontWeight: 700, outline: "none", flexShrink: 0,
-  maxWidth: "110px", fontFamily: "inherit",
+  maxWidth: 110, fontFamily: "inherit",
 };
-
 const fieldStyle: React.CSSProperties = {
-  border: "none", borderRadius: "12px", background: "#F7F3ED",
-  color: "#1A1A2E", padding: "10px 13px", fontSize: "14px",
+  border: "none", borderRadius: 12, background: "#F7F3ED",
+  color: "#1A1A2E", padding: "10px 13px", fontSize: 14,
   fontWeight: 600, outline: "none", fontFamily: "inherit",
 };
-
 const btnSmall: React.CSSProperties = {
-  border: "none", borderRadius: "8px", padding: "8px 12px",
-  fontSize: "13px", fontWeight: 700, cursor: "pointer", flexShrink: 0,
+  border: "none", borderRadius: 8, padding: "8px 12px",
+  fontSize: 13, fontWeight: 700, cursor: "pointer", flexShrink: 0,
 };
-
 function iconBtn(bg: string): React.CSSProperties {
   return {
-    width: "36px", height: "36px", borderRadius: "50%",
+    width: 36, height: 36, borderRadius: "50%",
     background: bg, border: "none", cursor: "pointer",
     display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
   };

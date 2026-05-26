@@ -6,6 +6,7 @@ type BasicProfile = {
   username?: string | null;
   full_name?: string | null;
   group_name?: string | null;
+  avatar_url?: string | null;
   is_approved?: boolean | null;
   is_admin?: boolean | null;
   created_at?: string | null;
@@ -19,12 +20,12 @@ export async function GET(req: NextRequest) {
     const [{ data: pending }, { data: past }, usersResult] = await Promise.all([
       service
         .from("profiles")
-        .select("id, username, full_name, group_name, is_approved, is_admin, created_at")
+        .select("id, username, full_name, group_name, avatar_url, is_approved, is_admin, created_at")
         .eq("is_approved", false)
         .order("created_at", { ascending: false }),
       service
         .from("profiles")
-        .select("id, username, full_name, group_name, is_approved, is_admin, created_at")
+        .select("id, username, full_name, group_name, avatar_url, is_approved, is_admin, created_at")
         .eq("is_approved", true)
         .eq("is_admin", false)
         .order("created_at", { ascending: false })

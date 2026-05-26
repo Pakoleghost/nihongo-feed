@@ -237,6 +237,8 @@ function NoGroupCard({ message }: { message?: string }) {
 export default function ClasesPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [groupName, setGroupName] = useState<string | null>(null);
+  // Map group_name → coleccion_slug (from groups table)
+  const [groupSlugMap, setGroupSlugMap] = useState<Map<string, string>>(new Map());
   const [colecciones, setColecciones] = useState<ColeccionesMap | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -254,25 +256,30 @@ export default function ClasesPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!alive) return;
 
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("is_admin, group_name")
-          .eq("id", session.user.id)
-          .maybeSingle();
-        if (!alive) return;
-        setIsAdmin(Boolean(profile?.is_admin));
-        setGroupName((profile?.group_name as string | null)?.trim() || null);
+      const [profileRes, groupsRes, colRes] = await Promise.all([
+        session?.user
+          ? supabase.from("profiles").select("is_admin, group_name").eq("id", session.user.id).maybeSingle()
+          : Promise.resolve({ data: null }),
+        supabase.from("groups").select("name, coleccion_slug"),
+        fetch(COLECCIONES_URL).then((r) => r.ok ? r.json() : null).catch(() => null),
+      ]);
+
+      if (!alive) return;
+
+      if (profileRes.data) {
+        setIsAdmin(Boolean(profileRes.data.is_admin));
+        setGroupName((profileRes.data.group_name as string | null)?.trim() || null);
       }
 
-      try {
-        const res = await fetch(COLECCIONES_URL);
-        if (!res.ok) throw new Error("fetch");
-        const data: ColeccionesMap = await res.json();
-        if (!alive) return;
-        setColecciones(data);
-      } catch {
-        if (!alive) return;
+      const map = new Map<string, string>();
+      ((groupsRes.data ?? []) as { name: string; coleccion_slug: string | null }[]).forEach((g) => {
+        if (g.coleccion_slug) map.set(g.name, g.coleccion_slug);
+      });
+      setGroupSlugMap(map);
+
+      if (colRes) {
+        setColecciones(colRes as ColeccionesMap);
+      } else {
         setFetchError("No se pudieron cargar las grabaciones. Verifica tu conexión.");
       }
 
@@ -296,13 +303,12 @@ export default function ClasesPage() {
     ? (studentViewGroupName || groupName)
     : groupName;
 
+  // Resolve coleccion via groups table slug mapping
   function findColeccion(name: string | null): Coleccion | null {
     if (!name || !colecciones) return null;
-    const normalized = name.toLowerCase().trim();
-    const entry = Object.values(colecciones).find(
-      (col) => col.nombre.toLowerCase().trim() === normalized
-    );
-    return entry ?? null;
+    const slug = groupSlugMap.get(name);
+    if (slug && colecciones[slug]) return colecciones[slug];
+    return null;
   }
 
   // ── Render ──────────────────────────────────────────────────────────────────
