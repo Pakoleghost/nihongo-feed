@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
 import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
-const COLECCIONES_URL = "https://pako-nihongo.tailcd0aee.ts.net/api/colecciones";
+const COLECCIONES_URL = "/api/colecciones";
 
 type Entrada = {
   label: string;

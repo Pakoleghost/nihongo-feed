@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import AppTopNav from "@/components/AppTopNav";
+import BottomNav from "@/components/BottomNav";
 import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 const cardStyle = {
@@ -146,19 +146,18 @@ export default function AdminGroupsPage() {
 
   return (
     <>
-    <div style={{ background: "#FFF8E7", minHeight: "100vh", padding: "18px 16px 48px" }}>
-      <div style={{ maxWidth: "860px", margin: "0 auto" }}>
-        <AppTopNav secondary="admin" />
+    <div style={{ background: "#FFF8E7", minHeight: "100dvh", display: "flex", flexDirection: "column", paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))" }}>
+      <div style={{ maxWidth: "760px", margin: "0 auto", width: "100%", padding: "0 16px" }}>
 
-        <header style={{ marginTop: 18, marginBottom: 18 }}>
-          <p style={{ margin: 0, color: "#9CA3AF", fontSize: 12, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+        <header style={{ padding: "20px 0 16px" }}>
+          <p style={{ margin: 0, color: "#9CA3AF", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase" }}>
             Administración
           </p>
-          <h1 style={{ margin: "6px 0 0", color: "#1A1A2E", fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
-            Panel de control
+          <h1 style={{ margin: "6px 0 0", color: "#1A1A2E", fontSize: 42, fontWeight: 800, lineHeight: 1 }}>
+            Panel
           </h1>
-          <p style={{ margin: "8px 0 0", color: "#53596B", fontSize: 15, lineHeight: 1.4 }}>
-            Gestiona acceso, grupos, foros y revisa cómo se ve la app para estudiantes.
+          <p style={{ margin: "8px 0 0", color: "#7A7F8D", fontSize: 14, lineHeight: 1.35 }}>
+            Gestiona acceso, grupos y vista de estudiante.
           </p>
         </header>
 
@@ -381,6 +380,7 @@ export default function AdminGroupsPage() {
           </div>
         </section>
       </div>
+      <BottomNav />
     </div>
     <ConfirmDialog
       open={Boolean(deleteTarget)}
