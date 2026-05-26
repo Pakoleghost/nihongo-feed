@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 type UserRow = {
   id: string;
@@ -16,6 +17,7 @@ type UserRow = {
   is_approved: boolean | null;
 };
 
+// coleccion_slug may not exist yet (migration pending) — always treat as nullable
 type GroupRow = {
   name: string;
   coleccion_slug: string | null;
@@ -52,8 +54,10 @@ function Avatar({ url, name, size = 44 }: { url: string | null; name: string | n
 export default function AdminUsuariosPage() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
+  const [isCurrentAdmin, setIsCurrentAdmin] = useState(false);
   const [groups, setGroups] = useState<GroupRow[]>([]);
   const [colecciones, setColecciones] = useState<ColeccionesMap>({});
+  const [hasColeccionSlug, setHasColeccionSlug] = useState(false); // migration ran?
   const [pending, setPending] = useState<UserRow[]>([]);
   const [approved, setApproved] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,11 +69,21 @@ export default function AdminUsuariosPage() {
   const [pendingGroupFor, setPendingGroupFor] = useState<Record<string, string>>({});
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
 
+  const { studentViewActive, studentViewGroupName, setStudentViewActive, setStudentViewGroupName } =
+    useStudentViewMode(isCurrentAdmin);
+
   // ── Loaders ─────────────────────────────────────────────────────────────────
 
   const loadGroups = useCallback(async (): Promise<GroupRow[]> => {
-    const { data } = await supabase.from("groups").select("name, coleccion_slug").order("name");
-    return (data ?? []) as GroupRow[];
+    // Try with coleccion_slug first (requires migration). Fall back to just name.
+    const { data, error } = await supabase.from("groups").select("name, coleccion_slug").order("name");
+    if (!error && data) {
+      setHasColeccionSlug(true);
+      return data as GroupRow[];
+    }
+    // Column doesn't exist yet — safe fallback
+    const { data: fallback } = await supabase.from("groups").select("name").order("name");
+    return (fallback ?? []).map((g: { name: string }) => ({ name: g.name, coleccion_slug: null }));
   }, []);
 
   const loadUsers = useCallback(async (accessToken: string) => {
@@ -83,16 +97,22 @@ export default function AdminUsuariosPage() {
 
   useEffect(() => {
     async function init() {
-      const { data } = await supabase.auth.getSession();
-      const t = data.session?.access_token ?? null;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const t = sessionData.session?.access_token ?? null;
       setToken(t);
+
+      // Check admin status
+      if (sessionData.session?.user) {
+        const { data: prof } = await supabase.from("profiles").select("is_admin")
+          .eq("id", sessionData.session.user.id).maybeSingle();
+        setIsCurrentAdmin(Boolean(prof?.is_admin));
+      }
 
       const [grps, colRes] = await Promise.all([
         loadGroups(),
         fetch("/api/colecciones").then((r) => r.ok ? r.json() : {}).catch(() => ({})),
       ]);
       setGroups(grps);
-      // Only need nombre for display
       const slim: ColeccionesMap = {};
       Object.entries(colRes as Record<string, { nombre: string }>).forEach(([slug, col]) => {
         slim[slug] = { nombre: col.nombre };
@@ -152,6 +172,7 @@ export default function AdminUsuariosPage() {
   }
 
   async function handleMapColeccion(groupName: string, slug: string) {
+    if (!hasColeccionSlug) return; // migration not run yet
     await supabase.from("groups").update({ coleccion_slug: slug || null }).eq("name", groupName);
     setGroups((prev) => prev.map((g) => g.name === groupName ? { ...g, coleccion_slug: slug || null } : g));
   }
@@ -227,31 +248,62 @@ export default function AdminUsuariosPage() {
         ) : (
           <div style={{ padding: "20px 16px 0", display: "flex", flexDirection: "column", gap: "24px" }}>
 
+            {/* ── Student view ─────────────────────────────────────────────── */}
+            {isCurrentAdmin && (
+              <section>
+                <p style={sectionLabel}>Vista de estudiante</p>
+                <div style={{ ...cardStyle, padding: "14px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                    <p style={{ fontSize: 13, color: "#53596B", margin: 0 }}>
+                      {studentViewActive
+                        ? `Activa · ${studentViewGroupName ?? "sin grupo"}`
+                        : "Revisa la app como si fueras un alumno"}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setStudentViewActive(!studentViewActive)}
+                      style={{
+                        border: "none", borderRadius: 999,
+                        background: studentViewActive ? "#4ECDC4" : "#1A1A2E",
+                        color: "#FFFFFF",
+                        padding: "9px 16px", fontSize: 13, fontWeight: 800,
+                        cursor: "pointer", flexShrink: 0,
+                        transition: "background 140ms ease",
+                      }}
+                    >
+                      {studentViewActive ? "Salir" : "Activar"}
+                    </button>
+                  </div>
+                  {!studentViewActive && groupNames.length > 0 && (
+                    <select
+                      value={studentViewGroupName ?? ""}
+                      onChange={(e) => setStudentViewGroupName(e.target.value || null)}
+                      style={{ marginTop: 10, ...groupSelect, maxWidth: "100%", width: "100%" }}
+                    >
+                      <option value="">Elegir grupo…</option>
+                      {groupNames.map((g) => <option key={g} value={g}>{g}</option>)}
+                    </select>
+                  )}
+                </div>
+              </section>
+            )}
+
             {/* ── Groups + coleccion mapping ────────────────────────────────── */}
             <section>
               <p style={sectionLabel}>Grupos</p>
               <div style={cardStyle}>
-
                 {groups.length === 0 && (
-                  <p style={{ fontSize: 13, color: "#9CA3AF", margin: 0 }}>Sin grupos todavía.</p>
+                  <p style={{ fontSize: 13, color: "#9CA3AF", margin: "10px 0" }}>Sin grupos todavía.</p>
                 )}
-
                 {groups.map((g) => (
                   <div key={g.name} style={{
-                    display: "flex", alignItems: "center", gap: "8px",
-                    padding: "10px 0",
-                    borderBottom: "1px solid rgba(26,26,46,0.06)",
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "10px 0", borderBottom: "1px solid rgba(26,26,46,0.06)",
                   }}>
-                    {/* Group name / rename trigger */}
-                    <button
-                      type="button"
-                      onClick={() => setRenaming({ old: g.name, draft: g.name })}
-                      style={{
-                        flex: 1, textAlign: "left", background: "none", border: "none",
-                        cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 6,
-                        minWidth: 0,
-                      }}
-                    >
+                    {/* Rename trigger */}
+                    <button type="button" onClick={() => setRenaming({ old: g.name, draft: g.name })}
+                      style={{ flex: 1, textAlign: "left", background: "none", border: "none",
+                        cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
                       <span style={{ fontSize: 14, fontWeight: 700, color: "#1A1A2E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {g.name}
                       </span>
@@ -260,15 +312,15 @@ export default function AdminUsuariosPage() {
                           stroke="#C4BAB0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </button>
-
-                    {/* Coleccion mapping */}
-                    {coleccionEntries.length > 0 && (
+                    {/* Coleccion mapping (only when migration ran) */}
+                    {hasColeccionSlug && coleccionEntries.length > 0 && (
                       <select
                         value={g.coleccion_slug ?? ""}
                         onChange={(e) => void handleMapColeccion(g.name, e.target.value)}
-                        title="Grabaciones Zoom asociadas"
+                        title="Grabaciones Zoom"
                         style={{
-                          border: "none", borderRadius: 10, background: g.coleccion_slug ? "rgba(78,205,196,0.12)" : "#F7F3ED",
+                          border: "none", borderRadius: 10,
+                          background: g.coleccion_slug ? "rgba(78,205,196,0.12)" : "#F7F3ED",
                           color: g.coleccion_slug ? "#178A83" : "#9CA3AF",
                           padding: "7px 10px", fontSize: 12, fontWeight: 700,
                           outline: "none", flexShrink: 0, maxWidth: 140, fontFamily: "inherit",
@@ -285,15 +337,12 @@ export default function AdminUsuariosPage() {
 
                 {/* Rename editor */}
                 {renaming && (
-                  <div style={{ display: "flex", gap: 8, alignItems: "center", paddingTop: 4 }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "10px 0 4px" }}>
                     <span style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 600, flexShrink: 0 }}>Renombrar:</span>
-                    <input
-                      autoFocus
-                      value={renaming.draft}
+                    <input autoFocus value={renaming.draft}
                       onChange={(e) => setRenaming({ ...renaming, draft: e.target.value })}
                       onKeyDown={(e) => { if (e.key === "Enter") void handleRenameGroup(); if (e.key === "Escape") setRenaming(null); }}
-                      style={{ ...fieldStyle, flex: 1 }}
-                    />
+                      style={{ ...fieldStyle, flex: 1 }} />
                     <button type="button" disabled={savingRename} onClick={() => void handleRenameGroup()}
                       style={{ ...btnSmall, background: "#4ECDC4", color: "#1A1A2E" }}>
                       {savingRename ? "…" : "✓"}
@@ -304,14 +353,10 @@ export default function AdminUsuariosPage() {
                 )}
 
                 {/* New group */}
-                <div style={{ display: "flex", gap: 8, paddingTop: groups.length ? 4 : 0 }}>
-                  <input
-                    value={newGroup}
-                    onChange={(e) => setNewGroup(e.target.value)}
+                <div style={{ display: "flex", gap: 8, paddingTop: 12 }}>
+                  <input value={newGroup} onChange={(e) => setNewGroup(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") void handleCreateGroup(); }}
-                    placeholder="Nuevo grupo…"
-                    style={{ ...fieldStyle, flex: 1 }}
-                  />
+                    placeholder="Nuevo grupo…" style={{ ...fieldStyle, flex: 1 }} />
                   <button type="button" onClick={() => void handleCreateGroup()}
                     disabled={creatingGroup || !newGroup.trim()}
                     style={{
@@ -398,9 +443,7 @@ export default function AdminUsuariosPage() {
                     {users.length} {users.length === 1 ? "alumno" : "alumnos"}
                   </span>
                   {group.coleccion_slug && (
-                    <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 700, color: "#4ECDC4", textTransform: "none", letterSpacing: 0 }}>
-                      ● grabaciones
-                    </span>
+                    <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 700, color: "#4ECDC4", textTransform: "none", letterSpacing: 0 }}>● grabaciones</span>
                   )}
                 </p>
                 {users.length === 0 ? (
@@ -426,8 +469,7 @@ export default function AdminUsuariosPage() {
         open={Boolean(deleteTarget)}
         title="¿Eliminar alumno?"
         description={deleteTarget ? `Se eliminará a ${deleteTarget.label}. Perderá acceso a la app inmediatamente.` : ""}
-        confirmLabel="Sí, eliminar"
-        destructive
+        confirmLabel="Sí, eliminar" destructive
         onCancel={() => setDeleteTarget(null)}
         onConfirm={() => void executeDelete()}
       />
@@ -435,11 +477,8 @@ export default function AdminUsuariosPage() {
   );
 }
 
-// ─── Approved user row ─────────────────────────────────────────────────────────
-
 function ApprovedUserRow({ user, groups, onChangeGroup, onDelete }: {
-  user: UserRow;
-  groups: string[];
+  user: UserRow; groups: string[];
   onChangeGroup: (id: string, group: string) => void;
   onDelete: (user: UserRow) => void;
 }) {
@@ -450,72 +489,37 @@ function ApprovedUserRow({ user, groups, onChangeGroup, onDelete }: {
         <p style={userName}>{user.full_name ?? user.username ?? "—"}</p>
         {user.username && <p style={userSub}>@{user.username}</p>}
       </div>
-      <select value={user.group_name ?? ""}
-        onChange={(e) => onChangeGroup(user.id, e.target.value)}
-        style={groupSelect}>
+      <select value={user.group_name ?? ""} onChange={(e) => onChangeGroup(user.id, e.target.value)} style={groupSelect}>
         <option value="">Sin grupo</option>
         {groups.map((g) => <option key={g} value={g}>{g}</option>)}
       </select>
-      <button type="button" onClick={() => onDelete(user)}
-        style={iconBtn("rgba(230,57,70,0.10)")} aria-label="Eliminar">
+      <button type="button" onClick={() => onDelete(user)} style={iconBtn("rgba(230,57,70,0.10)")} aria-label="Eliminar">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
-            stroke="#C53340" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="#C53340" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
     </div>
   );
 }
 
-// ─── Shared styles ─────────────────────────────────────────────────────────────
-
 const sectionLabel: React.CSSProperties = {
-  fontSize: 12, fontWeight: 700, color: "#9CA3AF",
-  letterSpacing: "0.08em", textTransform: "uppercase",
-  margin: "0 4px 10px", display: "flex", alignItems: "center",
+  fontSize: 12, fontWeight: 700, color: "#9CA3AF", letterSpacing: "0.08em",
+  textTransform: "uppercase", margin: "0 4px 10px", display: "flex", alignItems: "center",
 };
 const cardStyle: React.CSSProperties = {
   background: "#FFFFFF", borderRadius: 16, padding: "4px 14px 14px",
-  boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
-  display: "flex", flexDirection: "column", gap: 0,
+  boxShadow: "0 2px 10px rgba(26,26,46,0.07)", display: "flex", flexDirection: "column",
 };
 const userCardStyle: React.CSSProperties = {
   background: "#FFFFFF", borderRadius: 16, padding: "12px 14px",
-  display: "flex", alignItems: "center", gap: 10,
-  boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+  display: "flex", alignItems: "center", gap: 10, boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
 };
-const userName: React.CSSProperties = {
-  fontSize: 14, fontWeight: 700, color: "#1A1A2E",
-  margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-};
-const userSub: React.CSSProperties = {
-  fontSize: 11, color: "#9CA3AF",
-  margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-};
-const emptyCard: React.CSSProperties = {
-  background: "#FFFFFF", borderRadius: 16, padding: 20,
-  textAlign: "center", boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
-  color: "#9CA3AF", fontSize: 14,
-};
-const groupSelect: React.CSSProperties = {
-  border: "none", borderRadius: 10, background: "#F7F3ED",
-  color: "#1A1A2E", padding: "8px 10px", fontSize: 13,
-  fontWeight: 700, outline: "none", flexShrink: 0,
-  maxWidth: 110, fontFamily: "inherit",
-};
-const fieldStyle: React.CSSProperties = {
-  border: "none", borderRadius: 12, background: "#F7F3ED",
-  color: "#1A1A2E", padding: "10px 13px", fontSize: 14,
-  fontWeight: 600, outline: "none", fontFamily: "inherit",
-};
-const btnSmall: React.CSSProperties = {
-  border: "none", borderRadius: 8, padding: "8px 12px",
-  fontSize: 13, fontWeight: 700, cursor: "pointer", flexShrink: 0,
-};
+const userName: React.CSSProperties = { fontSize: 14, fontWeight: 700, color: "#1A1A2E", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" };
+const userSub: React.CSSProperties = { fontSize: 11, color: "#9CA3AF", margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" };
+const emptyCard: React.CSSProperties = { background: "#FFFFFF", borderRadius: 16, padding: 20, textAlign: "center", boxShadow: "0 2px 10px rgba(26,26,46,0.07)", color: "#9CA3AF", fontSize: 14 };
+const groupSelect: React.CSSProperties = { border: "none", borderRadius: 10, background: "#F7F3ED", color: "#1A1A2E", padding: "8px 10px", fontSize: 13, fontWeight: 700, outline: "none", flexShrink: 0, maxWidth: 110, fontFamily: "inherit" };
+const fieldStyle: React.CSSProperties = { border: "none", borderRadius: 12, background: "#F7F3ED", color: "#1A1A2E", padding: "10px 13px", fontSize: 14, fontWeight: 600, outline: "none", fontFamily: "inherit" };
+const btnSmall: React.CSSProperties = { border: "none", borderRadius: 8, padding: "8px 12px", fontSize: 13, fontWeight: 700, cursor: "pointer", flexShrink: 0 };
 function iconBtn(bg: string): React.CSSProperties {
-  return {
-    width: 36, height: 36, borderRadius: "50%",
-    background: bg, border: "none", cursor: "pointer",
-    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-  };
+  return { width: 36, height: 36, borderRadius: "50%", background: bg, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 };
 }

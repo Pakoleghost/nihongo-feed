@@ -303,11 +303,18 @@ export default function ClasesPage() {
     ? (studentViewGroupName || groupName)
     : groupName;
 
-  // Resolve coleccion via groups table slug mapping
+  // Resolve coleccion via groups table slug mapping, with substring fallback
   function findColeccion(name: string | null): Coleccion | null {
     if (!name || !colecciones) return null;
+    // 1. Explicit slug mapping (via groups.coleccion_slug)
     const slug = groupSlugMap.get(name);
     if (slug && colecciones[slug]) return colecciones[slug];
+    // 2. Fallback: find coleccion whose nombre contains the group name (e.g. "日本語 しばいぬ" ⊃ "しばいぬ")
+    const nameLower = name.toLowerCase();
+    const fallbackSlug = Object.keys(colecciones).find((s) =>
+      colecciones![s].nombre.toLowerCase().includes(nameLower)
+    );
+    if (fallbackSlug) return colecciones[fallbackSlug];
     return null;
   }
 
