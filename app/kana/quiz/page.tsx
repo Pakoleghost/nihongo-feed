@@ -55,11 +55,13 @@ type MatchSelection = {
 type Phase = "question" | "traceReview" | "feedback";
 type KanaAnim = "idle" | "bounce" | "shake";
 type TraceCompletion = { retries: number; strokes: number };
+// Smart mode weights — priority: recognise kana (show kana → pick romaji / match pairs)
+// romaji_to_kana_choice is kept minimal; romaji_to_kana_trace is secondary
 const MIXED_TASK_WEIGHTS: Array<{ type: KanaQuestionType; weight: number }> = [
-  { type: "kana_to_romaji_choice", weight: 0.4 },
-  { type: "romaji_to_kana_choice", weight: 0.35 },
-  { type: "hiragana_katakana_match", weight: 0.15 },
-  { type: "romaji_to_kana_trace", weight: 0.3 },
+  { type: "kana_to_romaji_choice", weight: 0.60 },
+  { type: "hiragana_katakana_match", weight: 0.20 },
+  { type: "romaji_to_kana_trace", weight: 0.15 },
+  { type: "romaji_to_kana_choice", weight: 0.05 },
 ];
 
 function formatQuizContext(primary: string, secondary: string, sets: string[]) {
@@ -301,6 +303,24 @@ function isCorrectAnswer(item: KanaItem, answer: string): boolean {
   return a === item.romaji || (item.alternatives?.includes(a) ?? false);
 }
 
+/**
+ * In libre mode, distractors should come from the same "category" as the answer:
+ * - basic: use the selected pool (same script, basic)
+ * - yoon: only yoon from same script (combinations look alike)
+ * - dakuten / handakuten: mix both — ば vs ぱ is the real challenge
+ */
+function getLibreDistractorPool(item: KanaItem, selectedPool: KanaItem[]): KanaItem[] {
+  if (item.set === "dakuten" || item.set === "handakuten") {
+    return KANA_ITEMS.filter(
+      (i) => (i.set === "dakuten" || i.set === "handakuten") && i.script === item.script,
+    );
+  }
+  if (item.set === "yoon") {
+    return KANA_ITEMS.filter((i) => i.set === "yoon" && i.script === item.script);
+  }
+  return selectedPool;
+}
+
 function buildQuiz(
   mode: string,
   sets: string[],
@@ -326,6 +346,17 @@ function buildQuiz(
   }
 
   const effectivePool = pool.length > 0 ? pool : KANA_ITEMS;
+
+  // ── Libre mode: only kana→romaji recognition, same-category distractors ──────
+  if (mode === "libre") {
+    return items.map((item) => ({
+      item,
+      taskType: "kana_to_romaji_choice" as KanaQuestionType,
+      options: getOptions(item, getLibreDistractorPool(item, effectivePool)),
+    }));
+  }
+
+  // ── Smart / repeat modes: full mixed task set ─────────────────────────────────
   const traceItems = items.filter((item) => hasKanaTraceData(item.kana));
   const matchDeck = shuffle(getIntroducedBasicPairs(progress, effectivePool, mode));
   const availableTaskTypes: KanaQuestionType[] = [
