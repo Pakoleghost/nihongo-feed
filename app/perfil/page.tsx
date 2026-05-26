@@ -7,6 +7,7 @@ import BottomNav from "@/components/BottomNav";
 import { getStreak } from "@/lib/streak";
 import { loadKanaProgress, getKanaStateCounts } from "@/lib/kana-progress";
 import { KANA_ITEMS } from "@/lib/kana-data";
+import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 type Profile = {
   id: string;
@@ -107,6 +108,9 @@ export default function PerfilPage() {
   const [savingUsername, setSavingUsername] = useState(false);
 
   const [isAdmin, setIsAdmin] = useState(false);
+  const [groupOptions, setGroupOptions] = useState<string[]>([]);
+  const { studentViewActive, studentViewGroupName, setStudentViewActive, setStudentViewGroupName } =
+    useStudentViewMode(isAdmin);
 
   // Stats (client-side)
   const [streak, setStreak] = useState(0);
@@ -132,6 +136,11 @@ export default function PerfilPage() {
       if (data) {
         setProfile(data as Profile);
         setIsAdmin((data as { is_admin?: boolean | null }).is_admin === true);
+        if ((data as { is_admin?: boolean | null }).is_admin) {
+          supabase.from("groups").select("name").order("name").then(({ data: grps }) => {
+            setGroupOptions((grps ?? []).map((g: { name: string }) => g.name));
+          });
+        }
       }
 
       // Streak from localStorage
@@ -646,17 +655,65 @@ export default function PerfilPage() {
             Admin
           </h2>
           <div style={{ background: "#FFFFFF", borderRadius: 16, boxShadow: "0 2px 10px rgba(26,26,46,0.07)", overflow: "hidden" }}>
+
+            {/* Student view toggle — inline, always visible */}
+            <div style={{ padding: "14px 18px", borderBottom: "1px solid #F0EDE8" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", margin: 0 }}>Vista de estudiante</p>
+                  <p style={{ fontSize: 12, color: "#9CA3AF", margin: "2px 0 0" }}>
+                    {studentViewActive
+                      ? `Activa · ${studentViewGroupName ?? "sin grupo"}`
+                      : "Revisa la app como alumno"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setStudentViewActive(!studentViewActive)}
+                  style={{
+                    border: "none",
+                    borderRadius: 999,
+                    background: studentViewActive ? "#4ECDC4" : "#F0EDE8",
+                    color: studentViewActive ? "#1A1A2E" : "#53596B",
+                    padding: "8px 14px",
+                    fontSize: 13,
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    transition: "background 140ms ease",
+                  }}
+                >
+                  {studentViewActive ? "Salir" : "Activar"}
+                </button>
+              </div>
+              {/* Group selector — only visible when activating */}
+              {!studentViewActive && groupOptions.length > 0 && (
+                <select
+                  value={studentViewGroupName ?? ""}
+                  onChange={(e) => setStudentViewGroupName(e.target.value || null)}
+                  style={{
+                    marginTop: 10, width: "100%", border: "none",
+                    borderRadius: 10, background: "#F7F3ED", color: "#1A1A2E",
+                    padding: "9px 12px", fontSize: 13, fontWeight: 700,
+                    outline: "none", fontFamily: "inherit",
+                  }}
+                >
+                  <option value="">Elegir grupo…</option>
+                  {groupOptions.map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
+              )}
+            </div>
+
+            {/* Nav links */}
             {[
               { href: "/admin/usuarios", label: "Gestionar alumnos", desc: "Grupos, acceso y solicitudes" },
-              { href: "/admin/groups", label: "Panel de control", desc: "Vista de estudiante y configuración" },
-            ].map(({ href, label, desc }, i, arr) => (
+            ].map(({ href, label, desc }) => (
               <a
                 key={href}
                 href={href}
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
                   padding: "16px 18px", textDecoration: "none",
-                  borderBottom: i < arr.length - 1 ? "1px solid #F0EDE8" : "none",
                 }}
               >
                 <div>
