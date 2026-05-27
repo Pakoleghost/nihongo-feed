@@ -251,10 +251,10 @@ export default function RecursosPage() {
     <div
       style={{
         background: "#FFF8E7",
-        minHeight: "100vh",
+        minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
-        paddingBottom: "calc(112px + env(safe-area-inset-bottom, 0px))",
+        paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))",
       }}
     >
       <div
@@ -513,9 +513,6 @@ export default function RecursosPage() {
                           opacity: item.url ? 1 : 0.45,
                         }}
                       >
-                        {/* Corner fold */}
-                        <div style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, background: fileResource ? "#E63946" : "#4ECDC4", borderBottomLeftRadius: 28, opacity: 0.15 }} />
-
                         {/* Icon */}
                         <div style={{
                           width: 46, height: 46, borderRadius: "12px", flexShrink: 0,

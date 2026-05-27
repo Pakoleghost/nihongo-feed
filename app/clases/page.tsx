@@ -265,18 +265,6 @@ function ColeccionView({ coleccion }: { coleccion: Coleccion }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-      {coleccion.zoom_topic ? (
-        <p
-          style={{
-            fontSize: "13px",
-            color: "#7A7F8D",
-            margin: "0 0 4px",
-            fontWeight: 500,
-          }}
-        >
-          {coleccion.zoom_topic}
-        </p>
-      ) : null}
       {coleccion.entradas.map((entrada, index) => (
         // eslint-disable-next-line react/no-array-index-key
         <EntradaCard key={index} entrada={entrada} />
