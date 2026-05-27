@@ -43,7 +43,7 @@ export default function SprintResultadosPage() {
   return (
     <div
       style={{
-        background: "#FFF8E7",
+        background: "#1A1A2E",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -56,7 +56,7 @@ export default function SprintResultadosPage() {
         style={{
           fontSize: "80px",
           fontWeight: 800,
-          color: "#1A1A2E",
+          color: "#FFFFFF",
           margin: 0,
           lineHeight: 1,
         }}
@@ -74,7 +74,7 @@ export default function SprintResultadosPage() {
         correctas
       </p>
       {bestScore !== null && (
-        <p style={{ fontSize: "15px", color: "#9CA3AF", margin: "4px 0 48px" }}>
+        <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.42)", margin: "4px 0 48px" }}>
           Tu mejor racha: {bestScore}
         </p>
       )}
@@ -92,7 +92,6 @@ export default function SprintResultadosPage() {
             color: "#FFFFFF",
             fontSize: "17px",
             fontWeight: 700,
-            boxShadow: "0 4px 20px rgba(230,57,70,0.3)",
           }}
         >
           Jugar de nuevo
@@ -106,7 +105,7 @@ export default function SprintResultadosPage() {
             border: "none",
             cursor: "pointer",
             background: "transparent",
-            color: "#1A1A2E",
+            color: "rgba(255,255,255,0.65)",
             fontSize: "17px",
             fontWeight: 600,
           }}

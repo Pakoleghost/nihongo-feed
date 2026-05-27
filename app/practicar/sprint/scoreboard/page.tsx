@@ -35,13 +35,13 @@ function AvatarCircle({ url, name }: { url: string | null; name: string | null }
         width: size,
         height: size,
         borderRadius: "50%",
-        background: "#E5E7EB",
+        background: "rgba(255,255,255,0.12)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         fontSize: 14,
         fontWeight: 700,
-        color: "#53596B",
+        color: "rgba(255,255,255,0.65)",
         flexShrink: 0,
       }}
     >
@@ -53,7 +53,7 @@ function AvatarCircle({ url, name }: { url: string | null; name: string | null }
 function rankColor(rank: number): string {
   if (rank === 1) return "#E63946";
   if (rank === 3) return "#4ECDC4";
-  return "#53596B";
+  return "rgba(255,255,255,0.65)";
 }
 
 export default function ScoreboardPage() {
@@ -125,7 +125,7 @@ export default function ScoreboardPage() {
   return (
     <div
       style={{
-        background: "#FFF8E7",
+        background: "#1A1A2E",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -147,13 +147,12 @@ export default function ScoreboardPage() {
             width: "40px",
             height: "40px",
             borderRadius: "50%",
-            background: "#FFFFFF",
-            border: "none",
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.10)",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "0 2px 10px rgba(26,26,46,0.10)",
             flexShrink: 0,
           }}
           aria-label="Volver"
@@ -161,7 +160,7 @@ export default function ScoreboardPage() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path
               d="M19 12H5M12 5l-7 7 7 7"
-              stroke="#1A1A2E"
+              stroke="#FFFFFF"
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -172,7 +171,7 @@ export default function ScoreboardPage() {
           style={{
             fontSize: "28px",
             fontWeight: 800,
-            color: "#1A1A2E",
+            color: "#FFFFFF",
             margin: 0,
             lineHeight: 1,
           }}
@@ -198,8 +197,8 @@ export default function ScoreboardPage() {
               borderRadius: "999px",
               border: "none",
               cursor: "pointer",
-              background: period === p ? "#1A1A2E" : "#E8E3DC",
-              color: period === p ? "#FFFFFF" : "#9CA3AF",
+              background: period === p ? "#4ECDC4" : "rgba(255,255,255,0.08)",
+              color: period === p ? "#1A1A2E" : "rgba(255,255,255,0.42)",
               fontWeight: 700,
               fontSize: "14px",
               transition: "background 0.15s, color 0.15s",
@@ -213,21 +212,21 @@ export default function ScoreboardPage() {
       {/* Ranking list */}
       <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: "10px" }}>
         {loading ? (
-          <div style={{ textAlign: "center", color: "#9CA3AF", padding: "40px 0" }}>
+          <div style={{ textAlign: "center", color: "rgba(255,255,255,0.42)", padding: "40px 0" }}>
             Cargando...
           </div>
         ) : rows.length === 0 ? (
           <div
             style={{
-              background: "#FFFFFF",
+              background: "#1E2235",
               borderRadius: "1.5rem",
               padding: "32px",
               textAlign: "center",
-              boxShadow: "0 4px 20px rgba(26,26,46,0.07)",
+              border: "1px solid rgba(255,255,255,0.06)",
             }}
           >
             <p style={{ fontSize: "28px", margin: "0 0 8px" }}>🏅</p>
-            <p style={{ fontSize: "15px", color: "#9CA3AF", margin: 0 }}>
+            <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.42)", margin: 0 }}>
               {period === "week" ? "Sin scores esta semana." : "Aún no hay scores."}
             </p>
           </div>
@@ -239,13 +238,13 @@ export default function ScoreboardPage() {
               <div
                 key={row.user_id}
                 style={{
-                  background: isMe ? "rgba(78,205,196,0.15)" : "#FFFFFF",
+                  background: isMe ? "rgba(78,205,196,0.15)" : "#1E2235",
                   borderRadius: "1.5rem",
                   padding: "14px 18px",
                   display: "flex",
                   alignItems: "center",
                   gap: "14px",
-                  boxShadow: "0 2px 12px rgba(26,26,46,0.07)",
+                  border: isMe ? "1px solid rgba(78,205,196,0.3)" : "1px solid rgba(255,255,255,0.06)",
                 }}
               >
                 {/* Rank */}
@@ -269,7 +268,7 @@ export default function ScoreboardPage() {
                     flex: 1,
                     fontSize: "15px",
                     fontWeight: 700,
-                    color: "#1A1A2E",
+                    color: "#FFFFFF",
                     margin: 0,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
@@ -289,7 +288,7 @@ export default function ScoreboardPage() {
                   style={{
                     fontSize: "22px",
                     fontWeight: 800,
-                    color: "#1A1A2E",
+                    color: "#FFFFFF",
                     flexShrink: 0,
                   }}
                 >

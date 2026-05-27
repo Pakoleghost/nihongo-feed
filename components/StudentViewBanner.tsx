@@ -49,8 +49,8 @@ export default function StudentViewBanner() {
         display: "flex",
         justifyContent: "center",
         padding: "calc(env(safe-area-inset-top, 0px) + 8px) 12px 8px",
-        background: "linear-gradient(to bottom, #FFF8E7 0%, rgba(255,248,231,0.96) 100%)",
-        borderBottom: "1px solid rgba(26,26,46,0.06)",
+        background: "#1A1A2E",
+        borderBottom: "1px solid rgba(255,255,255,0.07)",
       }}
     >
       <div

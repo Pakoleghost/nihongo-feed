@@ -31,7 +31,7 @@ export default function PracticarPage() {
   return (
     <div
       style={{
-        background: "#FFF8E7",
+        background: "#1A1A2E",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
@@ -42,7 +42,7 @@ export default function PracticarPage() {
         style={{
           fontSize: "42px",
           fontWeight: 800,
-          color: "#1A1A2E",
+          color: "#FFFFFF",
           margin: 0,
           lineHeight: 1,
           letterSpacing: "-0.04em",
@@ -53,7 +53,7 @@ export default function PracticarPage() {
       <p
         style={{
           fontSize: "14px",
-          color: "#7A7F8D",
+          color: "rgba(255,255,255,0.42)",
           margin: "8px 0 24px",
           lineHeight: 1.4,
         }}
@@ -113,12 +113,12 @@ export default function PracticarPage() {
           href="/practicar/vocabulario"
           style={{
             position: "relative",
-            background: "#FFFFFF",
+            background: "#1E2235",
             borderRadius: "14px",
             padding: "20px 20px 22px",
             display: "block",
             textDecoration: "none",
-            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+            border: "1px solid rgba(255,255,255,0.06)",
             overflow: "hidden",
           }}
         >
@@ -140,7 +140,7 @@ export default function PracticarPage() {
               style={{
                 fontSize: "20px",
                 fontWeight: 800,
-                color: "#1A1A2E",
+                color: "#FFFFFF",
                 margin: 0,
                 lineHeight: 1.1,
                 letterSpacing: "-0.03em",
@@ -151,7 +151,7 @@ export default function PracticarPage() {
             <p
               style={{
                 fontSize: "13px",
-                color: "#7A7F8D",
+                color: "rgba(255,255,255,0.42)",
                 margin: "5px 0 0",
                 lineHeight: 1.35,
               }}
@@ -170,14 +170,14 @@ export default function PracticarPage() {
                 marginBottom: 6,
               }}
             >
-              <span style={{ fontSize: "12px", color: "#7A7F8D" }}>
+              <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.42)" }}>
                 {vocabReviewed !== null ? (
                   <>
-                    <span style={{ fontWeight: 700, color: "#1A1A2E" }}>
+                    <span style={{ fontWeight: 700, color: "#FFFFFF" }}>
                       {vocabReviewed}
                     </span>
                     {" de "}
-                    <span style={{ fontWeight: 700, color: "#1A1A2E" }}>
+                    <span style={{ fontWeight: 700, color: "#FFFFFF" }}>
                       {TOTAL_VOCAB}
                     </span>
                     {" palabras practicadas"}
@@ -202,7 +202,7 @@ export default function PracticarPage() {
             <div
               style={{
                 height: 4,
-                background: "#F0EDE8",
+                background: "rgba(255,255,255,0.10)",
                 borderRadius: 999,
                 overflow: "hidden",
               }}
@@ -225,12 +225,12 @@ export default function PracticarPage() {
           href="/practicar/kanji"
           style={{
             position: "relative",
-            background: "#FFFFFF",
+            background: "#1E2235",
             borderRadius: "14px",
             padding: "20px 20px 22px",
             display: "block",
             textDecoration: "none",
-            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+            border: "1px solid rgba(255,255,255,0.06)",
             overflow: "hidden",
           }}
         >
@@ -252,7 +252,7 @@ export default function PracticarPage() {
               style={{
                 fontSize: "20px",
                 fontWeight: 800,
-                color: "#1A1A2E",
+                color: "#FFFFFF",
                 margin: 0,
                 lineHeight: 1.1,
                 letterSpacing: "-0.03em",
@@ -263,7 +263,7 @@ export default function PracticarPage() {
             <p
               style={{
                 fontSize: "13px",
-                color: "#7A7F8D",
+                color: "rgba(255,255,255,0.42)",
                 margin: "5px 0 0",
                 lineHeight: 1.35,
               }}
