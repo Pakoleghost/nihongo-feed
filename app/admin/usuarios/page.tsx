@@ -77,6 +77,8 @@ export default function AdminUsuariosPage() {
   const [notifResult, setNotifResult] = useState<{ sent: number; failed: number } | null>(null);
   const [notifError, setNotifError] = useState<string | null>(null);
 
+  const [progresoMap, setProgresoMap] = useState<Record<string, boolean>>({});
+
   const { studentViewActive, studentViewGroupName, setStudentViewActive, setStudentViewGroupName } =
     useStudentViewMode(isCurrentAdmin);
 
@@ -109,17 +111,24 @@ export default function AdminUsuariosPage() {
       const t = sessionData.session?.access_token ?? null;
       setToken(t);
 
-      // Check admin status
+      // Check admin status — redirect non-admins immediately
       if (sessionData.session?.user) {
         const { data: prof } = await supabase.from("profiles").select("is_admin")
           .eq("id", sessionData.session.user.id).maybeSingle();
-        setIsCurrentAdmin(Boolean(prof?.is_admin));
+        const admin = Boolean(prof?.is_admin);
+        setIsCurrentAdmin(admin);
+        if (!admin) { router.replace("/"); return; }
+      } else {
+        router.replace("/login");
+        return;
       }
 
-      const [grps, colRes] = await Promise.all([
+      const [grps, colRes, progresoRes] = await Promise.all([
         loadGroups(),
         fetch("/api/colecciones").then((r) => r.ok ? r.json() : {}).catch(() => ({})),
+        fetch("/api/grupos-progreso", { cache: "no-store" }).then((r) => r.ok ? r.json() : {}).catch(() => ({})),
       ]);
+      setProgresoMap(progresoRes as Record<string, boolean>);
       setGroups(grps);
       const slim: ColeccionesMap = {};
       Object.entries(colRes as Record<string, { nombre: string }>).forEach(([slug, col]) => {
@@ -177,6 +186,19 @@ export default function AdminUsuariosPage() {
     setApproved((prev) => prev.map((u) => u.group_name === oldName ? { ...u, group_name: newName } : u));
     setSavingRename(false);
     setRenaming(null);
+  }
+
+  async function handleToggleProgreso(groupName: string) {
+    const next = !progresoMap[groupName];
+    setProgresoMap((prev) => ({ ...prev, [groupName]: next }));
+    await fetch(`/api/admin/progreso-toggle?grupo=${encodeURIComponent(groupName)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ show_progreso: next }),
+    }).catch(() => {
+      // revert on error
+      setProgresoMap((prev) => ({ ...prev, [groupName]: !next }));
+    });
   }
 
   async function handleMapColeccion(groupName: string, slug: string) {
@@ -351,6 +373,28 @@ export default function AdminUsuariosPage() {
                       </svg>
                     </button>
                     {/* Coleccion mapping (only when migration ran) */}
+                    {/* Progreso toggle */}
+                    <button
+                      type="button"
+                      title={progresoMap[g.name] ? "Progreso activo" : "Activar línea de progreso"}
+                      onClick={() => void handleToggleProgreso(g.name)}
+                      style={{
+                        width: 36, height: 20, borderRadius: 10, border: "none",
+                        background: progresoMap[g.name] ? "#4ECDC4" : "rgba(26,26,46,0.10)",
+                        position: "relative", flexShrink: 0, cursor: "pointer",
+                        transition: "background 140ms ease",
+                      }}
+                    >
+                      <span style={{
+                        position: "absolute", top: 2,
+                        left: progresoMap[g.name] ? 18 : 2,
+                        width: 16, height: 16, borderRadius: "50%",
+                        background: "#FFFFFF",
+                        transition: "left 140ms ease",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
+                      }} />
+                    </button>
+
                     {hasColeccionSlug && coleccionEntries.length > 0 && (
                       <select
                         value={g.coleccion_slug ?? ""}
