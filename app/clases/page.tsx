@@ -68,10 +68,10 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
     <div
       style={{
         position: "relative",
-        background: "#FFFFFF",
+        background: "#1E2235",
         borderRadius: "14px",
         padding: "14px 48px 14px 16px",
-        boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+        border: "1px solid rgba(255,255,255,0.06)",
         display: "flex",
         flexDirection: "column",
         gap: "10px",
@@ -87,7 +87,7 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
           style={{
             fontSize: "15px",
             fontWeight: 700,
-            color: "#1A1A2E",
+            color: "#FFFFFF",
             margin: 0,
             lineHeight: 1.35,
             flex: 1,
@@ -128,7 +128,7 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
             style={{
               fontSize: "10px",
               fontWeight: 700,
-              color: "#9CA3AF",
+              color: "rgba(255,255,255,0.42)",
               textTransform: "uppercase",
               letterSpacing: "0.08em",
             }}
@@ -139,8 +139,8 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
             style={{
               fontSize: "13px",
               fontWeight: 700,
-              color: "#1A1A2E",
-              background: "#F7F3ED",
+              color: "#FFFFFF",
+              background: "rgba(255,255,255,0.07)",
               borderRadius: "6px",
               padding: "3px 8px",
               fontFamily: "monospace",
@@ -186,7 +186,7 @@ function TareaSection({ notas }: { notas: NotaClase[] }) {
           display: "block",
           fontSize: "11px",
           fontWeight: 700,
-          color: "#9CA3AF",
+          color: "rgba(255,255,255,0.42)",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
           marginBottom: "10px",
@@ -199,10 +199,10 @@ function TareaSection({ notas }: { notas: NotaClase[] }) {
       <div
         style={{
           position: "relative",
-          background: "#FFFFFF",
+          background: "#1E2235",
           borderRadius: "14px",
           padding: "14px 48px 14px 16px",
-          boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+          border: "1px solid rgba(255,255,255,0.06)",
           display: "flex",
           flexDirection: "column",
           gap: "10px",
@@ -214,7 +214,7 @@ function TareaSection({ notas }: { notas: NotaClase[] }) {
 
         {/* Meta: fecha · tema */}
         {(nota.fecha || nota.tema) && (
-          <p style={{ fontSize: "12px", color: "#9CA3AF", margin: 0, fontWeight: 500 }}>
+          <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.42)", margin: 0, fontWeight: 500 }}>
             {nota.fecha ?? ""}
             {nota.tema ? `${nota.fecha ? " · " : ""}${nota.tema}` : ""}
           </p>
@@ -231,7 +231,7 @@ function TareaSection({ notas }: { notas: NotaClase[] }) {
                 gap: "8px",
                 fontSize: "14px",
                 lineHeight: 1.45,
-                color: "#1A1A2E",
+                color: "rgba(255,255,255,0.88)",
               }}
             >
               <span style={{ color: "#E63946", fontWeight: 700, flexShrink: 0 }}>•</span>
@@ -249,17 +249,17 @@ function ColeccionView({ coleccion }: { coleccion: Coleccion }) {
     return (
       <div
         style={{
-          background: "#FFFFFF",
+          background: "#1E2235",
           borderRadius: "16px",
           padding: "40px 24px",
           textAlign: "center",
-          boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+          border: "1px solid rgba(255,255,255,0.06)",
         }}
       >
-        <p style={{ fontSize: "16px", fontWeight: 700, color: "#1A1A2E", margin: "0 0 6px" }}>
+        <p style={{ fontSize: "16px", fontWeight: 700, color: "#FFFFFF", margin: "0 0 6px" }}>
           Sin grabaciones aún
         </p>
-        <p style={{ fontSize: "13px", color: "#9CA3AF", margin: 0 }}>
+        <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.42)", margin: 0 }}>
           Las clases aparecerán aquí cuando estén disponibles.
         </p>
       </div>
@@ -280,11 +280,11 @@ function NoGroupCard({ message }: { message?: string }) {
   return (
     <div
       style={{
-        background: "#FFFFFF",
+        background: "#1E2235",
         borderRadius: "16px",
         padding: "40px 24px",
         textAlign: "center",
-        boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+        border: "1px solid rgba(255,255,255,0.06)",
       }}
     >
       <div
@@ -292,7 +292,7 @@ function NoGroupCard({ message }: { message?: string }) {
           width: "52px",
           height: "52px",
           borderRadius: "14px",
-          background: "rgba(78,205,196,0.10)",
+          background: "rgba(78,205,196,0.12)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -301,10 +301,10 @@ function NoGroupCard({ message }: { message?: string }) {
       >
         <VideoIcon color="#4ECDC4" />
       </div>
-      <p style={{ fontSize: "16px", fontWeight: 700, color: "#1A1A2E", margin: "0 0 6px" }}>
+      <p style={{ fontSize: "16px", fontWeight: 700, color: "#FFFFFF", margin: "0 0 6px" }}>
         {message ?? "Tu grupo aún no está configurado"}
       </p>
-      <p style={{ fontSize: "13px", color: "#9CA3AF", margin: 0, lineHeight: 1.5 }}>
+      <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.42)", margin: 0, lineHeight: 1.5 }}>
         {message ? "Contacta a tu profesor para más información." : "Cuando tu profesor te asigne un grupo, las grabaciones aparecerán aquí."}
       </p>
     </div>
@@ -433,7 +433,7 @@ export default function ClasesPage() {
 
   if (loading) {
     content = (
-      <div style={{ textAlign: "center", color: "#9CA3AF", padding: "48px 0", fontSize: "14px" }}>
+      <div style={{ textAlign: "center", color: "rgba(255,255,255,0.42)", padding: "48px 0", fontSize: "14px" }}>
         Cargando…
       </div>
     );
@@ -442,8 +442,8 @@ export default function ClasesPage() {
       <div
         style={{
           borderRadius: "16px",
-          background: "rgba(230,57,70,0.08)",
-          color: "#C53340",
+          background: "rgba(230,57,70,0.12)",
+          color: "#FF6470",
           padding: "14px 16px",
           fontSize: "14px",
           fontWeight: 700,
@@ -475,15 +475,14 @@ export default function ClasesPage() {
                 type="button"
                 onClick={() => setSelectedSlug(slug)}
                 style={{
-                  border: "none",
+                  border: active ? "none" : "1px solid rgba(255,255,255,0.10)",
                   borderRadius: "999px",
-                  background: active ? "#1A1A2E" : "#FFFFFF",
-                  color: active ? "#FFFFFF" : "#53596B",
+                  background: active ? "#4ECDC4" : "rgba(255,255,255,0.06)",
+                  color: active ? "#1A1A2E" : "rgba(255,255,255,0.65)",
                   padding: "9px 16px",
                   fontSize: "13px",
                   fontWeight: 700,
                   cursor: "pointer",
-                  boxShadow: active ? "none" : "0 2px 8px rgba(26,26,46,0.08)",
                   transition: "background 140ms ease, color 140ms ease",
                 }}
               >
@@ -524,10 +523,10 @@ export default function ClasesPage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
-                background: "#FFFFFF",
+                background: "rgba(255,255,255,0.06)",
                 borderRadius: "999px",
                 padding: "5px 12px 5px 8px",
-                boxShadow: "0 1px 6px rgba(26,26,46,0.07)",
+                border: "1px solid rgba(255,255,255,0.08)",
                 marginBottom: "16px",
               }}
             >
@@ -539,7 +538,7 @@ export default function ClasesPage() {
                   background: "#4ECDC4",
                 }}
               />
-              <span style={{ fontSize: "12px", fontWeight: 800, color: "#1A1A2E" }}>
+              <span style={{ fontSize: "12px", fontWeight: 800, color: "#FFFFFF" }}>
                 {coleccion.nombre}
               </span>
             </div>
@@ -554,13 +553,18 @@ export default function ClasesPage() {
   return (
     <div
       style={{
-        background: "#FFF8E7",
+        background: "#1A1A2E",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
         paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))",
+        position: "relative",
       }}
     >
+      {/* Ambient glow */}
+      <div style={{ position: "fixed", top: -160, right: -100, width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(78,205,196,0.09) 0%, rgba(78,205,196,0) 60%)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", minHeight: "100%" }}>
+
       {/* Header */}
       <div
         style={{
@@ -576,14 +580,14 @@ export default function ClasesPage() {
             style={{
               fontSize: "42px",
               fontWeight: 800,
-              color: "#1A1A2E",
+              color: "#FFFFFF",
               margin: 0,
               lineHeight: 1,
             }}
           >
             Clases
           </h1>
-          <p style={{ margin: "8px 0 0", fontSize: "14px", color: "#7A7F8D", lineHeight: 1.35 }}>
+          <p style={{ margin: "8px 0 0", fontSize: "14px", color: "rgba(255,255,255,0.42)", lineHeight: 1.35 }}>
             Grabaciones de sesiones
           </p>
         </div>
@@ -594,6 +598,7 @@ export default function ClasesPage() {
       </div>
 
       <BottomNav />
+      </div>
     </div>
   );
 }

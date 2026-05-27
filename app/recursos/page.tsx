@@ -250,13 +250,18 @@ export default function RecursosPage() {
   return (
     <div
       style={{
-        background: "#FFF8E7",
+        background: "#1A1A2E",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
         paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))",
+        position: "relative",
       }}
     >
+      {/* Ambient glow */}
+      <div style={{ position: "fixed", top: -160, left: -100, width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(78,205,196,0.10) 0%, rgba(78,205,196,0) 60%)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", minHeight: "100%" }}>
+
       <div
         style={{
           display: "flex",
@@ -271,14 +276,14 @@ export default function RecursosPage() {
             style={{
               fontSize: "42px",
               fontWeight: 800,
-              color: "#1A1A2E",
+              color: "#FFFFFF",
               margin: 0,
               lineHeight: 1,
             }}
           >
             Recursos
           </h1>
-          <p style={{ margin: "8px 0 0", fontSize: "14px", color: "#7A7F8D", lineHeight: 1.35 }}>
+          <p style={{ margin: "8px 0 0", fontSize: "14px", color: "rgba(255,255,255,0.42)", lineHeight: 1.35 }}>
             Materiales del curso
           </p>
         </div>
@@ -288,9 +293,9 @@ export default function RecursosPage() {
             type="button"
             onClick={() => setShowAdminPanel((value) => !value)}
             style={{
-              border: "none",
+              border: "1px solid rgba(255,255,255,0.14)",
               borderRadius: "10px",
-              background: "#1A1A2E",
+              background: "rgba(255,255,255,0.08)",
               color: "#FFFFFF",
               padding: "8px 14px",
               fontSize: "13px",
@@ -310,10 +315,10 @@ export default function RecursosPage() {
           <form
             onSubmit={handleAdminSubmit}
             style={{
-              background: "#FFFFFF",
+              background: "#1E2235",
               borderRadius: "24px",
               padding: "16px",
-              boxShadow: "0 8px 24px rgba(26,26,46,0.08)",
+              border: "1px solid rgba(255,255,255,0.06)",
               display: "grid",
               gap: "14px",
             }}
@@ -333,8 +338,8 @@ export default function RecursosPage() {
                     style={{
                       border: "none",
                       borderRadius: "999px",
-                      background: active ? "#4ECDC4" : "#F7F3ED",
-                      color: active ? "#1A1A2E" : "#53596B",
+                      background: active ? "#4ECDC4" : "rgba(255,255,255,0.07)",
+                      color: active ? "#1A1A2E" : "rgba(255,255,255,0.55)",
                       padding: "8px 12px",
                       fontSize: "13px",
                       fontWeight: 800,
@@ -349,7 +354,7 @@ export default function RecursosPage() {
 
             {adminAction === "folder" ? (
               <label style={{ display: "grid", gap: "6px" }}>
-                <span style={{ fontSize: "12px", fontWeight: 800, color: "#9CA3AF" }}>Nombre de carpeta</span>
+                <span style={{ fontSize: "12px", fontWeight: 800, color: "rgba(255,255,255,0.42)" }}>Nombre de carpeta</span>
                 <input
                   value={folderName}
                   onChange={(event) => setFolderName(event.target.value)}
@@ -360,7 +365,7 @@ export default function RecursosPage() {
             ) : (
               <>
                 <label style={{ display: "grid", gap: "6px" }}>
-                  <span style={{ fontSize: "12px", fontWeight: 800, color: "#9CA3AF" }}>Título</span>
+                  <span style={{ fontSize: "12px", fontWeight: 800, color: "rgba(255,255,255,0.42)" }}>Título</span>
                   <input
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
@@ -370,7 +375,7 @@ export default function RecursosPage() {
                 </label>
 
                 <label style={{ display: "grid", gap: "6px" }}>
-                  <span style={{ fontSize: "12px", fontWeight: 800, color: "#9CA3AF" }}>Carpeta</span>
+                  <span style={{ fontSize: "12px", fontWeight: 800, color: "rgba(255,255,255,0.42)" }}>Carpeta</span>
                   <select
                     value={category}
                     onChange={(event) => setCategory(event.target.value)}
@@ -386,7 +391,7 @@ export default function RecursosPage() {
 
                 {adminAction === "link" ? (
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span style={{ fontSize: "12px", fontWeight: 800, color: "#9CA3AF" }}>URL</span>
+                    <span style={{ fontSize: "12px", fontWeight: 800, color: "rgba(255,255,255,0.42)" }}>URL</span>
                     <input
                       value={url}
                       onChange={(event) => setUrl(event.target.value)}
@@ -396,7 +401,7 @@ export default function RecursosPage() {
                   </label>
                 ) : (
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span style={{ fontSize: "12px", fontWeight: 800, color: "#9CA3AF" }}>Archivo</span>
+                    <span style={{ fontSize: "12px", fontWeight: 800, color: "rgba(255,255,255,0.42)" }}>Archivo</span>
                     <input
                       type="file"
                       onChange={(event) => setFile(event.target.files?.[0] ?? null)}
@@ -411,12 +416,12 @@ export default function RecursosPage() {
             )}
 
             {errorMessage ? (
-              <div style={{ borderRadius: "16px", background: "rgba(230,57,70,0.10)", color: "#C53340", padding: "10px 12px", fontSize: "13px", fontWeight: 700 }}>
+              <div style={{ borderRadius: "16px", background: "rgba(230,57,70,0.12)", color: "#FF6470", padding: "10px 12px", fontSize: "13px", fontWeight: 700 }}>
                 {errorMessage}
               </div>
             ) : null}
             {successMessage ? (
-              <div style={{ borderRadius: "16px", background: "rgba(78,205,196,0.16)", color: "#178A83", padding: "10px 12px", fontSize: "13px", fontWeight: 700 }}>
+              <div style={{ borderRadius: "16px", background: "rgba(78,205,196,0.14)", color: "#4ECDC4", padding: "10px 12px", fontSize: "13px", fontWeight: 700 }}>
                 {successMessage}
               </div>
             ) : null}
@@ -427,8 +432,8 @@ export default function RecursosPage() {
               style={{
                 border: "none",
                 borderRadius: "999px",
-                background: saving ? "#E5E7EB" : "#E63946",
-                color: saving ? "#9CA3AF" : "#FFFFFF",
+                background: saving ? "rgba(255,255,255,0.07)" : "#E63946",
+                color: saving ? "rgba(255,255,255,0.25)" : "#FFFFFF",
                 padding: "13px 16px",
                 fontSize: "15px",
                 fontWeight: 800,
@@ -439,20 +444,20 @@ export default function RecursosPage() {
             </button>
           </form>
         ) : errorMessage && !loading ? (
-          <div style={{ borderRadius: "18px", background: "rgba(230,57,70,0.10)", color: "#C53340", padding: "12px 14px", fontSize: "14px", fontWeight: 700 }}>
+          <div style={{ borderRadius: "18px", background: "rgba(230,57,70,0.12)", color: "#FF6470", padding: "12px 14px", fontSize: "14px", fontWeight: 700 }}>
             {errorMessage}
           </div>
         ) : null}
 
         {loading ? (
-          <div style={{ textAlign: "center", color: "#9CA3AF", padding: "48px 0", fontSize: 14 }}>
+          <div style={{ textAlign: "center", color: "rgba(255,255,255,0.42)", padding: "48px 0", fontSize: 14 }}>
             Cargando…
           </div>
         ) : grouped.length === 0 ? (
-          <div style={{ background: "#FFFFFF", borderRadius: "16px", padding: "40px 24px", textAlign: "center", boxShadow: "0 2px 10px rgba(26,26,46,0.07)" }}>
+          <div style={{ background: "#1E2235", borderRadius: "16px", padding: "40px 24px", textAlign: "center", border: "1px solid rgba(255,255,255,0.06)" }}>
             <p style={{ fontSize: "32px", margin: "0 0 12px" }}>📂</p>
-            <p style={{ fontSize: "16px", fontWeight: 700, color: "#1A1A2E", margin: "0 0 6px" }}>Sin material aún</p>
-            <p style={{ fontSize: "13px", color: "#9CA3AF", margin: 0 }}>El profesor subirá los archivos aquí.</p>
+            <p style={{ fontSize: "16px", fontWeight: 700, color: "#FFFFFF", margin: "0 0 6px" }}>Sin material aún</p>
+            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.42)", margin: 0 }}>El profesor subirá los archivos aquí.</p>
           </div>
         ) : (
           grouped.map(([folder, items]) => (
@@ -461,25 +466,25 @@ export default function RecursosPage() {
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
                 <div style={{
                   display: "flex", alignItems: "center", gap: "7px",
-                  background: "#FFFFFF",
+                  background: "rgba(255,255,255,0.06)",
                   borderRadius: "999px",
                   padding: "5px 12px 5px 8px",
-                  boxShadow: "0 1px 6px rgba(26,26,46,0.07)",
+                  border: "1px solid rgba(255,255,255,0.08)",
                 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                     <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke="#4ECDC4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span style={{ fontSize: "12px", fontWeight: 800, color: "#1A1A2E", letterSpacing: "0.02em" }}>{folder}</span>
+                  <span style={{ fontSize: "12px", fontWeight: 800, color: "#FFFFFF", letterSpacing: "0.02em" }}>{folder}</span>
                 </div>
                 {effectiveIsAdmin && (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "#9CA3AF" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.35)" }}>
                     {items.length} {items.length === 1 ? "item" : "items"}
                   </span>
                 )}
               </div>
 
               {items.length === 0 ? (
-                <div style={{ background: "rgba(255,255,255,0.5)", borderRadius: "12px", padding: "16px", color: "#C4BAB0", fontSize: "13px", fontWeight: 600, textAlign: "center" }}>
+                <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: "12px", padding: "16px", color: "rgba(255,255,255,0.25)", fontSize: "13px", fontWeight: 600, textAlign: "center" }}>
                   Carpeta vacía
                 </div>
               ) : (
@@ -498,16 +503,15 @@ export default function RecursosPage() {
                         disabled={!item.url}
                         style={{
                           position: "relative",
-                          background: "#FFFFFF",
+                          background: "#1E2235",
                           borderRadius: "14px",
                           padding: "14px 52px 14px 16px",
                           display: "flex",
                           alignItems: "center",
                           gap: "14px",
-                          border: "none",
+                          border: "1px solid rgba(255,255,255,0.06)",
                           cursor: item.url ? "pointer" : "default",
                           textAlign: "left",
-                          boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
                           width: "100%",
                           overflow: "hidden",
                           opacity: item.url ? 1 : 0.45,
@@ -519,7 +523,7 @@ export default function RecursosPage() {
                         {/* Icon */}
                         <div style={{
                           width: 46, height: 46, borderRadius: "12px", flexShrink: 0,
-                          background: fileResource ? "rgba(230,57,70,0.07)" : "rgba(78,205,196,0.10)",
+                          background: fileResource ? "rgba(230,57,70,0.12)" : "rgba(78,205,196,0.12)",
                           display: "flex", alignItems: "center", justifyContent: "center",
                         }}>
                           {fileResource ? <FileIcon /> : <LinkIcon />}
@@ -527,10 +531,10 @@ export default function RecursosPage() {
 
                         {/* Text */}
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: "15px", fontWeight: 700, color: "#1A1A2E", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <p style={{ fontSize: "15px", fontWeight: 700, color: "#FFFFFF", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {getResourceTitle(item)}
                           </p>
-                          <p style={{ fontSize: "12px", color: "#9CA3AF", margin: "3px 0 0", fontWeight: 500 }}>
+                          <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.42)", margin: "3px 0 0", fontWeight: 500 }}>
                             {ext ? ext : domain ?? "Enlace"}
                           </p>
                         </div>
@@ -538,11 +542,11 @@ export default function RecursosPage() {
                         {/* Open icon */}
                         {fileResource ? (
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="#C4BAB0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="rgba(255,255,255,0.28)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         ) : (
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" stroke="#C4BAB0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" stroke="rgba(255,255,255,0.28)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         )}
                       </button>
@@ -556,6 +560,7 @@ export default function RecursosPage() {
       </div>
 
       <BottomNav />
+      </div>
     </div>
   );
 }
@@ -563,10 +568,10 @@ export default function RecursosPage() {
 const fieldStyle = {
   width: "100%",
   boxSizing: "border-box",
-  border: "none",
+  border: "1px solid rgba(255,255,255,0.10)",
   borderRadius: "16px",
-  background: "#F7F3ED",
-  color: "#1A1A2E",
+  background: "rgba(255,255,255,0.07)",
+  color: "#FFFFFF",
   padding: "12px 13px",
   fontSize: "15px",
   fontWeight: 700,
