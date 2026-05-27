@@ -69,7 +69,7 @@ html {
 
 body{
   margin: 0;
-  background: var(--color-bg);
+  background: #1A1A2E;
   color: var(--ink);
   font-family: var(--font-latin), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
     "Hiragino Sans", "Hiragino Kaku Gothic ProN",

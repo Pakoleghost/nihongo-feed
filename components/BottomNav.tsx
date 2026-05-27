@@ -78,12 +78,14 @@ export default function BottomNav() {
         bottom: 0,
         left: 0,
         right: 0,
-        background: "#FFFFFF",
+        background: "#13131F",
         display: "flex",
         justifyContent: "space-around",
         alignItems: "center",
         padding: "8px 4px calc(12px + env(safe-area-inset-bottom, 0px))",
-        boxShadow: "0 -1px 0 rgba(26,26,46,0.07)",
+        borderTop: "1px solid rgba(255,255,255,0.07)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
         zIndex: 100,
       }}
     >
@@ -93,7 +95,7 @@ export default function BottomNav() {
           href === "/practicar" ? (pathname === "/practicar" || pathname.startsWith("/practicar/") || pathname === "/kana" || pathname.startsWith("/kana/")) :
           href === "/clases" ? (pathname === "/clases" || pathname.startsWith("/clases/")) :
           pathname === href || pathname.startsWith(href + "/");
-        const color = isActive ? "#FFFFFF" : "#9CA3AF";
+        const color = isActive ? "#FFFFFF" : "rgba(255,255,255,0.38)";
 
         return (
           <Link
