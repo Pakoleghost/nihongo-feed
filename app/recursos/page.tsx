@@ -513,6 +513,9 @@ export default function RecursosPage() {
                           opacity: item.url ? 1 : 0.45,
                         }}
                       >
+                        {/* Corner fold */}
+                        <div style={{ position: "absolute", top: 0, right: 0, width: 40, height: 40, background: fileResource ? "#E63946" : "#4ECDC4", borderBottomLeftRadius: 40 }} />
+
                         {/* Icon */}
                         <div style={{
                           width: 46, height: 46, borderRadius: "12px", flexShrink: 0,

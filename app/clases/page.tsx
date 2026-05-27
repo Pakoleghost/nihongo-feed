@@ -67,6 +67,7 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
   return (
     <div
       style={{
+        position: "relative",
         background: "#FFFFFF",
         borderRadius: "14px",
         padding: "14px 16px",
@@ -74,8 +75,12 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
         display: "flex",
         flexDirection: "column",
         gap: "10px",
+        overflow: "hidden",
       }}
     >
+      {/* Corner fold */}
+      <div style={{ position: "absolute", top: 0, right: 0, width: 40, height: 40, background: "#4ECDC4", borderBottomLeftRadius: 40 }} />
+
       {/* Label row + button */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px" }}>
         <p
@@ -193,15 +198,20 @@ function TareaSection({ notas }: { notas: NotaClase[] }) {
       {/* Card */}
       <div
         style={{
+          position: "relative",
           background: "#FFFFFF",
           borderRadius: "14px",
           padding: "14px 16px",
-          boxShadow: "inset 4px 0 0 #E63946, 0 2px 10px rgba(26,26,46,0.07)",
+          boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
           display: "flex",
           flexDirection: "column",
           gap: "10px",
+          overflow: "hidden",
         }}
       >
+        {/* Corner fold */}
+        <div style={{ position: "absolute", top: 0, right: 0, width: 40, height: 40, background: "#E63946", borderBottomLeftRadius: 40 }} />
+
         {/* Meta: fecha · tema */}
         {(nota.fecha || nota.tema) && (
           <p style={{ fontSize: "12px", color: "#9CA3AF", margin: 0, fontWeight: 500 }}>
