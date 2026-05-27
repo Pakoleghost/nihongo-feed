@@ -20,9 +20,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  let response = NextResponse.next({
-    request: { headers: request.headers },
-  });
+  // IMPORTANT: supabaseResponse must be returned as-is to forward refreshed
+  // session cookies to the browser. Never create a new response after this
+  // point — clone or mutate supabaseResponse instead.
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,29 +34,38 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
+          // Apply cookies to the request so they're visible to downstream handlers
+          // (request.cookies.set only accepts name+value, options go on the response)
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          response = NextResponse.next({ request });
+          // Rebuild the response so the refreshed cookies are sent to the browser
+          supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options)
           );
         },
       },
     }
   );
 
+  // Use getUser() — NOT getSession(). getUser() validates the JWT with the
+  // Supabase server and automatically triggers a token refresh when needed.
+  // getSession() only reads from cookies and can silently return a stale/expired
+  // session, which is why users were being randomly logged out.
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     return NextResponse.redirect(loginUrl);
   }
 
-  return response;
+  // Must return supabaseResponse (not a new NextResponse) so that any
+  // refreshed session cookies set by setAll() are forwarded to the browser.
+  return supabaseResponse;
 }
 
 export const config = {
