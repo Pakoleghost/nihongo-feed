@@ -14,13 +14,35 @@ type Entrada = {
   notas?: string;
 };
 
+type NotaClase = {
+  id: string;
+  fecha?: string;
+  libro?: string;
+  tema?: string;
+  pagina?: string;
+  tarea?: string;
+  tarea_completada?: boolean;
+};
+
 type Coleccion = {
   nombre: string;
   zoom_topic?: string;
   entradas: Entrada[];
+  notas?: NotaClase[];
 };
 
 type ColeccionesMap = Record<string, Coleccion>;
+
+/** Returns the most recent nota that has a non-empty tarea. */
+function findActiveTarea(coleccion: Coleccion): NotaClase | null {
+  const withTarea = (coleccion.notas ?? []).filter((n) => n.tarea?.trim());
+  if (withTarea.length === 0) return null;
+  return withTarea.sort((a, b) => {
+    const da = a.fecha ? new Date(a.fecha).getTime() : 0;
+    const db = b.fecha ? new Date(b.fecha).getTime() : 0;
+    return db - da; // newest first
+  })[0];
+}
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
@@ -149,6 +171,148 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
           </button>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function TareaSection({
+  coleccion,
+  slug,
+  onToggle,
+}: {
+  coleccion: Coleccion;
+  slug: string;
+  onToggle: (notaId: string, completed: boolean) => void;
+}) {
+  const nota = findActiveTarea(coleccion);
+  const [toggling, setToggling] = useState(false);
+
+  if (!nota) return null;
+
+  // Capture as non-null const so TypeScript retains the narrowing inside async closures
+  const activeNota = nota;
+  const bullets = (activeNota.tarea ?? "").split("\n").filter(Boolean);
+  const isCompleted = activeNota.tarea_completada ?? false;
+
+  async function handleToggle() {
+    if (toggling) return;
+    setToggling(true);
+    try {
+      const res = await fetch(`/api/colecciones/${slug}/notas/${activeNota.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tarea_completada: !isCompleted }),
+      });
+      if (res.ok) onToggle(activeNota.id, !isCompleted);
+    } finally {
+      setToggling(false);
+    }
+  }
+
+  return (
+    <div style={{ marginTop: "20px" }}>
+      {/* Section header */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+        <span
+          style={{
+            fontSize: "11px",
+            fontWeight: 700,
+            color: "#9CA3AF",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+          }}
+        >
+          Tarea
+        </span>
+        {isCompleted && (
+          <span
+            style={{
+              fontSize: "10px",
+              fontWeight: 700,
+              color: "#178A83",
+              background: "rgba(78,205,196,0.12)",
+              borderRadius: "6px",
+              padding: "2px 7px",
+            }}
+          >
+            Completada
+          </span>
+        )}
+      </div>
+
+      {/* Card */}
+      <div
+        style={{
+          background: "#FFFFFF",
+          borderRadius: "14px",
+          padding: "14px 16px",
+          boxShadow: isCompleted
+            ? "inset 4px 0 0 #4ECDC4, 0 2px 10px rgba(26,26,46,0.07)"
+            : "inset 4px 0 0 #E63946, 0 2px 10px rgba(26,26,46,0.07)",
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          opacity: isCompleted ? 0.72 : 1,
+          transition: "opacity 200ms ease",
+        }}
+      >
+        {/* Meta: fecha · tema */}
+        {(activeNota.fecha || activeNota.tema) && (
+          <p style={{ fontSize: "12px", color: "#9CA3AF", margin: 0, fontWeight: 500 }}>
+            {activeNota.fecha ?? ""}
+            {activeNota.tema ? `${activeNota.fecha ? " · " : ""}${activeNota.tema}` : ""}
+          </p>
+        )}
+
+        {/* Bullet list */}
+        <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "6px" }}>
+          {bullets.map((line, i) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <li
+              key={i}
+              style={{
+                display: "flex",
+                gap: "8px",
+                fontSize: "14px",
+                lineHeight: 1.45,
+                color: isCompleted ? "#9CA3AF" : "#1A1A2E",
+                textDecoration: isCompleted ? "line-through" : "none",
+              }}
+            >
+              <span style={{ color: isCompleted ? "#C4BAB0" : "#E63946", fontWeight: 700, flexShrink: 0 }}>•</span>
+              {line}
+            </li>
+          ))}
+        </ul>
+
+        {/* Toggle button */}
+        <button
+          type="button"
+          onClick={() => void handleToggle()}
+          disabled={toggling}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            background: isCompleted ? "rgba(78,205,196,0.10)" : "#4ECDC4",
+            color: isCompleted ? "#178A83" : "#FFFFFF",
+            border: isCompleted ? "1px solid rgba(78,205,196,0.30)" : "none",
+            borderRadius: "8px",
+            padding: "8px 14px",
+            fontSize: "13px",
+            fontWeight: 800,
+            cursor: toggling ? "default" : "pointer",
+            alignSelf: "flex-start",
+            opacity: toggling ? 0.6 : 1,
+            transition: "background 140ms ease, opacity 140ms ease",
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {toggling ? "…" : isCompleted ? "Desmarcar" : "Marcar como completada"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -303,19 +467,38 @@ export default function ClasesPage() {
     ? (studentViewGroupName || groupName)
     : groupName;
 
-  // Resolve coleccion via groups table slug mapping, with substring fallback
-  function findColeccion(name: string | null): Coleccion | null {
+  // Resolve coleccion via groups table slug mapping, with substring fallback.
+  // Returns both the coleccion and its slug (needed for the tarea PATCH proxy).
+  function findColeccion(name: string | null): { coleccion: Coleccion; slug: string } | null {
     if (!name || !colecciones) return null;
     // 1. Explicit slug mapping (via groups.coleccion_slug)
     const slug = groupSlugMap.get(name);
-    if (slug && colecciones[slug]) return colecciones[slug];
+    if (slug && colecciones[slug]) return { coleccion: colecciones[slug], slug };
     // 2. Fallback: find coleccion whose nombre contains the group name (e.g. "日本語 しばいぬ" ⊃ "しばいぬ")
     const nameLower = name.toLowerCase();
     const fallbackSlug = Object.keys(colecciones).find((s) =>
       colecciones![s].nombre.toLowerCase().includes(nameLower)
     );
-    if (fallbackSlug) return colecciones[fallbackSlug];
+    if (fallbackSlug) return { coleccion: colecciones[fallbackSlug], slug: fallbackSlug };
     return null;
+  }
+
+  /** Optimistically update tarea_completada in local state after a successful PATCH. */
+  function handleTareaToggle(colSlug: string, notaId: string, completed: boolean) {
+    setColecciones((prev) => {
+      if (!prev) return prev;
+      const col = prev[colSlug];
+      if (!col?.notas) return prev;
+      return {
+        ...prev,
+        [colSlug]: {
+          ...col,
+          notas: col.notas.map((n) =>
+            n.id === notaId ? { ...n, tarea_completada: completed } : n,
+          ),
+        },
+      };
+    });
   }
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -384,8 +567,15 @@ export default function ClasesPage() {
           })}
         </div>
 
-        {currentColeccion ? (
-          <ColeccionView coleccion={currentColeccion} />
+        {currentColeccion && selectedSlug ? (
+          <>
+            <ColeccionView coleccion={currentColeccion} />
+            <TareaSection
+              coleccion={currentColeccion}
+              slug={selectedSlug}
+              onToggle={(notaId, completed) => handleTareaToggle(selectedSlug, notaId, completed)}
+            />
+          </>
         ) : (
           <NoGroupCard message="Selecciona un grupo para ver sus grabaciones." />
         )}
@@ -396,14 +586,15 @@ export default function ClasesPage() {
     if (!effectiveGroupName) {
       content = <NoGroupCard />;
     } else {
-      const coleccion = findColeccion(effectiveGroupName);
-      if (!coleccion) {
+      const found = findColeccion(effectiveGroupName);
+      if (!found) {
         content = (
           <NoGroupCard
             message={`No se encontraron grabaciones para el grupo "${effectiveGroupName}".`}
           />
         );
       } else {
+        const { coleccion, slug } = found;
         content = (
           <>
             <div
@@ -431,6 +622,11 @@ export default function ClasesPage() {
               </span>
             </div>
             <ColeccionView coleccion={coleccion} />
+            <TareaSection
+              coleccion={coleccion}
+              slug={slug}
+              onToggle={(notaId, completed) => handleTareaToggle(slug, notaId, completed)}
+            />
           </>
         );
       }
