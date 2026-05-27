@@ -639,42 +639,71 @@ export default function HomePage() {
       {/* ── Mi Camino mini-card ── */}
       {showProgreso && !effectiveIsAdmin && (() => {
         const stop = currentLesson ? getLessonStop(currentLesson) : null;
+        const subtitle = stop?.tagline ?? "Tu ruta de aprendizaje";
         return (
           <div style={{ padding: "0 16px 12px" }}>
             <Link
               href={groupName ? `/progreso?grupo=${encodeURIComponent(groupName)}` : "/progreso"}
               style={{ textDecoration: "none", display: "block" }}
             >
-              <div
-                style={{
-                  background: "#1A1A2E",
-                  borderRadius: 14,
-                  padding: "14px 18px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 12,
-                }}
-              >
-                <div style={{ minWidth: 0 }}>
-                  {currentLesson ? (
-                    <>
-                      <p style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#FFFFFF", lineHeight: 1.1 }}>
-                        Lección {currentLesson}
-                      </p>
-                      {stop && (
-                        <p style={{ margin: "4px 0 0", fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.35 }}>
-                          {stop.tagline}
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <p style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#FFFFFF", lineHeight: 1.1 }}>
-                      Mi Camino
+              <div style={{
+                background: "linear-gradient(135deg, #0E1829 0%, #1A2B3C 55%, #0E1829 100%)",
+                borderRadius: 16,
+                padding: "14px 16px 14px 14px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+                position: "relative",
+                overflow: "hidden",
+                boxShadow: "0 0 0 1.5px rgba(78,205,196,0.35), 0 6px 28px rgba(78,205,196,0.14)",
+              }}>
+                {/* teal glow blob */}
+                <div style={{
+                  position: "absolute", top: -24, right: 52, width: 110, height: 110,
+                  borderRadius: "50%",
+                  background: "radial-gradient(circle, rgba(78,205,196,0.28) 0%, rgba(78,205,196,0) 70%)",
+                  pointerEvents: "none",
+                }} />
+
+                {/* icon + text */}
+                <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, position: "relative" }}>
+                  {/* winding-path icon */}
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                    background: "rgba(78,205,196,0.13)",
+                    border: "1.5px solid rgba(78,205,196,0.32)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                      <path d="M3 17c2-2 4-3 6-1s4 3 6 1" stroke="#4ECDC4" strokeWidth="2" strokeLinecap="round"/>
+                      <path d="M3 11c2-2 4-3 6-1s4 3 6 1" stroke="rgba(78,205,196,0.55)" strokeWidth="2" strokeLinecap="round"/>
+                      <circle cx="19" cy="7" r="2" fill="#4ECDC4"/>
+                      <path d="M19 9v4" stroke="rgba(78,205,196,0.4)" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
+                      <span style={{ fontSize: 17, fontWeight: 800, color: "#FFFFFF", lineHeight: 1, letterSpacing: "-0.02em" }}>
+                        Mi Camino
+                      </span>
+                      <span style={{
+                        fontSize: 9, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase",
+                        color: "#0E1829", background: "#4ECDC4",
+                        padding: "2px 6px", borderRadius: 5, lineHeight: 1.6,
+                      }}>
+                        NUEVO
+                      </span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 12.5, color: "rgba(255,255,255,0.48)", lineHeight: 1.35, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {subtitle}
                     </p>
-                  )}
+                  </div>
                 </div>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+
+                {/* arrow */}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, position: "relative" }}>
                   <path d="M9 18l6-6-6-6" stroke="#4ECDC4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
