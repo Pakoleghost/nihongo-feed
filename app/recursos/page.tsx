@@ -500,7 +500,7 @@ export default function RecursosPage() {
                           position: "relative",
                           background: "#FFFFFF",
                           borderRadius: "14px",
-                          padding: "14px 16px",
+                          padding: "14px 52px 14px 16px",
                           display: "flex",
                           alignItems: "center",
                           gap: "14px",

@@ -70,7 +70,7 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
         position: "relative",
         background: "#FFFFFF",
         borderRadius: "14px",
-        padding: "14px 16px",
+        padding: "14px 48px 14px 16px",
         boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
         display: "flex",
         flexDirection: "column",
