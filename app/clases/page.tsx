@@ -201,7 +201,7 @@ function TareaSection({ notas }: { notas: NotaClase[] }) {
           position: "relative",
           background: "#FFFFFF",
           borderRadius: "14px",
-          padding: "14px 16px",
+          padding: "14px 48px 14px 16px",
           boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
           display: "flex",
           flexDirection: "column",
@@ -402,15 +402,15 @@ export default function ClasesPage() {
       return;
     }
     let alive = true;
-    fetch(`/api/clase-notas?grupo=${encodeURIComponent(activeNotasGroup)}`)
+    const url = `/api/clase-notas?grupo=${encodeURIComponent(activeNotasGroup)}`;
+    fetch(url)
       .then((r) => r.ok ? r.json() : [])
       .catch(() => [])
       .then((data: unknown) => {
         if (alive) setNotas(Array.isArray(data) ? (data as NotaClase[]) : []);
       });
     return () => { alive = false; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeNotasGroup]);
+  }, [activeNotasGroup]); // activeNotasGroup is a derived string — changes when selectedSlug or effectiveGroupName changes
 
   // Resolve coleccion via groups table slug mapping, with substring fallback.
   function findColeccion(name: string | null): { coleccion: Coleccion; slug: string } | null {
