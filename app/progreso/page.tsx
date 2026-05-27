@@ -75,11 +75,29 @@ export default async function ProgresoPage({
 
   if (!showProgreso && !isAdmin) redirect("/");
 
-  // Fetch clase-notas from Flask server-side
+  // Resolve the Flask-internal grupo name from colecciones
+  // (clases_log.json uses coleccion.nombre like "Nihongo ゴジラ", not the short Supabase name)
+  let flaskGrupo = grupo;
+  try {
+    const colRes = await fetch(`${FLASK_BASE}/api/colecciones`, {
+      headers: { "X-Sensei-Key": SENSEI_KEY },
+      next: { revalidate: 60 },
+    });
+    if (colRes.ok) {
+      const cols: Record<string, { nombre: string }> = await colRes.json();
+      const nameLower = grupo.toLowerCase();
+      const match = Object.values(cols).find(c =>
+        c.nombre.toLowerCase().includes(nameLower)
+      );
+      if (match) flaskGrupo = match.nombre;
+    }
+  } catch {/* silent — fall back to short name */}
+
+  // Fetch clase-notas from Flask server-side using the resolved grupo name
   let notas: ClaseNota[] = [];
   try {
     const res = await fetch(
-      `${FLASK_BASE}/api/sensei/grupo/${encodeURIComponent(grupo)}/clase-notas`,
+      `${FLASK_BASE}/api/sensei/grupo/${encodeURIComponent(flaskGrupo)}/clase-notas`,
       {
         headers: { "X-Sensei-Key": SENSEI_KEY },
         cache: "no-store",

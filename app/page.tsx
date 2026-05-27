@@ -220,8 +220,20 @@ export default function HomePage() {
               const progreso = Boolean(map[effectiveGroup]);
               setShowProgreso(progreso);
               // Fetch lesson in background (non-blocking)
+              // Flask keys clases_log.json by coleccion.nombre (e.g. "Nihongo ゴジラ"),
+              // not by the short Supabase group name — resolve via /api/colecciones first.
               if (progreso) {
-                fetch(`/api/clase-notas?grupo=${encodeURIComponent(effectiveGroup)}`)
+                fetch("/api/colecciones")
+                  .then(r => r.ok ? r.json() : {})
+                  .then((cols: Record<string, { nombre: string }>) => {
+                    // Find coleccion whose nombre contains the group name (substring match)
+                    const nameLower = effectiveGroup.toLowerCase();
+                    const match = Object.values(cols).find(c =>
+                      c.nombre.toLowerCase().includes(nameLower)
+                    );
+                    const flaskGrupo = match?.nombre ?? effectiveGroup;
+                    return fetch(`/api/clase-notas?grupo=${encodeURIComponent(flaskGrupo)}`);
+                  })
                   .then(r => r.json())
                   .then((notas: Array<{ tema?: string }>) => {
                     let max = 0;
@@ -625,8 +637,8 @@ export default function HomePage() {
       </div>
 
       {/* ── Mi Camino mini-card ── */}
-      {showProgreso && currentLesson !== null && !effectiveIsAdmin && (() => {
-        const stop = getLessonStop(currentLesson);
+      {showProgreso && !effectiveIsAdmin && (() => {
+        const stop = currentLesson ? getLessonStop(currentLesson) : null;
         return (
           <div style={{ padding: "0 16px 12px" }}>
             <Link
@@ -645,12 +657,20 @@ export default function HomePage() {
                 }}
               >
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#FFFFFF", lineHeight: 1.1 }}>
-                    Lección {currentLesson}
-                  </p>
-                  {stop && (
-                    <p style={{ margin: "4px 0 0", fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.35 }}>
-                      {stop.tagline}
+                  {currentLesson ? (
+                    <>
+                      <p style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#FFFFFF", lineHeight: 1.1 }}>
+                        Lección {currentLesson}
+                      </p>
+                      {stop && (
+                        <p style={{ margin: "4px 0 0", fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.35 }}>
+                          {stop.tagline}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#FFFFFF", lineHeight: 1.1 }}>
+                      Mi Camino
                     </p>
                   )}
                 </div>
