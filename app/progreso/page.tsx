@@ -133,13 +133,13 @@ export default async function ProgresoPage({
   });
 
   // ── Roadmap geometry (matches Claude Design spec) ─────────────────────────
-  const ROW_H   = 132;
+  const ROW_H   = 148;
   const NODE_R  = 30;   // 60px ø
   const CUR_R   = 34;   // 68px ø — current node is slightly bigger
   const PAD_TOP = 78;   // space above first node for AHORA chip
 
   const positions = visibleStops.map((_, i) => ({
-    cx:   i % 2 === 0 ? 28 : 66,
+    cx:   i % 2 === 0 ? 22 : 72,
     cy:   PAD_TOP + i * ROW_H,
     side: (i % 2 === 0 ? "left" : "right") as "left" | "right",
   }));
@@ -281,8 +281,8 @@ export default async function ProgresoPage({
         </div>
 
         {/* ── Roadmap canvas ── */}
-        <div style={{ padding: "4px 12px 24px" }}>
-          <div style={{ position: "relative", maxWidth: 480, margin: "0 auto", height: canvasH }}>
+        <div style={{ padding: "4px 0 24px" }}>
+          <div style={{ position: "relative", width: "100%", height: canvasH }}>
 
             {/* SVG path */}
             <svg
