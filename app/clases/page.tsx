@@ -394,19 +394,14 @@ export default function ClasesPage() {
     ? (studentViewGroupName || groupName)
     : groupName;
 
-  // Reverse lookup: coleccion slug → group name (for admin tarea fetch)
-  function slugToGroupName(slug: string): string | null {
-    for (const [name, s] of groupSlugMap.entries()) {
-      if (s === slug) return name;
-    }
-    return null;
-  }
-
-  // The group name whose notas should be displayed
-  const activeNotasGroup: string | null = !loading
+  // The group name whose notas should be fetched.
+  // Flask keys clases_log.json by coleccion.nombre (e.g. "日本語 しばいぬ"),
+  // NOT by the short profile group_name ("しばいぬ"), so we derive it from
+  // the resolved coleccion rather than directly from the profile field.
+  const activeNotasGroup: string | null = !loading && colecciones
     ? (effectiveIsAdmin
-        ? (selectedSlug ? slugToGroupName(selectedSlug) : null)
-        : effectiveGroupName)
+        ? (selectedSlug ? colecciones[selectedSlug].nombre : null)
+        : (effectiveGroupName ? findColeccion(effectiveGroupName)?.coleccion.nombre ?? null : null))
     : null;
 
   // Fetch notas whenever the target group changes (read-only)
