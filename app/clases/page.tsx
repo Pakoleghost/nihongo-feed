@@ -28,14 +28,13 @@ type Coleccion = {
   nombre: string;
   zoom_topic?: string;
   entradas: Entrada[];
-  notas?: NotaClase[];
 };
 
 type ColeccionesMap = Record<string, Coleccion>;
 
 /** Returns the most recent nota that has a non-empty tarea. */
-function findActiveTarea(coleccion: Coleccion): NotaClase | null {
-  const withTarea = (coleccion.notas ?? []).filter((n) => n.tarea?.trim());
+function findActiveTarea(notas: NotaClase[]): NotaClase | null {
+  const withTarea = notas.filter((n) => n.tarea?.trim());
   if (withTarea.length === 0) return null;
   return withTarea.sort((a, b) => {
     const da = a.fecha ? new Date(a.fecha).getTime() : 0;
@@ -176,15 +175,15 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
 }
 
 function TareaSection({
-  coleccion,
-  slug,
+  notas,
+  groupName,
   onToggle,
 }: {
-  coleccion: Coleccion;
-  slug: string;
+  notas: NotaClase[];
+  groupName: string;
   onToggle: (notaId: string, completed: boolean) => void;
 }) {
-  const nota = findActiveTarea(coleccion);
+  const nota = findActiveTarea(notas);
   const [toggling, setToggling] = useState(false);
 
   if (!nota) return null;
@@ -198,10 +197,14 @@ function TareaSection({
     if (toggling) return;
     setToggling(true);
     try {
-      const res = await fetch(`/api/colecciones/${slug}/notas/${activeNota.id}`, {
+      const res = await fetch("/api/clase-notas", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tarea_completada: !isCompleted }),
+        body: JSON.stringify({
+          grupo: groupName,
+          id: activeNota.id,
+          tarea_completada: !isCompleted,
+        }),
       });
       if (res.ok) onToggle(activeNota.id, !isCompleted);
     } finally {
@@ -408,6 +411,9 @@ export default function ClasesPage() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
 
+  // Notas (homework) fetched separately from /api/clase-notas
+  const [notas, setNotas] = useState<NotaClase[]>([]);
+
   const { effectiveIsAdmin, studentViewActive, studentViewGroupName } = useStudentViewMode(isAdmin);
 
   useEffect(() => {
@@ -467,14 +473,46 @@ export default function ClasesPage() {
     ? (studentViewGroupName || groupName)
     : groupName;
 
+  // Reverse lookup: coleccion slug → group name (for admin tarea fetch)
+  function slugToGroupName(slug: string): string | null {
+    for (const [name, s] of groupSlugMap.entries()) {
+      if (s === slug) return name;
+    }
+    return null;
+  }
+
+  // The group name whose notas should be displayed
+  const activeNotasGroup: string | null = !loading
+    ? (effectiveIsAdmin
+        ? (selectedSlug ? slugToGroupName(selectedSlug) : null)
+        : effectiveGroupName)
+    : null;
+
+  // Fetch notas whenever the target group changes
+  useEffect(() => {
+    if (!activeNotasGroup) {
+      setNotas([]);
+      return;
+    }
+    let alive = true;
+    setNotas([]); // clear stale data while loading
+    fetch(`/api/clase-notas?grupo=${encodeURIComponent(activeNotasGroup)}`)
+      .then((r) => r.ok ? r.json() : [])
+      .catch(() => [])
+      .then((data: unknown) => {
+        if (alive) setNotas(Array.isArray(data) ? (data as NotaClase[]) : []);
+      });
+    return () => { alive = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeNotasGroup]);
+
   // Resolve coleccion via groups table slug mapping, with substring fallback.
-  // Returns both the coleccion and its slug (needed for the tarea PATCH proxy).
   function findColeccion(name: string | null): { coleccion: Coleccion; slug: string } | null {
     if (!name || !colecciones) return null;
     // 1. Explicit slug mapping (via groups.coleccion_slug)
     const slug = groupSlugMap.get(name);
     if (slug && colecciones[slug]) return { coleccion: colecciones[slug], slug };
-    // 2. Fallback: find coleccion whose nombre contains the group name (e.g. "日本語 しばいぬ" ⊃ "しばいぬ")
+    // 2. Fallback: find coleccion whose nombre contains the group name
     const nameLower = name.toLowerCase();
     const fallbackSlug = Object.keys(colecciones).find((s) =>
       colecciones![s].nombre.toLowerCase().includes(nameLower)
@@ -483,22 +521,11 @@ export default function ClasesPage() {
     return null;
   }
 
-  /** Optimistically update tarea_completada in local state after a successful PATCH. */
-  function handleTareaToggle(colSlug: string, notaId: string, completed: boolean) {
-    setColecciones((prev) => {
-      if (!prev) return prev;
-      const col = prev[colSlug];
-      if (!col?.notas) return prev;
-      return {
-        ...prev,
-        [colSlug]: {
-          ...col,
-          notas: col.notas.map((n) =>
-            n.id === notaId ? { ...n, tarea_completada: completed } : n,
-          ),
-        },
-      };
-    });
+  /** Optimistically update tarea_completada in local notas state after a successful PATCH. */
+  function handleTareaToggle(notaId: string, completed: boolean) {
+    setNotas((prev) =>
+      prev.map((n) => (n.id === notaId ? { ...n, tarea_completada: completed } : n))
+    );
   }
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -570,11 +597,13 @@ export default function ClasesPage() {
         {currentColeccion && selectedSlug ? (
           <>
             <ColeccionView coleccion={currentColeccion} />
-            <TareaSection
-              coleccion={currentColeccion}
-              slug={selectedSlug}
-              onToggle={(notaId, completed) => handleTareaToggle(selectedSlug, notaId, completed)}
-            />
+            {activeNotasGroup && (
+              <TareaSection
+                notas={notas}
+                groupName={activeNotasGroup}
+                onToggle={handleTareaToggle}
+              />
+            )}
           </>
         ) : (
           <NoGroupCard message="Selecciona un grupo para ver sus grabaciones." />
@@ -594,7 +623,7 @@ export default function ClasesPage() {
           />
         );
       } else {
-        const { coleccion, slug } = found;
+        const { coleccion } = found;
         content = (
           <>
             <div
@@ -622,11 +651,13 @@ export default function ClasesPage() {
               </span>
             </div>
             <ColeccionView coleccion={coleccion} />
-            <TareaSection
-              coleccion={coleccion}
-              slug={slug}
-              onToggle={(notaId, completed) => handleTareaToggle(slug, notaId, completed)}
-            />
+            {activeNotasGroup && (
+              <TareaSection
+                notas={notas}
+                groupName={activeNotasGroup}
+                onToggle={handleTareaToggle}
+              />
+            )}
           </>
         );
       }
