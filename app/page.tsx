@@ -11,6 +11,7 @@ import { markActiveToday, getStreak } from "@/lib/streak";
 import { getWeeklyTopic, fetchTopicOverride, saveTopicOverride, type WeeklyTopic } from "@/lib/weekly-topics";
 import Link from "next/link";
 import RepliesSheet from "@/components/RepliesSheet";
+import { getLessonStop } from "@/lib/lesson-competencies";
 
 type Post = {
   id: string;
@@ -130,6 +131,11 @@ export default function HomePage() {
   const [justLikedId, setJustLikedId] = useState<string | null>(null);
   const likeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Progress mini-card
+  const [groupName, setGroupName] = useState<string | null>(null);
+  const [showProgreso, setShowProgreso] = useState(false);
+  const [currentLesson, setCurrentLesson] = useState<number | null>(null);
+
   // Lightbox — no extra refs needed (framer-motion drag handles it)
 
   async function loadPostsBatch({ uid, cursor, reset }: { uid: string | null; cursor: string | null; reset: boolean }) {
@@ -195,8 +201,43 @@ export default function HomePage() {
       setUserId(uid);
 
       if (uid) {
-        const { data: adminRow } = await supabase.from("profiles").select("is_admin").eq("id", uid).single();
-        setIsAdmin((adminRow as { is_admin: boolean | null } | null)?.is_admin === true);
+        const { data: adminRow } = await supabase.from("profiles").select("is_admin, group_name").eq("id", uid).single();
+        const adminData = adminRow as { is_admin: boolean | null; group_name: string | null } | null;
+        const isAdminUser = adminData?.is_admin === true;
+        setIsAdmin(isAdminUser);
+
+        // Determine effective group (student view uses localStorage group; students use their own)
+        const { readStudentViewPreference, readStudentViewGroup } = await import("@/lib/student-view");
+        const svActive = isAdminUser && readStudentViewPreference();
+        const effectiveGroup = svActive ? readStudentViewGroup() : (adminData?.group_name ?? null);
+
+        if (effectiveGroup && (!isAdminUser || svActive)) {
+          setGroupName(effectiveGroup);
+          // Check show_progreso from Flask via proxy
+          fetch("/api/grupos-progreso")
+            .then(r => r.ok ? r.json() : {})
+            .then((map: Record<string, boolean>) => {
+              const progreso = Boolean(map[effectiveGroup]);
+              setShowProgreso(progreso);
+              // Fetch lesson in background (non-blocking)
+              if (progreso) {
+                fetch(`/api/clase-notas?grupo=${encodeURIComponent(effectiveGroup)}`)
+                  .then(r => r.json())
+                  .then((notas: Array<{ tema?: string }>) => {
+                    let max = 0;
+                    for (const n of notas) {
+                      const m = n.tema?.match(/^L(\d+)/);
+                      if (m) { const l = parseInt(m[1], 10); if (l > max) max = l; }
+                    }
+                    if (max > 0) setCurrentLesson(max);
+                  })
+                  .catch(() => {/* silent */});
+              }
+            })
+            .catch(() => {/* silent */});
+        }
+      } else {
+        setIsAdmin(false);
       }
 
       // Fetch topic override (falls back to static if table empty)
@@ -582,6 +623,45 @@ export default function HomePage() {
           )}
         </div>
       </div>
+
+      {/* ── Mi Camino mini-card ── */}
+      {showProgreso && currentLesson !== null && !effectiveIsAdmin && (() => {
+        const stop = getLessonStop(currentLesson);
+        return (
+          <div style={{ padding: "0 16px 12px" }}>
+            <Link
+              href={groupName ? `/progreso?grupo=${encodeURIComponent(groupName)}` : "/progreso"}
+              style={{ textDecoration: "none", display: "block" }}
+            >
+              <div
+                style={{
+                  background: "#1A1A2E",
+                  borderRadius: 14,
+                  padding: "14px 18px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#FFFFFF", lineHeight: 1.1 }}>
+                    Lección {currentLesson}
+                  </p>
+                  {stop && (
+                    <p style={{ margin: "4px 0 0", fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.35 }}>
+                      {stop.tagline}
+                    </p>
+                  )}
+                </div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                  <path d="M9 18l6-6-6-6" stroke="#4ECDC4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </Link>
+          </div>
+        );
+      })()}
 
       {/* ── Compose box ── */}
       {userId && (

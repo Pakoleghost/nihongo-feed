@@ -52,7 +52,15 @@ export default function AdminGroupsPage() {
     }
 
     const { data: grps } = await supabase.from("groups").select("name").order("name");
-    setGroups(grps || []);
+
+    // Fetch show_progreso flags from Flask
+    let progresoMap: Record<string, boolean> = {};
+    try {
+      const pr = await fetch("/api/grupos-progreso", { cache: "no-store" });
+      if (pr.ok) progresoMap = await pr.json();
+    } catch {/* silent */}
+
+    setGroups((grps || []).map(g => ({ ...g, show_progreso: Boolean(progresoMap[g.name]) })));
     
     try {
       const accessToken = sessionData.session?.access_token;
@@ -99,6 +107,20 @@ export default function AdminGroupsPage() {
       setNewGroupName("");
       fetchData();
     }
+  };
+
+  const handleToggleProgreso = async (groupName: string, current: boolean) => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    await fetch(`/api/admin/progreso-toggle?grupo=${encodeURIComponent(groupName)}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+      body: JSON.stringify({ show_progreso: !current }),
+    });
+    fetchData();
   };
 
   const handleUpdateGroup = async (userId: string, newGroup: string) => {
@@ -347,6 +369,37 @@ export default function AdminGroupsPage() {
                     style={{ flex: "1 1 180px", padding: "10px 12px", borderRadius: "12px", border: "none" }}
                   />
                   <button onClick={handleCreateGroup} style={{ ...pillButtonStyle, background: "#1A1A2E", color: "#FFFFFF" }}>Crear grupo</button>
+                </div>
+
+                {/* Groups — progreso toggles */}
+                <div style={{ marginBottom: 16 }}>
+                  <p style={{ margin: "0 0 8px", color: "#9CA3AF", fontSize: 11, fontWeight: 900, letterSpacing: "0.10em", textTransform: "uppercase" }}>
+                    Línea de progreso
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    {groups.map(g => (
+                      <div key={g.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 12px", borderRadius: 12, background: "#F8F4EE" }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E" }}>{g.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleProgreso(g.name, Boolean(g.show_progreso))}
+                          style={{
+                            width: 40, height: 22, borderRadius: 11, border: "none", cursor: "pointer",
+                            background: g.show_progreso ? "#4ECDC4" : "rgba(26,26,46,0.12)",
+                            position: "relative", transition: "background 140ms ease", flexShrink: 0,
+                          }}
+                          aria-label={g.show_progreso ? "Desactivar progreso" : "Activar progreso"}
+                        >
+                          <span style={{
+                            position: "absolute", top: 3, left: g.show_progreso ? 21 : 3,
+                            width: 16, height: 16, borderRadius: "50%",
+                            background: "#FFFFFF", transition: "left 140ms ease",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                          }} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <select value={selectedGroup} onChange={e => setSelectedGroup(e.target.value)} style={{ marginBottom: "16px", padding: "11px 12px", borderRadius: "14px", width: "100%", border: "none", background: "#F8F4EE" }}>
