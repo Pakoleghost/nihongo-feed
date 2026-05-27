@@ -174,74 +174,28 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
   );
 }
 
-function TareaSection({
-  notas,
-  groupName,
-  onToggle,
-}: {
-  notas: NotaClase[];
-  groupName: string;
-  onToggle: (notaId: string, completed: boolean) => void;
-}) {
+function TareaSection({ notas }: { notas: NotaClase[] }) {
   const nota = findActiveTarea(notas);
-  const [toggling, setToggling] = useState(false);
-
   if (!nota) return null;
 
-  // Capture as non-null const so TypeScript retains the narrowing inside async closures
-  const activeNota = nota;
-  const bullets = (activeNota.tarea ?? "").split("\n").filter(Boolean);
-  const isCompleted = activeNota.tarea_completada ?? false;
-
-  async function handleToggle() {
-    if (toggling) return;
-    setToggling(true);
-    try {
-      const res = await fetch("/api/clase-notas", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          grupo: groupName,
-          id: activeNota.id,
-          tarea_completada: !isCompleted,
-        }),
-      });
-      if (res.ok) onToggle(activeNota.id, !isCompleted);
-    } finally {
-      setToggling(false);
-    }
-  }
+  const bullets = (nota.tarea ?? "").split("\n").filter(Boolean);
 
   return (
     <div style={{ marginTop: "20px" }}>
       {/* Section header */}
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-        <span
-          style={{
-            fontSize: "11px",
-            fontWeight: 700,
-            color: "#9CA3AF",
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-          }}
-        >
-          Tarea
-        </span>
-        {isCompleted && (
-          <span
-            style={{
-              fontSize: "10px",
-              fontWeight: 700,
-              color: "#178A83",
-              background: "rgba(78,205,196,0.12)",
-              borderRadius: "6px",
-              padding: "2px 7px",
-            }}
-          >
-            Completada
-          </span>
-        )}
-      </div>
+      <span
+        style={{
+          display: "block",
+          fontSize: "11px",
+          fontWeight: 700,
+          color: "#9CA3AF",
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          marginBottom: "10px",
+        }}
+      >
+        Tarea
+      </span>
 
       {/* Card */}
       <div
@@ -249,21 +203,17 @@ function TareaSection({
           background: "#FFFFFF",
           borderRadius: "14px",
           padding: "14px 16px",
-          boxShadow: isCompleted
-            ? "inset 4px 0 0 #4ECDC4, 0 2px 10px rgba(26,26,46,0.07)"
-            : "inset 4px 0 0 #E63946, 0 2px 10px rgba(26,26,46,0.07)",
+          boxShadow: "inset 4px 0 0 #E63946, 0 2px 10px rgba(26,26,46,0.07)",
           display: "flex",
           flexDirection: "column",
           gap: "10px",
-          opacity: isCompleted ? 0.72 : 1,
-          transition: "opacity 200ms ease",
         }}
       >
         {/* Meta: fecha · tema */}
-        {(activeNota.fecha || activeNota.tema) && (
+        {(nota.fecha || nota.tema) && (
           <p style={{ fontSize: "12px", color: "#9CA3AF", margin: 0, fontWeight: 500 }}>
-            {activeNota.fecha ?? ""}
-            {activeNota.tema ? `${activeNota.fecha ? " · " : ""}${activeNota.tema}` : ""}
+            {nota.fecha ?? ""}
+            {nota.tema ? `${nota.fecha ? " · " : ""}${nota.tema}` : ""}
           </p>
         )}
 
@@ -278,43 +228,14 @@ function TareaSection({
                 gap: "8px",
                 fontSize: "14px",
                 lineHeight: 1.45,
-                color: isCompleted ? "#9CA3AF" : "#1A1A2E",
-                textDecoration: isCompleted ? "line-through" : "none",
+                color: "#1A1A2E",
               }}
             >
-              <span style={{ color: isCompleted ? "#C4BAB0" : "#E63946", fontWeight: 700, flexShrink: 0 }}>•</span>
+              <span style={{ color: "#E63946", fontWeight: 700, flexShrink: 0 }}>•</span>
               {line}
             </li>
           ))}
         </ul>
-
-        {/* Toggle button */}
-        <button
-          type="button"
-          onClick={() => void handleToggle()}
-          disabled={toggling}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "6px",
-            background: isCompleted ? "rgba(78,205,196,0.10)" : "#4ECDC4",
-            color: isCompleted ? "#178A83" : "#FFFFFF",
-            border: isCompleted ? "1px solid rgba(78,205,196,0.30)" : "none",
-            borderRadius: "8px",
-            padding: "8px 14px",
-            fontSize: "13px",
-            fontWeight: 800,
-            cursor: toggling ? "default" : "pointer",
-            alignSelf: "flex-start",
-            opacity: toggling ? 0.6 : 1,
-            transition: "background 140ms ease, opacity 140ms ease",
-          }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          {toggling ? "…" : isCompleted ? "Desmarcar" : "Marcar como completada"}
-        </button>
       </div>
     </div>
   );
@@ -411,7 +332,7 @@ export default function ClasesPage() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
 
-  // Notas (homework) fetched separately from /api/clase-notas
+  // Notas fetched separately from /api/clase-notas (read-only display)
   const [notas, setNotas] = useState<NotaClase[]>([]);
 
   const { effectiveIsAdmin, studentViewActive, studentViewGroupName } = useStudentViewMode(isAdmin);
@@ -488,14 +409,13 @@ export default function ClasesPage() {
         : effectiveGroupName)
     : null;
 
-  // Fetch notas whenever the target group changes
+  // Fetch notas whenever the target group changes (read-only)
   useEffect(() => {
     if (!activeNotasGroup) {
       setNotas([]);
       return;
     }
     let alive = true;
-    setNotas([]); // clear stale data while loading
     fetch(`/api/clase-notas?grupo=${encodeURIComponent(activeNotasGroup)}`)
       .then((r) => r.ok ? r.json() : [])
       .catch(() => [])
@@ -519,13 +439,6 @@ export default function ClasesPage() {
     );
     if (fallbackSlug) return { coleccion: colecciones[fallbackSlug], slug: fallbackSlug };
     return null;
-  }
-
-  /** Optimistically update tarea_completada in local notas state after a successful PATCH. */
-  function handleTareaToggle(notaId: string, completed: boolean) {
-    setNotas((prev) =>
-      prev.map((n) => (n.id === notaId ? { ...n, tarea_completada: completed } : n))
-    );
   }
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -597,13 +510,7 @@ export default function ClasesPage() {
         {currentColeccion && selectedSlug ? (
           <>
             <ColeccionView coleccion={currentColeccion} />
-            {activeNotasGroup && (
-              <TareaSection
-                notas={notas}
-                groupName={activeNotasGroup}
-                onToggle={handleTareaToggle}
-              />
-            )}
+            {activeNotasGroup && <TareaSection notas={notas} />}
           </>
         ) : (
           <NoGroupCard message="Selecciona un grupo para ver sus grabaciones." />
@@ -651,13 +558,7 @@ export default function ClasesPage() {
               </span>
             </div>
             <ColeccionView coleccion={coleccion} />
-            {activeNotasGroup && (
-              <TareaSection
-                notas={notas}
-                groupName={activeNotasGroup}
-                onToggle={handleTareaToggle}
-              />
-            )}
+            {activeNotasGroup && <TareaSection notas={notas} />}
           </>
         );
       }
