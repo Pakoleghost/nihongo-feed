@@ -106,7 +106,7 @@ export default async function ProgresoPage({
     if (res.ok) notas = await res.json();
   } catch {/* silent — show empty state */}
 
-  // Parse lesson numbers from notas
+  // ── Data ──────────────────────────────────────────────────────────────────
   const lessonSet = new Set<number>();
   for (const n of notas) {
     const l = parseLeccionFromTema(n.tema);
@@ -114,7 +114,6 @@ export default async function ProgresoPage({
   }
   const currentLesson = lessonSet.size > 0 ? Math.max(...lessonSet) : null;
 
-  // Count notas per lesson for the current lesson display
   const notasByLesson: Record<number, number> = {};
   for (const n of notas) {
     const l = parseLeccionFromTema(n.tema);
@@ -122,55 +121,93 @@ export default async function ProgresoPage({
   }
 
   const currentStop = currentLesson ? getLessonStop(currentLesson) : null;
-  const totalLessons = LESSON_STOPS.length; // 23
-  // All lessons up to currentLesson count as done (student passed through them)
+  const totalLessons = LESSON_STOPS.length;
   const completedCount = currentLesson ?? 0;
   const progressPct = Math.round((completedCount / totalLessons) * 100);
 
-  // Build the visible stops: all up to current + 3 future
+  // Visible stops: all lessons up to current + 3 ahead
   const maxFuture = 3;
   let futureCount = 0;
   const visibleStops: LessonStop[] = [];
   for (const stop of LESSON_STOPS) {
     const isCurrent = stop.leccion === currentLesson;
     const isCompleted = currentLesson !== null && stop.leccion < currentLesson;
-    const isFuture = !isCompleted && !isCurrent;
     if (isCompleted || isCurrent) {
       visibleStops.push(stop);
-    } else if (isFuture && futureCount < maxFuture) {
+    } else if (futureCount < maxFuture) {
       visibleStops.push(stop);
       futureCount++;
     }
   }
 
-  // Find level-2 boundary
-  const firstNivel2 = LESSON_STOPS.find(s => s.nivel === 2)?.leccion ?? 13;
+  // ── Roadmap geometry ───────────────────────────────────────────────────────
+  // cx is in 0-100 scale (= % of container width) — used in both SVG and CSS left
+  // cy is in actual pixels
+  const ROW_H = 128;
+  const NODE_R = 30;   // default node radius → 60px ø
+  const CUR_R  = 34;   // current node radius → 68px ø
+  const PAD_TOP = 72;  // top space for AHORA chip
 
+  const positions = visibleStops.map((_, i) => ({
+    cx:   i % 2 === 0 ? 28 : 66,
+    cy:   PAD_TOP + i * ROW_H,
+    side: (i % 2 === 0 ? "left" : "right") as "left" | "right",
+  }));
+
+  const canvasH = PAD_TOP + (visibleStops.length - 1) * ROW_H + CUR_R + 48;
+
+  // Bezier path through all node centers (x in 0-100, y in px)
+  function makePath(pts: typeof positions) {
+    return pts
+      .map((p, i) => {
+        if (i === 0) return `M ${p.cx} ${p.cy}`;
+        const prev = pts[i - 1];
+        const cpY = ROW_H * 0.52;
+        return `C ${prev.cx} ${prev.cy + cpY}, ${p.cx} ${p.cy - cpY}, ${p.cx} ${p.cy}`;
+      })
+      .join(" ");
+  }
+
+  const fullPath  = makePath(positions);
+  const curIdx    = currentLesson
+    ? positions.findIndex((_, i) => visibleStops[i].leccion === currentLesson)
+    : -1;
+  const donePath  = curIdx > 0 ? makePath(positions.slice(0, curIdx + 1)) : "";
+
+  // Compact lesson ID: "1.3", "2.1", …
+  function lessonId(s: LessonStop) {
+    return s.nivel === 1 ? `1.${s.leccion}` : `2.${s.leccion - 12}`;
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div style={{ background: "#FFF8E7", minHeight: "100dvh", display: "flex", flexDirection: "column", paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))" }}>
+    <div style={{
+      background: "#1A1A2E",
+      minHeight: "100dvh",
+      display: "flex",
+      flexDirection: "column",
+      paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))",
+    }}>
 
       {/* ── Header ── */}
-      <div style={{ background: "#1A1A2E", padding: "20px 20px 28px" }}>
-        <div style={{ maxWidth: 760, margin: "0 auto", width: "100%" }}>
-          <Link
-            href="/"
-            style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 20, textDecoration: "none" }}
-          >
+      <div style={{ padding: "20px 20px 24px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+          <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 18, textDecoration: "none" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M15 18l-6-6 6-6" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M15 18l-6-6 6-6" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.4)" }}>Inicio</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.3)" }}>Inicio</span>
           </Link>
 
-          <h1 style={{ margin: "0 0 6px", fontSize: 38, fontWeight: 800, color: "#FFFFFF", lineHeight: 1, letterSpacing: "-0.04em" }}>
+          <h1 style={{ margin: "0 0 5px", fontSize: 38, fontWeight: 800, color: "#FFFFFF", lineHeight: 1, letterSpacing: "-0.04em" }}>
             Mi Camino
           </h1>
           {currentLesson && currentStop ? (
             <p style={{ margin: "0 0 20px", fontSize: 14, fontWeight: 600, color: "#4ECDC4" }}>
-              Lección {currentLesson} · {currentStop.titulo}
+              {currentStop.tagline}
             </p>
           ) : (
-            <p style={{ margin: "0 0 20px", fontSize: 14, color: "rgba(255,255,255,0.35)" }}>
+            <p style={{ margin: "0 0 20px", fontSize: 14, color: "rgba(255,255,255,0.3)" }}>
               Sin clases registradas aún
             </p>
           )}
@@ -178,198 +215,179 @@ export default async function ProgresoPage({
           {/* Progress bar */}
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                Progreso
-              </span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#4ECDC4" }}>
-                {completedCount} / {totalLessons}
-              </span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Progreso</span>
+              <span style={{ fontSize: 13, fontWeight: 800, color: "#4ECDC4" }}>{completedCount} / {totalLessons}</span>
             </div>
-            <div style={{ height: 6, borderRadius: 99, background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
-              <div style={{
-                height: "100%",
-                width: `${progressPct}%`,
-                borderRadius: 99,
-                background: "linear-gradient(90deg, #4ECDC4, #178A83)",
-                transition: "width 0.6s ease",
-              }} />
+            <div style={{ height: 6, borderRadius: 99, background: "rgba(255,255,255,0.08)", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${progressPct}%`, borderRadius: 99, background: "linear-gradient(90deg, #4ECDC4, #178A83)" }} />
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Cards ── */}
-      <div style={{ flex: 1, padding: "20px 16px 8px", maxWidth: 760, margin: "0 auto", width: "100%", boxSizing: "border-box" }}>
-        {visibleStops.map((stop, idx) => {
-          const isCurrent = stop.leccion === currentLesson;
-          const isCompleted = currentLesson !== null && stop.leccion < currentLesson;
-          const isFuture = !isCompleted && !isCurrent;
-          const notaCount = notasByLesson[stop.leccion] ?? 0;
+      {/* ── Roadmap ── */}
+      <div style={{ flex: 1, padding: "4px 16px 24px", overflowX: "hidden" }}>
+        <div style={{
+          position: "relative",
+          maxWidth: 480,
+          margin: "0 auto",
+          height: canvasH,
+        }}>
 
-          // Show a nivel-2 separator when crossing from genki I → II
-          const prevStop = visibleStops[idx - 1];
-          const showNivel2Sep =
-            stop.nivel === 2 &&
-            stop.leccion === firstNivel2 &&
-            (!prevStop || prevStop.nivel === 1);
+          {/* ── SVG path (background winding road) ── */}
+          <svg
+            viewBox={`0 0 100 ${canvasH}`}
+            preserveAspectRatio="none"
+            aria-hidden="true"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+          >
+            {/* Full road — muted */}
+            <path
+              d={fullPath}
+              fill="none"
+              stroke="rgba(255,255,255,0.07)"
+              strokeWidth="8"
+              strokeLinecap="round"
+              style={{ vectorEffect: "non-scaling-stroke" } as React.CSSProperties}
+            />
+            {/* Completed portion — teal */}
+            {donePath && (
+              <path
+                d={donePath}
+                fill="none"
+                stroke="rgba(78,205,196,0.45)"
+                strokeWidth="8"
+                strokeLinecap="round"
+                style={{ vectorEffect: "non-scaling-stroke" } as React.CSSProperties}
+              />
+            )}
+          </svg>
 
-          // Connector color between cards (teal for done, muted for upcoming)
-          const isLastVisible = idx === visibleStops.length - 1;
-          const connectorTeal = isCompleted || isCurrent;
+          {/* ── Nodes + labels ── */}
+          {positions.map((pos, i) => {
+            const stop      = visibleStops[i];
+            const isCurrent  = stop.leccion === currentLesson;
+            const isCompleted = currentLesson !== null && stop.leccion < currentLesson;
+            const isFuture   = !isCompleted && !isCurrent;
+            const r          = isCurrent ? CUR_R : NODE_R;
+            const dia        = r * 2;
+            const notaCount  = notasByLesson[stop.leccion] ?? 0;
+            const labelRight = pos.side === "left"; // node left → label on right
 
-          return (
-            <div key={stop.leccion}>
-              {/* ── Nivel 2 separator ── */}
-              {showNivel2Sep && (
-                <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "4px 0 8px" }}>
-                  <div style={{ flex: 1, height: 1, background: "rgba(78,205,196,0.3)" }} />
-                  <span style={{ fontSize: 10, fontWeight: 700, color: "#4ECDC4", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                    Genki II
-                  </span>
-                  <div style={{ flex: 1, height: 1, background: "rgba(78,205,196,0.3)" }} />
-                </div>
-              )}
-
-              {/* ── Completed card ── */}
-              {isCompleted && (
-                <div style={{
-                  background: "#FFFFFF",
-                  borderRadius: 14,
-                  padding: "14px 16px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  boxShadow: "inset 4px 0 0 #4ECDC4, 0 1px 6px rgba(26,26,46,0.06)",
-                  overflow: "hidden",
-                  position: "relative",
-                }}>
-                  {/* Check circle */}
+            return (
+              <div key={stop.leccion}>
+                {/* AHORA chip — floats above current node */}
+                {isCurrent && (
                   <div style={{
-                    width: 34, height: 34, borderRadius: "50%",
-                    background: "rgba(78,205,196,0.12)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0,
+                    position: "absolute",
+                    left: `${pos.cx}%`,
+                    top: pos.cy - r - 30,
+                    transform: "translateX(-50%)",
+                    background: "#4ECDC4",
+                    color: "#1A1A2E",
+                    fontSize: 10, fontWeight: 800,
+                    letterSpacing: "0.10em", textTransform: "uppercase",
+                    padding: "3px 12px", borderRadius: 99,
+                    whiteSpace: "nowrap",
+                    boxShadow: "0 2px 10px rgba(78,205,196,0.45)",
+                    zIndex: 2,
                   }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                      <path d="M5 13l4 4L19 7" stroke="#4ECDC4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    AHORA
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: "#9CA3AF", letterSpacing: "0.07em" }}>L{stop.leccion}</span>
-                    <p style={{ margin: "1px 0 0", fontSize: 14, fontWeight: 600, color: "#1A1A2E", lineHeight: 1.3 }}>
-                      {stop.tagline}
-                    </p>
-                  </div>
-                  {/* Decorative lesson number */}
-                  <span style={{
-                    fontSize: 44, fontWeight: 800, color: "rgba(26,26,46,0.04)",
-                    lineHeight: 1, flexShrink: 0, userSelect: "none",
-                    letterSpacing: "-0.04em",
-                  }}>
-                    {String(stop.leccion).padStart(2, "0")}
-                  </span>
-                </div>
-              )}
+                )}
 
-              {/* ── Current card ── */}
-              {isCurrent && (
+                {/* Node circle */}
                 <div style={{
-                  background: "#1A1A2E",
-                  borderRadius: 16,
-                  padding: "20px 18px",
-                  boxShadow: "0 6px 24px rgba(26,26,46,0.22)",
-                  overflow: "hidden",
-                  position: "relative",
+                  position: "absolute",
+                  left: `${pos.cx}%`,
+                  top: pos.cy,
+                  transform: "translate(-50%, -50%)",
+                  width: dia, height: dia,
+                  borderRadius: "50%",
+                  zIndex: 1,
+                  flexShrink: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: isCompleted
+                    ? "linear-gradient(150deg, #5ED8CF 0%, #38B8AF 100%)"
+                    : isCurrent
+                    ? "#FFFFFF"
+                    : "rgba(255,255,255,0.07)",
+                  outline: isCurrent
+                    ? "3px solid rgba(78,205,196,0.75)"
+                    : isCompleted
+                    ? "2px solid rgba(78,205,196,0.25)"
+                    : "2px solid rgba(255,255,255,0.10)",
+                  outlineOffset: isCurrent ? 3 : 1,
+                  boxShadow: isCurrent
+                    ? "0 0 0 8px rgba(78,205,196,0.12), 0 6px 20px rgba(0,0,0,0.4)"
+                    : isCompleted
+                    ? "0 3px 12px rgba(0,0,0,0.35)"
+                    : "none",
                 }}>
-                  {/* Decorative large number (background watermark) */}
-                  <span style={{
-                    position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
-                    fontSize: 80, fontWeight: 800, color: "rgba(255,255,255,0.04)",
-                    lineHeight: 1, letterSpacing: "-0.04em", userSelect: "none",
-                    pointerEvents: "none",
+                  {isCompleted && (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                      <path d="M5 13l4 4L19 7" stroke="#1A1A2E" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                  {isCurrent && (
+                    /* Teal pulse dot */
+                    <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#4ECDC4" }} />
+                  )}
+                  {isFuture && (
+                    <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.2)" }}>
+                      {lessonId(stop)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Text label — opposite side of node */}
+                <div style={{
+                  position: "absolute",
+                  top: pos.cy - (isCurrent ? 22 : 18),
+                  ...(labelRight
+                    ? { left: `calc(${pos.cx}% + ${r + 14}px)`, right: 0 }
+                    : { left: 0, right: `calc(${100 - pos.cx}% + ${r + 14}px)` }),
+                }}>
+                  {/* Lesson ID — small, secondary */}
+                  <p style={{
+                    margin: "0 0 4px",
+                    fontSize: 10, fontWeight: 700,
+                    letterSpacing: "0.07em",
+                    color: isCompleted
+                      ? "rgba(78,205,196,0.65)"
+                      : isCurrent
+                      ? "rgba(255,255,255,0.45)"
+                      : "rgba(255,255,255,0.18)",
+                    textAlign: labelRight ? "left" : "right",
                   }}>
-                    {String(stop.leccion).padStart(2, "0")}
-                  </span>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                    <span style={{
-                      fontSize: 10, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase",
-                      background: "#4ECDC4", color: "#1A1A2E",
-                      borderRadius: 6, padding: "3px 9px",
-                    }}>
-                      Ahora
-                    </span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.3)" }}>
-                      Lección {stop.leccion}
-                    </span>
-                  </div>
-
-                  <p style={{ margin: "0 0 6px", fontSize: 20, fontWeight: 800, color: "#FFFFFF", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
+                    {lessonId(stop)}
+                  </p>
+                  {/* Competency — main text */}
+                  <p style={{
+                    margin: 0,
+                    fontSize: isCurrent ? 15 : 13,
+                    fontWeight: isCompleted ? 600 : isCurrent ? 700 : 400,
+                    lineHeight: 1.35,
+                    color: isCompleted
+                      ? "#FFFFFF"
+                      : isCurrent
+                      ? "#FFFFFF"
+                      : "rgba(255,255,255,0.22)",
+                    textAlign: labelRight ? "left" : "right",
+                  }}>
                     {stop.tagline}
                   </p>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#4ECDC4" }}>
-                    {stop.titulo}
-                  </p>
-                  {notaCount > 0 && (
-                    <p style={{ margin: "10px 0 0", fontSize: 12, color: "rgba(255,255,255,0.3)", fontWeight: 600 }}>
-                      {notaCount} {notaCount === 1 ? "clase registrada" : "clases registradas"}
+                  {/* Class count under current */}
+                  {isCurrent && notaCount > 0 && (
+                    <p style={{ margin: "5px 0 0", fontSize: 11, fontWeight: 600, color: "rgba(78,205,196,0.65)", textAlign: "left" }}>
+                      {notaCount} {notaCount === 1 ? "clase" : "clases"}
                     </p>
                   )}
                 </div>
-              )}
-
-              {/* ── Future card ── */}
-              {isFuture && (
-                <div style={{
-                  background: "rgba(255,255,255,0.55)",
-                  borderRadius: 14,
-                  padding: "14px 16px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  boxShadow: "inset 0 0 0 1px rgba(26,26,46,0.07)",
-                  overflow: "hidden",
-                  position: "relative",
-                }}>
-                  {/* Hollow circle */}
-                  <div style={{
-                    width: 34, height: 34, borderRadius: "50%",
-                    border: "2px solid rgba(26,26,46,0.10)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0,
-                  }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(26,26,46,0.20)" }}>
-                      L{stop.leccion}
-                    </span>
-                  </div>
-                  <p style={{ margin: 0, flex: 1, fontSize: 14, color: "#C4BAB0", lineHeight: 1.3 }}>
-                    {stop.tagline}
-                  </p>
-                  <span style={{
-                    fontSize: 44, fontWeight: 800, color: "rgba(26,26,46,0.03)",
-                    lineHeight: 1, flexShrink: 0, userSelect: "none",
-                    letterSpacing: "-0.04em",
-                  }}>
-                    {String(stop.leccion).padStart(2, "0")}
-                  </span>
-                </div>
-              )}
-
-              {/* ── Connector between cards ── */}
-              {!isLastVisible && (
-                <div style={{ display: "flex", justifyContent: "flex-start", paddingLeft: 23, height: 14 }}>
-                  <div style={{
-                    width: 2,
-                    height: "100%",
-                    background: connectorTeal ? "#4ECDC4" : "rgba(26,26,46,0.10)",
-                    opacity: connectorTeal ? 0.6 : 1,
-                    borderRadius: 1,
-                  }} />
-                </div>
-              )}
-            </div>
-          );
-        })}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
