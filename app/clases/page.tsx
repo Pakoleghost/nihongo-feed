@@ -70,7 +70,7 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
         background: "#FFFFFF",
         borderRadius: "14px",
         padding: "14px 16px",
-        boxShadow: "inset 4px 0 0 #4ECDC4, 0 2px 10px rgba(26,26,46,0.07)",
+        boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
         display: "flex",
         flexDirection: "column",
         gap: "10px",
@@ -115,13 +115,6 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
           Ver
         </a>
       </div>
-
-      {/* Notas */}
-      {entrada.notas ? (
-        <p style={{ fontSize: "13px", color: "#53596B", margin: 0, lineHeight: 1.5 }}>
-          {entrada.notas}
-        </p>
-      ) : null}
 
       {/* Contraseña */}
       {entrada.password ? (
