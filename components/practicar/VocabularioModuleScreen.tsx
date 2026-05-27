@@ -68,15 +68,15 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
     <div
       style={{
         minHeight: "100dvh",
-        background: "#FFF8E7",
+        background: "#1A1A2E",
         padding: "24px 20px calc(100px + env(safe-area-inset-bottom, 0px))",
       }}
     >
       {/* ── Header ── */}
-      <h1 style={{ fontSize: 42, fontWeight: 800, color: "#1A1A2E", margin: 0, lineHeight: 1, letterSpacing: "-0.04em" }}>
+      <h1 style={{ fontSize: 42, fontWeight: 800, color: "#FFFFFF", margin: 0, lineHeight: 1, letterSpacing: "-0.04em" }}>
         Vocabulario
       </h1>
-      <p style={{ fontSize: 14, color: "#9CA3AF", margin: "6px 0 0" }}>
+      <p style={{ fontSize: 14, color: "rgba(255,255,255,0.42)", margin: "6px 0 0" }}>
         {lessonItems.length} palabras · L{lesson} · {lessonTitle}
       </p>
 
@@ -102,12 +102,11 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
                 padding: "8px 14px",
                 borderRadius: 999,
                 border: "none",
-                background: active ? "#1A1A2E" : "#FFFFFF",
-                color: active ? "#FFFFFF" : "#1A1A2E",
+                background: active ? "#FFFFFF" : "rgba(255,255,255,0.08)",
+                color: active ? "#1A1A2E" : "rgba(255,255,255,0.55)",
                 fontWeight: 700,
                 fontSize: 13,
                 cursor: "pointer",
-                boxShadow: active ? "none" : "0 2px 8px rgba(26,26,46,0.07)",
                 whiteSpace: "nowrap",
               }}
             >
@@ -121,14 +120,14 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
       {lessonSummary.total > 0 && (
         <div style={{ marginTop: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
               Repasadas
             </span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#53596B" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.6)" }}>
               {seen}/{lessonSummary.total}
             </span>
           </div>
-          <div style={{ height: 4, background: "#F0EDE8", borderRadius: 999, overflow: "hidden" }}>
+          <div style={{ height: 4, background: "rgba(255,255,255,0.10)", borderRadius: 999, overflow: "hidden" }}>
             <div style={{ height: "100%", width: `${seenPct}%`, background: "#4ECDC4", borderRadius: 999, transition: "width 0.4s ease" }} />
           </div>
         </div>
@@ -140,15 +139,14 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
         <button
           onClick={goToFlashcards}
           style={{
-            background: "#1A1A2E",
+            background: "#1E2235",
             borderRadius: 14,
-            border: "none",
+            border: "1px solid rgba(255,255,255,0.10)",
             cursor: "pointer",
             padding: "20px 22px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            boxShadow: "0 4px 16px rgba(26,26,46,0.18)",
           }}
         >
           <div style={{ textAlign: "left" }}>
@@ -170,23 +168,22 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
         <button
           onClick={goToPracticeSession}
           style={{
-            background: "#FFFFFF",
+            background: "rgba(255,255,255,0.06)",
             borderRadius: 14,
-            border: "none",
+            border: "1px solid rgba(255,255,255,0.08)",
             cursor: "pointer",
             padding: "16px 22px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
           }}
         >
           <div style={{ textAlign: "left" }}>
-            <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1A1A2E" }}>Quiz</p>
-            <p style={{ margin: "3px 0 0", fontSize: 13, color: "#9CA3AF" }}>Elige la traducción correcta</p>
+            <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#FFFFFF" }}>Quiz</p>
+            <p style={{ margin: "3px 0 0", fontSize: 13, color: "rgba(255,255,255,0.42)" }}>Elige la traducción correcta</p>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M9 18l6-6-6-6" stroke="#C4BAB0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M9 18l6-6-6-6" stroke="rgba(255,255,255,0.25)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
       </div>

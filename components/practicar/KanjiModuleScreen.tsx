@@ -75,15 +75,15 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
     <div
       style={{
         minHeight: "100dvh",
-        background: "#FFF8E7",
+        background: "#1A1A2E",
         padding: "24px 20px calc(100px + env(safe-area-inset-bottom, 0px))",
       }}
     >
       {/* ── Header ── */}
-      <h1 style={{ fontSize: 42, fontWeight: 800, color: "#1A1A2E", margin: 0, lineHeight: 1, letterSpacing: "-0.04em" }}>
+      <h1 style={{ fontSize: 42, fontWeight: 800, color: "#FFFFFF", margin: 0, lineHeight: 1, letterSpacing: "-0.04em" }}>
         Kanji
       </h1>
-      <p style={{ fontSize: 14, color: "#9CA3AF", margin: "6px 0 0" }}>
+      <p style={{ fontSize: 14, color: "rgba(255,255,255,0.42)", margin: "6px 0 0" }}>
         {lessonItems.length} kanji · L{lesson} · {lessonTitle}
       </p>
 
@@ -109,12 +109,11 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
                 padding: "8px 16px",
                 borderRadius: 999,
                 border: "none",
-                background: active ? "#1A1A2E" : "#FFFFFF",
-                color: active ? "#FFFFFF" : "#1A1A2E",
+                background: active ? "#FFFFFF" : "rgba(255,255,255,0.08)",
+                color: active ? "#1A1A2E" : "rgba(255,255,255,0.55)",
                 fontWeight: 700,
                 fontSize: 13,
                 cursor: "pointer",
-                boxShadow: active ? "none" : "0 2px 8px rgba(26,26,46,0.07)",
               }}
             >
               L{value}
@@ -126,7 +125,7 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
       {/* ── Mini stats ── */}
       <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
         {[
-          { label: "Nuevas", value: lessonSummary.nuevos, color: "#9CA3AF" },
+          { label: "Nuevas", value: lessonSummary.nuevos, color: "rgba(255,255,255,0.65)" },
           { label: "Pendientes", value: lessonSummary.pendientes, color: "#E63946" },
           { label: "Dominadas", value: lessonSummary.dominados, color: "#4ECDC4" },
         ].map((s) => (
@@ -134,17 +133,17 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
             key={s.label}
             style={{
               flex: 1,
-              background: "#FFFFFF",
+              background: "#1E2235",
               borderRadius: 12,
               padding: "10px 0",
               textAlign: "center",
-              boxShadow: "0 2px 8px rgba(26,26,46,0.06)",
+              border: "1px solid rgba(255,255,255,0.06)",
             }}
           >
             <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: s.color, lineHeight: 1 }}>
               {s.value}
             </p>
-            <p style={{ margin: "4px 0 0", fontSize: 10, fontWeight: 700, color: "#9CA3AF", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+            <p style={{ margin: "4px 0 0", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
               {s.label}
             </p>
           </div>
@@ -157,15 +156,14 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
         <button
           onClick={primaryAction.onClick}
           style={{
-            background: "#1A1A2E",
+            background: "#1E2235",
             borderRadius: 14,
-            border: "none",
+            border: "1px solid rgba(255,255,255,0.10)",
             cursor: "pointer",
             padding: "20px 22px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            boxShadow: "0 4px 16px rgba(26,26,46,0.18)",
           }}
         >
           <div style={{ textAlign: "left" }}>
@@ -187,23 +185,22 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
         <button
           onClick={secondaryAction.onClick}
           style={{
-            background: "#FFFFFF",
+            background: "rgba(255,255,255,0.06)",
             borderRadius: 14,
-            border: "none",
+            border: "1px solid rgba(255,255,255,0.08)",
             cursor: "pointer",
             padding: "16px 22px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
           }}
         >
           <div style={{ textAlign: "left" }}>
-            <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1A1A2E" }}>{secondaryAction.label}</p>
-            <p style={{ margin: "3px 0 0", fontSize: 13, color: "#9CA3AF" }}>{secondaryAction.sub}</p>
+            <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#FFFFFF" }}>{secondaryAction.label}</p>
+            <p style={{ margin: "3px 0 0", fontSize: 13, color: "rgba(255,255,255,0.42)" }}>{secondaryAction.sub}</p>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M9 18l6-6-6-6" stroke="#C4BAB0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M9 18l6-6-6-6" stroke="rgba(255,255,255,0.25)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
       </div>
