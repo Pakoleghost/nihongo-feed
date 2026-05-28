@@ -61,7 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={jakarta.className}>
-        {/* Top safe-area frosted glass — matches BottomNav translucent aesthetic */}
+        {/* Top safe-area frosted glass — mirrors BottomNav translucent aesthetic */}
         <div
           aria-hidden="true"
           style={{
@@ -69,10 +69,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             top: 0,
             left: 0,
             right: 0,
-            height: "env(safe-area-inset-top, 0px)",
-            background: "rgba(19,19,31,0.72)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
+            height: "env(safe-area-inset-top, 20px)",
+            background: "#13131F",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            borderBottom: "1px solid rgba(255,255,255,0.04)",
             zIndex: 9999,
             pointerEvents: "none",
           }}

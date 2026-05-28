@@ -126,10 +126,10 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
         {cardsDone ? (
           <div
             style={{
-              background: "#FFFFFF",
+              background: "#1E2235",
               borderRadius: "24px",
               padding: "22px 20px",
-              boxShadow: "0 8px 28px rgba(26,26,46,0.08)",
+              border: "1px solid rgba(255,255,255,0.08)",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -139,8 +139,8 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
               flex: 1,
             }}
           >
-            <p style={{ fontSize: "22px", fontWeight: 800, color: "#1A1A2E", margin: 0 }}>Lección repasada</p>
-            <p style={{ fontSize: "14px", color: "#6B7280", margin: 0, lineHeight: 1.4 }}>
+            <p style={{ fontSize: "22px", fontWeight: 800, color: "#FFFFFF", margin: 0 }}>Lección repasada</p>
+            <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.42)", margin: 0, lineHeight: 1.4 }}>
               Conocías {known} de {cards.length}.
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%", marginTop: "4px" }}>
@@ -183,11 +183,10 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                 borderRadius: "999px",
                 border: "none",
                 cursor: "pointer",
-                background: "#FFFFFF",
-                color: "#1A1A2E",
+                background: "rgba(255,255,255,0.08)",
+                color: "rgba(255,255,255,0.65)",
                 fontWeight: 700,
                 fontSize: "13px",
-                boxShadow: "0 2px 10px rgba(26,26,46,0.08)",
               }}
             >
               Volver al módulo
@@ -203,7 +202,7 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                 marginBottom: "8px",
               }}
             >
-              <span style={{ fontSize: "10px", fontWeight: 800, letterSpacing: "0.1em", color: "#9CA3AF" }}>
+              <span style={{ fontSize: "10px", fontWeight: 800, letterSpacing: "0.1em", color: "rgba(255,255,255,0.42)" }}>
                 REPASO
               </span>
               <span style={{ fontSize: "12px", fontWeight: 700, color: "#E63946" }}>
@@ -227,22 +226,22 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                     position: "absolute",
                     inset: 0,
                     backfaceVisibility: "hidden",
-                    background: "#FFFFFF",
+                    background: "#1E2235",
                     borderRadius: "24px",
+                    border: "1px solid rgba(255,255,255,0.08)",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "6px",
                     padding: "24px",
-                    boxShadow: "0 8px 32px rgba(26,26,46,0.09)",
                   }}
                 >
                   <p
                     style={{
                       fontSize: "54px",
                       fontWeight: 800,
-                      color: "#1A1A2E",
+                      color: "#FFFFFF",
                       margin: 0,
                       fontFamily: "var(--font-noto-sans-jp), sans-serif",
                       lineHeight: 1,
@@ -255,7 +254,7 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                     <p
                       style={{
                         fontSize: "18px",
-                        color: "#9CA3AF",
+                        color: "rgba(255,255,255,0.42)",
                         margin: 0,
                         fontFamily: "var(--font-noto-sans-jp), sans-serif",
                       }}
@@ -263,7 +262,7 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                       {currentCard.hira}
                     </p>
                   )}
-                  <p style={{ fontSize: "12px", color: "#C4BAB0", margin: "16px 0 0" }}>Toca para ver el significado</p>
+                  <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)", margin: "16px 0 0" }}>Toca para ver el significado</p>
                 </div>
 
                 <div
@@ -272,21 +271,21 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                     inset: 0,
                     backfaceVisibility: "hidden",
                     transform: "rotateY(180deg)",
-                    background: "#FFFFFF",
+                    background: "#252B3F",
                     borderRadius: "24px",
+                    border: "1px solid rgba(255,255,255,0.12)",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
                     padding: "24px",
-                    boxShadow: "0 8px 32px rgba(26,26,46,0.09)",
                   }}
                 >
                   <p
                     style={{
                       fontSize: "24px",
                       fontWeight: 700,
-                      color: "#1A1A2E",
+                      color: "#FFFFFF",
                       margin: 0,
                       textAlign: "center",
                       lineHeight: 1.3,
@@ -304,17 +303,16 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                 style={{
                   padding: "16px 12px",
                   borderRadius: "999px",
-                  border: "none",
+                  border: "1px solid rgba(255,255,255,0.10)",
                   cursor: "pointer",
-                  background: "#E63946",
-                  color: "#FFFFFF",
+                  background: "rgba(255,255,255,0.06)",
+                  color: "rgba(255,255,255,0.65)",
                   fontWeight: 700,
                   fontSize: "15px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "8px",
-                  boxShadow: "0 4px 16px rgba(230,57,70,0.28)",
                 }}
               >
                 <span style={{ fontSize: "18px" }}>✕</span>
@@ -335,7 +333,6 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "8px",
-                  boxShadow: "0 4px 16px rgba(78,205,196,0.28)",
                 }}
               >
                 <span style={{ fontSize: "18px" }}>✓</span>

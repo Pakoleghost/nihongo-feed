@@ -127,10 +127,10 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
         {studyComplete ? (
           <div
             style={{
-              background: "#FFFFFF",
+              background: "#1E2235",
               borderRadius: "24px",
               padding: "22px 20px",
-              boxShadow: "0 8px 28px rgba(26,26,46,0.08)",
+              border: "1px solid rgba(255,255,255,0.08)",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -140,8 +140,8 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
               flex: 1,
             }}
           >
-            <p style={{ fontSize: "22px", fontWeight: 800, color: "#1A1A2E", margin: 0 }}>Lección repasada</p>
-            <p style={{ fontSize: "14px", color: "#6B7280", margin: 0, lineHeight: 1.4 }}>
+            <p style={{ fontSize: "22px", fontWeight: 800, color: "#FFFFFF", margin: 0 }}>Lección repasada</p>
+            <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.42)", margin: 0, lineHeight: 1.4 }}>
               Revisaste {studyItems.length} palabras.
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%", marginTop: "4px" }}>
@@ -184,11 +184,10 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
                 borderRadius: "999px",
                 border: "none",
                 cursor: "pointer",
-                background: "#FFFFFF",
-                color: "#1A1A2E",
+                background: "rgba(255,255,255,0.08)",
+                color: "rgba(255,255,255,0.65)",
                 fontWeight: 700,
                 fontSize: "13px",
-                boxShadow: "0 2px 10px rgba(26,26,46,0.08)",
               }}
             >
               Volver al módulo
@@ -198,10 +197,10 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
           <>
             <div
               style={{
-                background: "#FFFFFF",
+                background: "#1E2235",
                 borderRadius: 20,
                 padding: "28px 24px",
-                boxShadow: "0 4px 20px rgba(26,26,46,0.08)",
+                border: "1px solid rgba(255,255,255,0.08)",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -213,7 +212,7 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
                 style={{
                   fontSize: 68,
                   fontWeight: 800,
-                  color: "#1A1A2E",
+                  color: "#FFFFFF",
                   margin: 0,
                   fontFamily: "var(--font-noto-sans-jp), sans-serif",
                   lineHeight: 1,
@@ -227,7 +226,7 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
                 style={{
                   margin: "14px 0 0",
                   fontSize: 24,
-                  color: "#53596B",
+                  color: "rgba(255,255,255,0.65)",
                   fontFamily: "var(--font-noto-sans-jp), sans-serif",
                 }}
               >
@@ -235,10 +234,10 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
               </p>
 
               {/* Divider */}
-              <div style={{ width: 40, height: 1, background: "#F0EDE8", margin: "16px 0" }} />
+              <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.10)", margin: "16px 0" }} />
 
               {/* Meaning */}
-              <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#1A1A2E", lineHeight: 1.4 }}>
+              <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#FFFFFF", lineHeight: 1.4 }}>
                 {currentStudyItem.es}
               </p>
             </div>
@@ -252,11 +251,10 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
                   borderRadius: "999px",
                   border: "none",
                   cursor: currentStudyIndex === 0 ? "default" : "pointer",
-                  background: currentStudyIndex === 0 ? "#E5E7EB" : "#FFFFFF",
-                  color: currentStudyIndex === 0 ? "#9CA3AF" : "#1A1A2E",
+                  background: currentStudyIndex === 0 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.10)",
+                  color: currentStudyIndex === 0 ? "rgba(255,255,255,0.20)" : "#FFFFFF",
                   fontWeight: 700,
                   fontSize: "15px",
-                  boxShadow: currentStudyIndex === 0 ? "none" : "0 4px 16px rgba(26,26,46,0.08)",
                 }}
               >
                 Anterior

@@ -101,24 +101,24 @@ export default function KanaPage() {
   return (
     <div
       style={{
-        background: "#FFF8E7",
+        background: "#1A1A2E",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
-        padding: "24px 20px calc(80px + env(safe-area-inset-bottom, 0px))",
+        padding: "calc(env(safe-area-inset-top, 20px) + 24px) 20px calc(80px + env(safe-area-inset-bottom, 0px))",
       }}
     >
       {/* ── Header ── */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: 42, fontWeight: 800, color: "#1A1A2E", margin: 0, lineHeight: 1 }}>Kana</h1>
-          <p style={{ fontSize: 14, color: "#9CA3AF", margin: "6px 0 0" }}>
+          <h1 style={{ fontSize: 42, fontWeight: 800, color: "#FFFFFF", margin: 0, lineHeight: 1 }}>Kana</h1>
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.42)", margin: "6px 0 0" }}>
             {dominados} de {TOTAL} dominados
           </p>
         </div>
         <Link
           href="/kana/tabla"
-          style={{ background: "#FFFFFF", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, color: "#1A1A2E", textDecoration: "none", boxShadow: "0 2px 8px rgba(26,26,46,0.08)", whiteSpace: "nowrap", alignSelf: "center" }}
+          style={{ background: "rgba(255,255,255,0.08)", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, color: "#FFFFFF", textDecoration: "none", border: "1px solid rgba(255,255,255,0.10)", whiteSpace: "nowrap", alignSelf: "center" }}
         >
           Ver tabla
         </Link>
@@ -127,7 +127,7 @@ export default function KanaPage() {
       {/* ── Smart CTA ── */}
       <Link
         href={smartHref}
-        style={{ background: "#1A1A2E", borderRadius: 16, padding: "20px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, textDecoration: "none", boxShadow: "0 8px 24px rgba(26,26,46,0.18)", marginTop: 8 }}
+        style={{ background: "#1E2235", borderRadius: 16, padding: "20px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, textDecoration: "none", border: "1px solid rgba(255,255,255,0.10)", marginTop: 8 }}
       >
         <div style={{ minWidth: 0, flex: 1 }}>
           <p style={{ fontSize: 22, fontWeight: 800, color: "#FFFFFF", margin: "0 0 6px", letterSpacing: "-0.02em", lineHeight: 1 }}>
@@ -149,42 +149,42 @@ export default function KanaPage() {
         {/* Modo libre */}
         <Link
           href="/kana/configurar?mode=libre"
-          style={{ position: "relative", background: "#FFFFFF", borderRadius: 14, padding: "16px 16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", boxShadow: "0 2px 10px rgba(26,26,46,0.07)", overflow: "hidden", minHeight: 80 }}
+          style={{ position: "relative", background: "#1E2235", borderRadius: 14, padding: "16px 16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden", minHeight: 80 }}
         >
           <div style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, background: "#4ECDC4", borderBottomLeftRadius: 28 }} />
-          <p style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", margin: 0 }}>Modo libre</p>
-          <p style={{ fontSize: 12, color: "#9CA3AF", margin: "4px 0 0" }}>Elige script y bloques</p>
+          <p style={{ fontSize: 15, fontWeight: 700, color: "#FFFFFF", margin: 0 }}>Modo libre</p>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.42)", margin: "4px 0 0" }}>Elige script y bloques</p>
         </Link>
         {/* Leer palabras */}
         <Link
           href="/kana/palabras"
-          style={{ position: "relative", background: "#FFFFFF", borderRadius: 14, padding: "16px 16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", boxShadow: "0 2px 10px rgba(26,26,46,0.07)", overflow: "hidden", minHeight: 80 }}
+          style={{ position: "relative", background: "#1E2235", borderRadius: 14, padding: "16px 16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden", minHeight: 80 }}
         >
           <div style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, background: "#E63946", borderBottomLeftRadius: 28 }} />
-          <p style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E", margin: 0 }}>Leer palabras</p>
-          <p style={{ fontSize: 12, color: "#9CA3AF", margin: "4px 0 0" }}>Escribe el romaji</p>
+          <p style={{ fontSize: 15, fontWeight: 700, color: "#FFFFFF", margin: 0 }}>Leer palabras</p>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.42)", margin: "4px 0 0" }}>Escribe el romaji</p>
         </Link>
       </div>
 
       {/* ── Progress breakdown ── */}
       <div
-        style={{ background: "#FFFFFF", borderRadius: 16, padding: "18px 18px 14px", boxShadow: "0 2px 10px rgba(26,26,46,0.07)", marginTop: 16 }}
+        style={{ background: "#1E2235", borderRadius: 16, padding: "18px 18px 14px", border: "1px solid rgba(255,255,255,0.06)", marginTop: 16 }}
       >
         {/* Section header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E", margin: 0 }}>Tu progreso</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "#FFFFFF", margin: 0 }}>Tu progreso</p>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             {/* Mini overall ring */}
             <svg width="32" height="32" style={{ transform: "rotate(-90deg)" }}>
-              <circle cx="16" cy="16" r="12" fill="none" stroke="rgba(26,26,46,0.07)" strokeWidth="4" />
+              <circle cx="16" cy="16" r="12" fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="4" />
               <circle
                 cx="16" cy="16" r="12" fill="none"
-                stroke={overallPct >= 80 ? "#4ECDC4" : overallPct >= 40 ? "#1A1A2E" : "#E63946"}
+                stroke={overallPct >= 80 ? "#4ECDC4" : overallPct >= 40 ? "#FFFFFF" : "#E63946"}
                 strokeWidth="4" strokeLinecap="round"
                 strokeDasharray={`${(overallPct / 100) * 75.4} 75.4`}
               />
             </svg>
-            <span style={{ fontSize: 13, fontWeight: 800, color: "#1A1A2E" }}>{overallPct}%</span>
+            <span style={{ fontSize: 13, fontWeight: 800, color: "#FFFFFF" }}>{overallPct}%</span>
           </div>
         </div>
 
@@ -198,28 +198,28 @@ export default function KanaPage() {
               <div key={g.label}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 15, fontFamily: "var(--font-noto-serif-jp), serif", lineHeight: 1, minWidth: 24, display: "inline-block" }}>
+                    <span style={{ fontSize: 15, fontFamily: "var(--font-noto-serif-jp), serif", lineHeight: 1, minWidth: 24, display: "inline-block", color: "#FFFFFF" }}>
                       {g.symbol}
                     </span>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: allDone ? "#178A83" : "#1A1A2E" }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: allDone ? "#4ECDC4" : "rgba(255,255,255,0.88)" }}>
                       {g.label}
                     </span>
                     {allDone && (
-                      <span style={{ fontSize: 10, fontWeight: 700, color: "#178A83", background: "rgba(78,205,196,0.14)", borderRadius: 5, padding: "1px 6px", letterSpacing: "0.04em" }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: "#4ECDC4", background: "rgba(78,205,196,0.14)", borderRadius: 5, padding: "1px 6px", letterSpacing: "0.04em" }}>
                         ✓
                       </span>
                     )}
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#9CA3AF" }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.42)" }}>
                     {g.dominated}/{g.total}
                   </span>
                 </div>
                 {/* Double-layer progress bar: seen (light) + dominated (solid) */}
-                <div style={{ height: 5, background: "#F0EDE8", borderRadius: 999, overflow: "hidden", position: "relative" }}>
+                <div style={{ height: 5, background: "rgba(255,255,255,0.08)", borderRadius: 999, overflow: "hidden", position: "relative" }}>
                   {/* Seen layer */}
-                  <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${seenPct}%`, background: "rgba(26,26,46,0.10)", borderRadius: 999 }} />
+                  <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${seenPct}%`, background: "rgba(255,255,255,0.15)", borderRadius: 999 }} />
                   {/* Dominated layer */}
-                  <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${domPct}%`, background: allDone ? "#4ECDC4" : "#1A1A2E", borderRadius: 999, transition: "width 0.4s ease" }} />
+                  <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${domPct}%`, background: allDone ? "#4ECDC4" : "#FFFFFF", borderRadius: 999, transition: "width 0.4s ease" }} />
                 </div>
               </div>
             );
@@ -227,14 +227,14 @@ export default function KanaPage() {
         </div>
 
         {/* Legend */}
-        <div style={{ display: "flex", gap: 16, marginTop: 14, paddingTop: 12, borderTop: "1px solid #F0EDE8" }}>
+        <div style={{ display: "flex", gap: 16, marginTop: 14, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <div style={{ width: 10, height: 4, borderRadius: 2, background: "rgba(26,26,46,0.12)" }} />
-            <span style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 600 }}>Vistas</span>
+            <div style={{ width: 10, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.15)" }} />
+            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.42)", fontWeight: 600 }}>Vistas</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <div style={{ width: 10, height: 4, borderRadius: 2, background: "#1A1A2E" }} />
-            <span style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 600 }}>Dominadas</span>
+            <div style={{ width: 10, height: 4, borderRadius: 2, background: "#FFFFFF" }} />
+            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.42)", fontWeight: 600 }}>Dominadas</span>
           </div>
         </div>
       </div>
@@ -243,16 +243,16 @@ export default function KanaPage() {
       <div style={{ marginTop: 20, display: "flex", justifyContent: "center" }}>
         {confirmReset ? (
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 13, color: "#9CA3AF" }}>¿Reiniciar todo tu progreso?</span>
+            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.42)" }}>¿Reiniciar todo tu progreso?</span>
             <button onClick={handleReset} style={{ fontSize: 13, fontWeight: 700, color: "#E63946", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}>
               Sí, reiniciar
             </button>
-            <button onClick={() => setConfirmReset(false)} style={{ fontSize: 13, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}>
+            <button onClick={() => setConfirmReset(false)} style={{ fontSize: 13, color: "rgba(255,255,255,0.42)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}>
               Cancelar
             </button>
           </div>
         ) : (
-          <button onClick={() => setConfirmReset(true)} style={{ fontSize: 12, color: "#C4BAB0", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}>
+          <button onClick={() => setConfirmReset(true)} style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}>
             Reiniciar progreso
           </button>
         )}

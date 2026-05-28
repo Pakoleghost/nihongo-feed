@@ -23,22 +23,22 @@ function ActionCard({
   isRecommended: boolean;
 }) {
   const accent = card.accent ?? "teal";
-  const buttonBackground = isRecommended ? (accent === "red" ? "#E63946" : "#1A1A2E") : accent === "red" ? "#1A1A2E" : "#4ECDC4";
-  const buttonColor = isRecommended ? "#FFFFFF" : accent === "red" ? "#FFFFFF" : "#1A1A2E";
+  const buttonBackground = isRecommended ? (accent === "red" ? "#E63946" : "#4ECDC4") : "rgba(255,255,255,0.10)";
+  const buttonColor = isRecommended ? (accent === "red" ? "#FFFFFF" : "#1A1A2E") : "#FFFFFF";
 
   return (
     <div
       style={{
         position: "relative",
         overflow: "hidden",
-        background: isRecommended ? "#FFFFFF" : "rgba(255,255,255,0.78)",
+        background: isRecommended ? "#252B3F" : "#1E2235",
         borderRadius: "2rem",
         padding: "14px",
         minHeight: "118px",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        boxShadow: isRecommended ? "0 14px 30px rgba(26,26,46,0.08)" : "0 8px 18px rgba(26,26,46,0.05)",
+        border: isRecommended ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(255,255,255,0.06)",
       }}
     >
       {card.watermark ? (
@@ -68,7 +68,7 @@ function ActionCard({
               fontSize: "18px",
               lineHeight: 1,
               fontWeight: 700,
-              color: "#1A1A2E",
+              color: "#FFFFFF",
             }}
           >
             {card.title}
@@ -78,7 +78,7 @@ function ActionCard({
               style={{
                 borderRadius: "999px",
                 background: "rgba(78,205,196,0.12)",
-                color: "#0F766E",
+                color: "#4ECDC4",
                 padding: "4px 8px",
                 fontSize: "10px",
                 fontWeight: 800,
@@ -96,7 +96,7 @@ function ActionCard({
             fontSize: "12px",
             lineHeight: 1.25,
             fontWeight: 400,
-            color: "#6B7280",
+            color: "rgba(255,255,255,0.55)",
             maxWidth: "200px",
           }}
         >
@@ -135,10 +135,10 @@ export default function ModuleActionChoices({
     <div
       style={{
         marginTop: "12px",
-        background: "rgba(255,255,255,0.78)",
+        background: "rgba(255,255,255,0.04)",
         borderRadius: "2rem",
         padding: "12px",
-        boxShadow: "0 12px 30px rgba(26,26,46,0.06)",
+        border: "1px solid rgba(255,255,255,0.06)",
       }}
     >
       <p
@@ -147,7 +147,7 @@ export default function ModuleActionChoices({
           fontSize: "11px",
           letterSpacing: "0.12em",
           fontWeight: 700,
-          color: "#9CA3AF",
+          color: "rgba(255,255,255,0.42)",
           textTransform: "uppercase",
         }}
       >

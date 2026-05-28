@@ -275,10 +275,10 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
         {practiceResult ? (
           <div
             style={{
-              background: "#FFFFFF",
+              background: "#1E2235",
               borderRadius: "24px",
               padding: "22px 20px",
-              boxShadow: "0 8px 28px rgba(26,26,46,0.08)",
+              border: "1px solid rgba(255,255,255,0.08)",
               display: "flex",
               flexDirection: "column",
               gap: "12px",
@@ -287,13 +287,13 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
             }}
           >
             <div>
-              <p style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "#1A1A2E" }}>Sesión completada</p>
+              <p style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "#FFFFFF" }}>Sesión completada</p>
               <div
                 style={{
                   display: "inline-flex",
                   marginTop: "8px",
-                  background: "#F5FCFB",
-                  color: "#0F766E",
+                  background: "rgba(78,205,196,0.15)",
+                  color: "#4ECDC4",
                   borderRadius: "999px",
                   padding: "7px 11px",
                   fontSize: "12px",
@@ -303,24 +303,24 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
                 {getKanjiSessionTag(sessionContext)} · L{lesson}
               </div>
             </div>
-            <p style={{ margin: 0, fontSize: "14px", color: "#1A1A2E", lineHeight: 1.4 }}>
+            <p style={{ margin: 0, fontSize: "14px", color: "rgba(255,255,255,0.65)", lineHeight: 1.4 }}>
               {practiceResult.practiced} ítems · {practiceResult.correct} correctas ·{" "}
               {practiceResult.incorrect} incorrectas
             </p>
             <div
               style={{
-                background: "#FFF8E7",
+                background: "rgba(255,255,255,0.06)",
                 borderRadius: "18px",
                 padding: "12px 14px",
               }}
             >
-              <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, letterSpacing: "0.08em", color: "#9CA3AF" }}>
+              <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, letterSpacing: "0.08em", color: "rgba(255,255,255,0.4)" }}>
                 QUÉ SIGUE
               </p>
-              <p style={{ margin: "5px 0 0", fontSize: "15px", fontWeight: 800, color: "#1A1A2E" }}>
+              <p style={{ margin: "5px 0 0", fontSize: "15px", fontWeight: 800, color: "#FFFFFF" }}>
                 {nextAction.label}
               </p>
-              <p style={{ margin: "3px 0 0", fontSize: "13px", color: "#6B7280", lineHeight: 1.35 }}>
+              <p style={{ margin: "3px 0 0", fontSize: "13px", color: "rgba(255,255,255,0.42)", lineHeight: 1.35 }}>
                 {nextAction.helper}
               </p>
             </div>
@@ -332,7 +332,7 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
                   borderRadius: "999px",
                   border: "none",
                   cursor: "pointer",
-                  background: "#1A1A2E",
+                  background: "rgba(255,255,255,0.10)",
                   color: "#FFFFFF",
                   fontWeight: 800,
                   fontSize: "14px",
@@ -364,14 +364,14 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
               style={{
                 position: "relative",
                 overflow: "hidden",
-                background: "#FFFFFF",
+                background: "#1E2235",
                 borderRadius: 20,
                 flex: 1,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+                border: "1px solid rgba(255,255,255,0.08)",
                 textAlign: "center",
                 padding: "24px 20px",
               }}
@@ -383,7 +383,7 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
                 style={{
                   fontSize: "clamp(32px, 12vw, 72px)",
                   fontWeight: 800,
-                  color: "#1A1A2E",
+                  color: "#FFFFFF",
                   margin: 0,
                   fontFamily: "var(--font-noto-sans-jp), sans-serif",
                   lineHeight: 1.1,
@@ -391,10 +391,10 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
               >
                 {currentQuestion.item.kanji}
               </p>
-              <p style={{ margin: "16px 0 0", fontSize: 13, color: "#9CA3AF", fontStyle: "italic" }}>
+              <p style={{ margin: "16px 0 0", fontSize: 13, color: "rgba(255,255,255,0.42)", fontStyle: "italic" }}>
                 {currentQuestion.item.es}
               </p>
-              <p style={{ margin: "12px 0 0", fontSize: 11, color: "#C4BAB0", letterSpacing: "0.02em" }}>
+              <p style={{ margin: "12px 0 0", fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: "0.02em" }}>
                 Elige la lectura correcta
               </p>
             </div>
@@ -411,8 +411,8 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
               {currentQuestion.options.map((option) => {
                 const isSelected = selectedOption === option;
                 const isCorrectOption = option === currentQuestion.item.hira;
-                let background = "#FFFFFF";
-                let color = "#1A1A2E";
+                let background = "rgba(255,255,255,0.08)";
+                let color = "#FFFFFF";
 
                 if (quizPhase === "feedback") {
                   if (isCorrectOption) { background = "#4ECDC4"; color = "#FFFFFF"; }
@@ -427,13 +427,12 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
                     style={{
                       padding: "18px 10px",
                       borderRadius: 16,
-                      border: "none",
+                      border: "1px solid rgba(255,255,255,0.06)",
                       cursor: quizPhase === "feedback" ? "default" : "pointer",
                       background,
                       color,
                       fontSize: 22,
                       fontWeight: 800,
-                      boxShadow: "0 2px 8px rgba(26,26,46,0.08)",
                       transition: "background 0.15s",
                       textAlign: "center",
                       fontFamily: "var(--font-noto-sans-jp), sans-serif",

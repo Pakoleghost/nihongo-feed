@@ -141,7 +141,7 @@ export default function KanjiQuizScreen({
   return (
     <div
       style={{
-        background: "#FFF8E7",
+        background: "#1A1A2E",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -167,14 +167,14 @@ export default function KanjiQuizScreen({
           aria-label="Volver"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M18 6L6 18M6 6l12 12" stroke="#1A1A2E" strokeWidth="2.5" strokeLinecap="round" />
+            <path d="M18 6L6 18M6 6l12 12" stroke="rgba(255,255,255,0.65)" strokeWidth="2.5" strokeLinecap="round" />
           </svg>
         </button>
         <div
           style={{
             flex: 1,
             height: "6px",
-            background: "#E5E7EB",
+            background: "rgba(255,255,255,0.10)",
             borderRadius: "999px",
             overflow: "hidden",
           }}
@@ -210,11 +210,10 @@ export default function KanjiQuizScreen({
               borderRadius: "999px",
               border: "none",
               cursor: "pointer",
-              background: lesson === l ? "#1A1A2E" : "#FFFFFF",
-              color: lesson === l ? "#FFFFFF" : "#1A1A2E",
+              background: lesson === l ? "#FFFFFF" : "rgba(255,255,255,0.08)",
+              color: lesson === l ? "#1A1A2E" : "rgba(255,255,255,0.55)",
               fontWeight: 700,
               fontSize: "14px",
-              boxShadow: lesson === l ? "none" : "0 2px 8px rgba(26,26,46,0.08)",
               whiteSpace: "nowrap",
             }}
           >
@@ -234,8 +233,8 @@ export default function KanjiQuizScreen({
                 borderRadius: "999px",
                 border: "none",
                 cursor: "pointer",
-                background: type === t ? "#E63946" : "#E8E3DC",
-                color: type === t ? "#FFFFFF" : "#53596B",
+                background: type === t ? "#E63946" : "rgba(255,255,255,0.08)",
+                color: type === t ? "#FFFFFF" : "rgba(255,255,255,0.42)",
                 fontWeight: 700,
                 fontSize: "15px",
                 transition: "background 0.15s",
@@ -252,14 +251,14 @@ export default function KanjiQuizScreen({
           <div
             style={{
               margin: "16px 20px 0",
-              background: "#FFFFFF",
+              background: "#1E2235",
               borderRadius: "24px",
               padding: "32px 24px",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 4px 20px rgba(26,26,46,0.08)",
+              border: "1px solid rgba(255,255,255,0.08)",
               minHeight: "200px",
             }}
           >
@@ -267,7 +266,7 @@ export default function KanjiQuizScreen({
               style={{
                 fontSize: "64px",
                 fontWeight: 800,
-                color: "#1A1A2E",
+                color: "#FFFFFF",
                 margin: 0,
                 fontFamily: "var(--font-noto-sans-jp), sans-serif",
                 lineHeight: 1,
@@ -279,7 +278,7 @@ export default function KanjiQuizScreen({
               <p
                 style={{
                   fontSize: "18px",
-                  color: "#9CA3AF",
+                  color: "rgba(255,255,255,0.42)",
                   margin: "10px 0 0",
                   fontFamily: "var(--font-noto-sans-jp), sans-serif",
                 }}
@@ -300,8 +299,8 @@ export default function KanjiQuizScreen({
             {currentQ.options.map((option) => {
               const isSelected = selectedOption === option;
               const isCorrectOpt = option === currentQ.item.es;
-              let bg = "#FFFFFF";
-              let color = "#1A1A2E";
+              let bg = "rgba(255,255,255,0.08)";
+              let color = "#FFFFFF";
 
               if (phase === "feedback") {
                 if (isCorrectOpt) {
@@ -321,13 +320,12 @@ export default function KanjiQuizScreen({
                   style={{
                     padding: "18px 12px",
                     borderRadius: "18px",
-                    border: "none",
+                    border: phase === "feedback" ? "none" : "1px solid rgba(255,255,255,0.08)",
                     cursor: phase === "feedback" ? "default" : "pointer",
                     background: bg,
                     color,
                     fontSize: "16px",
                     fontWeight: 700,
-                    boxShadow: "0 4px 14px rgba(26,26,46,0.08)",
                     transition: "background 0.15s",
                     textAlign: "center",
                   }}

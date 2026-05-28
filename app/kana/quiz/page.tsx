@@ -698,14 +698,14 @@ function QuizContent() {
     return (
       <div
         style={{
-          background: "#FFF8E7",
+          background: "#1A1A2E",
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <p style={{ color: "#53596B", fontSize: "16px" }}>Preparando sesión…</p>
+        <p style={{ color: "rgba(255,255,255,0.42)", fontSize: "16px" }}>Preparando sesión…</p>
       </div>
     );
   }
@@ -714,14 +714,14 @@ function QuizContent() {
     return (
       <div
         style={{
-          background: "#FFF8E7",
+          background: "#1A1A2E",
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <p style={{ color: "#53596B", fontSize: "16px" }}>Preparando quiz…</p>
+        <p style={{ color: "rgba(255,255,255,0.42)", fontSize: "16px" }}>Preparando quiz…</p>
       </div>
     );
   }
@@ -750,19 +750,19 @@ function QuizContent() {
     : feedbackNeedsSoftReview
       ? "rgba(245,158,11,0.14)"
       : "rgba(230,57,70,0.12)";
-  const feedbackColor = feedbackIsCorrect ? "#178A83" : feedbackNeedsSoftReview ? "#9A5B00" : "#C53340";
+  const feedbackColor = feedbackIsCorrect ? "#4ECDC4" : feedbackNeedsSoftReview ? "#F59E0B" : "#E63946";
   const matchReviewCount = new Set(matchMistakePairKeys).size;
   const sharedCardStyle = {
-    background: "#FFFFFF",
+    background: "#1E2235",
     borderRadius: "28px",
-    boxShadow: "0 10px 28px rgba(26,26,46,0.08)",
+    border: "1px solid rgba(255,255,255,0.08)",
   } as const;
 
   if (isTraceQuestion) {
     return (
       <div
         style={{
-          background: "#FFF8E7",
+          background: "#1A1A2E",
           height: "100dvh",
           display: "flex",
           flexDirection: "column",
@@ -771,7 +771,7 @@ function QuizContent() {
       >
         <div
           style={{
-            padding: "44px 20px 0",
+            padding: "calc(env(safe-area-inset-top, 20px) + 20px) 20px 0",
             display: "grid",
             gap: "12px",
             flexShrink: 0,
@@ -799,7 +799,7 @@ function QuizContent() {
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M19 12H5M12 5l-7 7 7 7"
-                  stroke="#1A1A2E"
+                  stroke="rgba(255,255,255,0.65)"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -819,7 +819,7 @@ function QuizContent() {
                   style={{
                     fontSize: "13px",
                     fontWeight: 700,
-                    color: "#53596B",
+                    color: "rgba(255,255,255,0.65)",
                   }}
                 >
                   Trazando
@@ -828,7 +828,7 @@ function QuizContent() {
                   style={{
                     fontSize: "13px",
                     fontWeight: 700,
-                    color: "#7A7F8D",
+                    color: "rgba(255,255,255,0.42)",
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -838,7 +838,7 @@ function QuizContent() {
               <div
                 style={{
                   height: "6px",
-                  background: "#E5E7EB",
+                  background: "rgba(255,255,255,0.10)",
                   borderRadius: "999px",
                   overflow: "hidden",
                 }}
@@ -867,12 +867,11 @@ function QuizContent() {
             <div
               style={{
                 borderRadius: "999px",
-                background: "#FFFFFF",
-                color: "#53596B",
+                background: "rgba(255,255,255,0.08)",
+                color: "rgba(255,255,255,0.65)",
                 fontSize: "12px",
                 fontWeight: 700,
                 padding: "8px 12px",
-                boxShadow: "0 2px 10px rgba(26,26,46,0.08)",
               }}
             >
               {quizContext}
@@ -881,7 +880,7 @@ function QuizContent() {
               style={{
                 borderRadius: "999px",
                 background: "rgba(78,205,196,0.12)",
-                color: "#178A83",
+                color: "#4ECDC4",
                 fontSize: "12px",
                 fontWeight: 700,
                 padding: "8px 12px",
@@ -923,7 +922,7 @@ function QuizContent() {
                   fontWeight: 800,
                   letterSpacing: "0.06em",
                   textTransform: "uppercase",
-                  color: "#8A8F9B",
+                  color: "rgba(255,255,255,0.42)",
                 }}
               >
                 {questionModeLabel}
@@ -932,7 +931,7 @@ function QuizContent() {
                 style={{
                   fontSize: "24px",
                   fontWeight: 800,
-                  color: "#1A1A2E",
+                  color: "#FFFFFF",
                   lineHeight: 1.1,
                 }}
               >
@@ -941,7 +940,7 @@ function QuizContent() {
               <p
                 style={{
                   fontSize: "14px",
-                  color: "#6E737F",
+                  color: "rgba(255,255,255,0.55)",
                   margin: 0,
                   lineHeight: 1.35,
                 }}
@@ -969,12 +968,11 @@ function QuizContent() {
                 <div
                   style={{
                     borderRadius: "24px",
-                    background: "#FAF7F1",
+                    background: "rgba(255,255,255,0.06)",
                     padding: "16px",
                     display: "grid",
                     gap: "8px",
                     textAlign: "center",
-                    boxShadow: "inset 0 0 0 1px rgba(26,26,46,0.05)",
                   }}
                 >
                   <div
@@ -983,7 +981,7 @@ function QuizContent() {
                       fontWeight: 800,
                       letterSpacing: "0.06em",
                       textTransform: "uppercase",
-                      color: "#8A8F9B",
+                      color: "rgba(255,255,255,0.42)",
                     }}
                   >
                     Reconocimiento
@@ -992,7 +990,7 @@ function QuizContent() {
                     style={{
                       fontSize: "24px",
                       fontWeight: 800,
-                      color: "#1A1A2E",
+                      color: "#FFFFFF",
                       lineHeight: 1.1,
                     }}
                   >
@@ -1007,7 +1005,7 @@ function QuizContent() {
                             ? "rgba(78,205,196,0.16)"
                             : "rgba(230,57,70,0.12)"
                           : "rgba(78,205,196,0.12)",
-                      color: phase === "feedback" ? feedbackColor : "#178A83",
+                      color: phase === "feedback" ? feedbackColor : "#4ECDC4",
                       padding: "8px 12px",
                       fontSize: "13px",
                       fontWeight: 800,
@@ -1045,14 +1043,14 @@ function QuizContent() {
                             ? "#4ECDC4"
                             : showWrong
                               ? "#E63946"
-                              : "#FFFFFF",
-                          color: showCorrect || showWrong ? "#FFFFFF" : "#1A1A2E",
+                              : "rgba(255,255,255,0.08)",
+                          color: "#FFFFFF",
                           minHeight: "72px",
                           padding: "12px",
                           fontSize: "22px",
                           fontWeight: 800,
                           cursor: phase === "traceReview" ? "pointer" : "default",
-                          boxShadow: "0 8px 20px rgba(26,26,46,0.07)",
+                          border: "1px solid rgba(255,255,255,0.08)",
                         }}
                       >
                         {option}
@@ -1071,7 +1069,7 @@ function QuizContent() {
   return (
     <div
       style={{
-        background: "#FFF8E7",
+        background: "#1A1A2E",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -1080,7 +1078,7 @@ function QuizContent() {
       {/* Top bar */}
       <div
         style={{
-          padding: "52px 20px 0",
+          padding: "calc(env(safe-area-inset-top, 20px) + 28px) 20px 0",
           display: "grid",
           gap: "14px",
         }}
@@ -1126,7 +1124,7 @@ function QuizContent() {
                 style={{
                   fontSize: "13px",
                   fontWeight: 700,
-                  color: "#53596B",
+                  color: "rgba(255,255,255,0.65)",
                 }}
               >
                 Practicando
@@ -1135,7 +1133,7 @@ function QuizContent() {
                 style={{
                   fontSize: "13px",
                   fontWeight: 700,
-                  color: "#7A7F8D",
+                  color: "rgba(255,255,255,0.42)",
                   whiteSpace: "nowrap",
                 }}
               >
@@ -1145,7 +1143,7 @@ function QuizContent() {
             <div
               style={{
                 height: "6px",
-                background: "#E5E7EB",
+                background: "rgba(255,255,255,0.10)",
                 borderRadius: "999px",
                 overflow: "hidden",
               }}
@@ -1174,12 +1172,11 @@ function QuizContent() {
           <div
             style={{
               borderRadius: "999px",
-              background: "#FFFFFF",
-              color: "#53596B",
+              background: "rgba(255,255,255,0.08)",
+              color: "rgba(255,255,255,0.65)",
               fontSize: "12px",
               fontWeight: 700,
               padding: "8px 12px",
-              boxShadow: "0 2px 10px rgba(26,26,46,0.08)",
             }}
           >
             {quizContext}
@@ -1188,7 +1185,7 @@ function QuizContent() {
             style={{
               borderRadius: "999px",
               background: "rgba(230,57,70,0.10)",
-              color: "#C53340",
+              color: "#E63946",
               fontSize: "12px",
               fontWeight: 700,
               padding: "8px 12px",
@@ -1228,7 +1225,7 @@ function QuizContent() {
               fontWeight: 800,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
-              color: "#8A8F9B",
+              color: "rgba(255,255,255,0.42)",
             }}
           >
             {questionModeLabel}
@@ -1249,7 +1246,7 @@ function QuizContent() {
                 style={{
                   fontSize: isMatchQuestion ? "42px" : promptKind === "kana" ? "112px" : "64px",
                   fontWeight: 700,
-                  color: "#1A1A2E",
+                  color: "#FFFFFF",
                   lineHeight: 1,
                   fontFamily:
                     promptKind === "kana" || isMatchQuestion ? "var(--font-noto-sans-jp), sans-serif" : "inherit",
@@ -1265,7 +1262,7 @@ function QuizContent() {
           <p
             style={{
               fontSize: "15px",
-              color: "#6E737F",
+              color: "rgba(255,255,255,0.55)",
               margin: 0,
               textAlign: "center",
             }}
@@ -1324,9 +1321,9 @@ function QuizContent() {
                         : matched
                           ? "rgba(78,205,196,0.18)"
                           : selected
-                            ? "#1A1A2E"
-                            : "#F7F3ED",
-                      color: needsReview ? "#C53340" : matched ? "#178A83" : selected ? "#FFFFFF" : "#1A1A2E",
+                            ? "rgba(255,255,255,0.20)"
+                            : "rgba(255,255,255,0.08)",
+                      color: needsReview ? "#E63946" : matched ? "#4ECDC4" : "#FFFFFF",
                       fontSize: "30px",
                       fontWeight: 800,
                       fontFamily: "var(--font-noto-sans-jp), sans-serif",
@@ -1366,14 +1363,13 @@ function QuizContent() {
                         : wrong
                           ? "rgba(230,57,70,0.16)"
                           : selected
-                            ? "#1A1A2E"
-                            : "#FFFFFF",
-                      color: needsReview ? "#C53340" : matched ? "#178A83" : selected ? "#FFFFFF" : "#1A1A2E",
+                            ? "rgba(255,255,255,0.20)"
+                            : "rgba(255,255,255,0.08)",
+                      color: needsReview ? "#E63946" : matched ? "#4ECDC4" : "#FFFFFF",
                       fontSize: "30px",
                       fontWeight: 800,
                       fontFamily: "var(--font-noto-sans-jp), sans-serif",
                       cursor: phase === "question" && !matched ? "pointer" : "default",
-                      boxShadow: matched ? "none" : "0 4px 14px rgba(26,26,46,0.06)",
                       transition: "background 0.16s, color 0.16s, transform 0.16s",
                       transform: wrong ? "translateX(2px)" : matched ? "scale(0.98)" : "scale(1)",
                     }}
@@ -1390,7 +1386,7 @@ function QuizContent() {
               textAlign: "center",
               fontSize: "14px",
               fontWeight: 700,
-              color: phase === "feedback" ? feedbackColor : "#8A8F9B",
+              color: phase === "feedback" ? feedbackColor : "rgba(255,255,255,0.42)",
               marginTop: "12px",
             }}
           >
@@ -1422,9 +1418,9 @@ function QuizContent() {
             {currentQ.options.map((option) => {
               const isSelected = selectedOption === option;
               const isCorrectOpt = option === correctChoiceValue;
-              let bg = "#FFFFFF";
-              let color = "#1A1A2E";
-              let borderColor = "rgba(26,26,46,0.08)";
+              let bg = "rgba(255,255,255,0.08)";
+              let color = "#FFFFFF";
+              let borderColor = "rgba(255,255,255,0.08)";
 
               if (phase === "feedback") {
                 if (isCorrectOpt) {
@@ -1458,7 +1454,6 @@ function QuizContent() {
                     color,
                     fontSize: currentQ.taskType === "romaji_to_kana_choice" ? "34px" : "22px",
                     fontWeight: 700,
-                    boxShadow: phase === "feedback" ? "none" : "0 4px 14px rgba(26,26,46,0.06)",
                     transition: "background 0.2s, color 0.2s, border-color 0.2s",
                     display: "flex",
                     alignItems: "center",
@@ -1492,7 +1487,7 @@ function QuizContent() {
               textAlign: "center",
               fontSize: "14px",
               fontWeight: 700,
-              color: phase === "feedback" ? feedbackColor : "#8A8F9B",
+              color: phase === "feedback" ? feedbackColor : "rgba(255,255,255,0.42)",
               marginTop: "12px",
             }}
           >

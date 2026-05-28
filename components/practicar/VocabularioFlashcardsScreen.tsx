@@ -222,32 +222,32 @@ export default function VocabularioFlashcardsScreen({
   const pct = total > 0 ? Math.round((known / total) * 100) : 0;
 
   return (
-    <div style={{ background: "#FFF8E7", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ background: "#1A1A2E", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {/* Header */}
       <div style={{ padding: "52px 20px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         <button
           onClick={() => router.push(backHref)}
-          style={{ width: 36, height: 36, borderRadius: "50%", background: "#FFFFFF", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(26,26,46,0.10)", flexShrink: 0 }}
+          style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.10)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
           aria-label="Volver"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M18 6L6 18M6 6l12 12" stroke="#1A1A2E" strokeWidth="2.5" strokeLinecap="round" />
+            <path d="M18 6L6 18M6 6l12 12" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
           </svg>
         </button>
 
-        <span style={{ fontSize: 13, fontWeight: 700, color: "#9CA3AF", flex: 1, textAlign: "center" }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.42)", flex: 1, textAlign: "center" }}>
           Flashcards · L{lesson}
         </span>
 
         <button
           onClick={() => setProyectar(true)}
           title="Proyectar"
-          style={{ width: 36, height: 36, borderRadius: "50%", background: "#FFFFFF", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(26,26,46,0.10)", flexShrink: 0 }}
+          style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.10)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
           aria-label="Modo proyectar"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <rect x="2" y="4" width="20" height="14" rx="2" stroke="#1A1A2E" strokeWidth="2" strokeLinecap="round"/>
-            <path d="M8 20h8M12 18v2" stroke="#1A1A2E" strokeWidth="2" strokeLinecap="round"/>
+            <rect x="2" y="4" width="20" height="14" rx="2" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round"/>
+            <path d="M8 20h8M12 18v2" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round"/>
           </svg>
         </button>
       </div>
@@ -263,10 +263,9 @@ export default function VocabularioFlashcardsScreen({
             onClick={() => setLesson(l)}
             style={{
               flexShrink: 0, padding: "6px 12px", borderRadius: 999, border: "none", cursor: "pointer",
-              background: lesson === l ? "#1A1A2E" : "#FFFFFF",
-              color: lesson === l ? "#FFFFFF" : "#9CA3AF",
+              background: lesson === l ? "#FFFFFF" : "rgba(255,255,255,0.08)",
+              color: lesson === l ? "#1A1A2E" : "rgba(255,255,255,0.42)",
               fontWeight: 700, fontSize: 12,
-              boxShadow: lesson === l ? "none" : "0 1px 4px rgba(26,26,46,0.07)",
             }}
           >
             L{l}
@@ -280,10 +279,10 @@ export default function VocabularioFlashcardsScreen({
           /* ── Completion screen ── */
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20 }}>
             <div style={{ textAlign: "center" }}>
-              <p style={{ fontSize: 26, fontWeight: 800, color: "#1A1A2E", margin: 0 }}>
+              <p style={{ fontSize: 26, fontWeight: 800, color: "#FFFFFF", margin: 0 }}>
                 {pct === 100 ? "¡Sesión perfecta!" : pct >= 70 ? "¡Buen repaso!" : "Sesión completada"}
               </p>
-              <p style={{ fontSize: 14, color: "#9CA3AF", margin: "6px 0 0" }}>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.42)", margin: "6px 0 0" }}>
                 {GENKI_LESSON_NAMES[lesson] ?? `Lección ${lesson}`}
               </p>
             </div>
@@ -291,13 +290,13 @@ export default function VocabularioFlashcardsScreen({
             {/* Stats */}
             <div style={{ display: "flex", gap: 16 }}>
               <div style={{ textAlign: "center", background: "rgba(78,205,196,0.12)", borderRadius: 14, padding: "14px 20px" }}>
-                <p style={{ fontSize: 32, fontWeight: 800, color: "#178A83", margin: 0, lineHeight: 1 }}>{known}</p>
-                <p style={{ fontSize: 10, fontWeight: 700, color: "#9CA3AF", margin: "4px 0 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>Conocidas</p>
+                <p style={{ fontSize: 32, fontWeight: 800, color: "#4ECDC4", margin: 0, lineHeight: 1 }}>{known}</p>
+                <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.42)", margin: "4px 0 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>Conocidas</p>
               </div>
               {missed.length > 0 && (
-                <div style={{ textAlign: "center", background: "rgba(230,57,70,0.08)", borderRadius: 14, padding: "14px 20px" }}>
+                <div style={{ textAlign: "center", background: "rgba(230,57,70,0.12)", borderRadius: 14, padding: "14px 20px" }}>
                   <p style={{ fontSize: 32, fontWeight: 800, color: "#E63946", margin: 0, lineHeight: 1 }}>{missed.length}</p>
-                  <p style={{ fontSize: 10, fontWeight: 700, color: "#9CA3AF", margin: "4px 0 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>Falladas</p>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.42)", margin: "4px 0 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>Falladas</p>
                 </div>
               )}
             </div>
@@ -306,12 +305,12 @@ export default function VocabularioFlashcardsScreen({
             {missed.length > 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", maxWidth: 320 }}>
                 {missed.slice(0, 8).map((item, i) => (
-                  <span key={i} style={{ fontSize: 18, fontWeight: 700, color: "#E63946", background: "rgba(230,57,70,0.07)", borderRadius: 8, padding: "4px 10px", fontFamily: "var(--font-noto-serif-jp), serif" }}>
+                  <span key={i} style={{ fontSize: 18, fontWeight: 700, color: "#E63946", background: "rgba(230,57,70,0.10)", borderRadius: 8, padding: "4px 10px", fontFamily: "var(--font-noto-serif-jp), serif" }}>
                     {item.kanji || item.hira}
                   </span>
                 ))}
                 {missed.length > 8 && (
-                  <span style={{ fontSize: 13, color: "#9CA3AF", alignSelf: "center" }}>+{missed.length - 8} más</span>
+                  <span style={{ fontSize: 13, color: "rgba(255,255,255,0.42)", alignSelf: "center" }}>+{missed.length - 8} más</span>
                 )}
               </div>
             )}
@@ -321,14 +320,14 @@ export default function VocabularioFlashcardsScreen({
               {missed.length > 0 && (
                 <button
                   onClick={restartWithMissed}
-                  style={{ width: "100%", padding: "16px", borderRadius: 14, border: "none", cursor: "pointer", background: "#1A1A2E", color: "#FFFFFF", fontSize: 16, fontWeight: 800 }}
+                  style={{ width: "100%", padding: "16px", borderRadius: 14, border: "1px solid rgba(255,255,255,0.10)", cursor: "pointer", background: "#1E2235", color: "#FFFFFF", fontSize: 16, fontWeight: 800 }}
                 >
                   Repasar {missed.length} falladas
                 </button>
               )}
               <button
                 onClick={restartAll}
-                style={{ width: "100%", padding: missed.length > 0 ? "12px" : "16px", borderRadius: 14, border: "none", cursor: "pointer", background: missed.length > 0 ? "rgba(26,26,46,0.06)" : "#E63946", color: missed.length > 0 ? "#9CA3AF" : "#FFFFFF", fontSize: missed.length > 0 ? 14 : 16, fontWeight: 700 }}
+                style={{ width: "100%", padding: missed.length > 0 ? "12px" : "16px", borderRadius: 14, border: "none", cursor: "pointer", background: missed.length > 0 ? "rgba(255,255,255,0.07)" : "#E63946", color: missed.length > 0 ? "rgba(255,255,255,0.42)" : "#FFFFFF", fontSize: missed.length > 0 ? 14 : 16, fontWeight: 700 }}
               >
                 {missed.length > 0 ? "Reiniciar todo el mazo" : "Reiniciar"}
               </button>
@@ -346,24 +345,24 @@ export default function VocabularioFlashcardsScreen({
               }}
             >
               {/* Front */}
-              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", background: "#FFFFFF", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: 28, overflow: "hidden", boxShadow: "0 4px 16px rgba(26,26,46,0.08)" }}>
+              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", background: "#1E2235", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: 28, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
                 {/* Corner fold */}
                 <div style={{ position: "absolute", top: 0, right: 0, width: 44, height: 44, background: "#4ECDC4", borderBottomLeftRadius: 44 }} />
-                <p style={{ fontSize: "clamp(28px, 11vw, 64px)", fontWeight: 800, color: "#1A1A2E", margin: 0, fontFamily: "var(--font-noto-sans-jp), sans-serif", lineHeight: 1.1, textAlign: "center", wordBreak: "break-word" }}>
+                <p style={{ fontSize: "clamp(28px, 11vw, 64px)", fontWeight: 800, color: "#FFFFFF", margin: 0, fontFamily: "var(--font-noto-sans-jp), sans-serif", lineHeight: 1.1, textAlign: "center", wordBreak: "break-word" }}>
                   {card.kanji || card.hira}
                 </p>
                 {card.kanji && (
-                  <p style={{ fontSize: 18, color: "#9CA3AF", margin: 0, fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
+                  <p style={{ fontSize: 18, color: "rgba(255,255,255,0.42)", margin: 0, fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
                     {card.hira}
                   </p>
                 )}
-                <p style={{ fontSize: 12, color: "#C4BAB0", margin: "20px 0 0" }}>
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", margin: "20px 0 0" }}>
                   ↻ toca para voltear
                 </p>
               </div>
 
               {/* Back */}
-              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", background: "#1A1A2E", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 28, overflow: "hidden", boxShadow: "0 4px 16px rgba(26,26,46,0.18)" }}>
+              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", background: "#252B3F", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 28, overflow: "hidden", border: "1px solid rgba(255,255,255,0.12)" }}>
                 {/* Corner fold */}
                 <div style={{ position: "absolute", top: 0, right: 0, width: 44, height: 44, background: "#E63946", borderBottomLeftRadius: 44 }} />
                 <p style={{ fontSize: 28, fontWeight: 800, color: "#FFFFFF", margin: 0, textAlign: "center", lineHeight: 1.3 }}>
@@ -395,10 +394,10 @@ export default function VocabularioFlashcardsScreen({
       {!done && (
         <div style={{ padding: "12px 20px", paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-            <div style={{ flex: 1, height: 3, background: "#E5E7EB", borderRadius: 999, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${progressPct}%`, background: "#1A1A2E", borderRadius: 999, transition: "width 0.3s ease" }} />
+            <div style={{ flex: 1, height: 3, background: "rgba(255,255,255,0.10)", borderRadius: 999, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${progressPct}%`, background: "#4ECDC4", borderRadius: 999, transition: "width 0.3s ease" }} />
             </div>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#9CA3AF", flexShrink: 0 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.42)", flexShrink: 0 }}>
               {currentIndex + 1}/{total}
             </span>
           </div>
@@ -406,7 +405,7 @@ export default function VocabularioFlashcardsScreen({
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <button
               onClick={() => handleKnow(false)}
-              style={{ padding: "18px 12px", borderRadius: 14, border: "none", cursor: "pointer", background: "#FFFFFF", color: "#53596B", fontWeight: 700, fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 2px 8px rgba(26,26,46,0.08)" }}
+              style={{ padding: "18px 12px", borderRadius: 14, border: "1px solid rgba(255,255,255,0.08)", cursor: "pointer", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.65)", fontWeight: 700, fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
@@ -415,7 +414,7 @@ export default function VocabularioFlashcardsScreen({
             </button>
             <button
               onClick={() => handleKnow(true)}
-              style={{ padding: "18px 12px", borderRadius: 14, border: "none", cursor: "pointer", background: "#1A1A2E", color: "#FFFFFF", fontWeight: 700, fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: "0 4px 14px rgba(26,26,46,0.18)" }}
+              style={{ padding: "18px 12px", borderRadius: 14, border: "none", cursor: "pointer", background: "#4ECDC4", color: "#1A1A2E", fontWeight: 800, fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>

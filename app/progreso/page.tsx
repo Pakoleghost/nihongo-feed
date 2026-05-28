@@ -207,7 +207,7 @@ export default async function ProgresoPage({
       <div style={{ position: "relative", zIndex: 1 }}>
 
         {/* ── Header ── */}
-        <div style={{ padding: "20px 22px 22px" }}>
+        <div style={{ padding: "calc(env(safe-area-inset-top, 20px) + 20px) 22px 22px" }}>
           {/* Top row */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
             <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 5, textDecoration: "none" }}>

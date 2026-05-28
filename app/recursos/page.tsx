@@ -268,7 +268,7 @@ export default function RecursosPage() {
           alignItems: "flex-start",
           justifyContent: "space-between",
           gap: "12px",
-          padding: "20px 20px 16px",
+          padding: "calc(env(safe-area-inset-top, 20px) + 20px) 20px 16px",
         }}
       >
         <div>

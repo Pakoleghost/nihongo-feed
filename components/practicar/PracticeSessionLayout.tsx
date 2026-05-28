@@ -9,7 +9,7 @@ export default function PracticeSessionLayout({ children }: PracticeSessionLayou
     <div
       style={{
         height: "100dvh",
-        background: "#FFF8E7",
+        background: "#1A1A2E",
         display: "flex",
         flexDirection: "column",
         paddingTop: "max(48px, env(safe-area-inset-top, 48px))",

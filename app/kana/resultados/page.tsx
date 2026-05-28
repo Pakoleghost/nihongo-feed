@@ -29,9 +29,9 @@ function getHeadline(pct: number, errors: number) {
 }
 
 function getHeadlineColor(pct: number, errors: number) {
-  if (errors === 0) return "#178A83";
-  if (pct >= 50) return "#1A1A2E";
-  return "#C53340";
+  if (errors === 0) return "#4ECDC4";
+  if (pct >= 50) return "#FFFFFF";
+  return "#E63946";
 }
 
 function getModeLabel(mode: string) {
@@ -105,16 +105,16 @@ export default function ResultadosPage() {
   const R = 52;
   const circ = 2 * Math.PI * R;
   const arcLen = (pct / 100) * circ;
-  const arcColor = errors === 0 ? "#4ECDC4" : pct >= 50 ? "#1A1A2E" : "#E63946";
+  const arcColor = errors === 0 ? "#4ECDC4" : pct >= 50 ? "#FFFFFF" : "#E63946";
 
   return (
     <div
       style={{
-        background: "#FFF8E7",
+        background: "#1A1A2E",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
-        padding: "52px 20px 40px",
+        padding: "calc(env(safe-area-inset-top, 20px) + 28px) 20px 40px",
       }}
     >
       <button
@@ -126,14 +126,14 @@ export default function ResultadosPage() {
           padding: "4px",
           alignSelf: "flex-start",
           marginBottom: "20px",
-          color: "#9CA3AF",
+          color: "rgba(255,255,255,0.42)",
         }}
         aria-label="Cerrar"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path
             d="M18 6L6 18M6 6l12 12"
-            stroke="#9CA3AF"
+            stroke="rgba(255,255,255,0.42)"
             strokeWidth="2.5"
             strokeLinecap="round"
           />
@@ -143,9 +143,9 @@ export default function ResultadosPage() {
       {/* Hero card */}
       <div
         style={{
-          background: "#FFFFFF",
+          background: "#1E2235",
           borderRadius: "24px",
-          boxShadow: "0 4px 20px rgba(26,26,46,0.08)",
+          border: "1px solid rgba(255,255,255,0.08)",
           padding: "28px 20px 24px",
           display: "flex",
           flexDirection: "column",
@@ -155,10 +155,10 @@ export default function ResultadosPage() {
       >
         {/* Mode badges */}
         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", justifyContent: "center" }}>
-          <span style={{ borderRadius: "6px", padding: "4px 10px", background: "#F3F0EB", color: "#53596B", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+          <span style={{ borderRadius: "6px", padding: "4px 10px", background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.65)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
             {modeLabel}
           </span>
-          <span style={{ borderRadius: "6px", padding: "4px 10px", background: "rgba(26,26,46,0.06)", color: "#53596B", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+          <span style={{ borderRadius: "6px", padding: "4px 10px", background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.65)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
             {taskModeLabel}
           </span>
         </div>
@@ -166,7 +166,7 @@ export default function ResultadosPage() {
         {/* Score ring */}
         <div style={{ position: "relative", width: 128, height: 128, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <svg width="128" height="128" style={{ position: "absolute", inset: 0, transform: "rotate(-90deg)" }}>
-            <circle cx="64" cy="64" r={R} fill="none" stroke="rgba(26,26,46,0.07)" strokeWidth="10" />
+            <circle cx="64" cy="64" r={R} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="10" />
             <circle
               cx="64" cy="64" r={R} fill="none"
               stroke={arcColor}
@@ -177,8 +177,8 @@ export default function ResultadosPage() {
             />
           </svg>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "32px", fontWeight: 800, color: "#1A1A2E", lineHeight: 1 }}>{pct}%</div>
-            <div style={{ fontSize: "12px", fontWeight: 600, color: "#9CA3AF", marginTop: 2 }}>{correct}/{total}</div>
+            <div style={{ fontSize: "32px", fontWeight: 800, color: "#FFFFFF", lineHeight: 1 }}>{pct}%</div>
+            <div style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.42)", marginTop: 2 }}>{correct}/{total}</div>
           </div>
         </div>
 
@@ -187,7 +187,7 @@ export default function ResultadosPage() {
           <p style={{ fontSize: "22px", fontWeight: 800, color: headlineColor, margin: 0, letterSpacing: "-0.03em" }}>
             {headline}
           </p>
-          <p style={{ fontSize: "14px", color: "#7A7F8D", margin: 0, lineHeight: 1.4 }}>
+          <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.55)", margin: 0, lineHeight: 1.4 }}>
             {errors === 0
               ? "Cero errores en esta sesión. ¡Sesión perfecta!"
               : `Acertaste ${correct} de ${total}. Te quedan ${errors} ${errors === 1 ? "kana" : "kana"} por repasar.`
@@ -198,9 +198,9 @@ export default function ResultadosPage() {
         {/* Stats row */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "8px", width: "100%" }}>
           {[
-            { label: "Practicados", value: total, bg: "rgba(26,26,46,0.05)", color: "#1A1A2E" },
-            { label: "Correctos", value: correct, bg: "rgba(78,205,196,0.12)", color: "#178A83" },
-            { label: "Por revisar", value: errors, bg: errors > 0 ? "rgba(230,57,70,0.10)" : "rgba(26,26,46,0.04)", color: errors > 0 ? "#C53340" : "#9CA3AF" },
+            { label: "Practicados", value: total, bg: "rgba(255,255,255,0.06)", color: "#FFFFFF" },
+            { label: "Correctos", value: correct, bg: "rgba(78,205,196,0.12)", color: "#4ECDC4" },
+            { label: "Por revisar", value: errors, bg: errors > 0 ? "rgba(230,57,70,0.12)" : "rgba(255,255,255,0.06)", color: errors > 0 ? "#E63946" : "rgba(255,255,255,0.42)" },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -214,7 +214,7 @@ export default function ResultadosPage() {
               }}
             >
               <div style={{ fontSize: "24px", fontWeight: 800, color: stat.color, lineHeight: 1 }}>{stat.value}</div>
-              <div style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9CA3AF" }}>
+              <div style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "rgba(255,255,255,0.4)" }}>
                 {stat.label}
               </div>
             </div>
@@ -227,13 +227,13 @@ export default function ResultadosPage() {
         <div
           style={{
             marginTop: "16px",
-            background: "#FFFFFF",
+            background: "#1E2235",
             borderRadius: "20px",
-            boxShadow: "0 2px 10px rgba(26,26,46,0.07)",
+            border: "1px solid rgba(255,255,255,0.08)",
             padding: "18px 18px 16px",
           }}
         >
-          <div style={{ fontSize: "13px", fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "14px" }}>
+          <div style={{ fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "14px" }}>
             Por repasar · {uniqueMissed.length}
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
@@ -254,7 +254,7 @@ export default function ResultadosPage() {
                 <span style={{ fontSize: "28px", fontWeight: 700, color: "#E63946", lineHeight: 1, fontFamily: "var(--font-noto-serif-jp), serif" }}>
                   {m.kana}
                 </span>
-                <span style={{ fontSize: "12px", fontWeight: 600, color: "#53596B" }}>
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.65)" }}>
                   {m.romaji}
                 </span>
               </div>
@@ -280,9 +280,9 @@ export default function ResultadosPage() {
               width: "100%",
               padding: "16px",
               borderRadius: "14px",
-              border: "none",
+              border: "1px solid rgba(255,255,255,0.10)",
               cursor: "pointer",
-              background: "#1A1A2E",
+              background: "#1E2235",
               color: "#FFFFFF",
               fontSize: "16px",
               fontWeight: 800,
@@ -331,7 +331,7 @@ export default function ResultadosPage() {
             border: "none",
             cursor: "pointer",
             background: "transparent",
-            color: "#9CA3AF",
+            color: "rgba(255,255,255,0.42)",
             fontSize: "15px",
             fontWeight: 600,
           }}

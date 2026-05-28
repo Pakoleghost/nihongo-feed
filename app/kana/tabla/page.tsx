@@ -109,11 +109,11 @@ const YOON_COL_LABELS = ["ya", "yu", "yo"];
 // ─── sub-components ──────────────────────────────────────────────────────────
 
 const STATE_STYLE: Record<KanaItemState, { bg: string; dot: string | null; badge: string | null }> = {
-  nuevo:      { bg: "#FFFFFF",  dot: null,      badge: null },
-  aprendiendo:{ bg: "#FFFFFF",  dot: "#E63946", badge: null },
-  en_repaso:  { bg: "#FFFFFF",  dot: "#4ECDC4", badge: null },
-  fijado:     { bg: "#F0FFFE",  dot: "#4ECDC4", badge: null },
-  quemado:    { bg: "#FFFBEB",  dot: null,      badge: "★" },
+  nuevo:      { bg: "rgba(255,255,255,0.08)",  dot: null,      badge: null },
+  aprendiendo:{ bg: "rgba(255,255,255,0.08)",  dot: "#E63946", badge: null },
+  en_repaso:  { bg: "rgba(255,255,255,0.08)",  dot: "#4ECDC4", badge: null },
+  fijado:     { bg: "rgba(78,205,196,0.12)",   dot: "#4ECDC4", badge: null },
+  quemado:    { bg: "rgba(245,158,11,0.10)",   dot: null,      badge: "★" },
 };
 
 function KanaCell({
@@ -132,7 +132,7 @@ function KanaCell({
       <div
         style={{
           borderRadius: "10px",
-          background: "#EDE9E3",
+          background: "rgba(255,255,255,0.04)",
           minHeight: "54px",
         }}
       />
@@ -151,7 +151,7 @@ function KanaCell({
       style={{
         background: isSelected ? "#4ECDC4" : bg,
         borderRadius: "10px",
-        border: "none",
+        border: isSelected ? "none" : "1px solid rgba(255,255,255,0.06)",
         cursor: "pointer",
         padding: "5px 2px",
         display: "flex",
@@ -161,10 +161,7 @@ function KanaCell({
         minHeight: "54px",
         width: "100%",
         position: "relative",
-        boxShadow: isSelected
-          ? "0 2px 8px rgba(78,205,196,0.35)"
-          : "0 1px 4px rgba(26,26,46,0.07)",
-        transition: "background 0.12s, box-shadow 0.12s",
+        transition: "background 0.12s",
       }}
     >
       {/* Progress badge: star for quemado, dot for others */}
@@ -199,7 +196,7 @@ function KanaCell({
         style={{
           fontSize: "22px",
           fontWeight: 700,
-          color: "#1A1A2E",
+          color: isSelected ? "#1A1A2E" : "#FFFFFF",
           lineHeight: 1.1,
           fontFamily: "var(--font-noto-sans-jp), sans-serif",
         }}
@@ -209,7 +206,7 @@ function KanaCell({
       <span
         style={{
           fontSize: "10px",
-          color: isSelected ? "rgba(26,26,46,0.7)" : "#9CA3AF",
+          color: isSelected ? "rgba(26,26,46,0.8)" : "rgba(255,255,255,0.42)",
           marginTop: "2px",
           fontWeight: 600,
           letterSpacing: "0.02em",
@@ -250,7 +247,7 @@ function TableGrid({
               textAlign: "center",
               fontSize: "11px",
               fontWeight: 700,
-              color: "#9CA3AF",
+              color: "rgba(255,255,255,0.42)",
               letterSpacing: "0.06em",
               padding: "2px 0 4px",
             }}
@@ -269,7 +266,7 @@ function TableGrid({
               justifyContent: "center",
               fontSize: "11px",
               fontWeight: 700,
-              color: "#9CA3AF",
+              color: "rgba(255,255,255,0.42)",
             }}
           >
             {rowLabels[ri]}
@@ -297,10 +294,10 @@ function CollapsibleSection({
   return (
     <div
       style={{
-        background: "#FFFFFF",
+        background: "#1E2235",
         borderRadius: "1.5rem",
         overflow: "hidden",
-        boxShadow: "0 2px 12px rgba(26,26,46,0.06)",
+        border: "1px solid rgba(255,255,255,0.08)",
       }}
     >
       <button
@@ -316,11 +313,11 @@ function CollapsibleSection({
           cursor: "pointer",
         }}
       >
-        <span style={{ fontSize: "15px", fontWeight: 700, color: "#1A1A2E" }}>{title}</span>
+        <span style={{ fontSize: "15px", fontWeight: 700, color: "#FFFFFF" }}>{title}</span>
         <span
           style={{
             fontSize: "16px",
-            color: "#9CA3AF",
+            color: "rgba(255,255,255,0.42)",
             display: "inline-block",
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
             transition: "transform 0.2s",
@@ -372,7 +369,7 @@ export default function TablaPage() {
   return (
     <div
       style={{
-        background: "#FFF8E7",
+        background: "#1A1A2E",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -385,7 +382,7 @@ export default function TablaPage() {
           display: "flex",
           alignItems: "center",
           gap: "14px",
-          padding: "20px 20px 0",
+          padding: "calc(env(safe-area-inset-top, 20px) + 20px) 20px 0",
         }}
       >
         <button
@@ -394,13 +391,12 @@ export default function TablaPage() {
             width: "40px",
             height: "40px",
             borderRadius: "50%",
-            background: "#FFFFFF",
-            border: "none",
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.10)",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "0 2px 10px rgba(26,26,46,0.10)",
             flexShrink: 0,
           }}
           aria-label="Volver"
@@ -408,7 +404,7 @@ export default function TablaPage() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
             <path
               d="M19 12H5M12 5l-7 7 7 7"
-              stroke="#1A1A2E"
+              stroke="rgba(255,255,255,0.65)"
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -419,7 +415,7 @@ export default function TablaPage() {
           style={{
             fontSize: "32px",
             fontWeight: 800,
-            color: "#1A1A2E",
+            color: "#FFFFFF",
             margin: 0,
             lineHeight: 1,
           }}
@@ -433,7 +429,7 @@ export default function TablaPage() {
         <div
           style={{
             display: "inline-flex",
-            background: "#E8E3DC",
+            background: "rgba(255,255,255,0.08)",
             borderRadius: "10px",
             padding: "3px",
           }}
@@ -448,7 +444,7 @@ export default function TablaPage() {
                 border: "none",
                 cursor: "pointer",
                 background: script === s ? "#E63946" : "transparent",
-                color: script === s ? "#FFFFFF" : "#9CA3AF",
+                color: script === s ? "#FFFFFF" : "rgba(255,255,255,0.42)",
                 fontWeight: 700,
                 fontSize: "13px",
                 transition: "background 0.15s, color 0.15s",
@@ -464,10 +460,10 @@ export default function TablaPage() {
       <div style={{ padding: "20px 16px 0" }}>
         <div
           style={{
-            background: "#FFFFFF",
+            background: "#1E2235",
             borderRadius: "14px",
             padding: "14px",
-            boxShadow: "0 2px 12px rgba(26,26,46,0.06)",
+            border: "1px solid rgba(255,255,255,0.08)",
           }}
         >
           <TableGrid
@@ -488,7 +484,7 @@ export default function TablaPage() {
                 justifyContent: "center",
                 fontSize: "11px",
                 fontWeight: 700,
-                color: "#9CA3AF",
+                color: "rgba(255,255,255,0.42)",
               }}
             >
               n
@@ -496,19 +492,15 @@ export default function TablaPage() {
             <button
               onClick={() => handleSelect(nKana)}
               style={{
-                background: selected === nKana ? "#4ECDC4" : "#FFFFFF",
+                background: selected === nKana ? "#4ECDC4" : "rgba(255,255,255,0.08)",
                 borderRadius: "10px",
-                border: "none",
+                border: selected === nKana ? "none" : "1px solid rgba(255,255,255,0.06)",
                 cursor: "pointer",
                 padding: "10px",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow:
-                  selected === nKana
-                    ? "0 2px 8px rgba(78,205,196,0.35)"
-                    : "0 1px 4px rgba(26,26,46,0.07)",
                 transition: "background 0.12s",
               }}
             >
@@ -516,14 +508,14 @@ export default function TablaPage() {
                 style={{
                   fontSize: "28px",
                   fontWeight: 700,
-                  color: "#1A1A2E",
+                  color: selected === nKana ? "#1A1A2E" : "#FFFFFF",
                   fontFamily: "var(--font-noto-sans-jp), sans-serif",
                   lineHeight: 1,
                 }}
               >
                 {nKana}
               </span>
-              <span style={{ fontSize: "11px", color: "#9CA3AF", marginTop: "3px", fontWeight: 600 }}>
+              <span style={{ fontSize: "11px", color: selected === nKana ? "rgba(26,26,46,0.8)" : "rgba(255,255,255,0.42)", marginTop: "3px", fontWeight: 600 }}>
                 {nItem?.romaji ?? "n"}
               </span>
             </button>
@@ -545,7 +537,7 @@ export default function TablaPage() {
                 : <span style={{ width: 6, height: 6, borderRadius: "50%", background: dot ?? "#ccc", display: "inline-block" }} />
               }
             </span>
-            <span style={{ fontSize: "11px", color: "#9CA3AF", fontWeight: 600 }}>{label}</span>
+            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.42)", fontWeight: 600 }}>{label}</span>
           </div>
         ))}
       </div>
@@ -607,11 +599,11 @@ export default function TablaPage() {
           const modalEntry = item ? progress[item.id] : undefined;
           const modalState = getKanaItemState(modalEntry);
           const STATE_LABEL: Record<KanaItemState, { text: string; color: string }> = {
-            nuevo:      { text: "Sin practicar", color: "#9CA3AF" },
+            nuevo:      { text: "Sin practicar", color: "rgba(255,255,255,0.42)" },
             aprendiendo:{ text: "Practicando",   color: "#E63946" },
             en_repaso:  { text: "Aprendido",     color: "#4ECDC4" },
-            fijado:     { text: "Bien aprendido",color: "#178A83" },
-            quemado:    { text: "★ Dominado",    color: "#D97706" },
+            fijado:     { text: "Bien aprendido",color: "#4ECDC4" },
+            quemado:    { text: "★ Dominado",    color: "#F59E0B" },
           };
           return (
             <motion.div
@@ -640,7 +632,7 @@ export default function TablaPage() {
                 transition={{ duration: 0.22, ease: [0.34, 1.2, 0.64, 1] }}
                 onClick={(e) => e.stopPropagation()}
                 style={{
-                  background: "#FFFFFF",
+                  background: "#1E2235",
                   borderRadius: "20px",
                   padding: "24px 20px 20px",
                   width: "100%",
@@ -650,6 +642,7 @@ export default function TablaPage() {
                   alignItems: "center",
                   gap: "6px",
                   position: "relative",
+                  border: "1px solid rgba(255,255,255,0.10)",
                 }}
               >
                 {/* Close button */}
@@ -662,14 +655,14 @@ export default function TablaPage() {
                     width: "32px",
                     height: "32px",
                     borderRadius: "50%",
-                    background: "#F3F0EB",
+                    background: "rgba(255,255,255,0.08)",
                     border: "none",
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: "18px",
-                    color: "#9CA3AF",
+                    color: "rgba(255,255,255,0.42)",
                     lineHeight: 1,
                   }}
                   aria-label="Cerrar"
@@ -696,7 +689,7 @@ export default function TablaPage() {
                   style={{
                     fontSize: "20px",
                     fontWeight: 700,
-                    color: "#9CA3AF",
+                    color: "rgba(255,255,255,0.42)",
                     margin: "0 0 4px",
                     letterSpacing: "0.04em",
                   }}
@@ -731,7 +724,7 @@ export default function TablaPage() {
                   style={{
                     marginTop: "10px",
                     display: "inline-flex",
-                    background: "#F3F0EB",
+                    background: "rgba(255,255,255,0.08)",
                     borderRadius: "999px",
                     padding: "4px",
                     gap: "4px",
@@ -752,7 +745,7 @@ export default function TablaPage() {
                           fontWeight: 700,
                           cursor: "pointer",
                           background: active ? "#E63946" : "transparent",
-                          color: active ? "#FFFFFF" : "#6E737F",
+                          color: active ? "#FFFFFF" : "rgba(255,255,255,0.42)",
                           transition: "background 0.15s, color 0.15s",
                         }}
                         aria-pressed={active}

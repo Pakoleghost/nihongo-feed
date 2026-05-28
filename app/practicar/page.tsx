@@ -35,7 +35,7 @@ export default function PracticarPage() {
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
-        padding: "24px 20px calc(100px + env(safe-area-inset-bottom, 0px))",
+        padding: "calc(env(safe-area-inset-top, 20px) + 24px) 20px calc(100px + env(safe-area-inset-bottom, 0px))",
       }}
     >
       <h1
@@ -68,12 +68,12 @@ export default function PracticarPage() {
           href="/kana"
           style={{
             position: "relative",
-            background: "#1A1A2E",
+            background: "#1E2235",
             borderRadius: "14px",
             padding: "20px 20px 22px",
             display: "block",
             textDecoration: "none",
-            boxShadow: "0 4px 16px rgba(26,26,46,0.18)",
+            border: "1px solid rgba(255,255,255,0.06)",
             overflow: "hidden",
           }}
         >
