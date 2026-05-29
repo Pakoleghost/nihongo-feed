@@ -572,7 +572,7 @@ export default function ClasesPage() {
           alignItems: "flex-start",
           justifyContent: "space-between",
           gap: "12px",
-          padding: "calc(env(safe-area-inset-top, 20px) + 20px) 20px 16px",
+          padding: "calc(env(safe-area-inset-top, 20px) + 8px) 20px 16px",
         }}
       >
         <div>

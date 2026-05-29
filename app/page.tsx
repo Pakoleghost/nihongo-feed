@@ -522,7 +522,7 @@ export default function HomePage() {
       {/* ── Header ── */}
       <div
         style={{
-          padding: "calc(env(safe-area-inset-top, 20px) + 20px) 20px 16px",
+          padding: "calc(env(safe-area-inset-top, 20px) + 8px) 20px 16px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",

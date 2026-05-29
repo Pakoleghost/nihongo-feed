@@ -382,7 +382,7 @@ export default function TablaPage() {
           display: "flex",
           alignItems: "center",
           gap: "14px",
-          padding: "calc(env(safe-area-inset-top, 20px) + 20px) 20px 0",
+          padding: "calc(env(safe-area-inset-top, 20px) + 8px) 20px 0",
         }}
       >
         <button
