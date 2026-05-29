@@ -1192,6 +1192,18 @@ export default function HomePage() {
           <TemaSemanaSheet
             key="tema-sheet"
             onClose={() => setShowTemaSheet(false)}
+            onUseSentence={(sentence) => {
+              setComposeText(sentence);
+              setShowTemaSheet(false);
+              // Give time for the sheet exit animation, then focus
+              setTimeout(() => {
+                if (textareaRef.current) {
+                  textareaRef.current.focus();
+                  textareaRef.current.style.height = "auto";
+                  textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+                }
+              }, 280);
+            }}
             tema={currentTema}
             fallback={topic}
           />

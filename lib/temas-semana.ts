@@ -32,11 +32,31 @@ export type DetalleTema = {
   ejemplos: Ejemplo[];      // Entre 3 y 4 ejemplos por nivel
 };
 
+/**
+ * Slot in an interactive sentence builder.
+ * {{id}} is replaced by the student's selection.
+ */
+export type SlotPlantilla = {
+  id: string;         // e.g. "FOOD" — matches {{FOOD}} in estructura
+  etiqueta: string;   // Displayed in the blank before filling: "食べ物"
+  opciones: string[]; // Vocab chips from Genki corpus
+};
+
+/**
+ * Interactive fill-in template for each weekly topic.
+ * estructura uses {{SLOT_ID}} markers, e.g. "{{FOOD}} が すきです！"
+ */
+export type PlantillaTema = {
+  estructura: string;
+  slots: SlotPlantilla[];
+};
+
 export type TemaSemana = {
   id: number;
   kana: string;       // Texto grande en la card (2–5 palabras, mayormente kana)
   prompt: string;     // Subtítulo en español (la invitación)
   detalle: DetalleTema;
+  plantilla: PlantillaTema;  // Interactive sentence builder
 };
 
 // ── Banco de temas ─────────────────────────────────────────────────────────────
@@ -89,6 +109,13 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         },
       ],
     },
+    plantilla: {
+      estructura: "きょうは {{FEELING}} です。",
+      slots: [{
+        id: "FEELING", etiqueta: "気持ち",
+        opciones: ["たのしい", "かなしい", "ねむい", "げんき", "わくわく", "つかれています", "いそがしい", "びっくりしました"],
+      }],
+    },
   },
 
   // ── 2 ────────────────────────────────────────────────────────────────────
@@ -136,6 +163,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           nivel: "medio",
         },
       ],
+    },
+    plantilla: {
+      estructura: "{{FOOD}} が すきです！",
+      slots: [{ id: "FOOD", etiqueta: "食べ物",
+        opciones: ["ラーメン", "すし", "ピザ", "たこやき", "アイスクリーム", "チョコレート", "カレー", "うどん", "から揚げ", "ハンバーガー"] }],
     },
   },
 
@@ -185,6 +217,13 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         },
       ],
     },
+    plantilla: {
+      estructura: "{{FAMILY}} は {{ADJ}} です。",
+      slots: [
+        { id: "FAMILY", etiqueta: "家族", opciones: ["おとうさん", "おかあさん", "あに", "あね", "おとうと", "いもうと"] },
+        { id: "ADJ",    etiqueta: "どんな人", opciones: ["やさしい", "おもしろい", "いそがしい", "げんき", "かわいい", "かっこいい", "うるさい"] },
+      ],
+    },
   },
 
   // ── 4 ────────────────────────────────────────────────────────────────────
@@ -230,6 +269,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           nivel: "medio",
         },
       ],
+    },
+    plantilla: {
+      estructura: "まいにち {{ACTIVITY}}。",
+      slots: [{ id: "ACTIVITY", etiqueta: "したこと",
+        opciones: ["コーヒーをのみます", "にほんごをべんきょうします", "シャワーをあびます", "ジョギングをします", "アニメをみます", "おんがくをききます", "ストレッチをします"] }],
     },
   },
 
@@ -278,6 +322,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         },
       ],
     },
+    plantilla: {
+      estructura: "しゅうまつに {{ACTION}} ました。",
+      slots: [{ id: "ACTION", etiqueta: "したこと",
+        opciones: ["えいがをみ", "ともだちとごはんをたべ", "うちでゆっくりし", "こうえんをさんぽし", "ゲームをし", "かぞくとでかけ", "カフェにいき"] }],
+    },
   },
 
   // ── 6 ────────────────────────────────────────────────────────────────────
@@ -323,6 +372,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           nivel: "medio",
         },
       ],
+    },
+    plantilla: {
+      estructura: "いま {{PLACE}} に います。",
+      slots: [{ id: "PLACE", etiqueta: "場所",
+        opciones: ["うち", "カフェ", "としょかん", "がっこう", "でんしゃのなか", "そと", "かいしゃ", "レストラン"] }],
     },
   },
 
@@ -370,6 +424,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         },
       ],
     },
+    plantilla: {
+      estructura: "きょうは {{WEATHER}} です。",
+      slots: [{ id: "WEATHER", etiqueta: "天気",
+        opciones: ["はれ", "くもり", "あめ", "ゆき", "あつい", "さむい", "すずしい", "あたたかい", "むしあつい"] }],
+    },
   },
 
   // ── 8 ────────────────────────────────────────────────────────────────────
@@ -415,6 +474,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           nivel: "medio",
         },
       ],
+    },
+    plantilla: {
+      estructura: "いま {{FOOD}} が たべたいです！",
+      slots: [{ id: "FOOD", etiqueta: "食べ物",
+        opciones: ["ラーメン", "アイスクリーム", "たこやき", "ピザ", "すし", "チョコレート", "カレー", "うどん", "ケーキ"] }],
     },
   },
 
@@ -462,6 +526,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         },
       ],
     },
+    plantilla: {
+      estructura: "まいにち {{METHOD}} で べんきょうしています。",
+      slots: [{ id: "METHOD", etiqueta: "方法",
+        opciones: ["アプリ", "クラス", "アニメ", "まんが", "ユーチューブ", "ゲーム", "フラッシュカード", "ポッドキャスト"] }],
+    },
   },
 
   // ── 10 ───────────────────────────────────────────────────────────────────
@@ -507,6 +576,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           nivel: "medio",
         },
       ],
+    },
+    plantilla: {
+      estructura: "{{ANIMAL}} が すきです！",
+      slots: [{ id: "ANIMAL", etiqueta: "動物",
+        opciones: ["いぬ", "ねこ", "うさぎ", "とり", "パンダ", "ペンギン", "くま", "きつね", "かわうそ", "ライオン"] }],
     },
   },
 
@@ -554,6 +628,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         },
       ],
     },
+    plantilla: {
+      estructura: "{{SEASON}} が いちばん すきです。",
+      slots: [{ id: "SEASON", etiqueta: "季節",
+        opciones: ["はる", "なつ", "あき", "ふゆ"] }],
+    },
   },
 
   // ── 12 ───────────────────────────────────────────────────────────────────
@@ -599,6 +678,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         },
       ],
     },
+    plantilla: {
+      estructura: "こどものころ、{{THING}} が すきでした。",
+      slots: [{ id: "THING", etiqueta: "好きだったもの",
+        opciones: ["アニメ", "ゲーム", "サッカー", "プール", "アイスクリーム", "まんが", "おかし", "そとあそび"] }],
+    },
   },
 
   // ── 13 ───────────────────────────────────────────────────────────────────
@@ -643,6 +727,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           nivel: "medio",
         },
       ],
+    },
+    plantilla: {
+      estructura: "さいきん {{GENRE}} を きいています。",
+      slots: [{ id: "GENRE", etiqueta: "ジャンル",
+        opciones: ["J-POP", "ロック", "K-POP", "クラシック", "アニメのうた", "ジャズ", "ヒップホップ", "インディーポップ"] }],
     },
   },
 
@@ -690,6 +779,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         },
       ],
     },
+    plantilla: {
+      estructura: "しょうらい {{JOB}} に なりたいです。",
+      slots: [{ id: "JOB", etiqueta: "仕事",
+        opciones: ["せんせい", "いしゃ", "エンジニア", "デザイナー", "ゲームクリエイター", "かんごし", "パイロット", "つうやく"] }],
+    },
   },
 
   // ── 15 ───────────────────────────────────────────────────────────────────
@@ -735,6 +829,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           nivel: "medio",
         },
       ],
+    },
+    plantilla: {
+      estructura: "にほんで {{FOOD}} が たべたいです！",
+      slots: [{ id: "FOOD", etiqueta: "食べたいもの",
+        opciones: ["ラーメン", "すし", "たこやき", "もちアイス", "やきとり", "おでん", "おにぎり", "そば", "てんぷら"] }],
     },
   },
 
@@ -782,6 +881,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         },
       ],
     },
+    plantilla: {
+      estructura: "けさ {{BREAKFAST}} ました。",
+      slots: [{ id: "BREAKFAST", etiqueta: "朝食",
+        opciones: ["パンをたべ", "コーヒーをのみ", "たまごをたべ", "おにぎりをたべ", "ヨーグルトをたべ", "フルーツをたべ", "ごはんをたべ"] }],
+    },
   },
 
   // ── 17 ───────────────────────────────────────────────────────────────────
@@ -826,6 +930,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           nivel: "medio",
         },
       ],
+    },
+    plantilla: {
+      estructura: "{{THING}} は おすすめです！",
+      slots: [{ id: "THING", etiqueta: "おすすめ",
+        opciones: ["このアニメ", "このアプリ", "このまんが", "このゲーム", "このドラマ", "このほん", "このレストラン"] }],
     },
   },
 
@@ -874,6 +983,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         },
       ],
     },
+    plantilla: {
+      estructura: "{{THING}} が にがてです。",
+      slots: [{ id: "THING", etiqueta: "苦手なこと",
+        opciones: ["はやおき", "りょうり", "かたづけ", "うんどう", "えいご", "すうがく", "じかんをまもること", "ちゅうしゃ"] }],
+    },
   },
 
   // ── 19 ───────────────────────────────────────────────────────────────────
@@ -918,6 +1032,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           nivel: "medio",
         },
       ],
+    },
+    plantilla: {
+      estructura: "わたしのまちは {{ADJ}} です。",
+      slots: [{ id: "ADJ", etiqueta: "どんな街?",
+        opciones: ["にぎやか", "しずか", "ちいさい", "おおきい", "あつい", "きれい", "すみやすい", "たのしい"] }],
     },
   },
 
@@ -966,6 +1085,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         },
       ],
     },
+    plantilla: {
+      estructura: "さいきん {{THING}} が たのしかったです。",
+      slots: [{ id: "THING", etiqueta: "たのしかったこと",
+        opciones: ["えいがかん", "ともだちとのごはん", "ゲーム", "りょこう", "アニメ", "コンサート", "おんせん", "しょっぴんぐ"] }],
+    },
   },
 
   // ── 21 ───────────────────────────────────────────────────────────────────
@@ -1012,6 +1136,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         },
       ],
     },
+    plantilla: {
+      estructura: "わたしのへやに {{THING}} が あります。",
+      slots: [{ id: "THING", etiqueta: "あるもの",
+        opciones: ["おおきいつくえ", "たくさんのほん", "ポスター", "まんが", "ゲーム", "ぬいぐるみ", "テレビ", "ねこ"] }],
+    },
   },
 
   // ── 22 ───────────────────────────────────────────────────────────────────
@@ -1056,6 +1185,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           nivel: "medio",
         },
       ],
+    },
+    plantilla: {
+      estructura: "わたしのともだちは {{ADJ}} です。",
+      slots: [{ id: "ADJ", etiqueta: "どんな人?",
+        opciones: ["やさしい", "おもしろい", "かわいい", "まじめ", "たのしい", "かっこいい", "げんき", "しんせつ"] }],
     },
   },
 
@@ -1104,6 +1238,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         },
       ],
     },
+    plantilla: {
+      estructura: "{{REASON}} から、にほんごを べんきょうしています。",
+      slots: [{ id: "REASON", etiqueta: "理由",
+        opciones: ["アニメがすきだ", "にほんにいきたい", "にほんごがおもしろい", "ゲームがしたい", "にほんのぶんかがすき", "しごとのため"] }],
+    },
   },
 
   // ── 24 ───────────────────────────────────────────────────────────────────
@@ -1149,6 +1288,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           nivel: "medio",
         },
       ],
+    },
+    plantilla: {
+      estructura: "{{TIME}} の じかんが いちばん すきです。",
+      slots: [{ id: "TIME", etiqueta: "時間",
+        opciones: ["あさのコーヒー", "よるのリラックス", "ひるごはん", "ねるまえ", "にほんごのじゅぎょう", "ともだちとのじかん"] }],
     },
   },
 
@@ -1196,6 +1340,11 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           nivel: "medio",
         },
       ],
+    },
+    plantilla: {
+      estructura: "{{MSG}}！",
+      slots: [{ id: "MSG", etiqueta: "メッセージ",
+        opciones: ["がんばれ", "できるよ", "だいじょうぶ", "あきらめないで", "すこしずつでいい", "きみならできる", "ファイト", "いけるよ"] }],
     },
   },
 ];
