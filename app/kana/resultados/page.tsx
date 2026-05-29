@@ -114,7 +114,7 @@ export default function ResultadosPage() {
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
-        padding: "calc(env(safe-area-inset-top, 20px) + 8px) 20px 40px",
+        padding: "calc(env(safe-area-inset-top, 20px) + 28px) 20px 40px",
       }}
     >
       <button

@@ -771,7 +771,7 @@ function QuizContent() {
       >
         <div
           style={{
-            padding: "calc(env(safe-area-inset-top, 20px) + 8px) 20px 0",
+            padding: "calc(env(safe-area-inset-top, 20px) + 20px) 20px 0",
             display: "grid",
             gap: "12px",
             flexShrink: 0,
@@ -1077,7 +1077,7 @@ function QuizContent() {
       {/* Top bar */}
       <div
         style={{
-          padding: "calc(env(safe-area-inset-top, 20px) + 8px) 20px 0",
+          padding: "calc(env(safe-area-inset-top, 20px) + 28px) 20px 0",
           display: "grid",
           gap: "14px",
         }}
