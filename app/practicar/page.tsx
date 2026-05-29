@@ -36,8 +36,12 @@ export default function PracticarPage() {
         display: "flex",
         flexDirection: "column",
         padding: "calc(env(safe-area-inset-top, 20px) + 24px) 20px calc(100px + env(safe-area-inset-bottom, 0px))",
+        position: "relative",
       }}
     >
+      {/* Ambient teal glow — same as home page */}
+      <div style={{ position: "fixed", top: -160, left: -100, width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(78,205,196,0.10) 0%, rgba(78,205,196,0) 60%)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", flex: 1 }}>
       <h1
         style={{
           fontSize: "42px",
@@ -273,6 +277,7 @@ export default function PracticarPage() {
           </div>
         </Link>
 
+      </div>
       </div>
 
       <BottomNav />
