@@ -64,6 +64,7 @@
 html, body { height: 100%; }
 
 html {
+  background: #1A1A2E;
   scroll-padding-top: var(--app-sticky-offset);
 }
 
