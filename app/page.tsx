@@ -11,7 +11,9 @@ import { markActiveToday, getStreak } from "@/lib/streak";
 import { getWeeklyTopic, fetchTopicOverride, saveTopicOverride, type WeeklyTopic } from "@/lib/weekly-topics";
 import Link from "next/link";
 import RepliesSheet from "@/components/RepliesSheet";
+import TemaSemanaSheet from "@/components/TemaSemanaSheet";
 import { getLessonStop } from "@/lib/lesson-competencies";
+import { TEMAS_SEMANA, type TemaSemana } from "@/lib/temas-semana";
 
 type Post = {
   id: string;
@@ -138,6 +140,10 @@ export default function HomePage() {
   const [groupName, setGroupName] = useState<string | null>(null);
   const [showProgreso, setShowProgreso] = useState(false);
   const [currentLesson, setCurrentLesson] = useState<number | null>(null);
+
+  // Tema de la semana sheet
+  const [showTemaSheet, setShowTemaSheet] = useState(false);
+  const [currentTema, setCurrentTema] = useState<TemaSemana | null>(null);
 
   // Lightbox — no extra refs needed (framer-motion drag handles it)
 
@@ -565,6 +571,20 @@ export default function HomePage() {
       {/* ── Tema de la semana ── */}
       <div style={{ padding: "0 16px 12px" }}>
         <div
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            const found = TEMAS_SEMANA.find(t => t.kana === topic.kana) ?? null;
+            setCurrentTema(found);
+            setShowTemaSheet(true);
+          }}
+          onKeyDown={e => {
+            if (e.key === "Enter" || e.key === " ") {
+              const found = TEMAS_SEMANA.find(t => t.kana === topic.kana) ?? null;
+              setCurrentTema(found);
+              setShowTemaSheet(true);
+            }
+          }}
           style={{
             position: "relative",
             background: "#1E2235",
@@ -572,6 +592,8 @@ export default function HomePage() {
             padding: "20px 20px 20px",
             overflow: "hidden",
             border: "1px solid rgba(255,255,255,0.06)",
+            cursor: "pointer",
+            WebkitTapHighlightColor: "transparent",
           }}
         >
           {/* Corner fold teal */}
@@ -589,7 +611,7 @@ export default function HomePage() {
             </p>
             {effectiveIsAdmin && !editingTopic && (
               <button
-                onClick={() => { setTopicDraft({ kana: topic.kana, prompt: topic.prompt }); setEditingTopic(true); }}
+                onClick={e => { e.stopPropagation(); setTopicDraft({ kana: topic.kana, prompt: topic.prompt }); setEditingTopic(true); }}
                 style={{ background: "rgba(255,255,255,0.06)", border: "none", borderRadius: 8, padding: "4px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, marginRight: 32 }}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
@@ -642,9 +664,18 @@ export default function HomePage() {
               <p style={{ fontSize: "28px", fontWeight: 700, color: "#FFFFFF", margin: "0 0 8px", fontFamily: "var(--font-noto-sans-jp), sans-serif", lineHeight: 1.15, letterSpacing: "0.01em" }}>
                 {topic.kana}
               </p>
-              <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.65)", margin: 0, lineHeight: 1.5, maxWidth: 280 }}>
+              <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.65)", margin: "0 0 14px", lineHeight: 1.5, maxWidth: 280 }}>
                 {topic.prompt}
               </p>
+              {/* Hint: tap to see examples */}
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#4ECDC4", letterSpacing: "0.04em" }}>
+                  Ver ejemplos y vocabulario
+                </span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 18l6-6-6-6" stroke="#4ECDC4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
             </>
           )}
         </div>
@@ -1152,6 +1183,18 @@ export default function HomePage() {
               />
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Tema de la semana sheet ── */}
+      <AnimatePresence>
+        {showTemaSheet && (
+          <TemaSemanaSheet
+            key="tema-sheet"
+            onClose={() => setShowTemaSheet(false)}
+            tema={currentTema}
+            fallback={topic}
+          />
         )}
       </AnimatePresence>
 
