@@ -7,9 +7,9 @@ export type OptimizeImageOptions = {
   maxFileSizeMb?: number;
 };
 
-const DEFAULT_MAX_WIDTH = 1600;
-const DEFAULT_MAX_HEIGHT = 1600;
-const DEFAULT_QUALITY = 0.8;
+const DEFAULT_MAX_WIDTH = 1200;
+const DEFAULT_MAX_HEIGHT = 1200;
+const DEFAULT_QUALITY = 0.72;
 const DEFAULT_MAX_FILE_SIZE_MB = 20;
 
 export function validateImageFile(file: File, options?: { maxFileSizeMb?: number }) {

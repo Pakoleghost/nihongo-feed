@@ -1037,7 +1037,7 @@ function QuizContent() {
                         animate={{ scale: scaledOption === option ? [1, 1.04, 1] : 1 }}
                         transition={{ duration: 0.24 }}
                         style={{
-                          border: "none",
+                          border: "1px solid rgba(255,255,255,0.08)",
                           borderRadius: "22px",
                           background: showCorrect
                             ? "#4ECDC4"
@@ -1050,7 +1050,6 @@ function QuizContent() {
                           fontSize: "22px",
                           fontWeight: 800,
                           cursor: phase === "traceReview" ? "pointer" : "default",
-                          border: "1px solid rgba(255,255,255,0.08)",
                         }}
                       >
                         {option}

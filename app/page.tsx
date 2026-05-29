@@ -162,35 +162,42 @@ export default function HomePage() {
       return [...cur, ...visible.filter((p) => !seen.has(p.id))];
     });
 
+    if (visible.length === 0) return;
+
+    const postIds = visible.map((p) => p.id);
     const userIds = [...new Set([...visible.map((p) => p.user_id), ...(uid ? [uid] : [])])];
+
+    // Fire all three secondary queries in parallel
+    const [profileData, likesData, countsData] = await Promise.all([
+      userIds.length > 0
+        ? supabase.from("profiles").select("id, username, avatar_url").in("id", userIds).then(r => r.data)
+        : Promise.resolve(null),
+      uid
+        ? supabase.from("comunidad_likes").select("post_id").eq("user_id", uid).in("post_id", postIds).then(r => r.data)
+        : Promise.resolve(null),
+      supabase.from("comunidad_comments").select("post_id").in("post_id", postIds).then(r => r.data),
+    ]);
+
+    // Profiles
+    const map: Record<string, Profile> = {};
+    (profileData as Profile[] | null)?.forEach((p) => { map[p.id] = p; });
     if (userIds.length > 0) {
-      const { data: profileData } = await supabase.from("profiles").select("id, username, avatar_url").in("id", userIds);
-      const map: Record<string, Profile> = {};
-      (profileData as Profile[] | null)?.forEach((p) => { map[p.id] = p; });
       setProfiles((cur) => ({ ...cur, ...map }));
       if (uid && map[uid]) setMyProfile(map[uid]);
     }
 
-    if (uid && visible.length > 0) {
-      const { data: likesData } = await supabase
-        .from("comunidad_likes").select("post_id").eq("user_id", uid)
-        .in("post_id", visible.map((p) => p.id));
-      const ids = (likesData as { post_id: string }[] | null)?.map((l) => l.post_id) ?? [];
+    // Likes
+    const ids = (likesData as { post_id: string }[] | null)?.map((l) => l.post_id) ?? [];
+    if (ids.length > 0) {
       setLikedIds((cur) => { const next = new Set(cur); ids.forEach((id) => next.add(id)); return next; });
     }
 
-    // Comment counts for this batch
-    if (visible.length > 0) {
-      const { data: counts } = await supabase
-        .from("comunidad_comments")
-        .select("post_id")
-        .in("post_id", visible.map((p) => p.id));
-      const countMap: Record<string, number> = {};
-      (counts as { post_id: string }[] | null)?.forEach(r => {
-        countMap[r.post_id] = (countMap[r.post_id] ?? 0) + 1;
-      });
-      setCommentCounts(prev => ({ ...prev, ...countMap }));
-    }
+    // Comment counts
+    const countMap: Record<string, number> = {};
+    (countsData as { post_id: string }[] | null)?.forEach(r => {
+      countMap[r.post_id] = (countMap[r.post_id] ?? 0) + 1;
+    });
+    setCommentCounts(prev => ({ ...prev, ...countMap }));
   }
 
   useEffect(() => {
@@ -413,7 +420,7 @@ export default function HomePage() {
     try {
       let imageUrl: string | null = null;
       if (composeImage) {
-        const optimized = await optimizeImageFile(composeImage, { maxWidth: 1600, maxHeight: 1600, quality: 0.8 });
+        const optimized = await optimizeImageFile(composeImage, { maxWidth: 1200, maxHeight: 1200, quality: 0.72 });
         const ext = optimized.name.split(".").pop() ?? "jpg";
         const path = `${userId}/${Date.now()}.${ext}`;
         const { data: up, error: upErr } = await supabase.storage.from("comunidad-images").upload(path, optimized, { upsert: false });

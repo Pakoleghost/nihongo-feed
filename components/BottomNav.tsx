@@ -62,10 +62,10 @@ function ClasesIcon({ color }: { color: string }) {
 }
 
 const tabs = [
-  { href: "/", label: "Comunidad", Icon: HomeIcon },
-  { href: "/practicar", label: "Estudiar", Icon: EstudiarIcon },
-  { href: "/recursos", label: "Recursos", Icon: RecursosIcon },
-  { href: "/clases", label: "Clases", Icon: ClasesIcon },
+  { href: "/",          label: "Comunidad", Icon: HomeIcon,     prefetch: true  },
+  { href: "/practicar", label: "Estudiar",  Icon: EstudiarIcon, prefetch: true  },
+  { href: "/recursos",  label: "Recursos",  Icon: RecursosIcon, prefetch: false },
+  { href: "/clases",    label: "Clases",    Icon: ClasesIcon,   prefetch: false },
 ] as const;
 
 export default function BottomNav() {
@@ -89,7 +89,7 @@ export default function BottomNav() {
         zIndex: 100,
       }}
     >
-      {tabs.map(({ href, label, Icon }) => {
+      {tabs.map(({ href, label, Icon, prefetch }) => {
         const isActive =
           href === "/" ? pathname === "/" :
           href === "/practicar" ? (pathname === "/practicar" || pathname.startsWith("/practicar/") || pathname === "/kana" || pathname.startsWith("/kana/")) :
@@ -101,6 +101,7 @@ export default function BottomNav() {
           <Link
             key={href}
             href={href}
+            prefetch={prefetch}
             style={{
               display: "flex",
               flexDirection: "column",
