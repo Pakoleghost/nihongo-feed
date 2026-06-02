@@ -670,7 +670,7 @@ export default function HomePage() {
               {/* Hint: tap to see examples */}
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <span style={{ fontSize: 11, fontWeight: 700, color: "#4ECDC4", letterSpacing: "0.04em" }}>
-                  Ver ejemplos y vocabulario
+                  Te ayudo a publicar paso a paso
                 </span>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
                   <path d="M9 18l6-6-6-6" stroke="#4ECDC4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
