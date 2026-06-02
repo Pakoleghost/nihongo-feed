@@ -2,13 +2,14 @@
  * Banco de Temas de la Semana — Nihongo Feed
  *
  * 25 temas para PRINCIPIANTES (A1, Genki I).
- * Cada tema es un mini-tutorial guiado que termina en una publicación.
+ * Cada tema es un mini-tutorial guiado de 5 pasos que termina en un post.
  *
  * Convenciones:
- *  - El japonés se escribe con ESPACIOS entre palabras para que un
- *    principiante pueda leerlo sin "bola de hiragana".
- *  - Notación de furigana: {漢字|ふりがな} (la renderiza <FuriganaText/>).
- *  - "___" en patron.jp marca el hueco que el alumno va a llenar.
+ *  - El japonés va con ESPACIOS entre palabras para que un principiante
+ *    pueda leerlo sin "bola de hiragana".
+ *  - Notación de furigana: {漢字|ふりがな}
+ *  - extensiones: 3 frases cortas opcionales para "bolt-on" al post
+ *  - fotoSugerencia: invitación de foto temática
  */
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -18,33 +19,33 @@ export type FraseBilingue = {
   es: string;   // traducción al español
 };
 
-/** Una opción de vocabulario en el constructor de oraciones. */
 export type OpcionSlot = {
-  jp: string;   // "ラーメン"
-  es: string;   // "el ramen" — encaja en estructuraEs
+  jp: string;
+  es: string;
 };
 
 export type SlotPlantilla = {
-  id: string;            // "FOOD" — corresponde a {{FOOD}} en estructura
-  etiqueta: string;      // pista del hueco en español: "comida"
+  id: string;
+  etiqueta: string;
   opciones: OpcionSlot[];
 };
 
-/** Plantilla interactiva: el alumno toca chips y arma la oración. */
 export type PlantillaTema = {
-  estructura: string;     // "{{FOOD}} が すき です！"
-  estructuraEs: string;   // "¡Me gusta {{FOOD}}!"
+  estructura: string;
+  estructuraEs: string;
   slots: SlotPlantilla[];
 };
 
 export type TemaSemana = {
   id: number;
-  kana: string;            // título de la card (hiragana espaciado)
-  prompt: string;          // invitación corta en español
-  meta: string;            // 1 línea: qué vas a aprender
-  patron: FraseBilingue;   // patrón con ___ (jp) y su traducción (es)
-  nota: string;            // 1 línea pedagógica simple
-  ejemplo: FraseBilingue;  // un ejemplo modelo (principiante, espaciado)
+  kana: string;
+  prompt: string;
+  meta: string;                   // 1 línea: qué vas a aprender
+  patron: FraseBilingue;          // patrón con "___"
+  nota: string;                   // explicación de 1 línea
+  ejemplo: FraseBilingue;         // un ejemplo modelo
+  extensiones: FraseBilingue[];   // 3 frases cortas para bolt-on
+  fotoSugerencia: string;         // invitación temática de foto
   plantilla: PlantillaTema;
 };
 
@@ -59,7 +60,13 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     meta: "Aprende a decir cómo te sientes hoy.",
     patron: { jp: "きょうは ___ です。", es: "Hoy estoy ___." },
     nota: "Solo cambia la palabra del centro. 「です」hace la frase educada.",
-    ejemplo: { jp: "きょうは たのしい です。", es: "Hoy estoy feliz." },
+    ejemplo: { jp: "きょうは たのしい です！", es: "¡Hoy estoy feliz!" },
+    extensiones: [
+      { jp: "でも、がんばります！", es: "¡Pero voy a echarle ganas!" },
+      { jp: "あなた は どう です か？", es: "¿Y tú cómo estás?" },
+      { jp: "はやく よる に なって ほしい です。", es: "Quiero que sea de noche ya." },
+    ],
+    fotoSugerencia: "¿Foto de cómo está tu día hoy?",
     plantilla: {
       estructura: "きょうは {{FEELING}} です。",
       estructuraEs: "Hoy estoy {{FEELING}}.",
@@ -70,6 +77,8 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "つかれた", es: "cansado/a" },
         { jp: "わくわく", es: "emocionado/a" },
         { jp: "いそがしい", es: "ocupado/a" },
+        { jp: "きんちょう", es: "nervioso/a" },
+        { jp: "しあわせ", es: "feliz/contento/a" },
       ] }],
     },
   },
@@ -81,7 +90,13 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     meta: "Aprende a decir qué comida te gusta.",
     patron: { jp: "___ が すき です。", es: "Me gusta ___." },
     nota: "「が すき です」significa «me gusta». La comida va al principio.",
-    ejemplo: { jp: "ラーメン が すき です。", es: "Me gusta el ramen." },
+    ejemplo: { jp: "ラーメン が すき です！", es: "¡Me gusta el ramen!" },
+    extensiones: [
+      { jp: "とても おいしい です！", es: "¡Está riquísimo!" },
+      { jp: "いつか たべたい です。", es: "Algún día quiero probarlo." },
+      { jp: "あなた は なに が すき です か？", es: "¿Y tú, qué te gusta?" },
+    ],
+    fotoSugerencia: "¡Agrega foto de tu comida favorita!",
     plantilla: {
       estructura: "{{FOOD}} が すき です！",
       estructuraEs: "¡Me gusta {{FOOD}}!",
@@ -94,6 +109,8 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "チョコ", es: "el chocolate" },
         { jp: "カレー", es: "el curry" },
         { jp: "うどん", es: "el udon" },
+        { jp: "やきとり", es: "el yakitori" },
+        { jp: "てんぷら", es: "la tempura" },
       ] }],
     },
   },
@@ -106,6 +123,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "___ は ___ です。", es: "Mi ___ es ___." },
     nota: "「は」marca de quién hablas. Al final dices cómo es.",
     ejemplo: { jp: "ちち は やさしい です。", es: "Mi papá es amable." },
+    extensiones: [
+      { jp: "だいすき です！", es: "¡Lo/la quiero mucho!" },
+      { jp: "いつも ありがとう。", es: "Siempre gracias." },
+      { jp: "あなた の かぞく は どう です か？", es: "¿Y tu familia?" },
+    ],
+    fotoSugerencia: "¿Tienes foto con esa persona?",
     plantilla: {
       estructura: "{{FAMILY}} は {{ADJ}} です。",
       estructuraEs: "Mi {{FAMILY}} es {{ADJ}}.",
@@ -117,6 +140,8 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           { jp: "あね", es: "hermana mayor" },
           { jp: "おとうと", es: "hermano menor" },
           { jp: "いもうと", es: "hermana menor" },
+          { jp: "そふ", es: "abuelo" },
+          { jp: "そぼ", es: "abuela" },
         ] },
         { id: "ADJ", etiqueta: "cómo es", opciones: [
           { jp: "やさしい", es: "amable" },
@@ -124,6 +149,8 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           { jp: "げんき", es: "enérgico/a" },
           { jp: "かわいい", es: "lindo/a" },
           { jp: "きびしい", es: "estricto/a" },
+          { jp: "しずか", es: "tranquilo/a" },
+          { jp: "いそがしい", es: "ocupado/a" },
         ] },
       ],
     },
@@ -137,6 +164,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "まいにち ___。", es: "Todos los días ___." },
     nota: "「まいにち」significa «todos los días». Luego va la acción.",
     ejemplo: { jp: "まいにち コーヒー を のみます。", es: "Todos los días tomo café." },
+    extensiones: [
+      { jp: "たのしい です！", es: "¡Es divertido!" },
+      { jp: "たいへん です が、がんばります。", es: "Es difícil, pero me esfuerzo." },
+      { jp: "あなた は まいにち なに を します か？", es: "¿Y tú qué haces cada día?" },
+    ],
+    fotoSugerencia: "¿Foto de tu hábito favorito del día?",
     plantilla: {
       estructura: "まいにち {{ACTIVITY}}。",
       estructuraEs: "Todos los días {{ACTIVITY}}.",
@@ -147,6 +180,8 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "アニメ を みます", es: "veo anime" },
         { jp: "おんがく を ききます", es: "escucho música" },
         { jp: "さんぽ します", es: "salgo a caminar" },
+        { jp: "ほん を よみます", es: "leo un libro" },
+        { jp: "シャワー を あびます", es: "me baño" },
       ] }],
     },
   },
@@ -156,18 +191,27 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     kana: "しゅうまつの こと",
     prompt: "¿Qué hiciste el fin de semana?",
     meta: "Aprende a contar qué hiciste.",
-    patron: { jp: "しゅうまつ、___。", es: "El fin de semana ___." },
+    patron: { jp: "しゅうまつ、___ ました。", es: "El fin de semana ___." },
     nota: "「〜ました」es pasado: significa «hice...».",
-    ejemplo: { jp: "しゅうまつ、えいが を みました。", es: "El fin de semana vi una película." },
+    ejemplo: { jp: "しゅうまつ、えいが を み ました。", es: "El fin de semana vi una película." },
+    extensiones: [
+      { jp: "たのしかった です！", es: "¡Estuvo divertido!" },
+      { jp: "また いきたい です。", es: "Quiero volver." },
+      { jp: "つかれました が、よかった です。", es: "Me cansé, pero estuvo bien." },
+    ],
+    fotoSugerencia: "¿Tienes foto del fin de semana?",
     plantilla: {
-      estructura: "しゅうまつ、{{ACTION}}。",
+      estructura: "しゅうまつ、{{ACTION}}ました。",
       estructuraEs: "El fin de semana {{ACTION}}.",
       slots: [{ id: "ACTION", etiqueta: "qué hiciste", opciones: [
-        { jp: "えいが を みました", es: "vi una película" },
-        { jp: "ともだち と あいました", es: "vi a un amigo/a" },
-        { jp: "うち で やすみました", es: "descansé en casa" },
-        { jp: "かいもの を しました", es: "fui de compras" },
-        { jp: "ゲーム を しました", es: "jugué videojuegos" },
+        { jp: "えいが を み", es: "vi una película" },
+        { jp: "ともだち と あい", es: "vi a un amigo/a" },
+        { jp: "うち で やすみ", es: "descansé en casa" },
+        { jp: "かいもの を し", es: "fui de compras" },
+        { jp: "ゲーム を し", es: "jugué videojuegos" },
+        { jp: "りょうり を し", es: "cociné" },
+        { jp: "こうえん を さんぽ し", es: "paseé por el parque" },
+        { jp: "ともだち の うち に い", es: "fui a casa de un amigo/a" },
       ] }],
     },
   },
@@ -180,6 +224,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "いま ___ に います。", es: "Ahora estoy en ___." },
     nota: "「に います」significa «estoy en (un lugar)».",
     ejemplo: { jp: "いま カフェ に います。", es: "Ahora estoy en un café." },
+    extensiones: [
+      { jp: "きもち が いい です。", es: "Se siente bien." },
+      { jp: "しずか で すき です。", es: "Es tranquilo, me gusta." },
+      { jp: "あなた は いま どこ です か？", es: "¿Y tú dónde estás?" },
+    ],
+    fotoSugerencia: "¿Foto del lugar donde estás?",
     plantilla: {
       estructura: "いま {{PLACE}} に います。",
       estructuraEs: "Ahora estoy en {{PLACE}}.",
@@ -189,7 +239,9 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "がっこう", es: "la escuela" },
         { jp: "としょかん", es: "la biblioteca" },
         { jp: "そと", es: "afuera" },
-        { jp: "でんしゃ", es: "el tren" },
+        { jp: "でんしゃ の なか", es: "el metro" },
+        { jp: "こうえん", es: "el parque" },
+        { jp: "レストラン", es: "un restaurante" },
       ] }],
     },
   },
@@ -201,7 +253,13 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     meta: "Aprende a describir el clima.",
     patron: { jp: "きょうは ___ です。", es: "Hoy está ___." },
     nota: "Cambia la palabra del clima. 「です」cierra la frase.",
-    ejemplo: { jp: "きょうは はれ です。", es: "Hoy está soleado." },
+    ejemplo: { jp: "きょうは はれ です！", es: "¡Hoy está soleado!" },
+    extensiones: [
+      { jp: "そと に でたく ない です。", es: "No quiero salir." },
+      { jp: "さんぽ したい です！", es: "¡Quiero salir a caminar!" },
+      { jp: "あなた の まち は どう です か？", es: "¿Y en tu ciudad?" },
+    ],
+    fotoSugerencia: "¿Foto del cielo de hoy?",
     plantilla: {
       estructura: "きょうは {{WEATHER}} です。",
       estructuraEs: "Hoy está {{WEATHER}}.",
@@ -212,6 +270,8 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "あつい", es: "caluroso" },
         { jp: "さむい", es: "frío" },
         { jp: "すずしい", es: "fresco" },
+        { jp: "あたたかい", es: "templado" },
+        { jp: "かぜ が つよい", es: "con mucho viento" },
       ] }],
     },
   },
@@ -221,9 +281,15 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     kana: "たべたい もの",
     prompt: "¿Qué se te antoja comer?",
     meta: "Aprende a decir qué quieres comer.",
-    patron: { jp: "いま ___ が たべたい です。", es: "Ahora quiero comer ___." },
+    patron: { jp: "___ が たべたい です。", es: "Quiero comer ___." },
     nota: "「たべたい です」significa «quiero comer».",
-    ejemplo: { jp: "いま ラーメン が たべたい です。", es: "Ahora quiero comer ramen." },
+    ejemplo: { jp: "ラーメン が たべたい です！", es: "¡Quiero comer ramen!" },
+    extensiones: [
+      { jp: "おなか が ぺこぺこ です！", es: "¡Tengo mucha hambre!" },
+      { jp: "はやく たべたい！", es: "¡Quiero comer ya!" },
+      { jp: "あなた は なに が たべたい です か？", es: "¿Y tú qué quieres comer?" },
+    ],
+    fotoSugerencia: "¿Foto de lo que se te está antojando?",
     plantilla: {
       estructura: "いま {{FOOD}} が たべたい です！",
       estructuraEs: "¡Ahora quiero comer {{FOOD}}!",
@@ -234,6 +300,8 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "すし", es: "sushi" },
         { jp: "ケーキ", es: "pastel" },
         { jp: "たこやき", es: "takoyaki" },
+        { jp: "カレー", es: "curry" },
+        { jp: "チョコ", es: "chocolate" },
       ] }],
     },
   },
@@ -246,6 +314,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "___ で べんきょう しています。", es: "Estudio con ___." },
     nota: "「で」significa «con» (una herramienta o método).",
     ejemplo: { jp: "アニメ で べんきょう しています。", es: "Estudio con anime." },
+    extensiones: [
+      { jp: "むずかしい です が、たのしい です！", es: "Es difícil, ¡pero divertido!" },
+      { jp: "いっしょ に がんばりましょう！", es: "¡Vamos juntos!" },
+      { jp: "まいにち すこし ずつ です。", es: "Poco a poco cada día." },
+    ],
+    fotoSugerencia: "¿Foto de cómo estudias?",
     plantilla: {
       estructura: "{{METHOD}} で べんきょう しています。",
       estructuraEs: "Estudio con {{METHOD}}.",
@@ -256,6 +330,8 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "ユーチューブ", es: "YouTube" },
         { jp: "ゲーム", es: "videojuegos" },
         { jp: "クラス", es: "la clase" },
+        { jp: "ドラマ", es: "dramas" },
+        { jp: "うた", es: "canciones" },
       ] }],
     },
   },
@@ -266,8 +342,14 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     prompt: "¿Qué animal te gusta?",
     meta: "Aprende a decir qué animal te gusta.",
     patron: { jp: "___ が すき です。", es: "Me gustan ___." },
-    nota: "「が すき です」también sirve para animales: «me gustan».",
-    ejemplo: { jp: "ねこ が すき です。", es: "Me gustan los gatos." },
+    nota: "「が すき です」también sirve para animales.",
+    ejemplo: { jp: "ねこ が すき です！", es: "¡Me gustan los gatos!" },
+    extensiones: [
+      { jp: "かわいい です！", es: "¡Son adorables!" },
+      { jp: "うち で かいたい です。", es: "Quiero tener uno de mascota." },
+      { jp: "あなた は どの どうぶつ が すき です か？", es: "¿Y tú qué animal te gusta?" },
+    ],
+    fotoSugerencia: "¿Tienes foto de tu animal favorito o mascota?",
     plantilla: {
       estructura: "{{ANIMAL}} が すき です！",
       estructuraEs: "¡Me gustan {{ANIMAL}}!",
@@ -278,6 +360,8 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "とり", es: "los pájaros" },
         { jp: "パンダ", es: "los pandas" },
         { jp: "ペンギン", es: "los pingüinos" },
+        { jp: "きつね", es: "los zorros" },
+        { jp: "かわうそ", es: "las nutrias" },
       ] }],
     },
   },
@@ -289,7 +373,13 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     meta: "Aprende a decir tu estación favorita.",
     patron: { jp: "___ が いちばん すき です。", es: "___ es lo que más me gusta." },
     nota: "「いちばん すき」significa «lo que MÁS me gusta».",
-    ejemplo: { jp: "なつ が いちばん すき です。", es: "El verano es lo que más me gusta." },
+    ejemplo: { jp: "なつ が いちばん すき です！", es: "¡El verano es lo que más me gusta!" },
+    extensiones: [
+      { jp: "きれい です！", es: "¡Es hermoso!" },
+      { jp: "はやく こない か な。", es: "Que llegue pronto." },
+      { jp: "あなた は どの きせつ が すき です か？", es: "¿Y tú qué estación prefieres?" },
+    ],
+    fotoSugerencia: "¿Foto de esa estación donde vives?",
     plantilla: {
       estructura: "{{SEASON}} が いちばん すき です。",
       estructuraEs: "{{SEASON}} es lo que más me gusta.",
@@ -310,6 +400,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "こどもの ころ、___ が すきでした。", es: "De niño/a me gustaba ___." },
     nota: "「すきでした」es pasado de «me gusta»: «me gustaba».",
     ejemplo: { jp: "こどもの ころ、アニメ が すきでした。", es: "De niño/a me gustaba el anime." },
+    extensiones: [
+      { jp: "なつかしい です！", es: "¡Qué nostalgia!" },
+      { jp: "いま も すき です。", es: "Todavía me gusta." },
+      { jp: "あなた は こどもの ころ なに が すきでしたか？", es: "¿Y tú qué te gustaba?" },
+    ],
+    fotoSugerencia: "¿Tienes una foto de cuando eras niño/a?",
     plantilla: {
       estructura: "こどもの ころ、{{THING}} が すきでした。",
       estructuraEs: "De niño/a me gustaba {{THING}}.",
@@ -319,6 +415,9 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "サッカー", es: "el fútbol" },
         { jp: "アイス", es: "el helado" },
         { jp: "まんが", es: "el manga" },
+        { jp: "おかし", es: "los dulces" },
+        { jp: "ロボット", es: "los robots" },
+        { jp: "うた", es: "las canciones" },
       ] }],
     },
   },
@@ -331,6 +430,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "さいきん ___ を きいて います。", es: "Últimamente escucho ___." },
     nota: "「を きいて います」significa «estoy escuchando».",
     ejemplo: { jp: "さいきん J-POP を きいて います。", es: "Últimamente escucho J-Pop." },
+    extensiones: [
+      { jp: "とても かっこいい です！", es: "¡Es muy cool!" },
+      { jp: "ぜひ きいて ください！", es: "¡Por favor escúchalo!" },
+      { jp: "あなた は どんな おんがく が すき です か？", es: "¿Y tú qué música te gusta?" },
+    ],
+    fotoSugerencia: "¿Foto del artista o canción que escuchas?",
     plantilla: {
       estructura: "さいきん {{GENRE}} を きいて います。",
       estructuraEs: "Últimamente escucho {{GENRE}}.",
@@ -340,6 +445,9 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "K-POP", es: "K-Pop" },
         { jp: "アニメソング", es: "canciones de anime" },
         { jp: "クラシック", es: "música clásica" },
+        { jp: "ヒップホップ", es: "hip-hop" },
+        { jp: "ジャズ", es: "jazz" },
+        { jp: "ラテン", es: "música latina" },
       ] }],
     },
   },
@@ -352,6 +460,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "___ に なりたい です。", es: "Quiero ser ___." },
     nota: "「に なりたい です」significa «quiero ser/convertirme en».",
     ejemplo: { jp: "せんせい に なりたい です。", es: "Quiero ser maestro/a." },
+    extensiones: [
+      { jp: "ぜったい に なります！", es: "¡Sí lo voy a lograr!" },
+      { jp: "むずかしい です が、あきらめません。", es: "Es difícil, pero no me rindo." },
+      { jp: "あなた の ゆめ は なん です か？", es: "¿Y cuál es tu sueño?" },
+    ],
+    fotoSugerencia: "¿Foto de algo relacionado con tu sueño?",
     plantilla: {
       estructura: "{{JOB}} に なりたい です。",
       estructuraEs: "Quiero ser {{JOB}}.",
@@ -361,6 +475,9 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "エンジニア", es: "ingeniero/a" },
         { jp: "デザイナー", es: "diseñador/a" },
         { jp: "つうやく", es: "intérprete" },
+        { jp: "かんごし", es: "enfermero/a" },
+        { jp: "りょうりにん", es: "cocinero/a" },
+        { jp: "うちゅうひこうし", es: "astronauta" },
       ] }],
     },
   },
@@ -373,6 +490,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "にほんで ___ が たべたい です。", es: "En Japón quiero comer ___." },
     nota: "「で」aquí significa «en» (un lugar donde pasa algo).",
     ejemplo: { jp: "にほんで すし が たべたい です。", es: "En Japón quiero comer sushi." },
+    extensiones: [
+      { jp: "はやく にほん に いきたい です！", es: "¡Quiero ir a Japón ya!" },
+      { jp: "ゆめ です。", es: "Es mi sueño." },
+      { jp: "いっしょ に いき ましょう！", es: "¡Vamos juntos!" },
+    ],
+    fotoSugerencia: "¿Foto del plato japonés que más quieres probar?",
     plantilla: {
       estructura: "にほんで {{FOOD}} が たべたい です！",
       estructuraEs: "¡En Japón quiero comer {{FOOD}}!",
@@ -382,6 +505,9 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "たこやき", es: "takoyaki" },
         { jp: "やきとり", es: "yakitori" },
         { jp: "おにぎり", es: "onigiri" },
+        { jp: "もちアイス", es: "mochi ice cream" },
+        { jp: "ラーメン", es: "ramen de verdad" },
+        { jp: "てんぷら", es: "tempura" },
       ] }],
     },
   },
@@ -394,6 +520,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "けさ ___。", es: "Esta mañana ___." },
     nota: "「けさ」significa «esta mañana». 「〜ました」es pasado.",
     ejemplo: { jp: "けさ パン を たべました。", es: "Esta mañana comí pan." },
+    extensiones: [
+      { jp: "おいしかった です！", es: "¡Estuvo rico!" },
+      { jp: "じかん が なくて、いそがしかった です。", es: "No tuve tiempo, estaba ocupado/a." },
+      { jp: "あなた は けさ なに を たべましたか？", es: "¿Y tú qué desayunaste?" },
+    ],
+    fotoSugerencia: "¿Foto de tu desayuno de hoy?",
     plantilla: {
       estructura: "けさ {{BREAKFAST}}。",
       estructuraEs: "Esta mañana {{BREAKFAST}}.",
@@ -403,6 +535,9 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "たまご を たべました", es: "comí huevo" },
         { jp: "フルーツ を たべました", es: "comí fruta" },
         { jp: "ごはん を たべました", es: "comí arroz" },
+        { jp: "ヨーグルト を たべました", es: "comí yogurt" },
+        { jp: "なにも たべませんでした", es: "no comí nada" },
+        { jp: "シリアル を たべました", es: "comí cereal" },
       ] }],
     },
   },
@@ -414,7 +549,13 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     meta: "Aprende a recomendar algo.",
     patron: { jp: "___ は おすすめ です。", es: "Recomiendo ___." },
     nota: "「おすすめ です」significa «lo recomiendo».",
-    ejemplo: { jp: "この アニメ は おすすめ です。", es: "Recomiendo este anime." },
+    ejemplo: { jp: "この アニメ は おすすめ です！", es: "¡Recomiendo este anime!" },
+    extensiones: [
+      { jp: "ぜったい に みて ください！", es: "¡Definitivamente míralo/pruébalo!" },
+      { jp: "さいこう です！", es: "¡Es lo mejor!" },
+      { jp: "きっと すき に なります。", es: "Seguro te va a gustar." },
+    ],
+    fotoSugerencia: "¿Foto de lo que recomiendas?",
     plantilla: {
       estructura: "{{THING}} は おすすめ です！",
       estructuraEs: "¡Recomiendo {{THING}}!",
@@ -424,6 +565,9 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "この まんが", es: "este manga" },
         { jp: "この ゲーム", es: "este juego" },
         { jp: "この えいが", es: "esta película" },
+        { jp: "この おんがく", es: "esta música" },
+        { jp: "この ほん", es: "este libro" },
+        { jp: "この たべもの", es: "esta comida" },
       ] }],
     },
   },
@@ -436,6 +580,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "___ が にがて です。", es: "Se me dificulta ___." },
     nota: "「にがて です」significa «no soy bueno/a en...». ¡Todos tenemos algo!",
     ejemplo: { jp: "はやおき が にがて です。", es: "Se me dificulta madrugar." },
+    extensiones: [
+      { jp: "でも、がんばります！", es: "¡Pero voy a intentarlo!" },
+      { jp: "すこし ずつ れんしゅう します。", es: "Voy a practicar poco a poco." },
+      { jp: "あなた は どう です か？", es: "¿Y a ti, qué se te dificulta?" },
+    ],
+    fotoSugerencia: "¿Foto que represente ese reto?",
     plantilla: {
       estructura: "{{THING}} が にがて です。",
       estructuraEs: "Se me dificulta {{THING}}.",
@@ -445,6 +595,9 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "うんどう", es: "el ejercicio" },
         { jp: "すうがく", es: "las matemáticas" },
         { jp: "かたづけ", es: "ordenar" },
+        { jp: "じかん を まもる こと", es: "ser puntual" },
+        { jp: "みず を のむ こと", es: "tomar agua" },
+        { jp: "はやく ねる こと", es: "dormir temprano" },
       ] }],
     },
   },
@@ -457,6 +610,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "わたしの まちは ___ です。", es: "Mi ciudad es ___." },
     nota: "Una sola palabra dice cómo es. 「です」la hace educada.",
     ejemplo: { jp: "わたしの まちは にぎやか です。", es: "Mi ciudad es animada." },
+    extensiones: [
+      { jp: "とても すき です。", es: "Me gusta mucho." },
+      { jp: "ぜひ きて ください！", es: "¡Ven a visitarla!" },
+      { jp: "あなた の まち は どう です か？", es: "¿Y tu ciudad cómo es?" },
+    ],
+    fotoSugerencia: "¿Foto de tu ciudad o calle favorita?",
     plantilla: {
       estructura: "わたしの まちは {{ADJ}} です。",
       estructuraEs: "Mi ciudad es {{ADJ}}.",
@@ -466,6 +625,9 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "おおきい", es: "grande" },
         { jp: "ちいさい", es: "pequeña" },
         { jp: "きれい", es: "bonita" },
+        { jp: "あたたかい", es: "cálida" },
+        { jp: "さむい", es: "fría" },
+        { jp: "たのしい", es: "divertida" },
       ] }],
     },
   },
@@ -478,6 +640,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "さいきん ___ が たのしかった です。", es: "Últimamente ___ estuvo divertido." },
     nota: "「たのしかった です」es pasado: «estuvo divertido».",
     ejemplo: { jp: "さいきん えいが が たのしかった です。", es: "Últimamente la película estuvo divertida." },
+    extensiones: [
+      { jp: "また したい です！", es: "¡Quiero repetirlo!" },
+      { jp: "すごく よかった です！", es: "¡Estuvo genial!" },
+      { jp: "あなた は さいきん なに が たのしかった です か？", es: "¿Y tú qué estuvo divertido?" },
+    ],
+    fotoSugerencia: "¿Tienes foto de ese momento?",
     plantilla: {
       estructura: "さいきん {{THING}} が たのしかった です。",
       estructuraEs: "Últimamente {{THING}} estuvo divertido.",
@@ -487,6 +655,9 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "ゲーム", es: "el videojuego" },
         { jp: "パーティー", es: "la fiesta" },
         { jp: "デート", es: "la cita" },
+        { jp: "りょうり", es: "cocinar" },
+        { jp: "クラス", es: "la clase" },
+        { jp: "かいもの", es: "ir de compras" },
       ] }],
     },
   },
@@ -499,6 +670,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "わたしの へやに ___ が あります。", es: "En mi cuarto hay ___." },
     nota: "「が あります」significa «hay» (para cosas).",
     ejemplo: { jp: "わたしの へやに ほん が あります。", es: "En mi cuarto hay libros." },
+    extensiones: [
+      { jp: "とても すき な ばしょ です。", es: "Es mi lugar favorito." },
+      { jp: "すこし ちらかって います。", es: "Está un poco desordenado." },
+      { jp: "あなた の へや は どう です か？", es: "¿Y tu cuarto?" },
+    ],
+    fotoSugerencia: "¿Foto de tu cuarto o rincón favorito?",
     plantilla: {
       estructura: "わたしの へやに {{THING}} が あります。",
       estructuraEs: "En mi cuarto hay {{THING}}.",
@@ -508,6 +685,9 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "まんが", es: "manga" },
         { jp: "ぬいぐるみ", es: "peluches" },
         { jp: "ギター", es: "una guitarra" },
+        { jp: "ねこ", es: "un gato" },
+        { jp: "しょくぶつ", es: "plantas" },
+        { jp: "たくさんの ほん", es: "muchos libros" },
       ] }],
     },
   },
@@ -520,6 +700,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "わたしの ともだちは ___ です。", es: "Mi amigo/a es ___." },
     nota: "Una palabra dice cómo es. 「は」marca de quién hablas.",
     ejemplo: { jp: "わたしの ともだちは やさしい です。", es: "Mi amigo/a es amable." },
+    extensiones: [
+      { jp: "だいすき です！", es: "¡Le quiero mucho!" },
+      { jp: "いつも ありがとう。", es: "Siempre gracias." },
+      { jp: "あなた の ともだち は どう です か？", es: "¿Y tu amigo/a?" },
+    ],
+    fotoSugerencia: "¿Foto con tu amigo/a?",
     plantilla: {
       estructura: "わたしの ともだちは {{ADJ}} です。",
       estructuraEs: "Mi amigo/a es {{ADJ}}.",
@@ -529,6 +715,9 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "げんき", es: "enérgico/a" },
         { jp: "しんせつ", es: "bondadoso/a" },
         { jp: "かわいい", es: "lindo/a" },
+        { jp: "かっこいい", es: "cool" },
+        { jp: "まじめ", es: "serio/a" },
+        { jp: "たのしい", es: "divertido/a" },
       ] }],
     },
   },
@@ -541,6 +730,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "___ から、べんきょう しています。", es: "Estudio porque ___." },
     nota: "「から」significa «porque». La razón va antes.",
     ejemplo: { jp: "アニメ が すき だから、べんきょう しています。", es: "Estudio porque me gusta el anime." },
+    extensiones: [
+      { jp: "むずかしい です が、たのしい です！", es: "Es difícil, ¡pero divertido!" },
+      { jp: "ゆめ が あります！", es: "¡Tengo un sueño!" },
+      { jp: "いっしょ に がんばりましょう！", es: "¡Vamos juntos!" },
+    ],
+    fotoSugerencia: "¿Foto de lo que te motivó a estudiar japonés?",
     plantilla: {
       estructura: "{{REASON}} から、べんきょう しています。",
       estructuraEs: "Estudio porque {{REASON}}.",
@@ -549,6 +744,8 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "にほんに いきたい", es: "quiero ir a Japón" },
         { jp: "ゲーム が すき だ", es: "me gustan los videojuegos" },
         { jp: "ぶんか が すき だ", es: "me gusta la cultura" },
+        { jp: "にほんご が おもしろい", es: "el japonés es interesante" },
+        { jp: "しごと の ため", es: "para el trabajo" },
       ] }],
     },
   },
@@ -561,14 +758,22 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "___ が いちばん すき です。", es: "___ es mi momento favorito." },
     nota: "「いちばん すき」significa «lo que más me gusta».",
     ejemplo: { jp: "よる が いちばん すき です。", es: "La noche es mi momento favorito." },
+    extensiones: [
+      { jp: "ほっと します。", es: "Me relajo." },
+      { jp: "コーヒー を のみ ながら のんびり します。", es: "Me relajo tomando café." },
+      { jp: "あなた は いつ が いちばん すき です か？", es: "¿Y tú cuándo es tu favorito?" },
+    ],
+    fotoSugerencia: "¿Foto de ese momento del día?",
     plantilla: {
       estructura: "{{TIME}} が いちばん すき です。",
       estructuraEs: "{{TIME}} es mi momento favorito.",
       slots: [{ id: "TIME", etiqueta: "momento", opciones: [
         { jp: "あさ", es: "la mañana" },
         { jp: "よる", es: "la noche" },
-        { jp: "ひるごはん", es: "la hora de comer" },
+        { jp: "ひるごはん の じかん", es: "la hora de comer" },
         { jp: "ねるまえ", es: "antes de dormir" },
+        { jp: "ともだち と の じかん", es: "el tiempo con amigos" },
+        { jp: "こうえん の さんぽ", es: "el paseo por el parque" },
       ] }],
     },
   },
@@ -581,6 +786,12 @@ export const TEMAS_SEMANA: TemaSemana[] = [
     patron: { jp: "___！", es: "¡___!" },
     nota: "Frases cortas de ánimo. ¡Una palabra es suficiente!",
     ejemplo: { jp: "がんばれ！", es: "¡Tú puedes!" },
+    extensiones: [
+      { jp: "まいにち すこし ずつ。", es: "Poco a poco cada día." },
+      { jp: "いっしょ に がんばりましょう！", es: "¡Vamos juntos!" },
+      { jp: "にほんご が たのしい です！", es: "¡El japonés es divertido!" },
+    ],
+    fotoSugerencia: "¿Una foto que te inspire o anime?",
     plantilla: {
       estructura: "{{MSG}}！",
       estructuraEs: "¡{{MSG}}!",
@@ -589,6 +800,8 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "だいじょうぶ", es: "todo está bien" },
         { jp: "できるよ", es: "sí se puede" },
         { jp: "あきらめないで", es: "no te rindas" },
+        { jp: "すこし ずつ で いい", es: "poco a poco está bien" },
+        { jp: "ゆっくり で いい", es: "sin prisa está bien" },
       ] }],
     },
   },
