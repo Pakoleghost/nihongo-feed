@@ -13,6 +13,7 @@ export type CurriculumProject = {
 
 export type CurriculumModule = {
   id: string;
+  numero: number;
   nombre: string;
   nombreJa: string;
   nivel: 1 | 2;
@@ -29,6 +30,7 @@ export type CurriculumModule = {
 export const CURRICULUM_MODULES: CurriculumModule[] = [
   {
     id: "g1-a",
+    numero: 1,
     nombre: "Primeras palabras",
     nombreJa: "はじめのことば",
     nivel: 1,
@@ -70,14 +72,8 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
         formato: "conversación Zoom",
         evalTipo: "interaccion",
         evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento de la tarea)",
-        ],
-        competencias: [
-          "presentación personal",
-          "interacción básica",
-          "horarios",
-        ],
+        evalDimensiones: ["タスク遂行 (cumplimiento de la tarea)"],
+        competencias: ["presentación personal", "interacción básica", "horarios"],
         checklist: [
           "Sostiene la entrevista sin recurrir al español",
           "Responde a todas las preguntas (nombre, origen, ocupación, gustos)",
@@ -93,16 +89,8 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
         formato: "video",
         evalTipo: "produccion",
         evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento)",
-          "正確さ (precisión)",
-          "流暢さ (fluidez)",
-        ],
-        competencias: [
-          "rutina diaria",
-          "tiempo y lugar",
-          "ubicación",
-        ],
+        evalDimensiones: ["タスク遂行 (cumplimiento)", "正確さ (precisión)", "流暢さ (fluidez)"],
+        competencias: ["rutina diaria", "tiempo y lugar", "ubicación"],
         checklist: [
           "タスク遂行 · Incluye al menos 6 actividades con hora y lugar",
           "タスク遂行 · Describe dónde está algo o alguien con ある・いる",
@@ -110,33 +98,11 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
           "流暢さ · El video fluye sin pausas largas ni lectura palabra por palabra",
         ],
       },
-      {
-        id: "g1-a-p3",
-        nombre: "Hagamos un plan",
-        nombreJa: "いっしょに行きませんか",
-        definicion: "En parejas o grupo pequeño, proponer un plan real o ficticio para salir: invitar, responder, negociar día y hora. 3–4 minutos.",
-        formato: "conversación Zoom",
-        evalTipo: "interaccion",
-        evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento de la tarea)",
-        ],
-        competencias: [
-          "invitaciones",
-          "horarios",
-          "interacción básica",
-        ],
-        checklist: [
-          "Logra proponer un plan y cerrarlo (día, hora, lugar)",
-          "Negocia o ajusta cuando el otro propone algo distinto",
-          "Acepta o rechaza con una razón comprensible",
-          "La conversación avanza sin depender del profesor",
-        ],
-      }
     ],
   },
   {
     id: "g1-b",
+    numero: 2,
     nombre: "En acción",
     nombreJa: "こうどうしよう",
     nivel: 1,
@@ -178,19 +144,11 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
         formato: "presentación Zoom",
         evalTipo: "produccion",
         evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento)",
-          "正確さ (precisión)",
-          "流暢さ (fluidez)",
-        ],
-        competencias: [
-          "adjetivos",
-          "gustos y preferencias",
-          "descripción",
-        ],
+        evalDimensiones: ["タスク遂行 (cumplimiento)", "正確さ (precisión)", "流暢さ (fluidez)"],
+        competencias: ["adjetivos", "gustos y preferencias", "descripción"],
         checklist: [
           "タスク遂行 · Recomienda algo con al menos 3 adjetivos distintos",
-          "タスク遂行 · Explica por qué lo recomienda (gustos / razones)",
+          "タスク遂行 · Explica por qué lo recomienda (gustos / razones con から)",
           "正確さ · Conjuga adjetivos い y な correctamente",
           "流暢さ · Presenta con ritmo natural y responde preguntas",
         ],
@@ -203,16 +161,8 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
         formato: "presentación Zoom o video",
         evalTipo: "produccion",
         evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento)",
-          "正確さ (precisión)",
-          "流暢さ (fluidez)",
-        ],
-        competencias: [
-          "forma て",
-          "reglas y permisos",
-          "descripción de acciones",
-        ],
+        evalDimensiones: ["タスク遂行 (cumplimiento)", "正確さ (precisión)", "流暢さ (fluidez)"],
+        competencias: ["forma て", "reglas y permisos", "descripción de acciones"],
         checklist: [
           "タスク遂行 · Presenta al menos 4 reglas coherentes con el lugar",
           "タスク遂行 · Mezcla permisos (てもいい) y prohibiciones (てはいけません)",
@@ -222,33 +172,26 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
       },
       {
         id: "g1-b-p3",
-        nombre: "Misión en secuencia",
-        nombreJa: "今日のミッション",
-        definicion: "El alumno narra una secuencia de acciones (real o ficticia) usando forma て para conectarlas: una receta, una aventura, un día de trabajo. 2 minutos.",
-        formato: "video o presentación",
-        evalTipo: "produccion",
-        evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento)",
-          "正確さ (precisión)",
-          "流暢さ (fluidez)",
-        ],
-        competencias: [
-          "forma て",
-          "secuencia de acciones",
-          "acciones en progreso",
-        ],
+        nombre: "¿Qué está haciendo?",
+        nombreJa: "今、何してる？",
+        definicion: "El profesor comparte en pantalla una foto o escena (anime, cotidiana, divertida). Los 5 alumnos describen en japonés qué están haciendo las personas, qué hay en la escena, y se hacen preguntas entre sí. 4–5 min en grupo.",
+        formato: "conversación Zoom con pantalla compartida",
+        evalTipo: "interaccion",
+        evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
+        evalDimensiones: ["タスク遂行 (cumplimiento de la tarea)"],
+        competencias: ["ている", "adjetivos descriptivos", "descripción de escenas"],
         checklist: [
-          "タスク遂行 · Encadena al menos 5 acciones en secuencia",
-          "タスク遂行 · Incluye al menos 1 acción en progreso (ている)",
-          "正確さ · Las conexiones con forma て están bien hechas",
-          "流暢さ · La narración fluye y se entiende la secuencia",
+          "Describe al menos 3 personas o cosas con ている",
+          "Hace al menos 1 pregunta a un compañero sobre la escena",
+          "Responde a las preguntas del grupo",
+          "Mantiene el intercambio en japonés",
         ],
-      }
+      },
     ],
   },
   {
     id: "g1-c",
+    numero: 3,
     nombre: "Tu voz",
     nombreJa: "じぶんのこえ",
     nivel: 1,
@@ -288,16 +231,8 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
         formato: "presentación Zoom",
         evalTipo: "produccion",
         evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento)",
-          "正確さ (precisión)",
-          "流暢さ (fluidez)",
-        ],
-        competencias: [
-          "modificación de sustantivo",
-          "opiniones",
-          "citas indirectas",
-        ],
+        evalDimensiones: ["タスク遂行 (cumplimiento)", "正確さ (precisión)", "流暢さ (fluidez)"],
+        competencias: ["modificación de sustantivo", "opiniones", "citas indirectas"],
         checklist: [
           "タスク遂行 · Reseña con al menos 2 cláusulas de modificación de sustantivo",
           "タスク遂行 · Da opinión propia (と思います) y responde 1 pregunta",
@@ -313,50 +248,37 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
         formato: "presentación Zoom o video",
         evalTipo: "produccion",
         evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento)",
-          "正確さ (precisión)",
-          "流暢さ (fluidez)",
-        ],
-        competencias: [
-          "modificación de sustantivo",
-          "descripción de personas",
-          "formas cortas",
-        ],
+        evalDimensiones: ["タスク遂行 (cumplimiento)", "正確さ (precisión)", "流暢さ (fluidez)"],
+        competencias: ["modificación de sustantivo", "descripción de personas", "formas cortas"],
         checklist: [
           "タスク遂行 · Describe a la persona con al menos 3 cláusulas de modificación",
-          "タスク遂行 · Incluye acciones habituales y una opinión",
+          "タスク遂行 · Incluye algo que esa persona dijo (と言っていました) y da su opinión",
           "正確さ · Formas cortas y modificación bien usadas",
           "流暢さ · Habla con conexión real al tema y ritmo natural",
         ],
       },
       {
         id: "g1-c-p3",
-        nombre: "Opinión y respuesta",
-        nombreJa: "ミニ意見交換",
-        definicion: "Debate express en grupo sobre un tema sencillo (¿qué es mejor, X o Y?). Cada alumno da su opinión, escucha la de otro, y responde. 4–5 minutos en grupo.",
-        formato: "conversación Zoom",
-        evalTipo: "interaccion",
-        evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento de la tarea)",
-        ],
-        competencias: [
-          "opiniones",
-          "formas cortas",
-          "interacción",
-        ],
+        nombre: "Lo que descubrí",
+        nombreJa: "私が見つけたもの",
+        definicion: "El alumno presenta algo que descubrió recientemente (app, receta, dato curioso, lugar, canción) usando modificación de sustantivo para describirlo, menciona qué alguien dijo sobre ello, y da su propia opinión. 2–3 min. Los compañeros reaccionan.",
+        formato: "presentación Zoom",
+        evalTipo: "produccion",
+        evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
+        evalDimensiones: ["タスク遂行 (cumplimiento)", "正確さ (precisión)", "流暢さ (fluidez)"],
+        competencias: ["modificación de sustantivo", "と言っていました", "と思います"],
         checklist: [
-          "Expresa su opinión de forma comprensible",
-          "Responde a la opinión de otro compañero (acuerdo / desacuerdo / pregunta)",
-          "Sostiene al menos 2 turnos de ida y vuelta",
-          "Mantiene la interacción en japonés",
+          "タスク遂行 · Describe el descubrimiento con al menos 1 cláusula de modificación de sustantivo",
+          "タスク遂行 · Incluye algo que alguien dijo (と言っていました) y da su propia opinión (と思います)",
+          "正確さ · La cláusula de modificación está bien construida",
+          "流暢さ · La presentación fluye y no se lee palabra por palabra",
         ],
-      }
+      },
     ],
   },
   {
     id: "g1-d",
+    numero: 4,
     nombre: "Miras hacia adelante",
     nombreJa: "これからのこと",
     nivel: 1,
@@ -398,17 +320,8 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
         formato: "presentación Zoom",
         evalTipo: "produccion",
         evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento)",
-          "正確さ (precisión)",
-          "流暢さ (fluidez)",
-        ],
-        competencias: [
-          "comparaciones",
-          "planes e intenciones",
-          "experiencias",
-          "recomendaciones",
-        ],
+        evalDimensiones: ["タスク遂行 (cumplimiento)", "正確さ (precisión)", "流暢さ (fluidez)"],
+        competencias: ["comparaciones", "planes e intenciones", "experiencias", "recomendaciones"],
         checklist: [
           "タスク遂行 · Compara 2 opciones y explica una intención (つもり)",
           "タスク遂行 · Menciona una experiencia (ことがある) y un consejo (ほうがいい)",
@@ -424,14 +337,8 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
         formato: "conversación Zoom",
         evalTipo: "interaccion",
         evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento de la tarea)",
-        ],
-        competencias: [
-          "consejos",
-          "obligaciones",
-          "explicaciones con んです",
-        ],
+        evalDimensiones: ["タスク遂行 (cumplimiento de la tarea)"],
+        competencias: ["consejos", "obligaciones", "explicaciones con んです"],
         checklist: [
           "Da consejos comprensibles al problema planteado",
           "Reacciona a los consejos de los demás",
@@ -441,31 +348,26 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
       },
       {
         id: "g1-d-p3",
-        nombre: "Elige tu camino",
-        nombreJa: "どっちを選ぶ？",
-        definicion: "Se presentan dos opciones difíciles (trabajo A vs B, ciudad X o Y). Cada alumno argumenta su elección comparando, expresando deseos y experiencias. 4 minutos.",
-        formato: "conversación Zoom",
-        evalTipo: "interaccion",
-        evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento de la tarea)",
-        ],
-        competencias: [
-          "comparaciones",
-          "expresar deseos",
-          "experiencias pasadas",
-        ],
+        nombre: "Mi lista de vida",
+        nombreJa: "バケットリスト",
+        definicion: "El alumno presenta su bucket list personal: cosas que ya hizo (ことがある), cosas que nunca ha hecho pero quiere hacer (たい), y qué necesita hacer para lograrlo (なければなりません). 3–4 min. El grupo pregunta y comparte también.",
+        formato: "presentación Zoom",
+        evalTipo: "produccion",
+        evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
+        evalDimensiones: ["タスク遂行 (cumplimiento)", "正確さ (precisión)", "流暢さ (fluidez)"],
+        competencias: ["ことがある", "たい", "なければなりません", "んです"],
         checklist: [
-          "Defiende su elección con razones comprensibles",
-          "Compara las dos opciones de forma clara",
-          "Responde cuando alguien cuestiona su elección",
-          "Sostiene el intercambio sin recurrir al español",
+          "タスク遂行 · Menciona al menos 3 experiencias pasadas con ことがある (o ことがない)",
+          "タスク遂行 · Presenta al menos 2 metas futuras con razón (たい・んです)",
+          "正確さ · ことがある y たい bien formados y diferenciados",
+          "流暢さ · La presentación fluye y se siente personal, no memorizada",
         ],
-      }
+      },
     ],
   },
   {
     id: "g2-a",
+    numero: 5,
     nombre: "Posibilidades",
     nombreJa: "できること",
     nivel: 2,
@@ -500,46 +402,14 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
     proyectos: [
       {
         id: "g2-a-p1",
-        nombre: "Lo que puedo hacer ahora",
-        nombreJa: "できること発表",
-        definicion: "El alumno presenta sus habilidades actuales: qué puede y no puede hacer, qué probó por primera vez, y qué quiere poder hacer pronto. 3–4 minutos.",
-        formato: "presentación Zoom o video",
-        evalTipo: "produccion",
-        evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento)",
-          "正確さ (precisión)",
-          "流暢さ (fluidez)",
-        ],
-        competencias: [
-          "forma potencial",
-          "habilidades",
-          "intentar cosas nuevas",
-        ],
-        checklist: [
-          "タスク遂行 · Describe habilidades con al menos 5 verbos en potencial",
-          "タスク遂行 · Menciona algo que intentó (てみた) y da razones (し)",
-          "正確さ · Forma potencial bien conjugada, incluso irregulares",
-          "流暢さ · La presentación es espontánea, no memorizada",
-        ],
-      },
-      {
-        id: "g2-a-p2",
         nombre: "Organicemos algo",
         nombreJa: "みんなで企画しよう",
-        definicion: "En grupo, planear un evento real o ficticio: cada alumno propone, acepta, prepara y hace peticiones formales. 6–8 minutos en grupo.",
+        definicion: "En grupo, planear un evento real o ficticio: cada alumno propone, acepta responsabilidades, prepara algo con ておく, y hace peticiones formales. Los 5 trabajan juntos hacia un plan concreto. 6–8 min.",
         formato: "conversación Zoom",
         evalTipo: "interaccion",
         evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento de la tarea)",
-        ],
-        competencias: [
-          "dar/recibir favores",
-          "intenciones",
-          "peticiones formales",
-          "preparación anticipada",
-        ],
+        evalDimensiones: ["タスク遂行 (cumplimiento de la tarea)"],
+        competencias: ["dar/recibir favores", "intenciones", "peticiones formales", "preparación anticipada"],
         checklist: [
           "Contribuye con al menos una propuesta al plan del grupo",
           "Hace o responde una petición dentro de la conversación",
@@ -548,34 +418,27 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
         ],
       },
       {
-        id: "g2-a-p3",
-        nombre: "Historia de favores",
-        nombreJa: "ありがとうストーリー",
-        definicion: "El alumno cuenta una historia real sobre un favor que recibió o hizo usando las estructuras de dar y recibir. 2–3 minutos.",
-        formato: "conversación Zoom o video",
-        evalTipo: "produccion",
-        evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento)",
-          "正確さ (precisión)",
-          "流暢さ (fluidez)",
-        ],
-        competencias: [
-          "dar/recibir favores",
-          "narrativa en pasado",
-          "intercambios sociales",
-        ],
+        id: "g2-a-p2",
+        nombre: "La primera vez",
+        nombreJa: "はじめての〇〇",
+        definicion: "Cada alumno cuenta algo que hizo por primera vez recientemente (real o imaginario) usando てみた, explica con し cómo fue, y comenta si lo recomendaría. El grupo pregunta y comparte sus propias experiencias. 5–6 min en grupo.",
+        formato: "conversación Zoom",
+        evalTipo: "interaccion",
+        evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
+        evalDimensiones: ["タスク遂行 (cumplimiento de la tarea)"],
+        competencias: ["てみる", "し (razones múltiples)", "そうだ (apariencia)", "recomendaciones"],
         checklist: [
-          "タスク遂行 · Cuenta un favor con dirección social correcta (あげる/くれる/もらう)",
-          "タスク遂行 · La historia tiene inicio, desarrollo y desenlace",
-          "正確さ · Las estructuras de dar y recibir están bien usadas",
-          "流暢さ · La narración fluye y transmite la emoción",
+          "Cuenta la experiencia usando てみた de forma correcta",
+          "Da al menos 2 razones con し sobre cómo fue",
+          "Responde preguntas del grupo sobre su experiencia",
+          "Recomienda o no recomienda con razones comprensibles",
         ],
-      }
+      },
     ],
   },
   {
     id: "g2-b",
+    numero: 6,
     nombre: "Si y cuando",
     nombreJa: "もしもの話",
     nivel: 2,
@@ -610,79 +473,43 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
     proyectos: [
       {
         id: "g2-b-p1",
-        nombre: "Laboratorio de historias",
-        nombreJa: "ストーリー研究会",
-        definicion: "El alumno narra una película, serie o libro usando condicionales para describir causas y consecuencias. Los compañeros preguntan al final. 3–4 minutos.",
-        formato: "presentación Zoom",
-        evalTipo: "produccion",
-        evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento)",
-          "正確さ (precisión)",
-          "流暢さ (fluidez)",
-        ],
-        competencias: [
-          "condicionales",
-          "narrativa",
-          "secuencia de eventos",
-        ],
-        checklist: [
-          "タスク遂行 · Narra con condicionales (たら／と) causas y consecuencias",
-          "タスク遂行 · Incluye información de oído (そうだ) y responde preguntas",
-          "正確さ · Los condicionales están bien diferenciados",
-          "流暢さ · La narración se sostiene y fluye",
-        ],
-      },
-      {
-        id: "g2-b-p2",
         nombre: "Si pudiera volver",
         nombreJa: "もし戻れたら",
-        definicion: "El alumno habla de algo que haría diferente si pudiera volver atrás, o expresa un arrepentimiento real o ficticio usando condicionales y ばよかった. 2–3 minutos.",
+        definicion: "Cada alumno comparte algo que haría diferente si pudiera volver atrás (real o ficticio), usando ばよかった y condicionales. El grupo reacciona y hace preguntas. 5–6 min.",
         formato: "conversación Zoom",
         evalTipo: "interaccion",
         evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento de la tarea)",
-        ],
-        competencias: [
-          "arrepentimiento",
-          "hipótesis",
-          "condicionales",
-        ],
+        evalDimensiones: ["タスク遂行 (cumplimiento de la tarea)"],
+        competencias: ["arrepentimiento", "hipótesis", "condicionales"],
         checklist: [
           "Plantea una situación pasada comprensible",
           "Expresa qué cambiaría y por qué",
-          "Responde a las preguntas o reacciones del grupo",
+          "Responde a las reacciones del grupo",
           "Sostiene la reflexión en japonés",
         ],
       },
       {
-        id: "g2-b-p3",
-        nombre: "Escena en movimiento",
-        nombreJa: "同時進行シーン",
-        definicion: "En parejas, improvisar una escena donde ambos hacen cosas simultáneamente y ocurren eventos inesperados. Usar ながら, てしまう y verbos transitivos/intransitivos. 4–5 minutos.",
-        formato: "roleplay Zoom",
+        id: "g2-b-p2",
+        nombre: "¿Y si...?",
+        nombreJa: "もしも〇〇だったら",
+        definicion: "Conversación grupal sobre situaciones hipotéticas divertidas o reveladoras: si ganaras la lotería, si fueras invisible, si pudieras vivir en Japón. Cada alumno propone un escenario, el grupo reacciona y debate. 5–6 min.",
+        formato: "conversación Zoom",
         evalTipo: "interaccion",
         evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento de la tarea)",
-        ],
-        competencias: [
-          "simultaneidad",
-          "verbos transitivos/intransitivos",
-          "resultado inesperado",
-        ],
+        evalDimensiones: ["タスク遂行 (cumplimiento de la tarea)"],
+        competencias: ["たら/ば (hipótesis)", "と (consecuencia natural)", "ために (propósito)"],
         checklist: [
-          "Improvisa la escena sin guión escrito",
-          "Reacciona en tiempo real a lo que hace la pareja",
-          "Logra comunicar acciones simultáneas y un giro inesperado",
-          "Mantiene el roleplay en japonés de principio a fin",
+          "Plantea su hipotético con claridad usando たら o ば",
+          "Responde al hipotético de al menos otro compañero",
+          "El intercambio tiene ida y vuelta real entre los 5",
+          "Mantiene el japonés durante toda la conversación",
         ],
-      }
+      },
     ],
   },
   {
     id: "g2-c",
+    numero: 7,
     nombre: "Con conciencia",
     nombreJa: "ていねいに話す",
     nivel: 2,
@@ -716,77 +543,43 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
     proyectos: [
       {
         id: "g2-c-p1",
-        nombre: "Entrevista formal",
-        nombreJa: "フォーマル面談",
-        definicion: "Roleplay de entrevista de trabajo o reunión formal. El alumno usa keigo apropiado, se presenta humildemente y responde preguntas. 5–6 minutos.",
-        formato: "roleplay Zoom",
-        evalTipo: "interaccion",
-        evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento de la tarea)",
-        ],
-        competencias: [
-          "keigo",
-          "registro formal",
-          "presentación personal avanzada",
-        ],
-        checklist: [
-          "Sostiene el registro formal durante toda la entrevista",
-          "Responde a todas las preguntas del entrevistador",
-          "Hace preguntas o peticiones apropiadas al contexto",
-          "No rompe el roleplay para cambiar al español",
-        ],
-      },
-      {
-        id: "g2-c-p2",
         nombre: "Cómo he cambiado",
         nombreJa: "変わったこと",
-        definicion: "El alumno reflexiona sobre cómo ha cambiado desde que empezó a estudiar japonés: qué puede hacer ahora que antes no podía. Usa ようになる y ようにする. 2–3 minutos.",
+        definicion: "Cada alumno reflexiona en grupo sobre cómo ha cambiado desde que empezó japonés: qué puede hacer ahora que antes no podía, qué quiere mejorar. El grupo pregunta y comparte también. 6–8 min.",
         formato: "conversación Zoom",
         evalTipo: "interaccion",
         evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento de la tarea)",
-        ],
-        competencias: [
-          "cambios graduales",
-          "reflexión personal",
-          "voz pasiva",
-        ],
+        evalDimensiones: ["タスク遂行 (cumplimiento de la tarea)"],
+        competencias: ["ようになる", "ようにする", "reflexión personal", "voz pasiva"],
         checklist: [
           "Comunica al menos 2 cambios personales de forma comprensible",
-          "Responde a las preguntas del grupo sobre sus cambios",
+          "Responde preguntas del grupo sobre sus cambios",
           "Sostiene la conversación con ida y vuelta",
           "Mantiene el intercambio en japonés",
         ],
       },
       {
-        id: "g2-c-p3",
-        nombre: "Mini mesa redonda",
-        nombreJa: "ミニ座談会",
-        definicion: "Discusión grupal sobre un tema real (hábitos, tecnología, cultura japonesa). Participar usando registro adecuado y expresando lo que se quiere de los demás. 6–8 minutos.",
-        formato: "conversación Zoom",
-        evalTipo: "interaccion",
-        evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento de la tarea)",
-        ],
-        competencias: [
-          "registro y cortesía",
-          "deseos hacia otros",
-          "participación activa",
-        ],
+        id: "g2-c-p2",
+        nombre: "El noticiero",
+        nombreJa: "ニュースキャスター",
+        definicion: "Cada alumno presenta una noticia breve (real, inventada o absurda) en estilo formal de noticiero japonés. Usa voz pasiva, はずだ y という de forma natural. Los demás reaccionan con preguntas al final. 2–3 min por alumno.",
+        formato: "presentación Zoom",
+        evalTipo: "produccion",
+        evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
+        evalDimensiones: ["タスク遂行 (cumplimiento)", "正確さ (precisión)", "流暢さ (fluidez)"],
+        competencias: ["voz pasiva", "はずだ", "という", "registro formal"],
         checklist: [
-          "Hace al menos 2 intervenciones espontáneas",
-          "Responde y construye sobre lo que dicen los demás",
-          "Expresa lo que le gustaría que otros hicieran o pensaran",
-          "Mantiene un registro apropiado al grupo",
+          "タスク遂行 · Mantiene el registro formal durante toda la presentación",
+          "タスク遂行 · Usa voz pasiva al menos 2 veces",
+          "正確さ · La voz pasiva está bien formada",
+          "流暢さ · El tono es de noticiero, no de conversación casual",
         ],
-      }
+      },
     ],
   },
   {
     id: "g2-d",
+    numero: 8,
     nombre: "La línea de llegada",
     nombreJa: "ゴールへ",
     nivel: 2,
@@ -822,20 +615,12 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
         id: "g2-d-p1",
         nombre: "Presentación final conversacional",
         nombreJa: "卒業トーク",
-        definicion: "Presentación de 6–8 minutos sobre cualquier tema que le importe al alumno. Sin guión. El grupo hace preguntas al final. Marca el cierre del ciclo Genki.",
+        definicion: "Presentación de 6–8 minutos sobre cualquier tema que le importe al alumno. Sin guión. El grupo hace preguntas al final. Marca el cierre del ciclo completo.",
         formato: "presentación Zoom con preguntas",
         evalTipo: "produccion",
         evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento)",
-          "正確さ (precisión)",
-          "流暢さ (fluidez)",
-        ],
-        competencias: [
-          "fluidez conversacional",
-          "variedad de estructuras",
-          "respuesta espontánea",
-        ],
+        evalDimensiones: ["タスク遂行 (cumplimiento)", "正確さ (precisión)", "流暢さ (fluidez)"],
+        competencias: ["fluidez conversacional", "variedad de estructuras", "respuesta espontánea"],
         checklist: [
           "タスク遂行 · Sostiene 6–8 min sobre un tema propio sin cambiar al español",
           "タスク遂行 · Responde preguntas inesperadas del grupo",
@@ -845,53 +630,23 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
       },
       {
         id: "g2-d-p2",
-        nombre: "Así decido yo",
-        nombreJa: "私の決め方",
-        definicion: "El alumno explica cómo toma decisiones usando ことにする, y cómo establece sus propias reglas o límites. 2–3 minutos seguido de preguntas.",
-        formato: "conversación Zoom",
-        evalTipo: "interaccion",
-        evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento de la tarea)",
-        ],
-        competencias: [
-          "decisiones personales",
-          "reglas propias",
-          "matices",
-        ],
+        nombre: "Mis reglas de vida",
+        nombreJa: "私のルール",
+        definicion: "El alumno presenta su filosofía personal: qué ha decidido hacer (ことにする), qué se obliga a sí mismo a hacer (causativa reflexiva), para cuándo (までに), y qué le frustra que aún no pasa (のに). 3–4 min. El grupo pregunta.",
+        formato: "presentación Zoom",
+        evalTipo: "produccion",
+        evalNota: "Tarea de producción (産出): se evalúa el cumplimiento de la tarea + precisión + fluidez, porque es una entrega preparada.",
+        evalDimensiones: ["タスク遂行 (cumplimiento)", "正確さ (precisión)", "流暢さ (fluidez)"],
+        competencias: ["ことにする", "causativa", "のに", "までに"],
         checklist: [
-          "Explica cómo toma decisiones de forma comprensible",
-          "Da ejemplos reales que apoyan lo que dice",
-          "Responde a las preguntas del grupo",
-          "Sostiene el intercambio en japonés",
+          "タスク遂行 · Presenta al menos 2 reglas personales concretas con ことにする",
+          "タスク遂行 · Usa のに para contrastar con la realidad",
+          "正確さ · ことにする y causativa bien formados",
+          "流暢さ · El tono es genuino y personal, no memorizado",
         ],
       },
-      {
-        id: "g2-d-p3",
-        nombre: "Presión, permiso y decisiones",
-        nombreJa: "プレッシャーと選択",
-        definicion: "Roleplay donde el alumno usa causativa para hacer que otros hagan algo, y expresa frustración o concesión con のに y てもいい. 5–6 minutos.",
-        formato: "roleplay Zoom",
-        evalTipo: "interaccion",
-        evalNota: "Tarea de interacción (やりとり): se evalúa solo si logras comunicarte y completar la tarea. No se penalizan errores de gramática.",
-        evalDimensiones: [
-          "タスク遂行 (cumplimiento de la tarea)",
-        ],
-        competencias: [
-          "causativa",
-          "causativa-pasiva",
-          "frustración",
-          "concesiones",
-        ],
-        checklist: [
-          "Sostiene el roleplay con tensión dramática real",
-          "Reacciona en tiempo real a la presión o permiso de la pareja",
-          "Llega a una decisión final dentro de la escena",
-          "Mantiene el roleplay en japonés",
-        ],
-      }
     ],
-  }
+  },
 ];
 
 export function getCurrentCurriculumModule(currentLesson: number | null): CurriculumModule {
@@ -901,6 +656,11 @@ export function getCurrentCurriculumModule(currentLesson: number | null): Curric
   const maxLesson = Math.max(...CURRICULUM_MODULES.flatMap((m) => m.lecciones));
   if (currentLesson > maxLesson) return CURRICULUM_MODULES[CURRICULUM_MODULES.length - 1];
   return CURRICULUM_MODULES[0];
+}
+
+export function getCurriculumModuleByNumber(numero: number | null | undefined): CurriculumModule | undefined {
+  if (numero == null) return undefined;
+  return CURRICULUM_MODULES.find((m) => m.numero === numero);
 }
 
 export function getCurriculumModuleIndex(currentLesson: number | null): number {
