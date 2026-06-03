@@ -522,8 +522,46 @@ export default async function ProgresoPage({
             <p style={{ margin: "14px 0 0", fontSize: 14, fontWeight: 650, lineHeight: 1.5, color: "rgba(255,255,255,0.76)" }}>
               {currentModule.canDo}
             </p>
+
+            {/* Temas de vocabulario */}
+            {currentModule.vocabTemas.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>
+                  Lo que vas a aprender
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {currentModule.vocabTemas.map((t) => (
+                    <span key={t} style={{
+                      fontSize: 12, fontWeight: 650, padding: "5px 11px", borderRadius: 99,
+                      background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+                      color: "rgba(255,255,255,0.78)",
+                    }}>{t}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Competencias */}
+            {currentModule.competencias.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>
+                  Habilidades que dominas
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {currentModule.competencias.map((c) => (
+                    <span key={c} style={{
+                      fontSize: 12, fontWeight: 650, padding: "5px 11px", borderRadius: 99,
+                      background: "rgba(78,205,196,0.1)", border: "1px solid rgba(78,205,196,0.22)",
+                      color: "#4ECDC4",
+                    }}>{c}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Proyectos — solo nombres */}
             <div style={{
-              marginTop: 14,
+              marginTop: 16,
               borderRadius: 14,
               background: "rgba(78,205,196,0.10)",
               border: "1px solid rgba(78,205,196,0.22)",
@@ -533,21 +571,28 @@ export default async function ProgresoPage({
               fontWeight: 850,
             }}>
               Proyectos del módulo
-              <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
-                {currentModule.proyectos.map((project) => (
+              <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+                {currentModule.proyectos.map((project, i) => (
                   <div
                     key={project.id}
                     style={{
-                      borderRadius: 13,
+                      display: "flex", alignItems: "center", gap: 10,
+                      borderRadius: 12,
                       background: "rgba(255,255,255,0.07)",
                       border: "1px solid rgba(255,255,255,0.08)",
-                      padding: "11px 12px",
+                      padding: "10px 12px",
                     }}
                   >
-                    <div style={{ fontSize: 14, fontWeight: 950, color: "#FFFFFF" }}>{project.nombre}</div>
-                    <p style={{ margin: "5px 0 0", fontSize: 12.5, fontWeight: 650, lineHeight: 1.42, color: "rgba(255,255,255,0.68)" }}>
-                      {project.definicion}
-                    </p>
+                    <span style={{
+                      flexShrink: 0, width: 22, height: 22, borderRadius: 7,
+                      display: "grid", placeItems: "center",
+                      background: "rgba(78,205,196,0.18)", color: "#4ECDC4",
+                      fontSize: 11, fontWeight: 900,
+                    }}>{i + 1}</span>
+                    <div>
+                      <div style={{ fontSize: 13.5, fontWeight: 850, color: "#FFFFFF" }}>{project.nombre}</div>
+                      <div style={{ fontSize: 11.5, fontWeight: 600, color: "rgba(255,255,255,0.5)" }}>{project.nombreJa}</div>
+                    </div>
                   </div>
                 ))}
               </div>
