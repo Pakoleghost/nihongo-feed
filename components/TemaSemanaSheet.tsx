@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import FuriganaText from "@/components/FuriganaText";
-import type { TemaSemana, SlotPlantilla, OpcionSlot, FraseBilingue } from "@/lib/temas-semana";
+import type { TemaSemana, SlotPlantilla, OpcionSlot, FraseBilingue, BloqueDesglose, TipoBloque } from "@/lib/temas-semana";
 import type { WeeklyTopic } from "@/lib/weekly-topics";
 
 // ── constants ─────────────────────────────────────────────────────────────────
@@ -107,7 +107,7 @@ function SlotChips({ slot, selected, onSelect }: { slot: SlotPlantilla; selected
         {slot.opciones.map(op => {
           const active = op.jp === selected?.jp;
           return (
-            <button key={op.jp} type="button" onClick={() => onSelect(op)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, background: active ? TEAL : "rgba(255,255,255,0.07)", border: active ? "none" : "1px solid rgba(255,255,255,0.10)", borderRadius: 11, padding: "8px 14px", cursor: "pointer", transition: "background 140ms ease, transform 100ms ease", transform: active ? "scale(1.04)" : "scale(1)" }}>
+            <button key={op.jp} type="button" onClick={() => { navigator.vibrate?.(8); onSelect(op); }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, background: active ? TEAL : "rgba(255,255,255,0.07)", border: active ? "none" : "1px solid rgba(255,255,255,0.10)", borderRadius: 11, padding: "8px 14px", cursor: "pointer", transition: "background 140ms ease, transform 100ms ease", transform: active ? "scale(1.04)" : "scale(1)" }}>
               <span style={{ fontFamily: "var(--font-noto-sans-jp), sans-serif", fontSize: 16, fontWeight: 700, color: active ? "#12121F" : "#FFFFFF", lineHeight: 1.3 }}>{op.jp}</span>
               <span style={{ fontSize: 11, fontWeight: 600, color: active ? "rgba(18,18,31,0.65)" : "rgba(255,255,255,0.4)", lineHeight: 1.2 }}>{op.es}</span>
             </button>
@@ -129,7 +129,7 @@ function ExtensionChips({ extensiones, selected, onToggle }: { extensiones: Fras
         {extensiones.map((ext, i) => {
           const active = selected.has(i);
           return (
-            <button key={i} type="button" onClick={() => onToggle(i)} style={{ display: "flex", alignItems: "flex-start", gap: 12, textAlign: "left", background: active ? "rgba(78,205,196,0.10)" : "rgba(255,255,255,0.04)", border: active ? `1px solid rgba(78,205,196,0.35)` : "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "12px 14px", cursor: "pointer", transition: "background 150ms ease, border-color 150ms ease" }}>
+            <button key={i} type="button" onClick={() => { navigator.vibrate?.(6); onToggle(i); }} style={{ display: "flex", alignItems: "flex-start", gap: 12, textAlign: "left", background: active ? "rgba(78,205,196,0.10)" : "rgba(255,255,255,0.04)", border: active ? `1px solid rgba(78,205,196,0.35)` : "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "12px 14px", cursor: "pointer", transition: "background 150ms ease, border-color 150ms ease" }}>
               <div style={{ width: 20, height: 20, borderRadius: "50%", border: `2px solid ${active ? TEAL : "rgba(255,255,255,0.2)"}`, background: active ? TEAL : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 150ms ease", marginTop: 2 }}>
                 {active && (
                   <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -146,6 +146,52 @@ function ExtensionChips({ extensiones, selected, onToggle }: { extensiones: Fras
                 </div>
               </div>
             </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── desglose visual ───────────────────────────────────────────────────────────
+
+const BLOQUE_STYLES: Record<TipoBloque, { bg: string; color: string; italic?: boolean; small?: boolean }> = {
+  nom:  { bg: "rgba(78,205,196,0.14)",  color: "#4ECDC4" },
+  part: { bg: "transparent",            color: "rgba(255,255,255,0.42)", italic: true },
+  pred: { bg: "rgba(255,255,255,0.09)", color: "#FFFFFF" },
+  aux:  { bg: "transparent",            color: "rgba(255,255,255,0.28)", small: true },
+  adv:  { bg: "rgba(240,165,0,0.12)",   color: "rgba(240,165,0,0.85)" },
+};
+
+function DesgloseVisual({ bloques, sel }: { bloques: BloqueDesglose[]; sel: Record<string, import("@/lib/temas-semana").OpcionSlot> }) {
+  return (
+    <div>
+      <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>
+        ¿Cómo funciona?
+      </p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "flex-end" }}>
+        {bloques.map((b, i) => {
+          const st = BLOQUE_STYLES[b.t];
+          const word = b.txt.startsWith("{{") ? (sel[b.txt.slice(2,-2)]?.jp ?? b.txt) : b.txt;
+          return (
+            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+              <div style={{
+                background: st.bg,
+                borderRadius: 7,
+                padding: b.t === "part" || b.t === "aux" ? "5px 6px" : "6px 10px",
+                fontFamily: "var(--font-noto-serif-jp), serif",
+                fontSize: b.t === "aux" ? 14 : 17,
+                fontWeight: b.t === "nom" ? 800 : b.t === "pred" ? 700 : 500,
+                color: st.color,
+                fontStyle: st.italic ? "italic" : "normal",
+                lineHeight: 1.3,
+              }}>
+                {word}
+              </div>
+              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.32)", fontWeight: 600, textAlign: "center", lineHeight: 1.2, maxWidth: 64, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {b.es}
+              </span>
+            </div>
           );
         })}
       </div>
@@ -317,6 +363,11 @@ export default function TemaSemanaSheet({ onClose, onUseSentence, tema, fallback
                   </span>
                 ))}
               </p>
+            </div>
+
+            {/* Desglose visual */}
+            <div style={{ marginBottom: 22, padding: "14px 16px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14 }}>
+              <DesgloseVisual bloques={tema.plantilla.desglose} sel={sel} />
             </div>
 
             {/* Extension chips */}

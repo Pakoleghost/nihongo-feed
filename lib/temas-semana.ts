@@ -30,10 +30,24 @@ export type SlotPlantilla = {
   opciones: OpcionSlot[];
 };
 
+/** Tipos de bloque para el desglose visual de la oración. */
+export type TipoBloque = "nom" | "part" | "pred" | "aux" | "adv";
+
+/**
+ * Un bloque en el desglose visual de la oración.
+ * txt puede ser texto literal o "{{SLOT_ID}}" para mostrar la palabra elegida.
+ */
+export type BloqueDesglose = {
+  txt: string;         // texto literal o "{{SLOT_ID}}"
+  t: TipoBloque;       // tipo → determina color
+  es: string;          // etiqueta en español
+};
+
 export type PlantillaTema = {
   estructura: string;
   estructuraEs: string;
   slots: SlotPlantilla[];
+  desglose: BloqueDesglose[];   // anotación gramatical visual
 };
 
 export type TemaSemana = {
@@ -80,6 +94,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "きんちょう", es: "nervioso/a" },
         { jp: "しあわせ", es: "feliz/contento/a" },
       ] }],
+      desglose: [{txt:"きょうは",t:"adv",es:"hoy"},{txt:"{{FEELING}}",t:"nom",es:"sentimiento"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -112,6 +127,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "やきとり", es: "el yakitori" },
         { jp: "てんぷら", es: "la tempura" },
       ] }],
+      desglose: [{txt:"{{FOOD}}",t:"nom",es:"comida"},{txt:"が",t:"part",es:"partícula が"},{txt:"すき",t:"pred",es:"gustar"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -153,6 +169,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
           { jp: "いそがしい", es: "ocupado/a" },
         ] },
       ],
+      desglose: [{txt:"{{FAMILY}}",t:"nom",es:"familiar"},{txt:"は",t:"part",es:"partícula は"},{txt:"{{ADJ}}",t:"pred",es:"cómo es"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -183,6 +200,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "ほん を よみます", es: "leo un libro" },
         { jp: "シャワー を あびます", es: "me baño" },
       ] }],
+      desglose: [{txt:"まいにち",t:"adv",es:"todos los días"},{txt:"{{ACTIVITY}}",t:"pred",es:"actividad"}],
     },
   },
 
@@ -213,6 +231,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "こうえん を さんぽ し", es: "paseé por el parque" },
         { jp: "ともだち の うち に い", es: "fui a casa de un amigo/a" },
       ] }],
+      desglose: [{txt:"しゅうまつ",t:"adv",es:"fin de semana"},{txt:"{{ACTION}}",t:"pred",es:"qué hiciste"},{txt:"ました",t:"aux",es:"pasado"}],
     },
   },
 
@@ -243,6 +262,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "こうえん", es: "el parque" },
         { jp: "レストラン", es: "un restaurante" },
       ] }],
+      desglose: [{txt:"いま",t:"adv",es:"ahora"},{txt:"{{PLACE}}",t:"nom",es:"lugar"},{txt:"に",t:"part",es:"partícula に"},{txt:"います",t:"pred",es:"estoy"}],
     },
   },
 
@@ -273,6 +293,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "あたたかい", es: "templado" },
         { jp: "かぜ が つよい", es: "con mucho viento" },
       ] }],
+      desglose: [{txt:"きょうは",t:"adv",es:"hoy"},{txt:"{{WEATHER}}",t:"pred",es:"clima"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -303,6 +324,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "カレー", es: "curry" },
         { jp: "チョコ", es: "chocolate" },
       ] }],
+      desglose: [{txt:"いま",t:"adv",es:"ahora"},{txt:"{{FOOD}}",t:"nom",es:"comida"},{txt:"が",t:"part",es:"partícula が"},{txt:"たべたい",t:"pred",es:"quiero comer"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -333,6 +355,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "ドラマ", es: "dramas" },
         { jp: "うた", es: "canciones" },
       ] }],
+      desglose: [{txt:"{{METHOD}}",t:"nom",es:"método"},{txt:"で",t:"part",es:"con / usando"},{txt:"べんきょう しています",t:"pred",es:"estudio"}],
     },
   },
 
@@ -363,6 +386,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "きつね", es: "los zorros" },
         { jp: "かわうそ", es: "las nutrias" },
       ] }],
+      desglose: [{txt:"{{ANIMAL}}",t:"nom",es:"animal"},{txt:"が",t:"part",es:"partícula が"},{txt:"すき",t:"pred",es:"gustar"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -389,6 +413,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "あき", es: "el otoño" },
         { jp: "ふゆ", es: "el invierno" },
       ] }],
+      desglose: [{txt:"{{SEASON}}",t:"nom",es:"estación"},{txt:"が",t:"part",es:"partícula が"},{txt:"いちばん",t:"adv",es:"lo más"},{txt:"すき",t:"pred",es:"gustar"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -419,6 +444,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "ロボット", es: "los robots" },
         { jp: "うた", es: "las canciones" },
       ] }],
+      desglose: [{txt:"こどもの ころ",t:"adv",es:"de niño/a"},{txt:"{{THING}}",t:"nom",es:"cosa"},{txt:"が",t:"part",es:"partícula が"},{txt:"すきでした",t:"pred",es:"gustaba (pasado)"}],
     },
   },
 
@@ -449,6 +475,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "ジャズ", es: "jazz" },
         { jp: "ラテン", es: "música latina" },
       ] }],
+      desglose: [{txt:"さいきん",t:"adv",es:"últimamente"},{txt:"{{GENRE}}",t:"nom",es:"música"},{txt:"を",t:"part",es:"partícula を"},{txt:"きいて います",t:"pred",es:"escucho"}],
     },
   },
 
@@ -479,6 +506,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "りょうりにん", es: "cocinero/a" },
         { jp: "うちゅうひこうし", es: "astronauta" },
       ] }],
+      desglose: [{txt:"{{JOB}}",t:"nom",es:"trabajo"},{txt:"に",t:"part",es:"partícula に"},{txt:"なりたい",t:"pred",es:"quiero ser"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -509,6 +537,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "ラーメン", es: "ramen de verdad" },
         { jp: "てんぷら", es: "tempura" },
       ] }],
+      desglose: [{txt:"にほんで",t:"adv",es:"en Japón"},{txt:"{{FOOD}}",t:"nom",es:"comida"},{txt:"が",t:"part",es:"partícula が"},{txt:"たべたい",t:"pred",es:"quiero comer"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -539,6 +568,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "なにも たべませんでした", es: "no comí nada" },
         { jp: "シリアル を たべました", es: "comí cereal" },
       ] }],
+      desglose: [{txt:"けさ",t:"adv",es:"esta mañana"},{txt:"{{BREAKFAST}}",t:"pred",es:"qué comiste"}],
     },
   },
 
@@ -569,6 +599,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "この ほん", es: "este libro" },
         { jp: "この たべもの", es: "esta comida" },
       ] }],
+      desglose: [{txt:"{{THING}}",t:"nom",es:"recomendación"},{txt:"は",t:"part",es:"partícula は"},{txt:"おすすめ",t:"pred",es:"recomendado"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -599,6 +630,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "みず を のむ こと", es: "tomar agua" },
         { jp: "はやく ねる こと", es: "dormir temprano" },
       ] }],
+      desglose: [{txt:"{{THING}}",t:"nom",es:"cosa"},{txt:"が",t:"part",es:"partícula が"},{txt:"にがて",t:"pred",es:"difícil para mí"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -629,6 +661,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "さむい", es: "fría" },
         { jp: "たのしい", es: "divertida" },
       ] }],
+      desglose: [{txt:"わたしの まち",t:"nom",es:"mi ciudad"},{txt:"は",t:"part",es:"partícula は"},{txt:"{{ADJ}}",t:"pred",es:"cómo es"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -659,6 +692,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "クラス", es: "la clase" },
         { jp: "かいもの", es: "ir de compras" },
       ] }],
+      desglose: [{txt:"さいきん",t:"adv",es:"últimamente"},{txt:"{{THING}}",t:"nom",es:"cosa"},{txt:"が",t:"part",es:"partícula が"},{txt:"たのしかった",t:"pred",es:"estuvo divertido"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -689,6 +723,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "しょくぶつ", es: "plantas" },
         { jp: "たくさんの ほん", es: "muchos libros" },
       ] }],
+      desglose: [{txt:"わたしの へやに",t:"nom",es:"en mi cuarto"},{txt:"{{THING}}",t:"nom",es:"cosa"},{txt:"が",t:"part",es:"partícula が"},{txt:"あります",t:"pred",es:"hay"}],
     },
   },
 
@@ -719,6 +754,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "まじめ", es: "serio/a" },
         { jp: "たのしい", es: "divertido/a" },
       ] }],
+      desglose: [{txt:"わたしの ともだち",t:"nom",es:"mi amigo/a"},{txt:"は",t:"part",es:"partícula は"},{txt:"{{ADJ}}",t:"pred",es:"cómo es"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -747,6 +783,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "にほんご が おもしろい", es: "el japonés es interesante" },
         { jp: "しごと の ため", es: "para el trabajo" },
       ] }],
+      desglose: [{txt:"{{REASON}}",t:"pred",es:"razón"},{txt:"から",t:"part",es:"porque"},{txt:"べんきょう しています",t:"pred",es:"estudio"}],
     },
   },
 
@@ -775,6 +812,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "ともだち と の じかん", es: "el tiempo con amigos" },
         { jp: "こうえん の さんぽ", es: "el paseo por el parque" },
       ] }],
+      desglose: [{txt:"{{TIME}}",t:"nom",es:"momento"},{txt:"が",t:"part",es:"partícula が"},{txt:"いちばん",t:"adv",es:"lo más"},{txt:"すき",t:"pred",es:"gustar"},{txt:"です",t:"aux",es:"educado"}],
     },
   },
 
@@ -803,6 +841,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "すこし ずつ で いい", es: "poco a poco está bien" },
         { jp: "ゆっくり で いい", es: "sin prisa está bien" },
       ] }],
+      desglose: [{txt:"{{MSG}}",t:"pred",es:"mensaje"}],
     },
   },
 ];

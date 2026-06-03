@@ -8,11 +8,11 @@ import BottomNav from "@/components/BottomNav";
 import { optimizeImageFile, validateImageFile } from "@/lib/client-image-upload";
 import { useStudentViewMode } from "@/lib/use-student-view-mode";
 import { markActiveToday, getStreak } from "@/lib/streak";
-import { getWeeklyTopic, fetchTopicOverride, saveTopicOverride, type WeeklyTopic } from "@/lib/weekly-topics";
+import { getWeeklyTopic, fetchTopicOverride, saveTopicOverride, fetchAnnouncement, type WeeklyTopic } from "@/lib/weekly-topics";
 import Link from "next/link";
 import RepliesSheet from "@/components/RepliesSheet";
 import TemaSemanaSheet from "@/components/TemaSemanaSheet";
-import { getLessonStop } from "@/lib/lesson-competencies";
+import { getCurrentCurriculumModule, getCurriculumModuleIndex, CURRICULUM_MODULES } from "@/lib/curriculum-modules";
 import { TEMAS_SEMANA, type TemaSemana } from "@/lib/temas-semana";
 
 type Post = {
@@ -22,7 +22,16 @@ type Post = {
   image_url: string | null;
   likes: number;
   created_at: string;
+  from_tema?: boolean;  // set when post was created via the weekly-topic wizard
 };
+
+// Reaction types shown on posts (in Japanese — no emojis)
+const REACTIONS = [
+  { type: "like",     label: "いいね" },
+  { type: "sugoii",   label: "すごい" },
+  { type: "wakaru",   label: "わかる" },
+  { type: "ganbatte", label: "がんばれ" },
+] as const;
 
 type Profile = {
   id: string;
@@ -90,6 +99,14 @@ export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+  // reactions: postId → reaction type the current user has given
+  const [myReactions, setMyReactions] = useState<Record<string, string>>({});
+  // reactionCounts: postId → { like: N, sugoii: M, ... }
+  const [reactionCounts, setReactionCounts] = useState<Record<string, Record<string, number>>>({});
+  // true when the next publish came from the tema wizard
+  const fromTemaRef = useRef(false);
+  // teacher announcement banner
+  const [announcement, setAnnouncement] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [myProfile, setMyProfile] = useState<Profile | null>(null);
   const [streak, setStreak] = useState(0);
@@ -173,15 +190,17 @@ export default function HomePage() {
     const postIds = visible.map((p) => p.id);
     const userIds = [...new Set([...visible.map((p) => p.user_id), ...(uid ? [uid] : [])])];
 
-    // Fire all three secondary queries in parallel
-    const [profileData, likesData, countsData] = await Promise.all([
+    // Fire secondary queries in parallel
+    const [profileData, likesData, countsData, allReactionsData] = await Promise.all([
       userIds.length > 0
         ? supabase.from("profiles").select("id, username, avatar_url").in("id", userIds).then(r => r.data)
         : Promise.resolve(null),
       uid
-        ? supabase.from("comunidad_likes").select("post_id").eq("user_id", uid).in("post_id", postIds).then(r => r.data)
+        ? supabase.from("comunidad_likes").select("post_id, reaction").eq("user_id", uid).in("post_id", postIds).then(r => r.error ? null : r.data)
         : Promise.resolve(null),
       supabase.from("comunidad_comments").select("post_id").in("post_id", postIds).then(r => r.data),
+      // All reactions for these posts (for counts per type)
+      supabase.from("comunidad_likes").select("post_id, reaction").in("post_id", postIds).then(r => r.error ? null : r.data),
     ]);
 
     // Profiles
@@ -192,11 +211,26 @@ export default function HomePage() {
       if (uid && map[uid]) setMyProfile(map[uid]);
     }
 
-    // Likes
-    const ids = (likesData as { post_id: string }[] | null)?.map((l) => l.post_id) ?? [];
+    // Likes + reactions
+    const likeRows = (likesData as { post_id: string; reaction?: string }[] | null) ?? [];
+    const ids = likeRows.map(l => l.post_id);
     if (ids.length > 0) {
-      setLikedIds((cur) => { const next = new Set(cur); ids.forEach((id) => next.add(id)); return next; });
+      setLikedIds((cur) => { const next = new Set(cur); ids.forEach(id => next.add(id)); return next; });
+      // Track per-type reaction for current user
+      const newMyReactions: Record<string, string> = {};
+      likeRows.forEach(l => { newMyReactions[l.post_id] = l.reaction ?? "like"; });
+      setMyReactions(prev => ({ ...prev, ...newMyReactions }));
     }
+
+    // Aggregate reaction counts for all posts
+    const allRows = (allReactionsData as { post_id: string; reaction?: string }[] | null) ?? [];
+    const newCounts: Record<string, Record<string, number>> = {};
+    allRows.forEach(r => {
+      const pid = r.post_id; const rt = r.reaction ?? "like";
+      if (!newCounts[pid]) newCounts[pid] = {};
+      newCounts[pid][rt] = (newCounts[pid][rt] ?? 0) + 1;
+    });
+    setReactionCounts(prev => ({ ...prev, ...newCounts }));
 
     // Comment counts
     const countMap: Record<string, number> = {};
@@ -268,9 +302,13 @@ export default function HomePage() {
         setIsAdmin(false);
       }
 
-      // Fetch topic override (falls back to static if table empty)
-      const override = await fetchTopicOverride(supabase);
+      // Fetch topic override + announcement in parallel
+      const [override, ann] = await Promise.all([
+        fetchTopicOverride(supabase),
+        fetchAnnouncement(supabase),
+      ]);
       if (override) setTopic(override);
+      setAnnouncement(ann);
 
       try {
         await loadPostsBatch({ uid, cursor: null, reset: true });
@@ -434,10 +472,20 @@ export default function HomePage() {
         if (up) imageUrl = supabase.storage.from("comunidad-images").getPublicUrl(up.path).data.publicUrl;
         else throw new Error("No se pudo subir la imagen.");
       }
-      const { data: inserted, error: insertErr } = await supabase
+      const isTema = fromTemaRef.current;
+      fromTemaRef.current = false;
+      // Try with from_tema column; gracefully fall back if column doesn't exist yet
+      let insertResult = await supabase
         .from("comunidad_posts")
-        .insert({ user_id: userId, content: composeText.trim(), image_url: imageUrl, likes: 0, created_at: new Date().toISOString() })
+        .insert({ user_id: userId, content: composeText.trim(), image_url: imageUrl, likes: 0, created_at: new Date().toISOString(), ...(isTema ? { from_tema: true } : {}) })
         .select().single();
+      if (insertResult.error?.code === "42703" /* column does not exist */) {
+        insertResult = await supabase
+          .from("comunidad_posts")
+          .insert({ user_id: userId, content: composeText.trim(), image_url: imageUrl, likes: 0, created_at: new Date().toISOString() })
+          .select().single();
+      }
+      const { data: inserted, error: insertErr } = insertResult;
       if (insertErr) throw new Error(insertErr.message);
       if (inserted) {
         setPosts((prev) => [inserted as Post, ...prev]);
@@ -475,6 +523,57 @@ export default function HomePage() {
     } else {
       await supabase.from("comunidad_likes").insert({ post_id: post.id, user_id: userId });
       await supabase.from("comunidad_posts").update({ likes: newCount }).eq("id", post.id);
+    }
+  }
+
+  async function toggleReaction(postId: string, reactionType: string) {
+    if (!userId) { router.push("/login"); return; }
+    const current = myReactions[postId] ?? "";
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+
+    if (current === reactionType) {
+      // Remove reaction
+      setMyReactions(prev => { const n = { ...prev }; delete n[postId]; return n; });
+      setLikedIds(prev => { const n = new Set(prev); n.delete(postId); return n; });
+      setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes: Math.max(0, p.likes - 1) } : p));
+      setReactionCounts(prev => {
+        const n = { ...prev, [postId]: { ...(prev[postId] ?? {}) } };
+        n[postId][reactionType] = Math.max(0, (n[postId][reactionType] ?? 1) - 1);
+        return n;
+      });
+      await supabase.from("comunidad_likes").delete().match({ post_id: postId, user_id: userId });
+      await supabase.from("comunidad_posts").update({ likes: Math.max(0, post.likes - 1) }).eq("id", postId);
+    } else if (current) {
+      // Switch reaction type
+      setMyReactions(prev => ({ ...prev, [postId]: reactionType }));
+      setReactionCounts(prev => {
+        const n = { ...prev, [postId]: { ...(prev[postId] ?? {}) } };
+        n[postId][current] = Math.max(0, (n[postId][current] ?? 1) - 1);
+        n[postId][reactionType] = (n[postId][reactionType] ?? 0) + 1;
+        return n;
+      });
+      try {
+        await supabase.from("comunidad_likes").update({ reaction: reactionType }).match({ post_id: postId, user_id: userId });
+      } catch {/* reaction column may not exist yet */}
+    } else {
+      // New reaction
+      setMyReactions(prev => ({ ...prev, [postId]: reactionType }));
+      setLikedIds(prev => { const n = new Set(prev); n.add(postId); return n; });
+      setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes: p.likes + 1 } : p));
+      setReactionCounts(prev => ({
+        ...prev,
+        [postId]: { ...(prev[postId] ?? {}), [reactionType]: ((prev[postId] ?? {})[reactionType] ?? 0) + 1 },
+      }));
+      if (likeTimerRef.current) clearTimeout(likeTimerRef.current);
+      setJustLikedId(postId);
+      likeTimerRef.current = setTimeout(() => setJustLikedId(null), 900);
+      try {
+        await supabase.from("comunidad_likes").insert({ post_id: postId, user_id: userId, reaction: reactionType });
+      } catch {
+        await supabase.from("comunidad_likes").insert({ post_id: postId, user_id: userId });
+      }
+      await supabase.from("comunidad_posts").update({ likes: post.likes + 1 }).eq("id", postId);
     }
   }
 
@@ -683,8 +782,9 @@ export default function HomePage() {
 
       {/* ── Mi Camino mini-card ── */}
       {showProgreso && !effectiveIsAdmin && (() => {
-        const stop = currentLesson ? getLessonStop(currentLesson) : null;
-        const subtitle = stop?.tagline ?? "Tu ruta de aprendizaje";
+        const currentModule = getCurrentCurriculumModule(currentLesson);
+        const moduleIndex = getCurriculumModuleIndex(currentLesson);
+        const subtitle = `${currentModule.nombreJa} · ${currentModule.nombre}`;
         return (
           <div style={{ padding: "0 16px 12px" }}>
             <Link
@@ -744,6 +844,9 @@ export default function HomePage() {
                     <p style={{ margin: 0, fontSize: 12.5, color: "rgba(255,255,255,0.48)", lineHeight: 1.35, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {subtitle}
                     </p>
+                    <p style={{ margin: "3px 0 0", fontSize: 11, color: "rgba(78,205,196,0.72)", lineHeight: 1.25, fontWeight: 700 }}>
+                      Módulo {moduleIndex + 1} / {CURRICULUM_MODULES.length}
+                    </p>
                   </div>
                 </div>
 
@@ -756,6 +859,18 @@ export default function HomePage() {
           </div>
         );
       })()}
+
+      {/* ── Announcement banner (teacher broadcast) ── */}
+      {announcement && (
+        <div style={{ padding: "0 16px 12px" }}>
+          <div style={{ background: "rgba(78,205,196,0.10)", border: "1px solid rgba(78,205,196,0.25)", borderRadius: 13, padding: "12px 16px", display: "flex", gap: 12, alignItems: "flex-start" }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ECDC4", flexShrink: 0, marginTop: 6 }} />
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#FFFFFF", lineHeight: 1.5, fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
+              {announcement}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── Compose box ── */}
       {userId && (
@@ -926,7 +1041,14 @@ export default function HomePage() {
                           <p style={{ fontSize: 14, fontWeight: 700, color: "#FFFFFF", margin: 0, lineHeight: 1.2 }}>
                             {profile?.username ?? "Usuario"}
                           </p>
-                          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", margin: "2px 0 0", fontWeight: 500 }}>{timeAgo(post.created_at)}</p>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", fontWeight: 500 }}>{timeAgo(post.created_at)}</span>
+                            {post.from_tema && (
+                              <span style={{ fontSize: 10, fontWeight: 800, color: "#4ECDC4", background: "rgba(78,205,196,0.13)", borderRadius: 4, padding: "1px 6px", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                                tema
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </button>
 
@@ -994,96 +1116,79 @@ export default function HomePage() {
                     ) : null}
 
                     {/* Footer */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, position: "relative" }}>
-                      {/* Like button with heart burst */}
-                      <div style={{ position: "relative" }}>
-                        <motion.button
-                          onClick={() => toggleLike(post)}
-                          whileTap={{ scale: 1.22 }}
-                          transition={{ type: "spring", stiffness: 500, damping: 18 }}
-                          style={{ display: "flex", alignItems: "center", gap: 6, background: liked ? "rgba(230,57,70,0.14)" : "rgba(255,255,255,0.04)", borderRadius: "8px", padding: "6px 10px", border: `1px solid ${liked ? "rgba(230,57,70,0.28)" : "rgba(255,255,255,0.07)"}`, cursor: "pointer", fontSize: 13, fontWeight: 600, color: liked ? "#FF6470" : "rgba(255,255,255,0.65)", transition: "background 0.15s" }}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill={liked ? "#E63946" : "none"} style={{ flexShrink: 0, transition: "fill 0.15s" }}>
-                            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke={liked ? "#E63946" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                          いいね
-                        </motion.button>
-                        {/* Floating heart burst */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative" }}>
+                      {/* Reaction pills — Japanese labels, no emojis */}
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, position: "relative" }}>
+                        {REACTIONS.map(r => {
+                          const isActive = myReactions[post.id] === r.type;
+                          const count = reactionCounts[post.id]?.[r.type] ?? 0;
+                          return (
+                            <motion.button
+                              key={r.type}
+                              onClick={() => toggleReaction(post.id, r.type)}
+                              whileTap={{ scale: 1.12 }}
+                              transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                              style={{
+                                display: "flex", alignItems: "center", gap: 5,
+                                background: isActive ? "rgba(78,205,196,0.14)" : "rgba(255,255,255,0.04)",
+                                border: `1px solid ${isActive ? "rgba(78,205,196,0.3)" : "rgba(255,255,255,0.07)"}`,
+                                borderRadius: 8, padding: "5px 10px",
+                                cursor: "pointer", fontSize: 13, fontWeight: 700,
+                                color: isActive ? "#4ECDC4" : "rgba(255,255,255,0.5)",
+                                fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                                transition: "background 140ms ease, border-color 140ms ease, color 140ms ease",
+                              }}
+                            >
+                              {r.label}
+                              {count > 0 && (
+                                <span style={{ fontSize: 11, fontWeight: 800, opacity: 0.85 }}>{count}</span>
+                              )}
+                            </motion.button>
+                          );
+                        })}
+                        {/* Float-up burst on new reaction */}
                         <AnimatePresence>
                           {showHeartBurst && (
                             <motion.div
-                              key="heart-burst"
+                              key="burst"
                               initial={{ opacity: 1, y: 0, scale: 1 }}
-                              animate={{ opacity: 0, y: -36, scale: 1.6 }}
+                              animate={{ opacity: 0, y: -28, scale: 1.4 }}
                               exit={{}}
-                              transition={{ duration: 0.7, ease: "easeOut" }}
-                              style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", pointerEvents: "none", zIndex: 10 }}
+                              transition={{ duration: 0.6, ease: "easeOut" }}
+                              style={{ position: "absolute", top: 0, left: 10, pointerEvents: "none", zIndex: 10, fontSize: 14, fontWeight: 900, color: "#4ECDC4", fontFamily: "var(--font-noto-sans-jp), sans-serif" }}
                             >
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="#E63946">
-                                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
-                              </svg>
+                              いいね
                             </motion.div>
                           )}
                         </AnimatePresence>
                       </div>
 
-                      {/* Like count */}
-                      {post.likes > 0 && (
+                      {/* Reply + share row */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         <button
-                          onClick={(e) => { e.stopPropagation(); fetchLikers(post.id); }}
-                          style={{ fontSize: 13, fontWeight: 700, color: liked ? "#FF6470" : "rgba(255,255,255,0.35)", background: "none", border: "none", cursor: "pointer", padding: "6px 4px" }}
+                          onClick={() => setReplyPostId(post.id)}
+                          style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "8px", padding: "6px 10px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.55)" }}
                         >
-                          {post.likes}
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          {commentCounts[post.id] ? <span>{commentCounts[post.id]}</span> : null}
                         </button>
-                      )}
-
-                      {/* Likers bubble */}
-                      {openLikersId === post.id && (
-                        <div
-                          style={{ position: "absolute", bottom: "calc(100% + 8px)", left: 0, background: "#1A1A2E", borderRadius: 10, padding: "8px 12px", zIndex: 50, minWidth: 120, maxWidth: 220, boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }}
-                          onClick={(e) => { e.stopPropagation(); setOpenLikersId(null); }}
+                        <button
+                          onClick={() => handleShare(post, profiles[post.user_id])}
+                          style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "8px", padding: "6px 10px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.55)", marginLeft: "auto" }}
+                          aria-label="Compartir"
                         >
-                          {fetchingLikers ? (
-                            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Cargando…</span>
-                          ) : (likerNames[post.id] ?? []).length === 0 ? (
-                            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Sin likes aún</span>
-                          ) : (
-                            <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                              {(likerNames[post.id] ?? []).map((name, i) => (
-                                <span key={i} style={{ fontSize: 13, fontWeight: 600, color: "#FFFFFF" }}>♥ {name}</span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Reply button */}
-                      <button
-                        onClick={() => setReplyPostId(post.id)}
-                        style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "8px", padding: "6px 10px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.65)" }}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        {commentCounts[post.id] ? <span>{commentCounts[post.id]}</span> : null}
-                      </button>
-
-                      {/* Share button */}
-                      <button
-                        onClick={() => handleShare(post, profiles[post.user_id])}
-                        style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "8px", padding: "6px 10px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.65)", marginLeft: "auto" }}
-                        aria-label="Compartir"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                          <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-
-                      {effectiveIsAdmin && !isOwn && (
-                        <button onClick={() => setConfirmDeleteId(confirmDeleteId === post.id ? null : post.id)}
-                          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: "4px 8px", borderRadius: 8, opacity: 0.5 }}
-                          aria-label="Eliminar (admin)">🗑️</button>
-                      )}
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                        {effectiveIsAdmin && !isOwn && (
+                          <button onClick={() => setConfirmDeleteId(confirmDeleteId === post.id ? null : post.id)}
+                            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: "4px 8px", borderRadius: 8, opacity: 0.5 }}
+                            aria-label="Eliminar (admin)">🗑️</button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -1193,6 +1298,7 @@ export default function HomePage() {
             key="tema-sheet"
             onClose={() => setShowTemaSheet(false)}
             onUseSentence={(sentence) => {
+              fromTemaRef.current = true;
               setComposeText(sentence);
               setShowTemaSheet(false);
               // Give time for the sheet exit animation, then focus

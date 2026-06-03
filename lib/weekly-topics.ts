@@ -37,6 +37,43 @@ export async function fetchTopicOverride(
   }
 }
 
+// Fetch the current announcement (null if inactive or columns don't exist yet)
+export async function fetchAnnouncement(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabaseClient: any,
+): Promise<string | null> {
+  try {
+    const { data, error } = await supabaseClient
+      .from("weekly_topic_override")
+      .select("announcement, announcement_active")
+      .eq("id", 1)
+      .single();
+    if (error || !data) return null;
+    if (!data.announcement_active) return null;
+    return (data.announcement as string | null) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// Save/clear the announcement (active=true shows it, active=false hides it)
+export async function saveAnnouncement(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabaseClient: any,
+  text: string,
+  active: boolean,
+  userId: string,
+): Promise<boolean> {
+  try {
+    const { error } = await supabaseClient
+      .from("weekly_topic_override")
+      .upsert({ id: 1, announcement: text, announcement_active: active, updated_by: userId, updated_at: new Date().toISOString() });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
 // Upsert the admin override (id = 1 is the single row)
 export async function saveTopicOverride(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

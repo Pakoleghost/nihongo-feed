@@ -6,6 +6,7 @@ import Link from "next/link";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import BottomNav from "@/components/BottomNav";
 import { useStudentViewMode } from "@/lib/use-student-view-mode";
+import { saveAnnouncement } from "@/lib/weekly-topics";
 
 const cardStyle = {
   background: "#FFFFFF",
@@ -32,6 +33,9 @@ export default function AdminGroupsPage() {
   const [pastRequests, setPastRequests] = useState<any[]>([]);
   const [pendingGroupByUser, setPendingGroupByUser] = useState<Record<string, string>>({});
   const [newGroupName, setNewGroupName] = useState("");
+  const [announcementText, setAnnouncementText] = useState("");
+  const [announcementActive, setAnnouncementActive] = useState(false);
+  const [savingAnnouncement, setSavingAnnouncement] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null);
   const [isCurrentAdmin, setIsCurrentAdmin] = useState(false);
   const { studentViewActive, studentViewGroupName, setStudentViewActive, setStudentViewGroupName } =
@@ -61,7 +65,20 @@ export default function AdminGroupsPage() {
     } catch {/* silent */}
 
     setGroups((grps || []).map(g => ({ ...g, show_progreso: Boolean(progresoMap[g.name]) })));
-    
+
+    // Load current announcement
+    try {
+      const { data: annRow } = await supabase
+        .from("weekly_topic_override")
+        .select("announcement, announcement_active")
+        .eq("id", 1)
+        .maybeSingle();
+      if (annRow) {
+        setAnnouncementText((annRow as { announcement?: string }).announcement ?? "");
+        setAnnouncementActive(Boolean((annRow as { announcement_active?: boolean }).announcement_active));
+      }
+    } catch {/* columns may not exist yet */}
+
     try {
       const accessToken = sessionData.session?.access_token;
       const response = await fetch("/api/admin/requests", {
@@ -121,6 +138,16 @@ export default function AdminGroupsPage() {
       body: JSON.stringify({ show_progreso: !current }),
     });
     fetchData();
+  };
+
+  const handleSaveAnnouncement = async (active: boolean) => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const uid = sessionData.session?.user?.id;
+    if (!uid) return;
+    setSavingAnnouncement(true);
+    const ok = await saveAnnouncement(supabase, announcementText.trim(), active, uid);
+    if (ok) setAnnouncementActive(active);
+    setSavingAnnouncement(false);
   };
 
   const handleUpdateGroup = async (userId: string, newGroup: string) => {
@@ -281,6 +308,51 @@ export default function AdminGroupsPage() {
             <Link href="/recursos" style={{ ...pillButtonStyle, display: "inline-flex", textDecoration: "none", background: "#FFFFFF", color: "#1A1A2E", boxShadow: "inset 0 0 0 1px rgba(26,26,46,0.10)" }}>
               Ir a Recursos
             </Link>
+          </div>
+        </section>
+
+        {/* Announcement banner manager */}
+        <section style={{ ...cardStyle, marginBottom: 18 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 4 }}>
+            <div>
+              <p style={{ margin: 0, color: "#9CA3AF", fontSize: 12, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                Comunicado
+              </p>
+              <h2 style={{ margin: "6px 0 0", color: "#1A1A2E", fontSize: 22, fontWeight: 900 }}>Anuncio del maestro</h2>
+            </div>
+            <span style={{ borderRadius: 999, background: announcementActive ? "rgba(78,205,196,0.16)" : "rgba(26,26,46,0.06)", color: announcementActive ? "#178A83" : "#9CA3AF", padding: "6px 12px", fontSize: 12, fontWeight: 900 }}>
+              {announcementActive ? "Visible" : "Oculto"}
+            </span>
+          </div>
+          <p style={{ margin: "10px 0 12px", color: "#53596B", fontSize: 14, lineHeight: 1.4 }}>
+            Aparece fijado arriba del feed de todos los estudiantes.
+          </p>
+          <textarea
+            value={announcementText}
+            onChange={e => setAnnouncementText(e.target.value)}
+            placeholder="Ej. 今週は家族について書いてね！ (Esta semana escriban sobre la familia)"
+            rows={2}
+            style={{ width: "100%", boxSizing: "border-box", border: "1px solid rgba(26,26,46,0.12)", borderRadius: 12, background: "#F8F4EE", padding: "12px 14px", fontSize: 14, color: "#1A1A2E", resize: "vertical", outline: "none", fontFamily: "var(--font-noto-sans-jp), inherit", lineHeight: 1.5 }}
+          />
+          <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              disabled={savingAnnouncement || !announcementText.trim()}
+              onClick={() => handleSaveAnnouncement(true)}
+              style={{ ...pillButtonStyle, background: "#4ECDC4", color: "#1A1A2E", opacity: (savingAnnouncement || !announcementText.trim()) ? 0.5 : 1, cursor: (savingAnnouncement || !announcementText.trim()) ? "not-allowed" : "pointer" }}
+            >
+              {announcementActive ? "Actualizar" : "Publicar anuncio"}
+            </button>
+            {announcementActive && (
+              <button
+                type="button"
+                disabled={savingAnnouncement}
+                onClick={() => handleSaveAnnouncement(false)}
+                style={{ ...pillButtonStyle, background: "#FFFFFF", color: "#C53340", boxShadow: "inset 0 0 0 1px rgba(230,57,70,0.25)" }}
+              >
+                Quitar
+              </button>
+            )}
           </div>
         </section>
 

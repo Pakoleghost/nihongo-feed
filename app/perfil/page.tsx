@@ -20,6 +20,7 @@ type RecentPost = {
   id: string;
   content: string;
   created_at: string;
+  from_tema?: boolean;
 };
 
 function AvatarCircle({
@@ -151,13 +152,13 @@ export default function PerfilPage() {
       const counts = getKanaStateCounts(KANA_ITEMS, progress);
       setKanaCount(counts.fijado + counts.quemado);
 
-      // Posts from Supabase
+      // Posts from Supabase — load all for the personal diary
       const { data: posts } = await supabase
         .from("comunidad_posts")
-        .select("id, content, created_at")
+        .select("id, content, created_at, from_tema")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
-        .limit(3);
+        .limit(100);
 
       const { count } = await supabase
         .from("comunidad_posts")
@@ -582,17 +583,14 @@ export default function PerfilPage() {
 
       {/* Recent posts section */}
       <div style={{ padding: "24px 20px 0" }}>
-        <h2
-          style={{
-            fontSize: "18px",
-            fontWeight: 800,
-            color: "#1A1A2E",
-            margin: "0 0 12px",
-            letterSpacing: "-0.03em",
-          }}
-        >
-          Mis publicaciones
-        </h2>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
+          <h2 style={{ fontSize: "18px", fontWeight: 800, color: "#1A1A2E", margin: 0, letterSpacing: "-0.03em" }}>
+            Mi Diario
+          </h2>
+          {postCount > 0 && (
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#9CA3AF" }}>{postCount} publicaciones</span>
+          )}
+        </div>
 
         {recentPosts.length === 0 ? (
           <div
@@ -624,23 +622,27 @@ export default function PerfilPage() {
                   boxSizing: "border-box",
                 }}
               >
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                  <span style={{ fontSize: "11px", color: "#9CA3AF", fontWeight: 600 }}>
+                    {formatDate(post.created_at)}
+                  </span>
+                  {post.from_tema && (
+                    <span style={{ fontSize: 10, fontWeight: 800, color: "#178A83", background: "rgba(78,205,196,0.10)", borderRadius: 4, padding: "1px 6px", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                      tema
+                    </span>
+                  )}
+                </div>
                 <p
                   style={{
                     fontSize: "14px",
                     color: "#1A1A2E",
-                    margin: "0 0 8px",
-                    lineHeight: 1.5,
+                    margin: 0,
+                    lineHeight: 1.55,
                     fontWeight: 500,
-                    display: "-webkit-box",
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
+                    fontFamily: "var(--font-noto-sans-jp), sans-serif",
                   }}
                 >
                   {post.content}
-                </p>
-                <p style={{ fontSize: "11px", color: "#9CA3AF", margin: 0, fontWeight: 600 }}>
-                  {formatDate(post.created_at)}
                 </p>
               </div>
             ))}
