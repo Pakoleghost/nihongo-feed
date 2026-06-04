@@ -12,7 +12,7 @@ import { getWeeklyTopic, fetchTopicOverride, saveTopicOverride, fetchAnnouncemen
 import Link from "next/link";
 import RepliesSheet from "@/components/RepliesSheet";
 import TemaSemanaSheet from "@/components/TemaSemanaSheet";
-import { getCurrentCurriculumModule, getCurriculumModuleIndex, CURRICULUM_MODULES } from "@/lib/curriculum-modules";
+import { getCurrentCurriculumModule, getCurriculumModuleByNumber, CURRICULUM_MODULES } from "@/lib/curriculum-modules";
 import { TEMAS_SEMANA, type TemaSemana } from "@/lib/temas-semana";
 
 type Post = {
@@ -24,7 +24,6 @@ type Post = {
   created_at: string;
   from_tema?: boolean;  // set when post was created via the weekly-topic wizard
 };
-
 
 type Profile = {
   id: string;
@@ -146,6 +145,7 @@ export default function HomePage() {
   const [groupName, setGroupName] = useState<string | null>(null);
   const [showProgreso, setShowProgreso] = useState(false);
   const [currentLesson, setCurrentLesson] = useState<number | null>(null);
+  const [currentModuleNumber, setCurrentModuleNumber] = useState<number | null>(null);
 
   // Tema de la semana sheet
   const [showTemaSheet, setShowTemaSheet] = useState(false);
@@ -255,6 +255,13 @@ export default function HomePage() {
                       c.nombre.toLowerCase().includes(nameLower)
                     );
                     const flaskGrupo = match?.nombre ?? effectiveGroup;
+                    fetch("/api/grupos-modulos")
+                      .then(r => r.ok ? r.json() : {})
+                      .then((map: Record<string, { numero?: number }>) => {
+                        const mod = map[flaskGrupo] ?? map[effectiveGroup];
+                        setCurrentModuleNumber(typeof mod?.numero === "number" ? mod.numero : null);
+                      })
+                      .catch(() => {/* silent */});
                     return fetch(`/api/clase-notas?grupo=${encodeURIComponent(flaskGrupo)}`);
                   })
                   .then(r => r.json())
@@ -704,9 +711,9 @@ export default function HomePage() {
 
       {/* ── Mi Camino mini-card ── */}
       {showProgreso && !effectiveIsAdmin && (() => {
-        const currentModule = getCurrentCurriculumModule(currentLesson);
-        const moduleIndex = getCurriculumModuleIndex(currentLesson);
+        const currentModule = getCurriculumModuleByNumber(currentModuleNumber) ?? getCurrentCurriculumModule(currentLesson);
         const subtitle = `${currentModule.nombreJa} · ${currentModule.nombre}`;
+        const moduleNumber = currentModule.numero ?? 1;
         return (
           <div style={{ padding: "0 16px 12px" }}>
             <Link
@@ -767,7 +774,7 @@ export default function HomePage() {
                       {subtitle}
                     </p>
                     <p style={{ margin: "3px 0 0", fontSize: 11, color: "rgba(78,205,196,0.72)", lineHeight: 1.25, fontWeight: 700 }}>
-                      Módulo {moduleIndex + 1} / {CURRICULUM_MODULES.length}
+                      Módulo {moduleNumber} / {CURRICULUM_MODULES.length}
                     </p>
                   </div>
                 </div>
@@ -1037,73 +1044,75 @@ export default function HomePage() {
                       </p>
                     ) : null}
 
-                    {/* Footer */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative" }}>
-                      {/* Like pill */}
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, position: "relative" }}>
-                        <motion.button
-                          onClick={() => toggleLike(post)}
-                          whileTap={{ scale: 1.12 }}
-                          transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                          style={{
-                            display: "flex", alignItems: "center", gap: 5,
-                            background: liked ? "rgba(78,205,196,0.14)" : "rgba(255,255,255,0.04)",
-                            border: `1px solid ${liked ? "rgba(78,205,196,0.3)" : "rgba(255,255,255,0.07)"}`,
-                            borderRadius: 8, padding: "5px 10px",
-                            cursor: "pointer", fontSize: 13, fontWeight: 700,
-                            color: liked ? "#4ECDC4" : "rgba(255,255,255,0.5)",
-                            fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                            transition: "background 140ms ease, border-color 140ms ease, color 140ms ease",
-                          }}
-                        >
-                          いいね！
-                          {post.likes > 0 && (
-                            <span style={{ fontSize: 11, fontWeight: 800, opacity: 0.85 }}>{post.likes}</span>
-                          )}
-                        </motion.button>
-                        {/* Float-up burst on new like */}
-                        <AnimatePresence>
-                          {showHeartBurst && (
-                            <motion.div
-                              key="burst"
-                              initial={{ opacity: 1, y: 0, scale: 1 }}
-                              animate={{ opacity: 0, y: -28, scale: 1.4 }}
-                              exit={{}}
-                              transition={{ duration: 0.6, ease: "easeOut" }}
-                              style={{ position: "absolute", top: 0, left: 10, pointerEvents: "none", zIndex: 10, fontSize: 14, fontWeight: 900, color: "#4ECDC4", fontFamily: "var(--font-noto-sans-jp), sans-serif" }}
-                            >
-                              いいね！
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-
-                      {/* Reply + share row */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <button
-                          onClick={() => setReplyPostId(post.id)}
-                          style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "8px", padding: "6px 10px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.55)" }}
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                          {commentCounts[post.id] ? <span>{commentCounts[post.id]}</span> : null}
-                        </button>
-                        <button
-                          onClick={() => handleShare(post, profiles[post.user_id])}
-                          style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "8px", padding: "6px 10px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.55)", marginLeft: "auto" }}
-                          aria-label="Compartir"
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
-                        {effectiveIsAdmin && !isOwn && (
-                          <button onClick={() => setConfirmDeleteId(confirmDeleteId === post.id ? null : post.id)}
-                            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: "4px 8px", borderRadius: 8, opacity: 0.5 }}
-                            aria-label="Eliminar (admin)">🗑️</button>
+                    {/* Footer — single row: like · comments · share */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, position: "relative" }}>
+                      {/* いいね button */}
+                      <motion.button
+                        onClick={() => toggleLike(post)}
+                        whileTap={{ scale: 1.12 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 5,
+                          background: liked ? "rgba(78,205,196,0.14)" : "rgba(255,255,255,0.04)",
+                          border: `1px solid ${liked ? "rgba(78,205,196,0.3)" : "rgba(255,255,255,0.07)"}`,
+                          borderRadius: 8, padding: "5px 10px",
+                          cursor: "pointer", fontSize: 13, fontWeight: 700,
+                          color: liked ? "#4ECDC4" : "rgba(255,255,255,0.5)",
+                          fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                          transition: "background 140ms ease, border-color 140ms ease, color 140ms ease",
+                        }}
+                      >
+                        いいね！
+                        {post.likes > 0 && (
+                          <span style={{ fontSize: 11, fontWeight: 800, opacity: 0.85 }}>{post.likes}</span>
                         )}
-                      </div>
+                      </motion.button>
+
+                      {/* Float-up heart burst */}
+                      <AnimatePresence>
+                        {showHeartBurst && (
+                          <motion.div
+                            key="burst"
+                            initial={{ opacity: 1, y: 0, scale: 1 }}
+                            animate={{ opacity: 0, y: -34, scale: 1.6 }}
+                            exit={{}}
+                            transition={{ duration: 0.65, ease: "easeOut" }}
+                            style={{ position: "absolute", top: 0, left: 8, pointerEvents: "none", zIndex: 10 }}
+                          >
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="#E63946">
+                              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                            </svg>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Comments button */}
+                      <button
+                        onClick={() => setReplyPostId(post.id)}
+                        style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "8px", padding: "6px 10px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.55)" }}
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        {commentCounts[post.id] ? <span>{commentCounts[post.id]}</span> : null}
+                      </button>
+
+                      {/* Share — pushed to the right */}
+                      <button
+                        onClick={() => handleShare(post, profiles[post.user_id])}
+                        style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "8px", padding: "6px 10px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.55)", marginLeft: "auto" }}
+                        aria-label="Compartir"
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                          <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+
+                      {effectiveIsAdmin && !isOwn && (
+                        <button onClick={() => setConfirmDeleteId(confirmDeleteId === post.id ? null : post.id)}
+                          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: "4px 8px", borderRadius: 8, opacity: 0.5 }}
+                          aria-label="Eliminar (admin)">🗑️</button>
+                      )}
                     </div>
                   </div>
                 </motion.div>

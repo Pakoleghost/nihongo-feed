@@ -26,9 +26,10 @@ function Avatar({ url, name, size = 32 }: { url: string | null; name: string | n
   );
   return (
     <div style={{
-      width: size, height: size, borderRadius: "50%", background: "#E5E7EB",
+      width: size, height: size, borderRadius: "50%",
+      background: "linear-gradient(135deg, #4ECDC4 0%, #4ECDC4AA 100%)",
       display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: size * 0.4, fontWeight: 700, color: "#53596B", flexShrink: 0,
+      fontSize: size * 0.4, fontWeight: 800, color: "#1A1A2E", flexShrink: 0,
     }}>
       {(name ?? "?").charAt(0).toUpperCase()}
     </div>
@@ -97,19 +98,25 @@ export default function RepliesSheet({ postId, postContent, postAuthorName, user
     setSending(false);
   }
 
-  const preview = postContent.length > 80 ? postContent.slice(0, 77) + "…" : postContent;
+  const preview = postContent.length > 90 ? postContent.slice(0, 87) + "…" : postContent;
+  const canSend = Boolean(text.trim()) && Boolean(userId) && !sending;
 
   return (
     <AnimatePresence>
+      {/* Backdrop */}
       <motion.div
-        key="sheet-backdrop"
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        key="replies-backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         transition={{ duration: 0.18 }}
         onClick={onClose}
-        style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 400 }}
+        style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 400, backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
       />
+
+      {/* Panel */}
       <motion.div
-        key="sheet-panel"
+        key="replies-panel"
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
@@ -117,66 +124,106 @@ export default function RepliesSheet({ postId, postContent, postAuthorName, user
         onClick={e => e.stopPropagation()}
         style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 401,
-          background: "#FFF8E7",
+          background: "#12121F",
           borderRadius: "20px 20px 0 0",
           maxHeight: "88dvh",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
+          boxShadow: "0 -8px 40px rgba(0,0,0,0.5)",
         }}
       >
-        {/* Handle */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px" }}>
-          <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(26,26,46,0.15)" }} />
+        {/* Drag handle */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 6px" }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.14)" }} />
         </div>
 
         {/* Header — post preview */}
-        <div style={{ padding: "8px 18px 12px", borderBottom: "1px solid rgba(26,26,46,0.08)" }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", margin: "0 0 4px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+        <div style={{ padding: "8px 18px 14px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+          <p style={{ fontSize: 10, fontWeight: 700, color: "#4ECDC4", margin: "0 0 5px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
             {postAuthorName ?? "Publicación"}
           </p>
-          <p style={{ fontSize: 14, fontWeight: 500, color: "#53596B", margin: 0, lineHeight: 1.4 }}>
+          <p style={{
+            fontSize: 14, fontWeight: 500, color: "rgba(255,255,255,0.55)",
+            margin: 0, lineHeight: 1.45,
+            fontFamily: "var(--font-noto-sans-jp), sans-serif",
+          }}>
             {preview}
           </p>
         </div>
 
         {/* Comments list */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "12px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{
+          flex: 1, overflowY: "auto", padding: "14px 18px",
+          display: "flex", flexDirection: "column", gap: 14,
+        }}>
           {loading ? (
-            <p style={{ color: "#9CA3AF", fontSize: 14, textAlign: "center", margin: "24px 0" }}>Cargando…</p>
+            /* Skeleton */
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 4 }}>
+              {[0, 1].map(i => (
+                <div key={i} style={{ display: "flex", gap: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,0.07)", flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ width: "30%", height: 10, borderRadius: 5, background: "rgba(255,255,255,0.07)", marginBottom: 8 }} />
+                    <div style={{ width: "80%", height: 12, borderRadius: 5, background: "rgba(255,255,255,0.05)" }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : comments.length === 0 ? (
-            <p style={{ color: "#C4BAB0", fontSize: 14, textAlign: "center", margin: "32px 0", fontWeight: 600 }}>
-              Sin respuestas aún. ¡Sé el primero!
-            </p>
+            <div style={{ textAlign: "center", padding: "36px 0 20px" }}>
+              <p style={{ fontSize: 15, fontWeight: 700, color: "rgba(255,255,255,0.22)", margin: "0 0 4px" }}>
+                Sin respuestas aún
+              </p>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.18)", margin: 0 }}>
+                Sé el primero en responder
+              </p>
+            </div>
           ) : comments.map(c => {
             const p = profiles[c.user_id];
+            const isOwn = c.user_id === userId;
             return (
-              <div key={c.id} style={{ display: "flex", gap: 10 }}>
+              <motion.div
+                key={c.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                style={{ display: "flex", gap: 10, alignItems: "flex-start" }}
+              >
                 <Avatar url={p?.avatar_url ?? null} name={p?.username ?? null} size={30} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 3 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E" }}>{p?.username ?? "Anónimo"}</span>
-                    <span style={{ fontSize: 11, color: "#9CA3AF" }}>{timeAgo(c.created_at)}</span>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 4 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: isOwn ? "#4ECDC4" : "#FFFFFF" }}>
+                      {p?.username ?? "Anónimo"}
+                    </span>
+                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.28)" }}>{timeAgo(c.created_at)}</span>
                   </div>
-                  <p style={{ fontSize: 14, color: "#1A1A2E", margin: 0, lineHeight: 1.45, background: "#FFFFFF", borderRadius: "0 12px 12px 12px", padding: "8px 12px", boxShadow: "0 1px 4px rgba(26,26,46,0.07)" }}>
+                  <p style={{
+                    fontSize: 14, color: "rgba(255,255,255,0.82)", margin: 0, lineHeight: 1.5,
+                    background: isOwn ? "rgba(78,205,196,0.08)" : "rgba(255,255,255,0.05)",
+                    border: `1px solid ${isOwn ? "rgba(78,205,196,0.18)" : "rgba(255,255,255,0.06)"}`,
+                    borderRadius: isOwn ? "12px 12px 0 12px" : "0 12px 12px 12px",
+                    padding: "9px 13px",
+                    fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                  }}>
                     {c.content}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
           <div ref={bottomRef} />
         </div>
 
-        {/* Compose */}
+        {/* Compose bar */}
         <div style={{
           padding: "10px 14px",
           paddingBottom: "max(14px, env(safe-area-inset-bottom, 14px))",
-          borderTop: "1px solid rgba(26,26,46,0.08)",
+          borderTop: "1px solid rgba(255,255,255,0.07)",
           display: "flex",
           alignItems: "flex-end",
           gap: 10,
-          background: "#FFFFFF",
+          background: "#1A1A2E",
         }}>
           <textarea
             ref={inputRef}
@@ -193,37 +240,42 @@ export default function RepliesSheet({ postId, postContent, postAuthorName, user
             rows={1}
             style={{
               flex: 1,
-              border: "none",
+              border: "1px solid rgba(255,255,255,0.10)",
               borderRadius: 12,
-              background: "#F3F0EB",
+              background: "rgba(255,255,255,0.06)",
               padding: "10px 13px",
               fontSize: 14,
-              fontFamily: "inherit",
+              fontFamily: "var(--font-noto-sans-jp), inherit",
               resize: "none",
               outline: "none",
-              color: "#1A1A2E",
+              color: "#FFFFFF",
               lineHeight: 1.4,
               maxHeight: 120,
               overflow: "auto",
+              transition: "border-color 140ms ease",
             }}
           />
-          <button
+          <motion.button
             onClick={handleSend}
-            disabled={!text.trim() || !userId || sending}
+            disabled={!canSend}
+            whileTap={canSend ? { scale: 0.9 } : {}}
+            transition={{ type: "spring", stiffness: 500, damping: 20 }}
             style={{
-              width: 38, height: 38, borderRadius: "50%",
-              background: text.trim() && userId ? "#E63946" : "#E5E7EB",
+              width: 40, height: 40, borderRadius: "50%",
+              background: canSend ? "#E63946" : "rgba(255,255,255,0.07)",
               border: "none",
-              cursor: text.trim() && userId ? "pointer" : "default",
+              cursor: canSend ? "pointer" : "default",
               display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0,
               transition: "background 0.15s",
             }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke={text.trim() && userId ? "#FFFFFF" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"
+                stroke={canSend ? "#FFFFFF" : "rgba(255,255,255,0.25)"}
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </button>
+          </motion.button>
         </div>
       </motion.div>
     </AnimatePresence>
