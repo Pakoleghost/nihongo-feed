@@ -112,7 +112,7 @@ export default function PublicarPage() {
   return (
     <div
       style={{
-        background: "#FFF8E7",
+        background: "#0D0D1A",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -127,8 +127,8 @@ export default function PublicarPage() {
             width: "44px",
             height: "44px",
             borderRadius: "50%",
-            background: "#FFFFFF",
-            border: "none",
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.09)",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
@@ -141,7 +141,7 @@ export default function PublicarPage() {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path
               d="M19 12H5M12 5l-7 7 7 7"
-              stroke="#1A1A2E"
+              stroke="#FFFFFF"
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -153,7 +153,7 @@ export default function PublicarPage() {
           style={{
             fontSize: "28px",
             fontWeight: 800,
-            color: "#1A1A2E",
+            color: "#FFFFFF",
             margin: "0 0 28px",
           }}
         >
@@ -163,7 +163,7 @@ export default function PublicarPage() {
         {/* Text area */}
         <div
           style={{
-            borderBottom: "2px solid #E5E7EB",
+            borderBottom: "2px solid rgba(255,255,255,0.10)",
             marginBottom: "28px",
           }}
         >
@@ -178,7 +178,7 @@ export default function PublicarPage() {
               border: "none",
               outline: "none",
               fontSize: "18px",
-              color: "#1A1A2E",
+              color: "#FFFFFF",
               fontFamily: "var(--font-noto-sans-jp), sans-serif",
               resize: "none",
               padding: "8px 0",
@@ -232,11 +232,11 @@ export default function PublicarPage() {
               width: "100%",
               padding: "24px",
               borderRadius: "16px",
-              border: "2px dashed #D1D5DB",
+              border: "2px dashed rgba(255,255,255,0.16)",
               background: "transparent",
               cursor: "pointer",
               fontSize: "20px",
-              color: "#9CA3AF",
+              color: "rgba(255,255,255,0.52)",
               fontWeight: 600,
             }}
           >
@@ -267,7 +267,7 @@ export default function PublicarPage() {
           left: 0,
           right: 0,
           padding: "16px 20px 36px",
-          background: "linear-gradient(to top, #FFF8E7 70%, transparent)",
+          background: "linear-gradient(to top, #0D0D1A 70%, transparent)",
         }}
       >
         <button

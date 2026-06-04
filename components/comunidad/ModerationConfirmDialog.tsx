@@ -63,18 +63,21 @@ export default function ModerationConfirmDialog({
         style={{
           width: "min(100%, 390px)",
           borderRadius: 28,
-          background: "#FFFFFF",
-          boxShadow: "0 24px 70px rgba(26,26,46,0.26)",
+          background: "rgba(255,255,255,0.06)",
+          border: "1px solid rgba(255,255,255,0.09)",
+          boxShadow: "0 16px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.09)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
           padding: 20,
           display: "grid",
           gap: 14,
         }}
       >
         <div style={{ display: "grid", gap: 7 }}>
-          <h2 id="moderation-confirm-title" style={{ margin: 0, color: "#1A1A2E", fontSize: 22, fontWeight: 900, lineHeight: 1.08 }}>
+          <h2 id="moderation-confirm-title" style={{ margin: 0, color: "#FFFFFF", fontSize: 22, fontWeight: 900, lineHeight: 1.08 }}>
             {title}
           </h2>
-          <p id="moderation-confirm-description" style={{ margin: 0, color: "#6E737F", fontSize: 14, lineHeight: 1.45 }}>
+          <p id="moderation-confirm-description" style={{ margin: 0, color: "rgba(255,255,255,0.58)", fontSize: 14, lineHeight: 1.45 }}>
             {description}
           </p>
         </div>
@@ -87,8 +90,8 @@ export default function ModerationConfirmDialog({
             style={{
               border: "none",
               borderRadius: 999,
-              background: "#F8F4EE",
-              color: "#53596B",
+              background: "rgba(255,255,255,0.07)",
+              color: "rgba(255,255,255,0.72)",
               padding: "12px 14px",
               fontSize: 14,
               fontWeight: 900,

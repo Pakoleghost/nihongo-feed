@@ -78,7 +78,7 @@ export default function BottomNav() {
         bottom: 0,
         left: 0,
         right: 0,
-        background: "#13131F",
+        background: "linear-gradient(to top, #0D0D1A 60%, rgba(13,13,26,0.0) 100%)",
         display: "flex",
         justifyContent: "space-around",
         alignItems: "center",
