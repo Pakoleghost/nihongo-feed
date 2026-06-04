@@ -31,7 +31,7 @@ type Profile = {
   avatar_url: string | null;
 };
 
-const POSTS_PAGE_SIZE = 10;
+const POSTS_PAGE_SIZE = 20;
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -528,7 +528,7 @@ export default function HomePage() {
   return (
     <div
       style={{
-        background: "#1A1A2E",
+        background: "#0D0D1A",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
@@ -542,11 +542,19 @@ export default function HomePage() {
       {/* ── Header ── */}
       <div
         style={{
-          padding: "calc(env(safe-area-inset-top, 20px) + 20px) 20px 16px",
+          position: "sticky",
+          top: 0,
+          zIndex: 30,
+          padding: "calc(max(env(safe-area-inset-top, 0px), 28px) + 10px) 20px 14px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: 12,
+          background: "linear-gradient(180deg, rgba(13,13,26,0.98) 0%, rgba(13,13,26,0.90) 72%, rgba(13,13,26,0.62) 100%)",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          boxShadow: "0 12px 28px rgba(0,0,0,0.18)",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
         }}
       >
         <div>
@@ -1115,6 +1123,26 @@ export default function HomePage() {
               <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, fontWeight: 600, textAlign: "center", margin: "4px 0 0" }}>
                 Cargando…
               </p>
+            )}
+            {hasMorePosts && !loadingMore && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); loadMorePosts(); }}
+                style={{
+                  alignSelf: "center",
+                  margin: "8px 0 16px",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  borderRadius: 10,
+                  color: "rgba(255,255,255,0.72)",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  fontWeight: 800,
+                  padding: "9px 16px",
+                }}
+              >
+                Cargar más
+              </button>
             )}
             {!hasMorePosts && posts.length > 0 && (
               <p style={{ color: "rgba(255,255,255,0.22)", fontSize: 12, fontWeight: 700, letterSpacing: "0.16em", textAlign: "center", margin: "4px 0 16px", textTransform: "uppercase" }}>
