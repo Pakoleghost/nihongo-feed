@@ -316,20 +316,33 @@ export default function HomePage() {
     }
   }
 
-  // IntersectionObserver — auto-load when sentinel enters viewport
+  // IntersectionObserver + scroll fallback keep the feed loading without a tap on mobile.
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
+    const shouldLoadMore = () => {
+      const distanceFromBottom = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
+      if (distanceFromBottom < 900 && hasMorePosts && !loadingMoreRef.current) {
+        loadMorePosts();
+      }
+    };
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMorePosts && !loadingMoreRef.current) {
           loadMorePosts();
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "900px 0px" }
     );
     observer.observe(sentinel);
-    return () => observer.disconnect();
+    window.addEventListener("scroll", shouldLoadMore, { passive: true });
+    window.addEventListener("resize", shouldLoadMore);
+    shouldLoadMore();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", shouldLoadMore);
+      window.removeEventListener("resize", shouldLoadMore);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMorePosts, nextPostsCursor]);
 
@@ -591,7 +604,7 @@ export default function HomePage() {
       </div>
 
       {/* ── Tema de la semana ── */}
-      <div style={{ padding: "0 16px 12px" }}>
+      <div style={{ padding: "14px 16px 12px" }}>
         <div
           role="button"
           tabIndex={0}
@@ -1118,31 +1131,11 @@ export default function HomePage() {
             )}
 
             {/* Infinite scroll sentinel */}
-            <div ref={sentinelRef} style={{ height: 1 }} />
+            <div ref={sentinelRef} style={{ height: 80 }} />
             {loadingMore && (
               <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, fontWeight: 600, textAlign: "center", margin: "4px 0 0" }}>
                 Cargando…
               </p>
-            )}
-            {hasMorePosts && !loadingMore && (
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); loadMorePosts(); }}
-                style={{
-                  alignSelf: "center",
-                  margin: "8px 0 16px",
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  borderRadius: 10,
-                  color: "rgba(255,255,255,0.72)",
-                  cursor: "pointer",
-                  fontSize: 13,
-                  fontWeight: 800,
-                  padding: "9px 16px",
-                }}
-              >
-                Cargar más
-              </button>
             )}
             {!hasMorePosts && posts.length > 0 && (
               <p style={{ color: "rgba(255,255,255,0.22)", fontSize: 12, fontWeight: 700, letterSpacing: "0.16em", textAlign: "center", margin: "4px 0 16px", textTransform: "uppercase" }}>
