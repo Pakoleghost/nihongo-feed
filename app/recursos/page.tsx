@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import BottomNav from "@/components/BottomNav";
 import { useStudentViewMode } from "@/lib/use-student-view-mode";
@@ -99,7 +100,16 @@ export default function RecursosPage() {
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
   const { effectiveIsAdmin } = useStudentViewMode(isAdmin);
+
+  function toggleFolder(name: string) {
+    setOpenFolders(prev => {
+      const next = new Set(prev);
+      next.has(name) ? next.delete(name) : next.add(name);
+      return next;
+    });
+  }
 
   async function load() {
     setLoading(true);
@@ -460,35 +470,68 @@ export default function RecursosPage() {
             <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.42)", margin: 0 }}>El profesor subirá los archivos aquí.</p>
           </div>
         ) : (
-          grouped.map(([folder, items]) => (
+          grouped.map(([folder, items]) => {
+            const isOpen = openFolders.has(folder);
+            return (
             <section key={folder}>
-              {/* Folder header */}
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+              {/* Folder header — tap to toggle */}
+              <button
+                onClick={() => toggleFolder(folder)}
+                style={{
+                  display: "flex", alignItems: "center", gap: "8px",
+                  width: "100%", background: "none", border: "none",
+                  cursor: "pointer", padding: "0 0 10px", textAlign: "left",
+                  WebkitTapHighlightColor: "transparent",
+                }}
+              >
                 <div style={{
-                  display: "flex", alignItems: "center", gap: "7px",
-                  background: "rgba(255,255,255,0.06)",
+                  display: "flex", alignItems: "center", gap: "7px", flex: 1,
+                  background: isOpen ? "rgba(78,205,196,0.10)" : "rgba(255,255,255,0.06)",
                   borderRadius: "999px",
-                  padding: "5px 12px 5px 8px",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  padding: "6px 12px 6px 8px",
+                  border: `1px solid ${isOpen ? "rgba(78,205,196,0.22)" : "rgba(255,255,255,0.08)"}`,
+                  transition: "background 140ms ease, border-color 140ms ease",
                 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke="#4ECDC4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"
+                      stroke={isOpen ? "#4ECDC4" : "rgba(255,255,255,0.45)"}
+                      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span style={{ fontSize: "12px", fontWeight: 800, color: "#FFFFFF", letterSpacing: "0.02em" }}>{folder}</span>
-                </div>
-                {effectiveIsAdmin && (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.35)" }}>
-                    {items.length} {items.length === 1 ? "item" : "items"}
+                  <span style={{ fontSize: "12px", fontWeight: 800, color: isOpen ? "#4ECDC4" : "rgba(255,255,255,0.75)", letterSpacing: "0.02em", flex: 1, transition: "color 140ms ease" }}>
+                    {folder}
                   </span>
-                )}
-              </div>
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "rgba(255,255,255,0.28)" }}>
+                    {items.length}
+                  </span>
+                </div>
+                {/* Chevron */}
+                <motion.div
+                  animate={{ rotate: isOpen ? 180 : 0 }}
+                  transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+                  style={{ flexShrink: 0, display: "flex" }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M6 9l6 6 6-6" stroke="rgba(255,255,255,0.35)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </motion.div>
+              </button>
 
+              <AnimatePresence initial={false}>
+              {isOpen && (
+                <motion.div
+                  key="content"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                  style={{ overflow: "hidden" }}
+                >
               {items.length === 0 ? (
-                <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: "12px", padding: "16px", color: "rgba(255,255,255,0.25)", fontSize: "13px", fontWeight: 600, textAlign: "center" }}>
+                <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: "12px", padding: "16px", color: "rgba(255,255,255,0.25)", fontSize: "13px", fontWeight: 600, textAlign: "center", marginBottom: 12 }}>
                   Carpeta vacía
                 </div>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "20px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "8px" }}>
                   {items.map((item) => {
                     const fileResource = isFile(item.url);
                     const ext = fileResource ? getFileExtension(item.url) : null;
@@ -554,8 +597,12 @@ export default function RecursosPage() {
                   })}
                 </div>
               )}
+                </motion.div>
+              )}
+              </AnimatePresence>
             </section>
-          ))
+            );
+          })
         )}
       </div>
 
