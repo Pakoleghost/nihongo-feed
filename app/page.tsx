@@ -137,10 +137,6 @@ export default function HomePage() {
   const [savingEdit, setSavingEdit] = useState(false);
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
 
-  // Like burst animation
-  const [justLikedId, setJustLikedId] = useState<string | null>(null);
-  const likeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   // Progress mini-card
   const [groupName, setGroupName] = useState<string | null>(null);
   const [showProgreso, setShowProgreso] = useState(false);
@@ -305,10 +301,6 @@ export default function HomePage() {
   useEffect(() => {
     return () => { if (composePreview) URL.revokeObjectURL(composePreview); };
   }, [composePreview]);
-
-  useEffect(() => {
-    return () => { if (likeTimerRef.current) clearTimeout(likeTimerRef.current); };
-  }, []);
 
   async function loadMorePosts() {
     if (loadingMoreRef.current || !hasMorePosts || !nextPostsCursor) return;
@@ -489,12 +481,6 @@ export default function HomePage() {
     if (!userId) { router.push("/login"); return; }
     const liked = likedIds.has(post.id);
     const newCount = post.likes + (liked ? -1 : 1);
-    // Trigger heart burst only when liking (not unliking)
-    if (!liked) {
-      if (likeTimerRef.current) clearTimeout(likeTimerRef.current);
-      setJustLikedId(post.id);
-      likeTimerRef.current = setTimeout(() => setJustLikedId(null), 900);
-    }
     setLikedIds((prev) => { const next = new Set(prev); liked ? next.delete(post.id) : next.add(post.id); return next; });
     setPosts((prev) => prev.map((p) => (p.id === post.id ? { ...p, likes: newCount } : p)));
     if (liked) {
@@ -932,7 +918,6 @@ export default function HomePage() {
               const isOwn = post.user_id === userId;
               const isEditing = editingPostId === post.id;
               const isConfirmDelete = confirmDeleteId === post.id;
-              const showHeartBurst = justLikedId === post.id;
 
               return (
                 <motion.div
@@ -1049,42 +1034,41 @@ export default function HomePage() {
                       {/* いいね button */}
                       <motion.button
                         onClick={() => toggleLike(post)}
-                        whileTap={{ scale: 1.12 }}
+                        whileTap={{ scale: 0.92 }}
                         transition={{ type: "spring", stiffness: 500, damping: 20 }}
                         style={{
                           display: "flex", alignItems: "center", gap: 5,
-                          background: liked ? "rgba(78,205,196,0.14)" : "rgba(255,255,255,0.04)",
-                          border: `1px solid ${liked ? "rgba(78,205,196,0.3)" : "rgba(255,255,255,0.07)"}`,
+                          background: liked ? "rgba(230,57,70,0.12)" : "rgba(255,255,255,0.04)",
+                          border: `1px solid ${liked ? "rgba(230,57,70,0.30)" : "rgba(255,255,255,0.07)"}`,
                           borderRadius: 8, padding: "5px 10px",
                           cursor: "pointer", fontSize: 13, fontWeight: 700,
-                          color: liked ? "#4ECDC4" : "rgba(255,255,255,0.5)",
+                          color: liked ? "#E63946" : "rgba(255,255,255,0.5)",
                           fontFamily: "var(--font-noto-sans-jp), sans-serif",
                           transition: "background 140ms ease, border-color 140ms ease, color 140ms ease",
                         }}
                       >
+                        {/* Heart — outline when idle, filled+pop when liked */}
+                        <motion.span
+                          animate={liked
+                            ? { scale: [1, 1.45, 0.9, 1.15, 1], rotate: [0, -12, 8, -4, 0] }
+                            : { scale: 1, rotate: 0 }
+                          }
+                          transition={{ duration: 0.42, ease: "easeOut" }}
+                          style={{ display: "flex", alignItems: "center", lineHeight: 0 }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24"
+                            fill={liked ? "#E63946" : "none"}
+                            stroke={liked ? "#E63946" : "currentColor"}
+                            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                          >
+                            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                          </svg>
+                        </motion.span>
                         いいね！
                         {post.likes > 0 && (
                           <span style={{ fontSize: 11, fontWeight: 800, opacity: 0.85 }}>{post.likes}</span>
                         )}
                       </motion.button>
-
-                      {/* Float-up heart burst */}
-                      <AnimatePresence>
-                        {showHeartBurst && (
-                          <motion.div
-                            key="burst"
-                            initial={{ opacity: 1, y: 0, scale: 1 }}
-                            animate={{ opacity: 0, y: -34, scale: 1.6 }}
-                            exit={{}}
-                            transition={{ duration: 0.65, ease: "easeOut" }}
-                            style={{ position: "absolute", top: 0, left: 8, pointerEvents: "none", zIndex: 10 }}
-                          >
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="#E63946">
-                              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
-                            </svg>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
 
                       {/* Comments button */}
                       <button
