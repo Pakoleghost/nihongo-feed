@@ -25,13 +25,6 @@ type Post = {
   from_tema?: boolean;  // set when post was created via the weekly-topic wizard
 };
 
-// Reaction types shown on posts (in Japanese — no emojis)
-const REACTIONS = [
-  { type: "like",     label: "いいね" },
-  { type: "sugoii",   label: "すごい" },
-  { type: "wakaru",   label: "わかる" },
-  { type: "ganbatte", label: "がんばれ" },
-] as const;
 
 type Profile = {
   id: string;
@@ -99,10 +92,6 @@ export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
-  // reactions: postId → reaction type the current user has given
-  const [myReactions, setMyReactions] = useState<Record<string, string>>({});
-  // reactionCounts: postId → { like: N, sugoii: M, ... }
-  const [reactionCounts, setReactionCounts] = useState<Record<string, Record<string, number>>>({});
   // true when the next publish came from the tema wizard
   const fromTemaRef = useRef(false);
   // teacher announcement banner
@@ -191,16 +180,14 @@ export default function HomePage() {
     const userIds = [...new Set([...visible.map((p) => p.user_id), ...(uid ? [uid] : [])])];
 
     // Fire secondary queries in parallel
-    const [profileData, likesData, countsData, allReactionsData] = await Promise.all([
+    const [profileData, likesData, countsData] = await Promise.all([
       userIds.length > 0
         ? supabase.from("profiles").select("id, username, avatar_url").in("id", userIds).then(r => r.data)
         : Promise.resolve(null),
       uid
-        ? supabase.from("comunidad_likes").select("post_id, reaction").eq("user_id", uid).in("post_id", postIds).then(r => r.error ? null : r.data)
+        ? supabase.from("comunidad_likes").select("post_id").eq("user_id", uid).in("post_id", postIds).then(r => r.error ? null : r.data)
         : Promise.resolve(null),
       supabase.from("comunidad_comments").select("post_id").in("post_id", postIds).then(r => r.data),
-      // All reactions for these posts (for counts per type)
-      supabase.from("comunidad_likes").select("post_id, reaction").in("post_id", postIds).then(r => r.error ? null : r.data),
     ]);
 
     // Profiles
@@ -211,26 +198,12 @@ export default function HomePage() {
       if (uid && map[uid]) setMyProfile(map[uid]);
     }
 
-    // Likes + reactions
-    const likeRows = (likesData as { post_id: string; reaction?: string }[] | null) ?? [];
+    // Likes
+    const likeRows = (likesData as { post_id: string }[] | null) ?? [];
     const ids = likeRows.map(l => l.post_id);
     if (ids.length > 0) {
       setLikedIds((cur) => { const next = new Set(cur); ids.forEach(id => next.add(id)); return next; });
-      // Track per-type reaction for current user
-      const newMyReactions: Record<string, string> = {};
-      likeRows.forEach(l => { newMyReactions[l.post_id] = l.reaction ?? "like"; });
-      setMyReactions(prev => ({ ...prev, ...newMyReactions }));
     }
-
-    // Aggregate reaction counts for all posts
-    const allRows = (allReactionsData as { post_id: string; reaction?: string }[] | null) ?? [];
-    const newCounts: Record<string, Record<string, number>> = {};
-    allRows.forEach(r => {
-      const pid = r.post_id; const rt = r.reaction ?? "like";
-      if (!newCounts[pid]) newCounts[pid] = {};
-      newCounts[pid][rt] = (newCounts[pid][rt] ?? 0) + 1;
-    });
-    setReactionCounts(prev => ({ ...prev, ...newCounts }));
 
     // Comment counts
     const countMap: Record<string, number> = {};
@@ -523,57 +496,6 @@ export default function HomePage() {
     } else {
       await supabase.from("comunidad_likes").insert({ post_id: post.id, user_id: userId });
       await supabase.from("comunidad_posts").update({ likes: newCount }).eq("id", post.id);
-    }
-  }
-
-  async function toggleReaction(postId: string, reactionType: string) {
-    if (!userId) { router.push("/login"); return; }
-    const current = myReactions[postId] ?? "";
-    const post = posts.find(p => p.id === postId);
-    if (!post) return;
-
-    if (current === reactionType) {
-      // Remove reaction
-      setMyReactions(prev => { const n = { ...prev }; delete n[postId]; return n; });
-      setLikedIds(prev => { const n = new Set(prev); n.delete(postId); return n; });
-      setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes: Math.max(0, p.likes - 1) } : p));
-      setReactionCounts(prev => {
-        const n = { ...prev, [postId]: { ...(prev[postId] ?? {}) } };
-        n[postId][reactionType] = Math.max(0, (n[postId][reactionType] ?? 1) - 1);
-        return n;
-      });
-      await supabase.from("comunidad_likes").delete().match({ post_id: postId, user_id: userId });
-      await supabase.from("comunidad_posts").update({ likes: Math.max(0, post.likes - 1) }).eq("id", postId);
-    } else if (current) {
-      // Switch reaction type
-      setMyReactions(prev => ({ ...prev, [postId]: reactionType }));
-      setReactionCounts(prev => {
-        const n = { ...prev, [postId]: { ...(prev[postId] ?? {}) } };
-        n[postId][current] = Math.max(0, (n[postId][current] ?? 1) - 1);
-        n[postId][reactionType] = (n[postId][reactionType] ?? 0) + 1;
-        return n;
-      });
-      try {
-        await supabase.from("comunidad_likes").update({ reaction: reactionType }).match({ post_id: postId, user_id: userId });
-      } catch {/* reaction column may not exist yet */}
-    } else {
-      // New reaction
-      setMyReactions(prev => ({ ...prev, [postId]: reactionType }));
-      setLikedIds(prev => { const n = new Set(prev); n.add(postId); return n; });
-      setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes: p.likes + 1 } : p));
-      setReactionCounts(prev => ({
-        ...prev,
-        [postId]: { ...(prev[postId] ?? {}), [reactionType]: ((prev[postId] ?? {})[reactionType] ?? 0) + 1 },
-      }));
-      if (likeTimerRef.current) clearTimeout(likeTimerRef.current);
-      setJustLikedId(postId);
-      likeTimerRef.current = setTimeout(() => setJustLikedId(null), 900);
-      try {
-        await supabase.from("comunidad_likes").insert({ post_id: postId, user_id: userId, reaction: reactionType });
-      } catch {
-        await supabase.from("comunidad_likes").insert({ post_id: postId, user_id: userId });
-      }
-      await supabase.from("comunidad_posts").update({ likes: post.likes + 1 }).eq("id", postId);
     }
   }
 
@@ -1117,36 +1039,29 @@ export default function HomePage() {
 
                     {/* Footer */}
                     <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative" }}>
-                      {/* Reaction pills — Japanese labels, no emojis */}
+                      {/* Like pill */}
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 5, position: "relative" }}>
-                        {REACTIONS.map(r => {
-                          const isActive = myReactions[post.id] === r.type;
-                          const count = reactionCounts[post.id]?.[r.type] ?? 0;
-                          return (
-                            <motion.button
-                              key={r.type}
-                              onClick={() => toggleReaction(post.id, r.type)}
-                              whileTap={{ scale: 1.12 }}
-                              transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                              style={{
-                                display: "flex", alignItems: "center", gap: 5,
-                                background: isActive ? "rgba(78,205,196,0.14)" : "rgba(255,255,255,0.04)",
-                                border: `1px solid ${isActive ? "rgba(78,205,196,0.3)" : "rgba(255,255,255,0.07)"}`,
-                                borderRadius: 8, padding: "5px 10px",
-                                cursor: "pointer", fontSize: 13, fontWeight: 700,
-                                color: isActive ? "#4ECDC4" : "rgba(255,255,255,0.5)",
-                                fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                                transition: "background 140ms ease, border-color 140ms ease, color 140ms ease",
-                              }}
-                            >
-                              {r.label}
-                              {count > 0 && (
-                                <span style={{ fontSize: 11, fontWeight: 800, opacity: 0.85 }}>{count}</span>
-                              )}
-                            </motion.button>
-                          );
-                        })}
-                        {/* Float-up burst on new reaction */}
+                        <motion.button
+                          onClick={() => toggleLike(post)}
+                          whileTap={{ scale: 1.12 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                          style={{
+                            display: "flex", alignItems: "center", gap: 5,
+                            background: liked ? "rgba(78,205,196,0.14)" : "rgba(255,255,255,0.04)",
+                            border: `1px solid ${liked ? "rgba(78,205,196,0.3)" : "rgba(255,255,255,0.07)"}`,
+                            borderRadius: 8, padding: "5px 10px",
+                            cursor: "pointer", fontSize: 13, fontWeight: 700,
+                            color: liked ? "#4ECDC4" : "rgba(255,255,255,0.5)",
+                            fontFamily: "var(--font-noto-sans-jp), sans-serif",
+                            transition: "background 140ms ease, border-color 140ms ease, color 140ms ease",
+                          }}
+                        >
+                          いいね！
+                          {post.likes > 0 && (
+                            <span style={{ fontSize: 11, fontWeight: 800, opacity: 0.85 }}>{post.likes}</span>
+                          )}
+                        </motion.button>
+                        {/* Float-up burst on new like */}
                         <AnimatePresence>
                           {showHeartBurst && (
                             <motion.div
@@ -1157,7 +1072,7 @@ export default function HomePage() {
                               transition={{ duration: 0.6, ease: "easeOut" }}
                               style={{ position: "absolute", top: 0, left: 10, pointerEvents: "none", zIndex: 10, fontSize: 14, fontWeight: 900, color: "#4ECDC4", fontFamily: "var(--font-noto-sans-jp), sans-serif" }}
                             >
-                              いいね
+                              いいね！
                             </motion.div>
                           )}
                         </AnimatePresence>
