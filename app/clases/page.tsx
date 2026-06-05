@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import BottomNav from "@/components/BottomNav";
 import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 const COLECCIONES_URL = "/api/colecciones";
@@ -611,7 +610,7 @@ export default function ClasesPage() {
         {content}
       </div>
 
-      <BottomNav />
+
       </div>
     </div>
   );

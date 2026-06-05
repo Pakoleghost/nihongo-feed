@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import BottomNav from "@/components/BottomNav";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
@@ -606,7 +605,7 @@ export default function AdminUsuariosPage() {
           </div>
         )}
 
-        <BottomNav />
+  
       </div>
 
       <ConfirmDialog

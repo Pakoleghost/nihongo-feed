@@ -3,7 +3,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import BottomNav from "@/components/BottomNav";
 import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 function FileIcon() {
@@ -616,7 +615,7 @@ export default function RecursosPage() {
         )}
       </div>
 
-      <BottomNav />
+
       </div>
     </div>
   );

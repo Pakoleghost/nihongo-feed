@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import BottomNav from "@/components/BottomNav";
 import { optimizeImageFile, validateImageFile } from "@/lib/client-image-upload";
 import { useStudentViewMode } from "@/lib/use-student-view-mode";
 import { markActiveToday, getStreak } from "@/lib/streak";
@@ -1262,7 +1261,7 @@ export default function HomePage() {
         );
       })()}
 
-      <BottomNav />
+
       </div>
     </div>
   );

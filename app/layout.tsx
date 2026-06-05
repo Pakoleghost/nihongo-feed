@@ -4,6 +4,7 @@ import type { Viewport } from "next";
 import Script from "next/script";
 import PushInit from "@/components/PushInit";
 import StudentViewBanner from "@/components/StudentViewBanner";
+import BottomNav from "@/components/BottomNav";
 
 const noto = Noto_Sans_JP({
   subsets: ["latin"],
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={jakarta.className}>
         <StudentViewBanner />
         {children}
+        <BottomNav />
         <Script id="sw-register" strategy="afterInteractive">{`
           if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js');

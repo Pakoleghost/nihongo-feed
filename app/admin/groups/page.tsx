@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import BottomNav from "@/components/BottomNav";
 import { useStudentViewMode } from "@/lib/use-student-view-mode";
 import { saveAnnouncement } from "@/lib/weekly-topics";
 
@@ -505,7 +504,7 @@ export default function AdminGroupsPage() {
           </div>
         </section>
       </div>
-      <BottomNav />
+
     </div>
     <ConfirmDialog
       open={Boolean(deleteTarget)}

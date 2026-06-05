@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import BottomNav from "@/components/BottomNav";
 import { getStreak } from "@/lib/streak";
 import { loadKanaProgress, getKanaStateCounts } from "@/lib/kana-progress";
 import { KANA_ITEMS } from "@/lib/kana-data";
@@ -752,7 +751,7 @@ export default function PerfilPage() {
         </button>
       </div>
 
-      <BottomNav />
+
     </div>
   );
 }

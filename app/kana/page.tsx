@@ -15,7 +15,6 @@ import {
 import { getKanaSmartRecommendation } from "@/lib/kana-smart";
 import { syncKanaProgressOnLoad } from "@/lib/kana-progress-sync";
 import { supabase } from "@/lib/supabase";
-import BottomNav from "@/components/BottomNav";
 
 const TOTAL = KANA_ITEMS.length;
 
@@ -258,7 +257,7 @@ export default function KanaPage() {
         )}
       </div>
 
-      <BottomNav />
+
     </div>
   );
 }

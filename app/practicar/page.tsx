@@ -7,7 +7,6 @@ import { loadVocabProgress } from "@/lib/vocab-progress";
 import { loadKanaProgress, getKanaStateCounts } from "@/lib/kana-progress";
 import { KANA_ITEMS } from "@/lib/kana-data";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
-import BottomNav from "@/components/BottomNav";
 
 const TOTAL_VOCAB = Object.values(GENKI_VOCAB_BY_LESSON).flat().length;
 
@@ -292,7 +291,7 @@ export default function PracticarPage() {
       </div>
       </div>
 
-      <BottomNav />
+
     </div>
   );
 }

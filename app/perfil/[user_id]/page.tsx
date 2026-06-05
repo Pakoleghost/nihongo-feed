@@ -5,7 +5,6 @@ import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { KANA_ITEMS } from "@/lib/kana-data";
 import { getKanaStateCounts, type KanaProgressMap } from "@/lib/kana-progress";
-import BottomNav from "@/components/BottomNav";
 
 type PublicProfile = {
   id: string;
@@ -252,7 +251,7 @@ export default function PublicProfilePage() {
         )}
       </div>
 
-      <BottomNav />
+
     </div>
   );
 }
