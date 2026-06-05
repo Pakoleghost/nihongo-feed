@@ -260,7 +260,7 @@ export default function RecursosPage() {
   return (
     <div
       style={{
-        background: "#1A1A2E",
+        background: "#0D0D1A",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
@@ -268,8 +268,10 @@ export default function RecursosPage() {
         position: "relative",
       }}
     >
-      {/* Ambient glow */}
-      <div style={{ position: "fixed", top: -160, left: -100, width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(78,205,196,0.10) 0%, rgba(78,205,196,0) 60%)", pointerEvents: "none", zIndex: 0 }} />
+      {/* Teal glow — top left */}
+      <div style={{ position: "fixed", top: -120, left: -100, width: 360, height: 360, borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: "radial-gradient(circle, rgba(78,205,196,0.20) 0%, rgba(78,205,196,0) 68%)", filter: "blur(8px)" }} />
+      {/* Red glow — bottom right */}
+      <div style={{ position: "fixed", bottom: 40, right: -120, width: 340, height: 340, borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: "radial-gradient(circle, rgba(230,57,70,0.13) 0%, rgba(230,57,70,0) 70%)", filter: "blur(8px)" }} />
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", minHeight: "100%" }}>
 
       <div
@@ -304,15 +306,17 @@ export default function RecursosPage() {
             onClick={() => setShowAdminPanel((value) => !value)}
             style={{
               border: "1px solid rgba(255,255,255,0.14)",
-              borderRadius: "10px",
+              borderRadius: "12px",
               background: "rgba(255,255,255,0.08)",
-              color: "#FFFFFF",
+              color: "rgba(255,255,255,0.80)",
               padding: "8px 14px",
               fontSize: "13px",
               fontWeight: 700,
               cursor: "pointer",
               flexShrink: 0,
               marginTop: "8px",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
             }}
           >
             {showAdminPanel ? "Cerrar" : "Agregar"}
@@ -325,10 +329,13 @@ export default function RecursosPage() {
           <form
             onSubmit={handleAdminSubmit}
             style={{
-              background: "#1E2235",
+              background: "rgba(255,255,255,0.06)",
               borderRadius: "24px",
               padding: "16px",
-              border: "1px solid rgba(255,255,255,0.06)",
+              backdropFilter: "blur(20px) saturate(140%)",
+              WebkitBackdropFilter: "blur(20px) saturate(140%)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
               display: "grid",
               gap: "14px",
             }}
@@ -346,10 +353,10 @@ export default function RecursosPage() {
                     type="button"
                     onClick={() => setAdminAction(key as AdminAction)}
                     style={{
-                      border: "none",
+                      border: `1px solid ${active ? "rgba(78,205,196,0.40)" : "rgba(255,255,255,0.12)"}`,
                       borderRadius: "999px",
-                      background: active ? "#4ECDC4" : "rgba(255,255,255,0.07)",
-                      color: active ? "#1A1A2E" : "rgba(255,255,255,0.55)",
+                      background: active ? "rgba(78,205,196,0.15)" : "rgba(255,255,255,0.07)",
+                      color: active ? "#4ECDC4" : "rgba(255,255,255,0.55)",
                       padding: "8px 12px",
                       fontSize: "13px",
                       fontWeight: 800,
@@ -464,7 +471,7 @@ export default function RecursosPage() {
             Cargando…
           </div>
         ) : grouped.length === 0 ? (
-          <div style={{ background: "#1E2235", borderRadius: "16px", padding: "40px 24px", textAlign: "center", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: "16px", padding: "40px 24px", textAlign: "center", backdropFilter: "blur(20px) saturate(140%)", WebkitBackdropFilter: "blur(20px) saturate(140%)", border: "1px solid rgba(255,255,255,0.10)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)" }}>
             <p style={{ fontSize: "32px", margin: "0 0 12px" }}>📂</p>
             <p style={{ fontSize: "16px", fontWeight: 700, color: "#FFFFFF", margin: "0 0 6px" }}>Sin material aún</p>
             <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.42)", margin: 0 }}>El profesor subirá los archivos aquí.</p>
@@ -486,10 +493,10 @@ export default function RecursosPage() {
               >
                 <div style={{
                   display: "flex", alignItems: "center", gap: "7px", flex: 1,
-                  background: isOpen ? "rgba(78,205,196,0.10)" : "rgba(255,255,255,0.06)",
+                  background: isOpen ? "rgba(78,205,196,0.15)" : "rgba(255,255,255,0.07)",
                   borderRadius: "999px",
                   padding: "6px 12px 6px 8px",
-                  border: `1px solid ${isOpen ? "rgba(78,205,196,0.22)" : "rgba(255,255,255,0.08)"}`,
+                  border: `1px solid ${isOpen ? "rgba(78,205,196,0.40)" : "rgba(255,255,255,0.12)"}`,
                   transition: "background 140ms ease, border-color 140ms ease",
                 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -497,7 +504,7 @@ export default function RecursosPage() {
                       stroke={isOpen ? "#4ECDC4" : "rgba(255,255,255,0.45)"}
                       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span style={{ fontSize: "12px", fontWeight: 800, color: isOpen ? "#4ECDC4" : "rgba(255,255,255,0.75)", letterSpacing: "0.02em", flex: 1, transition: "color 140ms ease" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 800, color: isOpen ? "#4ECDC4" : "rgba(255,255,255,0.55)", letterSpacing: "0.02em", flex: 1, transition: "color 140ms ease" }}>
                     {folder}
                   </span>
                   <span style={{ fontSize: "11px", fontWeight: 600, color: "rgba(255,255,255,0.28)" }}>
@@ -546,13 +553,16 @@ export default function RecursosPage() {
                         disabled={!item.url}
                         style={{
                           position: "relative",
-                          background: "#1E2235",
+                          background: "rgba(255,255,255,0.06)",
                           borderRadius: "14px",
                           padding: "14px 52px 14px 16px",
                           display: "flex",
                           alignItems: "center",
                           gap: "14px",
-                          border: "1px solid rgba(255,255,255,0.06)",
+                          backdropFilter: "blur(20px) saturate(140%)",
+                          WebkitBackdropFilter: "blur(20px) saturate(140%)",
+                          border: "1px solid rgba(255,255,255,0.10)",
+                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
                           cursor: item.url ? "pointer" : "default",
                           textAlign: "left",
                           width: "100%",

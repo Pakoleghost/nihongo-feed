@@ -68,10 +68,13 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
     <div
       style={{
         position: "relative",
-        background: "#1E2235",
+        background: "rgba(255,255,255,0.06)",
         borderRadius: "14px",
         padding: "14px 48px 14px 16px",
-        border: "1px solid rgba(255,255,255,0.06)",
+        backdropFilter: "blur(20px) saturate(140%)",
+        WebkitBackdropFilter: "blur(20px) saturate(140%)",
+        border: "1px solid rgba(255,255,255,0.10)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
         display: "flex",
         flexDirection: "column",
         gap: "10px",
@@ -127,10 +130,10 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
           <span
             style={{
               fontSize: "10px",
-              fontWeight: 700,
-              color: "rgba(255,255,255,0.42)",
+              fontWeight: 800,
+              color: "rgba(255,255,255,0.38)",
               textTransform: "uppercase",
-              letterSpacing: "0.08em",
+              letterSpacing: "0.15em",
             }}
           >
             Contraseña
@@ -184,10 +187,10 @@ function TareaSection({ notas }: { notas: NotaClase[] }) {
       <span
         style={{
           display: "block",
-          fontSize: "11px",
-          fontWeight: 700,
-          color: "rgba(255,255,255,0.42)",
-          letterSpacing: "0.08em",
+          fontSize: "10px",
+          fontWeight: 800,
+          color: "rgba(255,255,255,0.38)",
+          letterSpacing: "0.15em",
           textTransform: "uppercase",
           marginBottom: "10px",
         }}
@@ -199,10 +202,13 @@ function TareaSection({ notas }: { notas: NotaClase[] }) {
       <div
         style={{
           position: "relative",
-          background: "#1E2235",
+          background: "rgba(255,255,255,0.06)",
           borderRadius: "14px",
           padding: "14px 48px 14px 16px",
-          border: "1px solid rgba(255,255,255,0.06)",
+          backdropFilter: "blur(20px) saturate(140%)",
+          WebkitBackdropFilter: "blur(20px) saturate(140%)",
+          border: "1px solid rgba(255,255,255,0.10)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
           display: "flex",
           flexDirection: "column",
           gap: "10px",
@@ -249,11 +255,14 @@ function ColeccionView({ coleccion }: { coleccion: Coleccion }) {
     return (
       <div
         style={{
-          background: "#1E2235",
+          background: "rgba(255,255,255,0.06)",
           borderRadius: "16px",
           padding: "40px 24px",
           textAlign: "center",
-          border: "1px solid rgba(255,255,255,0.06)",
+          backdropFilter: "blur(20px) saturate(140%)",
+          WebkitBackdropFilter: "blur(20px) saturate(140%)",
+          border: "1px solid rgba(255,255,255,0.10)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
         }}
       >
         <p style={{ fontSize: "16px", fontWeight: 700, color: "#FFFFFF", margin: "0 0 6px" }}>
@@ -280,11 +289,14 @@ function NoGroupCard({ message }: { message?: string }) {
   return (
     <div
       style={{
-        background: "#1E2235",
+        background: "rgba(255,255,255,0.06)",
         borderRadius: "16px",
         padding: "40px 24px",
         textAlign: "center",
-        border: "1px solid rgba(255,255,255,0.06)",
+        backdropFilter: "blur(20px) saturate(140%)",
+        WebkitBackdropFilter: "blur(20px) saturate(140%)",
+        border: "1px solid rgba(255,255,255,0.10)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
       }}
     >
       <div
@@ -475,10 +487,10 @@ export default function ClasesPage() {
                 type="button"
                 onClick={() => setSelectedSlug(slug)}
                 style={{
-                  border: active ? "none" : "1px solid rgba(255,255,255,0.10)",
+                  border: `1px solid ${active ? "rgba(78,205,196,0.40)" : "rgba(255,255,255,0.12)"}`,
                   borderRadius: "999px",
-                  background: active ? "#4ECDC4" : "rgba(255,255,255,0.06)",
-                  color: active ? "#1A1A2E" : "rgba(255,255,255,0.65)",
+                  background: active ? "rgba(78,205,196,0.15)" : "rgba(255,255,255,0.07)",
+                  color: active ? "#4ECDC4" : "rgba(255,255,255,0.55)",
                   padding: "9px 16px",
                   fontSize: "13px",
                   fontWeight: 700,
@@ -523,10 +535,10 @@ export default function ClasesPage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
-                background: "rgba(255,255,255,0.06)",
+                background: "rgba(255,255,255,0.07)",
                 borderRadius: "999px",
                 padding: "5px 12px 5px 8px",
-                border: "1px solid rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.12)",
                 marginBottom: "16px",
               }}
             >
@@ -553,7 +565,7 @@ export default function ClasesPage() {
   return (
     <div
       style={{
-        background: "#1A1A2E",
+        background: "#0D0D1A",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
@@ -561,8 +573,10 @@ export default function ClasesPage() {
         position: "relative",
       }}
     >
-      {/* Ambient glow */}
-      <div style={{ position: "fixed", top: -160, right: -100, width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(78,205,196,0.09) 0%, rgba(78,205,196,0) 60%)", pointerEvents: "none", zIndex: 0 }} />
+      {/* Teal glow — top left */}
+      <div style={{ position: "fixed", top: -120, left: -100, width: 360, height: 360, borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: "radial-gradient(circle, rgba(78,205,196,0.20) 0%, rgba(78,205,196,0) 68%)", filter: "blur(8px)" }} />
+      {/* Red glow — bottom right */}
+      <div style={{ position: "fixed", bottom: 40, right: -120, width: 340, height: 340, borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: "radial-gradient(circle, rgba(230,57,70,0.13) 0%, rgba(230,57,70,0) 70%)", filter: "blur(8px)" }} />
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", minHeight: "100%" }}>
 
       {/* Header */}

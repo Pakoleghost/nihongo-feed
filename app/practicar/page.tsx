@@ -31,7 +31,7 @@ export default function PracticarPage() {
   return (
     <div
       style={{
-        background: "#1A1A2E",
+        background: "#0D0D1A",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
@@ -39,8 +39,10 @@ export default function PracticarPage() {
         position: "relative",
       }}
     >
-      {/* Ambient teal glow — same as home page */}
-      <div style={{ position: "fixed", top: -160, left: -100, width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(78,205,196,0.10) 0%, rgba(78,205,196,0) 60%)", pointerEvents: "none", zIndex: 0 }} />
+      {/* Teal glow — top left */}
+      <div style={{ position: "fixed", top: -120, left: -100, width: 360, height: 360, borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: "radial-gradient(circle, rgba(78,205,196,0.20) 0%, rgba(78,205,196,0) 68%)", filter: "blur(8px)" }} />
+      {/* Red glow — bottom right */}
+      <div style={{ position: "fixed", bottom: 40, right: -120, width: 340, height: 340, borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: "radial-gradient(circle, rgba(230,57,70,0.13) 0%, rgba(230,57,70,0) 70%)", filter: "blur(8px)" }} />
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", flex: 1 }}>
       <h1
         style={{
@@ -72,12 +74,15 @@ export default function PracticarPage() {
           href="/kana"
           style={{
             position: "relative",
-            background: "#1E2235",
+            background: "rgba(255,255,255,0.06)",
             borderRadius: "14px",
             padding: "20px 20px 22px",
             display: "block",
             textDecoration: "none",
-            border: "1px solid rgba(255,255,255,0.06)",
+            backdropFilter: "blur(20px) saturate(140%)",
+            WebkitBackdropFilter: "blur(20px) saturate(140%)",
+            border: "1px solid rgba(255,255,255,0.10)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
             overflow: "hidden",
           }}
         >
@@ -99,15 +104,15 @@ export default function PracticarPage() {
           {/* Progress bar */}
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <span style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              <span style={{ fontSize: "10px", fontWeight: 800, color: "rgba(255,255,255,0.38)", textTransform: "uppercase", letterSpacing: "0.15em" }}>
                 Dominados
               </span>
               <span style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.6)" }}>
                 {kanaDominados ?? "—"} / {TOTAL_KANA}
               </span>
             </div>
-            <div style={{ height: 4, background: "rgba(255,255,255,0.1)", borderRadius: 999 }}>
-              <div style={{ height: "100%", width: `${kanaDominados !== null ? Math.min(100, (kanaDominados / TOTAL_KANA) * 100) : 0}%`, background: "#4ECDC4", borderRadius: 999, transition: "width 0.4s ease" }} />
+            <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 999 }}>
+              <div style={{ height: "100%", width: `${kanaDominados !== null ? Math.min(100, (kanaDominados / TOTAL_KANA) * 100) : 0}%`, background: "linear-gradient(90deg, #4ECDC4, #38B0A7)", boxShadow: "0 0 8px rgba(78,205,196,0.4)", borderRadius: 999, transition: "width 0.4s ease" }} />
             </div>
           </div>
         </Link>
@@ -117,12 +122,15 @@ export default function PracticarPage() {
           href="/practicar/vocabulario"
           style={{
             position: "relative",
-            background: "#1E2235",
+            background: "rgba(255,255,255,0.06)",
             borderRadius: "14px",
             padding: "20px 20px 22px",
             display: "block",
             textDecoration: "none",
-            border: "1px solid rgba(255,255,255,0.06)",
+            backdropFilter: "blur(20px) saturate(140%)",
+            WebkitBackdropFilter: "blur(20px) saturate(140%)",
+            border: "1px solid rgba(255,255,255,0.10)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
             overflow: "hidden",
           }}
         >
@@ -206,7 +214,7 @@ export default function PracticarPage() {
             <div
               style={{
                 height: 4,
-                background: "rgba(255,255,255,0.10)",
+                background: "rgba(255,255,255,0.08)",
                 borderRadius: 999,
                 overflow: "hidden",
               }}
@@ -215,7 +223,8 @@ export default function PracticarPage() {
                 style={{
                   height: "100%",
                   width: `${vocabPct}%`,
-                  background: "#4ECDC4",
+                  background: "linear-gradient(90deg, #4ECDC4, #38B0A7)",
+                  boxShadow: "0 0 8px rgba(78,205,196,0.4)",
                   borderRadius: 999,
                   transition: "width 0.6s ease",
                 }}
@@ -229,12 +238,15 @@ export default function PracticarPage() {
           href="/practicar/kanji"
           style={{
             position: "relative",
-            background: "#1E2235",
+            background: "rgba(255,255,255,0.06)",
             borderRadius: "14px",
             padding: "20px 20px 22px",
             display: "block",
             textDecoration: "none",
-            border: "1px solid rgba(255,255,255,0.06)",
+            backdropFilter: "blur(20px) saturate(140%)",
+            WebkitBackdropFilter: "blur(20px) saturate(140%)",
+            border: "1px solid rgba(255,255,255,0.10)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
             overflow: "hidden",
           }}
         >
