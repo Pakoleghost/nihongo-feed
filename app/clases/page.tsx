@@ -590,11 +590,11 @@ export default function ClasesPage() {
         <div>
           <h1
             style={{
-              fontSize: "42px",
+              fontSize: "34px",
               fontWeight: 800,
               color: "#FFFFFF",
               margin: 0,
-              lineHeight: 1,
+              lineHeight: 1.05,
             }}
           >
             Clases
