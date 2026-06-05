@@ -30,7 +30,7 @@ export default function PracticarPage() {
   return (
     <div
       style={{
-        background: "#0D0D1A",
+        background: "#1A1A2E",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",

@@ -63,7 +63,7 @@ function ClasesIcon({ color }: { color: string }) {
 
 const tabs = [
   { href: "/",          label: "Comunidad", Icon: HomeIcon,     prefetch: true  },
-  { href: "/practicar", label: "Estudiar",  Icon: EstudiarIcon, prefetch: true  },
+  { href: "/practicar", label: "Practicar",  Icon: EstudiarIcon, prefetch: true  },
   { href: "/recursos",  label: "Recursos",  Icon: RecursosIcon, prefetch: false },
   { href: "/clases",    label: "Clases",    Icon: ClasesIcon,   prefetch: false },
 ] as const;
