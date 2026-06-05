@@ -551,52 +551,19 @@ export default function HomePage() {
       <div style={{ position: "fixed", top: -160, left: -100, width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(78,205,196,0.10) 0%, rgba(78,205,196,0) 60%)", pointerEvents: "none", zIndex: 0 }} />
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", minHeight: "100%" }}>
       {/* ── Header ── */}
-      <div
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 30,
-          padding: "calc(max(env(safe-area-inset-top, 0px), 28px) + 10px) 20px 14px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          background: "linear-gradient(180deg, rgba(13,13,26,0.98) 0%, rgba(13,13,26,0.90) 72%, rgba(13,13,26,0.62) 100%)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          boxShadow: "0 12px 28px rgba(0,0,0,0.18)",
-          backdropFilter: "blur(18px)",
-          WebkitBackdropFilter: "blur(18px)",
-        }}
-      >
-        <div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo-header.png"
-            alt="フィード"
-            height={30}
-            style={{ display: "block", filter: "brightness(0) invert(1)", width: "auto" }}
-          />
-          <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.42)", margin: "4px 0 0", fontWeight: 500 }}>{getGreeting()}</p>
+      <div className="ph">
+        <div className="ph-l">
+          <h1 className="ph-title-jp">フィード</h1>
+          <p className="ph-sub-jp">{getGreeting()}</p>
         </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+        <div className="ph-actions">
           {streak > 0 && (
-            <div
-              style={{
-                background: "rgba(230,57,70,0.10)",
-                borderRadius: "10px",
-                padding: "6px 10px",
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-              }}
-            >
-              <span style={{ fontSize: "14px" }}>🔥</span>
-              <span style={{ fontSize: "14px", fontWeight: 700, color: "#E63946" }}>{streak}</span>
-            </div>
+            <span className="ph-streak">
+              <span>🔥</span>{streak}
+            </span>
           )}
           <Link href="/perfil" style={{ display: "block", flexShrink: 0 }}>
-            <AvatarCircle url={myProfile?.avatar_url ?? null} name={myProfile?.username ?? null} size={38} />
+            <AvatarCircle url={myProfile?.avatar_url ?? null} name={myProfile?.username ?? null} size={44} />
           </Link>
         </div>
       </div>

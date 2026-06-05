@@ -578,30 +578,10 @@ export default function ClasesPage() {
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", minHeight: "100%" }}>
 
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: "12px",
-          padding: "calc(env(safe-area-inset-top, 20px) + 20px) 20px 16px",
-        }}
-      >
-        <div>
-          <h1
-            style={{
-              fontSize: "34px",
-              fontWeight: 800,
-              color: "#FFFFFF",
-              margin: 0,
-              lineHeight: 1.05,
-            }}
-          >
-            Clases
-          </h1>
-          <p style={{ margin: "8px 0 0", fontSize: "14px", color: "rgba(255,255,255,0.42)", lineHeight: 1.35 }}>
-            Grabaciones de sesiones
-          </p>
+      <div className="ph">
+        <div className="ph-l">
+          <h1 className="ph-title">Clases</h1>
+          <p className="ph-sub">Grabaciones de sesiones</p>
         </div>
       </div>
 

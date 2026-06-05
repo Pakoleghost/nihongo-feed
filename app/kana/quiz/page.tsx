@@ -691,7 +691,7 @@ function QuizContent() {
 
   function handleExit() {
     saveKanaProgress("anon", progressMap);
-    router.push("/kana");
+    router.push("/practicar");
   }
 
   if (!isReady && questions.length === 0) {

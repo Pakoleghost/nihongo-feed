@@ -1,0 +1,250 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
+
+type ApplicationStatus = "pending" | "rejected";
+
+export default function PendingApprovalPage() {
+  const router = useRouter();
+  const [status, setStatus] = useState<ApplicationStatus>("pending");
+  const [checked, setChecked] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  const [userId, setUserId] = useState<string | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+
+  // Auth hydration (local + first load). Use session + auth state changes.
+  useEffect(() => {
+    let alive = true;
+
+    const boot = async () => {
+      const { data } = await supabase.auth.getSession();
+      const uid = data.session?.user?.id ?? null;
+
+      if (!alive) return;
+
+      if (uid) {
+        setUserId(uid);
+        setAuthReady(true);
+        return;
+      }
+
+      // No session on first load.
+      setSessionExpired(true);
+
+      const { data: sub } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
+        const nextUid = session?.user?.id ?? null;
+        if (!alive) return;
+        if (nextUid) {
+          setUserId(nextUid);
+          setSessionExpired(false);
+        }
+        setAuthReady(true);
+      });
+
+      return () => sub.subscription.unsubscribe();
+    };
+
+    const cleanupPromise = boot();
+
+    return () => {
+      alive = false;
+      Promise.resolve(cleanupPromise).then((fn) => (typeof fn === "function" ? fn() : null));
+    };
+  }, []);
+
+  // Check status after auth hydration.
+  useEffect(() => {
+    if (!authReady) return;
+    if (!userId) {
+      setChecked(true);
+      return;
+    }
+
+    const checkStatus = async () => {
+      setChecked(false);
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("is_approved,is_admin,username")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error("profiles read failed", profileError);
+      }
+
+      const username = (profile?.username ?? "").toString().trim();
+
+      if (profile?.is_admin) {
+        window.location.href = "/";
+        return;
+      }
+
+      if (profile?.is_approved) {
+        window.location.href = username ? "/" : "/pick-username";
+        return;
+      }
+
+      const { data: app } = await supabase
+        .from("applications")
+        .select("id,status")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (app?.status === "rejected") {
+        setStatus("rejected");
+        setChecked(true);
+        return;
+      }
+
+      if (app?.status === "approved") {
+        // Fallback: if applications is approved but profiles.approved hasn't propagated yet,
+        // still move the user forward.
+        window.location.href = username ? "/" : "/pick-username";
+        return;
+      }
+
+      // Default: pending (covers none, pending, approved not yet propagated, or missing application row)
+      setStatus("pending");
+      setChecked(true);
+    };
+
+    checkStatus();
+  }, [authReady, userId]);
+
+  // While pending, poll for approval and then send the user into Study (no re-login).
+  useEffect(() => {
+    if (!authReady) return;
+    if (!userId) return;
+    if (status !== "pending") return;
+
+    let alive = true;
+    const tick = async () => {
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("is_approved,is_admin,username")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error("profiles read failed", profileError);
+      }
+
+      const username = (profile?.username ?? "").toString().trim();
+
+      if (!alive) return;
+
+      if (profile?.is_admin) {
+        window.location.href = "/";
+        return;
+      }
+
+      if (profile?.is_approved) {
+        // Keep the session. Just move them into the app.
+        window.location.href = username ? "/" : "/pick-username";
+      }
+
+      const { data: app } = await supabase
+        .from("applications")
+        .select("status")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (app?.status === "approved") {
+        window.location.href = username ? "/" : "/pick-username";
+      }
+    };
+
+    // Run once quickly, then poll.
+    tick();
+    const id = window.setInterval(tick, 4000);
+
+    return () => {
+      alive = false;
+      window.clearInterval(id);
+    };
+  }, [authReady, userId, status]);
+
+  async function goToLogin() {
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
+
+  if (!authReady || (userId && !checked)) {
+    return (
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ maxWidth: 420, textAlign: "center" }}>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Loading…</h1>
+          <p style={{ opacity: 0.7 }}>Please wait.</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (sessionExpired) {
+    return (
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ maxWidth: 420, textAlign: "center" }}>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Session expired</h1>
+          <p style={{ opacity: 0.7 }}>
+            Please log in again to continue.<br />
+            If your application is already approved, you will go straight into Study.
+          </p>
+          <button onClick={goToLogin} style={{ marginTop: 14 }}>
+            Go to login
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (status === "pending") {
+    return (
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ maxWidth: 420, textAlign: "center" }}>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Pending approval</h1>
+          <p style={{ opacity: 0.7 }}>
+            Your application is under review.<br />
+            Once an administrator approves your account, you will be sent into Study automatically.
+          </p>
+          <p style={{ marginTop: 14, fontSize: 12, opacity: 0.5 }}>User: {userId}</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (status === "rejected") {
+    return (
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ maxWidth: 420, textAlign: "center" }}>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Application rejected</h1>
+          <p style={{ opacity: 0.7 }}>
+            Your application was not approved.<br />
+            Please contact an administrator if you believe this is a mistake.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  // Default screen (no form here)
+  return (
+    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+      <div style={{ maxWidth: 420, textAlign: "center" }}>
+        <h1 style={{ fontSize: 22, marginBottom: 12 }}>Pending approval</h1>
+        <p style={{ opacity: 0.7 }}>
+          Your account is under review.<br />
+          Once an administrator approves your account, you will be sent into the app automatically.
+        </p>
+      </div>
+    </main>
+  );
+}

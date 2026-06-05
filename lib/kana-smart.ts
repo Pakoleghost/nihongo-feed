@@ -136,12 +136,16 @@ function getGroupsBefore(group: KanaGroup) {
 }
 
 function getPreviousReviewItems(group: KanaGroup, progress: KanaProgressMap) {
-  return getGroupsBefore(group).flatMap((previousGroup) =>
-    previousGroup.items.filter((item) => {
-      const entry = progress[item.id];
-      if (!isSeen(entry)) return false;
-      return isKanaDue(entry) || entry?.difficult || !isDominated(item, progress);
-    }),
+  const groupsBefore = getGroupsBefore(group);
+  if (groupsBefore.length === 0) return [];
+
+  // Always include ALL seen items from previous groups so the session mixes
+  // old kana in alongside new ones — even dominated (stable) kana should
+  // occasionally appear for reinforcement. The smart session builder will
+  // de-prioritize stable items via bucket ordering, so they fill slots only
+  // after due/weak/learning items.
+  return groupsBefore.flatMap((previousGroup) =>
+    previousGroup.items.filter((item) => isSeen(progress[item.id])),
   );
 }
 
@@ -389,6 +393,8 @@ export function getKanaSmartRecommendation(
     };
   }
 
+  // All kana are dominated — general review across everything seen
+  const allSeenIds = KANA_ITEMS.filter((item) => isSeen(progress[item.id])).map((item) => item.id);
   const fallbackGroup = KANA_GROUPS[0];
   const preview = fallbackGroup.items.slice(0, 5).map((i) => i.kana).join("  ");
   return {
@@ -399,7 +405,7 @@ export function getKanaSmartRecommendation(
     chips: [`${counts.vistos} vistos`, `${counts.dominados} dominados`],
     contextPrimary: fallbackGroup.primary,
     contextSecondary: fallbackGroup.secondary ?? "",
-    focusItemIds: fallbackGroup.items.map((item) => item.id),
-    itemIds: buildRecommendationItemIds(fallbackGroup, progress),
+    focusItemIds: allSeenIds,
+    itemIds: allSeenIds,
   };
 }

@@ -40,8 +40,6 @@ export default function PracticarPage() {
 
   useEffect(() => {
     setLastActivity("Practicar", "/practicar");
-    document.body.classList.add("in-session");
-    return () => document.body.classList.remove("in-session");
   }, []);
 
   function pickType(id: TypeId) {
@@ -176,11 +174,10 @@ export default function PracticarPage() {
         </div>
       </div>
 
-      {/* Start button — fixed at bottom, above nav */}
+      {/* Start button — fixed at bottom, above nav pill (~80px) */}
       <div style={{
-        position: "fixed", bottom: 0, left: 0, right: 0,
-        padding: "16px 20px",
-        paddingBottom: "max(20px, env(safe-area-inset-bottom, 20px))",
+        position: "fixed", bottom: "max(80px, calc(env(safe-area-inset-bottom, 0px) + 76px))", left: 0, right: 0,
+        padding: "16px 20px 0",
         background: "linear-gradient(to top, #0D0D1A 65%, transparent)",
         pointerEvents: "none",
       }}>

@@ -1,0 +1,443 @@
+/* Design system foundation */
+
+:root{
+  /* spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+
+  /* typography */
+  --text-display: clamp(2rem, 4vw, 3.25rem);
+  --text-h1: 2rem;
+  --text-h2: 1.5rem;
+  --text-h3: 1.125rem;
+  --text-body-lg: 1rem;
+  --text-body: 0.9375rem;
+  --text-body-sm: 0.8125rem;
+  --text-label: 0.75rem;
+
+  /* colors */
+  --color-primary: #1A1A2E;
+  --color-primary-strong: #111122;
+  --color-accent: #4ECDC4;
+  --color-accent-strong: #E63946;
+  --color-accent-soft: rgba(78, 205, 196, 0.22);
+  --color-highlight-soft: rgba(230, 57, 70, 0.16);
+  --color-bg: #FFF8E7;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #FFF5E6;
+  --color-text: #1A1A2E;
+  --color-text-muted: #53596B;
+  --color-border: rgba(26, 26, 46, 0.14);
+  --color-border-strong: rgba(26, 26, 46, 0.22);
+  --color-focus: rgba(78, 205, 196, 0.34);
+
+  /* primitives */
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --shadow-card: 0 14px 30px rgba(26, 26, 46, 0.07);
+  --shadow-raised: 0 20px 38px rgba(26, 26, 46, 0.1);
+  --container-max: 760px;
+  --page-padding: 16px;
+  --app-sticky-offset: 88px;
+
+  /* legacy aliases kept for old pages */
+  --bg: var(--color-bg);
+  --card: var(--color-surface);
+  --ink: var(--color-text);
+  --muted: var(--color-text-muted);
+  --line: var(--color-border);
+  --shadow: var(--shadow-card);
+  --radius: var(--radius-md);
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+html {
+  scroll-padding-top: var(--app-sticky-offset);
+}
+
+body{
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--ink);
+  font-family: var(--font-latin), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
+  letter-spacing: 0.01em;
+  font-size: var(--text-body);
+  line-height: 1.55;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  color: var(--color-text);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+h1 { font-size: var(--text-h1); font-weight: 800; }
+h2 { font-size: var(--text-h2); font-weight: 800; }
+h3 { font-size: var(--text-h3); font-weight: 700; }
+
+p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, var(--color-text-muted) 82%, transparent);
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+button:focus-visible,
+a:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-primary));
+  box-shadow: 0 0 0 4px var(--color-focus);
+}
+
+.ds-container {
+  width: min(100%, var(--container-max));
+  margin: 0 auto;
+  padding-left: var(--page-padding);
+  padding-right: var(--page-padding);
+}
+
+.ds-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.ds-btn,
+.ds-btn-secondary,
+.ds-btn-ghost {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  text-decoration: none;
+  font-size: var(--text-body-sm);
+  font-weight: 700;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+}
+
+.ds-btn {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-bg);
+}
+
+.ds-btn:hover {
+  background: var(--color-primary-strong);
+  border-color: var(--color-primary-strong);
+  box-shadow: 0 8px 18px rgba(26, 26, 46, 0.16);
+}
+
+.ds-btn:active {
+  transform: translateY(1px);
+}
+
+.ds-btn-secondary {
+  background: var(--color-surface);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.ds-btn-secondary:hover {
+  background: color-mix(in srgb, var(--color-surface-muted) 86%, white);
+  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border-strong));
+}
+
+.ds-btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-text);
+}
+
+.ds-btn-ghost:hover {
+  background: var(--color-accent-soft);
+}
+
+
+.appTopNav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding-top: var(--space-2);
+}
+
+.appTopNav.studyTone {
+  padding-top: 8px;
+  padding-bottom: 0;
+  background: color-mix(in srgb, var(--color-bg) 96%, white);
+}
+
+.appTopNavInner {
+  position: relative;
+}
+
+.appTopNavBar {
+  min-height: 56px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  background: color-mix(in srgb, var(--color-bg) 84%, white);
+  backdrop-filter: blur(10px);
+  border-color: color-mix(in srgb, var(--color-border) 86%, var(--color-accent) 14%);
+  box-shadow: none;
+}
+
+.appTopNavBar.studyTone {
+  min-height: 40px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.appNavBrand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: var(--color-text);
+}
+
+.appTopNav.studyTone .appNavBrand {
+  font-family: var(--font-study), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
+  font-size: 0.94rem;
+  letter-spacing: -0.03em;
+}
+
+.appNavMark {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-accent-strong);
+  flex-shrink: 0;
+}
+
+.appPrimaryNav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.appNavLink,
+.appMenuButton,
+.appMenuItem {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-body-sm);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.appTopNav.studyTone .appNavLink,
+.appTopNav.studyTone .appMenuButton {
+  font-family: var(--font-study), var(--font-noto-sans-jp), ui-sans-serif, system-ui, -apple-system,
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
+  min-height: 30px;
+  padding: 0 9px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 0;
+}
+
+.appTopNav.studyTone .appNavLink:not(.active),
+.appTopNav.studyTone .appMenuButton:not(.active) {
+  color: color-mix(in srgb, var(--color-text) 76%, transparent);
+}
+
+.appTopNav.studyTone .appNavLink:hover,
+.appTopNav.studyTone .appMenuButton:hover {
+  background: rgba(26, 26, 46, 0.05);
+}
+
+.appTopNav.studyTone .appNavLink.active,
+.appTopNav.studyTone .appMenuButton.active {
+  background: rgba(230, 57, 70, 0.12);
+  border-color: transparent;
+  color: var(--color-accent-strong);
+}
+
+.appNavLink:hover,
+.appMenuButton:hover,
+.appMenuItem:hover {
+  background: var(--color-surface-muted);
+}
+
+.appNavLink.active,
+.appMenuButton.active,
+.appMenuItem.active {
+  background: var(--color-highlight-soft);
+  border-color: color-mix(in srgb, var(--color-accent-strong) 24%, var(--color-border));
+  color: var(--color-accent-strong);
+}
+
+.appMenuBackdrop {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  background: transparent;
+}
+
+.appMenuPanel {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: var(--page-padding);
+  min-width: 220px;
+  padding: var(--space-2);
+  display: grid;
+  gap: 4px;
+}
+
+.appTopNav.studyTone .appMenuPanel {
+  top: calc(100% + 6px);
+}
+
+.appMenuItem {
+  width: 100%;
+  justify-content: flex-start;
+  background: transparent;
+}
+
+@media (max-width: 640px) {
+  .appTopNavBar {
+    min-height: 52px;
+    padding: 7px 8px;
+  }
+
+  .appTopNavBar.studyTone {
+    min-height: 38px;
+    padding: 0;
+  }
+
+  .appPrimaryNav {
+    gap: 6px;
+  }
+
+  .appNavLink,
+  .appMenuButton,
+  .appMenuItem {
+    min-height: 34px;
+    padding: 0 11px;
+  }
+
+  .appNavBrand {
+    font-size: 0.98rem;
+  }
+
+  .appTopNav.studyTone {
+    padding-top: 6px;
+  }
+}
+
+.ds-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.commentInput{
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fbfbfc;
+  outline: none;
+  font-size: 13px;
+}
+.commentInput:focus{
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(60, 120, 255, .10);
+  border-color: rgba(60, 120, 255, .25);
+}
+
+.miniPost{
+  padding: 9px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(17,17,20,.12);
+  background: #111114;
+  color: #fff;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+}
+.miniPost:disabled{ opacity: .45; cursor: not-allowed; }

@@ -272,54 +272,23 @@ export default function RecursosPage() {
       <div style={{ position: "fixed", bottom: 40, right: -120, width: 340, height: 340, borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: "radial-gradient(circle, rgba(230,57,70,0.13) 0%, rgba(230,57,70,0) 70%)", filter: "blur(8px)" }} />
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", minHeight: "100%" }}>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: "12px",
-          padding: "calc(env(safe-area-inset-top, 20px) + 20px) 20px 16px",
-        }}
-      >
-        <div>
-          <h1
-            style={{
-              fontSize: "34px",
-              fontWeight: 800,
-              color: "#FFFFFF",
-              margin: 0,
-              lineHeight: 1.05,
-            }}
-          >
-            Recursos
-          </h1>
-          <p style={{ margin: "8px 0 0", fontSize: "14px", color: "rgba(255,255,255,0.42)", lineHeight: 1.35 }}>
-            Materiales del curso
-          </p>
+      <div className="ph">
+        <div className="ph-l">
+          <h1 className="ph-title">Recursos</h1>
+          <p className="ph-sub">Materiales del curso</p>
         </div>
-
-        {effectiveIsAdmin ? (
-          <button
-            type="button"
-            onClick={() => setShowAdminPanel((value) => !value)}
-            style={{
-              border: "1px solid rgba(255,255,255,0.14)",
-              borderRadius: "12px",
-              background: "rgba(255,255,255,0.08)",
-              color: "rgba(255,255,255,0.80)",
-              padding: "8px 14px",
-              fontSize: "13px",
-              fontWeight: 700,
-              cursor: "pointer",
-              flexShrink: 0,
-              marginTop: "8px",
-              backdropFilter: "blur(10px)",
-              WebkitBackdropFilter: "blur(10px)",
-            }}
-          >
-            {showAdminPanel ? "Cerrar" : "Agregar"}
-          </button>
-        ) : null}
+        {effectiveIsAdmin && (
+          <div className="ph-actions">
+            <button type="button" className="ph-btn" onClick={() => setShowAdminPanel((v) => !v)}>
+              <span className="ph-btn-teal">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"/>
+                </svg>
+              </span>
+              {showAdminPanel ? "Cerrar" : "Agregar"}
+            </button>
+          </div>
+        )}
       </div>
 
       <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: "18px" }}>

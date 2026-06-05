@@ -118,7 +118,7 @@ export default function ResultadosPage() {
       }}
     >
       <button
-        onClick={() => router.push("/kana")}
+        onClick={() => router.push("/practicar")}
         style={{
           background: "none",
           border: "none",
@@ -323,7 +323,7 @@ export default function ResultadosPage() {
           Seguir con Smart
         </button>
         <button
-          onClick={() => router.push("/kana")}
+          onClick={() => router.push("/practicar")}
           style={{
             width: "100%",
             padding: "14px",

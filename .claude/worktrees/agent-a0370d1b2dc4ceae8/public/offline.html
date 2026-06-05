@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sin conexión — Nihongo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #FFF8E7;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .logo {
+      font-size: 96px;
+      line-height: 1;
+      color: #E63946;
+      font-weight: 800;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1A1A2E;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    p {
+      font-size: 16px;
+      color: #53596B;
+      text-align: center;
+      line-height: 1.6;
+      max-width: 300px;
+      margin-bottom: 40px;
+    }
+    button {
+      background: #E63946;
+      color: #ffffff;
+      border: none;
+      border-radius: 999px;
+      padding: 16px 40px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(230, 57, 70, 0.3);
+    }
+    button:active { opacity: 0.85; }
+  </style>
+</head>
+<body>
+  <div class="logo">あ</div>
+  <h1>Sin conexión</h1>
+  <p>Puedes seguir practicando Kana, Flashcards y Vocab sin internet una vez que hayas cargado la app al menos una vez.</p>
+  <button onclick="window.location.reload()">Reintentar</button>
+</body>
+</html>
