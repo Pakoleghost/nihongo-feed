@@ -115,32 +115,35 @@ export default function BottomNav() {
               prefetch={prefetch}
               style={{
                 display: "flex",
-                flexDirection: isActive ? "row" : "column",
+                flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: isActive ? "8px" : "0",
+                gap: "8px",
                 textDecoration: "none",
                 padding: isActive ? "10px 18px" : "10px 14px",
                 borderRadius: "14px",
                 background: isActive ? "#E63946" : "transparent",
-                boxShadow: isActive ? "0 8px 20px rgba(230,57,70,0.28)" : "none",
-                minWidth: isActive ? "auto" : "50px",
-                transition: "background 0.15s, box-shadow 0.15s",
+                boxShadow: isActive ? "0 6px 18px rgba(230,57,70,0.38)" : "none",
+                transition: "background 0.22s ease, box-shadow 0.22s ease, padding 0.22s ease",
+                overflow: "hidden",
               }}
             >
               <Icon color={color} />
-              {isActive && (
-                <span
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    color,
-                    lineHeight: 1,
-                  }}
-                >
-                  {label}
-                </span>
-              )}
+              <span
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 800,
+                  color: "#fff",
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                  maxWidth: isActive ? "80px" : "0px",
+                  opacity: isActive ? 1 : 0,
+                  overflow: "hidden",
+                  transition: "max-width 0.22s ease, opacity 0.18s ease",
+                }}
+              >
+                {label}
+              </span>
             </Link>
           );
         })}
