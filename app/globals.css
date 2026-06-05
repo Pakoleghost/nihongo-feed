@@ -630,6 +630,12 @@ body::after {
   overflow: hidden;
   overscroll-behavior: contain;
 }
+/* Hide bottom nav during practice sessions */
+.sesh-layout ~ * .bottom-nav-wrap,
+body:has(.sesh-layout) .bottom-nav-wrap {
+  display: none;
+}
+
 .sesh-inner {
   width: 100%;
   max-width: 760px;
@@ -638,7 +644,7 @@ body::after {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding-bottom: max(24px, env(safe-area-inset-bottom, 24px));
+  padding-bottom: max(32px, env(safe-area-inset-bottom, 32px));
 }
 
 /* Session header */

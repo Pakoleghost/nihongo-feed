@@ -1,297 +1,198 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { setLastActivity } from "@/lib/streak";
-import { loadVocabProgress } from "@/lib/vocab-progress";
-import { loadKanaProgress, getKanaStateCounts } from "@/lib/kana-progress";
-import { KANA_ITEMS } from "@/lib/kana-data";
-import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 
-const TOTAL_VOCAB = Object.values(GENKI_VOCAB_BY_LESSON).flat().length;
+type TypeId = "kana" | "vocab" | "kanji" | "repaso";
+
+const TYPES = [
+  { id: "kana"   as TypeId, glyph: "あ", name: "Kana",        desc: "Hiragana y katakana → romaji", accent: "#E63946", accentBg: "rgba(230,57,70,0.14)" },
+  { id: "vocab"  as TypeId, glyph: "語", name: "Vocabulario", desc: "Palabra → significado",         accent: "#4ECDC4", accentBg: "rgba(78,205,196,0.14)" },
+  { id: "kanji"  as TypeId, glyph: "字", name: "Kanji",       desc: "Kanji → lectura",               accent: "#4ECDC4", accentBg: "rgba(78,205,196,0.14)" },
+  { id: "repaso" as TypeId, glyph: "復", name: "Repaso",      desc: "Flashcards con memoria · SRS",  accent: "#4ECDC4", accentBg: "rgba(78,205,196,0.14)" },
+];
+
+const KANA_FILTERS = [
+  { key: "hiragana", label: "Hiragana" },
+  { key: "katakana", label: "Katakana" },
+  { key: "ambos",    label: "Ambos" },
+];
+
+const LESSON_FILTERS = ["Todas","L1","L2","L3","L4","L5","L6","L7","L8","L9","L10","L11","L12"];
+
+const DEFAULTS: Record<TypeId, { filter: string; count: number; max: number }> = {
+  kana:   { filter: "hiragana", count: 10, max: 46 },
+  vocab:  { filter: "Todas",    count: 10, max: 66 },
+  kanji:  { filter: "Todas",    count: 10, max: 48 },
+  repaso: { filter: "Todas",    count: 8,  max: 30 },
+};
 
 export default function PracticarPage() {
-  const [vocabReviewed, setVocabReviewed] = useState<number | null>(null);
-  const [kanaDominados, setKanaDominados] = useState<number | null>(null);
-  const TOTAL_KANA = KANA_ITEMS.length;
+  const router = useRouter();
+  const [typeId, setTypeId] = useState<TypeId>("kana");
+  const [filter, setFilter] = useState("hiragana");
+  const [count, setCount] = useState(10);
 
-  useEffect(() => {
-    setLastActivity("Practicar", "/practicar");
-    const vocabProgress = loadVocabProgress("anon");
-    setVocabReviewed(Object.keys(vocabProgress).length);
-    const kanaProgress = loadKanaProgress("anon");
-    const counts = getKanaStateCounts(KANA_ITEMS, kanaProgress);
-    setKanaDominados(counts.fijado + counts.quemado);
-  }, []);
+  const cfg = DEFAULTS[typeId];
+  const type = TYPES.find((t) => t.id === typeId)!;
+  const estMin = Math.max(1, Math.round((count * (typeId === "repaso" ? 9 : 7)) / 60));
 
-  const vocabPct =
-    vocabReviewed !== null ? Math.min(100, (vocabReviewed / TOTAL_VOCAB) * 100) : 0;
+  useEffect(() => { setLastActivity("Practicar", "/practicar"); }, []);
+
+  function pickType(id: TypeId) {
+    setTypeId(id);
+    setFilter(DEFAULTS[id].filter);
+    setCount(Math.min(count, DEFAULTS[id].max));
+  }
+
+  function start() {
+    if (typeId === "kana") {
+      const sets = filter === "ambos" ? "hiragana,katakana" : filter;
+      router.push(`/kana/quiz?mode=libre&sets=${sets}&count=${count}&taskMode=mixed`);
+    } else if (typeId === "vocab") {
+      const lesson = filter === "Todas" ? 1 : parseInt(filter.replace("L", ""));
+      router.push(`/practicar/vocabulario/practicar?lesson=${lesson}`);
+    } else if (typeId === "kanji") {
+      const lesson = filter === "Todas" ? 3 : parseInt(filter.replace("L", ""));
+      router.push(`/practicar/kanji/practicar?lesson=${lesson}`);
+    } else {
+      const lesson = filter === "Todas" ? 1 : parseInt(filter.replace("L", ""));
+      router.push(`/practicar/vocabulario/flashcards?lesson=${lesson}`);
+    }
+  }
+
+  const chipFilters = typeId === "kana"
+    ? KANA_FILTERS
+    : LESSON_FILTERS.map((f) => ({ key: f, label: f }));
 
   return (
-    <div
-      style={{
-        background: "#1A1A2E",
-        minHeight: "100dvh",
-        display: "flex",
-        flexDirection: "column",
-        padding: "calc(env(safe-area-inset-top, 20px) + 24px) 20px calc(100px + env(safe-area-inset-bottom, 0px))",
-        position: "relative",
-      }}
-    >
-      {/* Teal glow — top left */}
-      <div style={{ position: "fixed", top: -120, left: -100, width: 360, height: 360, borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: "radial-gradient(circle, rgba(78,205,196,0.20) 0%, rgba(78,205,196,0) 68%)", filter: "blur(8px)" }} />
-      {/* Red glow — bottom right */}
-      <div style={{ position: "fixed", bottom: 40, right: -120, width: 340, height: 340, borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: "radial-gradient(circle, rgba(230,57,70,0.13) 0%, rgba(230,57,70,0) 70%)", filter: "blur(8px)" }} />
-      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", flex: 1 }}>
-      <h1
-        style={{
-          fontSize: "42px",
-          fontWeight: 800,
-          color: "#FFFFFF",
-          margin: 0,
-          lineHeight: 1,
-          letterSpacing: "-0.04em",
-        }}
-      >
-        Practicar
-      </h1>
-      <p
-        style={{
-          fontSize: "14px",
-          color: "rgba(255,255,255,0.42)",
-          margin: "8px 0 24px",
-          lineHeight: 1.4,
-        }}
-      >
-        Pon a prueba lo que aprendes.
-      </p>
+    <div className="sesh-layout" style={{ overflowY: "auto" }}>
+      <div style={{ flex: 1, paddingBottom: 120, maxWidth: 760, width: "100%", margin: "0 auto" }}>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {/* Title */}
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ fontSize: 34, fontWeight: 800, color: "#F4F4F8", letterSpacing: -0.5, lineHeight: 1.05 }}>Practicar</div>
+          <div style={{ fontSize: 15, fontWeight: 500, color: "rgba(244,244,248,0.56)", marginTop: 4 }}>Arma tu sesión y empieza cuando quieras.</div>
+        </div>
 
-        {/* ── Kana ── */}
-        <Link
-          href="/kana"
-          style={{
-            position: "relative",
-            background: "rgba(255,255,255,0.06)",
-            borderRadius: "14px",
-            padding: "20px 20px 22px",
-            display: "block",
-            textDecoration: "none",
-            backdropFilter: "blur(20px) saturate(140%)",
-            WebkitBackdropFilter: "blur(20px) saturate(140%)",
-            border: "1px solid rgba(255,255,255,0.10)",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
-            overflow: "hidden",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: "20px", fontWeight: 800, color: "#FFFFFF", margin: 0, lineHeight: 1.1, letterSpacing: "-0.03em" }}>
-                Kana
-              </p>
-              <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", margin: "5px 0 0", lineHeight: 1.35 }}>
-                Hiragana · Katakana · Smart SRS
-              </p>
-            </div>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: "#E63946", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <svg width="16" height="11" viewBox="0 0 18 12" fill="none">
-                <path d="M1 6h15m0 0l-5-5m5 5l-5 5" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
+        {/* Type cards 2×2 */}
+        <div style={{ marginBottom: 26 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "1.4px", textTransform: "uppercase", color: "rgba(244,244,248,0.34)", marginBottom: 12 }}>
+            Tipo de práctica
           </div>
-          {/* Progress bar */}
-          <div style={{ marginTop: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <span style={{ fontSize: "10px", fontWeight: 800, color: "rgba(255,255,255,0.38)", textTransform: "uppercase", letterSpacing: "0.15em" }}>
-                Dominados
-              </span>
-              <span style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.6)" }}>
-                {kanaDominados ?? "—"} / {TOTAL_KANA}
-              </span>
-            </div>
-            <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 999 }}>
-              <div style={{ height: "100%", width: `${kanaDominados !== null ? Math.min(100, (kanaDominados / TOTAL_KANA) * 100) : 0}%`, background: "linear-gradient(90deg, #4ECDC4, #38B0A7)", boxShadow: "0 0 8px rgba(78,205,196,0.4)", borderRadius: 999, transition: "width 0.4s ease" }} />
-            </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {TYPES.map((t) => {
+              const active = typeId === t.id;
+              return (
+                <button key={t.id} onClick={() => pickType(t.id)} style={{
+                  cursor: "pointer", borderRadius: 20, padding: "16px 14px", textAlign: "left",
+                  background: active ? t.accentBg : "rgba(255,255,255,0.06)",
+                  border: `1.5px solid ${active ? t.accent : "rgba(255,255,255,0.09)"}`,
+                  display: "flex", flexDirection: "column", gap: 8,
+                  transition: "border-color .15s, background .15s",
+                }}>
+                  <span style={{ fontFamily: "var(--font-noto-serif-jp), serif", fontSize: 28, fontWeight: 600, color: t.accent, lineHeight: 1 }}>
+                    {t.glyph}
+                  </span>
+                  <div>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: "#F4F4F8" }}>{t.name}</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(244,244,248,0.56)", lineHeight: 1.3, marginTop: 2 }}>{t.desc}</div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
-        </Link>
+        </div>
 
-        {/* ── Vocabulario ── */}
-        <Link
-          href="/practicar/vocabulario"
-          style={{
-            position: "relative",
-            background: "rgba(255,255,255,0.06)",
-            borderRadius: "14px",
-            padding: "20px 20px 22px",
-            display: "block",
-            textDecoration: "none",
-            backdropFilter: "blur(20px) saturate(140%)",
-            WebkitBackdropFilter: "blur(20px) saturate(140%)",
-            border: "1px solid rgba(255,255,255,0.10)",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
-            overflow: "hidden",
-          }}
-        >
-          {/* Corner fold */}
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              width: 40,
-              height: 40,
-              background: "#E63946",
-              borderBottomLeftRadius: 40,
-            }}
-          />
-
-          <div style={{ paddingRight: 48 }}>
-            <p
-              style={{
-                fontSize: "20px",
-                fontWeight: 800,
-                color: "#FFFFFF",
-                margin: 0,
-                lineHeight: 1.1,
-                letterSpacing: "-0.03em",
-              }}
-            >
-              Vocabulario
-            </p>
-            <p
-              style={{
-                fontSize: "13px",
-                color: "rgba(255,255,255,0.42)",
-                margin: "5px 0 0",
-                lineHeight: 1.35,
-              }}
-            >
-              Genki I · lecciones 3–23
-            </p>
+        {/* Filter chips */}
+        <div style={{ marginBottom: 26 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "1.4px", textTransform: "uppercase", color: "rgba(244,244,248,0.34)", marginBottom: 12 }}>
+            {typeId === "kana" ? "Silabario" : "Lección"}
           </div>
+          <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4, marginLeft: -20, marginRight: -20, paddingLeft: 20, paddingRight: 20, scrollbarWidth: "none" }}>
+            {chipFilters.map(({ key, label }) => {
+              const active = filter === key;
+              return (
+                <button key={key} onClick={() => setFilter(key)} style={{
+                  flexShrink: 0, cursor: "pointer", borderRadius: 999, padding: "10px 18px",
+                  fontSize: 15, fontWeight: 700, whiteSpace: "nowrap", fontFamily: "inherit",
+                  background: active ? type.accentBg : "rgba(255,255,255,0.06)",
+                  border: `1.5px solid ${active ? type.accent : "rgba(255,255,255,0.09)"}`,
+                  color: active ? "#F4F4F8" : "rgba(244,244,248,0.56)",
+                  transition: "background .15s, border-color .15s, color .15s",
+                }}>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-          {/* Progress section */}
-          <div style={{ marginTop: 16 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 6,
-              }}
-            >
-              <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.42)" }}>
-                {vocabReviewed !== null ? (
-                  <>
-                    <span style={{ fontWeight: 700, color: "#FFFFFF" }}>
-                      {vocabReviewed}
-                    </span>
-                    {" de "}
-                    <span style={{ fontWeight: 700, color: "#FFFFFF" }}>
-                      {TOTAL_VOCAB}
-                    </span>
-                    {" palabras practicadas"}
-                  </>
-                ) : (
-                  "Cargando…"
-                )}
-              </span>
-              <span
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  color: "#4ECDC4",
-                  letterSpacing: "0.04em",
-                }}
-              >
-                {vocabReviewed !== null ? `${Math.round(vocabPct)}%` : "—"}
-              </span>
+        {/* Stepper */}
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "1.4px", textTransform: "uppercase", color: "rgba(244,244,248,0.34)", marginBottom: 12 }}>
+            {typeId === "repaso" ? "Tarjetas por sesión" : "Número de ítems"}
+          </div>
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14,
+            borderRadius: 22, padding: "18px",
+            background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.07)",
+            backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+          }}>
+            <button onClick={() => setCount((c) => Math.max(3, c - 1))} disabled={count <= 3} style={{
+              width: 52, height: 52, flexShrink: 0, borderRadius: "50%",
+              border: "1px solid rgba(255,255,255,0.09)",
+              background: "rgba(255,255,255,0.09)",
+              cursor: count <= 3 ? "not-allowed" : "pointer",
+              fontSize: 26, fontWeight: 700,
+              color: count <= 3 ? "rgba(244,244,248,0.2)" : "#F4F4F8",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>−</button>
+
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 52, fontWeight: 800, color: "#F4F4F8", letterSpacing: -1, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                {count}
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(244,244,248,0.56)", marginTop: 4 }}>
+                {count} de {cfg.max} · ~{estMin} min
+              </div>
             </div>
 
-            {/* Progress bar */}
-            <div
-              style={{
-                height: 4,
-                background: "rgba(255,255,255,0.08)",
-                borderRadius: 999,
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  height: "100%",
-                  width: `${vocabPct}%`,
-                  background: "linear-gradient(90deg, #4ECDC4, #38B0A7)",
-                  boxShadow: "0 0 8px rgba(78,205,196,0.4)",
-                  borderRadius: 999,
-                  transition: "width 0.6s ease",
-                }}
-              />
-            </div>
+            <button onClick={() => setCount((c) => Math.min(cfg.max, c + 1))} disabled={count >= cfg.max} style={{
+              width: 52, height: 52, flexShrink: 0, borderRadius: "50%",
+              border: "1px solid rgba(255,255,255,0.09)",
+              background: "rgba(255,255,255,0.09)",
+              cursor: count >= cfg.max ? "not-allowed" : "pointer",
+              fontSize: 26, fontWeight: 700,
+              color: count >= cfg.max ? "rgba(244,244,248,0.2)" : "#F4F4F8",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>+</button>
           </div>
-        </Link>
-
-        {/* ── Kanji ── */}
-        <Link
-          href="/practicar/kanji"
-          style={{
-            position: "relative",
-            background: "rgba(255,255,255,0.06)",
-            borderRadius: "14px",
-            padding: "20px 20px 22px",
-            display: "block",
-            textDecoration: "none",
-            backdropFilter: "blur(20px) saturate(140%)",
-            WebkitBackdropFilter: "blur(20px) saturate(140%)",
-            border: "1px solid rgba(255,255,255,0.10)",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
-            overflow: "hidden",
-          }}
-        >
-          {/* Corner fold */}
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              width: 40,
-              height: 40,
-              background: "#4ECDC4",
-              borderBottomLeftRadius: 40,
-            }}
-          />
-
-          <div style={{ paddingRight: 48 }}>
-            <p
-              style={{
-                fontSize: "20px",
-                fontWeight: 800,
-                color: "#FFFFFF",
-                margin: 0,
-                lineHeight: 1.1,
-                letterSpacing: "-0.03em",
-              }}
-            >
-              Kanji
-            </p>
-            <p
-              style={{
-                fontSize: "13px",
-                color: "rgba(255,255,255,0.42)",
-                margin: "5px 0 0",
-                lineHeight: 1.35,
-              }}
-            >
-              Genki I · lecciones 3–23
-            </p>
-          </div>
-        </Link>
-
-      </div>
+        </div>
       </div>
 
-
+      {/* Start button — fixed at bottom, above nav */}
+      <div style={{
+        position: "fixed", bottom: 0, left: 0, right: 0,
+        padding: "16px 20px",
+        paddingBottom: "max(20px, env(safe-area-inset-bottom, 20px))",
+        background: "linear-gradient(to top, #0D0D1A 65%, transparent)",
+        pointerEvents: "none",
+      }}>
+        <button
+          onClick={start}
+          className="sesh-btn"
+          style={{
+            background: type.accent,
+            color: typeId === "kana" ? "#fff" : "#052B28",
+            boxShadow: `0 10px 30px -8px ${type.accent}99`,
+            pointerEvents: "all",
+          }}
+        >
+          Empezar · {count} {typeId === "repaso" ? "tarjetas" : "ítems"}
+        </button>
+      </div>
     </div>
   );
 }
