@@ -93,16 +93,12 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
 
   if (lessonItems.length === 0) {
     return (
-      <PracticeSessionLayout>
+      <PracticeSessionLayout accent="red">
         <PracticeSessionHeader
-          moduleName="Kanji"
-          lesson={lesson}
-          lessonTitle={lessonTitle}
+          typeLabel="Kanji"
+          lesson={`L${lesson} · ${lessonTitle}`}
           progressCurrent={0}
           progressTotal={0}
-          progressPct={0}
-          accentColor="#E63946"
-          accentSurface="rgba(230,57,70,0.10)"
           onExit={() => router.push(`/practicar/kanji?lesson=${lesson}`)}
         />
       </PracticeSessionLayout>
@@ -110,16 +106,12 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
   }
 
   return (
-    <PracticeSessionLayout>
+    <PracticeSessionLayout accent="red">
       <PracticeSessionHeader
-        moduleName="Kanji"
-        lesson={lesson}
-        lessonTitle={lessonTitle}
-        progressCurrent={currentStudyIndex + 1}
+        typeLabel="Kanji"
+        lesson={`L${lesson} · ${lessonTitle}`}
+        progressCurrent={currentStudyIndex}
         progressTotal={studyItems.length}
-        progressPct={studyProgressPct}
-        accentColor="#E63946"
-        accentSurface="rgba(230,57,70,0.10)"
         onExit={() => router.push(`/practicar/kanji?lesson=${lesson}`)}
       />
 

@@ -92,16 +92,12 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
 
   if (lessonItems.length === 0) {
     return (
-      <PracticeSessionLayout>
+      <PracticeSessionLayout accent="red">
         <PracticeSessionHeader
-          moduleName="Vocabulario"
-          lesson={lesson}
-          lessonTitle={lessonTitle}
+          typeLabel="Vocabulario"
+          lesson={`L${lesson} · ${lessonTitle}`}
           progressCurrent={0}
           progressTotal={0}
-          progressPct={0}
-          accentColor="#E63946"
-          accentSurface="rgba(230,57,70,0.10)"
           onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
         />
       </PracticeSessionLayout>
@@ -109,16 +105,12 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
   }
 
   return (
-    <PracticeSessionLayout>
+    <PracticeSessionLayout accent="red">
       <PracticeSessionHeader
-        moduleName="Vocabulario"
-        lesson={lesson}
-        lessonTitle={lessonTitle}
-        progressCurrent={currentCardIndex + 1}
+        typeLabel="Vocabulario"
+        lesson={`L${lesson} · ${lessonTitle}`}
+        progressCurrent={currentCardIndex}
         progressTotal={cards.length}
-        progressPct={learnProgressPct}
-        accentColor="#E63946"
-        accentSurface="rgba(230,57,70,0.10)"
         onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
       />
 
