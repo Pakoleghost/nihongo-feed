@@ -189,7 +189,7 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
     setResult(null);
   }
 
-  const exit = () => router.push(`/practicar/kanji?lesson=${lesson}`);
+  const exit = () => router.push("/practicar");
 
   // Results screen
   if (result) {

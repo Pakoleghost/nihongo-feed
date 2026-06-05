@@ -631,8 +631,7 @@ body::after {
   overscroll-behavior: contain;
 }
 /* Hide bottom nav during practice sessions */
-.sesh-layout ~ * .bottom-nav-wrap,
-body:has(.sesh-layout) .bottom-nav-wrap {
+body.in-session .bottom-nav-wrap {
   display: none;
 }
 

@@ -284,7 +284,7 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
     setPracticeResult(null);
   }
 
-  const exit = () => router.push(`/practicar/vocabulario?lesson=${lesson}`);
+  const exit = () => router.push("/practicar");
 
   // Results screen
   if (practiceResult) {

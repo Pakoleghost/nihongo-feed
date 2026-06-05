@@ -98,7 +98,7 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
           lesson={`L${lesson} · ${lessonTitle}`}
           progressCurrent={0}
           progressTotal={0}
-          onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
+          onExit={() => router.push("/practicar")}
         />
       </PracticeSessionLayout>
     );
@@ -111,7 +111,7 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
         lesson={`L${lesson} · ${lessonTitle}`}
         progressCurrent={currentCardIndex}
         progressTotal={cards.length}
-        onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
+        onExit={() => router.push("/practicar")}
       />
 
       <div style={{ marginTop: "12px", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
@@ -168,7 +168,7 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
               </button>
             </div>
             <button
-              onClick={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
+              onClick={() => router.push("/practicar")}
               style={{
                 marginTop: "2px",
                 padding: "11px 16px",
