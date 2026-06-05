@@ -72,34 +72,8 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav
-      style={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        paddingBottom: "calc(22px + env(safe-area-inset-bottom, 0px))",
-        background: "linear-gradient(180deg, rgba(13,13,26,0) 0%, rgba(13,13,26,0.85) 35%, #0D0D1A 70%)",
-        pointerEvents: "none",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-around",
-          margin: "0 16px",
-          padding: "10px 8px",
-          background: "rgba(26,26,46,0.70)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          border: "1px solid rgba(255,255,255,0.10)",
-          borderRadius: "22px",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.4)",
-          pointerEvents: "all",
-        }}
-      >
+    <nav className="bottom-nav-wrap">
+      <div className="bottom-nav-pill">
         {tabs.map(({ href, label, Icon, prefetch }) => {
           const isActive =
             href === "/" ? pathname === "/" :
@@ -113,37 +87,10 @@ export default function BottomNav() {
               key={href}
               href={href}
               prefetch={prefetch}
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                textDecoration: "none",
-                padding: isActive ? "10px 18px" : "10px 14px",
-                borderRadius: "14px",
-                background: isActive ? "#E63946" : "transparent",
-                boxShadow: isActive ? "0 6px 18px rgba(230,57,70,0.38)" : "none",
-                transition: "background 0.22s ease, box-shadow 0.22s ease, padding 0.22s ease",
-                overflow: "hidden",
-              }}
+              className={`nav-tab${isActive ? " active" : ""}`}
             >
-              <Icon color={color} />
-              <span
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 800,
-                  color: "#fff",
-                  lineHeight: 1,
-                  whiteSpace: "nowrap",
-                  maxWidth: isActive ? "80px" : "0px",
-                  opacity: isActive ? 1 : 0,
-                  overflow: "hidden",
-                  transition: "max-width 0.22s ease, opacity 0.18s ease",
-                }}
-              >
-                {label}
-              </span>
+              <Icon color={isActive ? "#FFFFFF" : "rgba(255,255,255,0.38)"} />
+              <span className="nav-tab-label">{label}</span>
             </Link>
           );
         })}
