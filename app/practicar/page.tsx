@@ -38,7 +38,11 @@ export default function PracticarPage() {
   const type = TYPES.find((t) => t.id === typeId)!;
   const estMin = Math.max(1, Math.round((count * (typeId === "repaso" ? 9 : 7)) / 60));
 
-  useEffect(() => { setLastActivity("Practicar", "/practicar"); }, []);
+  useEffect(() => {
+    setLastActivity("Practicar", "/practicar");
+    document.body.classList.add("in-session");
+    return () => document.body.classList.remove("in-session");
+  }, []);
 
   function pickType(id: TypeId) {
     setTypeId(id);
