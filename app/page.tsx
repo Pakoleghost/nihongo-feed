@@ -540,7 +540,6 @@ export default function HomePage() {
   return (
     <div
       style={{
-        background: "#0D0D1A",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",

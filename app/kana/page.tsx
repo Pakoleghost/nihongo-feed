@@ -100,7 +100,6 @@ export default function KanaPage() {
   return (
     <div
       style={{
-        background: "#1A1A2E",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
