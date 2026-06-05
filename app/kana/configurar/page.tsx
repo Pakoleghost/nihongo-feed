@@ -182,300 +182,120 @@ function ConfigurarContent() {
   }
 
   return (
-    <div
-      style={{
-        background: "#FFF8E7",
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* Scrollable content */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "52px 20px 120px",
-        }}
-      >
-        {/* Back button */}
+    <div className="sesh-layout" style={{ overflowY: "auto" }}>
+      <div style={{ flex: 1, padding: "0 0 140px", maxWidth: 760, width: "100%", margin: "0 auto" }}>
+        {/* Back */}
         <button
           onClick={() => router.back()}
           style={{
-            width: "44px",
-            height: "44px",
-            borderRadius: "50%",
-            background: "#FFFFFF",
-            border: "none",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 2px 12px rgba(26,26,46,0.10)",
-            marginBottom: "24px",
+            width: 42, height: 42, borderRadius: "50%",
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.09)",
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            marginBottom: 24,
           }}
           aria-label="Volver"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M19 12H5M12 5l-7 7 7 7"
-              stroke="#1A1A2E"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+            <path d="M19 12H5M12 5l-7 7 7 7" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
 
-        {/* Title */}
-        <h1
-          style={{
-            fontSize: "34px",
-            fontWeight: 800,
-            color: "#1A1A2E",
-            margin: "0 0 28px",
-            lineHeight: 1.15,
-          }}
-        >
-          Configurar
-          <br />
-          práctica
+        <h1 style={{ fontSize: 34, fontWeight: 800, color: "#F4F4F8", margin: "0 0 28px", lineHeight: 1.1, letterSpacing: -0.5 }}>
+          Configurar<br />práctica
         </h1>
 
-        {/* Mode toggle — oculto cuando se entra directamente en libre */}
+        {/* Mode toggle */}
         {!forceLibre && (
-          <div
-            style={{
-              background: "#E8E3DC",
-              borderRadius: "999px",
-              padding: "4px",
-              display: "flex",
-              marginBottom: "28px",
-            }}
-          >
+          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 999, padding: 4, display: "flex", marginBottom: 28, border: "1px solid rgba(255,255,255,0.09)" }}>
             {(["smart", "libre"] as Mode[]).map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                style={{
-                  flex: 1,
-                  padding: "12px 0",
-                  borderRadius: "999px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: 700,
-                  fontSize: "16px",
-                  background: mode === m ? "#E63946" : "transparent",
-                  color: mode === m ? "#FFFFFF" : "#9CA3AF",
-                  transition: "background 0.2s, color 0.2s",
-                }}
-              >
+              <button key={m} onClick={() => setMode(m)} style={{
+                flex: 1, padding: "12px 0", borderRadius: 999, border: "none", cursor: "pointer",
+                fontWeight: 700, fontSize: 16, fontFamily: "inherit",
+                background: mode === m ? "#E63946" : "transparent",
+                color: mode === m ? "#FFFFFF" : "rgba(244,244,248,0.45)",
+                transition: "background 0.2s, color 0.2s",
+              }}>
                 {m === "smart" ? "Smart" : "Libre"}
               </button>
             ))}
           </div>
         )}
 
-        {/* Character selection — libre only */}
+        {/* Chip selection — libre only */}
         {mode === "libre" && (
-          <div style={{ marginBottom: "28px" }}>
-            <p
-              style={{
-                fontSize: "16px",
-                fontWeight: 700,
-                color: "#1A1A2E",
-                margin: "0 0 14px",
-              }}
-            >
+          <div style={{ marginBottom: 28 }}>
+            <p style={{ fontSize: 12, fontWeight: 800, letterSpacing: "1.4px", textTransform: "uppercase", color: "rgba(244,244,248,0.34)", margin: "0 0 12px" }}>
               Kana a practicar
             </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
               {CHIPS.map(({ key, label }) => {
-                const active =
-                  key === "ambos"
-                    ? selectedSets.includes("hiragana") && selectedSets.includes("katakana")
-                    : selectedSets.includes(key);
+                const active = key === "ambos"
+                  ? selectedSets.includes("hiragana") && selectedSets.includes("katakana")
+                  : selectedSets.includes(key);
                 const isDependent = DEPENDENT_CHIPS.includes(key);
                 const hasBase = selectedSets.some((k) => BASE_CHIPS.includes(k));
                 const dimmed = isDependent && !hasBase;
-
                 return (
-                  <button
-                    key={key}
-                    onClick={() => toggleChip(key)}
-                    style={{
-                      padding: "12px 22px",
-                      borderRadius: "999px",
-                      border: "none",
-                      cursor: "pointer",
-                      background: active ? "#1A1A2E" : "#FFFFFF",
-                      color: active ? "#FFFFFF" : dimmed ? "#C4BAB0" : "#1A1A2E",
-                      fontWeight: 600,
-                      fontSize: "15px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      boxShadow: active ? "none" : "0 2px 8px rgba(26,26,46,0.08)",
-                      opacity: dimmed ? 0.6 : 1,
-                      flexGrow: key === "combinaciones" ? 1 : 0,
-                      justifyContent: key === "combinaciones" ? "center" : undefined,
-                      transition: "opacity 0.15s",
-                    }}
-                  >
+                  <button key={key} onClick={() => toggleChip(key)} style={{
+                    padding: "11px 20px", borderRadius: 999, border: "1.5px solid",
+                    borderColor: active ? "#E63946" : "rgba(255,255,255,0.09)",
+                    cursor: "pointer",
+                    background: active ? "rgba(230,57,70,0.14)" : "rgba(255,255,255,0.06)",
+                    color: active ? "#F4F4F8" : dimmed ? "rgba(244,244,248,0.3)" : "rgba(244,244,248,0.6)",
+                    fontWeight: 700, fontSize: 15, fontFamily: "inherit",
+                    opacity: dimmed ? 0.5 : 1,
+                    flexGrow: key === "combinaciones" ? 1 : 0,
+                    justifyContent: key === "combinaciones" ? "center" : undefined,
+                    display: "flex", alignItems: "center", gap: 6,
+                    transition: "background 0.15s, border-color 0.15s",
+                  }}>
                     {label}
                     {active && (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path
-                          d="M20 6L9 17l-5-5"
-                          stroke="#FFFFFF"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M20 6L9 17l-5-5" stroke="#F4F4F8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     )}
                   </button>
                 );
               })}
             </div>
-
-            {/* Validation message */}
-            <p
-              style={{
-                fontSize: "13px",
-                color: "#9CA3AF",
-                margin: "10px 0 0",
-                minHeight: "18px",
-                transition: "opacity 0.3s",
-                opacity: validationMsg ? 1 : 0,
-              }}
-            >
+            <p style={{ fontSize: 13, color: "rgba(244,244,248,0.4)", margin: "10px 0 0", minHeight: 18, transition: "opacity 0.3s", opacity: validationMsg ? 1 : 0 }}>
               Selecciona Hiragana o Katakana primero
             </p>
           </div>
         )}
 
-        {/* Number of questions */}
-        <div
-          style={{
-            background: "#FFFFFF",
-            borderRadius: "20px",
-            padding: "24px",
-            boxShadow: "0 4px 20px rgba(26,26,46,0.07)",
-          }}
-        >
-          <p
-            style={{
-              fontSize: "16px",
-              fontWeight: 700,
-              color: "#1A1A2E",
-              margin: "0 0 16px",
-              textAlign: "center",
-            }}
-          >
-            Número de preguntas
+        {/* Stepper */}
+        <div>
+          <p style={{ fontSize: 12, fontWeight: 800, letterSpacing: "1.4px", textTransform: "uppercase", color: "rgba(244,244,248,0.34)", margin: "0 0 12px" }}>
+            Número de ítems
           </p>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "24px",
-            }}
-          >
-            <button
-              onClick={() => changeCount(-5)}
-              disabled={questionCount <= 5}
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "50%",
-                background: "#F0EDE8",
-                border: "none",
-                cursor: questionCount <= 5 ? "not-allowed" : "pointer",
-                fontSize: "22px",
-                fontWeight: 700,
-                color: questionCount <= 5 ? "#C0BCB5" : "#1A1A2E",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              −
-            </button>
-            <span
-              style={{
-                fontSize: "52px",
-                fontWeight: 800,
-                color: "#1A1A2E",
-                minWidth: "72px",
-                textAlign: "center",
-                lineHeight: 1,
-              }}
-            >
-              {questionCount}
-            </span>
-            <button
-              onClick={() => changeCount(5)}
-              disabled={questionCount >= maxQuestions}
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "50%",
-                background: "#F0EDE8",
-                border: "none",
-                cursor: questionCount >= maxQuestions ? "not-allowed" : "pointer",
-                fontSize: "22px",
-                fontWeight: 700,
-                color: questionCount >= maxQuestions ? "#C0BCB5" : "#1A1A2E",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              +
-            </button>
+          <div className="sesh-itemcard" style={{ padding: "20px 22px", flexDirection: "row", justifyContent: "space-between", flex: "none", marginTop: 0 }}>
+            <button onClick={() => changeCount(-5)} disabled={questionCount <= 5} style={{
+              width: 52, height: 52, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.09)",
+              background: "rgba(255,255,255,0.09)", cursor: questionCount <= 5 ? "not-allowed" : "pointer",
+              fontSize: 26, fontWeight: 700, color: questionCount <= 5 ? "rgba(244,244,248,0.2)" : "#F4F4F8",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>−</button>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 52, fontWeight: 800, color: "#F4F4F8", letterSpacing: -1, lineHeight: 1 }}>{questionCount}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "rgba(244,244,248,0.56)", marginTop: 4 }}>{questionCount} de {pool.length} · ~{Math.max(1, Math.round(questionCount * 7 / 60))} min</div>
+            </div>
+            <button onClick={() => changeCount(5)} disabled={questionCount >= maxQuestions} style={{
+              width: 52, height: 52, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.09)",
+              background: "rgba(255,255,255,0.09)", cursor: questionCount >= maxQuestions ? "not-allowed" : "pointer",
+              fontSize: 26, fontWeight: 700, color: questionCount >= maxQuestions ? "rgba(244,244,248,0.2)" : "#F4F4F8",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>+</button>
           </div>
-          <p
-            style={{
-              fontSize: "13px",
-              color: "#9CA3AF",
-              textAlign: "center",
-              margin: "12px 0 0",
-            }}
-          >
-            {questionCount} de {pool.length} posibles
-          </p>
         </div>
       </div>
 
-      {/* Fixed bottom button */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: "16px 20px 36px",
-          background: "linear-gradient(to top, #FFF8E7 70%, transparent)",
-        }}
-      >
-        <button
-          onClick={handleStart}
-          style={{
-            width: "100%",
-            padding: "18px",
-            borderRadius: "999px",
-            border: "none",
-            cursor: "pointer",
-            background: "#E63946",
-            color: "#FFFFFF",
-            fontSize: "18px",
-            fontWeight: 700,
-            boxShadow: "0 4px 20px rgba(230,57,70,0.35)",
-          }}
-        >
-          Empezar Mixto
+      {/* Bottom button */}
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 20px", paddingBottom: "max(20px, env(safe-area-inset-bottom, 20px))", background: "linear-gradient(to top, #0D0D1A 70%, transparent)" }}>
+        <button onClick={handleStart} className="sesh-btn sesh-btn-red">
+          Empezar · {questionCount} ítems
         </button>
       </div>
     </div>

@@ -187,6 +187,7 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
   const [quizPhase, setQuizPhase] = useState<QuizPhase>("question");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [correct, setCorrect] = useState(0);
+  const [wrongItems, setWrongItems] = useState<VocabQuestion[]>([]);
   const [practiceResult, setPracticeResult] = useState<PracticeSessionResult | null>(null);
 
   const lesson = initialLesson;
@@ -228,6 +229,7 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
     setQuizPhase("question");
     setSelectedOption(null);
     setCorrect(0);
+    setWrongItems([]);
     setPracticeResult(null);
   }
 
@@ -242,269 +244,168 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
     setSelectedOption(option);
     setQuizPhase("feedback");
     const isCorrect = option === currentQuestion.item.es;
-    const nextCorrect = correct + (isCorrect ? 1 : 0);
-    if (isCorrect) setCorrect((value) => value + 1);
+    if (isCorrect) setCorrect((v) => v + 1);
+    else setWrongItems((arr) => [...arr, currentQuestion]);
     setProgress((previous) => {
       const next = recordVocabResult(previous, lesson, currentQuestion.source, isCorrect ? "correct" : "wrong");
       saveVocabProgress(USER_KEY, next);
       return next;
     });
-
-    setTimeout(() => {
-      if (currentQuestionIndex + 1 >= questions.length) {
-        setPracticeResult({
-          practiced: questions.length,
-          correct: nextCorrect,
-          incorrect: Math.max(questions.length - nextCorrect, 0),
-        });
-        setCurrentQuestionIndex(questions.length);
-        setQuizPhase("question");
-        setSelectedOption(null);
-      } else {
-        setCurrentQuestionIndex((value) => value + 1);
-        setQuizPhase("question");
-        setSelectedOption(null);
-      }
-    }, isCorrect ? 700 : 1000);
   }
 
-  if (lessonItems.length === 0) {
+  function advance() {
+    if (!currentQuestion) return;
+    const isCorrect = selectedOption === currentQuestion.item.es;
+    const nextCorrect = correct + (isCorrect ? 0 : 0); // already set
+    if (currentQuestionIndex + 1 >= questions.length) {
+      setPracticeResult({
+        practiced: questions.length,
+        correct: correct + (isCorrect ? 0 : 0),
+        incorrect: wrongItems.length + (isCorrect ? 0 : 1),
+      });
+      setCurrentQuestionIndex(questions.length);
+      setQuizPhase("question");
+      setSelectedOption(null);
+    } else {
+      setCurrentQuestionIndex((v) => v + 1);
+      setQuizPhase("question");
+      setSelectedOption(null);
+    }
+  }
+
+  function repeatWrong() {
+    const wrong = wrongItems;
+    setQuestions(shuffle(wrong));
+    setCurrentQuestionIndex(0);
+    setQuizPhase("question");
+    setSelectedOption(null);
+    setCorrect(0);
+    setWrongItems([]);
+    setPracticeResult(null);
+  }
+
+  const exit = () => router.push(`/practicar/vocabulario?lesson=${lesson}`);
+
+  // Results screen
+  if (practiceResult) {
+    const total = practiceResult.practiced;
+    const pctCorrect = total > 0 ? Math.round((practiceResult.correct / total) * 100) : 0;
+    const ringColor = pctCorrect >= 70 ? "#34D399" : pctCorrect >= 40 ? "#4ECDC4" : "#E63946";
+    const headline = pctCorrect >= 80 ? "¡Excelente!" : pctCorrect >= 50 ? "¡Buen trabajo!" : "A seguir practicando";
+    const r = 72;
+    const circ = 2 * Math.PI * r;
     return (
-      <PracticeSessionLayout>
-        <PracticeSessionHeader
-          moduleName="Vocabulario"
-          lesson={lesson}
-          lessonTitle={lessonTitle}
-          progressCurrent={0}
-          progressTotal={0}
-          progressPct={0}
-          accentColor="#4ECDC4"
-          accentSurface="rgba(78,205,196,0.14)"
-          onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
-        />
+      <PracticeSessionLayout accent="teal">
+        <div className="sesh-res">
+          <div className="sesh-res-top">
+            <div style={{ position: "relative", width: 184, height: 184 }}>
+              <svg width="184" height="184" viewBox="0 0 184 184">
+                <circle cx="92" cy="92" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="12" />
+                <circle cx="92" cy="92" r={r} fill="none" stroke={ringColor} strokeWidth="12" strokeLinecap="round"
+                  strokeDasharray={circ} strokeDashoffset={circ - (circ * pctCorrect) / 100}
+                  transform="rotate(-90 92 92)" style={{ filter: `drop-shadow(0 0 8px ${ringColor})` }} />
+              </svg>
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: 46, fontWeight: 800, letterSpacing: -1, color: "#F4F4F8" }}>{pctCorrect}%</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(244,244,248,0.56)", letterSpacing: 0.5 }}>{practiceResult.correct} DE {total}</span>
+              </div>
+            </div>
+            <div className="sesh-res-title">{headline}</div>
+            <div className="sesh-res-stats">
+              <div className="sesh-stat good"><span className="v">{practiceResult.correct}</span><span className="k">Correctas</span></div>
+              <div className="sesh-stat bad"><span className="v">{practiceResult.incorrect}</span><span className="k">Para repasar</span></div>
+            </div>
+          </div>
+          <div className="sesh-res-foot">
+            {wrongItems.length > 0 && (
+              <button className="sesh-btn sesh-btn-red" onClick={repeatWrong}>
+                Repetir las {wrongItems.length} que fallé
+              </button>
+            )}
+            <button className="sesh-btn sesh-btn-ghost" onClick={exit}>Terminar</button>
+          </div>
+        </div>
       </PracticeSessionLayout>
     );
   }
 
+  if (lessonItems.length === 0) {
+    return (
+      <PracticeSessionLayout accent="teal">
+        <PracticeSessionHeader typeLabel="Vocabulario" lesson={`L${lesson} · ${lessonTitle}`}
+          progressCurrent={0} progressTotal={0} onExit={exit} />
+      </PracticeSessionLayout>
+    );
+  }
+
+  const isAnswerCorrect = selectedOption !== null && currentQuestion && selectedOption === currentQuestion.item.es;
+
   return (
-    <PracticeSessionLayout>
+    <PracticeSessionLayout accent="teal">
       <PracticeSessionHeader
-        moduleName="Vocabulario"
-        lesson={lesson}
-        lessonTitle={lessonTitle}
-        progressCurrent={currentQuestionIndex + 1}
+        typeLabel="Vocabulario"
+        lesson={`L${lesson} · ${lessonTitle}`}
+        progressCurrent={currentQuestionIndex}
         progressTotal={questions.length}
-        progressPct={practiceProgressPct}
-        accentColor="#4ECDC4"
-        accentSurface="rgba(78,205,196,0.14)"
-        onExit={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
+        onExit={exit}
       />
 
-      <div style={{ marginTop: 12, flex: 1, display: "flex", flexDirection: "column", minHeight: 0, paddingBottom: "max(24px, env(safe-area-inset-bottom, 24px))" }}>
-        {practiceResult ? (
-          <div
-            style={{
-              background: "#1E2235",
-              borderRadius: "24px",
-              padding: "22px 20px",
-              border: "1px solid rgba(255,255,255,0.08)",
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-              flex: 1,
-              justifyContent: "center",
-            }}
-          >
-            <div>
-              <p style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "#FFFFFF" }}>Sesión completada</p>
-              <div
-                style={{
-                  display: "inline-flex",
-                  marginTop: "8px",
-                  background: "rgba(78,205,196,0.15)",
-                  color: "#4ECDC4",
-                  borderRadius: "999px",
-                  padding: "7px 11px",
-                  fontSize: "12px",
-                  fontWeight: 800,
-                }}
-              >
-                {getVocabSessionTag(sessionContext)} · L{lesson}
-              </div>
-            </div>
-            <p style={{ margin: 0, fontSize: "14px", color: "rgba(255,255,255,0.65)", lineHeight: 1.4 }}>
-              {practiceResult.practiced} ítems · {practiceResult.correct} correctas ·{" "}
-              {practiceResult.incorrect} incorrectas
-            </p>
-            <div
-              style={{
-                background: "rgba(255,255,255,0.06)",
-                borderRadius: "18px",
-                padding: "12px 14px",
-              }}
-            >
-              <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, letterSpacing: "0.08em", color: "rgba(255,255,255,0.4)" }}>
-                QUÉ SIGUE
-              </p>
-              <p style={{ margin: "5px 0 0", fontSize: "15px", fontWeight: 800, color: "#FFFFFF" }}>
-                {nextAction.label}
-              </p>
-              <p style={{ margin: "3px 0 0", fontSize: "13px", color: "rgba(255,255,255,0.42)", lineHeight: 1.35 }}>
-                {nextAction.helper}
-              </p>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-              <button
-                onClick={() => startSession(sessionContext)}
-                style={{
-                  padding: "13px 16px",
-                  borderRadius: "999px",
-                  border: "none",
-                  cursor: "pointer",
-                  background: "rgba(255,255,255,0.10)",
-                  color: "#FFFFFF",
-                  fontWeight: 800,
-                  fontSize: "14px",
-                }}
-              >
-                Otra sesión
-              </button>
-              <button
-                onClick={() => router.push(`/practicar/vocabulario?lesson=${lesson}`)}
-                style={{
-                  padding: "13px 16px",
-                  borderRadius: "999px",
-                  border: "none",
-                  cursor: "pointer",
-                  background: "#4ECDC4",
-                  color: "#1A1A2E",
-                  fontWeight: 800,
-                  fontSize: "14px",
-                }}
-              >
-                Volver al módulo
-              </button>
-            </div>
-          </div>
-        ) : currentQuestion ? (
+      <div style={{ marginTop: 14, flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        {currentQuestion && (
           <>
-            {/* Question card — grows to fill space */}
-            <div
-              style={{
-                position: "relative",
-                overflow: "hidden",
-                background: "#1E2235",
-                borderRadius: 20,
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "1px solid rgba(255,255,255,0.08)",
-                textAlign: "center",
-                padding: "24px 20px",
-              }}
-            >
-              {/* Corner fold */}
-              <div style={{ position: "absolute", top: 0, right: 0, width: 40, height: 40, background: "#4ECDC4", borderBottomLeftRadius: 40 }} />
-
-              <p
-                style={{
-                  fontSize: "clamp(28px, 11vw, 60px)",
-                  fontWeight: 800,
-                  color: "#FFFFFF",
-                  margin: 0,
-                  fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                  lineHeight: 1.1,
-                  textAlign: "center",
-                  wordBreak: "break-word",
-                }}
-              >
-                {currentQuestion.item.display}
-              </p>
+            <div className="sesh-itemcard">
+              <div className="sesh-jp-word">{currentQuestion.item.display}</div>
               {currentQuestion.item.reading !== currentQuestion.item.display && (
-                <p
-                  style={{
-                    margin: "10px 0 0",
-                    fontSize: 20,
-                    color: "rgba(255,255,255,0.42)",
-                    fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                  }}
-                >
-                  {currentQuestion.item.reading}
-                </p>
+                <div className="sesh-jp-read">{currentQuestion.item.reading}</div>
               )}
-              <p style={{ margin: "16px 0 0", fontSize: 12, color: "rgba(255,255,255,0.25)", letterSpacing: "0.02em" }}>
-                Elige el significado correcto
-              </p>
+              <div className="sesh-prompt">Elige el significado correcto</div>
             </div>
 
-            {/* Answer grid — anchored to bottom */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 10,
-                paddingTop: 12,
-              }}
-            >
-              {currentQuestion.options.map((option, index) => {
-                const isSelected = selectedOption === option;
-                const isCorrectOption = option === currentQuestion.item.es;
-                let background = "rgba(255,255,255,0.08)";
-                let color = "#FFFFFF";
-
+            <div className="sesh-answers">
+              {currentQuestion.options.map((opt) => {
+                let cls = "sesh-ans sesh-ans-ui";
                 if (quizPhase === "feedback") {
-                  if (isCorrectOption) { background = "#4ECDC4"; color = "#FFFFFF"; }
-                  else if (isSelected) { background = "#E63946"; color = "#FFFFFF"; }
+                  cls += " locked";
+                  if (opt === currentQuestion.item.es) cls += " correct";
+                  else if (opt === selectedOption) cls += " wrong";
+                  else cls += " muted";
                 }
-
                 return (
-                  <button
-                    key={option}
-                    onClick={() => handleOption(option)}
-                    disabled={quizPhase === "feedback"}
-                    style={{
-                      padding: "18px 14px",
-                      borderRadius: 16,
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      cursor: quizPhase === "feedback" ? "default" : "pointer",
-                      background,
-                      color,
-                      fontSize: 15,
-                      fontWeight: 700,
-                      transition: "background 0.15s",
-                      textAlign: "left",
-                      minHeight: 72,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 22,
-                        height: 22,
-                        borderRadius: "50%",
-                        background: quizPhase === "feedback" && isCorrectOption ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.12)",
-                        color,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: 11,
-                        fontWeight: 800,
-                        flexShrink: 0,
-                      }}
-                    >
-                      {String.fromCharCode(65 + index)}
-                    </span>
-                    <span style={{ lineHeight: 1.3 }}>{option}</span>
+                  <button key={opt} className={cls} onClick={() => handleOption(opt)}>
+                    {opt}
                   </button>
                 );
               })}
             </div>
+
+            {quizPhase === "feedback" && (
+              <div className="sesh-feedback">
+                {isAnswerCorrect ? (
+                  <div className="sesh-fbline ok">
+                    <span className="sesh-fbbadge ok">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M4 12.5l5 5L20 6.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                    ¡Correcto!
+                  </div>
+                ) : (
+                  <div className="sesh-fbline no">
+                    <span className="sesh-fbbadge no">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                      </svg>
+                    </span>
+                    Casi —&nbsp;<span className="sub">la respuesta es «{currentQuestion.item.es}»</span>
+                  </div>
+                )}
+                <button className={`sesh-btn ${isAnswerCorrect ? "sesh-btn-green" : "sesh-btn-red"}`} onClick={advance}>
+                  {currentQuestionIndex + 1 < questions.length ? "Continuar" : "Ver resultados"}
+                </button>
+              </div>
+            )}
           </>
-        ) : null}
+        )}
       </div>
     </PracticeSessionLayout>
   );

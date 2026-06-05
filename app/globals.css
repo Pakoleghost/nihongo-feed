@@ -609,3 +609,235 @@ body::after {
   pointer-events: none;
   z-index: 0;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   PRACTICE SESSION SYSTEM — design by Claude Design
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Layout */
+.sesh-layout {
+  height: 100dvh;
+  background:
+    radial-gradient(95% 55% at 12% 4%, rgba(78,205,196,0.13), transparent 55%),
+    radial-gradient(110% 60% at 100% 102%, rgba(230,57,70,0.14), transparent 55%),
+    #0D0D1A;
+  display: flex;
+  flex-direction: column;
+  padding-top: max(52px, env(safe-area-inset-top, 52px));
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 0;
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+.sesh-inner {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-bottom: max(24px, env(safe-area-inset-bottom, 24px));
+}
+
+/* Session header */
+.sesh-head { display: flex; flex-direction: column; gap: 14px; }
+.sesh-head-row { display: flex; align-items: center; gap: 12px; }
+.sesh-iconbtn {
+  width: 42px; height: 42px; flex: 0 0 42px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.09);
+  color: rgba(244,244,248,0.56);
+  cursor: pointer; padding: 0;
+  transition: background .15s, color .15s;
+}
+.sesh-iconbtn:hover { background: rgba(255,255,255,0.09); color: #F4F4F8; }
+.sesh-pill {
+  flex: 1; min-width: 0;
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 42px; padding: 0 16px; border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.09);
+  font-size: 15px; font-weight: 700;
+  overflow: hidden; white-space: nowrap;
+}
+.sesh-pill-type { color: var(--sesh-accent, #4ECDC4); }
+.sesh-pill-lesson { color: rgba(244,244,248,0.56); font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.sesh-count {
+  flex: 0 0 auto; font-size: 15px; font-weight: 700;
+  color: rgba(244,244,248,0.56); font-variant-numeric: tabular-nums;
+}
+.sesh-count b { color: #F4F4F8; }
+
+/* Glowing progress bar */
+.sesh-ptrack {
+  height: 6px; border-radius: 999px;
+  background: rgba(255,255,255,0.07);
+  position: relative; overflow: visible;
+}
+.sesh-pfill {
+  height: 100%; border-radius: 999px;
+  background: var(--sesh-accent, #4ECDC4);
+  position: relative;
+  transition: width .5s cubic-bezier(.2,.8,.2,1);
+  box-shadow: 0 0 10px 0 var(--sesh-accent, #4ECDC4);
+}
+.sesh-pfill::after {
+  content: '';
+  position: absolute; right: -3px; top: 50%; transform: translateY(-50%);
+  width: 12px; height: 12px; border-radius: 999px;
+  background: var(--sesh-accent, #4ECDC4);
+  box-shadow: 0 0 14px 3px var(--sesh-accent, #4ECDC4);
+  opacity: .9;
+  animation: sesh-pulse 1.6s ease-in-out infinite;
+}
+@keyframes sesh-pulse {
+  0%, 100% { transform: translateY(-50%) scale(1); opacity: .85; }
+  50%       { transform: translateY(-50%) scale(1.35); opacity: .35; }
+}
+
+/* Item card */
+.sesh-itemcard {
+  flex: 1; min-height: 0; margin-top: 18px; border-radius: 28px;
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px; padding: 28px 22px; text-align: center;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.07);
+  backdrop-filter: blur(24px) saturate(135%);
+  -webkit-backdrop-filter: blur(24px) saturate(135%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.sesh-itemcard::before {
+  content: '';
+  position: absolute; top: -52px; right: -52px;
+  width: 150px; height: 150px; border-radius: 999px;
+  background: radial-gradient(circle at 30% 70%, rgba(78,205,196,0.42), transparent 70%);
+  filter: blur(6px); pointer-events: none;
+}
+.sesh-jp-kana {
+  font-family: var(--font-noto-serif-jp), serif;
+  font-size: clamp(90px, 24vw, 150px);
+  font-weight: 600; color: #F4F4F8; line-height: 1;
+}
+.sesh-jp-word {
+  font-family: var(--font-noto-serif-jp), serif;
+  font-size: clamp(60px, 18vw, 92px);
+  font-weight: 600; color: #F4F4F8; line-height: 1;
+}
+.sesh-jp-read {
+  font-family: var(--font-noto-serif-jp), serif;
+  font-size: 28px; font-weight: 500;
+  color: rgba(244,244,248,0.56); letter-spacing: 2px;
+}
+.sesh-hint {
+  font-size: 22px; font-weight: 500; font-style: italic;
+  color: rgba(244,244,248,0.56);
+}
+.sesh-prompt {
+  font-size: 14px; font-weight: 600;
+  color: rgba(244,244,248,0.34); letter-spacing: 0.2px; margin-top: 4px;
+}
+
+/* Answer grid */
+.sesh-answers {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-top: 14px;
+}
+.sesh-ans {
+  min-height: 80px; border-radius: 20px; padding: 12px 14px;
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; text-align: center;
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(255,255,255,0.07);
+  color: #F4F4F8; font-weight: 700; line-height: 1.2;
+  transition: transform .12s, background .18s, border-color .18s, opacity .18s;
+  font-family: var(--font-study), sans-serif;
+}
+.sesh-ans:active { transform: scale(.97); }
+.sesh-ans-mono { font-size: 26px; letter-spacing: 0.5px; }
+.sesh-ans-ui   { font-size: 17px; }
+.sesh-ans-jp   { font-family: var(--font-noto-serif-jp), serif; font-size: 30px; font-weight: 600; }
+.sesh-ans.correct {
+  background: rgba(52,211,153,0.16);
+  border-color: #34D399; color: #B9F6DD;
+  box-shadow: 0 0 22px -4px rgba(52,211,153,0.5);
+}
+.sesh-ans.wrong {
+  background: rgba(230,57,70,0.16);
+  border-color: #E63946; color: #FFC2C7;
+  box-shadow: 0 0 22px -4px rgba(230,57,70,0.5);
+}
+.sesh-ans.muted { opacity: .35; }
+.sesh-ans.locked { cursor: default; }
+
+/* Feedback + Continuar */
+.sesh-feedback {
+  margin-top: 14px; display: flex; flex-direction: column; gap: 12px;
+  animation: sesh-sheetup .28s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes sesh-sheetup { from { transform: translateY(12px); } to { transform: none; } }
+.sesh-fbline {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 16px; font-weight: 700;
+}
+.sesh-fbline.ok { color: #34D399; }
+.sesh-fbline.no { color: #E63946; }
+.sesh-fbline .sub { color: rgba(244,244,248,0.56); font-weight: 600; }
+.sesh-fbbadge {
+  width: 26px; height: 26px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center; flex: 0 0 26px;
+}
+.sesh-fbbadge.ok { background: rgba(52,211,153,0.18); }
+.sesh-fbbadge.no { background: rgba(230,57,70,0.18); }
+.sesh-btn {
+  width: 100%; border: none; cursor: pointer; border-radius: 18px;
+  height: 60px; font-family: var(--font-study), sans-serif;
+  font-size: 17px; font-weight: 800; letter-spacing: 0.2px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; transition: transform .12s, filter .15s;
+}
+.sesh-btn:active { transform: scale(.985); }
+.sesh-btn-green {
+  background: #34D399; color: #04231A;
+  box-shadow: 0 10px 30px -8px rgba(52,211,153,0.55);
+}
+.sesh-btn-green:hover { filter: brightness(1.06); }
+.sesh-btn-red {
+  background: #E63946; color: #fff;
+  box-shadow: 0 10px 30px -8px rgba(230,57,70,0.6);
+}
+.sesh-btn-red:hover { filter: brightness(1.06); }
+.sesh-btn-teal {
+  background: #4ECDC4; color: #052B28;
+  box-shadow: 0 10px 30px -8px rgba(78,205,196,0.5);
+}
+.sesh-btn-ghost {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #F4F4F8;
+}
+
+/* Results */
+.sesh-res { flex: 1; display: flex; flex-direction: column; }
+.sesh-res-top {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  flex: 1; gap: 20px; text-align: center;
+}
+.sesh-res-title { font-size: 26px; font-weight: 800; letter-spacing: -0.3px; color: #F4F4F8; }
+.sesh-res-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.sesh-stat {
+  border-radius: 18px; padding: 16px;
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.sesh-stat .v { font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; color: #F4F4F8; }
+.sesh-stat .k { font-size: 12.5px; font-weight: 700; color: rgba(244,244,248,0.56); }
+.sesh-stat.good .v { color: #34D399; }
+.sesh-stat.bad .v  { color: #E63946; }
+.sesh-res-foot { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }

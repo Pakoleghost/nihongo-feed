@@ -6,13 +6,13 @@ import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 import type { GenkiKanjiItem } from "@/lib/genki-kanji-by-lesson";
 import { setLastActivity } from "@/lib/streak";
 import {
-  getKanjiLessonSummary,
   getKanjiProgressId,
   loadKanjiProgress,
   recordKanjiResult,
   saveKanjiProgress,
   type KanjiProgressMap,
 } from "@/lib/kanji-progress";
+import { getKanjiLessonSummary } from "@/lib/kanji-progress";
 import {
   getPracticeNextAction,
   getPracticeSessionContext,
@@ -31,15 +31,8 @@ import { GENKI_LESSON_NAMES } from "@/lib/genki-lesson-names";
 const USER_KEY = "anon";
 
 type QuizPhase = "question" | "feedback";
-type ReadingQuestion = {
-  item: GenkiKanjiItem;
-  options: string[];
-};
-type PracticeSessionResult = {
-  practiced: number;
-  correct: number;
-  incorrect: number;
-};
+type ReadingQuestion = { item: GenkiKanjiItem; options: string[] };
+type SessionResult = { practiced: number; correct: number; incorrect: number };
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -52,111 +45,57 @@ function shuffle<T>(arr: T[]): T[] {
 
 function getReadingOptions(correct: GenkiKanjiItem, pool: GenkiKanjiItem[]) {
   const correctReading = correct.hira;
-  const others = [...new Set(pool.map((item) => item.hira).filter((hira) => hira !== correctReading))];
+  const others = [...new Set(pool.map((x) => x.hira).filter((h) => h !== correctReading))];
   const supplemented =
     others.length < 3
       ? [
           ...new Set(
             Object.values(GENKI_KANJI_BY_LESSON)
               .flat()
-              .map((item) => item.hira)
-              .filter((hira) => hira !== correctReading),
+              .map((x) => x.hira)
+              .filter((h) => h !== correctReading),
           ),
         ]
       : others;
-  const wrong3 = shuffle(supplemented).slice(0, 3);
-  return shuffle([correctReading, ...wrong3]);
+  return shuffle([correctReading, ...shuffle(supplemented).slice(0, 3)]);
 }
 
-function sortLessonItemsForPractice(
+function sortItems(
   items: GenkiKanjiItem[],
   progress: KanjiProgressMap,
   lesson: number,
   actionKey: PracticeNextAction["key"],
 ) {
-  function getRank(item: GenkiKanjiItem) {
+  function rank(item: GenkiKanjiItem) {
     const id = getKanjiProgressId(lesson, item);
-    const entry = progress[id];
-    const exposedOnly = Boolean(entry && entry.exposure_count > 0 && entry.times_seen === 0);
-    const due = isPracticeDue(entry);
-    const weak = isPracticeDifficult(entry);
-    const dominated = isPracticeDominated(entry);
-    const practiced = Boolean(entry && entry.times_seen > 0);
-
+    const e = progress[id];
+    const exposedOnly = Boolean(e && e.exposure_count > 0 && e.times_seen === 0);
+    const due = isPracticeDue(e);
+    const weak = isPracticeDifficult(e);
+    const dominated = isPracticeDominated(e);
+    const practiced = Boolean(e && e.times_seen > 0);
     if (actionKey === "practice_due") {
-      if (due) return 0;
-      if (weak) return 1;
-      if (exposedOnly) return 2;
-      if (practiced && !dominated) return 3;
-      return 4;
+      if (due) return 0; if (weak) return 1; if (exposedOnly) return 2;
+      if (practiced && !dominated) return 3; return 4;
     }
-
     if (actionKey === "practice_weak") {
-      if (weak) return 0;
-      if (due) return 1;
-      if (exposedOnly) return 2;
-      if (practiced && !dominated) return 3;
-      return 4;
+      if (weak) return 0; if (due) return 1; if (exposedOnly) return 2;
+      if (practiced && !dominated) return 3; return 4;
     }
-
     if (actionKey === "practice_now") {
-      if (exposedOnly) return 0;
-      if (!practiced) return 1;
-      if (due) return 2;
-      if (weak) return 3;
-      return 4;
+      if (exposedOnly) return 0; if (!practiced) return 1; if (due) return 2;
+      if (weak) return 3; return 4;
     }
-
-    if (due) return 0;
-    if (weak) return 1;
-    if (practiced && !dominated) return 2;
-    if (exposedOnly) return 3;
-    return 4;
+    if (due) return 0; if (weak) return 1; if (practiced && !dominated) return 2;
+    if (exposedOnly) return 3; return 4;
   }
-
   return [...items].sort((a, b) => {
-    const rankDiff = getRank(a) - getRank(b);
-    if (rankDiff !== 0) return rankDiff;
-    return a.kanji.localeCompare(b.kanji, "ja");
+    const d = rank(a) - rank(b);
+    return d !== 0 ? d : a.kanji.localeCompare(b.kanji, "ja");
   });
 }
 
-type Props = {
-  initialLesson: number;
-  initialFocusKey?: PracticeSessionSortKey | null;
-};
-
-function getKanjiPracticeTitle() {
-  return "Práctica de lectura";
-}
-
-function getKanjiPracticeHelper(context: PracticeSessionContext) {
-  switch (context.sortKey) {
-    case "practice_due":
-      return "Repasa las lecturas que ya toca reforzar.";
-    case "practice_weak":
-      return "Refuerza las lecturas más difíciles.";
-    case "practice_now":
-      return "Practica lo que ya viste antes.";
-    case "review_lesson":
-    default:
-      return "Repaso breve de esta lección.";
-  }
-}
-
-function getKanjiSessionTag(context: PracticeSessionContext) {
-  switch (context.sortKey) {
-    case "practice_due":
-      return "Pendientes";
-    case "practice_weak":
-      return "Débiles";
-    case "practice_now":
-      return "Lo visto";
-    case "review_lesson":
-    default:
-      return "Repaso";
-  }
-}
+type Props = { initialLesson: number; initialFocusKey?: PracticeSessionSortKey | null };
 
 export default function KanjiPracticeSessionScreen({ initialLesson, initialFocusKey = null }: Props) {
   const router = useRouter();
@@ -164,14 +103,15 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
     typeof window === "undefined" ? {} : loadKanjiProgress(USER_KEY),
   );
   const [questions, setQuestions] = useState<ReadingQuestion[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [quizPhase, setQuizPhase] = useState<QuizPhase>("question");
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [idx, setIdx] = useState(0);
+  const [phase, setPhase] = useState<QuizPhase>("question");
+  const [selected, setSelected] = useState<string | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
-  const [practiceResult, setPracticeResult] = useState<PracticeSessionResult | null>(null);
+  const [wrongItems, setWrongItems] = useState<ReadingQuestion[]>([]);
+  const [result, setResult] = useState<SessionResult | null>(null);
 
   const lesson = initialLesson;
-  const lessonTitle = GENKI_LESSON_NAMES[lesson] ?? `Lección ${lesson}`;
+  const lessonTitle = GENKI_LESSON_NAMES[lesson] ?? `L${lesson}`;
   const lessonItems = useMemo(() => GENKI_KANJI_BY_LESSON[lesson] ?? [], [lesson]);
   const lessonSummary = useMemo(
     () => getKanjiLessonSummary(lesson, lessonItems, progress),
@@ -185,267 +125,200 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
         : getPracticeSessionContext(lessonSummary),
     [initialFocusKey, lessonSummary],
   );
-  const currentQuestion = questions[currentQuestionIndex];
-  const practiceProgressPct = questions.length > 0 ? (currentQuestionIndex / questions.length) * 100 : 0;
 
   useEffect(() => {
     setLastActivity(`Kanji · Practicar · L${lesson}`, "/practicar/kanji");
   }, [lesson]);
 
-  function startSession(context: PracticeSessionContext) {
-    const prioritized = sortLessonItemsForPractice(lessonItems, progress, lesson, context.sortKey);
-    setQuestions(prioritized.map((item) => ({ item, options: getReadingOptions(item, lessonItems) })));
-    setCurrentQuestionIndex(0);
-    setQuizPhase("question");
-    setSelectedOption(null);
+  function startSession(ctx: PracticeSessionContext) {
+    const sorted = sortItems(lessonItems, progress, lesson, ctx.sortKey);
+    setQuestions(sorted.map((item) => ({ item, options: getReadingOptions(item, lessonItems) })));
+    setIdx(0);
+    setPhase("question");
+    setSelected(null);
     setCorrectCount(0);
-    setPracticeResult(null);
+    setWrongItems([]);
+    setResult(null);
   }
 
   useEffect(() => {
     startSession(sessionContext);
-    // lesson/focus start a new session intentionally
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson, initialFocusKey]);
 
-  function handleOption(option: string) {
-    if (quizPhase !== "question" || !currentQuestion) return;
-    setSelectedOption(option);
-    setQuizPhase("feedback");
-    const isCorrect = option === currentQuestion.item.hira;
-    const nextCorrectCount = correctCount + (isCorrect ? 1 : 0);
-    if (isCorrect) setCorrectCount((value) => value + 1);
-    setProgress((previous) => {
-      const next = recordKanjiResult(previous, lesson, currentQuestion.item, isCorrect ? "correct" : "wrong");
+  const q = questions[idx];
+  const total = questions.length;
+  const pct = total > 0 ? (idx / total) * 100 : 0;
+  const isCorrect = selected !== null && selected === q?.item.hira;
+
+  function choose(opt: string) {
+    if (phase !== "question" || !q) return;
+    setSelected(opt);
+    setPhase("feedback");
+    const correct = opt === q.item.hira;
+    if (correct) setCorrectCount((n) => n + 1);
+    else setWrongItems((arr) => [...arr, q]);
+    setProgress((prev) => {
+      const next = recordKanjiResult(prev, lesson, q.item, correct ? "correct" : "wrong");
       saveKanjiProgress(USER_KEY, next);
       return next;
     });
-
-    setTimeout(() => {
-      if (currentQuestionIndex + 1 >= questions.length) {
-        setPracticeResult({
-          practiced: questions.length,
-          correct: nextCorrectCount,
-          incorrect: Math.max(questions.length - nextCorrectCount, 0),
-        });
-        setCurrentQuestionIndex(questions.length);
-        setQuizPhase("question");
-        setSelectedOption(null);
-      } else {
-        setCurrentQuestionIndex((value) => value + 1);
-        setQuizPhase("question");
-        setSelectedOption(null);
-      }
-    }, isCorrect ? 700 : 1000);
   }
 
-  if (lessonItems.length === 0) {
+  function advance() {
+    if (!q) return;
+    if (idx + 1 >= total) {
+      setResult({ practiced: total, correct: correctCount + (isCorrect ? 0 : 0), incorrect: wrongItems.length + (isCorrect ? 0 : 1) });
+      setPhase("question");
+      setSelected(null);
+    } else {
+      setIdx((i) => i + 1);
+      setPhase("question");
+      setSelected(null);
+    }
+  }
+
+  function repeatWrong() {
+    const wrong = wrongItems;
+    setQuestions(shuffle(wrong));
+    setIdx(0);
+    setPhase("question");
+    setSelected(null);
+    setCorrectCount(0);
+    setWrongItems([]);
+    setResult(null);
+  }
+
+  const exit = () => router.push(`/practicar/kanji?lesson=${lesson}`);
+
+  // Results screen
+  if (result) {
+    const pctCorrect = total > 0 ? Math.round((result.correct / total) * 100) : 0;
+    const ringColor = pctCorrect >= 70 ? "#34D399" : pctCorrect >= 40 ? "#4ECDC4" : "#E63946";
+    const headline = pctCorrect >= 80 ? "¡Excelente!" : pctCorrect >= 50 ? "¡Buen trabajo!" : "A seguir practicando";
+    const r = 72;
+    const circ = 2 * Math.PI * r;
+
     return (
-      <PracticeSessionLayout>
-        <PracticeSessionHeader
-          moduleName="Kanji"
-          lesson={lesson}
-          lessonTitle={lessonTitle}
-          progressCurrent={0}
-          progressTotal={0}
-          progressPct={0}
-          accentColor="#4ECDC4"
-          accentSurface="rgba(78,205,196,0.14)"
-          onExit={() => router.push(`/practicar/kanji?lesson=${lesson}`)}
-        />
+      <PracticeSessionLayout accent="teal">
+        <div className="sesh-res">
+          <div className="sesh-res-top">
+            {/* SVG ring */}
+            <div style={{ position: "relative", width: 184, height: 184 }}>
+              <svg width="184" height="184" viewBox="0 0 184 184">
+                <circle cx="92" cy="92" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="12" />
+                <circle
+                  cx="92" cy="92" r={r} fill="none"
+                  stroke={ringColor} strokeWidth="12" strokeLinecap="round"
+                  strokeDasharray={circ}
+                  strokeDashoffset={circ - (circ * pctCorrect) / 100}
+                  transform="rotate(-90 92 92)"
+                  style={{ filter: `drop-shadow(0 0 8px ${ringColor})` }}
+                />
+              </svg>
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: 46, fontWeight: 800, letterSpacing: -1, color: "#F4F4F8" }}>{pctCorrect}%</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(244,244,248,0.56)", letterSpacing: 0.5 }}>{result.correct} DE {total}</span>
+              </div>
+            </div>
+
+            <div className="sesh-res-title">{headline}</div>
+
+            <div className="sesh-res-stats">
+              <div className="sesh-stat good">
+                <span className="v">{result.correct}</span>
+                <span className="k">Correctas</span>
+              </div>
+              <div className="sesh-stat bad">
+                <span className="v">{result.incorrect}</span>
+                <span className="k">Para repasar</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="sesh-res-foot">
+            {wrongItems.length > 0 && (
+              <button className="sesh-btn sesh-btn-red" onClick={repeatWrong}>
+                Repetir las {wrongItems.length} que fallé
+              </button>
+            )}
+            <button className="sesh-btn sesh-btn-ghost" onClick={exit}>Terminar</button>
+          </div>
+        </div>
       </PracticeSessionLayout>
     );
   }
 
   return (
-    <PracticeSessionLayout>
+    <PracticeSessionLayout accent="teal">
       <PracticeSessionHeader
-        moduleName="Kanji"
-        lesson={lesson}
-        lessonTitle={lessonTitle}
-        progressCurrent={currentQuestionIndex + 1}
-        progressTotal={questions.length}
-        progressPct={practiceProgressPct}
-        accentColor="#4ECDC4"
-        accentSurface="rgba(78,205,196,0.14)"
-        onExit={() => router.push(`/practicar/kanji?lesson=${lesson}`)}
+        typeLabel="Kanji"
+        lesson={`L${lesson} · ${lessonTitle}`}
+        progressCurrent={idx}
+        progressTotal={total}
+        onExit={exit}
       />
 
-      <div style={{ marginTop: 12, flex: 1, display: "flex", flexDirection: "column", minHeight: 0, paddingBottom: "max(24px, env(safe-area-inset-bottom, 24px))" }}>
-        {practiceResult ? (
-          <div
-            style={{
-              background: "#1E2235",
-              borderRadius: "24px",
-              padding: "22px 20px",
-              border: "1px solid rgba(255,255,255,0.08)",
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-              flex: 1,
-              justifyContent: "center",
-            }}
-          >
-            <div>
-              <p style={{ margin: 0, fontSize: "22px", fontWeight: 800, color: "#FFFFFF" }}>Sesión completada</p>
-              <div
-                style={{
-                  display: "inline-flex",
-                  marginTop: "8px",
-                  background: "rgba(78,205,196,0.15)",
-                  color: "#4ECDC4",
-                  borderRadius: "999px",
-                  padding: "7px 11px",
-                  fontSize: "12px",
-                  fontWeight: 800,
-                }}
-              >
-                {getKanjiSessionTag(sessionContext)} · L{lesson}
-              </div>
-            </div>
-            <p style={{ margin: 0, fontSize: "14px", color: "rgba(255,255,255,0.65)", lineHeight: 1.4 }}>
-              {practiceResult.practiced} ítems · {practiceResult.correct} correctas ·{" "}
-              {practiceResult.incorrect} incorrectas
-            </p>
-            <div
-              style={{
-                background: "rgba(255,255,255,0.06)",
-                borderRadius: "18px",
-                padding: "12px 14px",
-              }}
-            >
-              <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, letterSpacing: "0.08em", color: "rgba(255,255,255,0.4)" }}>
-                QUÉ SIGUE
-              </p>
-              <p style={{ margin: "5px 0 0", fontSize: "15px", fontWeight: 800, color: "#FFFFFF" }}>
-                {nextAction.label}
-              </p>
-              <p style={{ margin: "3px 0 0", fontSize: "13px", color: "rgba(255,255,255,0.42)", lineHeight: 1.35 }}>
-                {nextAction.helper}
-              </p>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-              <button
-                onClick={() => startSession(sessionContext)}
-                style={{
-                  padding: "13px 16px",
-                  borderRadius: "999px",
-                  border: "none",
-                  cursor: "pointer",
-                  background: "rgba(255,255,255,0.10)",
-                  color: "#FFFFFF",
-                  fontWeight: 800,
-                  fontSize: "14px",
-                }}
-              >
-                Otra sesión
-              </button>
-              <button
-                onClick={() => router.push(`/practicar/kanji?lesson=${lesson}`)}
-                style={{
-                  padding: "13px 16px",
-                  borderRadius: "999px",
-                  border: "none",
-                  cursor: "pointer",
-                  background: "#4ECDC4",
-                  color: "#1A1A2E",
-                  fontWeight: 800,
-                  fontSize: "14px",
-                }}
-              >
-                Volver al módulo
-              </button>
-            </div>
-          </div>
-        ) : currentQuestion ? (
+      <div style={{ marginTop: 14, flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        {q && (
           <>
-            {/* Question card — grows to fill space */}
-            <div
-              style={{
-                position: "relative",
-                overflow: "hidden",
-                background: "#1E2235",
-                borderRadius: 20,
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "1px solid rgba(255,255,255,0.08)",
-                textAlign: "center",
-                padding: "24px 20px",
-              }}
-            >
-              {/* Corner fold */}
-              <div style={{ position: "absolute", top: 0, right: 0, width: 40, height: 40, background: "#4ECDC4", borderBottomLeftRadius: 40 }} />
-
-              <p
-                style={{
-                  fontSize: "clamp(32px, 12vw, 72px)",
-                  fontWeight: 800,
-                  color: "#FFFFFF",
-                  margin: 0,
-                  fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                  lineHeight: 1.1,
-                }}
-              >
-                {currentQuestion.item.kanji}
-              </p>
-              <p style={{ margin: "16px 0 0", fontSize: 13, color: "rgba(255,255,255,0.42)", fontStyle: "italic" }}>
-                {currentQuestion.item.es}
-              </p>
-              <p style={{ margin: "12px 0 0", fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: "0.02em" }}>
-                Elige la lectura correcta
-              </p>
+            {/* Item card */}
+            <div className="sesh-itemcard">
+              <div className="sesh-jp-word">{q.item.kanji}</div>
+              <div className="sesh-hint">{q.item.es}</div>
+              <div className="sesh-prompt">Elige la lectura correcta</div>
             </div>
 
-            {/* Answer grid — anchored to bottom */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 10,
-                paddingTop: 12,
-              }}
-            >
-              {currentQuestion.options.map((option) => {
-                const isSelected = selectedOption === option;
-                const isCorrectOption = option === currentQuestion.item.hira;
-                let background = "rgba(255,255,255,0.08)";
-                let color = "#FFFFFF";
-
-                if (quizPhase === "feedback") {
-                  if (isCorrectOption) { background = "#4ECDC4"; color = "#FFFFFF"; }
-                  else if (isSelected) { background = "#E63946"; color = "#FFFFFF"; }
+            {/* Answer grid */}
+            <div className="sesh-answers">
+              {q.options.map((opt) => {
+                let cls = "sesh-ans sesh-ans-jp";
+                if (phase === "feedback") {
+                  cls += " locked";
+                  if (opt === q.item.hira) cls += " correct";
+                  else if (opt === selected) cls += " wrong";
+                  else cls += " muted";
                 }
-
                 return (
-                  <button
-                    key={option}
-                    onClick={() => handleOption(option)}
-                    disabled={quizPhase === "feedback"}
-                    style={{
-                      padding: "18px 10px",
-                      borderRadius: 16,
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      cursor: quizPhase === "feedback" ? "default" : "pointer",
-                      background,
-                      color,
-                      fontSize: 22,
-                      fontWeight: 800,
-                      transition: "background 0.15s",
-                      textAlign: "center",
-                      fontFamily: "var(--font-noto-sans-jp), sans-serif",
-                      minHeight: 72,
-                    }}
-                  >
-                    {option}
+                  <button key={opt} className={cls} onClick={() => choose(opt)}>
+                    {opt}
                   </button>
                 );
               })}
             </div>
+
+            {/* Feedback + Continuar */}
+            {phase === "feedback" && (
+              <div className="sesh-feedback">
+                {isCorrect ? (
+                  <div className="sesh-fbline ok">
+                    <span className="sesh-fbbadge ok">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M4 12.5l5 5L20 6.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                    ¡Correcto!
+                  </div>
+                ) : (
+                  <div className="sesh-fbline no">
+                    <span className="sesh-fbbadge no">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                      </svg>
+                    </span>
+                    Casi —&nbsp;<span className="sub">la respuesta es «{q.item.hira}»</span>
+                  </div>
+                )}
+                <button
+                  className={`sesh-btn ${isCorrect ? "sesh-btn-green" : "sesh-btn-red"}`}
+                  onClick={advance}
+                >
+                  {idx + 1 < total ? "Continuar" : "Ver resultados"}
+                </button>
+              </div>
+            )}
           </>
-        ) : null}
+        )}
       </div>
     </PracticeSessionLayout>
   );
