@@ -30,8 +30,8 @@
   --color-accent-soft: rgba(78,205,196,0.14);
   --color-highlight-soft: rgba(230, 57, 70, 0.16);
   --color-bg: #0D0D1A;
-  --color-surface: rgba(255,255,255,0.06);
-  --color-surface-muted: rgba(255,255,255,0.04);
+  --color-surface: #16161F;
+  --color-surface-muted: #1C1C28;
   --color-text: #FFFFFF;
   --color-text-muted: rgba(255,255,255,0.52);
   --color-border: rgba(255,255,255,0.09);
@@ -43,8 +43,8 @@
   --radius-md: 18px;
   --radius-lg: 24px;
   --radius-pill: 999px;
-  --shadow-card: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07);
-  --shadow-raised: 0 16px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.09);
+  --shadow-card: 0 6px 18px rgba(0,0,0,0.28);
+  --shadow-raised: 0 12px 28px rgba(0,0,0,0.34);
   --container-max: 760px;
   --page-padding: 16px;
   --app-sticky-offset: 88px;
@@ -148,12 +148,10 @@ a:focus-visible {
 }
 
 .ds-card {
-  background: rgba(255,255,255,0.06);
+  background: #16161F;
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: var(--radius-lg);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 32px rgba(0,0,0,0.30);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: var(--shadow-card);
 }
 
 .ds-btn,
@@ -239,9 +237,7 @@ a:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: linear-gradient(180deg, rgba(13,13,26,0.95) 60%, rgba(13,13,26,0));
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: #0D0D1A;
   border: none;
   box-shadow: none;
 }
@@ -252,7 +248,6 @@ a:focus-visible {
   background: transparent;
   border: 0;
   box-shadow: none;
-  backdrop-filter: none;
 }
 
 .appNavBrand {
@@ -335,7 +330,7 @@ a:focus-visible {
 .appNavLink:hover,
 .appMenuButton:hover {
   color: rgba(255,255,255,0.75);
-  background: rgba(255,255,255,0.06);
+  background: #1C1C28;
 }
 
 .appNavLink.active,
@@ -357,9 +352,7 @@ a:focus-visible {
   right: var(--page-padding);
   min-width: 220px;
   padding: 0;
-  background: rgba(26,26,46,0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #1C1C28;
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.4);
@@ -395,7 +388,7 @@ a:focus-visible {
 }
 
 .appMenuItem:hover {
-  background: rgba(255,255,255,0.06);
+  background: #16161F;
   color: #FFFFFF;
 }
 
@@ -445,83 +438,57 @@ a:focus-visible {
 
 .bottom-nav-wrap {
   position: fixed;
-  bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  bottom: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  pointer-events: none;
-}
-
-/* Fade gradient behind the pill */
-.bottom-nav-wrap::before {
-  content: '';
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: 130px;
-  background: linear-gradient(to top, #0D0D1A 0%, rgba(13,13,26,0.85) 55%, rgba(13,13,26,0) 100%);
-  pointer-events: none;
-  z-index: -1;
+  height: calc(60px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: #0D0D1A;
+  border-top: 1px solid rgba(255,255,255,0.07);
 }
 
 .bottom-nav-pill {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  margin: 0 16px;
-  padding: 10px 8px;
-  background: rgba(26,26,46,0.70);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 22px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-  pointer-events: all;
+  gap: 0;
+  height: 60px;
+  margin: 0;
+  padding: 0 8px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
-/* Tab items — transición en CSS pura, no inline styles */
 .nav-tab {
+  flex: 1;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0px;
+  gap: 4px;
   text-decoration: none;
-  padding: 10px 14px;
-  border-radius: 14px;
+  padding: 6px 0;
+  border-radius: 0;
   background: transparent;
   box-shadow: none;
   overflow: hidden;
-  transition:
-    background 0.24s ease,
-    box-shadow 0.24s ease,
-    padding 0.24s ease,
-    gap 0.24s ease;
+  color: rgba(244,244,248,0.35);
+  transition: color 0.15s ease;
 }
 
 .nav-tab.active {
-  background: #E63946;
-  box-shadow: 0 6px 18px rgba(230,57,70,0.40);
-  padding: 10px 20px;
-  gap: 8px;
+  color: #E63946;
 }
 
 .nav-tab-label {
-  font-size: 13px;
-  font-weight: 800;
-  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  color: currentColor;
   line-height: 1;
   white-space: nowrap;
-  max-width: 0px;
-  opacity: 0;
-  overflow: hidden;
-  transition:
-    max-width 0.24s ease,
-    opacity 0.20s ease;
-}
-
-.nav-tab.active .nav-tab-label {
-  max-width: 90px;
-  opacity: 1;
 }
 
 .section-label {
@@ -575,40 +542,6 @@ a:focus-visible {
 }
 .miniPost:disabled{ opacity: .45; cursor: not-allowed; }
 
-/* Cards glassmorphism */
-.card, [class*="card"], [class*="Card"] {
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-}
-
-/* Ambient glow global */
-body::before {
-  content: '';
-  position: fixed;
-  top: -120px;
-  left: -100px;
-  width: 360px;
-  height: 360px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(78,205,196,0.20) 0%, rgba(78,205,196,0) 68%);
-  filter: blur(8px);
-  pointer-events: none;
-  z-index: 0;
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  bottom: 40px;
-  right: -120px;
-  width: 340px;
-  height: 340px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(230,57,70,0.13) 0%, rgba(230,57,70,0) 70%);
-  filter: blur(8px);
-  pointer-events: none;
-  z-index: 0;
-}
 
 /* ═══════════════════════════════════════════════════════════════
    PAGE HEADER — design by Claude Design

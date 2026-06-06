@@ -540,6 +540,7 @@ export default function HomePage() {
   return (
     <div
       style={{
+        background: "#0D0D1A",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
@@ -547,8 +548,6 @@ export default function HomePage() {
         position: "relative",
       }}
     >
-      {/* Ambient teal glow top-left */}
-      <div style={{ position: "fixed", top: -160, left: -100, width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(78,205,196,0.10) 0%, rgba(78,205,196,0) 60%)", pointerEvents: "none", zIndex: 0 }} />
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", minHeight: "100%" }}>
       {/* ── Tema de la semana ── */}
       <div style={{ padding: "14px 16px 12px" }}>
@@ -569,7 +568,7 @@ export default function HomePage() {
           }}
           style={{
             position: "relative",
-            background: "#1E2235",
+            background: "#16161F",
             borderRadius: "16px",
             padding: "20px 20px 20px",
             overflow: "hidden",
@@ -594,7 +593,7 @@ export default function HomePage() {
             {effectiveIsAdmin && !editingTopic && (
               <button
                 onClick={e => { e.stopPropagation(); setTopicDraft({ kana: topic.kana, prompt: topic.prompt }); setEditingTopic(true); }}
-                style={{ background: "rgba(255,255,255,0.06)", border: "none", borderRadius: 8, padding: "4px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, marginRight: 32 }}
+                style={{ background: "#16161F", border: "none", borderRadius: 8, padding: "4px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, marginRight: 32 }}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                   <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="rgba(255,255,255,0.45)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -611,13 +610,13 @@ export default function HomePage() {
                 value={topicDraft.kana}
                 onChange={e => setTopicDraft(d => ({ ...d, kana: e.target.value }))}
                 placeholder="Texto en kana (ej. きょうのてんき)"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 10, padding: "10px 14px", color: "#FFFFFF", fontSize: 16, fontFamily: "var(--font-noto-serif-jp), serif", outline: "none", width: "100%", boxSizing: "border-box" }}
+                style={{ background: "#16161F", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 10, padding: "10px 14px", color: "#FFFFFF", fontSize: 16, fontFamily: "var(--font-noto-serif-jp), serif", outline: "none", width: "100%", boxSizing: "border-box" }}
               />
               <input
                 value={topicDraft.prompt}
                 onChange={e => setTopicDraft(d => ({ ...d, prompt: e.target.value }))}
                 placeholder="Prompt en español"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 10, padding: "10px 14px", color: "#FFFFFF", fontSize: 14, outline: "none", width: "100%", boxSizing: "border-box" }}
+                style={{ background: "#16161F", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 10, padding: "10px 14px", color: "#FFFFFF", fontSize: 14, outline: "none", width: "100%", boxSizing: "border-box" }}
               />
               <div style={{ display: "flex", gap: 8 }}>
                 <button
@@ -635,7 +634,7 @@ export default function HomePage() {
                 </button>
                 <button
                   onClick={() => setEditingTopic(false)}
-                  style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.45)", border: "none", borderRadius: 10, padding: "10px 16px", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
+                  style={{ background: "#16161F", color: "rgba(255,255,255,0.45)", border: "none", borderRadius: 10, padding: "10px 16px", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
                 >
                   Cancelar
                 </button>
@@ -686,14 +685,6 @@ export default function HomePage() {
                 overflow: "hidden",
                 boxShadow: "0 0 0 1.5px rgba(78,205,196,0.35), 0 6px 28px rgba(78,205,196,0.14)",
               }}>
-                {/* teal glow blob */}
-                <div style={{
-                  position: "absolute", top: -24, right: 52, width: 110, height: 110,
-                  borderRadius: "50%",
-                  background: "radial-gradient(circle, rgba(78,205,196,0.28) 0%, rgba(78,205,196,0) 70%)",
-                  pointerEvents: "none",
-                }} />
-
                 {/* icon + text */}
                 <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, position: "relative" }}>
                   {/* winding-path icon */}
@@ -760,7 +751,7 @@ export default function HomePage() {
         <div style={{ padding: "0 16px 16px" }}>
           <div
             style={{
-              background: "#1E2235",
+              background: "#16161F",
               borderRadius: "14px",
               padding: "14px",
               border: "1px solid rgba(255,255,255,0.06)",
@@ -845,7 +836,7 @@ export default function HomePage() {
           /* Skeleton cards */
           <>
             {[0, 1, 2].map((i) => (
-              <div key={i} style={{ background: "#1E2235", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div key={i} style={{ background: "#16161F", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" }}>
                 {/* Shimmer image placeholder */}
                 {i < 2 && <div style={{ width: "100%", height: 200, background: "linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 75%)", backgroundSize: "400% 100%", animation: "shimmer 1.4s ease-in-out infinite" }} />}
                 <div style={{ padding: "14px 16px" }}>
@@ -866,7 +857,7 @@ export default function HomePage() {
             <style>{`@keyframes shimmer { 0%{background-position:100% 50%} 100%{background-position:-100% 50%} }`}</style>
           </>
         ) : feedError && posts.length === 0 ? (
-          <div style={{ background: "#1E2235", borderRadius: "14px", padding: "28px", textAlign: "center", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ background: "#16161F", borderRadius: "14px", padding: "28px", textAlign: "center", border: "1px solid rgba(255,255,255,0.06)" }}>
             <p style={{ fontSize: 15, color: "#FF6470", fontWeight: 700, margin: "0 0 14px" }}>{feedError}</p>
             <button onClick={reloadFeed}
               style={{ border: "none", borderRadius: "8px", background: "#4ECDC4", color: "#1A1A2E", padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
@@ -874,7 +865,7 @@ export default function HomePage() {
             </button>
           </div>
         ) : posts.length === 0 ? (
-          <div style={{ background: "#1E2235", borderRadius: "14px", padding: "32px 20px", textAlign: "center", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ background: "#16161F", borderRadius: "14px", padding: "32px 20px", textAlign: "center", border: "1px solid rgba(255,255,255,0.06)" }}>
             <p style={{ fontSize: 15, fontWeight: 700, color: "#FFFFFF", margin: "0 0 6px" }}>Sé el primero en publicar</p>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.42)", margin: 0 }}>Usa el tema de esta semana como inspiración.</p>
           </div>
@@ -894,7 +885,7 @@ export default function HomePage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.32, delay: Math.min(index, 6) * 0.055, ease: [0.22, 1, 0.36, 1] }}
                   style={{
-                    background: "#1E2235",
+                    background: "#16161F",
                     borderRadius: "16px",
                     overflow: "hidden",
                     border: "1px solid rgba(255,255,255,0.06)",
@@ -942,7 +933,7 @@ export default function HomePage() {
                             aria-label="Opciones"
                           >···</button>
                           {openMenuId === post.id && (
-                            <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 10, background: "#252A40", borderRadius: "12px", boxShadow: "0 4px 24px rgba(0,0,0,0.4)", overflow: "hidden", minWidth: 130, border: "1px solid rgba(255,255,255,0.08)" }}>
+                            <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 10, background: "#1C1C28", borderRadius: "12px", boxShadow: "0 4px 24px rgba(0,0,0,0.4)", overflow: "hidden", minWidth: 130, border: "1px solid rgba(255,255,255,0.08)" }}>
                               <button onClick={() => startEdit(post)}
                                 style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#FFFFFF" }}>
                                 Editar
@@ -964,7 +955,7 @@ export default function HomePage() {
                           autoFocus value={editContent}
                           onChange={(e) => setEditContent(e.target.value)}
                           onKeyDown={(e) => { if (e.key === "Escape") { setEditingPostId(null); setEditContent(""); } }}
-                          style={{ width: "100%", border: "none", borderBottom: "2px solid #4ECDC4", background: "rgba(255,255,255,0.06)", borderRadius: "8px 8px 0 0", padding: "8px 10px", fontSize: 15, fontFamily: "var(--font-noto-sans-jp), inherit", color: "#FFFFFF", resize: "none", outline: "none", lineHeight: 1.5, boxSizing: "border-box", minHeight: 72 }}
+                          style={{ width: "100%", border: "none", borderBottom: "2px solid #4ECDC4", background: "#16161F", borderRadius: "8px 8px 0 0", padding: "8px 10px", fontSize: 15, fontFamily: "var(--font-noto-sans-jp), inherit", color: "#FFFFFF", resize: "none", outline: "none", lineHeight: 1.5, boxSizing: "border-box", minHeight: 72 }}
                         />
                         <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                           <button onClick={() => handleSaveEdit(post.id)} disabled={savingEdit || !editContent.trim()}
@@ -1041,7 +1032,7 @@ export default function HomePage() {
                       {/* Comments button */}
                       <button
                         onClick={() => setReplyPostId(post.id)}
-                        style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "8px", padding: "6px 10px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.55)" }}
+                        style={{ display: "flex", alignItems: "center", gap: 5, background: "#1C1C28", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "8px", padding: "6px 10px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.55)" }}
                       >
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
                           <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1052,7 +1043,7 @@ export default function HomePage() {
                       {/* Share — pushed to the right */}
                       <button
                         onClick={() => handleShare(post, profiles[post.user_id])}
-                        style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "8px", padding: "6px 10px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.55)", marginLeft: "auto" }}
+                        style={{ display: "flex", alignItems: "center", gap: 5, background: "#1C1C28", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "8px", padding: "6px 10px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.55)", marginLeft: "auto" }}
                         aria-label="Compartir"
                       >
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
@@ -1108,8 +1099,6 @@ export default function HomePage() {
               style={{
                 position: "fixed", inset: 0, zIndex: 200,
                 background: "rgba(0,0,0,0.88)",
-                backdropFilter: "blur(10px)",
-                WebkitBackdropFilter: "blur(10px)",
               }}
             />
 

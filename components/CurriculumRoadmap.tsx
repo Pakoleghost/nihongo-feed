@@ -827,7 +827,6 @@ export default function CurriculumRoadmap({ currentLesson, currentModuleNumber }
           justify-content: center;
           padding: 16px;
           background: rgba(10, 10, 22, 0.48);
-          backdrop-filter: blur(7px);
           animation: roadmapFadeIn 160ms ease both;
         }
 
@@ -838,9 +837,7 @@ export default function CurriculumRoadmap({ currentLesson, currentModuleNumber }
           padding: 8px 18px calc(22px + env(safe-area-inset-bottom, 0px));
           border: 1px solid rgba(255, 255, 255, 0.14);
           border-radius: 26px 26px 20px 20px;
-          background: rgba(255,255,255,0.06);
-          backdrop-filter: blur(20px) saturate(140%);
-          -webkit-backdrop-filter: blur(20px) saturate(140%);
+          background: #16161F;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25);
           animation: roadmapSheetUp 210ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
         }
@@ -952,9 +949,7 @@ export default function CurriculumRoadmap({ currentLesson, currentModuleNumber }
         .roadmap-project {
           border: 1px solid rgba(255,255,255,0.10);
           border-radius: 18px;
-          background: rgba(255,255,255,0.06);
-          backdrop-filter: blur(20px) saturate(140%);
-          -webkit-backdrop-filter: blur(20px) saturate(140%);
+          background: #16161F;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25);
           overflow: hidden;
         }

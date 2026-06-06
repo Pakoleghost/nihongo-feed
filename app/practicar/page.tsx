@@ -133,8 +133,7 @@ export default function PracticarPage() {
           <div style={{
             display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14,
             borderRadius: 22, padding: "18px",
-            background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.07)",
-            backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+            background: "#16161F", border: "1px solid rgba(255,255,255,0.07)",
           }}>
             <button onClick={() => setCount((c) => Math.max(3, c - 1))} disabled={count <= 3} style={{
               width: 52, height: 52, flexShrink: 0, borderRadius: "50%",

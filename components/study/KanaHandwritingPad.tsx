@@ -262,7 +262,6 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
                 position: "absolute",
                 inset: 0,
                 background: "rgba(255, 248, 231, 0.96)",
-                backdropFilter: "blur(6px)",
                 display: "grid",
                 alignContent: "center",
                 justifyItems: "center",

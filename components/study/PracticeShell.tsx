@@ -146,7 +146,6 @@ export default function PracticeShell({
         inset: 0,
         zIndex: 90,
         background: "rgba(255, 248, 231, 0.94)",
-        backdropFilter: "blur(10px)",
         transform: visible ? "translateY(0)" : "translateY(100%)",
         opacity: visible ? 1 : 0,
         transition: "transform 260ms ease, opacity 220ms ease",

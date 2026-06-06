@@ -266,10 +266,6 @@ export default function RecursosPage() {
         position: "relative",
       }}
     >
-      {/* Teal glow — top left */}
-      <div style={{ position: "fixed", top: -120, left: -100, width: 360, height: 360, borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: "radial-gradient(circle, rgba(78,205,196,0.20) 0%, rgba(78,205,196,0) 68%)", filter: "blur(8px)" }} />
-      {/* Red glow — bottom right */}
-      <div style={{ position: "fixed", bottom: 40, right: -120, width: 340, height: 340, borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: "radial-gradient(circle, rgba(230,57,70,0.13) 0%, rgba(230,57,70,0) 70%)", filter: "blur(8px)" }} />
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", minHeight: "100%" }}>
 
       <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: "18px" }}>
@@ -287,11 +283,9 @@ export default function RecursosPage() {
           <form
             onSubmit={handleAdminSubmit}
             style={{
-              background: "rgba(255,255,255,0.06)",
+              background: "#16161F",
               borderRadius: "24px",
               padding: "16px",
-              backdropFilter: "blur(20px) saturate(140%)",
-              WebkitBackdropFilter: "blur(20px) saturate(140%)",
               border: "1px solid rgba(255,255,255,0.10)",
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
               display: "grid",
@@ -429,7 +423,7 @@ export default function RecursosPage() {
             Cargando…
           </div>
         ) : grouped.length === 0 ? (
-          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: "16px", padding: "40px 24px", textAlign: "center", backdropFilter: "blur(20px) saturate(140%)", WebkitBackdropFilter: "blur(20px) saturate(140%)", border: "1px solid rgba(255,255,255,0.10)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)" }}>
+          <div style={{ background: "#16161F", borderRadius: "16px", padding: "40px 24px", textAlign: "center", border: "1px solid rgba(255,255,255,0.10)", boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }}>
             <p style={{ fontSize: "32px", margin: "0 0 12px" }}>📂</p>
             <p style={{ fontSize: "16px", fontWeight: 700, color: "#FFFFFF", margin: "0 0 6px" }}>Sin material aún</p>
             <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.42)", margin: 0 }}>El profesor subirá los archivos aquí.</p>
@@ -492,7 +486,7 @@ export default function RecursosPage() {
                   style={{ overflow: "hidden" }}
                 >
               {items.length === 0 ? (
-                <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: "12px", padding: "16px", color: "rgba(255,255,255,0.25)", fontSize: "13px", fontWeight: 600, textAlign: "center", marginBottom: 12 }}>
+                <div style={{ background: "#1C1C28", borderRadius: "12px", padding: "16px", color: "rgba(255,255,255,0.25)", fontSize: "13px", fontWeight: 600, textAlign: "center", marginBottom: 12 }}>
                   Carpeta vacía
                 </div>
               ) : (
@@ -511,14 +505,12 @@ export default function RecursosPage() {
                         disabled={!item.url}
                         style={{
                           position: "relative",
-                          background: "rgba(255,255,255,0.06)",
+                          background: "#16161F",
                           borderRadius: "14px",
                           padding: "14px 52px 14px 16px",
                           display: "flex",
                           alignItems: "center",
                           gap: "14px",
-                          backdropFilter: "blur(20px) saturate(140%)",
-                          WebkitBackdropFilter: "blur(20px) saturate(140%)",
                           border: "1px solid rgba(255,255,255,0.10)",
                           boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
                           cursor: item.url ? "pointer" : "default",

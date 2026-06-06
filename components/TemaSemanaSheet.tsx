@@ -416,7 +416,7 @@ export default function TemaSemanaSheet({ onClose, onUseSentence, tema, fallback
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         transition={{ duration: 0.18 }}
         onClick={onClose}
-        style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.72)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
+        style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.72)" }}
       />
 
       <motion.div

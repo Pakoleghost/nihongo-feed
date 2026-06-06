@@ -111,7 +111,7 @@ export default function RepliesSheet({ postId, postContent, postAuthorName, user
         exit={{ opacity: 0 }}
         transition={{ duration: 0.18 }}
         onClick={onClose}
-        style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 400, backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
+        style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 400 }}
       />
 
       {/* Panel */}
@@ -242,7 +242,7 @@ export default function RepliesSheet({ postId, postContent, postAuthorName, user
               flex: 1,
               border: "1px solid rgba(255,255,255,0.10)",
               borderRadius: 12,
-              background: "rgba(255,255,255,0.06)",
+              background: "#16161F",
               padding: "10px 13px",
               fontSize: 14,
               fontFamily: "var(--font-noto-sans-jp), inherit",

@@ -7885,7 +7885,6 @@ function StudyContent() {
               inset: 0,
               zIndex: 95,
               background: "rgba(26, 26, 46, 0.18)",
-              backdropFilter: "blur(10px)",
               display: "grid",
               alignItems: "end",
               padding: "12px",

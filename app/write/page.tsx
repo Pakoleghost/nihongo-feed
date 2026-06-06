@@ -429,7 +429,6 @@ function WriteContent() {
           top: 0;
           z-index: 20;
           background: color-mix(in srgb, var(--color-bg) 92%, transparent);
-          backdrop-filter: blur(10px);
           padding: var(--space-2) 0 var(--space-4);
           margin-bottom: var(--space-2);
         }

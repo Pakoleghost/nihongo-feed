@@ -63,9 +63,9 @@ function ClasesIcon({ color }: { color: string }) {
 
 const tabs = [
   { href: "/",          label: "Comunidad", Icon: HomeIcon,     prefetch: true  },
+  { href: "/clases",    label: "Clases",    Icon: ClasesIcon,   prefetch: false },
   { href: "/practicar", label: "Practicar",  Icon: EstudiarIcon, prefetch: true  },
   { href: "/recursos",  label: "Recursos",  Icon: RecursosIcon, prefetch: false },
-  { href: "/clases",    label: "Clases",    Icon: ClasesIcon,   prefetch: false },
 ] as const;
 
 export default function BottomNav() {
@@ -80,7 +80,7 @@ export default function BottomNav() {
             href === "/practicar" ? (pathname === "/practicar" || pathname.startsWith("/practicar/") || pathname === "/kana" || pathname.startsWith("/kana/")) :
             href === "/clases" ? (pathname === "/clases" || pathname.startsWith("/clases/")) :
             pathname === href || pathname.startsWith(href + "/");
-          const color = isActive ? "#FFFFFF" : "rgba(255,255,255,0.38)";
+          const color = isActive ? "#E63946" : "rgba(244,244,248,0.35)";
 
           return (
             <Link
@@ -89,7 +89,7 @@ export default function BottomNav() {
               prefetch={prefetch}
               className={`nav-tab${isActive ? " active" : ""}`}
             >
-              <Icon color={isActive ? "#FFFFFF" : "rgba(255,255,255,0.38)"} />
+              <Icon color={color} />
               <span className="nav-tab-label">{label}</span>
             </Link>
           );

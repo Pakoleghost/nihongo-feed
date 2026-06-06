@@ -214,7 +214,6 @@ export default function EditProfilePage() {
           top: 0;
           z-index: 10;
           background: rgba(246,247,248,.84);
-          backdrop-filter: blur(10px);
           padding: 10px 0;
         }
         .ghostBtn {

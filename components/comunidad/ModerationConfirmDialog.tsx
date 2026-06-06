@@ -63,11 +63,9 @@ export default function ModerationConfirmDialog({
         style={{
           width: "min(100%, 390px)",
           borderRadius: 28,
-          background: "rgba(255,255,255,0.06)",
+          background: "#16161F",
           border: "1px solid rgba(255,255,255,0.09)",
           boxShadow: "0 16px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.09)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
           padding: 20,
           display: "grid",
           gap: 14,
