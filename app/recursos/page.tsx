@@ -7,20 +7,20 @@ import { useStudentViewMode } from "@/lib/use-student-view-mode";
 
 function FileIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="#E63946" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <polyline points="14 2 14 8 20 8" stroke="#E63946" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <line x1="16" y1="13" x2="8" y2="13" stroke="#E63946" strokeWidth="1.8" strokeLinecap="round" />
-      <line x1="16" y1="17" x2="8" y2="17" stroke="#E63946" strokeWidth="1.8" strokeLinecap="round" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points="14 2 14 8 20 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
 
 function LinkIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="#4ECDC4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="#4ECDC4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -270,8 +270,15 @@ export default function RecursosPage() {
 
       <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: "18px" }}>
         {effectiveIsAdmin && (
-          <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 4 }}>
-            <button type="button" className="ph-btn" onClick={() => setShowAdminPanel((v) => !v)}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 4, marginBottom: -8 }}>
+            <span style={{ fontSize: "17px", fontWeight: 800, letterSpacing: "-0.2px", color: "#F4F4F8" }}>Materiales del curso</span>
+            <button type="button" onClick={() => setShowAdminPanel((v) => !v)} style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              height: 36, padding: "0 14px 0 11px", borderRadius: 999,
+              background: "transparent", border: "1.5px solid rgba(78,205,196,0.45)",
+              color: "#4ECDC4", fontFamily: "inherit", fontSize: "13.5px", fontWeight: 800,
+              cursor: "pointer", whiteSpace: "nowrap",
+            }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"/>
               </svg>
@@ -423,10 +430,12 @@ export default function RecursosPage() {
             Cargando…
           </div>
         ) : grouped.length === 0 ? (
-          <div style={{ background: "#16161F", borderRadius: "16px", padding: "40px 24px", textAlign: "center", border: "1px solid rgba(255,255,255,0.10)", boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }}>
-            <p style={{ fontSize: "32px", margin: "0 0 12px" }}>📂</p>
-            <p style={{ fontSize: "16px", fontWeight: 700, color: "#FFFFFF", margin: "0 0 6px" }}>Sin material aún</p>
-            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.42)", margin: 0 }}>El profesor subirá los archivos aquí.</p>
+          <div style={{ background: "#16161F", borderRadius: "16px", padding: "40px 24px", textAlign: "center", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div style={{ width: 84, height: 84, borderRadius: 24, background: "#1C1C28", border: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "rgba(244,244,248,0.3)" }}>
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <p style={{ fontSize: "19px", fontWeight: 800, color: "#F4F4F8", margin: "0 0 8px" }}>Sin material aún</p>
+            <p style={{ fontSize: "14px", color: "rgba(244,244,248,0.5)", margin: 0, lineHeight: 1.5, maxWidth: "28ch", marginInline: "auto" }}>El profesor subirá los archivos aquí cuando estén listos.</p>
           </div>
         ) : (
           grouped.map(([folder, items]) => {
@@ -445,21 +454,21 @@ export default function RecursosPage() {
               >
                 <div style={{
                   display: "flex", alignItems: "center", gap: "7px", flex: 1,
-                  background: isOpen ? "rgba(78,205,196,0.15)" : "rgba(255,255,255,0.07)",
+                  background: isOpen ? "#F4F4F8" : "#16161F",
                   borderRadius: "999px",
-                  padding: "6px 12px 6px 8px",
-                  border: `1px solid ${isOpen ? "rgba(78,205,196,0.40)" : "rgba(255,255,255,0.12)"}`,
+                  padding: "0 12px 0 10px", height: 38,
+                  border: `1.5px solid ${isOpen ? "#F4F4F8" : "rgba(255,255,255,0.07)"}`,
                   transition: "background 140ms ease, border-color 140ms ease",
                 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                     <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"
-                      stroke={isOpen ? "#4ECDC4" : "rgba(255,255,255,0.45)"}
+                      stroke={isOpen ? "#0D0D1A" : "rgba(244,244,248,0.45)"}
                       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span style={{ fontSize: "12px", fontWeight: 800, color: isOpen ? "#4ECDC4" : "rgba(255,255,255,0.55)", letterSpacing: "0.02em", flex: 1, transition: "color 140ms ease" }}>
+                  <span style={{ fontSize: "14px", fontWeight: 700, color: isOpen ? "#0D0D1A" : "rgba(244,244,248,0.5)", flex: 1, transition: "color 140ms ease" }}>
                     {folder}
                   </span>
-                  <span style={{ fontSize: "11px", fontWeight: 600, color: "rgba(255,255,255,0.28)" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: isOpen ? "rgba(13,13,26,0.4)" : "rgba(244,244,248,0.28)" }}>
                     {items.length}
                   </span>
                 </div>
@@ -504,52 +513,57 @@ export default function RecursosPage() {
                         onClick={() => openResource(item.url)}
                         disabled={!item.url}
                         style={{
-                          position: "relative",
                           background: "#16161F",
-                          borderRadius: "14px",
-                          padding: "14px 52px 14px 16px",
+                          borderRadius: "16px",
+                          padding: "13px 14px",
                           display: "flex",
                           alignItems: "center",
-                          gap: "14px",
-                          border: "1px solid rgba(255,255,255,0.10)",
-                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
+                          gap: "13px",
+                          border: "1px solid rgba(255,255,255,0.07)",
                           cursor: item.url ? "pointer" : "default",
                           textAlign: "left",
                           width: "100%",
-                          overflow: "hidden",
                           opacity: item.url ? 1 : 0.45,
                         }}
                       >
-                        {/* Corner fold */}
-                        <div style={{ position: "absolute", top: 0, right: 0, width: 40, height: 40, background: fileResource ? "#E63946" : "#4ECDC4", borderBottomLeftRadius: 40 }} />
-
                         {/* Icon */}
                         <div style={{
-                          width: 46, height: 46, borderRadius: "12px", flexShrink: 0,
-                          background: fileResource ? "rgba(230,57,70,0.12)" : "rgba(78,205,196,0.12)",
+                          width: 44, height: 44, borderRadius: "12px", flexShrink: 0,
+                          background: "#1C1C28", border: "1px solid rgba(255,255,255,0.07)",
                           display: "flex", alignItems: "center", justifyContent: "center",
+                          color: fileResource ? "#E63946" : "#4ECDC4",
                         }}>
                           {fileResource ? <FileIcon /> : <LinkIcon />}
                         </div>
 
                         {/* Text */}
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: "15px", fontWeight: 700, color: "#FFFFFF", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <p style={{ fontSize: "15px", fontWeight: 700, color: "#F4F4F8", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {getResourceTitle(item)}
                           </p>
-                          <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.42)", margin: "3px 0 0", fontWeight: 500 }}>
-                            {ext ? ext : domain ?? "Enlace"}
-                          </p>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+                            <span style={{
+                              display: "inline-flex", alignItems: "center", height: 20, padding: "0 8px",
+                              borderRadius: 6, fontSize: "10.5px", fontWeight: 800, letterSpacing: "0.4px",
+                              background: fileResource ? "rgba(230,57,70,0.14)" : "rgba(78,205,196,0.12)",
+                              color: fileResource ? "#FF9CA3" : "#4ECDC4",
+                            }}>
+                              {fileResource ? (ext || "PDF") : "LINK"}
+                            </span>
+                            <span style={{ fontSize: "12.5px", fontWeight: 600, color: "rgba(244,244,248,0.5)" }}>
+                              {ext ? "" : domain ?? ""}
+                            </span>
+                          </div>
                         </div>
 
-                        {/* Open icon */}
+                        {/* Action icon */}
                         {fileResource ? (
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="rgba(255,255,255,0.28)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, color: "rgba(244,244,248,0.3)" }}>
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         ) : (
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" stroke="rgba(255,255,255,0.28)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, color: "rgba(244,244,248,0.3)" }}>
+                            <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         )}
                       </button>

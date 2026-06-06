@@ -66,108 +66,64 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
   return (
     <div
       style={{
-        position: "relative",
         background: "#16161F",
-        borderRadius: "14px",
-        padding: "14px 48px 14px 16px",
-        border: "1px solid rgba(255,255,255,0.10)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
+        borderRadius: "16px",
+        padding: "13px 14px",
+        border: "1px solid rgba(255,255,255,0.07)",
         display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        overflow: "hidden",
+        alignItems: "center",
+        gap: "14px",
       }}
     >
-      {/* Corner fold */}
-      <div style={{ position: "absolute", top: 0, right: 0, width: 40, height: 40, background: "#4ECDC4", borderBottomLeftRadius: 40 }} />
-
-      {/* Label row + button */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px" }}>
-        <p
-          style={{
-            fontSize: "15px",
-            fontWeight: 700,
-            color: "#FFFFFF",
-            margin: 0,
-            lineHeight: 1.35,
-            flex: 1,
-          }}
-        >
-          {entrada.label}
-        </p>
-        <a
-          href={entrada.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "5px",
-            background: "#E63946",
-            color: "#FFFFFF",
-            borderRadius: "8px",
-            padding: "7px 12px",
-            fontSize: "12px",
-            fontWeight: 800,
-            textDecoration: "none",
-            flexShrink: 0,
-            lineHeight: 1,
-          }}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-            <polygon points="5 3 19 12 5 21 5 3" fill="#FFFFFF" />
-          </svg>
-          Ver
-        </a>
+      {/* Play icon box */}
+      <div style={{
+        width: 46, height: 46, flexShrink: 0, borderRadius: 13,
+        background: "#1C1C28", border: "1px solid rgba(255,255,255,0.07)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        color: "#4ECDC4",
+      }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M8 5.5v13l11-6.5L8 5.5Z" fill="currentColor"/>
+        </svg>
       </div>
 
-      {/* Contraseña */}
-      {entrada.password ? (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-          <span
-            style={{
-              fontSize: "10px",
-              fontWeight: 800,
-              color: "rgba(255,255,255,0.38)",
-              textTransform: "uppercase",
-              letterSpacing: "0.15em",
-            }}
-          >
-            Contraseña
-          </span>
-          <code
-            style={{
-              fontSize: "13px",
-              fontWeight: 700,
-              color: "#FFFFFF",
-              background: "rgba(255,255,255,0.07)",
-              borderRadius: "6px",
-              padding: "3px 8px",
-              fontFamily: "monospace",
-              letterSpacing: "0.03em",
-            }}
-          >
-            {entrada.password}
-          </code>
-          <button
-            type="button"
-            onClick={copyPassword}
-            style={{
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              padding: "2px 6px",
-              borderRadius: "6px",
-              fontSize: "11px",
-              fontWeight: 700,
-              color: copied ? "#178A83" : "#4ECDC4",
-              transition: "color 140ms ease",
-            }}
-          >
-            {copied ? "✓ Copiada" : "Copiar"}
-          </button>
+      {/* Content */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: "15px", fontWeight: 700, color: "#F4F4F8", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {entrada.label}
         </div>
-      ) : null}
+        {entrada.password && (
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ fontSize: "10px", fontWeight: 800, color: "rgba(244,244,248,0.3)", textTransform: "uppercase", letterSpacing: "0.1em" }}>pw</span>
+            <code style={{ fontSize: "12px", fontWeight: 700, color: "rgba(244,244,248,0.6)", fontFamily: "monospace" }}>{entrada.password}</code>
+            <button type="button" onClick={copyPassword} style={{
+              border: "none", background: "transparent", cursor: "pointer",
+              padding: "1px 5px", borderRadius: 4, fontSize: "11px", fontWeight: 700,
+              color: copied ? "#178A83" : "#4ECDC4", transition: "color 140ms",
+            }}>
+              {copied ? "✓" : "Copiar"}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Action button */}
+      <a
+        href={entrada.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: "inline-flex", alignItems: "center", gap: 5,
+          background: "#E63946", color: "#fff",
+          borderRadius: 10, padding: "8px 14px",
+          fontSize: "13px", fontWeight: 800, textDecoration: "none", flexShrink: 0,
+        }}
+      >
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+          <path d="M8 5.5v13l11-6.5L8 5.5Z" fill="#fff"/>
+        </svg>
+        Ver
+      </a>
     </div>
   );
 }
@@ -198,20 +154,15 @@ function TareaSection({ notas }: { notas: NotaClase[] }) {
       {/* Card */}
       <div
         style={{
-          position: "relative",
           background: "#16161F",
           borderRadius: "14px",
-          padding: "14px 48px 14px 16px",
-          border: "1px solid rgba(255,255,255,0.10)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
+          padding: "14px 16px",
+          border: "1px solid rgba(255,255,255,0.07)",
           display: "flex",
           flexDirection: "column",
           gap: "10px",
-          overflow: "hidden",
         }}
       >
-        {/* Corner fold */}
-        <div style={{ position: "absolute", top: 0, right: 0, width: 40, height: 40, background: "#E63946", borderBottomLeftRadius: 40 }} />
 
         {/* Meta: fecha · tema */}
         {(nota.fecha || nota.tema) && (
@@ -255,7 +206,7 @@ function ColeccionView({ coleccion }: { coleccion: Coleccion }) {
           padding: "40px 24px",
           textAlign: "center",
           border: "1px solid rgba(255,255,255,0.10)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
+          boxShadow: "none",
         }}
       >
         <p style={{ fontSize: "16px", fontWeight: 700, color: "#FFFFFF", margin: "0 0 6px" }}>
@@ -287,7 +238,7 @@ function NoGroupCard({ message }: { message?: string }) {
         padding: "40px 24px",
         textAlign: "center",
         border: "1px solid rgba(255,255,255,0.10)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25)",
+        boxShadow: "none",
       }}
     >
       <div
@@ -462,37 +413,34 @@ export default function ClasesPage() {
     content = (
       <>
         {/* Group selector */}
-        <div
-          style={{
-            display: "flex",
-            gap: "8px",
-            flexWrap: "wrap",
-            marginBottom: "20px",
-          }}
-        >
-          {allSlugs.map((slug) => {
-            const active = slug === selectedSlug;
-            return (
-              <button
-                key={slug}
-                type="button"
-                onClick={() => setSelectedSlug(slug)}
-                style={{
-                  border: `1px solid ${active ? "rgba(78,205,196,0.40)" : "rgba(255,255,255,0.12)"}`,
-                  borderRadius: "999px",
-                  background: active ? "rgba(78,205,196,0.15)" : "rgba(255,255,255,0.07)",
-                  color: active ? "#4ECDC4" : "rgba(255,255,255,0.55)",
-                  padding: "9px 16px",
-                  fontSize: "13px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  transition: "background 140ms ease, color 140ms ease",
-                }}
-              >
-                {colecciones![slug].nombre}
-              </button>
-            );
-          })}
+        <div style={{ marginBottom: "16px" }}>
+          <div style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "1.6px", textTransform: "uppercase", color: "rgba(244,244,248,0.3)", marginBottom: 11 }}>
+            Grupo
+          </div>
+          <div style={{ display: "flex", gap: "8px", overflowX: "auto", margin: "0 -20px", padding: "0 20px 2px", scrollbarWidth: "none" }}>
+            {allSlugs.map((slug) => {
+              const active = slug === selectedSlug;
+              return (
+                <button
+                  key={slug}
+                  type="button"
+                  onClick={() => setSelectedSlug(slug)}
+                  style={{
+                    flexShrink: 0, border: `1.5px solid ${active ? "#F4F4F8" : "rgba(255,255,255,0.07)"}`,
+                    borderRadius: "999px",
+                    background: active ? "#F4F4F8" : "#16161F",
+                    color: active ? "#0D0D1A" : "rgba(244,244,248,0.5)",
+                    padding: "0 16px", height: 38,
+                    fontSize: "14px", fontWeight: 700,
+                    cursor: "pointer", whiteSpace: "nowrap",
+                    transition: "background 140ms ease, color 140ms ease",
+                  }}
+                >
+                  {colecciones![slug].nombre}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {currentColeccion && selectedSlug ? (
@@ -521,29 +469,11 @@ export default function ClasesPage() {
         const { coleccion } = found;
         content = (
           <>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                background: "rgba(255,255,255,0.07)",
-                borderRadius: "999px",
-                padding: "5px 12px 5px 8px",
-                border: "1px solid rgba(255,255,255,0.12)",
-                marginBottom: "16px",
-              }}
-            >
-              <div
-                style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  background: "#4ECDC4",
-                }}
-              />
-              <span style={{ fontSize: "12px", fontWeight: 800, color: "#FFFFFF" }}>
-                {coleccion.nombre}
-              </span>
+            <div style={{ marginBottom: "16px" }}>
+              <div style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "1.6px", textTransform: "uppercase", color: "rgba(244,244,248,0.3)", marginBottom: 11 }}>Grupo</div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#F4F4F8", borderRadius: "999px", padding: "0 16px", height: 38, border: "1.5px solid #F4F4F8" }}>
+                <span style={{ fontSize: "14px", fontWeight: 700, color: "#0D0D1A" }}>{coleccion.nombre}</span>
+              </div>
             </div>
             <ColeccionView coleccion={coleccion} />
             {activeNotasGroup && <TareaSection notas={notas} />}

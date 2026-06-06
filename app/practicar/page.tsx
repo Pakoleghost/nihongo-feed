@@ -7,10 +7,10 @@ import { setLastActivity } from "@/lib/streak";
 type TypeId = "kana" | "vocab" | "kanji" | "repaso";
 
 const TYPES = [
-  { id: "kana"   as TypeId, glyph: "あ", name: "Kana",        desc: "Hiragana y katakana → romaji", accent: "#E63946", accentBg: "rgba(230,57,70,0.14)" },
-  { id: "vocab"  as TypeId, glyph: "語", name: "Vocabulario", desc: "Palabra → significado",         accent: "#4ECDC4", accentBg: "rgba(78,205,196,0.14)" },
-  { id: "kanji"  as TypeId, glyph: "字", name: "Kanji",       desc: "Kanji → lectura",               accent: "#4ECDC4", accentBg: "rgba(78,205,196,0.14)" },
-  { id: "repaso" as TypeId, glyph: "復", name: "Repaso",      desc: "Flashcards con memoria · SRS",  accent: "#4ECDC4", accentBg: "rgba(78,205,196,0.14)" },
+  { id: "kana"   as TypeId, glyph: "かな", name: "Kana",        desc: "Hiragana y katakana → romaji" },
+  { id: "vocab"  as TypeId, glyph: "語",   name: "Vocabulario", desc: "Palabra → significado" },
+  { id: "kanji"  as TypeId, glyph: "字",   name: "Kanji",       desc: "Kanji → lectura" },
+  { id: "repaso" as TypeId, glyph: "復",   name: "Repaso",      desc: "Flashcards · SRS" },
 ];
 
 const KANA_FILTERS = [
@@ -35,7 +35,6 @@ export default function PracticarPage() {
   const [count, setCount] = useState(10);
 
   const cfg = DEFAULTS[typeId];
-  const type = TYPES.find((t) => t.id === typeId)!;
   const estMin = Math.max(1, Math.round((count * (typeId === "repaso" ? 9 : 7)) / 60));
 
   useEffect(() => {
@@ -82,18 +81,19 @@ export default function PracticarPage() {
               const active = typeId === t.id;
               return (
                 <button key={t.id} onClick={() => pickType(t.id)} style={{
-                  cursor: "pointer", borderRadius: 20, padding: "16px 14px", textAlign: "left",
-                  background: active ? t.accentBg : "rgba(255,255,255,0.06)",
-                  border: `1.5px solid ${active ? t.accent : "rgba(255,255,255,0.09)"}`,
-                  display: "flex", flexDirection: "column", gap: 8,
+                  cursor: "pointer", borderRadius: 16, padding: "14px", textAlign: "left",
+                  background: active ? "rgba(78,205,196,0.12)" : "#16161F",
+                  border: `1.5px solid ${active ? "#4ECDC4" : "rgba(255,255,255,0.07)"}`,
+                  display: "flex", flexDirection: "column", gap: 8, minHeight: 78,
+                  justifyContent: "space-between",
                   transition: "border-color .15s, background .15s",
                 }}>
-                  <span style={{ fontFamily: "var(--font-noto-serif-jp), serif", fontSize: 28, fontWeight: 600, color: t.accent, lineHeight: 1 }}>
+                  <span style={{ fontFamily: "var(--font-zen-kaku, 'Zen Kaku Gothic New'), sans-serif", fontSize: 13, fontWeight: 500, color: active ? "#4ECDC4" : "rgba(244,244,248,0.3)", lineHeight: 1 }}>
                     {t.glyph}
                   </span>
                   <div>
-                    <div style={{ fontSize: 17, fontWeight: 800, color: "#F4F4F8" }}>{t.name}</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(244,244,248,0.56)", lineHeight: 1.3, marginTop: 2 }}>{t.desc}</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: "#F4F4F8" }}>{t.name}</div>
+                    <div style={{ fontSize: 11.5, fontWeight: 600, color: "rgba(244,244,248,0.5)", lineHeight: 1.3, marginTop: 2 }}>{t.desc}</div>
                   </div>
                 </button>
               );
@@ -111,11 +111,12 @@ export default function PracticarPage() {
               const active = filter === key;
               return (
                 <button key={key} onClick={() => setFilter(key)} style={{
-                  flexShrink: 0, cursor: "pointer", borderRadius: 999, padding: "10px 18px",
-                  fontSize: 15, fontWeight: 700, whiteSpace: "nowrap", fontFamily: "inherit",
-                  background: active ? type.accentBg : "rgba(255,255,255,0.06)",
-                  border: `1.5px solid ${active ? type.accent : "rgba(255,255,255,0.09)"}`,
-                  color: active ? "#F4F4F8" : "rgba(244,244,248,0.56)",
+                  flexShrink: 0, cursor: "pointer", borderRadius: 999, padding: "0 16px",
+                  height: 38, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", fontFamily: "inherit",
+                  display: "flex", alignItems: "center",
+                  background: active ? "#F4F4F8" : "#16161F",
+                  border: `1.5px solid ${active ? "#F4F4F8" : "rgba(255,255,255,0.07)"}`,
+                  color: active ? "#0D0D1A" : "rgba(244,244,248,0.5)",
                   transition: "background .15s, border-color .15s, color .15s",
                 }}>
                   {label}
@@ -178,9 +179,8 @@ export default function PracticarPage() {
           onClick={start}
           className="sesh-btn"
           style={{
-            background: type.accent,
-            color: typeId === "kana" ? "#fff" : "#052B28",
-            boxShadow: `0 10px 30px -8px ${type.accent}99`,
+            background: "#E63946",
+            color: "#fff",
             pointerEvents: "all",
           }}
         >
