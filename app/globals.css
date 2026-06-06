@@ -552,7 +552,8 @@ a:focus-visible {
   position: sticky; top: 0; z-index: 50;
   height: calc(50px + env(safe-area-inset-top, 0px));
   padding-top: env(safe-area-inset-top, 0px);
-  display: flex; align-items: center; justify-content: center;
+  padding-left: 16px; padding-right: 16px;
+  display: flex; align-items: center; justify-content: space-between;
   background: #0D0D1A;
   border-bottom: 1px solid rgba(255,255,255,0.07);
 }
