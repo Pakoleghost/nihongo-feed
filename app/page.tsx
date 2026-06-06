@@ -569,7 +569,7 @@ export default function HomePage() {
           style={{
             position: "relative",
             background: "#16161F",
-            borderRadius: "16px",
+            borderRadius: "14px",
             padding: "20px 20px 20px",
             overflow: "hidden",
             border: "1px solid rgba(255,255,255,0.06)",
@@ -577,14 +577,6 @@ export default function HomePage() {
             WebkitTapHighlightColor: "transparent",
           }}
         >
-          {/* Corner fold teal */}
-          <motion.div
-            aria-hidden="true"
-            animate={{ scale: [1, 1.18, 1] }}
-            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-            style={{ position: "absolute", top: 0, right: 0, width: 44, height: 44, background: "#4ECDC4", borderBottomLeftRadius: 44, pointerEvents: "none", transformOrigin: "top right" }}
-          />
-
           {/* Header row */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", color: "#4ECDC4", textTransform: "uppercase", margin: 0 }}>
@@ -753,23 +745,28 @@ export default function HomePage() {
             style={{
               background: "#16161F",
               borderRadius: "14px",
-              padding: "14px",
+              padding: "12px",
               border: "1px solid rgba(255,255,255,0.06)",
             }}
           >
             <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-              <AvatarCircle url={myProfile?.avatar_url ?? null} name={myProfile?.username ?? null} size={36} />
+              <AvatarCircle url={myProfile?.avatar_url ?? null} name={myProfile?.username ?? null} size={40} />
               <textarea
+                className="ichigo-compose-input"
                 ref={textareaRef}
                 value={composeText}
                 onChange={handleTextareaInput}
                 placeholder={topic.prompt}
                 rows={1}
                 style={{
-                  flex: 1, background: "transparent", border: "none", outline: "none",
-                  resize: "none", fontSize: "15px",
+                  flex: 1,
+                  background: "#1C1C28",
+                  border: "none",
+                  borderRadius: 12,
+                  outline: "none",
+                  resize: "none", fontSize: "14.5px",
                   fontFamily: "var(--font-noto-sans-jp), inherit",
-                  color: "#FFFFFF", lineHeight: 1.5, padding: "4px 0", overflow: "hidden",
+                  color: "#F4F4F8", lineHeight: 1.5, padding: "10px 12px", overflow: "hidden",
                 }}
               />
             </div>
@@ -813,10 +810,11 @@ export default function HomePage() {
                 onClick={handlePublish}
                 disabled={!canPublish}
                 style={{
-                  background: canPublish ? "#E63946" : "rgba(255,255,255,0.07)",
-                  color: canPublish ? "#FFFFFF" : "rgba(255,255,255,0.25)", borderRadius: "8px", padding: "7px 16px",
+                  background: "#E63946",
+                  color: "#FFFFFF", borderRadius: "999px", padding: "8px 18px",
                   border: "none", cursor: canPublish ? "pointer" : "not-allowed",
-                  fontSize: "13px", fontWeight: 700, transition: "background 0.15s",
+                  fontSize: "13px", fontWeight: 800, opacity: canPublish ? 1 : 0.55,
+                  transition: "opacity 0.15s",
                 }}
               >
                 {publishing ? "Publicando…" : "Publicar"}
@@ -886,42 +884,31 @@ export default function HomePage() {
                   transition={{ duration: 0.32, delay: Math.min(index, 6) * 0.055, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     background: "#16161F",
-                    borderRadius: "16px",
+                    borderRadius: "14px",
                     overflow: "hidden",
                     border: "1px solid rgba(255,255,255,0.06)",
+                    padding: 12,
                   }}
                 >
-                  {/* Image — full-bleed at top when present */}
-                  {post.image_url && !isEditing && !isConfirmDelete && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={post.image_url}
-                      alt="publicación"
-                      onClick={() => setLightboxUrl(post.image_url)}
-                      style={{ width: "100%", aspectRatio: "4/3", display: "block", objectFit: "cover", cursor: "pointer" }}
-                    />
-                  )}
-
-                  <div style={{ padding: "14px 16px" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <AvatarCircle url={profile?.avatar_url ?? null} name={profile?.username ?? null} size={40} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
                     {/* Author row */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: post.content || isEditing || isConfirmDelete ? 10 : 0 }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                       <button
                         onClick={() => router.push(`/perfil/${post.user_id}`)}
-                        style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, cursor: "pointer", background: "none", border: "none", padding: 0, textAlign: "left" }}
+                        style={{ display: "block", flex: 1, cursor: "pointer", background: "none", border: "none", padding: 0, textAlign: "left", minWidth: 0 }}
                       >
-                        <AvatarCircle url={profile?.avatar_url ?? null} name={profile?.username ?? null} size={36} />
-                        <div>
-                          <p style={{ fontSize: 14, fontWeight: 700, color: "#FFFFFF", margin: 0, lineHeight: 1.2 }}>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: 6, minWidth: 0 }}>
+                          <span style={{ fontSize: 13.5, fontWeight: 800, color: "#F4F4F8", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {profile?.username ?? "Usuario"}
-                          </p>
-                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
-                            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", fontWeight: 500 }}>{timeAgo(post.created_at)}</span>
+                          </span>
+                          <span style={{ fontSize: 11.5, color: "rgba(244,244,248,0.3)", fontWeight: 500, whiteSpace: "nowrap" }}>{timeAgo(post.created_at)}</span>
                             {post.from_tema && (
                               <span style={{ fontSize: 10, fontWeight: 800, color: "#4ECDC4", background: "rgba(78,205,196,0.13)", borderRadius: 4, padding: "1px 6px", letterSpacing: "0.05em", textTransform: "uppercase" }}>
                                 tema
                               </span>
                             )}
-                          </div>
                         </div>
                       </button>
 
@@ -983,13 +970,24 @@ export default function HomePage() {
                         </div>
                       </div>
                     ) : post.content ? (
-                      <p style={{ fontSize: 15, color: "rgba(255,255,255,0.88)", margin: "0 0 10px", lineHeight: 1.6, fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
+                      <p style={{ fontSize: 14.5, fontWeight: 500, color: "rgba(244,244,248,0.85)", margin: "6px 0 0", lineHeight: 1.55, fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
                         {post.content}
                       </p>
                     ) : null}
 
+                    {/* Image */}
+                    {post.image_url && !isEditing && !isConfirmDelete && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={post.image_url}
+                        alt="publicación"
+                        onClick={() => setLightboxUrl(post.image_url)}
+                        style={{ width: "100%", marginTop: 8, borderRadius: 10, display: "block", objectFit: "cover", cursor: "pointer" }}
+                      />
+                    )}
+
                     {/* Footer — single row: like · comments · share */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, position: "relative" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, position: "relative", marginTop: 10 }}>
                       {/* いいね button */}
                       <motion.button
                         onClick={() => toggleLike(post)}
@@ -1056,6 +1054,7 @@ export default function HomePage() {
                           style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: "4px 8px", borderRadius: 8, opacity: 0.5 }}
                           aria-label="Eliminar (admin)">🗑️</button>
                       )}
+                    </div>
                     </div>
                   </div>
                 </motion.div>
@@ -1198,6 +1197,7 @@ export default function HomePage() {
         );
       })()}
 
+      <style>{`.ichigo-compose-input::placeholder{color:rgba(244,244,248,0.3);}`}</style>
 
       </div>
     </div>
