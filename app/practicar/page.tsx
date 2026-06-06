@@ -68,8 +68,8 @@ export default function PracticarPage() {
     : LESSON_FILTERS.map((f) => ({ key: f, label: f }));
 
   return (
-    <div className="sesh-layout" style={{ overflowY: "auto" }}>
-      <div style={{ flex: 1, paddingBottom: 120, maxWidth: 760, width: "100%", margin: "0 auto" }}>
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", overflowY: "auto", background: "#0D0D1A" }}>
+      <div style={{ flex: 1, paddingBottom: 120, maxWidth: 760, width: "100%", margin: "0 auto", padding: "20px 20px 120px" }}>
 
         {/* Type cards 2×2 */}
         <div style={{ marginBottom: 26 }}>
@@ -170,7 +170,7 @@ export default function PracticarPage() {
 
       {/* Start button — fixed at bottom, above nav pill (~80px) */}
       <div style={{
-        position: "fixed", bottom: "max(80px, calc(env(safe-area-inset-bottom, 0px) + 76px))", left: 0, right: 0,
+        position: "fixed", bottom: "calc(60px + env(safe-area-inset-bottom, 0px))", left: 0, right: 0,
         padding: "16px 20px 0",
         background: "linear-gradient(to top, #0D0D1A 65%, transparent)",
         pointerEvents: "none",
