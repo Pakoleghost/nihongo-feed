@@ -123,6 +123,7 @@ export default function HomePage() {
   const [composeText, setComposeText] = useState("");
   const [composeImage, setComposeImage] = useState<File | null>(null);
   const [composePreview, setComposePreview] = useState<string | null>(null);
+  const [composeFocused, setComposeFocused] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -555,11 +556,13 @@ export default function HomePage() {
           role="button"
           tabIndex={0}
           onClick={() => {
+            if (editingTopic) return;
             const found = TEMAS_SEMANA.find(t => t.kana === topic.kana) ?? null;
             setCurrentTema(found);
             setShowTemaSheet(true);
           }}
           onKeyDown={e => {
+            if (editingTopic) return;
             if (e.key === "Enter" || e.key === " ") {
               const found = TEMAS_SEMANA.find(t => t.kana === topic.kana) ?? null;
               setCurrentTema(found);
@@ -568,30 +571,32 @@ export default function HomePage() {
           }}
           style={{
             position: "relative",
-            background: "#16161F",
-            borderRadius: "14px",
-            padding: "20px 20px 20px",
+            background: "linear-gradient(160deg, rgba(78,205,196,0.10), rgba(255,255,255,0.022) 60%)",
+            borderRadius: "24px",
+            padding: "20px 20px 18px",
             overflow: "hidden",
-            border: "1px solid rgba(255,255,255,0.06)",
-            cursor: "pointer",
+            border: "1px solid rgba(255,255,255,0.07)",
+            cursor: editingTopic ? "default" : "pointer",
             WebkitTapHighlightColor: "transparent",
           }}
         >
-          {/* Header row */}
+          {/* Eye row */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-            <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", color: "#4ECDC4", textTransform: "uppercase", margin: 0 }}>
-              Tema de la semana
-            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ECDC4", boxShadow: "0 0 8px #4ECDC4", flexShrink: 0, display: "inline-block" }} />
+              <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "2px", textTransform: "uppercase", color: "#4ECDC4" }}>
+                Tema de la semana
+              </span>
+            </div>
             {effectiveIsAdmin && !editingTopic && (
               <button
                 onClick={e => { e.stopPropagation(); setTopicDraft({ kana: topic.kana, prompt: topic.prompt }); setEditingTopic(true); }}
-                style={{ background: "#16161F", border: "none", borderRadius: 8, padding: "4px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, marginRight: 32 }}
+                style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="rgba(255,255,255,0.45)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="rgba(255,255,255,0.45)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                  <path d="M14 5l5 5M4 20l1-4L16 5l3 3L8 19l-4 1Z" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinejoin="round"/>
                 </svg>
-                <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.45)" }}>Editar</span>
+                <span style={{ fontSize: 12.5, fontWeight: 600, color: "rgba(255,255,255,0.4)" }}>Editar</span>
               </button>
             )}
           </div>
@@ -602,13 +607,13 @@ export default function HomePage() {
                 value={topicDraft.kana}
                 onChange={e => setTopicDraft(d => ({ ...d, kana: e.target.value }))}
                 placeholder="Texto en kana (ej. きょうのてんき)"
-                style={{ background: "#16161F", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 10, padding: "10px 14px", color: "#FFFFFF", fontSize: 16, fontFamily: "var(--font-noto-serif-jp), serif", outline: "none", width: "100%", boxSizing: "border-box" }}
+                style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "10px 14px", color: "#FFFFFF", fontSize: 16, fontFamily: "var(--font-noto-serif-jp), serif", outline: "none", width: "100%", boxSizing: "border-box" }}
               />
               <input
                 value={topicDraft.prompt}
                 onChange={e => setTopicDraft(d => ({ ...d, prompt: e.target.value }))}
                 placeholder="Prompt en español"
-                style={{ background: "#16161F", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 10, padding: "10px 14px", color: "#FFFFFF", fontSize: 14, outline: "none", width: "100%", boxSizing: "border-box" }}
+                style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "10px 14px", color: "#FFFFFF", fontSize: 14, outline: "none", width: "100%", boxSizing: "border-box" }}
               />
               <div style={{ display: "flex", gap: 8 }}>
                 <button
@@ -626,7 +631,7 @@ export default function HomePage() {
                 </button>
                 <button
                   onClick={() => setEditingTopic(false)}
-                  style={{ background: "#16161F", color: "rgba(255,255,255,0.45)", border: "none", borderRadius: 10, padding: "10px 16px", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
+                  style={{ background: "rgba(0,0,0,0.2)", color: "rgba(255,255,255,0.45)", border: "none", borderRadius: 10, padding: "10px 16px", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
                 >
                   Cancelar
                 </button>
@@ -634,21 +639,23 @@ export default function HomePage() {
             </div>
           ) : (
             <>
-              <p style={{ fontSize: "28px", fontWeight: 700, color: "#FFFFFF", margin: "0 0 8px", fontFamily: "var(--font-noto-sans-jp), sans-serif", lineHeight: 1.15, letterSpacing: "0.01em" }}>
+              <p style={{ fontSize: "30px", fontWeight: 500, color: "#FFFFFF", margin: "0 0 6px", fontFamily: "var(--font-zen-kaku, 'Zen Kaku Gothic New'), var(--font-noto-sans-jp), sans-serif", lineHeight: 1.15, letterSpacing: "1px" }}>
                 {topic.kana}
               </p>
-              <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.65)", margin: "0 0 14px", lineHeight: 1.5, maxWidth: 280 }}>
+              <p style={{ fontSize: "14.5px", fontWeight: 500, color: "rgba(244,244,248,0.6)", margin: "0 0 16px", lineHeight: 1.45 }}>
                 {topic.prompt}
               </p>
-              {/* Hint: tap to see examples */}
-              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#4ECDC4", letterSpacing: "0.04em" }}>
-                  Te ayudo a publicar paso a paso
-                </span>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 18l6-6-6-6" stroke="#4ECDC4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: 7,
+                background: "#4ECDC4", color: "#06231f",
+                borderRadius: "999px", padding: "9px 16px",
+                fontSize: 13.5, fontWeight: 700,
+              }}>
+                Responder
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 12h13m-5-6 6 6-6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-              </div>
+              </span>
             </>
           )}
         </div>
@@ -740,94 +747,91 @@ export default function HomePage() {
 
       {/* ── Compose box ── */}
       {userId && (
-        <div style={{ padding: "0 16px 16px" }}>
-          <div
-            style={{
-              background: "#16161F",
-              borderRadius: "14px",
-              padding: "12px",
-              border: "1px solid rgba(255,255,255,0.06)",
-            }}
-          >
-            <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-              <AvatarCircle url={myProfile?.avatar_url ?? null} name={myProfile?.username ?? null} size={40} />
+        <div style={{ padding: "0 16px 20px" }}>
+          {composeFocused || composeText ? (
+            /* Expanded composer */
+            <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: "22px", padding: "16px", border: "1px solid rgba(255,255,255,0.09)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                <AvatarCircle url={myProfile?.avatar_url ?? null} name={myProfile?.username ?? null} size={42} />
+                <div>
+                  <div style={{ fontSize: 14.5, fontWeight: 800, color: "#F4F4F8" }}>{myProfile?.username ?? "Tú"}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "#4ECDC4" }}>Respondiendo al tema · {topic.kana}</div>
+                </div>
+              </div>
               <textarea
                 className="ichigo-compose-input"
                 ref={textareaRef}
                 value={composeText}
                 onChange={handleTextareaInput}
-                placeholder={topic.prompt}
-                rows={1}
+                onFocus={() => setComposeFocused(true)}
+                onBlur={() => { if (!composeText) setComposeFocused(false); }}
+                placeholder="Escribe algo en japonés…"
+                rows={3}
+                autoFocus
                 style={{
-                  flex: 1,
-                  background: "#1C1C28",
-                  border: "none",
-                  borderRadius: 12,
-                  outline: "none",
-                  resize: "none", fontSize: "14.5px",
-                  fontFamily: "var(--font-noto-sans-jp), inherit",
-                  color: "#F4F4F8", lineHeight: 1.5, padding: "10px 12px", overflow: "hidden",
+                  width: "100%", background: "none", border: "none", outline: "none",
+                  resize: "none", fontSize: "19px", fontFamily: "var(--font-noto-sans-jp), inherit",
+                  color: "#F4F4F8", lineHeight: 1.6, padding: 0, overflow: "hidden", boxSizing: "border-box",
+                  minHeight: 58,
                 }}
               />
-            </div>
-
-            {composePreview && (
-              <div style={{ position: "relative", display: "inline-block", margin: "10px 0 0 48px" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={composePreview} alt="preview"
-                  style={{ width: 56, height: 56, borderRadius: 10, objectFit: "cover", display: "block" }} />
-                <button onClick={clearComposeImage} aria-label="Quitar imagen"
-                  style={{
-                    position: "absolute", top: -6, right: -6,
-                    width: 20, height: 20, borderRadius: "50%",
-                    background: "#1A1A2E", border: "none", cursor: "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "#FFFFFF", fontSize: 11,
-                  }}
-                >×</button>
+              {composePreview && (
+                <div style={{ position: "relative", display: "inline-block", marginTop: 10 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={composePreview} alt="preview" style={{ width: 56, height: 56, borderRadius: 10, objectFit: "cover", display: "block" }} />
+                  <button onClick={clearComposeImage} aria-label="Quitar imagen"
+                    style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%", background: "#1A1A2E", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#FFFFFF", fontSize: 11 }}>×</button>
+                </div>
+              )}
+              {publishError && (
+                <p style={{ color: "#C53340", fontSize: 13, fontWeight: 700, margin: "8px 0 0", lineHeight: 1.35 }}>{publishError}</p>
+              )}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 16, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+                <button onClick={() => fileInputRef.current?.click()} aria-label="Agregar imagen"
+                  style={{ width: 42, height: 42, borderRadius: 13, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(244,244,248,0.5)", flexShrink: 0 }}>
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+                    <rect x="3.5" y="4.5" width="17" height="15" rx="3" stroke="currentColor" strokeWidth="2"/>
+                    <circle cx="8.5" cy="9.5" r="1.6" fill="currentColor"/>
+                    <path d="M5 17l4.5-4 3 2.5L16 12l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                <button onClick={handlePublish} disabled={!canPublish}
+                  style={{ marginLeft: "auto", height: 44, padding: "0 22px", borderRadius: 14, background: "#E63946", color: "#fff", border: "none", cursor: canPublish ? "pointer" : "not-allowed", fontSize: 15, fontWeight: 800, opacity: canPublish ? 1 : 0.5, transition: "opacity 0.15s" }}>
+                  {publishing ? "Publicando…" : "Publicar"}
+                </button>
               </div>
-            )}
-
-            {publishError && (
-              <p style={{ color: "#C53340", fontSize: 13, fontWeight: 700, margin: "10px 0 0 48px", lineHeight: 1.35 }}>
-                {publishError}
-              </p>
-            )}
-
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 12, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                aria-label="Agregar imagen"
-                style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", color: "rgba(255,255,255,0.42)" }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.8" />
-                  <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
-                  <path d="M21 15l-5-5L5 21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </div>
+          ) : (
+            /* Resting composer — single row */
+            <div
+              style={{ display: "flex", alignItems: "center", gap: 13, borderRadius: "20px", padding: "13px 14px", background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.06)", cursor: "text" }}
+              onClick={() => setComposeFocused(true)}
+            >
+              <AvatarCircle url={myProfile?.avatar_url ?? null} name={myProfile?.username ?? null} size={38} />
+              <span style={{ flex: 1, fontSize: 15, fontWeight: 500, color: "rgba(244,244,248,0.35)" }}>Escribe algo en japonés…</span>
+              <button onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }} aria-label="Imagen"
+                style={{ width: 36, height: 36, borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "none", cursor: "pointer", color: "rgba(244,244,248,0.4)", flexShrink: 0 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <rect x="3.5" y="4.5" width="17" height="15" rx="3" stroke="currentColor" strokeWidth="2"/>
+                  <circle cx="8.5" cy="9.5" r="1.6" fill="currentColor"/>
+                  <path d="M5 17l4.5-4 3 2.5L16 12l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
-              <button
-                onClick={handlePublish}
-                disabled={!canPublish}
-                style={{
-                  background: "#E63946",
-                  color: "#FFFFFF", borderRadius: "999px", padding: "8px 18px",
-                  border: "none", cursor: canPublish ? "pointer" : "not-allowed",
-                  fontSize: "13px", fontWeight: 800, opacity: canPublish ? 1 : 0.55,
-                  transition: "opacity 0.15s",
-                }}
-              >
-                {publishing ? "Publicando…" : "Publicar"}
+              <button onClick={e => { e.stopPropagation(); setComposeFocused(true); }} aria-label="Publicar"
+                style={{ width: 40, height: 40, borderRadius: 13, background: "#E63946", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", flexShrink: 0 }}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 12l16-7-7 16-2.5-6.5L4 12Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" fill="currentColor"/>
+                </svg>
               </button>
             </div>
-          </div>
+          )}
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: "none" }} />
         </div>
       )}
 
       {/* ── Feed ── */}
       <div
-        style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: 12 }}
+        style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: 14 }}
         onClick={() => { setOpenMenuId(null); setOpenLikersId(null); }}
       >
         {loading ? (
@@ -883,11 +887,11 @@ export default function HomePage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.32, delay: Math.min(index, 6) * 0.055, ease: [0.22, 1, 0.36, 1] }}
                   style={{
-                    background: "#16161F",
-                    borderRadius: "14px",
+                    background: "rgba(255,255,255,0.035)",
+                    borderRadius: "20px",
                     overflow: "hidden",
                     border: "1px solid rgba(255,255,255,0.06)",
-                    padding: 12,
+                    padding: "16px 16px 12px",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
@@ -970,7 +974,7 @@ export default function HomePage() {
                         </div>
                       </div>
                     ) : post.content ? (
-                      <p style={{ fontSize: 14.5, fontWeight: 500, color: "rgba(244,244,248,0.85)", margin: "6px 0 0", lineHeight: 1.55, fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
+                      <p style={{ fontSize: 18, fontWeight: 500, color: "#ECECF2", margin: "0", lineHeight: 1.75, fontFamily: "var(--font-noto-sans-jp), sans-serif", letterSpacing: "0.2px" }}>
                         {post.content}
                       </p>
                     ) : null}
@@ -982,7 +986,7 @@ export default function HomePage() {
                         src={post.image_url}
                         alt="publicación"
                         onClick={() => setLightboxUrl(post.image_url)}
-                        style={{ width: "100%", marginTop: 8, borderRadius: 10, display: "block", objectFit: "cover", cursor: "pointer" }}
+                        style={{ width: "100%", marginTop: 14, borderRadius: 15, display: "block", objectFit: "cover", cursor: "pointer", maxHeight: 300 }}
                       />
                     )}
 
