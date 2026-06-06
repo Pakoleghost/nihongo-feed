@@ -894,50 +894,45 @@ export default function HomePage() {
                     padding: "16px 16px 12px",
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                    <AvatarCircle url={profile?.avatar_url ?? null} name={profile?.username ?? null} size={40} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                    {/* Author row */}
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                      <button
-                        onClick={() => router.push(`/perfil/${post.user_id}`)}
-                        style={{ display: "block", flex: 1, cursor: "pointer", background: "none", border: "none", padding: 0, textAlign: "left", minWidth: 0 }}
-                      >
-                        <div style={{ display: "flex", alignItems: "baseline", gap: 6, minWidth: 0 }}>
-                          <span style={{ fontSize: 13.5, fontWeight: 800, color: "#F4F4F8", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {profile?.username ?? "Usuario"}
-                          </span>
-                          <span style={{ fontSize: 11.5, color: "rgba(244,244,248,0.3)", fontWeight: 500, whiteSpace: "nowrap" }}>{timeAgo(post.created_at)}</span>
-                            {post.from_tema && (
-                              <span style={{ fontSize: 10, fontWeight: 800, color: "#4ECDC4", background: "rgba(78,205,196,0.13)", borderRadius: 4, padding: "1px 6px", letterSpacing: "0.05em", textTransform: "uppercase" }}>
-                                tema
-                              </span>
-                            )}
-                        </div>
-                      </button>
-
-                      {isOwn && (
-                        <div style={{ position: "relative", flexShrink: 0 }}>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === post.id ? null : post.id); }}
-                            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "rgba(255,255,255,0.35)", padding: "4px 8px", borderRadius: 8, letterSpacing: 2 }}
-                            aria-label="Opciones"
-                          >···</button>
-                          {openMenuId === post.id && (
-                            <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 10, background: "#1C1C28", borderRadius: "12px", boxShadow: "0 4px 24px rgba(0,0,0,0.4)", overflow: "hidden", minWidth: 130, border: "1px solid rgba(255,255,255,0.08)" }}>
-                              <button onClick={() => startEdit(post)}
-                                style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#FFFFFF" }}>
-                                Editar
-                              </button>
-                              <button onClick={() => { setConfirmDeleteId(post.id); setOpenMenuId(null); }}
-                                style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#FF6470", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-                                Eliminar
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                  {/* ── Post header: single row ── */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                    <button onClick={() => router.push(`/perfil/${post.user_id}`)} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", flexShrink: 0 }}>
+                      <AvatarCircle url={profile?.avatar_url ?? null} name={profile?.username ?? null} size={42} />
+                    </button>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 7, flex: 1, minWidth: 0 }}>
+                      <span style={{ fontSize: 15, fontWeight: 800, color: "#F4F4F8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {profile?.username ?? "Usuario"}
+                      </span>
+                      <span style={{ fontSize: 13, color: "rgba(244,244,248,0.3)", fontWeight: 600, whiteSpace: "nowrap" }}>
+                        · {timeAgo(post.created_at)}
+                      </span>
                     </div>
+                    {post.from_tema && (
+                      <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: "0.8px", color: "#4ECDC4", textTransform: "uppercase", flexShrink: 0 }}>Tema</span>
+                    )}
+                    {isOwn && (
+                      <div style={{ position: "relative", flexShrink: 0 }}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === post.id ? null : post.id); }}
+                          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "rgba(255,255,255,0.3)", padding: "2px 6px", borderRadius: 8, letterSpacing: 2 }}
+                          aria-label="Opciones"
+                        >···</button>
+                        {openMenuId === post.id && (
+                          <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 10, background: "#1C1C28", borderRadius: "12px", boxShadow: "0 4px 24px rgba(0,0,0,0.4)", overflow: "hidden", minWidth: 130, border: "1px solid rgba(255,255,255,0.08)" }}>
+                            <button onClick={() => startEdit(post)}
+                              style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#FFFFFF" }}>
+                              Editar
+                            </button>
+                            <button onClick={() => { setConfirmDeleteId(post.id); setOpenMenuId(null); }}
+                              style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#FF6470", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+                              Eliminar
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
 
                     {/* Content */}
                     {isEditing ? (
@@ -974,7 +969,7 @@ export default function HomePage() {
                         </div>
                       </div>
                     ) : post.content ? (
-                      <p style={{ fontSize: 18, fontWeight: 500, color: "#ECECF2", margin: "0", lineHeight: 1.75, fontFamily: "var(--font-noto-sans-jp), sans-serif", letterSpacing: "0.2px" }}>
+                      <p style={{ fontSize: 15, fontWeight: 500, color: "#ECECF2", margin: "0 0 2px", lineHeight: 1.65, fontFamily: "var(--font-noto-sans-jp), sans-serif", letterSpacing: "0.1px" }}>
                         {post.content}
                       </p>
                     ) : null}
@@ -1055,7 +1050,6 @@ export default function HomePage() {
                           </svg>
                         </button>
                       )}
-                    </div>
                     </div>
                   </div>
                 </motion.div>
