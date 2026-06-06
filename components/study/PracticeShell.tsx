@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
 type PracticeShellProps = {
@@ -125,6 +126,12 @@ export default function PracticeShell({
   onClose,
   children,
 }: PracticeShellProps) {
+  useEffect(() => {
+    if (!open) return;
+    document.body.classList.add("in-session");
+    return () => document.body.classList.remove("in-session");
+  }, [open]);
+
   if (!open) return null;
 
   const hasProgress = typeof current === "number" && typeof total === "number" && total > 0;
@@ -144,7 +151,7 @@ export default function PracticeShell({
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 90,
+        zIndex: 610,
         background: "rgba(255, 248, 231, 0.94)",
         transform: visible ? "translateY(0)" : "translateY(100%)",
         opacity: visible ? 1 : 0,

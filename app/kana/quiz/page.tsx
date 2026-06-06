@@ -483,6 +483,29 @@ function QuizContent() {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlOverflow = html.style.overflow;
+    const previousHtmlOverscroll = html.style.overscrollBehavior;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyOverscroll = body.style.overscrollBehavior;
+
+    body.classList.add("in-session");
+    html.style.overflow = "hidden";
+    html.style.overscrollBehavior = "none";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+
+    return () => {
+      body.classList.remove("in-session");
+      html.style.overflow = previousHtmlOverflow;
+      html.style.overscrollBehavior = previousHtmlOverscroll;
+      body.style.overflow = previousBodyOverflow;
+      body.style.overscrollBehavior = previousBodyOverscroll;
+    };
+  }, []);
+
+  useEffect(() => {
     const prog = loadKanaProgress("anon");
     setProgressMap(prog);
     const quiz = buildQuiz(mode, sets, taskMode, count, itemIds, focusItemIds, prog);
@@ -494,30 +517,6 @@ function QuizContent() {
   const isTraceQuestion = currentQ?.taskType === "romaji_to_kana_trace";
   const isMatchQuestion = currentQ?.taskType === "hiragana_katakana_match";
   const progressPct = questions.length > 0 ? (currentIndex / questions.length) * 100 : 0;
-
-  useEffect(() => {
-    if (!isTraceQuestion) return;
-
-    const html = document.documentElement;
-    const body = document.body;
-    const previousHtmlOverflow = html.style.overflow;
-    const previousHtmlOverscroll = html.style.overscrollBehavior;
-    const previousBodyOverflow = body.style.overflow;
-    const previousBodyOverscroll = body.style.overscrollBehavior;
-
-    html.style.overflow = "hidden";
-    html.style.overscrollBehavior = "none";
-    body.style.overflow = "hidden";
-    body.style.overscrollBehavior = "none";
-
-    return () => {
-      html.style.overflow = previousHtmlOverflow;
-      html.style.overscrollBehavior = previousHtmlOverscroll;
-      body.style.overflow = previousBodyOverflow;
-      body.style.overscrollBehavior = previousBodyOverscroll;
-    };
-  }, [isTraceQuestion]);
-
 
   const advance = useCallback(
     (result: QuestionResult, updatedProgress: KanaProgressMap) => {
@@ -1069,17 +1068,19 @@ function QuizContent() {
     <div
       style={{
         background: "#1A1A2E",
-        minHeight: "100vh",
+        height: "100dvh",
         display: "flex",
         flexDirection: "column",
+        overflow: "hidden",
       }}
     >
       {/* Top bar */}
       <div
         style={{
-          padding: "calc(env(safe-area-inset-top, 20px) + 28px) 20px 0",
+          padding: "calc(env(safe-area-inset-top, 20px) + 16px) 20px 0",
           display: "grid",
-          gap: "14px",
+          gap: "12px",
+          flexShrink: 0,
         }}
       >
         <div
@@ -1203,7 +1204,8 @@ function QuizContent() {
           alignItems: "center",
           justifyContent: "center",
           flex: 1,
-          padding: "18px 20px 16px",
+          minHeight: 0,
+          padding: "14px 20px 12px",
           overflow: "hidden",
         }}
       >
@@ -1212,10 +1214,10 @@ function QuizContent() {
             ...sharedCardStyle,
             width: "100%",
             maxWidth: "420px",
-            padding: "26px 20px 24px",
+            padding: "22px 20px 20px",
             display: "grid",
             justifyItems: "center",
-            gap: "14px",
+            gap: "12px",
           }}
         >
           <div
@@ -1243,7 +1245,7 @@ function QuizContent() {
                 variants={kanaAnim === "bounce" ? bounceVariants : shakeVariants}
                 animate={kanaAnim}
                 style={{
-                  fontSize: isMatchQuestion ? "42px" : promptKind === "kana" ? "112px" : "64px",
+                  fontSize: isMatchQuestion ? "42px" : promptKind === "kana" ? "clamp(88px, 29vw, 116px)" : "clamp(52px, 17vw, 66px)",
                   fontWeight: 700,
                   color: "#FFFFFF",
                   lineHeight: 1,
@@ -1290,7 +1292,7 @@ function QuizContent() {
 
       {/* Answer area */}
       {isMatchQuestion ? (
-        <div style={{ padding: "0 20px 40px" }}>
+        <div style={{ flexShrink: 0, padding: "0 20px calc(18px + env(safe-area-inset-bottom, 0px))" }}>
           <div
             style={{
               ...sharedCardStyle,
@@ -1312,7 +1314,7 @@ function QuizContent() {
                     onClick={() => handleMatchSelect("hiragana", pair.hiragana)}
                     disabled={phase !== "question" || matched}
                     style={{
-                      minHeight: "66px",
+                      minHeight: "60px",
                       border: "none",
                       borderRadius: "20px",
                       background: needsReview
@@ -1352,7 +1354,7 @@ function QuizContent() {
                     onClick={() => handleMatchSelect("katakana", item)}
                     disabled={phase !== "question" || matched}
                     style={{
-                      minHeight: "66px",
+                      minHeight: "60px",
                       border: "none",
                       borderRadius: "20px",
                       background: matched
@@ -1402,7 +1404,8 @@ function QuizContent() {
         /* Choice tasks */
         <div
           style={{
-            padding: "0 20px 40px",
+            flexShrink: 0,
+            padding: "0 20px calc(18px + env(safe-area-inset-bottom, 0px))",
           }}
         >
           <div
@@ -1444,8 +1447,8 @@ function QuizContent() {
                       : { scale: 1 }
                   }
                   style={{
-                    minHeight: "78px",
-                    padding: "18px 12px",
+                    minHeight: "66px",
+                    padding: "14px 12px",
                     borderRadius: "20px",
                     border: `1px solid ${borderColor}`,
                     cursor: phase === "feedback" ? "default" : "pointer",

@@ -61,6 +61,12 @@ export default function PalabrasPage() {
     }
   }, [phase, index, feedback]);
 
+  useEffect(() => {
+    if (phase !== "session") return;
+    document.body.classList.add("in-session");
+    return () => document.body.classList.remove("in-session");
+  }, [phase]);
+
   function startSession() {
     const sessionItems = buildSession(lessonFilter, sessionCount);
     if (sessionItems.length === 0) return;
@@ -238,6 +244,9 @@ export default function PalabrasPage() {
     return (
       <div
         style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 600,
           background: "#1A1A2E",
           height: "100dvh",
           display: "flex",

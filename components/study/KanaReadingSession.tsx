@@ -78,7 +78,7 @@ function SummaryScreen({
 
   return (
     <div style={{
-      position: "fixed", inset: 0, zIndex: 92,
+      position: "fixed", inset: 0, zIndex: 610,
       background: "#FFF8E7",
       display: "flex", flexDirection: "column",
       fontFamily: DS.fontHead,
@@ -250,6 +250,12 @@ export default function KanaReadingSession({
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (!open) return;
+    document.body.classList.add("in-session");
+    return () => document.body.classList.remove("in-session");
+  }, [open]);
+
   // Reset input on new question
   useEffect(() => {
     if (!feedback && !isFinished) {
@@ -291,7 +297,7 @@ export default function KanaReadingSession({
   return (
     <div
       style={{
-        position: "fixed", inset: 0, zIndex: 92,
+        position: "fixed", inset: 0, zIndex: 610,
         background: DS.bg,
         display: "flex", flexDirection: "column",
         transform: visible ? "translateY(0)" : "translateY(100%)",
