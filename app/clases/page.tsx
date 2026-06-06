@@ -577,14 +577,6 @@ export default function ClasesPage() {
       <div style={{ position: "fixed", bottom: 40, right: -120, width: 340, height: 340, borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: "radial-gradient(circle, rgba(230,57,70,0.13) 0%, rgba(230,57,70,0) 70%)", filter: "blur(8px)" }} />
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", minHeight: "100%" }}>
 
-      {/* Header */}
-      <div className="ph">
-        <div className="ph-l">
-          <h1 className="ph-title">Clases</h1>
-          <p className="ph-sub">Grabaciones de sesiones</p>
-        </div>
-      </div>
-
       <div style={{ padding: "0 20px", flex: 1 }}>
         {content}
       </div>

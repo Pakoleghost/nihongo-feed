@@ -72,12 +72,6 @@ export default function PracticarPage() {
     <div className="sesh-layout" style={{ overflowY: "auto" }}>
       <div style={{ flex: 1, paddingBottom: 120, maxWidth: 760, width: "100%", margin: "0 auto" }}>
 
-        {/* Title */}
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 34, fontWeight: 800, color: "#F4F4F8", letterSpacing: -0.5, lineHeight: 1.05 }}>Practicar</div>
-          <div style={{ fontSize: 15, fontWeight: 500, color: "rgba(244,244,248,0.56)", marginTop: 4 }}>Arma tu sesión y empieza cuando quieras.</div>
-        </div>
-
         {/* Type cards 2×2 */}
         <div style={{ marginBottom: 26 }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "1.4px", textTransform: "uppercase", color: "rgba(244,244,248,0.34)", marginBottom: 12 }}>

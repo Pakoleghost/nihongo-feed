@@ -272,26 +272,17 @@ export default function RecursosPage() {
       <div style={{ position: "fixed", bottom: 40, right: -120, width: 340, height: 340, borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: "radial-gradient(circle, rgba(230,57,70,0.13) 0%, rgba(230,57,70,0) 70%)", filter: "blur(8px)" }} />
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", minHeight: "100%" }}>
 
-      <div className="ph">
-        <div className="ph-l">
-          <h1 className="ph-title">Recursos</h1>
-          <p className="ph-sub">Materiales del curso</p>
-        </div>
+      <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: "18px" }}>
         {effectiveIsAdmin && (
-          <div className="ph-actions">
+          <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 4 }}>
             <button type="button" className="ph-btn" onClick={() => setShowAdminPanel((v) => !v)}>
-              <span className="ph-btn-teal">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"/>
-                </svg>
-              </span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"/>
+              </svg>
               {showAdminPanel ? "Cerrar" : "Agregar"}
             </button>
           </div>
         )}
-      </div>
-
-      <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: "18px" }}>
         {effectiveIsAdmin && showAdminPanel ? (
           <form
             onSubmit={handleAdminSubmit}

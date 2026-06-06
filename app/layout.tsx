@@ -1,10 +1,11 @@
 import "./globals.css";
-import { Noto_Sans_JP, Noto_Serif_JP, Plus_Jakarta_Sans, Poppins } from "next/font/google";
+import { Noto_Sans_JP, Noto_Serif_JP, Plus_Jakarta_Sans, Poppins, Zen_Kaku_Gothic_New } from "next/font/google";
 import type { Viewport } from "next";
 import Script from "next/script";
 import PushInit from "@/components/PushInit";
 import StudentViewBanner from "@/components/StudentViewBanner";
 import BottomNav from "@/components/BottomNav";
+import IchigoHeader from "@/components/IchigoHeader";
 
 const noto = Noto_Sans_JP({
   subsets: ["latin"],
@@ -34,6 +35,13 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-study",
 });
 
+const zenKaku = Zen_Kaku_Gothic_New({
+  subsets: ["latin"],
+  weight: ["500", "700", "900"],
+  display: "swap",
+  variable: "--font-zen-kaku",
+});
+
 export const metadata = {
   title: "フィード",
   icons: {
@@ -52,7 +60,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" className={`${poppins.variable} ${jakarta.variable} ${noto.variable} ${notoSerif.variable}`}>
+    <html lang="ja" className={`${poppins.variable} ${jakarta.variable} ${noto.variable} ${notoSerif.variable} ${zenKaku.variable}`}>
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -63,6 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={jakarta.className}>
         <StudentViewBanner />
+        <IchigoHeader />
         {children}
         <BottomNav />
         <Script id="sw-register" strategy="afterInteractive">{`

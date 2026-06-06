@@ -550,24 +550,6 @@ export default function HomePage() {
       {/* Ambient teal glow top-left */}
       <div style={{ position: "fixed", top: -160, left: -100, width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(78,205,196,0.10) 0%, rgba(78,205,196,0) 60%)", pointerEvents: "none", zIndex: 0 }} />
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", minHeight: "100%" }}>
-      {/* ── Header ── */}
-      <div className="ph">
-        <div className="ph-l">
-          <h1 className="ph-title-jp">フィード</h1>
-          <p className="ph-sub-jp">{getGreeting()}</p>
-        </div>
-        <div className="ph-actions">
-          {streak > 0 && (
-            <span className="ph-streak">
-              <span>🔥</span>{streak}
-            </span>
-          )}
-          <Link href="/perfil" style={{ display: "block", flexShrink: 0 }}>
-            <AvatarCircle url={myProfile?.avatar_url ?? null} name={myProfile?.username ?? null} size={44} />
-          </Link>
-        </div>
-      </div>
-
       {/* ── Tema de la semana ── */}
       <div style={{ padding: "14px 16px 12px" }}>
         <div
