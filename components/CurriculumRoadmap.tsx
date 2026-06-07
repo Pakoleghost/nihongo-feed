@@ -357,7 +357,7 @@ export default function CurriculumRoadmap({ currentLesson, currentModuleNumber }
           font-family: var(--font-plus-jakarta), system-ui, sans-serif;
           color: #ffffff;
           background: #0D0D1A;
-          padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+          padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px));
         }
 
         .roadmap-bg {

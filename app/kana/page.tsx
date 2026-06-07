@@ -103,7 +103,7 @@ export default function KanaPage() {
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
-        padding: "calc(env(safe-area-inset-top, 20px) + 24px) 20px calc(80px + env(safe-area-inset-bottom, 0px))",
+        padding: "calc(env(safe-area-inset-top, 20px) + 24px) 20px calc(140px + env(safe-area-inset-bottom, 0px))",
       }}
     >
       {/* ── Header ── */}

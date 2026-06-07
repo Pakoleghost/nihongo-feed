@@ -75,7 +75,7 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
     <div
       style={{
         minHeight: "100dvh",
-        background: "#1A1A2E",
+        background: "#0D0D1A",
         padding: "24px 20px calc(100px + env(safe-area-inset-bottom, 0px))",
       }}
     >
@@ -133,7 +133,7 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
             key={s.label}
             style={{
               flex: 1,
-              background: "#1E2235",
+              background: "#16161F",
               borderRadius: 12,
               padding: "10px 0",
               textAlign: "center",
@@ -156,7 +156,7 @@ export default function KanjiModuleScreen({ initialLesson }: KanjiModuleScreenPr
         <button
           onClick={primaryAction.onClick}
           style={{
-            background: "#1E2235",
+            background: "#16161F",
             borderRadius: 14,
             border: "1px solid rgba(255,255,255,0.10)",
             cursor: "pointer",

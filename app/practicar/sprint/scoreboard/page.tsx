@@ -125,7 +125,7 @@ export default function ScoreboardPage() {
   return (
     <div
       style={{
-        background: "#1A1A2E",
+        background: "#0D0D1A",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -218,7 +218,7 @@ export default function ScoreboardPage() {
         ) : rows.length === 0 ? (
           <div
             style={{
-              background: "#1E2235",
+              background: "#16161F",
               borderRadius: "1.5rem",
               padding: "32px",
               textAlign: "center",

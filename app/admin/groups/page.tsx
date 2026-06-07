@@ -194,7 +194,7 @@ export default function AdminGroupsPage() {
 
   return (
     <>
-    <div style={{ background: "#FFF8E7", minHeight: "100dvh", display: "flex", flexDirection: "column", paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))" }}>
+    <div style={{ background: "#FFF8E7", minHeight: "100dvh", display: "flex", flexDirection: "column", paddingBottom: "calc(140px + env(safe-area-inset-bottom, 0px))" }}>
       <div style={{ maxWidth: "760px", margin: "0 auto", width: "100%", padding: "0 16px" }}>
 
         <header style={{ padding: "20px 0 16px" }}>

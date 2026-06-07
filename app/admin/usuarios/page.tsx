@@ -284,7 +284,7 @@ export default function AdminUsuariosPage() {
     <>
       <div style={{
         background: "#FFF8E7", minHeight: "100dvh", display: "flex",
-        flexDirection: "column", paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))",
+        flexDirection: "column", paddingBottom: "calc(140px + env(safe-area-inset-bottom, 0px))",
       }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: "14px", padding: "20px 20px 4px" }}>

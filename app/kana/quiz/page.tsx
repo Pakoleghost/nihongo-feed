@@ -697,7 +697,7 @@ function QuizContent() {
     return (
       <div
         style={{
-          background: "#1A1A2E",
+          background: "#0D0D1A",
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
@@ -713,7 +713,7 @@ function QuizContent() {
     return (
       <div
         style={{
-          background: "#1A1A2E",
+          background: "#0D0D1A",
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
@@ -752,16 +752,16 @@ function QuizContent() {
   const feedbackColor = feedbackIsCorrect ? "#4ECDC4" : feedbackNeedsSoftReview ? "#F59E0B" : "#E63946";
   const matchReviewCount = new Set(matchMistakePairKeys).size;
   const sharedCardStyle = {
-    background: "#1E2235",
+    background: "#16161F",
     borderRadius: "28px",
-    border: "1px solid rgba(255,255,255,0.08)",
+    border: "1px solid rgba(255,255,255,0.07)",
   } as const;
 
   if (isTraceQuestion) {
     return (
       <div
         style={{
-          background: "#1A1A2E",
+          background: "#0D0D1A",
           height: "100dvh",
           display: "flex",
           flexDirection: "column",
@@ -866,7 +866,7 @@ function QuizContent() {
             <div
               style={{
                 borderRadius: "999px",
-                background: "rgba(255,255,255,0.08)",
+                background: "#1C1C28",
                 color: "rgba(255,255,255,0.65)",
                 fontSize: "12px",
                 fontWeight: 700,
@@ -1067,7 +1067,7 @@ function QuizContent() {
   return (
     <div
       style={{
-        background: "#1A1A2E",
+        background: "#0D0D1A",
         height: "100dvh",
         display: "flex",
         flexDirection: "column",
@@ -1172,7 +1172,7 @@ function QuizContent() {
           <div
             style={{
               borderRadius: "999px",
-              background: "rgba(255,255,255,0.08)",
+              background: "#1C1C28",
               color: "rgba(255,255,255,0.65)",
               fontSize: "12px",
               fontWeight: 700,
@@ -1420,9 +1420,9 @@ function QuizContent() {
             {currentQ.options.map((option) => {
               const isSelected = selectedOption === option;
               const isCorrectOpt = option === correctChoiceValue;
-              let bg = "rgba(255,255,255,0.08)";
+              let bg = "#1C1C28";
               let color = "#FFFFFF";
-              let borderColor = "rgba(255,255,255,0.08)";
+              let borderColor = "rgba(255,255,255,0.07)";
 
               if (phase === "feedback") {
                 if (isCorrectOpt) {

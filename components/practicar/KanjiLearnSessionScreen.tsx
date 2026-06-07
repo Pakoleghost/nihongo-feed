@@ -119,7 +119,7 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
         {studyComplete ? (
           <div
             style={{
-              background: "#1E2235",
+              background: "#16161F",
               borderRadius: "24px",
               padding: "22px 20px",
               border: "1px solid rgba(255,255,255,0.08)",
@@ -189,7 +189,7 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
           <>
             <div
               style={{
-                background: "#1E2235",
+                background: "#16161F",
                 borderRadius: 20,
                 padding: "28px 24px",
                 border: "1px solid rgba(255,255,255,0.08)",
