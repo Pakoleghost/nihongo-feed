@@ -168,9 +168,9 @@ export default function PracticarPage() {
         </div>
       </div>
 
-      {/* Start button — fixed at bottom, above nav pill (~80px) */}
+      {/* Start button — fixed at bottom, above nav pill */}
       <div style={{
-        position: "fixed", bottom: "calc(60px + env(safe-area-inset-bottom, 0px))", left: 0, right: 0,
+        position: "fixed", bottom: "calc(92px + env(safe-area-inset-bottom, 0px))", left: 0, right: 0,
         padding: "16px 20px 0",
         background: "linear-gradient(to top, #0D0D1A 65%, transparent)",
         pointerEvents: "none",

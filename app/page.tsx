@@ -545,7 +545,7 @@ export default function HomePage() {
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
-        paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))",
+        paddingBottom: "calc(140px + env(safe-area-inset-bottom, 0px))",
         position: "relative",
       }}
     >

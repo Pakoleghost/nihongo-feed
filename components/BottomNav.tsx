@@ -80,7 +80,7 @@ export default function BottomNav() {
             href === "/practicar" ? (pathname === "/practicar" || pathname.startsWith("/practicar/") || pathname === "/kana" || pathname.startsWith("/kana/")) :
             href === "/clases" ? (pathname === "/clases" || pathname.startsWith("/clases/")) :
             pathname === href || pathname.startsWith(href + "/");
-          const color = isActive ? "#E63946" : "rgba(244,244,248,0.35)";
+          const color = isActive ? "#FFFFFF" : "rgba(244,244,248,0.35)";
 
           return (
             <Link

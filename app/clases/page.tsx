@@ -16,6 +16,7 @@ type Entrada = {
 type NotaClase = {
   id: string;
   fecha?: string;
+  created?: string;
   libro?: string;
   tema?: string;
   pagina?: string;
@@ -36,9 +37,11 @@ function findActiveTarea(notas: NotaClase[]): NotaClase | null {
   const withTarea = notas.filter((n) => n.tarea?.trim());
   if (withTarea.length === 0) return null;
   return withTarea.sort((a, b) => {
-    const da = a.fecha ? new Date(a.fecha).getTime() : 0;
-    const db = b.fecha ? new Date(b.fecha).getTime() : 0;
-    return db - da; // newest first
+    const dateCompare = (b.fecha ?? "").localeCompare(a.fecha ?? "");
+    if (dateCompare !== 0) return dateCompare;
+    const createdCompare = (b.created ?? "").localeCompare(a.created ?? "");
+    if (createdCompare !== 0) return createdCompare;
+    return b.id.localeCompare(a.id);
   })[0];
 }
 
@@ -489,7 +492,7 @@ export default function ClasesPage() {
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
-        paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))",
+        paddingBottom: "calc(140px + env(safe-area-inset-bottom, 0px))",
         position: "relative",
       }}
     >

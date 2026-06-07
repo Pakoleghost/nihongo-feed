@@ -426,7 +426,7 @@ export default function TemaSemanaSheet({ onClose, onUseSentence, tema, fallback
         exit={{ y: "100%", transition: { duration: 0.22, ease: [0.4, 0, 1, 1] } }}
         transition={{ type: "spring", damping: 30, stiffness: 300, mass: 0.85 }}
         onClick={e => e.stopPropagation()}
-        style={{ position: "fixed", bottom: "calc(60px + env(safe-area-inset-bottom, 0px))", left: 0, right: 0, zIndex: 501, background: "#12121F", borderRadius: "22px 22px 0 0", maxHeight: "calc(92dvh - 60px - env(safe-area-inset-bottom, 0px))", display: "flex", flexDirection: "column", overflow: "hidden" }}
+        style={{ position: "fixed", bottom: "calc(92px + env(safe-area-inset-bottom, 0px))", left: 0, right: 0, zIndex: 501, background: "#12121F", borderRadius: "22px 22px 0 0", maxHeight: "calc(92dvh - 92px - env(safe-area-inset-bottom, 0px))", display: "flex", flexDirection: "column", overflow: "hidden" }}
       >
         {/* Header: back · dots · close */}
         <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px 12px" }}>
