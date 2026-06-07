@@ -61,7 +61,7 @@ function ProyectarOverlay({
       style={{
         position: "fixed",
         inset: 0,
-        background: "#1A1A2E",
+        background: "#0D0D1A",
         zIndex: 300,
         display: "flex",
         flexDirection: "column",
@@ -150,6 +150,11 @@ export default function VocabularioFlashcardsScreen({
 }: VocabularioFlashcardsScreenProps) {
   const router = useRouter();
   const [lesson, setLesson] = useState(initialLesson && LESSONS.includes(initialLesson) ? initialLesson : 1);
+
+  useEffect(() => {
+    document.body.classList.add("in-session");
+    return () => document.body.classList.remove("in-session");
+  }, []);
   const [cards, setCards] = useState<GenkiVocabItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -222,34 +227,26 @@ export default function VocabularioFlashcardsScreen({
   const pct = total > 0 ? Math.round((known / total) * 100) : 0;
 
   return (
-    <div style={{ background: "#1A1A2E", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      {/* Header */}
-      <div style={{ padding: "52px 20px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-        <button
-          onClick={() => router.push(backHref)}
-          style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.10)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
-          aria-label="Volver"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M18 6L6 18M6 6l12 12" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
-          </svg>
-        </button>
-
-        <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.42)", flex: 1, textAlign: "center" }}>
-          Flashcards · L{lesson}
-        </span>
-
-        <button
-          onClick={() => setProyectar(true)}
-          title="Proyectar"
-          style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.10)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
-          aria-label="Modo proyectar"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <rect x="2" y="4" width="20" height="14" rx="2" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round"/>
-            <path d="M8 20h8M12 18v2" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </button>
+    <div style={{ background: "#0D0D1A", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      {/* Header — ichigo session style */}
+      <div style={{ padding: "max(18px, env(safe-area-inset-top, 18px)) 18px 0" }}>
+        <div className="sesh-head-row">
+          <button className="sesh-iconbtn" onClick={() => router.push(backHref)} aria-label="Cerrar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+            </svg>
+          </button>
+          <span className="sesh-pill">
+            <span className="sesh-pill-type" style={{ color: "#4ECDC4" }}>Repaso</span>
+            <span className="sesh-pill-lesson">· L{lesson}</span>
+          </span>
+          <button className="sesh-iconbtn" onClick={() => setProyectar(true)} title="Proyectar" aria-label="Modo proyectar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <rect x="2" y="4" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M8 20h8M12 18v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Lesson selector — compact, just L# */}
@@ -320,7 +317,7 @@ export default function VocabularioFlashcardsScreen({
               {missed.length > 0 && (
                 <button
                   onClick={restartWithMissed}
-                  style={{ width: "100%", padding: "16px", borderRadius: 14, border: "1px solid rgba(255,255,255,0.10)", cursor: "pointer", background: "#1E2235", color: "#FFFFFF", fontSize: 16, fontWeight: 800 }}
+                  style={{ width: "100%", padding: "16px", borderRadius: 14, border: "1px solid rgba(255,255,255,0.10)", cursor: "pointer", background: "#16161F", color: "#FFFFFF", fontSize: 16, fontWeight: 800 }}
                 >
                   Repasar {missed.length} falladas
                 </button>
@@ -344,31 +341,27 @@ export default function VocabularioFlashcardsScreen({
                 transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
               }}
             >
-              {/* Front */}
-              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", background: "#1E2235", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: 28, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
-                {/* Corner fold */}
-                <div style={{ position: "absolute", top: 0, right: 0, width: 44, height: 44, background: "#4ECDC4", borderBottomLeftRadius: 44 }} />
-                <p style={{ fontSize: "clamp(28px, 11vw, 64px)", fontWeight: 800, color: "#FFFFFF", margin: 0, fontFamily: "var(--font-noto-sans-jp), sans-serif", lineHeight: 1.1, textAlign: "center", wordBreak: "break-word" }}>
+              {/* Front — flat ichigo */}
+              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", background: "#16161F", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: 28, overflow: "hidden", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <p style={{ fontSize: "clamp(48px, 16vw, 80px)", fontWeight: 600, color: "#F4F4F8", margin: 0, fontFamily: "var(--font-noto-serif-jp, var(--font-noto-sans-jp)), serif", lineHeight: 1.1, textAlign: "center", wordBreak: "break-word" }}>
                   {card.kanji || card.hira}
                 </p>
                 {card.kanji && (
-                  <p style={{ fontSize: 18, color: "rgba(255,255,255,0.42)", margin: 0, fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
+                  <p style={{ fontSize: 20, color: "rgba(244,244,248,0.45)", margin: 0, fontFamily: "var(--font-noto-sans-jp), sans-serif", letterSpacing: "2px" }}>
                     {card.hira}
                   </p>
                 )}
-                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", margin: "20px 0 0" }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "rgba(244,244,248,0.22)", margin: "18px 0 0", letterSpacing: "0.3px" }}>
                   ↻ toca para voltear
                 </p>
               </div>
 
-              {/* Back */}
-              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", background: "#252B3F", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 28, overflow: "hidden", border: "1px solid rgba(255,255,255,0.12)" }}>
-                {/* Corner fold */}
-                <div style={{ position: "absolute", top: 0, right: 0, width: 44, height: 44, background: "#E63946", borderBottomLeftRadius: 44 }} />
-                <p style={{ fontSize: 28, fontWeight: 800, color: "#FFFFFF", margin: 0, textAlign: "center", lineHeight: 1.3 }}>
+              {/* Back — flat ichigo */}
+              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", background: "#1C1C28", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 28, overflow: "hidden", border: "1px solid rgba(78,205,196,0.18)" }}>
+                <p style={{ fontSize: "clamp(24px, 8vw, 36px)", fontWeight: 800, color: "#F4F4F8", margin: 0, textAlign: "center", lineHeight: 1.3 }}>
                   {card.es}
                 </p>
-                <p style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", margin: "12px 0 0", fontFamily: "var(--font-noto-sans-jp), sans-serif" }}>
+                <p style={{ fontSize: 18, color: "rgba(244,244,248,0.42)", margin: "14px 0 0", fontFamily: "var(--font-noto-sans-jp), sans-serif", letterSpacing: "1px" }}>
                   {card.hira}
                 </p>
               </div>

@@ -259,14 +259,14 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
         onExit={exit}
       />
 
-      <div style={{ marginTop: 14, flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+      <div style={{ marginTop: 0, flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
         {q && (
           <>
-            {/* Item card */}
-            <div className="sesh-itemcard">
-              <div className="sesh-jp-word">{q.item.kanji}</div>
-              <div className="sesh-hint">{q.item.es}</div>
-              <div className="sesh-prompt">Elige la lectura correcta</div>
+            {/* Question zone — floating, no card box */}
+            <div className="qzone">
+              <div className="qbig word">{q.item.kanji}</div>
+              <div className="qhint">{q.item.es}</div>
+              <div className="qinstr">Elige la lectura correcta</div>
             </div>
 
             {/* Answer grid */}

@@ -14,7 +14,7 @@ export default async function VocabularioFlashcardsPage({ searchParams }: PagePr
     <VocabularioFlashcardsScreen
       activityPath="/practicar/vocabulario/flashcards"
       activityLabelPrefix="Flashcards"
-      backHref={`/practicar/vocabulario?lesson=${lesson}`}
+      backHref="/practicar"
       initialLesson={lesson}
     />
   );

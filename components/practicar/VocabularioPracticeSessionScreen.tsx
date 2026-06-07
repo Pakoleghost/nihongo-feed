@@ -350,15 +350,15 @@ export default function VocabularioPracticeSessionScreen({ initialLesson, initia
         onExit={exit}
       />
 
-      <div style={{ marginTop: 14, flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+      <div style={{ marginTop: 0, flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
         {currentQuestion && (
           <>
-            <div className="sesh-itemcard">
-              <div className="sesh-jp-word">{currentQuestion.item.display}</div>
+            <div className="qzone">
+              <div className="qbig word">{currentQuestion.item.display}</div>
               {currentQuestion.item.reading !== currentQuestion.item.display && (
-                <div className="sesh-jp-read">{currentQuestion.item.reading}</div>
+                <div className="qread">{currentQuestion.item.reading}</div>
               )}
-              <div className="sesh-prompt">Elige el significado correcto</div>
+              <div className="qinstr">Elige el significado correcto</div>
             </div>
 
             <div className="sesh-answers">
