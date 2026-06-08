@@ -846,7 +846,7 @@ export const TEMAS_SEMANA: TemaSemana[] = [
         { jp: "うんてん", es: "manejar" },
       ] }],
       desglose: [
-        {txt:"わたし は",t:"pron",es:"yo (tema)"},
+        {txt:"わたし は",t:"nom",es:"yo (tema)"},
         {txt:"{{SKILL}}",t:"nom",es:"habilidad"},
         {txt:"が",t:"part",es:"partícula が"},
         {txt:"できます",t:"pred",es:"puedo / sé"},
