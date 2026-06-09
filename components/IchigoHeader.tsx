@@ -79,7 +79,7 @@ export default function IchigoHeader() {
 
   function openProfileArea() {
     if (!userId) return;
-    router.push(isAdmin ? "/admin/groups" : `/perfil/${userId}`);
+    router.push(isAdmin ? "/admin/usuarios" : `/perfil/${userId}`);
   }
 
   return (
