@@ -369,11 +369,11 @@ export default function TablaPage() {
   return (
     <div
       style={{
-        background: "#1A1A2E",
+        background: "#0D0D1A",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        paddingBottom: "48px",
+        paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))",
       }}
     >
       {/* Top bar */}
