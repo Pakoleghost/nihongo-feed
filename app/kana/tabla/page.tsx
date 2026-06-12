@@ -386,7 +386,7 @@ export default function TablaPage() {
         }}
       >
         <button
-          onClick={() => router.push("/kana")}
+          onClick={() => router.back()}
           style={{
             width: "40px",
             height: "40px",

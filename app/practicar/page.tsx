@@ -104,8 +104,18 @@ export default function PracticarPage() {
 
         {/* Filter chips */}
         <div style={{ marginBottom: 26 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "1.4px", textTransform: "uppercase", color: "rgba(244,244,248,0.34)", marginBottom: 12 }}>
-            {typeId === "kana" ? "Silabario" : "Lección"}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "1.4px", textTransform: "uppercase", color: "rgba(244,244,248,0.34)" }}>
+              {typeId === "kana" ? "Silabario" : "Lección"}
+            </span>
+            {typeId === "kana" && (
+              <Link href="/kana/tabla" style={{ fontSize: 12, fontWeight: 700, color: "#4ECDC4", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+                Ver tabla
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 18l6-6-6-6" stroke="#4ECDC4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+            )}
           </div>
           <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4, marginLeft: -20, marginRight: -20, paddingLeft: 20, paddingRight: 20, scrollbarWidth: "none" }}>
             {chipFilters.map(({ key, label }) => {
@@ -126,53 +136,6 @@ export default function PracticarPage() {
             })}
           </div>
         </div>
-
-        {/* Kana tables shortcut */}
-        {typeId === "kana" && (
-          <div style={{ marginBottom: 26 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "1.4px", textTransform: "uppercase", color: "rgba(244,244,248,0.34)", marginBottom: 12 }}>
-              Referencia
-            </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              {(["hiragana", "katakana"] as const).map((script) => (
-                <Link
-                  key={script}
-                  href="/kana/tabla"
-                  style={{
-                    flex: 1,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    borderRadius: 14,
-                    padding: "13px 14px",
-                    background: "#16161F",
-                    border: "1.5px solid rgba(255,255,255,0.07)",
-                    textDecoration: "none",
-                    transition: "border-color .15s",
-                  }}
-                >
-                  <span style={{
-                    width: 38, height: 38, borderRadius: 10, flexShrink: 0,
-                    background: "rgba(255,255,255,0.06)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontFamily: "var(--font-noto-serif-jp), serif",
-                    fontSize: 20, color: "#F4F4F8",
-                  }}>
-                    {script === "hiragana" ? "あ" : "ア"}
-                  </span>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: "#F4F4F8", lineHeight: 1 }}>
-                      {script === "hiragana" ? "Hiragana" : "Katakana"}
-                    </div>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(244,244,248,0.4)", marginTop: 3 }}>
-                      Ver tabla
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Stepper */}
         <div>
