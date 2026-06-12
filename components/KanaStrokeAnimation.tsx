@@ -22,19 +22,17 @@ export default function KanaStrokeAnimation({ kana, size = 200, autoPlay = true,
   const [animKey, setAnimKey] = useState(0);
   const timing = SPEED_TIMINGS[speed];
 
-  // Reset when kana changes
   useEffect(() => {
     setAnimKey(0);
   }, [kana]);
 
-  // No stroke data — show static character
   if (paths.length === 0) {
     return (
       <div
         style={{
           width: size,
           height: size,
-          background: "#FFF8E7",
+          background: "#0D0D1A",
           borderRadius: "1rem",
           display: "flex",
           flexDirection: "column",
@@ -47,13 +45,13 @@ export default function KanaStrokeAnimation({ kana, size = 200, autoPlay = true,
           style={{
             fontSize: size * 0.45,
             fontFamily: "var(--font-noto-sans-jp), sans-serif",
-            color: "#1A1A2E",
+            color: "#F4F4F8",
             lineHeight: 1,
           }}
         >
           {kana}
         </span>
-        <span style={{ fontSize: "11px", color: "#C4BAB0", fontWeight: 600 }}>
+        <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", fontWeight: 600 }}>
           Sin datos de trazos
         </span>
       </div>
@@ -66,18 +64,18 @@ export default function KanaStrokeAnimation({ kana, size = 200, autoPlay = true,
         viewBox="0 0 109 109"
         width={size}
         height={size}
-        style={{ background: "#FFF8E7", borderRadius: "1rem", display: "block" }}
+        style={{ background: "#0D0D1A", borderRadius: "1rem", display: "block" }}
       >
         {/* Reference crosshair */}
-        <line x1="54.5" y1="4" x2="54.5" y2="105" stroke="#E0DAD3" strokeWidth="0.5" strokeDasharray="4 3" />
-        <line x1="4" y1="54.5" x2="105" y2="54.5" stroke="#E0DAD3" strokeWidth="0.5" strokeDasharray="4 3" />
+        <line x1="54.5" y1="4" x2="54.5" y2="105" stroke="rgba(255,255,255,0.07)" strokeWidth="0.6" strokeDasharray="4 3" />
+        <line x1="4" y1="54.5" x2="105" y2="54.5" stroke="rgba(255,255,255,0.07)" strokeWidth="0.6" strokeDasharray="4 3" />
 
         {paths.map((d, index) => (
           <motion.path
             key={`${animKey}-${index}`}
             d={d}
             fill="none"
-            stroke="#1A1A2E"
+            stroke="#F4F4F8"
             strokeWidth="3.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -105,7 +103,7 @@ export default function KanaStrokeAnimation({ kana, size = 200, autoPlay = true,
           bottom: 7,
           left: 9,
           fontSize: "10px",
-          color: "#9CA3AF",
+          color: "rgba(255,255,255,0.3)",
           fontWeight: 600,
           pointerEvents: "none",
         }}
