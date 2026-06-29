@@ -31,12 +31,17 @@
 }
 
 .app button {
-  cursor: default;
+  cursor: pointer;
   font-family: inherit;
 }
 
 .app a {
-  cursor: default;
+  cursor: pointer;
+}
+
+.app button:disabled,
+.app [aria-disabled="true"] {
+  cursor: not-allowed;
 }
 
 .sidebar {
@@ -407,11 +412,14 @@
   font-weight: 800;
   text-decoration: none;
   white-space: nowrap;
+  cursor: pointer;
   transition:
     background-color 140ms ease,
     border-color 140ms ease,
     color 140ms ease,
-    transform 140ms ease;
+    box-shadow 140ms ease,
+    transform 140ms ease,
+    opacity 140ms ease;
 }
 
 .ghostButton,
@@ -426,6 +434,8 @@
   border-color: var(--border-strong);
   background: var(--bg);
   color: var(--navy);
+  box-shadow: 0 8px 18px rgba(26, 26, 46, 0.08);
+  transform: translateY(-1px);
 }
 
 .primaryButton,
@@ -433,18 +443,76 @@
   border: 1px solid var(--teal);
   background: var(--teal);
   color: var(--navy);
+  box-shadow: 0 10px 22px rgba(78, 205, 196, 0.18);
+}
+
+.primaryButton:hover,
+.tealButton:hover {
+  border-color: #43beb5;
+  background: #5ad8d0;
+  box-shadow: 0 14px 28px rgba(78, 205, 196, 0.26);
+  transform: translateY(-1px);
 }
 
 .dangerButton {
   border: 1px solid var(--red);
   background: var(--red);
   color: #fff;
+  box-shadow: 0 10px 22px rgba(230, 57, 70, 0.18);
 }
 
+.dangerButton:hover {
+  background: #f04451;
+  box-shadow: 0 14px 28px rgba(230, 57, 70, 0.24);
+  transform: translateY(-1px);
+}
+
+.ghostButton:active,
 .primaryButton:active,
+.lightButton:active,
 .dangerButton:active,
 .tealButton:active {
-  transform: translateY(1px);
+  box-shadow: 0 5px 12px rgba(26, 26, 46, 0.08);
+  transform: translateY(1px) scale(0.985);
+}
+
+.ghostButton:focus-visible,
+.primaryButton:focus-visible,
+.lightButton:focus-visible,
+.dangerButton:focus-visible,
+.tealButton:focus-visible,
+.navItem:focus-visible,
+.bottomNavItem:focus-visible,
+.brand:focus-visible,
+.mobileHomeLink:focus-visible,
+.mobileProfileBrand:focus-visible,
+.profilePostCard:focus-visible,
+.learnModeCard:focus-visible,
+.kanaQuizCard:focus-visible,
+.tabButton:focus-visible,
+.kanjiBackButton:focus-visible {
+  outline: 3px solid rgba(78, 205, 196, 0.42);
+  outline-offset: 3px;
+}
+
+.ghostButton:disabled,
+.primaryButton:disabled,
+.lightButton:disabled,
+.dangerButton:disabled,
+.tealButton:disabled {
+  box-shadow: none;
+  opacity: 0.56;
+  transform: none;
+}
+
+.ghostButton:disabled:hover,
+.primaryButton:disabled:hover,
+.lightButton:disabled:hover,
+.dangerButton:disabled:hover,
+.tealButton:disabled:hover {
+  box-shadow: none;
+  opacity: 0.56;
+  transform: none;
 }
 
 .page {
@@ -895,6 +963,7 @@
   color: var(--navy);
   padding: 14px;
   text-align: left;
+  cursor: pointer;
   transition:
     border-color 140ms ease,
     box-shadow 140ms ease,
@@ -905,6 +974,11 @@
   border-color: rgba(78, 205, 196, 0.38);
   box-shadow: 0 14px 30px rgba(26, 26, 46, 0.08);
   transform: translateY(-1px);
+}
+
+.profilePostCard:active {
+  box-shadow: 0 8px 18px rgba(26, 26, 46, 0.08);
+  transform: translateY(1px) scale(0.992);
 }
 
 .profilePostCard img {
@@ -976,6 +1050,19 @@
   color: var(--muted);
   font-size: 22px;
   font-weight: 700;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease,
+    transform 120ms ease;
+}
+
+.profilePostModal header button:hover {
+  background: var(--bg);
+  color: var(--navy);
+}
+
+.profilePostModal header button:active {
+  transform: scale(0.94);
 }
 
 .profilePostModal > img {
@@ -1309,7 +1396,7 @@
   background: #fff;
   color: var(--navy);
   padding: 12px 14px;
-  cursor: default;
+  cursor: pointer;
 }
 
 .kanaLearnTab span {
@@ -1450,7 +1537,7 @@
   border: 1px solid rgba(26, 26, 46, 0.08);
   background: #fff;
   color: var(--navy);
-  cursor: default;
+  cursor: pointer;
   transition:
     transform 140ms ease,
     border-color 140ms ease,
@@ -1594,7 +1681,7 @@
   color: var(--muted);
   font-size: 12px;
   font-weight: 900;
-  cursor: default;
+  cursor: pointer;
 }
 
 .tabButtonActive {
@@ -1769,7 +1856,7 @@
   margin: 0 0 10px;
   font-size: 12px;
   font-weight: 950;
-  cursor: default;
+  cursor: pointer;
 }
 
 .kanjiModuleGrid {
@@ -1797,7 +1884,7 @@
   color: var(--navy);
   padding: 18px;
   text-align: left;
-  cursor: default;
+  cursor: pointer;
   box-shadow: 0 16px 34px rgba(26, 26, 46, 0.06);
   transition:
     transform 140ms ease,
@@ -1895,7 +1982,7 @@
   color: var(--navy);
   padding: 18px;
   text-align: left;
-  cursor: default;
+  cursor: pointer;
   box-shadow: 0 14px 30px rgba(26, 26, 46, 0.05);
   transition:
     transform 140ms ease,
@@ -1953,7 +2040,7 @@
   color: var(--navy);
   padding: 11px 12px;
   text-align: left;
-  cursor: default;
+  cursor: pointer;
   box-shadow: 0 10px 25px rgba(26, 26, 46, 0.04);
   transition:
     transform 140ms ease,
@@ -2048,7 +2135,7 @@
   color: var(--navy);
   padding: 13px 10px;
   text-align: center;
-  cursor: default;
+  cursor: pointer;
   box-shadow: 0 10px 24px rgba(26, 26, 46, 0.04);
   transition:
     transform 140ms ease,
@@ -2203,7 +2290,7 @@
   color: var(--muted);
   font-size: 12px;
   font-weight: 900;
-  cursor: default;
+  cursor: pointer;
   transition:
     background-color 140ms ease,
     color 140ms ease,
@@ -2322,7 +2409,7 @@
   color: var(--navy);
   padding: 16px;
   text-align: left;
-  cursor: default;
+  cursor: pointer;
   box-shadow: 0 10px 24px rgba(26, 26, 46, 0.04);
   transition:
     transform 140ms ease,
@@ -2531,7 +2618,7 @@
   color: var(--muted);
   font-size: 24px;
   line-height: 1;
-  cursor: default;
+  cursor: pointer;
 }
 
 .kanjiQuizProgress {
@@ -2599,7 +2686,7 @@
   font-size: 18px;
   font-weight: 900;
   line-height: 1.25;
-  cursor: default;
+  cursor: pointer;
   box-shadow: 0 10px 28px rgba(26, 26, 46, 0.04);
   transition:
     transform 140ms ease,
@@ -2610,10 +2697,15 @@
 .kanjiQuizOption:hover:not(:disabled) {
   transform: translateY(-1px);
   border-color: rgba(78, 205, 196, 0.3);
+  box-shadow: 0 14px 30px rgba(26, 26, 46, 0.08);
+}
+
+.kanjiQuizOption:active:not(:disabled) {
+  transform: translateY(1px) scale(0.985);
 }
 
 .kanjiQuizOption:disabled {
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .kanjiQuizOptionCorrect {
@@ -2625,6 +2717,42 @@
   border-color: rgba(230, 57, 70, 0.45);
   background: rgba(230, 57, 70, 0.12);
   color: var(--red);
+}
+
+.kanaLearnTab:active,
+.kanaChartCell:active,
+.tabButton:active,
+.kanjiBackButton:active,
+.kanjiGridToggle:active,
+.kanjiModuleCard:active:not(:disabled),
+.kanjiLessonChoiceCard:active,
+.kanjiLessonTab:active,
+.kanjiCharacterCard:active,
+.grammarPatternCard:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.kanjiQuizClose:hover {
+  background: rgba(26, 26, 46, 0.08);
+  color: var(--navy);
+}
+
+.kanjiQuizClose:active {
+  transform: scale(0.94);
+}
+
+.kanaLearnTab:focus-visible,
+.kanaChartCell:focus-visible,
+.kanjiModuleCard:focus-visible,
+.kanjiLessonChoiceCard:focus-visible,
+.kanjiLessonTab:focus-visible,
+.kanjiCharacterCard:focus-visible,
+.grammarPatternCard:focus-visible,
+.kanjiGridToggle:focus-visible,
+.kanjiQuizClose:focus-visible,
+.kanjiQuizOption:focus-visible {
+  outline: 3px solid rgba(78, 205, 196, 0.42);
+  outline-offset: 3px;
 }
 
 .kanjiQuizFooter {
