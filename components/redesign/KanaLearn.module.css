@@ -6,16 +6,10 @@
   margin-bottom: 18px;
   overflow: hidden;
   position: relative;
-  border: 1px solid rgba(26, 26, 46, 0.08);
+  border: 1px solid rgba(78, 205, 196, 0.18);
   border-radius: 20px;
-  background:
-    radial-gradient(
-      circle at 96% 42%,
-      rgba(78, 205, 196, 0.14),
-      transparent 26%
-    ),
-    #fff;
-  box-shadow: 0 16px 42px rgba(17, 24, 39, 0.075);
+  background: linear-gradient(120deg, #1a1a2e 0%, #1e2545 60%, #1a2e2b 100%);
+  box-shadow: 0 12px 32px -8px rgba(10, 15, 30, 0.38);
   padding: 26px;
 }
 
@@ -47,7 +41,7 @@
 
 .learnHeroLeft h1 {
   margin: 0;
-  color: #1a1a2e;
+  color: #fff;
   font-size: 31px;
   font-weight: 900;
   letter-spacing: 0;
@@ -56,9 +50,9 @@
 
 .learnHeroLeft p {
   margin: 8px 0 0;
-  color: #72798a;
+  color: rgba(255, 255, 255, 0.48);
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .learnHeroStats {
@@ -68,36 +62,36 @@
 
 .learnHeroStats div {
   min-width: 104px;
-  border: 1px solid rgba(78, 205, 196, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
-  background: rgba(78, 205, 196, 0.12);
+  background: rgba(255, 255, 255, 0.07);
   padding: 14px 16px;
   text-align: center;
 }
 
 .learnHeroStats div:nth-child(2) {
-  border-color: rgba(78, 205, 196, 0.18);
-  background: rgba(78, 205, 196, 0.12);
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .learnHeroStats strong {
   display: block;
-  color: #1a1a2e;
+  color: #fff;
   font-size: 30px;
   font-weight: 900;
   line-height: 1;
 }
 
 .learnHeroStats div:nth-child(2) strong {
-  color: #1a1a2e;
+  color: #fff;
 }
 
 .learnHeroStats span {
   display: block;
   margin-top: 5px;
-  color: #7b8190;
+  color: rgba(255, 255, 255, 0.42);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .learnModeGrid {
@@ -228,20 +222,10 @@
   display: grid;
   gap: 8px;
   margin-top: 24px;
-  border: 1px solid rgba(78, 205, 196, 0.2);
+  border: 1px solid rgba(78, 205, 196, 0.18);
+  border-left: 3px solid rgba(78, 205, 196, 0.6);
   border-radius: 14px;
-  background:
-    radial-gradient(
-      circle at 96% 0%,
-      rgba(245, 166, 35, 0.16),
-      transparent 30%
-    ),
-    linear-gradient(
-      135deg,
-      rgba(78, 205, 196, 0.07),
-      rgba(245, 166, 35, 0.055)
-    ),
-    #fff;
+  background: rgba(78, 205, 196, 0.05);
   padding: 18px 20px;
 }
 
@@ -375,16 +359,10 @@
 }
 
 .kanaLearnTabActive {
-  border-color: rgba(78, 205, 196, 0.34);
-  background:
-    radial-gradient(
-      circle at 88% 16%,
-      rgba(245, 166, 35, 0.28),
-      transparent 34%
-    ),
-    #4ecdc4;
+  border-color: #4ecdc4;
+  background: #4ecdc4;
   color: #1a1a2e;
-  box-shadow: 0 12px 26px rgba(78, 205, 196, 0.18);
+  box-shadow: 0 8px 20px -4px rgba(78, 205, 196, 0.4);
 }
 
 .kanaLearnTabActive span {

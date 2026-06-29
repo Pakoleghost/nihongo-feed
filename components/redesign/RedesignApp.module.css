@@ -14,8 +14,8 @@
   --border-strong: rgba(26, 26, 46, 0.15);
   --muted: #667085;
   --muted-light: #98a2b3;
-  --shadow-card: 0 1px 2px rgba(26, 26, 46, 0.04), 0 18px 44px rgba(26, 26, 46, 0.06);
-  --shadow-lift: 0 1px 2px rgba(26, 26, 46, 0.05), 0 24px 58px rgba(26, 26, 46, 0.1);
+  --shadow-card: 0 1px 3px rgba(26, 26, 46, 0.05), 0 10px 26px -8px rgba(26, 26, 46, 0.11);
+  --shadow-lift: 0 1px 3px rgba(26, 26, 46, 0.06), 0 16px 36px -8px rgba(26, 26, 46, 0.17);
   --font-display: var(--font-sora), var(--font-study), sans-serif;
   --sidebar-w: 248px;
   display: flex;
@@ -54,9 +54,9 @@
   flex-direction: column;
   height: 100%;
   overflow-y: auto;
-  border-right: 1px solid rgba(26, 26, 46, 0.07);
-  background: #fff;
-  color: var(--navy);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  background: #1a1a2e;
+  color: rgba(255, 255, 255, 0.65);
 }
 
 .sidebar::before {
@@ -76,8 +76,8 @@
   align-items: center;
   gap: 10px;
   padding: 20px 18px 18px;
-  border-bottom: 1px solid rgba(26, 26, 46, 0.07);
-  color: var(--navy);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  color: #fff;
   text-decoration: none;
   transition:
     background-color 140ms ease,
@@ -85,7 +85,7 @@
 }
 
 .brand:hover {
-  background: rgba(78, 205, 196, 0.08);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .brand:active {
@@ -119,7 +119,7 @@
   display: grid;
   gap: 1px;
   min-width: 0;
-  color: var(--navy);
+  color: #fff;
   line-height: 1;
 }
 
@@ -128,10 +128,11 @@
   font-size: 17px;
   font-weight: 800;
   letter-spacing: 0;
+  color: #fff;
 }
 
 .brandText span {
-  color: rgba(26, 26, 46, 0.46);
+  color: rgba(255, 255, 255, 0.38);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -146,8 +147,8 @@
   place-items: center;
   margin-left: auto;
   border-radius: 999px;
-  background: rgba(78, 205, 196, 0.14);
-  color: rgba(26, 26, 46, 0.58);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.36);
   font-size: 20px;
   font-weight: 900;
   line-height: 1;
@@ -163,7 +164,7 @@
 
 .navLabel {
   padding: 8px 8px;
-  color: rgba(26, 26, 46, 0.4);
+  color: rgba(255, 255, 255, 0.26);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -172,7 +173,7 @@
 
 .navItem {
   width: 100%;
-  min-height: 48px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -180,7 +181,7 @@
   border: 0;
   border-radius: 10px;
   background: transparent;
-  color: rgba(26, 26, 46, 0.68);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 14px;
   font-weight: 700;
   text-align: left;
@@ -196,38 +197,39 @@
 }
 
 .navItem:hover {
-  background: rgba(78, 205, 196, 0.09);
-  color: var(--navy);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.88);
   transform: translateX(1px);
 }
 
 .navItemActive {
-  background: rgba(78, 205, 196, 0.14);
-  outline-color: rgba(78, 205, 196, 0.72);
-  color: var(--navy);
-  box-shadow: 0 10px 24px rgba(78, 205, 196, 0.14);
+  background: linear-gradient(135deg, #4ecdc4, #3cbdb5);
+  outline-color: transparent;
+  color: #1a1a2e;
+  font-weight: 800;
+  box-shadow: 0 8px 20px -4px rgba(78, 205, 196, 0.45);
   transform: translateX(1px);
 }
 
 .navItemDisabled {
-  color: rgba(26, 26, 46, 0.38);
+  color: rgba(255, 255, 255, 0.22);
 }
 
 .navItemDisabled:hover {
   background: transparent;
-  color: rgba(26, 26, 46, 0.38);
+  color: rgba(255, 255, 255, 0.22);
   transform: none;
 }
 
 .navItemDisabled em {
   margin-left: auto;
-  border-radius: 999px;
-  background: rgba(26, 26, 46, 0.06);
-  color: rgba(26, 26, 46, 0.38);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.26);
   padding: 3px 7px;
   font-size: 10px;
   font-style: normal;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .navIcon {
@@ -244,12 +246,13 @@
 }
 
 .navIconBox {
-  background: rgba(26, 26, 46, 0.06);
+  background: rgba(255, 255, 255, 0.08);
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
 }
 
 .navItemActive .navIconBox {
-  background: rgba(78, 205, 196, 0.22);
+  background: rgba(255, 255, 255, 0.26);
+  color: #1a1a2e;
 }
 
 .navItem:active {
@@ -262,8 +265,8 @@
   gap: 10px;
   margin-top: auto;
   padding: 12px 10px;
-  border-top: 1px solid rgba(26, 26, 46, 0.07);
-  color: rgba(26, 26, 46, 0.82);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.68);
   text-decoration: none;
 }
 
@@ -308,10 +311,11 @@
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .profileText span {
-  color: rgba(26, 26, 46, 0.44);
+  color: rgba(255, 255, 255, 0.32);
   font-size: 11px;
   font-weight: 600;
 }
@@ -346,15 +350,17 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
+  background: #1a1a2e;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .mobileTopbar .brandText {
-  color: var(--navy);
+  color: #fff;
   text-decoration: none;
 }
 
 .mobileTopbar .brandText span {
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .mobileProfileBrand {
@@ -371,8 +377,8 @@
   display: grid;
   place-items: center;
   border-radius: 10px;
-  background: rgba(78, 205, 196, 0.14);
-  color: var(--navy);
+  background: rgba(78, 205, 196, 0.18);
+  color: var(--teal);
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
   font-size: 17px;
   font-weight: 900;
@@ -579,22 +585,16 @@
   margin-bottom: 16px;
   overflow: hidden;
   border-radius: 14px;
-  border: 1px solid rgba(245, 166, 35, 0.32);
-  background:
-    radial-gradient(
-      circle at 92% 16%,
-      rgba(78, 205, 196, 0.28),
-      transparent 26%
-    ),
-    linear-gradient(135deg, rgba(245, 166, 35, 0.2), rgba(78, 205, 196, 0.1)),
-    #fff;
-  color: var(--navy);
+  border: 1px solid rgba(78, 205, 196, 0.16);
+  background: linear-gradient(135deg, #1a1a2e 0%, #1e2545 100%);
+  color: #fff;
   padding: 22px;
+  box-shadow: 0 10px 28px -8px rgba(10, 15, 30, 0.35);
 }
 
 .greetingJa {
   margin-bottom: 5px;
-  color: var(--navy);
+  color: var(--teal);
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 12px;
   font-weight: 700;
@@ -606,11 +606,12 @@
   font-weight: 900;
   letter-spacing: 0;
   line-height: 1.05;
+  color: #fff;
 }
 
 .greetingSub {
   margin-top: 6px;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.48);
   font-size: 13px;
   font-weight: 600;
 }
@@ -624,14 +625,14 @@
 
 .statTile {
   border-radius: 10px;
-  border: 1px solid rgba(26, 26, 46, 0.06);
-  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   padding: 12px 10px;
 }
 
 .statTile strong {
   display: block;
-  color: var(--navy);
+  color: #fff;
   font-size: 24px;
   font-weight: 900;
   line-height: 1;
@@ -640,9 +641,9 @@
 .statTile span {
   display: block;
   margin-top: 4px;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.42);
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .noteCard {
@@ -1205,15 +1206,10 @@
 }
 
 .learnModeCardActive {
-  background:
-    radial-gradient(
-      circle at 92% 18%,
-      rgba(245, 166, 35, 0.34),
-      transparent 34%
-    ),
-    var(--teal);
+  background: var(--teal);
   color: var(--navy);
-  box-shadow: 0 18px 42px rgba(78, 205, 196, 0.2);
+  border-color: var(--teal);
+  box-shadow: 0 10px 28px -4px rgba(78, 205, 196, 0.35);
 }
 
 .learnModeIcon {
