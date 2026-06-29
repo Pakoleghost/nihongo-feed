@@ -1,9 +1,9 @@
-import { PracticeHubScreen } from "@/components/redesign/LearningScreens";
+import { ComingSoonScreen } from "@/components/redesign/LearningScreens";
 
 export const metadata = {
   title: "Práctica | Pako Nihongo",
 };
 
 export default function PracticeDashboardPage() {
-  return <PracticeHubScreen />;
+  return <ComingSoonScreen title="Práctica" subtitle="Los quizzes y sesiones libres llegarán después del primer lanzamiento." glyph="練" />;
 }

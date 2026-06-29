@@ -11,10 +11,11 @@ type ShellProps = {
 };
 
 type NavItem = {
-  href: string;
+  href?: string;
   label: string;
   icon: string;
   box?: boolean;
+  disabled?: boolean;
 };
 
 type NavGroup = {
@@ -40,18 +41,18 @@ const navGroups: NavGroup[] = [
   {
     label: "Practicar",
     items: [
-      { href: "/dashboard/practica", label: "Práctica", icon: "練" },
-      { href: "/dashboard/lectura", label: "Lectura", icon: "読" },
-      { href: "/dashboard/escucha", label: "Escucha", icon: "聴" },
-      { href: "/dashboard/repaso", label: "Repaso inteligente", icon: "復" },
+      { label: "Práctica", icon: "練", disabled: true },
+      { label: "Lectura", icon: "読", disabled: true },
+      { label: "Escucha", icon: "聴", disabled: true },
+      { label: "Repaso inteligente", icon: "復", disabled: true },
     ],
   },
   {
     label: "Actividad",
     items: [
-      { href: "/dashboard/plan", label: "Mi Plan", icon: "予" },
-      { href: "/dashboard/tareas", label: "Tareas", icon: "課" },
-      { href: "/dashboard/progreso", label: "Mi Progreso", icon: "進" },
+      { label: "Mi Plan", icon: "予", disabled: true },
+      { label: "Tareas", icon: "課", disabled: true },
+      { label: "Mi Progreso", icon: "進", disabled: true },
     ],
   },
 ];
@@ -59,9 +60,11 @@ const navGroups: NavGroup[] = [
 const bottomItems = [
   { href: "/dashboard", label: "Inicio", icon: "家" },
   { href: "/dashboard/hiragana", label: "Hiragana", icon: "あ" },
-  { href: "/dashboard/practica", label: "Práctica", icon: "練" },
-  { href: "/dashboard/tareas", label: "Tareas", icon: "課" },
-  { href: "/dashboard/progreso", label: "Progreso", icon: "進" },
+  { href: "/dashboard/katakana", label: "Katakana", icon: "ア" },
+  { href: "/dashboard/kanji", label: "Kanji", icon: "漢" },
+  { href: "/dashboard/gramatica", label: "Gramática", icon: "文" },
+  { href: "/dashboard/vocabulario", label: "Vocab", icon: "語" },
+  { href: "/dashboard/perfil", label: "Perfil", icon: "人" },
 ];
 
 function isActivePath(pathname: string, href: string) {
@@ -84,17 +87,24 @@ function Sidebar({ pathname }: { pathname: string }) {
     pathAtClick: string;
   } | null>(null);
   const initial = profile.displayName.trim()[0]?.toUpperCase() || "A";
+  const roleLabel = profile.roleLabel || "Alumno";
   const activePath =
     optimisticNav?.pathAtClick === pathname ? optimisticNav.href : pathname;
 
   return (
     <aside className={styles.sidebar} aria-label="Navegación principal del alumno">
-      <Link href="/dashboard" className={styles.brand} aria-label="Ir al inicio de Pako Nihongo">
-        <span className={styles.brandMark}>ぱ</span>
+      <Link href="/dashboard/perfil" className={styles.brand} aria-label="Abrir tu perfil">
+        {profile.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className={styles.brandAvatarImage} src={profile.avatarUrl} alt="" />
+        ) : (
+          <span className={styles.brandMark}>{initial}</span>
+        )}
         <span className={styles.brandText}>
           <strong>Pako Nihongo</strong>
-          <span>Alumno</span>
+          <span>{roleLabel}</span>
         </span>
+        <span className={styles.brandChevron} aria-hidden="true">›</span>
       </Link>
 
       <nav className={styles.nav}>
@@ -102,14 +112,29 @@ function Sidebar({ pathname }: { pathname: string }) {
           <section key={group.label || "inicio"} className={styles.navGroup}>
             {group.label && <div className={styles.navLabel}>{group.label}</div>}
             {group.items.map((item) => {
-              const active = isActivePath(activePath, item.href);
+              const href = item.href;
+              const active = href ? isActivePath(activePath, href) : false;
+              if (!href || item.disabled) {
+                return (
+                  <div
+                    key={`${group.label}-${item.label}`}
+                    className={`${styles.navItem} ${styles.navItemDisabled}`}
+                    aria-disabled="true"
+                  >
+                    <NavIcon icon={item.icon} boxed={item.box} />
+                    <span>{item.label}</span>
+                    <em>Próx.</em>
+                  </div>
+                );
+              }
+
               return (
                 <Link
-                  key={item.href}
-                  href={item.href}
+                  key={href}
+                  href={href}
                   prefetch
                   onPointerDown={() =>
-                    setOptimisticNav({ href: item.href, pathAtClick: pathname })
+                    setOptimisticNav({ href, pathAtClick: pathname })
                   }
                   className={`${styles.navItem} ${active ? styles.navItemActive : ""}`}
                 >
@@ -121,19 +146,6 @@ function Sidebar({ pathname }: { pathname: string }) {
           </section>
         ))}
       </nav>
-
-      <Link href="/dashboard/perfil" className={styles.profileLink}>
-        {profile.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img className={styles.avatarImage} src={profile.avatarUrl} alt="" />
-        ) : (
-          <span className={styles.avatar}>{initial}</span>
-        )}
-        <span className={styles.profileText}>
-          <strong>{profile.displayName}</strong>
-          <span>{profile.groupName || "Alumno"}</span>
-        </span>
-      </Link>
     </aside>
   );
 }
@@ -141,16 +153,23 @@ function Sidebar({ pathname }: { pathname: string }) {
 function MobileTopbar() {
   const { profile } = useStudentDashboardData();
   const initial = profile.displayName.trim()[0]?.toUpperCase() || "A";
+  const roleLabel = profile.roleLabel || "Alumno";
 
   return (
     <header className={styles.mobileTopbar}>
-      <Link href="/dashboard" className={styles.brandText} aria-label="Ir al inicio">
-        <strong>Pako Nihongo</strong>
-        <span>Alumno</span>
+      <Link href="/dashboard/perfil" className={styles.mobileProfileBrand} aria-label="Abrir tu perfil">
+        {profile.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className={styles.avatarImage} src={profile.avatarUrl} alt="" />
+        ) : (
+          <span className={styles.avatar}>{initial}</span>
+        )}
+        <span className={styles.brandText}>
+          <strong>Pako Nihongo</strong>
+          <span>{roleLabel}</span>
+        </span>
       </Link>
-      <Link href="/dashboard/perfil" className={styles.avatar} aria-label="Abrir perfil">
-        {initial}
-      </Link>
+      <Link href="/dashboard" className={styles.mobileHomeLink} aria-label="Ir al inicio">家</Link>
     </header>
   );
 }

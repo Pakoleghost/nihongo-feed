@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import styles from "./RedesignApp.module.css";
 import kanaStyles from "./KanaLearn.module.css";
 import {
@@ -76,6 +76,27 @@ function ProgressBar({ value }: { value: number }) {
       <div className={styles.progressFill} style={{ width: `${value}%` }} />
     </div>
   );
+}
+
+type ProfilePost = {
+  id: string;
+  content: string;
+  image_url: string | null;
+  from_tema: boolean | null;
+  likes: number | null;
+  created_at: string;
+};
+
+function formatPostDate(value: string) {
+  try {
+    return new Intl.DateTimeFormat("es-MX", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(value));
+  } catch {
+    return "Fecha reciente";
+  }
 }
 
 function HeroCard({
@@ -1612,6 +1633,48 @@ export function VocabLearningScreen() {
   );
 }
 
+export function ComingSoonScreen({
+  title,
+  subtitle,
+  glyph = "予",
+}: {
+  title: string;
+  subtitle: string;
+  glyph?: string;
+}) {
+  return (
+    <>
+      <PageHeader title={title} subtitle="Esta sección está en preparación para tus clases." />
+      <section className={styles.heroCard}>
+        <div className={styles.heroLeft}>
+          <div className={styles.heroGlyph}>{glyph}</div>
+          <div>
+            <div className={styles.heroTitle}>Próximamente</div>
+            <div className={styles.heroSub}>{subtitle}</div>
+          </div>
+        </div>
+        <Link href="/dashboard" className={styles.tealButton}>
+          Volver a inicio
+        </Link>
+      </section>
+      <section className={`${styles.card} ${styles.rowList}`}>
+        {[
+          ["Qué sí puedes usar ya", "Inicio, Hiragana, Katakana, Kanji, Gramática y Vocabulario.", "道"],
+          ["Por qué está cerrado", "Prefiero lanzar una app limpia antes de abrir práctica a medias.", "整"],
+        ].map(([rowTitle, meta, icon]) => (
+          <div key={rowTitle} className={styles.rowItem}>
+            <span className={styles.rowIcon}>{icon}</span>
+            <span className={styles.rowCopy}>
+              <span className={styles.rowTitle}>{rowTitle}</span>
+              <span className={styles.rowSub}>{meta}</span>
+            </span>
+          </div>
+        ))}
+      </section>
+    </>
+  );
+}
+
 export function TasksScreen() {
   return (
     <>
@@ -2146,10 +2209,15 @@ export function SmartReviewScreen() {
 }
 
 export function ProfileDashboardScreen() {
-  const { profile, course, streak, kana, vocab, kanji } = useStudentDashboardData();
-  const kanaPct = useDashboardPercent(kana);
-  const vocabPct = useDashboardPercent(vocab);
-  const kanjiPct = useDashboardPercent(kanji);
+  const { profile, course, refresh } = useStudentDashboardData();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [username, setUsername] = useState(profile.displayName);
+  const [savingName, setSavingName] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
+  const [posts, setPosts] = useState<ProfilePost[]>([]);
+  const [postsLoading, setPostsLoading] = useState(true);
+  const [selectedPost, setSelectedPost] = useState<ProfilePost | null>(null);
   const initial = profile.displayName.trim()[0]?.toUpperCase() || "A";
   const courseModule =
     getCurriculumModuleByNumber(course.currentModuleNumber) ??
@@ -2158,11 +2226,101 @@ export function ProfileDashboardScreen() {
     ? GENKI_LESSON_NAMES[course.currentLesson]
     : null;
 
+  useEffect(() => {
+    setUsername(profile.displayName);
+  }, [profile.displayName]);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function loadProfilePosts() {
+      if (!profile.userId || profile.userId === "anon") {
+        setPosts([]);
+        setPostsLoading(false);
+        return;
+      }
+
+      setPostsLoading(true);
+      const { data } = await supabase
+        .from("comunidad_posts")
+        .select("id, content, image_url, from_tema, likes, created_at")
+        .eq("user_id", profile.userId)
+        .order("created_at", { ascending: false })
+        .limit(24);
+
+      if (!alive) return;
+      setPosts((data as ProfilePost[] | null) ?? []);
+      setPostsLoading(false);
+    }
+
+    void loadProfilePosts();
+    return () => {
+      alive = false;
+    };
+  }, [profile.userId]);
+
+  async function saveUsername() {
+    const cleanName = username.trim();
+    if (!cleanName || profile.userId === "anon") return;
+    setSavingName(true);
+    setStatus(null);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ username: cleanName })
+      .eq("id", profile.userId);
+
+    setSavingName(false);
+    if (error) {
+      setStatus("No pude guardar el nombre. Intenta otra vez.");
+      return;
+    }
+
+    setStatus("Nombre actualizado.");
+    refresh();
+  }
+
+  async function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || profile.userId === "anon") return;
+
+    setUploadingAvatar(true);
+    setStatus(null);
+
+    try {
+      const extension = file.name.split(".").pop() || "jpg";
+      const path = `avatars/${profile.userId}-${Date.now()}.${extension}`;
+      const { data, error } = await supabase.storage
+        .from("uploads")
+        .upload(path, file, { upsert: true });
+
+      if (error || !data?.path) throw error ?? new Error("UPLOAD_FAILED");
+
+      const { data: urlData } = supabase.storage
+        .from("uploads")
+        .getPublicUrl(data.path);
+
+      const newAvatarUrl = urlData.publicUrl;
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: newAvatarUrl })
+        .eq("id", profile.userId);
+
+      if (updateError) throw updateError;
+      setStatus("Foto actualizada.");
+      refresh();
+    } catch {
+      setStatus("No pude subir la foto. Prueba con otra imagen.");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }
+
   return (
     <>
       <PageHeader
         title="Perfil"
-        subtitle={profile.groupName ? `${profile.groupName} · Alumno` : "Tu espacio de alumno"}
+        subtitle="Tu identidad dentro de la comunidad de Pako Nihongo"
       />
       <section className={styles.heroCard}>
         <div className={styles.heroLeft}>
@@ -2174,83 +2332,143 @@ export function ProfileDashboardScreen() {
           )}
           <div>
             <div className={styles.heroTitle}>{profile.displayName}</div>
-            <div className={styles.heroSub}>{profile.groupName || "Pako Nihongo"}</div>
+            <div className={styles.heroSub}>
+              {profile.groupName || "Grupo pendiente"} · {profile.roleLabel || "Alumno"}
+            </div>
           </div>
         </div>
-        <div className={styles.heroMetric}>
-          <strong>{streak || 0}</strong>
-          <span>días de ritmo</span>
+        <button
+          type="button"
+          className={styles.tealButton}
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploadingAvatar}
+        >
+          {uploadingAvatar ? "Subiendo..." : "Cambiar foto"}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className={styles.hiddenInput}
+          onChange={handleAvatarChange}
+        />
+      </section>
+
+      <div className={styles.profileGrid}>
+        <section className={`${styles.card} ${styles.profileEditCard}`}>
+          <SectionLabel>Datos visibles</SectionLabel>
+          <label className={styles.formLabel} htmlFor="profile-username">
+            Nombre de usuario
+          </label>
+          <div className={styles.inlineForm}>
+            <input
+              id="profile-username"
+              className={styles.textInput}
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              placeholder="Tu nombre en comunidad"
+            />
+            <button
+              type="button"
+              className={styles.tealButton}
+              onClick={saveUsername}
+              disabled={savingName || !username.trim()}
+            >
+              {savingName ? "Guardando..." : "Guardar"}
+            </button>
+          </div>
+          {status && <p className={styles.formStatus}>{status}</p>}
+        </section>
+
+        <section className={`${styles.card} ${styles.rowList}`}>
+          <SectionLabel>Curso actual</SectionLabel>
+          {[
+            ["Grupo", course.groupName || profile.groupName || "Grupo pendiente", "組"],
+            [
+              `Módulo ${courseModule.numero}`,
+              `${courseModule.nombre} · ${courseModule.nombreJa}`,
+              "道",
+            ],
+            [
+              "Lección actual",
+              course.currentLesson
+                ? `L${course.currentLesson}${lessonName ? ` · ${lessonName}` : ""}`
+                : "Pendiente de sincronizar",
+              "課",
+            ],
+          ].map(([title, meta, icon]) => (
+            <div key={title} className={styles.rowItem}>
+              <span className={styles.rowIcon}>{icon}</span>
+              <span className={styles.rowCopy}>
+                <span className={styles.rowTitle}>{title}</span>
+                <span className={styles.rowSub}>{meta}</span>
+              </span>
+            </div>
+          ))}
+        </section>
+      </div>
+
+      <SectionLabel>Mis posts en comunidad</SectionLabel>
+      <section className={styles.profilePostsGrid}>
+        {postsLoading ? (
+          <div className={`${styles.card} ${styles.emptyState}`}>Cargando tus posts...</div>
+        ) : posts.length === 0 ? (
+          <div className={`${styles.card} ${styles.emptyState}`}>
+            Todavía no has publicado en comunidad.
+          </div>
+        ) : (
+          posts.map((post) => (
+            <button
+              key={post.id}
+              type="button"
+              className={`${styles.card} ${styles.profilePostCard}`}
+              onClick={() => setSelectedPost(post)}
+            >
+              {post.image_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={post.image_url} alt="" />
+              )}
+              <span className={styles.profilePostMeta}>
+                {post.from_tema ? "Tema de la semana" : "Comunidad"} · {formatPostDate(post.created_at)}
+              </span>
+              <strong>{post.content}</strong>
+              <span className={styles.profilePostFooter}>
+                {post.likes || 0} me gusta · tocar para ver
+              </span>
+            </button>
+          ))
+        )}
+      </section>
+
+      {selectedPost && (
+        <div className={styles.profilePostOverlay} role="presentation" onClick={() => setSelectedPost(null)}>
+          <article
+            className={styles.profilePostModal}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Post de comunidad"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header>
+              <span>{selectedPost.from_tema ? "Tema de la semana" : "Comunidad"}</span>
+              <button type="button" onClick={() => setSelectedPost(null)} aria-label="Cerrar">
+                ×
+              </button>
+            </header>
+            {selectedPost.image_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={selectedPost.image_url} alt="" />
+            )}
+            <p>{selectedPost.content}</p>
+            <footer>
+              <span>{formatPostDate(selectedPost.created_at)}</span>
+              <Link href="/dashboard" className={styles.lightButton}>
+                Ver comunidad
+              </Link>
+            </footer>
+          </article>
         </div>
-      </section>
-
-      <SectionLabel>Curso</SectionLabel>
-      <section className={`${styles.card} ${styles.rowList}`}>
-        {[
-          [
-            "Grupo",
-            course.groupName || profile.groupName || "Grupo pendiente",
-            100,
-            "組",
-          ],
-          [
-            `Módulo ${courseModule.numero}`,
-            `${courseModule.nombre} · ${courseModule.nombreJa}`,
-            100,
-            "道",
-          ],
-          [
-            "Lección actual",
-            course.currentLesson
-              ? `L${course.currentLesson}${lessonName ? ` · ${lessonName}` : ""}`
-              : "Pendiente de sincronizar",
-            course.currentLesson ? 100 : 0,
-            "課",
-          ],
-        ].map(([title, meta, progress, icon]) => (
-          <div key={title} className={styles.rowItem}>
-            <span className={styles.rowIcon}>{icon}</span>
-            <span className={styles.rowCopy}>
-              <span className={styles.rowTitle}>{title}</span>
-              <span className={styles.rowSub}>{meta}</span>
-            </span>
-            <span className={styles.rowRight}>
-              <ProgressBar value={Number(progress)} />
-            </span>
-          </div>
-        ))}
-      </section>
-
-      <SectionLabel>Práctica libre</SectionLabel>
-      <section className={`${styles.card} ${styles.rowList}`}>
-        {[
-          ["Kana", `${kana.practiced}/${kana.total} vistos`, kanaPct, "あ"],
-          ["Vocabulario", `${vocab.practiced}/${vocab.total} vistos`, vocabPct, "語"],
-          ["Kanji", `${kanji.practiced}/${kanji.total} vistos`, kanjiPct, "漢"],
-        ].map(([title, meta, progress, icon]) => (
-          <div key={title} className={styles.rowItem}>
-            <span className={styles.rowIcon}>{icon}</span>
-            <span className={styles.rowCopy}>
-              <span className={styles.rowTitle}>{title}</span>
-              <span className={styles.rowSub}>{meta}</span>
-            </span>
-            <span className={styles.rowRight}>
-              <ProgressBar value={Number(progress)} />
-            </span>
-          </div>
-        ))}
-      </section>
-
-      <SectionLabel>Acciones</SectionLabel>
-      <section className={`${styles.card} ${styles.rowList}`}>
-        <Link href="/dashboard" className={styles.rowItem}>
-          <span className={styles.rowIcon}>家</span>
-          <span className={styles.rowCopy}>
-            <span className={styles.rowTitle}>Volver a inicio</span>
-            <span className={styles.rowSub}>Comunidad, tema de la semana y progreso</span>
-          </span>
-          <Badge tone="teal">Abrir</Badge>
-        </Link>
-      </section>
+      )}
     </>
   );
 }

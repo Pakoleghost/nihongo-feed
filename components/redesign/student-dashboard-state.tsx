@@ -22,6 +22,7 @@ type StudentProfile = {
   displayName: string;
   avatarUrl: string | null;
   groupName: string | null;
+  roleLabel: string;
 };
 
 type LastActivity = {
@@ -47,6 +48,7 @@ export type StudentDashboardState = {
   vocab: DashboardSummary;
   kanji: DashboardSummary;
   reviewTotal: number;
+  refresh: () => void;
 };
 
 const emptySummary: DashboardSummary = {
@@ -64,6 +66,7 @@ const defaultState: StudentDashboardState = {
     displayName: "Alumno",
     avatarUrl: null,
     groupName: null,
+    roleLabel: "Alumno",
   },
   course: {
     groupName: null,
@@ -78,6 +81,7 @@ const defaultState: StudentDashboardState = {
   vocab: emptySummary,
   kanji: emptySummary,
   reviewTotal: 0,
+  refresh: () => {},
 };
 
 const DashboardDataContext = createContext<StudentDashboardState>(defaultState);
@@ -162,7 +166,7 @@ function readKanjiSummary(): DashboardSummary {
 }
 
 function getDisplayName(profile: { username?: string | null; full_name?: string | null } | null | undefined) {
-  return profile?.full_name?.trim() || profile?.username?.trim() || "Alumno";
+  return profile?.username?.trim() || profile?.full_name?.trim() || "Alumno";
 }
 
 export function StudentDashboardDataProvider({ children }: { children: React.ReactNode }) {
@@ -184,6 +188,7 @@ export function StudentDashboardDataProvider({ children }: { children: React.Rea
         displayName: session?.user?.email?.split("@")[0] || "Alumno",
         avatarUrl: null,
         groupName: null,
+        roleLabel: "Alumno",
       };
 
       if (session?.user) {
@@ -201,6 +206,7 @@ export function StudentDashboardDataProvider({ children }: { children: React.Rea
           displayName: getDisplayName(data),
           avatarUrl: data?.avatar_url ?? null,
           groupName: studentViewGroup ?? data?.group_name ?? null,
+          roleLabel: isAdmin ? "Sensei" : "Alumno",
         };
       }
 
@@ -222,13 +228,18 @@ export function StudentDashboardDataProvider({ children }: { children: React.Rea
         vocab,
         kanji,
         reviewTotal: kana.due + vocab.due + kanji.due,
+        refresh: refreshDashboardState,
       });
     }
 
-    void loadDashboardState();
+    function refreshDashboardState() {
+      void loadDashboardState();
+    }
+
+    refreshDashboardState();
 
     const refresh = () => {
-      void loadDashboardState();
+      refreshDashboardState();
     };
     window.addEventListener("focus", refresh);
     window.addEventListener("storage", refresh);
