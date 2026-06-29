@@ -2374,40 +2374,42 @@
 
 .grammarStudyLayout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(310px, 360px);
-  gap: 16px;
+  grid-template-columns: minmax(244px, 320px) minmax(0, 1fr);
+  gap: 18px;
   align-items: start;
 }
 
 .grammarPatternList,
-.grammarDetailSticky {
+.grammarReader {
   border: 1px solid rgba(26, 26, 46, 0.08);
-  border-radius: 20px;
+  border-radius: 22px;
   background: #fff;
   box-shadow: 0 12px 30px rgba(26, 26, 46, 0.05);
 }
 
 .grammarPatternList {
   overflow: hidden;
+  position: sticky;
+  top: 18px;
 }
 
 .grammarPatternGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
-  padding: 18px;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 14px;
 }
 
 .grammarPatternCard {
-  min-height: 128px;
+  min-height: 92px;
   display: grid;
   align-content: center;
-  gap: 10px;
+  gap: 8px;
   border: 1px solid rgba(26, 26, 46, 0.08);
-  border-radius: 16px;
+  border-radius: 14px;
   background: #fff;
   color: var(--navy);
-  padding: 16px;
+  padding: 14px;
   text-align: left;
   cursor: pointer;
   box-shadow: 0 10px 24px rgba(26, 26, 46, 0.04);
@@ -2439,7 +2441,7 @@
 .grammarPatternCard strong {
   color: var(--navy);
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 950;
   line-height: 1.15;
 }
@@ -2447,12 +2449,19 @@
 .grammarPatternCard span {
   color: var(--muted);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 760;
   line-height: 1.35;
 }
 
 .grammarDetailPanel {
   min-width: 0;
+}
+
+.grammarReader {
+  display: grid;
+  gap: 16px;
+  overflow: hidden;
+  padding: 18px;
 }
 
 .grammarFuriganaToggle {
@@ -2486,30 +2495,65 @@
   color: var(--navy);
 }
 
-.grammarDetailSticky {
-  position: sticky;
-  top: 18px;
+.grammarReaderHero {
   display: grid;
-  gap: 14px;
-  overflow: hidden;
-  max-height: calc(100dvh - 96px);
-  overflow-y: auto;
-  padding: 20px;
-}
-
-.grammarDetailSticky::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 116px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+  border: 1px solid rgba(78, 205, 196, 0.32);
+  border-radius: 18px;
   background:
     radial-gradient(
-      circle at 18% 18%,
-      rgba(78, 205, 196, 0.18),
-      transparent 30%
+      circle at 92% 14%,
+      rgba(245, 166, 35, 0.14),
+      transparent 28%
     ),
-    linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(245, 166, 35, 0.07));
-  pointer-events: none;
+    linear-gradient(135deg, rgba(78, 205, 196, 0.16), #fff 62%);
+  padding: 22px;
+}
+
+.grammarReaderKicker {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--teal-dark);
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.grammarReaderActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.grammarReaderMeta,
+.grammarReaderAudioPill {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.grammarReaderMeta {
+  background: var(--navy);
+  color: #fff;
+}
+
+.grammarReaderAudioPill {
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--muted);
 }
 
 .grammarDetailPattern,
@@ -2520,7 +2564,8 @@
 .grammarFormationBox,
 .grammarDialogueBox,
 .grammarInlineInteractions,
-.grammarMistakeBox {
+.grammarMistakeBox,
+.grammarSupportGrid {
   position: relative;
   z-index: 1;
 }
@@ -2528,17 +2573,18 @@
 .grammarDetailPattern {
   color: var(--navy);
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
-  font-size: 32px;
+  font-size: clamp(32px, 4vw, 48px);
   font-weight: 950;
   letter-spacing: 0;
-  line-height: 1.08;
+  line-height: 1.02;
 }
 
 .grammarDetailMeaning {
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
-  font-weight: 800;
+  max-width: 760px;
+  font-size: 16px;
+  font-weight: 760;
   line-height: 1.45;
 }
 
@@ -2549,11 +2595,15 @@
 .grammarMistakeBox,
 .grammarInteraction {
   display: grid;
-  gap: 7px;
+  gap: 10px;
   border: 1px solid rgba(26, 26, 46, 0.08);
   border-radius: 16px;
   background: var(--bg);
-  padding: 14px;
+  padding: 16px;
+}
+
+.grammarExampleBox {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .grammarExampleBox span,
@@ -2569,6 +2619,10 @@
   text-transform: uppercase;
 }
 
+.grammarExampleBox > span {
+  grid-column: 1 / -1;
+}
+
 .grammarExampleBox strong,
 .grammarPracticeBox strong,
 .grammarFormationBox strong {
@@ -2579,19 +2633,23 @@
 
 .grammarExampleItem {
   display: grid;
-  gap: 4px;
+  align-content: start;
+  gap: 5px;
+  min-height: 120px;
+  border: 1px solid rgba(26, 26, 46, 0.05);
   border-radius: 12px;
   background: #fff;
-  padding: 11px;
+  padding: 14px;
 }
 
 .grammarExampleItem + .grammarExampleItem {
-  margin-top: 3px;
+  margin-top: 0;
 }
 
 .grammarExampleItem strong {
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
-  font-size: 22px;
+  font-size: 24px;
+  line-height: 1.25;
 }
 
 .grammarExampleItem small {
@@ -2605,7 +2663,7 @@
   color: var(--muted);
   font-size: 13px;
   font-style: normal;
-  font-weight: 800;
+  font-weight: 720;
   line-height: 1.35;
 }
 
@@ -2613,7 +2671,7 @@
   margin: 2px 0 0;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.35;
 }
 
@@ -2625,61 +2683,65 @@
 
 .grammarDialogueBox {
   border-color: rgba(78, 205, 196, 0.24);
-  background: rgba(78, 205, 196, 0.08);
+  background:
+    linear-gradient(180deg, rgba(78, 205, 196, 0.1), rgba(78, 205, 196, 0.04)),
+    #fff;
 }
 
 .grammarDialogueList {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .grammarDialogueLine {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  gap: 9px;
-  align-items: end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .grammarDialogueLineAlt {
-  grid-template-columns: minmax(0, 1fr) 28px;
+  align-items: flex-end;
 }
 
 .grammarDialogueLineAlt .grammarDialogueAvatar {
-  grid-column: 2;
-  grid-row: 1;
+  grid-column: auto;
+  grid-row: auto;
 }
 
 .grammarDialogueLineAlt .grammarDialogueBubble {
-  grid-column: 1;
-  grid-row: 1;
-  justify-self: end;
+  grid-column: auto;
+  grid-row: auto;
   border-color: rgba(26, 26, 46, 0.1);
   background: var(--navy);
   color: #fff;
 }
 
 .grammarDialogueAvatar {
-  width: 28px;
+  min-width: 58px;
+  width: fit-content;
   height: 28px;
   display: grid;
   place-items: center;
   border-radius: 999px;
   background: #fff;
   color: var(--teal-dark);
-  font-size: 12px;
+  padding: 0 8px;
+  font-size: 11px;
   font-weight: 950;
+  white-space: nowrap;
   box-shadow: 0 8px 18px rgba(26, 26, 46, 0.08);
 }
 
 .grammarDialogueBubble {
-  max-width: 92%;
+  max-width: min(620px, 88%);
   display: grid;
-  gap: 5px;
+  gap: 6px;
   border: 1px solid rgba(78, 205, 196, 0.2);
   border-radius: 16px 16px 16px 5px;
   background: #fff;
   color: var(--navy);
-  padding: 11px;
+  padding: 14px;
 }
 
 .grammarDialogueLineAlt .grammarDialogueBubble {
@@ -2688,14 +2750,14 @@
 
 .grammarDialogueBubble strong {
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 950;
   line-height: 1.35;
 }
 
 .grammarDialogueBubble em {
   color: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-style: normal;
   font-weight: 750;
   line-height: 1.35;
@@ -2727,28 +2789,35 @@
 
 .grammarExplanationBlock {
   display: grid;
-  gap: 9px;
+  gap: 12px;
+  border-left: 4px solid var(--teal);
+  padding: 2px 0 2px 16px;
 }
 
 .grammarExplanationBlock p {
   margin: 0;
   color: rgba(26, 26, 46, 0.76);
-  font-size: 14px;
-  font-weight: 750;
-  line-height: 1.55;
+  font-size: 16px;
+  font-weight: 680;
+  line-height: 1.65;
 }
 
 .grammarFormationBox {
   border-color: rgba(245, 166, 35, 0.26);
   background: rgba(245, 166, 35, 0.09);
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.grammarFormationBox span {
+  grid-column: 1 / -1;
 }
 
 .grammarFormationBox strong {
   border-radius: 10px;
   background: #fff;
-  padding: 9px 10px;
+  padding: 11px 12px;
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .grammarInlineInteractions {
@@ -2921,6 +2990,12 @@
   background: rgba(230, 57, 70, 0.06);
 }
 
+.grammarSupportGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .grammarMistakeBox ul,
 .grammarPracticeBox ul {
   display: grid;
@@ -2928,8 +3003,8 @@
   margin: 0;
   padding-left: 18px;
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 720;
   line-height: 1.4;
 }
 
@@ -2941,9 +3016,9 @@
 .grammarPracticeBox p {
   margin: 0;
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1.35;
+  font-size: 13px;
+  font-weight: 720;
+  line-height: 1.4;
 }
 
 .kanjiQuizShell {
@@ -3369,11 +3444,28 @@
     grid-template-columns: 1fr;
   }
 
+  .grammarPatternList {
+    position: static;
+  }
+
   .kanjiDetailSticky,
   .grammarDetailSticky {
     position: static;
     max-height: none;
     overflow: visible;
+  }
+
+  .grammarReaderHero {
+    grid-template-columns: 1fr;
+  }
+
+  .grammarReaderActions {
+    justify-content: flex-start;
+  }
+
+  .grammarExampleBox,
+  .grammarSupportGrid {
+    grid-template-columns: 1fr;
   }
 
   .kanjiQuickActions {

@@ -1732,17 +1732,29 @@ export function GrammarLearningScreen() {
             </div>
           </div>
 
-          <aside className={styles.grammarDetailPanel}>
-            <div className={styles.grammarDetailSticky}>
-              <span className={styles.kanjiDetailBadge}>
-                {selectedIndex + 1}/{activeLesson.patterns.length}
-              </span>
-              <div className={styles.grammarDetailPattern}>
-                {selectedPattern.pattern}
-              </div>
-              <p className={styles.grammarDetailMeaning}>
-                {selectedPattern.meaning}
-              </p>
+          <div className={styles.grammarDetailPanel}>
+            <article className={styles.grammarReader}>
+              <header className={styles.grammarReaderHero}>
+                <div>
+                  <span className={styles.grammarReaderKicker}>
+                    Patrón {selectedIndex + 1} de {activeLesson.patterns.length}
+                  </span>
+                  <div className={styles.grammarDetailPattern}>
+                    {selectedPattern.pattern}
+                  </div>
+                  <p className={styles.grammarDetailMeaning}>
+                    {selectedPattern.meaning}
+                  </p>
+                </div>
+                <div className={styles.grammarReaderActions}>
+                  <span className={styles.grammarReaderMeta}>
+                    L{activeLesson.lesson}
+                  </span>
+                  <span className={styles.grammarReaderAudioPill}>
+                    Audio próximamente
+                  </span>
+                </div>
+              </header>
               {selectedPattern.explanation?.length ? (
                 <div className={styles.grammarExplanationBlock}>
                   {selectedPattern.explanation.map((paragraph) => (
@@ -1840,31 +1852,33 @@ export function GrammarLearningScreen() {
                   ))}
                 </div>
               ) : null}
-              {selectedPattern.commonMistakes?.length ? (
-                <div className={styles.grammarMistakeBox}>
-                  <span>Errores comunes</span>
-                  <ul>
-                    {selectedPattern.commonMistakes.map((mistake) => (
-                      <li key={mistake}>{mistake}</li>
-                    ))}
-                  </ul>
+              <div className={styles.grammarSupportGrid}>
+                {selectedPattern.commonMistakes?.length ? (
+                  <div className={styles.grammarMistakeBox}>
+                    <span>Errores comunes</span>
+                    <ul>
+                      {selectedPattern.commonMistakes.map((mistake) => (
+                        <li key={mistake}>{mistake}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                <div className={styles.grammarPracticeBox}>
+                  <span>Practica</span>
+                  <strong>{selectedPattern.cue}</strong>
+                  {selectedPattern.practicePrompts?.length ? (
+                    <ul>
+                      {selectedPattern.practicePrompts.map((prompt) => (
+                        <li key={prompt}>{prompt}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>Di una frase nueva usando este patrón.</p>
+                  )}
                 </div>
-              ) : null}
-              <div className={styles.grammarPracticeBox}>
-                <span>Practica</span>
-                <strong>{selectedPattern.cue}</strong>
-                {selectedPattern.practicePrompts?.length ? (
-                  <ul>
-                    {selectedPattern.practicePrompts.map((prompt) => (
-                      <li key={prompt}>{prompt}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>Di una frase nueva usando este patrón.</p>
-                )}
               </div>
-            </div>
-          </aside>
+            </article>
+          </div>
         </div>
       </section>
     </>
