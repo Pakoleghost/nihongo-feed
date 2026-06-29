@@ -57,7 +57,7 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-const bottomItems = [
+const baseBottomItems = [
   { href: "/dashboard", label: "Inicio", icon: "家" },
   { href: "/dashboard/hiragana", label: "Hiragana", icon: "あ" },
   { href: "/dashboard/katakana", label: "Katakana", icon: "ア" },
@@ -66,6 +66,27 @@ const bottomItems = [
   { href: "/dashboard/vocabulario", label: "Vocab", icon: "語" },
   { href: "/dashboard/perfil", label: "Perfil", icon: "人" },
 ];
+
+function getNavGroups(isAdmin: boolean): NavGroup[] {
+  if (!isAdmin) return navGroups;
+  return [
+    ...navGroups,
+    {
+      label: "Sensei",
+      items: [
+        { href: "/dashboard/admin", label: "Admin", icon: "管", box: true },
+      ],
+    },
+  ];
+}
+
+function getBottomItems(isAdmin: boolean) {
+  if (!isAdmin) return baseBottomItems;
+  return [
+    ...baseBottomItems,
+    { href: "/dashboard/admin", label: "Admin", icon: "管" },
+  ];
+}
 
 function isActivePath(pathname: string, href: string) {
   if (href === "/dashboard") return pathname === "/dashboard";
@@ -108,7 +129,7 @@ function Sidebar({ pathname }: { pathname: string }) {
       </Link>
 
       <nav className={styles.nav}>
-        {navGroups.map((group) => (
+        {getNavGroups(profile.isAdmin).map((group) => (
           <section key={group.label || "inicio"} className={styles.navGroup}>
             {group.label && <div className={styles.navLabel}>{group.label}</div>}
             {group.items.map((item) => {
@@ -175,6 +196,7 @@ function MobileTopbar() {
 }
 
 function BottomNav({ pathname }: { pathname: string }) {
+  const { profile } = useStudentDashboardData();
   const [optimisticNav, setOptimisticNav] = useState<{
     href: string;
     pathAtClick: string;
@@ -185,7 +207,7 @@ function BottomNav({ pathname }: { pathname: string }) {
   return (
     <nav className={styles.bottomNav} aria-label="Navegación móvil del rediseño">
       <div className={styles.bottomNavInner}>
-        {bottomItems.map((item) => {
+        {getBottomItems(profile.isAdmin).map((item) => {
           const active = isActivePath(activePath, item.href);
           return (
             <Link

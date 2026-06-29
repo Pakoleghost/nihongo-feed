@@ -22,6 +22,7 @@ type StudentProfile = {
   displayName: string;
   avatarUrl: string | null;
   groupName: string | null;
+  isAdmin: boolean;
   roleLabel: string;
 };
 
@@ -66,6 +67,7 @@ const defaultState: StudentDashboardState = {
     displayName: "Alumno",
     avatarUrl: null,
     groupName: null,
+    isAdmin: false,
     roleLabel: "Alumno",
   },
   course: {
@@ -188,6 +190,7 @@ export function StudentDashboardDataProvider({ children }: { children: React.Rea
         displayName: session?.user?.email?.split("@")[0] || "Alumno",
         avatarUrl: null,
         groupName: null,
+        isAdmin: false,
         roleLabel: "Alumno",
       };
 
@@ -206,6 +209,7 @@ export function StudentDashboardDataProvider({ children }: { children: React.Rea
           displayName: getDisplayName(data),
           avatarUrl: data?.avatar_url ?? null,
           groupName: studentViewGroup ?? data?.group_name ?? null,
+          isAdmin,
           roleLabel: isAdmin ? "Sensei" : "Alumno",
         };
       }

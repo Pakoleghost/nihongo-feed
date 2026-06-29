@@ -12,6 +12,10 @@ type BasicProfile = {
   created_at?: string | null;
 };
 
+function getRouteErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "";
+}
+
 export async function GET(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization");
@@ -47,14 +51,90 @@ export async function GET(req: NextRequest) {
       pending: withEmail((pending || []) as BasicProfile[]),
       past: withEmail((past || []) as BasicProfile[]),
     });
-  } catch (error: any) {
-    if (error?.message === "UNAUTHORIZED") {
+  } catch (error: unknown) {
+    const message = getRouteErrorMessage(error);
+    if (message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    if (error?.message === "FORBIDDEN") {
+    if (message === "FORBIDDEN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
     return NextResponse.json({ error: "Failed to load requests" }, { status: 500 });
   }
 }
 
+export async function PATCH(req: NextRequest) {
+  try {
+    const authHeader = req.headers.get("authorization");
+    const { service } = await assertAdmin(authHeader);
+    const body = await req.json().catch(() => ({}));
+    const userId = typeof body.userId === "string" ? body.userId : "";
+    const action = typeof body.action === "string" ? body.action : "";
+
+    if (action === "createGroup") {
+      const groupName = typeof body.groupName === "string" ? body.groupName.trim() : "";
+      if (!groupName) {
+        return NextResponse.json({ error: "Missing groupName" }, { status: 400 });
+      }
+
+      const { error } = await service.from("groups").insert([{ name: groupName }]);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ ok: true });
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    }
+
+    if (action === "approve") {
+      const groupName = typeof body.groupName === "string" ? body.groupName.trim() : "";
+      if (!groupName) {
+        return NextResponse.json({ error: "Missing groupName" }, { status: 400 });
+      }
+
+      const { error } = await service
+        .from("profiles")
+        .update({ is_approved: true, group_name: groupName })
+        .eq("id", userId);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ ok: true });
+    }
+
+    if (action === "changeGroup") {
+      const groupName =
+        typeof body.groupName === "string" && body.groupName.trim()
+          ? body.groupName.trim()
+          : null;
+
+      const { error } = await service
+        .from("profiles")
+        .update({ group_name: groupName })
+        .eq("id", userId);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ ok: true });
+    }
+
+    return NextResponse.json({ error: "Unsupported action" }, { status: 400 });
+  } catch (error: unknown) {
+    const message = getRouteErrorMessage(error);
+    if (message === "UNAUTHORIZED") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (message === "FORBIDDEN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    return NextResponse.json({ error: "Failed to update request" }, { status: 500 });
+  }
+}
