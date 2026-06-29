@@ -1,0 +1,2773 @@
+// Grammar content for Genki I — original explanations in Spanish
+// Furigana format: {漢字|かな}
+// Batch: L1-L12 complete
+
+export type GrammarExample = {
+  jp: string;       // Japanese sentence (may include {漢字|かな})
+  reading?: string; // Full kana reading when needed
+  es: string;       // Spanish translation
+  note?: string;    // Usage note
+};
+
+export type GrammarDialogueLine = {
+  speaker: string;
+  jp: string;
+  es: string;
+};
+
+export type GrammarContentItem = {
+  id: string;
+  lesson: number;
+  title: string;
+  pattern: string;
+  shortMeaning: string;
+  explanation: string[];
+  formation: string[];
+  examples: GrammarExample[];
+  dialogue?: GrammarDialogueLine[];
+  commonMistakes: string[];
+  interactions?: string[];   // classroom interaction ideas
+  practicePrompts: string[];
+  relatedGrammarIds: string[];
+  sourceNotes: string[];
+};
+
+export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
+
+  // ═══════════════════════════════════════════════
+  //  LECCIÓN 1 — {新|あたら}しい{友達|ともだち}
+  // ═══════════════════════════════════════════════
+
+  {
+    id: "copula-affirmative",
+    lesson: 1,
+    title: "N は N です",
+    pattern: "X は Y です",
+    shortMeaning: "\"X es Y\" — identifica o describe el tema de la oración.",
+    explanation: [
+      "です es el equivalente japonés de «es/soy/eres». Siempre va al final de la oración, no en el medio.",
+      "は (se pronuncia «wa» cuando es partícula) marca el tema: aquello de lo que hablamos. No confundas tema con sujeto gramatical; は dice «en cuanto a X…», no necesariamente «X hace algo».",
+      "El orden básico es Tema は + Información です. Al contrario del español, el verbo — aquí です — cierra la oración.",
+      "Para negar se usa じゃないです (forma coloquial natural) o ではありません (forma más formal, adecuada para escritura o contextos serios).",
+    ],
+    formation: [
+      "N₁ は N₂ です          →  X es Y",
+      "N₁ は N₂ じゃないです  →  X no es Y",
+      "N₁ は N₂ ですか        →  ¿X es Y?  (la partícula か al final indica pregunta)",
+    ],
+    examples: [
+      {
+        jp: "{私|わたし}は{学生|がくせい}です。",
+        es: "Soy estudiante.",
+        note: "私 es el tema; 学生 es la información que lo describe.",
+      },
+      {
+        jp: "{山田|やまだ}さんは{先生|せんせい}じゃないです。",
+        es: "La señora Yamada no es profesora.",
+        note: "じゃないです niega la identificación de forma natural.",
+      },
+      {
+        jp: "{田中|たなか}さんは{日本人|にほんじん}ですか。",
+        es: "¿El señor Tanaka es japonés?",
+        note: "か convierte cualquier oración en pregunta. No se eleva la voz al final como en español.",
+      },
+      {
+        jp: "いいえ、{田中|たなか}さんは{日本人|にほんじん}じゃないです。{韓国人|かんこくじん}です。",
+        es: "No, el señor Tanaka no es japonés. Es coreano.",
+        note: "La respuesta negativa completa: primero niegas, luego das la información correcta.",
+      },
+    ],
+    dialogue: [
+      { speaker: "メアリー", jp: "はじめまして。{私|わたし}はメアリーです。{学生|がくせい}です。", es: "Mucho gusto. Soy Mary. Soy estudiante." },
+      { speaker: "たけし",   jp: "はじめまして。{僕|ぼく}はたけしです。{日本人|にほんじん}です。", es: "Mucho gusto. Soy Takeshi. Soy japonés." },
+      { speaker: "メアリー", jp: "{田中|たなか}さんも{学生|がくせい}ですか。", es: "¿El señor Tanaka también es estudiante?" },
+      { speaker: "たけし",   jp: "いいえ、{田中|たなか}さんは{学生|がくせい}じゃないです。{先生|せんせい}です。", es: "No, el señor Tanaka no es estudiante. Es profesor." },
+    ],
+    commonMistakes: [
+      "Poner です en el medio: ×{私|わたし}です{学生|がくせい} → ○{私|わたし}は{学生|がくせい}です",
+      "Leer は como «ha» cuando es partícula — siempre se pronuncia «wa».",
+      "Confundir です (cópula: «es») con あります/います (existencia: «hay/existe»).",
+      "Usar ×じゃないです en una carta formal o correo de trabajo — mejor ではありません.",
+      "Olvidar か al final de las preguntas. Sin か el japonés no sabe que es pregunta.",
+    ],
+    interactions: [
+      "Ronda de presentaciones: cada alumno dice nombre, rol y origen con X は Y です.",
+      "Verdad o mentira: el profesor hace una afirmación falsa sobre un alumno y la clase niega con じゃないです.",
+    ],
+    practicePrompts: [
+      "Preséntate mencionando tu nombre, tu rol en clase y tu nacionalidad.",
+      "Di tres cosas que NO eres usando じゃないです.",
+      "Pregunta a un compañero su nombre con ～さんは～ですか y confirma la respuesta.",
+    ],
+    relatedGrammarIds: ["questions-ka", "particle-no-modifier", "particle-to-listing"],
+    sourceNotes: ["Basado en Genki I L1, Grammar 1 (cópula)"],
+  },
+
+  {
+    id: "questions-ka",
+    lesson: 1,
+    title: "Preguntas con か",
+    pattern: "〜ですか",
+    shortMeaning: "Agrega か al final de cualquier oración para convertirla en pregunta.",
+    explanation: [
+      "En japonés no se cambia el orden de las palabras para preguntar. Solo añades か al final: es como poner un signo de interrogación audible.",
+      "La entonación no sube al final como en español. Se mantiene plana o baja ligeramente — la partícula か ya indica que es pregunta.",
+      "Para responder afirmativamente: はい (sí). Para negar: いいえ (no). Estas son las formas formales y recomendadas en clase.",
+      "El signo 「？」 en japonés escrito es opcional; muchos textos solo usan 「か。」",
+    ],
+    formation: [
+      "[oración] + か  →  ¿[oración]?",
+      "N は N ですか     →  ¿X es Y?",
+      "はい、N は N です →  Sí, X es Y.",
+      "いいえ、N は N じゃないです → No, X no es Y.",
+    ],
+    examples: [
+      {
+        jp: "これは{教科書|きょうかしょ}ですか。",
+        es: "¿Esto es el libro de texto?",
+        note: "Solo か al final — no se mueve nada más.",
+      },
+      {
+        jp: "はい、{教科書|きょうかしょ}です。",
+        es: "Sí, es el libro de texto.",
+        note: "En respuestas cortas puedes omitir el tema si es obvio del contexto.",
+      },
+      {
+        jp: "{山田|やまだ}さんは{先生|せんせい}ですか。",
+        es: "¿El señor Yamada es profesor?",
+      },
+      {
+        jp: "いいえ、{先生|せんせい}じゃないです。{医者|いしゃ}です。",
+        es: "No, no es profesor. Es médico.",
+      },
+    ],
+    commonMistakes: [
+      "Subir la voz al final como en español — en japonés formal la entonación baja o queda plana.",
+      "Invertir el orden de palabras: × ですか{先生|せんせい}は{田中|たなか}さん → ○ {田中|たなか}さんは{先生|せんせい}ですか",
+      "Responder solo «はい» o «いいえ» sin completar — está bien en conversación rápida, pero en clase es bueno repetir la información: «はい、{先生|せんせい}です».",
+    ],
+    interactions: [
+      "Juego de adivinanzas: un alumno piensa en una profesión y el grupo pregunta con ですか hasta adivinar.",
+    ],
+    practicePrompts: [
+      "Haz tres preguntas a un compañero sobre su identidad (nombre, profesión, origen) usando ですか.",
+      "Responde con oración completa: はい／いいえ + [información corregida].",
+    ],
+    relatedGrammarIds: ["copula-affirmative", "particle-no-modifier"],
+    sourceNotes: ["Basado en Genki I L1, Grammar 2 (preguntas con か)"],
+  },
+
+  {
+    id: "particle-no-modifier",
+    lesson: 1,
+    title: "N の N",
+    pattern: "N₁ の N₂",
+    shortMeaning: "の conecta dos sustantivos: posesión, categoría o descripción (N₁ modifica a N₂).",
+    explanation: [
+      "の es la partícula genitiva del japonés. Conecta dos sustantivos y casi siempre se traduce como «de» en español, aunque el orden es inverso: N₁ の N₂ = «N₂ de N₁».",
+      "Tiene tres usos principales en L1: posesión (mi libro), categoría (libro de japonés) y afiliación (estudiante de la Universidad de Tokio).",
+      "の puede encadenarse: {私|わたし}の{大学|だいがく}の{先生|せんせい} = «el profesor de mi universidad».",
+      "Cuando el segundo sustantivo es obvio en el contexto, se puede omitir y の actúa como pronombre: これは{私|わたし}のです = «Esto es mío».",
+    ],
+    formation: [
+      "N₁ の N₂   →  «N₂ de N₁»  (N₁ modifica a N₂)",
+      "{私|わたし} の N     →  mi N / el N de yo",
+      "N₁ の N₂ の N₃  →  encadenado (de derecha a izquierda para el español)",
+    ],
+    examples: [
+      {
+        jp: "{日本語|にほんご}の{本|ほん}です。",
+        es: "Es un libro de japonés.",
+        note: "日本語 (japonés) describe la categoría de 本 (libro).",
+      },
+      {
+        jp: "{私|わたし}の{名前|なまえ}はパコです。",
+        es: "Mi nombre es Pako.",
+        note: "Posesión: の indica que el nombre pertenece a «yo».",
+      },
+      {
+        jp: "{田中|たなか}さんは{東京大学|とうきょうだいがく}の{学生|がくせい}です。",
+        es: "El señor Tanaka es estudiante de la Universidad de Tokio.",
+        note: "Afiliación: の indica dónde estudia.",
+      },
+      {
+        jp: "これは{山田|やまだ}さんの{傘|かさ}ですか。",
+        es: "¿Este es el paraguas del señor Yamada?",
+        note: "Pregunta de posesión combinando の con か.",
+      },
+    ],
+    commonMistakes: [
+      "Invertir el orden al traducir al japonés: × {本|ほん}の{日本語|にほんご} («libro de japonés» en español → japonés va primero en japonés).",
+      "Usar の entre verbo y sustantivo — の solo conecta sustantivos (y pronombres). Para modificar con verbos se usa la forma plain + N (se estudia en L9).",
+      "Omitir の entre dos sustantivos: × {私|わたし}{本|ほん} → ○ {私|わたし}の{本|ほん}.",
+    ],
+    interactions: [
+      "¿De quién es esto? El profesor levanta objetos y pregunta ～さんの～ですか; los alumnos responden.",
+    ],
+    practicePrompts: [
+      "Describe tres objetos del salón de clase usando N の N (ej. 日本語の本、私のペン).",
+      "Preséntate mencionando tu universidad o trabajo usando ～の学生/先生/社員です.",
+    ],
+    relatedGrammarIds: ["copula-affirmative", "particle-to-listing"],
+    sourceNotes: ["Basado en Genki I L1, Grammar 3 (partícula の)"],
+  },
+
+  {
+    id: "particle-to-listing",
+    lesson: 1,
+    title: "N と N",
+    pattern: "N₁ と N₂",
+    shortMeaning: "\"N₁ y N₂\" — enumeración exhaustiva de sustantivos.",
+    explanation: [
+      "と conecta dos o más sustantivos con el significado de «y». Es una lista cerrada: implica que se mencionan TODOS los elementos relevantes.",
+      "A diferencia de や (L3), que deja la lista abierta («entre otras cosas»), と dice exactamente qué se incluye.",
+      "と puede encadenarse para listas más largas: A と B と C. En conversación informal a veces se omite el último と.",
+      "と también tiene otro uso muy distinto (compañía: «ir con alguien»), que se estudia en L4. Por ahora, enfócate en と para listas de sustantivos.",
+    ],
+    formation: [
+      "N₁ と N₂       →  N₁ y N₂  (lista completa)",
+      "N₁ と N₂ と N₃ →  N₁, N₂ y N₃",
+    ],
+    examples: [
+      {
+        jp: "{私|わたし}は{日本語|にほんご}と{英語|えいご}を{話|はな}します。",
+        es: "Hablo japonés e inglés.",
+        note: "と une exactamente dos lenguas — son todas las que se mencionan.",
+      },
+      {
+        jp: "{机|つくえ}の{上|うえ}に{本|ほん}とペンがあります。",
+        es: "Sobre el escritorio hay un libro y un bolígrafo.",
+        note: "Lista exacta de dos objetos (あります = hay/existe, se estudia en L4).",
+      },
+      {
+        jp: "{山田|やまだ}さんと{田中|たなか}さんは{学生|がくせい}です。",
+        es: "Los señores Yamada y Tanaka son estudiantes.",
+        note: "と puede enlazar personas como sujetos de una misma oración.",
+      },
+    ],
+    commonMistakes: [
+      "Confundir と (lista: «y») con も (también): × {本|ほん}も{ペン|ぺん}もあります puede ser correcto pero transmite un matiz diferente («tanto el libro como el bolígrafo»). と simplemente los une.",
+      "Usar と entre frases o verbos — と para listas solo funciona con sustantivos. Para conectar acciones se usa la forma て (L6).",
+      "Creer que と = «con (compañía)». Ese uso también existe pero se introduce en L4; por ahora と en L1 es solo «y» entre sustantivos.",
+    ],
+    practicePrompts: [
+      "Nombra dos cosas que tienes en tu mochila usando N と N があります。",
+      "Presenta a dos personas de tu familia usando Aと B は ～ です。",
+      "Compara: describe tres idiomas que hablas. ¿Cuándo usarías と y cuándo ya no alcanza?",
+    ],
+    relatedGrammarIds: ["particle-no-modifier", "particle-ya-listing", "particle-mo-similarity"],
+    sourceNotes: ["Basado en Genki I L1, Grammar 4 (partícula と — enumeración)"],
+  },
+
+  // ═══════════════════════════════════════════════
+  //  LECCIÓN 2 — {買|か}い{物|もの}
+  // ═══════════════════════════════════════════════
+
+  {
+    id: "particle-mo-similarity",
+    lesson: 2,
+    title: "N も",
+    pattern: "N も",
+    shortMeaning: "\"N también\" — agrega un elemento que comparte la misma descripción.",
+    explanation: [
+      "も reemplaza a は cuando quieres decir que algo comparte la misma característica que lo ya mencionado. Nunca aparece junto a は en la misma posición.",
+      "Si ya dijiste «A は X です» y quieres añadir «B también es X», dices «B も X です». No repitas は.",
+      "も puede combinarse con otras partículas de objeto (を→も, に→にも, で→でも) pero en L2 el foco es sustituir は.",
+      "En negación, も mantiene el sentido de «tampoco»: A は X じゃないです → B も X じゃないです (B tampoco es X).",
+    ],
+    formation: [
+      "A は Y です。B も Y です。  →  A es Y. B también es Y.",
+      "A は Y じゃないです。B も Y じゃないです。  →  A no es Y. B tampoco es Y.",
+    ],
+    examples: [
+      {
+        jp: "{私|わたし}は{学生|がくせい}です。{山田|やまだ}さんも{学生|がくせい}です。",
+        es: "Soy estudiante. El señor Yamada también es estudiante.",
+        note: "も reemplaza は para el segundo elemento.",
+      },
+      {
+        jp: "これはいくらですか。それも{同|おな}じ{値段|ねだん}ですか。",
+        es: "¿Cuánto cuesta esto? ¿Aquello también tiene el mismo precio?",
+        note: "も en preguntas: «¿también?»",
+      },
+      {
+        jp: "{田中|たなか}さんは{中国人|ちゅうごくじん}じゃないです。{鈴木|すずき}さんも{中国人|ちゅうごくじん}じゃないです。",
+        es: "El señor Tanaka no es chino. El señor Suzuki tampoco es chino.",
+        note: "も en negación = «tampoco».",
+      },
+    ],
+    dialogue: [
+      { speaker: "メアリー", jp: "{私|わたし}はアメリカ{人|じん}です。", es: "Soy estadounidense." },
+      { speaker: "アナ",     jp: "そうですか。{私|わたし}もアメリカ{人|じん}です。", es: "¿De verdad? Yo también soy estadounidense." },
+      { speaker: "メアリー", jp: "えっ、{山田|やまだ}さんもアメリカ{人|じん}ですか。", es: "¿En serio? ¿El señor Yamada también es estadounidense?" },
+      { speaker: "アナ",     jp: "いいえ、{山田|やまだ}さんはアメリカ{人|じん}じゃないです。", es: "No, el señor Yamada no es estadounidense." },
+    ],
+    commonMistakes: [
+      "Usar は y も juntos en la misma posición: × {私|わたし}はも{学生|がくせい}です → ○ {私|わたし}も{学生|がくせい}です",
+      "Olvidar も y repetir は: × {山田|やまだ}さんは{学生|がくせい}です (sin も) cuando la intención es «también».",
+      "Confundir も (también/tampoco) con と (y): も dice que el elemento nuevo comparte algo; と solo lo enumera junto a otro.",
+    ],
+    interactions: [
+      "Cadena de presentaciones: el primero se presenta, el siguiente dice 「～さんは～です。私も～です」 si comparte algo, o lo contradice.",
+    ],
+    practicePrompts: [
+      "Di dos cosas que tienes en común con un compañero usando も.",
+      "Encuentra algo que tú SÍ eres pero tu compañero NO: usa は para ti y も o じゃないです para el otro.",
+    ],
+    relatedGrammarIds: ["copula-affirmative", "particle-to-listing", "particle-ya-listing"],
+    sourceNotes: ["Basado en Genki I L2, Grammar 1 (partícula も)"],
+  },
+
+  {
+    id: "demonstratives",
+    lesson: 2,
+    title: "これ・それ・あれ / この・その・あの + N",
+    pattern: "これ／それ／あれ　/　この／その／あの + N",
+    shortMeaning: "Señalar cosas según la distancia: esto/eso/aquello y sus formas adjetivales.",
+    explanation: [
+      "El japonés tiene dos series de demostrativos. La serie これ/それ/あれ se usa sola (sin sustantivo): «¿Qué es esto?». La serie この/その/あの siempre va seguida de un sustantivo: «este libro», «ese cuaderno».",
+      "La distancia es desde la perspectiva del hablante y del oyente: これ/この = cerca del hablante · それ/その = cerca del oyente o en un contexto compartido · あれ/あの = lejos de ambos.",
+      "En conversación, それ/その también se usa para referencias abstractas o información que el oyente acaba de mencionar: «Eso que dijiste…»",
+      "Para preguntar: どれ (¿cuál?, de una lista) · どの + N (¿qué/cuál N?). No confundir con どこ (¿dónde?), que es ubicación.",
+    ],
+    formation: [
+      "これ／それ／あれ は N です   →  Esto/Eso/Aquello es N  (pronombre, sin sustantivo siguiente)",
+      "この／その／あの + N は〜   →  este/ese/aquel N es〜  (adjetivo, seguido de sustantivo)",
+      "どれ／どの + N は〜         →  ¿cuál / qué N?",
+    ],
+    examples: [
+      {
+        jp: "これは{何|なん}ですか。",
+        es: "¿Qué es esto?",
+        note: "これ sola, sin sustantivo. 何 = qué.",
+      },
+      {
+        jp: "あれは{私|わたし}の{傘|かさ}です。",
+        es: "Aquello es mi paraguas.",
+        note: "あれ = lejos de los dos interlocutores.",
+      },
+      {
+        jp: "この{時計|とけい}はいくらですか。",
+        es: "¿Cuánto cuesta este reloj?",
+        note: "この va directamente antes del sustantivo 時計.",
+      },
+      {
+        jp: "その{財布|さいふ}は{田中|たなか}さんのですか。",
+        es: "¿Esa cartera es del señor Tanaka?",
+        note: "その = cerca del oyente.",
+      },
+      {
+        jp: "あの{人|ひと}は{先生|せんせい}ですか。",
+        es: "¿Aquella persona es profesora?",
+        note: "あの + persona para señalar a alguien lejano de forma educada.",
+      },
+    ],
+    dialogue: [
+      { speaker: "メアリー", jp: "すみません、これはいくらですか。", es: "Disculpa, ¿cuánto cuesta esto?" },
+      { speaker: "てんいん",  jp: "それは{千|せん}{円|えん}です。", es: "Eso cuesta mil yenes." },
+      { speaker: "メアリー", jp: "じゃあ、あの{黒|くろ}いのは？", es: "Y entonces, ¿aquél negro?" },
+      { speaker: "てんいん",  jp: "あれは{二千|にせん}{円|えん}です。", es: "Aquél cuesta dos mil yenes." },
+    ],
+    commonMistakes: [
+      "Usar これ donde debería ir この: × これ{本|ほん}は → ○ この{本|ほん}は (この va antes de sustantivo, これ va sola).",
+      "Ignorar la perspectiva del oyente: それ no siempre es «eso lejos» — si está cerca de la persona con quien hablas, ese objeto es それ aunque tú lo veas cerca.",
+      "Confundir どれ y どの: どれ va solo («¿cuál de ellos?»); どの necesita sustantivo («¿qué libro?»).",
+    ],
+    interactions: [
+      "El profesor señala objetos del salón o imágenes y los alumnos practican las dos series: primero pronombre (これは何ですか) luego adjetival (この〇〇は何ですか).",
+      "Juego de tienda: un alumno es vendedor, otro cliente. Preguntan precios con これ／この usando vocabulario de objetos cotidianos.",
+    ],
+    practicePrompts: [
+      "Señala cinco objetos a tu alrededor usando la serie correcta (これ/それ/あれ) y descríbelos con です.",
+      "Practica la versión adjetival: escoge tres objetos y dí この/その/あの + sustantivo + は + descripción.",
+      "Haz una mini-conversación de tienda: pregunta precios con これ y responde con それ.",
+    ],
+    relatedGrammarIds: ["copula-affirmative", "questions-ka", "location-words-koko"],
+    sourceNotes: ["Basado en Genki I L2, Grammar 2-3 (demostrativos)"],
+  },
+
+  {
+    id: "location-words-koko",
+    lesson: 2,
+    title: "ここ・そこ・あそこ・どこ",
+    pattern: "ここ／そこ／あそこ／どこ",
+    shortMeaning: "Palabras para señalar o preguntar por la ubicación de un lugar.",
+    explanation: [
+      "Son el equivalente locativo de la serie これ/それ/あれ, pero en lugar de señalar cosas señalan lugares: ここ (aquí, cerca del hablante) · そこ (ahí, cerca del oyente) · あそこ (allá, lejos de ambos) · どこ (¿dónde?).",
+      "Se usan con la partícula は como tema o con に/で para indicar destino o lugar de acción (esas partículas se estudian en L3-L4; por ahora practica con は y です).",
+      "Una estructura muy útil en L2: 〜は どこですか = ¿Dónde está/es ~? — sirve para preguntar dónde está algo o dónde se puede encontrar algo.",
+      "ここ/そこ/あそこ pueden funcionar como respuesta directa a どこ: 「どこですか」→「あそこです」.",
+    ],
+    formation: [
+      "ここ／そこ／あそこ は N です  →  Aquí/Ahí/Allá es/está N",
+      "N は どこ ですか             →  ¿Dónde está/es N?",
+      "N は ここ／そこ／あそこ です  →  N está aquí/ahí/allá",
+    ],
+    examples: [
+      {
+        jp: "トイレは どこですか。",
+        es: "¿Dónde está el baño?",
+        note: "Pregunta de ubicación más común en la vida real.",
+      },
+      {
+        jp: "トイレは あそこです。",
+        es: "El baño está allá.",
+        note: "Respuesta directa señalando con あそこ.",
+      },
+      {
+        jp: "ここは{図書館|としょかん}ですか。",
+        es: "¿Aquí es la biblioteca?",
+        note: "ここ como tema: «este lugar, ¿es la biblioteca?»",
+      },
+      {
+        jp: "{駅|えき}は どこですか。— そこです。",
+        es: "¿Dónde está la estación? — Está ahí.",
+        note: "Mini-diálogo de orientación.",
+      },
+    ],
+    dialogue: [
+      { speaker: "メアリー", jp: "すみません、{郵便局|ゆうびんきょく}は どこですか。", es: "Disculpe, ¿dónde está la oficina de correos?" },
+      { speaker: "つうこうにん", jp: "あそこです。あの{建物|たてもの}の{中|なか}です。", es: "Está allá. Dentro de aquel edificio." },
+      { speaker: "メアリー", jp: "ここは どこですか。{地図|ちず}で{見|み}ると…", es: "¿Dónde estamos? Si miro el mapa…" },
+    ],
+    commonMistakes: [
+      "Confundir ここ con この: ここ es un lugar («aquí»), この es un adjetivo que modifica un sustantivo («este»).",
+      "Usar どこ cuando se pregunta por una persona: para personas se usa だれ (¿quién?). どこ es solo para lugares.",
+      "Olvidar は en preguntas: × {駅|えき}どこですか → ○ {駅|えき}は どこですか",
+    ],
+    interactions: [
+      "Mapa del aula: el profesor pregunta 〇〇はどこですか y los alumnos señalan y responden con ここ/そこ/あそこ.",
+      "Juego de orientación con mapa sencillo de una ciudad japonesa.",
+    ],
+    practicePrompts: [
+      "Pregunta dónde están tres lugares de tu ciudad o campus usando ～は どこですか.",
+      "Responde con ここ/そこ/あそこ según la distancia real en el salón.",
+      "Mini-diálogo: pide indicaciones para llegar al トイレ、{食堂|しょくどう}、{図書館|としょかん}.",
+    ],
+    relatedGrammarIds: ["demonstratives", "particle-ni-destination-time", "location-ni-arimasu"],
+    sourceNotes: ["Basado en Genki I L2, Grammar 4 (ここ・そこ・あそこ・どこ)"],
+  },
+
+  // ═══════════════════════════════════════════════
+  //  LECCIÓN 3 — {デート|でーと}
+  // ═══════════════════════════════════════════════
+
+  {
+    id: "verb-masu-present",
+    lesson: 3,
+    title: "Verbos en forma ます",
+    pattern: "Vます / Vません / Vますか",
+    shortMeaning: "Forma polite de los verbos para hablar de acciones presentes o futuras.",
+    explanation: [
+      "Los verbos japoneses en forma de diccionario (食べる、飲む…) suenan muy informales. En clase y con personas que no conoces bien se usa la forma ます, que es cortés sin ser rígida.",
+      "La forma ます tiene cuatro conjugaciones básicas: afirmación presente/futuro (ます), negación (ません), pregunta (ますか), y negación en pregunta (ませんか — que tiene un uso especial como invitación, ver más abajo).",
+      "El tiempo no siempre es claro por el verbo solo; depende del contexto o de palabras de tiempo como 毎日、明日、今。",
+      "Los verbos en japonés van siempre al final de la oración. Si hay objeto, va antes del verbo marcado con を.",
+    ],
+    formation: [
+      "V-ます       →  [acción] (presente / futuro habitual)",
+      "V-ません     →  no [acción]",
+      "V-ますか     →  ¿[acción]?",
+      "V-ませんでした →  no [accionó] (pasado negativo — se estudia en L4)",
+    ],
+    examples: [
+      {
+        jp: "{毎日|まいにち}{日本語|にほんご}を{勉強|べんきょう}します。",
+        es: "Estudio japonés todos los días.",
+        note: "します = forma ます de する (hacer).",
+      },
+      {
+        jp: "{朝|あさ}、コーヒーを{飲|の}みます。",
+        es: "Por la mañana tomo café.",
+        note: "飲みます = forma ます de 飲む.",
+      },
+      {
+        jp: "{週末|しゅうまつ}、{映画|えいが}を{見|み}ますか。",
+        es: "¿Ves películas el fin de semana?",
+        note: "Pregunta con ますか.",
+      },
+      {
+        jp: "{テレビ|てれび}は{見|み}ません。{本|ほん}を{読|よ}みます。",
+        es: "No veo televisión. Leo libros.",
+        note: "Contraste entre ません y ます.",
+      },
+    ],
+    commonMistakes: [
+      "Colocar el verbo en el medio: × {食|た}べます{ごはん|ごはん}を → ○ ごはんを{食|た}べます",
+      "Confundir ます (presente/futuro) con ました (pasado) — son distintos; ます nunca marca pasado.",
+      "Usar la forma de diccionario (食べる) en situaciones formales — en clase siempre usa ます.",
+    ],
+    interactions: [
+      "Ronda «¿Qué haces cada día?»: cada alumno dice una rutina con ます y el siguiente hace una pregunta con ますか.",
+    ],
+    practicePrompts: [
+      "Di tres cosas que haces todos los días usando ます y tres que no haces usando ません.",
+      "Pregunta a un compañero sobre sus hábitos de fin de semana con ますか.",
+    ],
+    relatedGrammarIds: ["particle-wo", "frequency-adverbs", "verb-masu-past"],
+    sourceNotes: ["Basado en Genki I L3, Grammar 1 (verbos en ます)"],
+  },
+
+  {
+    id: "particle-wo",
+    lesson: 3,
+    title: "を (objeto directo)",
+    pattern: "N を V",
+    shortMeaning: "を marca el objeto directo: lo que recibe la acción del verbo.",
+    explanation: [
+      "を (pronunciado «o») es la partícula que señala qué cosa se ve afectada por la acción del verbo. Equivale al objeto directo en español, pero en japonés siempre se marca explícitamente.",
+      "を nunca aparece con verbos de estado como です, あります o います — solo con verbos de acción.",
+      "Cuando el objeto es obvio en el contexto, a veces se omite en conversación informal. Pero en producción escrita o formal siempre inclúyelo.",
+    ],
+    formation: [
+      "N を V-ます  →  [hacer la acción] sobre N",
+    ],
+    examples: [
+      {
+        jp: "{音楽|おんがく}を{聞|き}きます。",
+        es: "Escucho música.",
+        note: "音楽 (música) recibe la acción de 聞く (escuchar).",
+      },
+      {
+        jp: "{昨日|きのう}、{手紙|てがみ}を{書|か}きました。",
+        es: "Ayer escribí una carta.",
+        note: "を + verbo en pasado (ました, L4).",
+      },
+      {
+        jp: "{水|みず}を{飲|の}みますか。",
+        es: "¿Tomas agua?",
+        note: "Pregunta con を.",
+      },
+    ],
+    commonMistakes: [
+      "Usar が en lugar de を para el objeto: × {映画|えいが}が{見|み}ます → ○ {映画|えいが}を{見|み}ます (が es para sujeto, no objeto).",
+      "Omitir を en escritura formal cuando el objeto está claro: en producción escrita siempre ponlo.",
+      "Usar を con です: × {学生|がくせい}をです → ○ {学生|がくせい}です (を solo con verbos de acción).",
+    ],
+    practicePrompts: [
+      "Escribe tres oraciones sobre lo que haces en clase: 〜を〜ます.",
+      "Pregunta a un compañero qué come en el desayuno: 〜を{食|た}べますか.",
+    ],
+    relatedGrammarIds: ["verb-masu-present", "particle-ga-subject", "particle-ni-destination-time"],
+    sourceNotes: ["Basado en Genki I L3, Grammar 2 (partícula を)"],
+  },
+
+  {
+    id: "particle-ni-destination-time",
+    lesson: 3,
+    title: "に (destino / tiempo específico)",
+    pattern: "N に V / 時間 に V",
+    shortMeaning: "に marca destino de movimiento y momentos de tiempo específicos.",
+    explanation: [
+      "に tiene dos usos clave en L3: destino («voy A algún lugar») y tiempo específico («a las tres»). Ambos indican un punto de llegada — sea un lugar o un momento.",
+      "Como destino se usa con verbos de movimiento: 行く (ir), 来る (venir), 帰る (regresar). La pregunta correspondiente es どこに行きますか.",
+      "Como marcador de tiempo, に indica momentos precisos: horas, días de la semana, meses, años. NO se usa に con palabras de tiempo relativo como 今日、明日、毎日、今 — esas van sin partícula.",
+    ],
+    formation: [
+      "場所 に 行く／来る／帰る  →  ir / venir / regresar A un lugar",
+      "時間 に V-ます           →  [hacer algo] a las [hora]  (hora específica)",
+    ],
+    examples: [
+      {
+        jp: "{明日|あした}{図書館|としょかん}に{行|い}きます。",
+        es: "Mañana voy a la biblioteca.",
+        note: "図書館 = destino; 明日 va sin に porque es tiempo relativo.",
+      },
+      {
+        jp: "{日曜日|にちようび}に{映画|えいが}を{見|み}ます。",
+        es: "El domingo veo una película.",
+        note: "日曜日 = día específico → lleva に.",
+      },
+      {
+        jp: "{七時|しちじ}に{起|お}きます。",
+        es: "Me levanto a las siete.",
+        note: "Hora exacta → に obligatorio.",
+      },
+      {
+        jp: "{毎日|まいにち}{学校|がっこう}に{来|き}ます。",
+        es: "Vengo a la escuela todos los días.",
+        note: "毎日 sin に; 学校 (destino) con に.",
+      },
+    ],
+    commonMistakes: [
+      "Usar に con 今日/明日/毎日: × 今日に{行|い}きます → ○ 今日{行|い}きます",
+      "Confundir に (destino/punto) con で (lugar donde pasa la acción): に es adónde vas, で es dónde lo haces.",
+      "Omitir に después del destino: × {大学|だいがく}{行|い}きます → ○ {大学|だいがく}に{行|い}きます",
+    ],
+    practicePrompts: [
+      "Di a qué lugar vas esta semana y cuándo exactamente: [lugar]に[時間]に行きます。",
+      "Comparte tu rutina mañanera con horas específicas usando に.",
+    ],
+    relatedGrammarIds: ["particle-de-location-means", "particle-wo", "verb-masu-present"],
+    sourceNotes: ["Basado en Genki I L3, Grammar 3 (partícula に — destino y tiempo)"],
+  },
+
+  {
+    id: "particle-de-location-means",
+    lesson: 3,
+    title: "で (lugar de acción / medio)",
+    pattern: "場所 で V / 手段 で V",
+    shortMeaning: "で marca dónde ocurre una acción o con qué medio se realiza.",
+    explanation: [
+      "で tiene dos usos en L3: lugar donde ocurre una acción (distinto de に, que es el destino de movimiento) y medio o instrumento con el que se hace algo.",
+      "Clave para no confundir に y で: に es el punto al que llegas (「図書館に行く」= voy a la biblioteca). で es dónde haces algo ya estando ahí (「図書館で勉強する」= estudio EN la biblioteca).",
+      "Como medio: バスで (en autobús), 日本語で (en japonés), はしで (con palillos). Responde a la pregunta どうやって (¿cómo?).",
+    ],
+    formation: [
+      "場所 で V-ます     →  [hacer V] en [lugar]",
+      "手段／方法 で V   →  [hacer V] con/en [medio]",
+    ],
+    examples: [
+      {
+        jp: "{図書館|としょかん}で{勉強|べんきょう}します。",
+        es: "Estudio en la biblioteca.",
+        note: "で = lugar donde ocurre la acción de estudiar.",
+      },
+      {
+        jp: "{カフェ|かふぇ}でコーヒーを{飲|の}みます。",
+        es: "Tomo café en el café.",
+        note: "La acción de beber ocurre en el café.",
+      },
+      {
+        jp: "{電車|でんしゃ}で{大学|だいがく}に{行|い}きます。",
+        es: "Voy a la universidad en tren.",
+        note: "電車で = medio de transporte; 大学に = destino (に).",
+      },
+      {
+        jp: "{日本語|にほんご}で{話|はな}しましょう。",
+        es: "Hablemos en japonés.",
+        note: "で = idioma como medio de comunicación.",
+      },
+    ],
+    commonMistakes: [
+      "Usar に en lugar de で para el lugar de acción: × {図書館|としょかん}に{勉強|べんきょう}します → ○ {図書館|としょかん}で{勉強|べんきょう}します",
+      "Olvidar で con el medio de transporte: × {バス|ばす}{行|い}きます → ○ {バス|ばす}で{行|い}きます",
+    ],
+    practicePrompts: [
+      "Di dónde haces tres actividades distintas: [場所]で[V]ます。",
+      "Describe cómo llegas a la universidad: 何で来ますか → [手段]で来ます。",
+    ],
+    relatedGrammarIds: ["particle-ni-destination-time", "particle-wo", "verb-masu-present"],
+    sourceNotes: ["Basado en Genki I L3, Grammar 4 (partícula で)"],
+  },
+
+  {
+    id: "particle-wa-contrast",
+    lesson: 3,
+    title: "は (contraste)",
+    pattern: "A は〜。B は〜。",
+    shortMeaning: "は también marca contraste: «en cuanto a A… en cuanto a B…».",
+    explanation: [
+      "Ya conoces は como marcador de tema. En L3 aparece su función de contraste: cuando repites は en dos partes de una oración o en dos oraciones seguidas, implica que estás comparando o contrastando.",
+      "Este uso aparece especialmente cuando niegas algo con ません y después afirmas algo alternativo: 「コーヒーは飲みません。お茶は飲みます」(Café no tomo. Té sí tomo).",
+      "El contraste no siempre es negativo; simplemente resalta que algo es distinto para A vs. B.",
+    ],
+    formation: [
+      "N₁ は V-ません。N₂ は V-ます。  →  N₁ no, pero N₂ sí.",
+      "A は adj₁ です。B は adj₂ です。  →  A es X, B es Y (contraste implícito).",
+    ],
+    examples: [
+      {
+        jp: "コーヒーは{飲|の}みません。{水|みず}は{飲|の}みます。",
+        es: "Café no tomo. Agua sí tomo.",
+        note: "Contraste claro entre dos objetos con la misma acción.",
+      },
+      {
+        jp: "{週末|しゅうまつ}は{勉強|べんきょう}しません。{映画|えいが}は{見|み}ます。",
+        es: "El fin de semana no estudio. Películas sí veo.",
+        note: "は en ambas cláusulas marca el contraste.",
+      },
+    ],
+    commonMistakes: [
+      "Pensar que は siempre es «sujeto» — は marca tema/contraste, no acción. El sujeto agente suele ir con が.",
+      "Usar が cuando la intención es contraste: が introduce el sujeto por primera vez o marca énfasis; は marca lo conocido y contrastado.",
+    ],
+    practicePrompts: [
+      "Di qué no haces entre semana pero sí haces el fin de semana: [tiempo]は～ません。[time]は～ます。",
+      "Compara dos amigos o miembros de la familia con は en contraste.",
+    ],
+    relatedGrammarIds: ["particle-ga-subject", "verb-masu-present", "copula-affirmative"],
+    sourceNotes: ["Basado en Genki I L3, Grammar 5 (は contraste)"],
+  },
+
+  {
+    id: "particle-ga-subject",
+    lesson: 3,
+    title: "が (sujeto / foco nuevo)",
+    pattern: "N が V / N が あります",
+    shortMeaning: "が marca el sujeto cuando se introduce información nueva o se responde a ¿quién/qué?",
+    explanation: [
+      "が es la partícula de sujeto gramatical y aparece cuando la información es nueva en la conversación, cuando se responde a «¿quién?» o «¿qué?», o cuando el sujeto no es el tema principal.",
+      "Comparado con は: は dice «en cuanto a X (ya mencionado)»; が dice «X (nuevo o enfatizado) es quien hace esto».",
+      "En L3, が aparece con oraciones de existencia (あります/います — L4), con gustos (好きです — L5) y con habilidades. Por ahora practica responder a 「だれが」y「何が」.",
+    ],
+    formation: [
+      "N が V-ます         →  N (sujeto nuevo/enfático) hace V",
+      "だれが V-ますか → N が V-ます  →  ¿Quién hace V? — N lo hace.",
+    ],
+    examples: [
+      {
+        jp: "だれが{日本語|にほんご}を{勉強|べんきょう}しますか。{田中|たなか}さんが{勉強|べんきょう}します。",
+        es: "¿Quién estudia japonés? El señor Tanaka lo estudia.",
+        note: "が en la respuesta porque 田中 es la información nueva buscada.",
+      },
+      {
+        jp: "{電話|でんわ}が{鳴|な}っています。",
+        es: "El teléfono está sonando.",
+        note: "が porque el teléfono es información que surge espontáneamente.",
+      },
+      {
+        jp: "A: {誰|だれ}が{来|き}ましたか。B: メアリーさんが{来|き}ました。",
+        es: "A: ¿Quién vino? B: Vino Mary.",
+        note: "だれが en pregunta → respuesta con が.",
+      },
+    ],
+    commonMistakes: [
+      "Sustituir は por が en presentaciones: × {私|わたし}が{学生|がくせい}です (suena como «YO SOY el estudiante», con énfasis exclusivo) vs. ○ {私|わたし}は{学生|がくせい}です (presentación normal).",
+      "Usar を para el sujeto: × {田中|たなか}さんを{来|き}ました → ○ {田中|たなか}さんが{来|き}ました",
+    ],
+    practicePrompts: [
+      "Responde: だれが先生ですか / 何が好きですか con が en la respuesta.",
+      "Crea tres oraciones donde se introduce algo nuevo con が.",
+    ],
+    relatedGrammarIds: ["particle-wa-contrast", "particle-wo", "arimasu-imasu"],
+    sourceNotes: ["Basado en Genki I L3, Grammar 6 (partícula が)"],
+  },
+
+  {
+    id: "frequency-adverbs",
+    lesson: 3,
+    title: "Adverbios de frecuencia",
+    pattern: "いつも／よく／時々／あまり～ない／全然～ない",
+    shortMeaning: "Palabras que indican con qué frecuencia haces algo.",
+    explanation: [
+      "Los adverbios de frecuencia van antes del verbo y no llevan partícula. Se ordenan de mayor a menor frecuencia: いつも (siempre) → よく (frecuentemente) → 時々 (a veces) → あまり (no mucho) → 全然 (nunca/para nada).",
+      "Clave: あまり y 全然 requieren negación obligatoria al final. Es un error muy común olvidarla: × あまり行きます → ○ あまり行きません.",
+      "たいてい (generalmente/casi siempre) cabe entre いつも y よく en la escala.",
+    ],
+    formation: [
+      "いつも／よく／時々 + V-ます   →  [frecuencia positiva]",
+      "あまり + V-ません             →  no [V] mucho",
+      "全然 + V-ません               →  no [V] para nada / nunca",
+    ],
+    examples: [
+      {
+        jp: "{私|わたし}はいつも{朝|あさ}{ごはん|ごはん}を{食|た}べます。",
+        es: "Siempre desayuno.",
+      },
+      {
+        jp: "{週末|しゅうまつ}はよく{友達|ともだち}と{映画|えいが}を{見|み}ます。",
+        es: "El fin de semana frecuentemente veo películas con amigos.",
+      },
+      {
+        jp: "{時々|ときどき}{図書館|としょかん}で{勉強|べんきょう}します。",
+        es: "A veces estudio en la biblioteca.",
+      },
+      {
+        jp: "{野菜|やさい}はあまり{食|た}べません。",
+        es: "No como mucha verdura.",
+        note: "あまり siempre con ません.",
+      },
+      {
+        jp: "{お酒|おさけ}は{全然|ぜんぜん}{飲|の}みません。",
+        es: "No tomo nada de alcohol.",
+        note: "全然 siempre con ません.",
+      },
+    ],
+    commonMistakes: [
+      "あまり con verbo afirmativo: × あまり{飲|の}みます → ○ あまり{飲|の}みません",
+      "全然 con verbo afirmativo: × 全然します → ○ 全然しません",
+      "Colocar el adverbio después del verbo: × {食|た}べますいつも → ○ いつも{食|た}べます",
+    ],
+    practicePrompts: [
+      "Describe tu semana usando los cinco adverbios de frecuencia con actividades distintas.",
+      "Pregunta a un compañero: よく〜ますか y responde con el adverbio adecuado.",
+    ],
+    relatedGrammarIds: ["verb-masu-present", "particle-wo"],
+    sourceNotes: ["Basado en Genki I L3, Grammar 7 (adverbios de frecuencia)"],
+  },
+
+  {
+    id: "particle-ya-listing",
+    lesson: 3,
+    title: "や (enumeración no exhaustiva)",
+    pattern: "N₁ や N₂",
+    shortMeaning: "\"N₁ y N₂ (entre otras cosas)\" — lista abierta, no incluye todo.",
+    explanation: [
+      "や funciona igual que と para unir sustantivos, pero con un matiz importante: la lista NO es completa. Implica «N₁, N₂ y cosas similares».",
+      "A veces se acompaña de など (entre otras cosas) al final para reforzar la idea de lista parcial: 本や雑誌など.",
+      "Regla práctica: si mencionas todo lo que hay, usa と. Si solo das ejemplos representativos, usa や.",
+    ],
+    formation: [
+      "N₁ や N₂ (など)  →  N₁, N₂ (y cosas similares)",
+    ],
+    examples: [
+      {
+        jp: "{図書館|としょかん}で{本|ほん}や{雑誌|ざっし}を{読|よ}みます。",
+        es: "En la biblioteca leo libros, revistas y cosas así.",
+        note: "や implica que también lee otras cosas además de libros y revistas.",
+      },
+      {
+        jp: "{週末|しゅうまつ}は{映画|えいが}や{音楽|おんがく}を{楽|たの}しみます。",
+        es: "El fin de semana disfruto películas, música y más.",
+      },
+    ],
+    commonMistakes: [
+      "Usar や cuando la lista es completa y exhaustiva — en ese caso usa と.",
+      "Poner や entre verbos — や solo conecta sustantivos; para acciones usa て-form (L6).",
+    ],
+    practicePrompts: [
+      "Di qué cosas sueles llevar en tu mochila usando や (son ejemplos, no todo).",
+      "¿Qué haces el fin de semana? Usa や para dar algunos ejemplos.",
+    ],
+    relatedGrammarIds: ["particle-to-listing", "particle-wo"],
+    sourceNotes: ["Basado en Genki I L3, Grammar 8 (partícula や)"],
+  },
+
+  {
+    id: "masen-ka",
+    lesson: 3,
+    title: "～ませんか (invitación)",
+    pattern: "V-ませんか",
+    shortMeaning: "Invitar a alguien a hacer algo juntos: \"¿No quieres/queremos…?\"",
+    explanation: [
+      "ませんか usa la forma negativa pero funciona como invitación amistosa. Equivale a «¿no te apetece…?» o «¿no hacemos…?» en español. Suena más suave que una orden directa.",
+      "Diferencia con ましょうか (L5): ましょう propone hacer algo juntos con entusiasmo («¡vamos a…!»); ませんか invita con más delicadeza, dejando espacio para declinar.",
+      "Para aceptar: はい、ぜひ (sí, con gusto) o いいですね (suena bien). Para declinar: すみません、ちょっと… (lo siento, es que…).",
+    ],
+    formation: [
+      "V-ませんか  →  ¿No quieres/queremos [V]?  (invitación cortés)",
+    ],
+    examples: [
+      {
+        jp: "{一緒|いっしょ}に{映画|えいが}を{見|み}ませんか。",
+        es: "¿No quieres ver una película juntos?",
+        note: "一緒に = juntos. Invitación clásica.",
+      },
+      {
+        jp: "{昼|ひる}ごはんを{食|た}べませんか。",
+        es: "¿Comemos juntos?",
+      },
+      {
+        jp: "{今週末|こんしゅうまつ}、カフェに{行|い}きませんか。",
+        es: "¿No vamos a un café este fin de semana?",
+      },
+    ],
+    dialogue: [
+      { speaker: "たけし", jp: "{一緒|いっしょ}に{昼|ひる}ごはんを{食|た}べませんか。", es: "¿Comemos juntos?" },
+      { speaker: "メアリー", jp: "いいですね！どこで{食|た}べますか。", es: "¡Me parece bien! ¿Dónde comemos?" },
+      { speaker: "たけし", jp: "あの{カフェ|かふぇ}はどうですか。", es: "¿Qué tal aquel café?" },
+      { speaker: "メアリー", jp: "いいです。{行|い}きましょう！", es: "Bien. ¡Vamos!" },
+    ],
+    commonMistakes: [
+      "Confundir ませんか (invitación suave) con ましょう (proposición directa y entusiasta).",
+      "Responder con はい、ませんか — las respuestas son afirmativas en forma: はい、{行|い}きましょう / はい、ぜひ.",
+    ],
+    practicePrompts: [
+      "Invita a un compañero a hacer tres actividades distintas esta semana con ませんか.",
+      "Practica aceptar y declinar invitaciones con el vocabulario aprendido.",
+    ],
+    relatedGrammarIds: ["verb-masu-present", "mashou-mashouka"],
+    sourceNotes: ["Basado en Genki I L3, Grammar 9 (～ませんか)"],
+  },
+
+  // ═══════════════════════════════════════════════
+  //  LECCIÓN 4 — {初|はじ}めてのデート
+  // ═══════════════════════════════════════════════
+
+  {
+    id: "verb-masu-past",
+    lesson: 4,
+    title: "Verbos en pasado: ました / ませんでした",
+    pattern: "V-ました / V-ませんでした",
+    shortMeaning: "Forma polite pasada: «hice» y «no hice».",
+    explanation: [
+      "Para hablar de acciones pasadas en forma cortés, ます → ました y ません → ませんでした. El cambio es solo en la terminación; el radical del verbo no cambia.",
+      "Palabras de tiempo comunes en pasado: 昨日 (ayer), 先週 (la semana pasada), 先月 (el mes pasado), 〜時間前 (hace X horas).",
+      "昨日 y 先週 van sin partícula (igual que 今日 y 毎日 van sin に en presente).",
+    ],
+    formation: [
+      "V-ます    →  V-ました      (pasado afirmativo)",
+      "V-ません  →  V-ませんでした (pasado negativo)",
+    ],
+    examples: [
+      {
+        jp: "{昨日|きのう}{図書館|としょかん}で{勉強|べんきょう}しました。",
+        es: "Ayer estudié en la biblioteca.",
+      },
+      {
+        jp: "{先週|せんしゅう}{映画|えいが}を{見|み}ませんでした。",
+        es: "La semana pasada no vi ninguna película.",
+      },
+      {
+        jp: "{朝|あさ}ごはんを{食|た}べましたか。",
+        es: "¿Desayunaste?",
+        note: "Pregunta en pasado con ましたか.",
+      },
+      {
+        jp: "はい、{食|た}べました。パンと{卵|たまご}を{食|た}べました。",
+        es: "Sí, desayuné. Comí pan y huevo.",
+      },
+    ],
+    commonMistakes: [
+      "Usar ました para el futuro: ました es SOLO pasado. Para futuro usa ます.",
+      "Escribir ×ましでした (forma incorrecta) → ○ ませんでした (nunca se separa en «ませ ん でした»).",
+      "Omitir el contexto temporal — en japonés a veces el tiempo debe inferirse del contexto; incluye 昨日/先週 para mayor claridad.",
+    ],
+    practicePrompts: [
+      "Cuenta qué hiciste ayer: tres cosas que sí hiciste (ました) y una que no (ませんでした).",
+      "Pregunta a un compañero qué hizo el fin de semana pasado: 先週の週末、何をしましたか.",
+    ],
+    relatedGrammarIds: ["verb-masu-present", "particle-wo", "particle-ni-destination-time"],
+    sourceNotes: ["Basado en Genki I L4, Grammar 1 (pasado de ます)"],
+  },
+
+  {
+    id: "particle-kara-starting",
+    lesson: 4,
+    title: "から (punto de inicio)",
+    pattern: "N から",
+    shortMeaning: "から indica el punto de partida: lugar o momento desde el que algo comienza.",
+    explanation: [
+      "から marca el inicio de un recorrido o un período: «desde/de». Se usa con lugares (から＝de dónde sales) y con tiempo (から＝desde cuándo).",
+      "Frecuentemente aparece junto con まで (hasta) para indicar un rango completo: 〜から〜まで.",
+      "No confundir から (punto de inicio) con ～から (razón/causa, L6) — son homófonos con funciones distintas; el contexto lo aclara.",
+    ],
+    formation: [
+      "場所・時間 から V      →  desde [lugar/tiempo]",
+      "A から B まで         →  desde A hasta B",
+    ],
+    examples: [
+      {
+        jp: "{大阪|おおさか}から{東京|とうきょう}まで{新幹線|しんかんせん}で{行|い}きます。",
+        es: "Voy de Osaka a Tokio en tren bala.",
+        note: "から (origen) + まで (destino) + で (medio).",
+      },
+      {
+        jp: "{授業|じゅぎょう}は{九時|くじ}から{十時|じゅうじ}まです。",
+        es: "La clase es de las nueve a las diez.",
+        note: "Rango de tiempo con から〜まで.",
+      },
+      {
+        jp: "{駅|えき}から{歩|ある}いて{来|き}ました。",
+        es: "Vine caminando desde la estación.",
+      },
+    ],
+    commonMistakes: [
+      "Confundir から (punto de inicio) con に (destino): 「{東京|とうきょう}に行く」= voy A Tokio; 「{東京|とうきょう}から来た」= vengo DE Tokio.",
+      "Usar から sin まで cuando el punto final es relevante — si mencionas el inicio, suele esperarse el fin también.",
+    ],
+    practicePrompts: [
+      "Di de dónde a dónde vas normalmente para ir a la universidad: [lugar]から[lugar]まで[medio]で行きます。",
+      "Describe el horario de tu clase favorita: ～から～まです。",
+    ],
+    relatedGrammarIds: ["particle-ni-destination-time", "particle-de-location-means", "kara-reason"],
+    sourceNotes: ["Basado en Genki I L4, Grammar 2 (から — punto de inicio)"],
+  },
+
+  {
+    id: "particle-to-accompaniment",
+    lesson: 4,
+    title: "と (acompañamiento)",
+    pattern: "N と [一緒に] V",
+    shortMeaning: "と marca con quién realizas una acción: \"con [persona]\".",
+    explanation: [
+      "と tiene ahora un segundo uso: indicar compañía. «Fui con Takeshi» = 「たけしさんと行きました」. Este と va después de la persona, no de la acción.",
+      "一緒に (juntos) puede agregarse para enfatizar, pero no es obligatorio: 「{友達|ともだち}と{一緒|いっしょ}に{映画|えいが}を見ました」.",
+      "No confundir este と (compañía) con と de enumeración (L1): 「たけしさんとメアリーさんが来ました」usa と para listar personas; 「たけしさんと行きました」usa と para indicar compañía.",
+    ],
+    formation: [
+      "人 と V-ます           →  [hacer V] con [persona]",
+      "人 と {一緒|いっしょ} に V-ます  →  [hacer V] juntos con [persona]",
+    ],
+    examples: [
+      {
+        jp: "{友達|ともだち}と{映画|えいが}を{見|み}ました。",
+        es: "Vi una película con un amigo.",
+      },
+      {
+        jp: "{誰|だれ}と{行|い}きましたか。",
+        es: "¿Con quién fuiste?",
+        note: "Pregunta con と: 誰と。",
+      },
+      {
+        jp: "{家族|かぞく}と{一緒|いっしょ}に{夕飯|ゆうはん}を{食|た}べます。",
+        es: "Ceno junto con mi familia.",
+      },
+    ],
+    commonMistakes: [
+      "Confundir と (compañía) con に (destino): × {友達|ともだち}に{行|い}きました → ○ {友達|ともだち}と{行|い}きました (「友達に」= le fui a la persona, no tiene sentido aquí).",
+      "Usar の entre persona y acción: × {友達|ともだち}の{見|み}ました → ○ {友達|ともだち}と{見|み}ました",
+    ],
+    practicePrompts: [
+      "Cuenta qué hiciste el fin de semana pasado y con quién: [人]と[活動]をしました。",
+      "Pregunta a tres compañeros: 先週末、誰と何をしましたか。",
+    ],
+    relatedGrammarIds: ["particle-to-listing", "verb-masu-past", "masen-ka"],
+    sourceNotes: ["Basado en Genki I L4, Grammar 3 (と — acompañamiento)"],
+  },
+
+  {
+    id: "arimasu-imasu",
+    lesson: 4,
+    title: "あります / います (existencia)",
+    pattern: "N が あります / います",
+    shortMeaning: "Indicar que algo o alguien existe o está presente.",
+    explanation: [
+      "あります es para cosas inanimadas (objetos, lugares, eventos). います es para seres animados (personas, animales). La diferencia es animado vs. inanimado, no concreto vs. abstracto.",
+      "Estas formas responden a la pregunta 「何がありますか／誰がいますか」(¿Qué hay? / ¿Quién está?).",
+      "La partícula que marca lo que existe es が (no は). Hay un cambio sutil: は diría «en cuanto al [objeto], existe» (tema conocido); が introduce el objeto como información nueva.",
+      "Plantas: うごかない → あります. Robots: depende del contexto cultural, pero normalmente あります. Mascotas: います siempre.",
+    ],
+    formation: [
+      "[cosa inanimada] が あります  →  Hay / existe [cosa]",
+      "[persona / animal] が います  →  Hay / está [persona/animal]",
+      "〜が ありますか／いますか    →  ¿Hay / está…?",
+    ],
+    examples: [
+      {
+        jp: "{机|つくえ}の{上|うえ}に{本|ほん}があります。",
+        es: "Sobre el escritorio hay un libro.",
+        note: "本 = inanimado → あります.",
+      },
+      {
+        jp: "{公園|こうえん}に{子供|こども}がいます。",
+        es: "En el parque hay niños.",
+        note: "子供 = personas → います.",
+      },
+      {
+        jp: "{冷蔵庫|れいぞうこ}にビールがありますか。",
+        es: "¿Hay cerveza en el refrigerador?",
+      },
+      {
+        jp: "{近所|きんじょ}に{猫|ねこ}が{三匹|さんびき}います。",
+        es: "En el vecindario hay tres gatos.",
+        note: "猫 = animado → います; contador 三匹.",
+      },
+    ],
+    commonMistakes: [
+      "Usar あります para personas: × {先生|せんせい}があります → ○ {先生|せんせい}がいます",
+      "Usar います para objetos: × {本|ほん}がいます → ○ {本|ほん}があります",
+      "Usar は en lugar de が para la cosa que existe (en el contexto de existencia, が introduce lo que hay).",
+    ],
+    interactions: [
+      "¿Qué hay en el salón? El profesor pregunta 何がありますか e います para describir el entorno.",
+    ],
+    practicePrompts: [
+      "Describe qué hay en tu cuarto usando あります e います con ubicaciones (en la mesa, en el piso…).",
+      "Pregunta a un compañero si tiene mascotas: ペットがいますか。",
+    ],
+    relatedGrammarIds: ["location-ni-arimasu", "possession-ga-arimasu", "particle-ga-subject", "location-nouns"],
+    sourceNotes: ["Basado en Genki I L4, Grammar 4 (あります／います)"],
+  },
+
+  {
+    id: "location-nouns",
+    lesson: 4,
+    title: "Sustantivos de ubicación",
+    pattern: "N の 上／下／前／後ろ／中／横／そば／近く",
+    shortMeaning: "Palabras para describir dónde está algo en relación a otro objeto.",
+    explanation: [
+      "El japonés usa sustantivos relacionales para indicar posición. Se conectan con の al objeto de referencia: 「{机|つくえ}の{上|うえ}」= encima del escritorio.",
+      "Lista básica: 上 (arriba/sobre) · 下 (abajo/debajo) · 前 (delante/enfrente) · 後ろ (detrás) · 中 (dentro/adentro) · 右 (derecha) · 左 (izquierda) · 横 (al lado) · そば (cerca de) · 近く (cerca de, área general).",
+      "Estos sustantivos se combinan con あります/います para indicar dónde existe algo.",
+    ],
+    formation: [
+      "N₁ の [位置語] に N₂ が あります／います",
+      "→  N₂ está [posición] de N₁",
+    ],
+    examples: [
+      {
+        jp: "{椅子|いす}の{下|した}に{猫|ねこ}がいます。",
+        es: "Debajo de la silla hay un gato.",
+      },
+      {
+        jp: "{銀行|ぎんこう}は{駅|えき}の{前|まえ}にあります。",
+        es: "El banco está frente a la estación.",
+      },
+      {
+        jp: "{かばん|かばん}の{中|なか}に{財布|さいふ}があります。",
+        es: "Dentro de la bolsa hay una cartera.",
+      },
+      {
+        jp: "{学校|がっこう}の{近く|ちかく}にコンビニがありますか。",
+        es: "¿Hay una tienda de conveniencia cerca de la escuela?",
+      },
+    ],
+    commonMistakes: [
+      "Olvidar の entre el objeto de referencia y la palabra de posición: × {机|つくえ}{上|うえ}に → ○ {机|つくえ}の{上|うえ}に",
+      "Confundir 前 (enfrente/delante) y 後ろ (detrás) — en japonés 前 es la cara/frente del objeto.",
+    ],
+    practicePrompts: [
+      "Describe la ubicación de cinco objetos de tu cuarto o el salón de clase.",
+      "Dibuja un mapa simple y describe dónde están tres lugares usando の+位置語.",
+    ],
+    relatedGrammarIds: ["arimasu-imasu", "location-ni-arimasu", "location-words-koko"],
+    sourceNotes: ["Basado en Genki I L4, Grammar 5 (sustantivos de ubicación)"],
+  },
+
+  {
+    id: "possession-ga-arimasu",
+    lesson: 4,
+    title: "X は Y が あります／います (posesión)",
+    pattern: "X は Y が あります／います",
+    shortMeaning: "\"X tiene Y\" — expresar posesión usando が あります／います.",
+    explanation: [
+      "El japonés no tiene un verbo «tener» equivalente a «have» en inglés. En su lugar, usa la estructura «X は Y が あります/います», que literalmente dice «en cuanto a X, Y existe».",
+      "La diferencia entre は y が aquí es importante: は marca el poseedor (el tema), が marca lo poseído (lo que existe en relación a X).",
+      "Este patrón funciona tanto con objetos (あります) como con personas o animales (います): {私|わたし}は{犬|いぬ}がいます = Tengo un perro.",
+    ],
+    formation: [
+      "人／もの は N が あります  →  [persona/cosa] tiene N (inanimado)",
+      "人 は 人／動物 が います  →  [persona] tiene [persona/animal]",
+    ],
+    examples: [
+      {
+        jp: "{私|わたし}は{車|くるま}があります。",
+        es: "Tengo coche.",
+        note: "車 = inanimado → あります.",
+      },
+      {
+        jp: "{田中|たなか}さんは{兄弟|きょうだい}がいますか。",
+        es: "¿Tiene hermanos el señor Tanaka?",
+        note: "兄弟 = personas → います; pregunta de posesión.",
+      },
+      {
+        jp: "{私|わたし}は{時間|じかん}がありません。",
+        es: "No tengo tiempo.",
+        note: "Negación: ありません.",
+      },
+    ],
+    commonMistakes: [
+      "Usar を en lugar de が: × {車|くるま}をあります → ○ {車|くるま}があります (あります／います no llevan を).",
+      "Usar います para objetos inanimados: × {車|くるま}がいます → ○ {車|くるま}があります",
+    ],
+    practicePrompts: [
+      "Di tres cosas que tienes y una que no tienes usando あります／ありません.",
+      "Pregunta a un compañero si tiene hermanos, mascotas y coche.",
+    ],
+    relatedGrammarIds: ["arimasu-imasu", "location-ni-arimasu", "particle-ga-subject"],
+    sourceNotes: ["Basado en Genki I L4, Grammar 6 (posesión con があります)"],
+  },
+
+  {
+    id: "location-ni-arimasu",
+    lesson: 4,
+    title: "X は Y にあります／います (ubicación)",
+    pattern: "X は Y に あります／います",
+    shortMeaning: "\"X está en Y\" — indicar dónde se encuentra algo o alguien.",
+    explanation: [
+      "Cuando quieres decir dónde está algo ya conocido (el tema は), usas la estructura X は [lugar] に あります/います.",
+      "La diferencia con possession-ga-arimasu es el foco: aquí el tema (は) es la cosa o persona que buscamos ubicar, y に indica el lugar donde existe.",
+      "Comparación: 「{図書館|としょかん}に{本|ほん}があります」(Hay libros en la biblioteca — foco en qué hay) vs. 「{本|ほん}は{図書館|としょかん}にあります」(El libro está en la biblioteca — foco en dónde está el libro).",
+    ],
+    formation: [
+      "X は [lugar] に あります  →  X (inanimado) está en [lugar]",
+      "X は [lugar] に います    →  X (animado) está en [lugar]",
+    ],
+    examples: [
+      {
+        jp: "{財布|さいふ}は{かばん|かばん}の{中|なか}にあります。",
+        es: "La cartera está dentro de la bolsa.",
+        note: "財布 = tema (ya se sabe qué es); el foco es dónde está.",
+      },
+      {
+        jp: "{先生|せんせい}は{研究室|けんきゅうしつ}にいます。",
+        es: "El profesor está en su oficina.",
+        note: "先生 = animado → います.",
+      },
+      {
+        jp: "コンビニは{駅|えき}の{近く|ちかく}にありますか。",
+        es: "¿El convenience store está cerca de la estación?",
+      },
+    ],
+    commonMistakes: [
+      "Usar で en lugar de に para ubicación de existencia: × {本|ほん}は{机|つくえ}の{上|うえ}で → ○ {机|つくえ}の{上|うえ}に (に para existencia/ubicación; で para lugar de acción).",
+      "Invertir el orden: × に{図書館|としょかん}{本|ほん}は → recuerda: X は [lugar] に あります.",
+    ],
+    practicePrompts: [
+      "Describe dónde están cuatro cosas de tu cuarto: [もの]は[場所]にあります。",
+      "Pregunta a un compañero dónde está algo que perdió: ～はどこにありますか／いますか。",
+    ],
+    relatedGrammarIds: ["arimasu-imasu", "location-nouns", "possession-ga-arimasu"],
+    sourceNotes: ["Basado en Genki I L4, Grammar 7 (ubicación con にあります／います)"],
+  },
+
+  // ═══════════════════════════════════════════════
+  //  LECCIÓN 5 — {沖縄|おきなわ}への{旅|たび}
+  // ═══════════════════════════════════════════════
+
+  {
+    id: "adjective-present",
+    lesson: 5,
+    title: "Adjetivos い / な — presente",
+    pattern: "い-adj です / な-adj です",
+    shortMeaning: "Dos clases de adjetivos para describir cosas en presente afirmativo y negativo.",
+    explanation: [
+      "El japonés tiene dos tipos de adjetivos. Los い-adjetivos terminan en い y se conjugan cambiando esa terminación: 高い → 高くないです. Los な-adjetivos terminan en な cuando modifican un sustantivo y se conjugan con じゃないです igual que los sustantivos con です.",
+      "Para afirmar: [い-adj] です / [な-adj] です. Para negar: い-adj → い → くないです; な-adj → じゃないです.",
+      "い-adj excepción importante: いい (bueno) tiene su forma negativa en よくないです, no ×いくないです.",
+      "Los na-adjetivos que más se usan en L5: きれい (na-adjetivo, aunque termina en い — excepción frecuente), 好き、嫌い、有名、静か、にぎやか、親切.",
+    ],
+    formation: [
+      "い-adj:  [stem]い です → [stem]くないです  (negación)",
+      "な-adj:  [adj] です  → [adj] じゃないです  (negación)",
+      "いい  →  よくないです  (excepción)",
+    ],
+    examples: [
+      {
+        jp: "{沖縄|おきなわ}の{海|うみ}はきれいです。",
+        es: "El mar de Okinawa es bonito.",
+        note: "きれい = na-adjetivo aunque termina en い.",
+      },
+      {
+        jp: "この{部屋|へや}は{広|ひろ}くないです。",
+        es: "Esta habitación no es amplia.",
+        note: "広い (い-adj): 広い → 広くないです.",
+      },
+      {
+        jp: "あのレストランは{有名|ゆうめい}じゃないです。",
+        es: "Ese restaurante no es famoso.",
+        note: "有名 = na-adjetivo.",
+      },
+      {
+        jp: "この{映画|えいが}はよくないです。",
+        es: "Esta película no es buena.",
+        note: "いい → よくないです (excepción).",
+      },
+    ],
+    commonMistakes: [
+      "Negar いい como ×いくないです → ○ よくないです",
+      "Tratar きれい como い-adjetivo: × きれくないです → ○ きれいじゃないです",
+      "Añadir な antes de です: × {静|しず}かなです → ○ {静|しず}かです",
+    ],
+    interactions: [
+      "Describe cinco cosas del salón o la ciudad con adjetivos い y な. El compañero contesta con contraste.",
+    ],
+    practicePrompts: [
+      "Describe tu cuarto con tres adjetivos: [もの]は[adj]です／[adj]くないです.",
+      "Compara tu ciudad natal con otra: [город]は[adj]ですが、[город]は[adj]じゃないです.",
+    ],
+    relatedGrammarIds: ["adjective-past", "adjective-noun-modifier", "suki-kirai"],
+    sourceNotes: ["Basado en Genki I L5, Grammar 1-2 (adjetivos い/な presente)"],
+  },
+
+  {
+    id: "adjective-past",
+    lesson: 5,
+    title: "Adjetivos い / な — pasado",
+    pattern: "い-adj かったです / な-adj でした",
+    shortMeaning: "Forma pasada de los adjetivos: «era / estaba».",
+    explanation: [
+      "い-adjetivos en pasado: se cambia い → かったです (afirmativo) y い → くなかったです (negativo).",
+      "な-adjetivos en pasado: でした (afirmativo) y じゃなかったです (negativo) — igual que los sustantivos.",
+      "Excepción: いい → よかったです (pasado afirmativo) / よくなかったです (pasado negativo).",
+    ],
+    formation: [
+      "い-adj:  [stem]い → [stem]かったです  /  [stem]くなかったです",
+      "な-adj:  [adj] でした  /  [adj] じゃなかったです",
+      "いい  →  よかったです  /  よくなかったです",
+    ],
+    examples: [
+      {
+        jp: "{昨日|きのう}の{天気|てんき}はよかったです。",
+        es: "El clima de ayer era bueno.",
+        note: "いい → よかったです.",
+      },
+      {
+        jp: "そのホテルはあまり{便利|べんり}じゃなかったです。",
+        es: "Ese hotel no era muy conveniente.",
+        note: "便利 = na-adjetivo → じゃなかったです.",
+      },
+      {
+        jp: "パーティーは{楽|たの}しかったですか。",
+        es: "¿La fiesta fue divertida?",
+        note: "楽しい → 楽しかったです (pregunta en pasado).",
+      },
+    ],
+    commonMistakes: [
+      "Negar いい en pasado como ×いかったです → ○ よかったです",
+      "Usar ×{静|しず}かかったです (い-adj form para na-adjetivo) → ○ {静|しず}かでした",
+    ],
+    practicePrompts: [
+      "Describe cómo fue tu fin de semana con tres adjetivos en pasado.",
+      "¿Cómo era tu escuela secundaria? Usa adjetivos en pasado positivo y negativo.",
+    ],
+    relatedGrammarIds: ["adjective-present", "verb-masu-past"],
+    sourceNotes: ["Basado en Genki I L5, Grammar 3 (adjetivos pasado)"],
+  },
+
+  {
+    id: "adjective-noun-modifier",
+    lesson: 5,
+    title: "Adjetivo + sustantivo",
+    pattern: "い-adj + N / な-adj な + N",
+    shortMeaning: "Usar un adjetivo directamente antes de un sustantivo para describirlo.",
+    explanation: [
+      "Los adjetivos pueden usarse en posición predicativa (です al final) o en posición atributiva (directamente antes del sustantivo). En posición atributiva no cambia la forma para い-adjetivos; los な-adjetivos agregan な antes del sustantivo.",
+      "い-adj: 高い山 (montaña alta), 古い車 (coche viejo). Sin cambio en la forma.",
+      "な-adj: 有名な人 (persona famosa), きれいな海 (mar bonito). Se agrega な entre adjetivo y sustantivo.",
+    ],
+    formation: [
+      "い-adj + N   →  [い-adj] N  (sin cambio)",
+      "な-adj + N   →  [な-adj] な N",
+    ],
+    examples: [
+      {
+        jp: "{新|あたら}しい{本|ほん}を{買|か}いました。",
+        es: "Compré un libro nuevo.",
+        note: "新しい (い-adj) directamente antes de 本.",
+      },
+      {
+        jp: "{有名|ゆうめい}なレストランに{行|い}きたいです。",
+        es: "Quiero ir a un restaurante famoso.",
+        note: "有名 (な-adj) + な antes de レストラン.",
+      },
+      {
+        jp: "きれいな{景色|けしき}ですね。",
+        es: "Es un paisaje hermoso, ¿verdad?",
+        note: "きれい (na-adj) + な + sustantivo.",
+      },
+    ],
+    commonMistakes: [
+      "Olvidar な con na-adjetivos: × 有名レストラン → ○ {有名|ゆうめい}なレストラン",
+      "Añadir な a い-adjetivos: × {高|たか}いな{山|やま} → ○ {高|たか}い{山|やま}",
+    ],
+    practicePrompts: [
+      "Describe tres cosas de tu ciudad usando adj + sustantivo (ej. {有名|ゆうめい}な{公園|こうえん}).",
+      "Crea un mini-tour de tu ciudad: [adj]な[场所]があります。",
+    ],
+    relatedGrammarIds: ["adjective-present", "suki-kirai", "noun-modification-relative"],
+    sourceNotes: ["Basado en Genki I L5, Grammar 4 (adjetivo + sustantivo)"],
+  },
+
+  {
+    id: "suki-kirai",
+    lesson: 5,
+    title: "好き(な) / きらい(な)",
+    pattern: "X は Y が 好きです / きらいです",
+    shortMeaning: "Expresar gustos y disgustos: «X le gusta Y» / «X no le gusta Y».",
+    explanation: [
+      "好き y きらい son na-adjetivos (no verbos). La estructura es X は Y が 好き/きらいです, donde Y (lo que te gusta) lleva が, no を.",
+      "Para intensificar: 大好き (me encanta) y 大きらい (odio). 大 se puede añadir a ambos.",
+      "Para preguntar: Yが好きですか. Para responder de forma neutra: まあまあです (más o menos) o 好きでも嫌いでもないです.",
+    ],
+    formation: [
+      "X は Y が {好|す}きです      →  X le gusta Y / X gusta de Y",
+      "X は Y が きらいです        →  X no le gusta Y / X odia Y",
+      "X は Y が {大好|だいす}きです →  X adora Y",
+    ],
+    examples: [
+      {
+        jp: "{私|わたし}は{寿司|すし}が{大好|だいす}きです。",
+        es: "Me encanta el sushi.",
+      },
+      {
+        jp: "{妹|いもうと}は{野菜|やさい}がきらいです。",
+        es: "A mi hermana menor no le gustan las verduras.",
+      },
+      {
+        jp: "{日本語|にほんご}の{勉強|べんきょう}が{好|す}きですか。",
+        es: "¿Te gusta estudiar japonés?",
+        note: "Pregunta de gusto con が.",
+      },
+    ],
+    dialogue: [
+      { speaker: "メアリー", jp: "{音楽|おんがく}が{好|す}きですか。", es: "¿Te gusta la música?" },
+      { speaker: "たけし", jp: "はい、{大好|だいす}きです。{特|とく}にロックが{好|す}きです。", es: "Sí, me encanta. Especialmente el rock." },
+      { speaker: "メアリー", jp: "クラシックはどうですか。", es: "¿Y la música clásica?" },
+      { speaker: "たけし", jp: "クラシックはあまり{好|す}きじゃないです。", es: "La música clásica no me gusta mucho." },
+    ],
+    commonMistakes: [
+      "Usar を en lugar de が: × {音楽|おんがく}を{好|す}きです → ○ {音楽|おんがく}が{好|す}きです",
+      "Tratar 好き como verbo: conjugar ×好きます → 好き es adjetivo, no verbo.",
+    ],
+    practicePrompts: [
+      "Di tres cosas que te gustan y una que no con 好きです y きらいです.",
+      "Encuesta de clase: pregunta a tres compañeros qué tipo de música／comida／deporte les gusta.",
+    ],
+    relatedGrammarIds: ["adjective-present", "particle-ga-subject", "x-wa-y-ga-z"],
+    sourceNotes: ["Basado en Genki I L5, Grammar 5 (好き／きらい)"],
+  },
+
+  {
+    id: "mashou-mashouka",
+    lesson: 5,
+    title: "～ましょう / ～ましょうか",
+    pattern: "V-ましょう / V-ましょうか",
+    shortMeaning: "Proponer hacer algo juntos («¡Hagamos X!») o ofrecer ayuda («¿Lo hago yo?»).",
+    explanation: [
+      "ましょう es la forma volitional polite. Se usa para hacer propuestas firmes o entusiastas: «¡Vamos!», «¡Hagamos X!». Expresa que el hablante ya quiere hacerlo y arrastra al oyente.",
+      "ましょうか suaviza la propuesta o se convierte en oferta: «¿Lo hacemos?» / «¿Te ayudo?». Deja más opción al oyente que ましょう.",
+      "Diferencia clave con ませんか (L3): ませんか invita con mucha suavidad («¿no quieres…?»); ましょう propone con energía; ましょうか ofrece con amabilidad.",
+    ],
+    formation: [
+      "V-ます → V-ましょう   →  ¡Hagamos V! (propuesta)",
+      "V-ます → V-ましょうか →  ¿Hacemos V? / ¿Hago V? (oferta / propuesta suave)",
+    ],
+    examples: [
+      {
+        jp: "{早|はや}く{行|い}きましょう！",
+        es: "¡Vayamos pronto!",
+        note: "ましょう = proposición directa y enérgica.",
+      },
+      {
+        jp: "ちょっと{休|やす}みましょうか。",
+        es: "¿Descansamos un poco?",
+        note: "ましょうか = propuesta más suave.",
+      },
+      {
+        jp: "{荷物|にもつ}を{持|も}ちましょうか。",
+        es: "¿Le llevo el equipaje?",
+        note: "ましょうか = oferta de ayuda.",
+      },
+    ],
+    commonMistakes: [
+      "Confundir ましょう (propuesta enérgica) con ませんか (invitación suave) — en la práctica oral suenan muy distintos en situación.",
+      "Usar ましょう con pronombres de segunda persona como orden: ましょう incluye siempre al hablante.",
+    ],
+    practicePrompts: [
+      "Propón a tu compañero tres actividades para el fin de semana usando ましょう y ましょうか.",
+      "Ofrece ayuda en tres situaciones distintas: [Vましょうか]。",
+    ],
+    relatedGrammarIds: ["masen-ka", "verb-masu-present"],
+    sourceNotes: ["Basado en Genki I L5, Grammar 6 (ましょう／ましょうか)"],
+  },
+
+  // ═══════════════════════════════════════════════
+  //  LECCIÓN 6 — {ロバート|ろばーと}の{生活|せいかつ}
+  // ═══════════════════════════════════════════════
+
+  {
+    id: "te-form-verbs",
+    lesson: 6,
+    title: "Forma て de los verbos",
+    pattern: "V-て",
+    shortMeaning: "Forma conectora de los verbos — base para peticiones, secuencias y más.",
+    explanation: [
+      "La forma て es una de las formas más versátiles del japonés. Por sí sola no tiene significado completo; conecta con otras palabras para expresar: secuencia de acciones, peticiones, permiso, prohibición, estado continuo, etc.",
+      "Las reglas de formación dependen del grupo del verbo:",
+      "Grupo 1 (verbos -u): く→いて, ぐ→いで, す→して, ぬ/む/ぶ→んで, る/つ/う→って. Excepción: 行く → 行って.",
+      "Grupo 2 (verbos -ru): se quita る y se añade て: 食べる→食べて, 起きる→起きて.",
+      "Irregulares: する→して, くる→きて.",
+    ],
+    formation: [
+      "G1:  書く→書いて / 飲む→飲んで / 話す→話して / 待つ→待って / 行く→行って (excep.)",
+      "G2:  食べる→食べて / 見る→見て / 起きる→起きて",
+      "Irreg: する→して / くる→きて",
+    ],
+    examples: [
+      {
+        jp: "{食|た}べて{寝|ね}ます。",
+        es: "Como y luego duermo.",
+        note: "Secuencia simple: て conecta dos acciones.",
+      },
+      {
+        jp: "{本|ほん}を{読|よ}んでいます。",
+        es: "Estoy leyendo un libro.",
+        note: "読む → 読んで + います = estado continuo (L7).",
+      },
+      {
+        jp: "{駅|えき}まで{歩|ある}いて{来|き}ました。",
+        es: "Vine caminando hasta la estación.",
+      },
+    ],
+    commonMistakes: [
+      "行く → ×行きて → ○ 行って (excepción importante del grupo 1).",
+      "Confundir grupo 1 y 2: 起きる es grupo 2 (起きて), no ×起いて.",
+      "Olvidar que ぬ/む/ぶ → んで (con dakuten): 飲む→飲んで, 読む→読んで.",
+    ],
+    interactions: [
+      "Drill en cadena: el profesor da un verbo, los alumnos producen la forma て en ronda rápida.",
+    ],
+    practicePrompts: [
+      "Convierte diez verbos a forma て: 書く, 見る, 飲む, 来る, する, 待つ, 話す, 食べる, 聞く, 帰る.",
+      "Conecta dos acciones de tu rutina con て: [V₁]て、[V₂]ます。",
+    ],
+    relatedGrammarIds: ["v1-te-v2-sequence", "te-kudasai", "te-iru", "te-mo-ii"],
+    sourceNotes: ["Basado en Genki I L6, Grammar 1 (forma て)"],
+  },
+
+  {
+    id: "v1-te-v2-sequence",
+    lesson: 6,
+    title: "V₁ て V₂ (secuencia de acciones)",
+    pattern: "V₁-て、V₂-ます",
+    shortMeaning: "Encadenar dos o más acciones en orden cronológico.",
+    explanation: [
+      "Cuando quieres decir «hago A y luego hago B», usas la forma て del primer verbo y terminas la oración con el segundo verbo conjugado normalmente.",
+      "El tiempo (presente/pasado) y la polaridad (afirmativo/negativo) de toda la secuencia los determina el verbo final. V₁て no marca tiempo por sí solo.",
+      "Pueden encadenarse más de dos acciones: V₁て、V₂て、V₃ます.",
+    ],
+    formation: [
+      "V₁-て、V₂-ます     →  [hace V₁] y [hace V₂] (presente/futuro)",
+      "V₁-て、V₂-ました  →  [hizo V₁] y [hizo V₂] (pasado)",
+    ],
+    examples: [
+      {
+        jp: "{朝|あさ}{起|お}きて、シャワーを{浴|あ}びて、{学校|がっこう}に{行|い}きます。",
+        es: "Me levanto, me ducho y voy a la escuela.",
+        note: "Tres acciones en secuencia; el tiempo (presente) lo da el verbo final.",
+      },
+      {
+        jp: "{図書館|としょかん}で{本|ほん}を{借|か}りて、{家|いえ}で{読|よ}みました。",
+        es: "Pedí prestado un libro en la biblioteca y lo leí en casa.",
+        note: "Pasado determinado por ました al final.",
+      },
+    ],
+    commonMistakes: [
+      "Marcar tiempo en V₁て: × {食|た}べましたて → ○ {食|た}べて (la forma て nunca lleva tiempo).",
+      "Cambiar el orden de las acciones — て respeta la secuencia cronológica real.",
+    ],
+    practicePrompts: [
+      "Describe tu mañana entera en una oración encadenando 4-5 acciones con て.",
+      "Cuenta qué hiciste ayer en secuencia: [V]て、[V]て、[V]ました。",
+    ],
+    relatedGrammarIds: ["te-form-verbs", "te-kudasai", "te-iru"],
+    sourceNotes: ["Basado en Genki I L6, Grammar 2 (V₁てV₂)"],
+  },
+
+  {
+    id: "te-kudasai",
+    lesson: 6,
+    title: "～てください",
+    pattern: "V-てください",
+    shortMeaning: "Petición educada: «por favor haz X».",
+    explanation: [
+      "V-てください es la forma más básica y natural de pedir algo en japonés. Funciona en clase, en tiendas, con amigos que respetas.",
+      "Para una petición aún más suave o formal: V-ていただけますか / V-ていただけませんか.",
+      "En contexto de clase, el profesor puede abreviar a V-て en comandos rápidos (sin ください), pero eso es muy informal.",
+    ],
+    formation: [
+      "V-て + ください  →  Por favor, [haz V]",
+    ],
+    examples: [
+      {
+        jp: "ちょっと{待|ま}ってください。",
+        es: "Espere un momento, por favor.",
+      },
+      {
+        jp: "{名前|なまえ}を{書|か}いてください。",
+        es: "Por favor, escribe tu nombre.",
+      },
+      {
+        jp: "もう{一度|いちど}{言|い}ってください。",
+        es: "Por favor, dígalo otra vez.",
+        note: "Muy útil en clase de japonés.",
+      },
+    ],
+    commonMistakes: [
+      "Usar la forma de diccionario en lugar de て: × {食|た}べるください → ○ {食|た}べてください",
+      "Confundir てください (petición directa) con てもいいですか (petición de permiso) — てください pide que el otro haga algo; てもいいですか pide permiso para que YO haga algo.",
+    ],
+    practicePrompts: [
+      "Escribe cinco instrucciones de clase que el profesor podría dar usando てください.",
+      "Practica pedir ayuda en tres situaciones distintas de la vida cotidiana.",
+    ],
+    relatedGrammarIds: ["te-form-verbs", "te-mo-ii", "naide-kudasai"],
+    sourceNotes: ["Basado en Genki I L6, Grammar 3 (てください)"],
+  },
+
+  {
+    id: "te-mo-ii",
+    lesson: 6,
+    title: "～てもいいです / ～てもいいですか",
+    pattern: "V-てもいいです",
+    shortMeaning: "Dar o pedir permiso para hacer algo: «está bien que hagas X» / «¿puedo hacer X?»",
+    explanation: [
+      "V-てもいいです afirma que algo está permitido. V-てもいいですか pide permiso. La estructura completa es «aunque hagas V, está bien» — いい (bueno/correcto) cierra la expresión.",
+      "Para dar permiso: はい、[Vても]いいですよ. Para negar el permiso (prohibición): いいえ、[Vては]いけません (ver te-wa-ikemasen).",
+      "Versión más informal: てもいい (sin です) — se usa entre amigos o con personas de confianza.",
+    ],
+    formation: [
+      "V-て + もいいですか  →  ¿Puedo [hacer V]?  (pedir permiso)",
+      "V-て + もいいです   →  Puedes [hacer V].  (dar permiso)",
+    ],
+    examples: [
+      {
+        jp: "{写真|しゃしん}を{撮|と}ってもいいですか。",
+        es: "¿Puedo tomar una foto?",
+      },
+      {
+        jp: "はい、{撮|と}ってもいいですよ。",
+        es: "Sí, puedes tomarla.",
+      },
+      {
+        jp: "{辞書|じしょ}を{使|つか}ってもいいですか。",
+        es: "¿Puedo usar el diccionario?",
+      },
+    ],
+    commonMistakes: [
+      "Usar てもいい para prohibición — la prohibición es てはいけません, no てもいけません.",
+      "Omitir も: × ていいですか → ○ てもいいですか (sin も cambia el significado).",
+    ],
+    practicePrompts: [
+      "Practica pedir permiso en cinco situaciones de clase o en una tienda.",
+      "Roleplay: un alumno pide permiso; el otro da o niega el permiso y explica por qué.",
+    ],
+    relatedGrammarIds: ["te-form-verbs", "te-wa-ikemasen", "te-kudasai"],
+    sourceNotes: ["Basado en Genki I L6, Grammar 4 (てもいいです)"],
+  },
+
+  {
+    id: "te-wa-ikemasen",
+    lesson: 6,
+    title: "～てはいけません",
+    pattern: "V-てはいけません",
+    shortMeaning: "Prohibición: «no debes / no se puede hacer X».",
+    explanation: [
+      "V-てはいけません es el opuesto de てもいいです: expresa que algo está prohibido o no está permitido. Equivale a «no puedes hacer X» o «no se permite X».",
+      "Es más fuerte que ないでください (L8), que es una petición cortés de que no hagas algo. てはいけません es una regla o norma.",
+      "Forma coloquial: てはダメです / ちゃダメ (muy informal, frecuente en anime/conversación cotidiana).",
+    ],
+    formation: [
+      "V-て + はいけません  →  No debes / No se puede [hacer V]",
+    ],
+    examples: [
+      {
+        jp: "ここで{食|た}べてはいけません。",
+        es: "No se puede comer aquí.",
+      },
+      {
+        jp: "{授業中|じゅぎょうちゅう}に{スマホ|すまほ}を{使|つか}ってはいけません。",
+        es: "No puedes usar el teléfono durante la clase.",
+      },
+      {
+        jp: "{図書館|としょかん}で{大|おお}きな{声|こえ}で{話|はな}してはいけません。",
+        es: "No se puede hablar en voz alta en la biblioteca.",
+      },
+    ],
+    commonMistakes: [
+      "Confundir てはいけません (prohibición-regla) con ないでください (petición de que no hagas algo): てはいけません es una norma general; ないでください es una solicitud directa a una persona.",
+    ],
+    practicePrompts: [
+      "Escribe tres reglas de tu escuela o trabajo usando てはいけません.",
+      "Compara con てもいいです: crea pares de «está permitido» y «está prohibido» para el mismo lugar.",
+    ],
+    relatedGrammarIds: ["te-mo-ii", "naide-kudasai", "te-form-verbs"],
+    sourceNotes: ["Basado en Genki I L6, Grammar 5 (てはいけません)"],
+  },
+
+  {
+    id: "kara-reason",
+    lesson: 6,
+    title: "～から (razón / causa)",
+    pattern: "〔理由〕から、〔結果〕",
+    shortMeaning: "Dar la razón de algo: «porque…».",
+    explanation: [
+      "Para expresar causalidad, から va después de la razón (en forma plain o forma ます). El resultado o consecuencia va después de から.",
+      "En japonés la causa viene primero y el resultado después — orden inverso al español donde «porque» suele ir en medio o al inicio de la razón.",
+      "から puede aparecer después de cualquier forma de cópula o verbo: [plain form] から、[resultado].",
+      "Comparado con ので (L12 Genki II): から es más directo y puede sonar más brusco; ので es más suave y preferido en situaciones formales. En L6, usa から.",
+    ],
+    formation: [
+      "[razón en forma plain/ます] から、[resultado]  →  Porque [razón], [resultado]",
+      "[resultado]。[razón] から。                   →  [resultado]. Porque [razón]. (la razón al final, frecuente en conversación)",
+    ],
+    examples: [
+      {
+        jp: "{眠|ねむ}いから、{早|はや}く{寝|ね}ます。",
+        es: "Porque tengo sueño, me acuesto temprano.",
+      },
+      {
+        jp: "{明日|あした}{テスト|てすと}があるから、{今日|きょう}{勉強|べんきょう}します。",
+        es: "Porque mañana hay examen, hoy estudio.",
+      },
+      {
+        jp: "どうして{遅|おそ}かったですか。— {電車|でんしゃ}が{遅|おく}れたから、{遅|おそ}くなりました。",
+        es: "¿Por qué llegaste tarde? — Porque el tren se retrasó.",
+      },
+    ],
+    commonMistakes: [
+      "Poner から antes de la razón: × から{眠|ねむ}い → ○ {眠|ねむ}いから (から va después de la razón).",
+      "Usar から con forma ます dentro de una oración larga — en estilo informal es aceptable, pero en estilo formal/escrito se prefiere plain form + から.",
+    ],
+    practicePrompts: [
+      "Explica tres de tus hábitos con から: {私|わたし}は[hábito]。[razón]からです。",
+      "Responde: どうして日本語を勉強しますか con una razón usando から.",
+    ],
+    relatedGrammarIds: ["particle-kara-starting", "verb-masu-present", "n-desu"],
+    sourceNotes: ["Basado en Genki I L6, Grammar 6 (から — razón)"],
+  },
+
+  // ═══════════════════════════════════════════════
+  //  LECCIÓN 7 — {家族|かぞく}の{写真|しゃしん}
+  // ═══════════════════════════════════════════════
+
+  {
+    id: "te-iru",
+    lesson: 7,
+    title: "～ている",
+    pattern: "V-ている",
+    shortMeaning: "Acción en progreso, estado resultante de una acción, o hábito continuo.",
+    explanation: [
+      "V-ている tiene tres usos principales que dependen del tipo de verbo:",
+      "① Acción en progreso (verbos de actividad): {食|た}べている = está comiendo. Equivale al gerundio español.",
+      "② Estado resultante (verbos de cambio puntual): 結婚している = está casado (resultado de haberse casado). {死|し}んでいる = está muerto (resultado de haber muerto).",
+      "③ Hábito continuo o ocupación: {大学|だいがく}で{教|おし}えている = enseña en la universidad (habitualmente).",
+      "En habla cotidiana, いる a veces se contrae: {食|た}べてる, {見|み}てる.",
+    ],
+    formation: [
+      "V-て + います  →  está V-ando / V-ido (estado) / V habitualmente",
+      "V-て + いません →  no está V-ando / no está en ese estado",
+    ],
+    examples: [
+      {
+        jp: "{父|ちち}は{テレビ|てれび}を{見|み}ています。",
+        es: "Mi papá está viendo televisión.",
+        note: "Acción en progreso.",
+      },
+      {
+        jp: "{山田|やまだ}さんは{結婚|けっこん}しています。",
+        es: "El señor Yamada está casado.",
+        note: "Estado resultante: se casó y sigue casado.",
+      },
+      {
+        jp: "{姉|あね}は{東京|とうきょう}に{住|す}んでいます。",
+        es: "Mi hermana mayor vive en Tokio.",
+        note: "住む = cambio de estado → ている = estado actual de residencia.",
+      },
+      {
+        jp: "何をしていますか。",
+        es: "¿Qué estás haciendo?",
+      },
+    ],
+    commonMistakes: [
+      "Usar ている con verbos de estado como ある, いる, 分かる — estos verbos ya expresan estado, no necesitan ている.",
+      "Confundir el uso con verbos puntuales: × {来|き}ています (como «está viniendo») tiene sentido diferente — significa que ya llegó y está aquí. En español esto es «ha llegado».",
+    ],
+    interactions: [
+      "Mímicas: un alumno actúa una acción y el resto adivina: 「何をしていますか」→「〜をしています」.",
+    ],
+    practicePrompts: [
+      "Describe qué están haciendo ahora mismo tres personas de tu familia.",
+      "Di tres hábitos o estados permanentes tuyos usando ている: {住|す}んでいます, {勉強|べんきょう}しています…",
+    ],
+    relatedGrammarIds: ["te-form-verbs", "v1-te-v2-sequence", "x-wa-y-ga-z"],
+    sourceNotes: ["Basado en Genki I L7, Grammar 1 (～ている)"],
+  },
+
+  {
+    id: "te-form-adjectives",
+    lesson: 7,
+    title: "Forma て de adjetivos",
+    pattern: "い-adj くて / な-adj で",
+    shortMeaning: "Conectar dos descripciones con adjetivos en una sola oración.",
+    explanation: [
+      "Al igual que los verbos usan て para encadenar acciones, los adjetivos tienen su propia forma て para unir dos características: «es A y también es B».",
+      "い-adjetivos: い → くて. Ejemplo: {大|おお}きい → 大きくて.",
+      "な-adjetivos (y sustantivos con です): な-adj/N → で. Ejemplo: きれい → きれいで; {学生|がくせい} → 学生で.",
+      "La forma て de adjetivos también puede expresar razón de forma más suave que から.",
+    ],
+    formation: [
+      "い-adj:  [stem]い → [stem]くて",
+      "な-adj:  [adj] → [adj] で",
+      "いい → よくて  (excepción)",
+    ],
+    examples: [
+      {
+        jp: "この{部屋|へや}は{広|ひろ}くてきれいです。",
+        es: "Esta habitación es amplia y bonita.",
+      },
+      {
+        jp: "{田中|たなか}さんは{親切|しんせつ}で{面白|おもしろ}いです。",
+        es: "El señor Tanaka es amable e interesante.",
+        note: "親切 (na-adj) → 親切で; 面白い (i-adj) al final en forma normal.",
+      },
+      {
+        jp: "{今日|きょう}は{寒|さむ}くて、{雨|あめ}が{降|ふ}っています。",
+        es: "Hoy hace frío y está lloviendo.",
+        note: "くて como conector de situaciones.",
+      },
+    ],
+    commonMistakes: [
+      "Usar て de verbo para adjetivos: × {大|おお}きくて → bien (este es el correcto), pero cuidado con いい → ×いくて → ○ よくて.",
+      "Poner な antes de で con na-adjetivos: × {親切|しんせつ}なで → ○ {親切|しんせつ}で.",
+    ],
+    practicePrompts: [
+      "Describe a un miembro de tu familia con dos adjetivos conectados con て.",
+      "Habla del clima de hoy combinando dos condiciones con くて/で.",
+    ],
+    relatedGrammarIds: ["adjective-present", "te-form-verbs", "adjective-noun-modifier"],
+    sourceNotes: ["Basado en Genki I L7, Grammar 2 (forma て de adjetivos)"],
+  },
+
+  {
+    id: "x-wa-y-ga-z",
+    lesson: 7,
+    title: "X は Y が Z",
+    pattern: "X は Y が Z (adj/V)",
+    shortMeaning: "Describir una característica de X donde Y es el punto específico de referencia.",
+    explanation: [
+      "Esta estructura expresa características, habilidades, preferencias y partes del cuerpo. X (el tema general) tiene una propiedad Y que se describe con Z.",
+      "Ejemplos de uso: habilidades (X は Y が 上手／下手), preferencias (X は Y が 好き／嫌い — ya visto en L5), características físicas (X は Y が 長い).",
+      "上手 (habilidoso) y 下手 (torpe) son na-adjetivos. Nota cultural: no uses 上手 para hablar de tus propias habilidades (suena presumido); usa まあまあです o un adverbio modesto.",
+    ],
+    formation: [
+      "X は Y が {上手|じょうず}です       →  X es bueno en Y",
+      "X は Y が {下手|へた}です          →  X es malo en Y",
+      "X は Y が [adj] です             →  X tiene Y que es [adj]",
+    ],
+    examples: [
+      {
+        jp: "{妹|いもうと}は{料理|りょうり}が{上手|じょうず}です。",
+        es: "Mi hermana menor es buena cocinando.",
+        note: "料理 = lo que hace bien; 妹 = tema general.",
+      },
+      {
+        jp: "{私|わたし}はスポーツが{苦手|にがて}です。",
+        es: "No se me da bien el deporte.",
+        note: "苦手 (na-adj) = no ser hábil, con matiz más suave que 下手.",
+      },
+      {
+        jp: "{象|ぞう}は{鼻|はな}が{長|なが}いです。",
+        es: "El elefante tiene la nariz larga.",
+        note: "Característica física: Y が [adj].",
+      },
+    ],
+    commonMistakes: [
+      "Usar を en lugar de が: × {料理|りょうり}を{上手|じょうず}です → ○ {料理|りょうり}が{上手|じょうず}です.",
+      "Hablar de tus propias habilidades con 上手 de forma directa — culturalmente es más apropiado ser modesto.",
+    ],
+    practicePrompts: [
+      "Describe las habilidades de tres personas de tu familia con Y が 上手/下手/苦手.",
+      "Habla de una característica física curiosa de un animal con X は Y が [adj].",
+    ],
+    relatedGrammarIds: ["suki-kirai", "adjective-present", "particle-ga-subject"],
+    sourceNotes: ["Basado en Genki I L7, Grammar 3 (X は Y が Z)"],
+  },
+
+  {
+    id: "place-ni-vmasu-ni-iku",
+    lesson: 7,
+    title: "〜に V-masu に行く／来る／帰る",
+    pattern: "場所 に V-masu に 行く／来る／帰る",
+    shortMeaning: "Expresar el propósito de un movimiento: «ir/venir/regresar A hacer X».",
+    explanation: [
+      "Para decir el motivo por el que te desplazas, usas la forma ます del verbo (sin ます) seguida de に antes del verbo de movimiento. Esta construcción responde a «¿para qué vas?».",
+      "La forma sin ます se llama «stem» o base verbal: 食べます→食べ、見ます→見、買います→買い.",
+      "El lugar puede aparecer antes o puede omitirse si es obvio del contexto.",
+    ],
+    formation: [
+      "場所 に [V-stem] に {行|い}く／{来|く}る／{帰|かえ}る",
+      "→  ir / venir / regresar a [lugar] para [hacer V]",
+    ],
+    examples: [
+      {
+        jp: "{図書館|としょかん}に{本|ほん}を{借|か}りに{行|い}きます。",
+        es: "Voy a la biblioteca a pedir prestado un libro.",
+        note: "借り = stem de 借りる.",
+      },
+      {
+        jp: "{友達|ともだち}の{家|いえ}に{遊|あそ}びに{来|き}ました。",
+        es: "Vine a la casa de mi amigo a pasar el rato.",
+        note: "遊び = stem de 遊ぶ.",
+      },
+      {
+        jp: "{スーパー|すーぱー}に{野菜|やさい}を{買|か}いに{行|い}きましょう。",
+        es: "¡Vayamos al supermercado a comprar verduras!",
+      },
+    ],
+    commonMistakes: [
+      "Usar la forma て en lugar del stem: × {食|た}べてに{行|い}く → ○ {食|た}べに{行|い}く.",
+      "Omitir el に de propósito: × {図書館|としょかん}に{勉強|べんきょう}{行|い}く → ○ {図書館|としょかん}に{勉強|べんきょう}しに{行|い}く.",
+    ],
+    practicePrompts: [
+      "Di a dónde fuiste esta semana y para qué: [場所]に[V-stem]に行きました。",
+      "Invita a un compañero a ir a algún lado con ましょう y agrega el propósito.",
+    ],
+    relatedGrammarIds: ["particle-ni-destination-time", "verb-masu-present", "mashou-mashouka"],
+    sourceNotes: ["Basado en Genki I L7, Grammar 4 (に V-stem に行く)"],
+  },
+
+  // ═══════════════════════════════════════════════
+  //  LECCIÓN 8 — バーベキュー
+  // ═══════════════════════════════════════════════
+
+  {
+    id: "short-form-present",
+    lesson: 8,
+    title: "Formas cortas (plain form) — presente",
+    pattern: "Forma corta / plain form",
+    shortMeaning: "Forma informal de los verbos, adjetivos y cópula usada en conversación casual y en cláusulas subordinadas.",
+    explanation: [
+      "La forma corta (también llamada «forma plain» o «forma de diccionario») es la base informal del japonés. No es menos correcta que la forma ます — es simplemente informal y se usa en distintos contextos.",
+      "Verbos: afirmativo = forma de diccionario (食べる, 飲む, する); negativo = ない-form (食べない, 飲まない, しない).",
+      "Adjetivos: い-adj no cambia (高い, 高くない); な-adj: だ/じゃない (きれいだ, きれいじゃない).",
+      "Cópula: だ (afirmativo informal) / じゃない (negativo informal). Excepción: en conversación femenina o neutral a veces se omite だ al final.",
+      "Importante: la forma corta es obligatoria dentro de cláusulas subordinadas, antes de と思います, から, ので, etc., sin importar si el nivel de habla es formal o informal.",
+    ],
+    formation: [
+      "Verbos G1 negativo:  [stem] + ない  (飲む→飲まない, 書く→書かない)",
+      "Verbos G2 negativo:  [stem] + ない  (食べる→食べない, 見る→見ない)",
+      "Irregulares:         する→しない / くる→こない",
+      "い-adj negativo:     [stem]くない   (高い→高くない)",
+      "な-adj:              [adj]だ / [adj]じゃない",
+    ],
+    examples: [
+      {
+        jp: "A: {明日|あした}{来|く}る？　B: うん、{行|い}く。",
+        es: "A: ¿Vienes mañana? B: Sí, voy.",
+        note: "Conversación casual entre amigos — plain form en ambos.",
+      },
+      {
+        jp: "この{映画|えいが}は{面白|おもしろ}くない。",
+        es: "Esta película no es interesante.",
+        note: "い-adj en plain form negativo.",
+      },
+      {
+        jp: "あの{人|ひと}は{先生|せんせい}じゃない。",
+        es: "Esa persona no es profesora.",
+        note: "Cópula plain form negativa.",
+      },
+    ],
+    commonMistakes: [
+      "Usar ない-form de verbos grupo 1 como si fueran grupo 2: × 飲みない → ○ 飲まない (stem cambia: 飲む→飲ま+ない).",
+      "Usar la forma corta en situaciones formales cuando acabas de conocer a alguien — puede sonar brusco.",
+      "Confundir ない (negativo de verbo) con ない (inexistencia de あります: ない = ありません informal).",
+    ],
+    interactions: [
+      "Conversación informal: el profesor establece pares y los alumnos hacen preguntas cotidianas en plain form.",
+    ],
+    practicePrompts: [
+      "Convierte cinco oraciones de forma ます a plain form afirmativa y negativa.",
+      "Ten una mini-conversación informal con un compañero sobre planes del fin de semana.",
+    ],
+    relatedGrammarIds: ["short-form-past", "to-omoimasu", "to-itte-imashita", "nominalization-no"],
+    sourceNotes: ["Basado en Genki I L8, Grammar 1 (formas cortas presente)"],
+  },
+
+  {
+    id: "to-omoimasu",
+    lesson: 8,
+    title: "～と思います",
+    pattern: "[plain form] と思います",
+    shortMeaning: "Expresar una opinión o suposición: «creo que…» / «pienso que…».",
+    explanation: [
+      "と思います reporta el contenido de tu pensamiento. El verbo o adjetivo antes de と siempre va en plain form, sin importar que el nivel de habla general sea formal.",
+      "Para opiniones en curso (lo que sigues pensando): と思っています.",
+      "Para preguntar la opinión: どう思いますか (¿Qué piensas?).",
+      "Nivel de certeza: con plain form present afirmativo = opinión o suposición. Con かもしれないと思います = posibilidad más dudosa.",
+    ],
+    formation: [
+      "[V/adj/N-plain] と{思|おも}います  →  Creo que [...]",
+      "[V/adj/N-plain] と{思|おも}っています →  Pienso (actualmente) que [...]",
+    ],
+    examples: [
+      {
+        jp: "この{映画|えいが}はおもしろいと{思|おも}います。",
+        es: "Creo que esta película es interesante.",
+        note: "おもしろい = plain form de い-adj.",
+      },
+      {
+        jp: "{明日|あした}は{雨|あめ}だと{思|おも}います。",
+        es: "Creo que mañana lloverá.",
+        note: "雨だ = cópula plain form.",
+      },
+      {
+        jp: "{田中|たなか}さんは{来|こ}ないと{思|おも}います。",
+        es: "Creo que el señor Tanaka no vendrá.",
+        note: "来ない = plain form negativo.",
+      },
+    ],
+    commonMistakes: [
+      "Usar forma ます antes de と: × {行|い}きますと{思|おも}います → ○ {行|い}くと{思|おも}います.",
+      "Confundir と思います (opinión) con と言っていました (cita) — と思います es lo que YO pienso; と言っていました es lo que OTRO dijo.",
+    ],
+    practicePrompts: [
+      "Da tu opinión sobre tres temas: la clase, el tiempo, la comida de la cafetería.",
+      "Responde a どう思いますか sobre un tema de la clase.",
+    ],
+    relatedGrammarIds: ["short-form-present", "to-itte-imashita", "deshou-darou"],
+    sourceNotes: ["Basado en Genki I L8, Grammar 2 (と思います)"],
+  },
+
+  {
+    id: "to-itte-imashita",
+    lesson: 8,
+    title: "～と言っていました",
+    pattern: "[plain form] と言っていました",
+    shortMeaning: "Reportar lo que alguien dijo (cita indirecta).",
+    explanation: [
+      "言っていました combina 言う (decir) + ている (estado) + ました (pasado): literalmente «estaba diciendo». Es la forma natural de reportar en japonés lo que otra persona dijo.",
+      "El contenido citado siempre va en plain form antes de と, igual que en と思います.",
+      "Nota: es cita indirecta (paráfrasis), no directa. Para citas directas el japonés usa 「」(comillas angulares).",
+    ],
+    formation: [
+      "[contenido en plain form] と{言|い}っていました  →  Dijo que [...]",
+    ],
+    examples: [
+      {
+        jp: "{先生|せんせい}は{明日|あした}テストがあると{言|い}っていました。",
+        es: "El profesor dijo que mañana hay examen.",
+      },
+      {
+        jp: "{山田|やまだ}さんは{来|こ}ないと{言|い}っていました。",
+        es: "El señor Yamada dijo que no vendría.",
+      },
+      {
+        jp: "メアリーさんはこの{映画|えいが}はおもしろいと{言|い}っていました。",
+        es: "Mary dijo que esta película era interesante.",
+      },
+    ],
+    commonMistakes: [
+      "Usar forma ます antes de と: × {来|き}ますと{言|い}っていました → ○ {来|く}ると{言|い}っていました.",
+      "Confundir と言っていました (lo que alguien dijo) con と思います (lo que YO pienso).",
+    ],
+    practicePrompts: [
+      "Reporta lo que dijo el profesor en la clase anterior usando と言っていました.",
+      "Cuéntale a tu compañero lo que escuchaste sobre el examen próximo.",
+    ],
+    relatedGrammarIds: ["to-omoimasu", "short-form-present"],
+    sourceNotes: ["Basado en Genki I L8, Grammar 3 (と言っていました)"],
+  },
+
+  {
+    id: "naide-kudasai",
+    lesson: 8,
+    title: "～ないでください",
+    pattern: "V-ないでください",
+    shortMeaning: "Petición educada de que NO hagas algo: «por favor no hagas X».",
+    explanation: [
+      "ないでください usa la forma ない (plain form negativo) del verbo + でください. Es la contraparte negativa de てください.",
+      "Es una petición directa a una persona; no es una regla general (eso sería てはいけません). Por eso ないでください suena más personal y educado que una prohibición.",
+      "En conversación informal entre amigos: ないで (sin ください).",
+    ],
+    formation: [
+      "V-ない + でください  →  Por favor no [hagas V]",
+    ],
+    examples: [
+      {
+        jp: "ここで{写真|しゃしん}を{撮|と}らないでください。",
+        es: "Por favor no tome fotos aquí.",
+      },
+      {
+        jp: "そのことは{田中|たなか}さんに{言|い}わないでください。",
+        es: "Por favor no le diga eso al señor Tanaka.",
+      },
+      {
+        jp: "{授業中|じゅぎょうちゅう}にスマホを{使|つか}わないでください。",
+        es: "Por favor no uses el teléfono durante la clase.",
+      },
+    ],
+    commonMistakes: [
+      "Usar ないでください para reglas generales — las reglas generales usan てはいけません.",
+      "Confundir el stem negativo: × {飲|の}みないで → ○ {飲|の}まないで (el stem negativo del grupo 1 cambia la vocal).",
+    ],
+    practicePrompts: [
+      "Escribe tres peticiones que harías a un compañero de cuarto ruidoso usando ないでください.",
+      "Compara: cuando usarías ないでください vs てはいけません en la misma situación.",
+    ],
+    relatedGrammarIds: ["te-kudasai", "te-wa-ikemasen", "short-form-present"],
+    sourceNotes: ["Basado en Genki I L8, Grammar 4 (ないでください)"],
+  },
+
+  {
+    id: "nominalization-no",
+    lesson: 8,
+    title: "V の (nominalización)",
+    pattern: "V-plain の は / の が / の を",
+    shortMeaning: "Convertir una acción verbal en «cosa» o «concepto» para usarlo como sustantivo.",
+    explanation: [
+      "Al añadir の después de un verbo (o cláusula) en plain form, toda esa frase se convierte en un sustantivo: 「{料理|りょうり}するの」= «el cocinar» / «cocinar».",
+      "Se usa principalmente con は (tema) y が (sujeto/objeto de adjetivos como 好き, 上手, etc.): {料理|りょうり}するのが{好|す}きです = Me gusta cocinar.",
+      "Diferencia con こと (L12 area): の es más coloquial y sensorialmente concreto; こと es más abstracto y formal. En L8, practica の.",
+    ],
+    formation: [
+      "[V/oración en plain form] の + は／が／を + [predicado]",
+    ],
+    examples: [
+      {
+        jp: "{音楽|おんがく}を{聞|き}くのが{好|す}きです。",
+        es: "Me gusta escuchar música.",
+        note: "聞くの = «el escuchar» → sujeto de 好き.",
+      },
+      {
+        jp: "{日本語|にほんご}を{話|はな}すのは{難|むずか}しいです。",
+        es: "Hablar japonés es difícil.",
+        note: "話すの = «el hablar» → tema de 難しい.",
+      },
+      {
+        jp: "{泳|およ}ぐのが{得意|とくい}です。",
+        es: "Soy bueno nadando.",
+        note: "泳ぐの = «el nadar» → sujeto de 得意.",
+      },
+    ],
+    commonMistakes: [
+      "Usar の después de forma ます: × {食|た}べますの → ○ {食|た}べるの (plain form obligatorio).",
+      "Confundir の (nominalización) con の (partícula posesiva, L1): el contexto aclara; nominalización siempre lleva un verbo antes.",
+    ],
+    practicePrompts: [
+      "Di tres actividades que te gustan usando のが好きです.",
+      "Di qué es difícil y qué es fácil para ti: [Vるの]は[adj]です.",
+    ],
+    relatedGrammarIds: ["suki-kirai", "short-form-present", "x-wa-y-ga-z"],
+    sourceNotes: ["Basado en Genki I L8, Grammar 5 (V の nominalización)"],
+  },
+
+  // ═══════════════════════════════════════════════
+  //  LECCIÓN 9 — {私|わたし}の{好きな|すきな}{歌|うた}
+  // ═══════════════════════════════════════════════
+
+  {
+    id: "short-form-past",
+    lesson: 9,
+    title: "Formas cortas — pasado",
+    pattern: "V-た / V-なかった / adj-かった / adj-じゃなかった",
+    shortMeaning: "Plain form pasada de verbos y adjetivos para habla informal y cláusulas subordinadas.",
+    explanation: [
+      "La forma た es la plain form pasada de los verbos. Se forma igual que la forma て pero con た en lugar de て (y だ en lugar de で): 食べて→食べた, 飲んで→飲んだ, 行って→行った.",
+      "Negativo pasado: ない → なかった (igual para todos los verbos): 食べない→食べなかった, 飲まない→飲まなかった.",
+      "い-adjetivos pasados: い→かった / くない→くなかった. な-adjetivos pasados: だった / じゃなかった.",
+      "Como la plain form presente, la pasada es obligatoria en cláusulas subordinadas antes de と思います, から, 時, etc.",
+    ],
+    formation: [
+      "V:     た-form (positivo) / なかった-form (negativo)",
+      "い-adj: [stem]かった / [stem]くなかった",
+      "な-adj: [adj]だった / [adj]じゃなかった",
+      "いい:  よかった / よくなかった",
+    ],
+    examples: [
+      {
+        jp: "{昨日|きのう}{友達|ともだち}と{映画|えいが}を{見|み}た。",
+        es: "Ayer vi una película con un amigo.",
+        note: "Forma た informal; equivale a 見ました en registro formal.",
+      },
+      {
+        jp: "{宿題|しゅくだい}をしなかった。",
+        es: "No hice la tarea.",
+        note: "しない → しなかった.",
+      },
+      {
+        jp: "パーティーは{楽|たの}しかったね！",
+        es: "¡La fiesta fue divertida, ¿verdad?!",
+        note: "楽しい → 楽しかった + ね (partícula de acuerdo).",
+      },
+    ],
+    commonMistakes: [
+      "Confundir la formación de た con て: 飲む→飲んだ (た-form), 飲んで (て-form). Mismo patrón, distinta terminación.",
+      "Usar ×なかったです como plain form — なかったです ya es un poco formal. Plain form pura es なかった.",
+    ],
+    practicePrompts: [
+      "Cuenta en registro informal qué hiciste el fin de semana: verbos en た-form.",
+      "Di tres cosas que querías hacer pero no hiciste: [Vたかった]けど、[Vなかった]。",
+    ],
+    relatedGrammarIds: ["short-form-present", "noun-modification-relative", "to-omoimasu"],
+    sourceNotes: ["Basado en Genki I L9, Grammar 1 (formas cortas pasado)"],
+  },
+
+  {
+    id: "noun-modification-relative",
+    lesson: 9,
+    title: "Modificar sustantivos con verbos／adjetivos (cláusula relativa)",
+    pattern: "[V/adj en plain form] + N",
+    shortMeaning: "Colocar una oración en plain form directamente antes de un sustantivo para describirlo.",
+    explanation: [
+      "En japonés no existe «que» relativo como en español. Para decir «el libro que compré» o «la persona que habla japonés», simplemente pones la cláusula en plain form antes del sustantivo: {買|か}った{本|ほん} / {日本語|にほんご}を{話|はな}す{人|ひと}.",
+      "El tiempo y la polaridad de la cláusula modificadora se expresan en plain form (presente o pasado, afirmativo o negativo).",
+      "No se añade ninguna partícula extra entre la cláusula y el sustantivo — el sustantivo va directamente después.",
+      "El sujeto dentro de la cláusula relativa va con が (no は) porque no es el tema del enunciado principal.",
+    ],
+    formation: [
+      "[V-plain] N          →  N que [hace/hizo V]",
+      "[V-plain-neg] N      →  N que no [hace/hizo V]",
+      "[い-adj] N           →  N que es [adj]  (mismo que adjetivo atributivo, L5)",
+      "[な-adj な] N        →  N que es [adj]",
+    ],
+    examples: [
+      {
+        jp: "これは{私|わたし}が{好|す}きな{歌|うた}です。",
+        es: "Esta es una canción que me gusta.",
+        note: "好きな + 歌: の/が de sujeto dentro de la cláusula relativa.",
+      },
+      {
+        jp: "{昨日|きのう}{食|た}べた{ケーキ|けーき}はおいしかったです。",
+        es: "El pastel que comí ayer estaba delicioso.",
+        note: "食べた (pasado) + ケーキ = modificador en plain form pasado.",
+      },
+      {
+        jp: "{日本語|にほんご}を{話|はな}す{人|ひと}はどこですか。",
+        es: "¿Dónde está la persona que habla japonés?",
+        note: "Cláusula presente modificando 人.",
+      },
+    ],
+    commonMistakes: [
+      "Colocar の entre cláusula y sustantivo: × {食|た}べたの{ケーキ|けーき} → ○ {食|た}べた{ケーキ|けーき} (no se pone の aquí).",
+      "Usar は para el sujeto dentro de la cláusula: × {私|わたし}は{書|か}いた{本|ほん} → ○ {私|わたし}が{書|か}いた{本|ほん}.",
+    ],
+    practicePrompts: [
+      "Describe tres cosas que buscas en una pareja o amigo usando [adj/V]人.",
+      "Habla de un lugar que visitaste: [adj]場所でした。/ [V]場所に行きました。",
+    ],
+    relatedGrammarIds: ["short-form-present", "short-form-past", "adjective-noun-modifier"],
+    sourceNotes: ["Basado en Genki I L9, Grammar 2 (modificación de sustantivos)"],
+  },
+
+  // ═══════════════════════════════════════════════
+  //  LECCIÓN 10 — {冬|ふゆ}の{京都|きょうと}
+  // ═══════════════════════════════════════════════
+
+  {
+    id: "comparison-two",
+    lesson: 10,
+    title: "Comparación entre dos cosas",
+    pattern: "A は B より [adj] / A と B では A のほうが [adj]",
+    shortMeaning: "Comparar dos elementos: «A es más [adj] que B».",
+    explanation: [
+      "La comparación básica usa より (que/en comparación con): A は B より [adj]です = «A es más [adj] que B».",
+      "Para preguntar cuál de los dos es más: A と B では、どちらのほうが [adj] ですか.",
+      "Para responder cuál de los dos: A のほうが [adj] です.",
+      "Para decir «igual»: A も B も [adj] です / AとBは同じくらい[adj]です.",
+      "Nota: el japonés no tiene «más» que se añada al adjetivo. El adjetivo no cambia — solo cambia la estructura con より o のほう.",
+    ],
+    formation: [
+      "A は B より [adj] です         →  A es más [adj] que B",
+      "A と B では、どちらのほうが [adj] ですか → ¿Cuál de los dos es más [adj]?",
+      "A のほうが [adj] です           →  A es más [adj] (de los dos)",
+    ],
+    examples: [
+      {
+        jp: "{京都|きょうと}は{東京|とうきょう}より{静|しず}かです。",
+        es: "Kioto es más tranquila que Tokio.",
+      },
+      {
+        jp: "バスと{電車|でんしゃ}では、どちらのほうが{速|はや}いですか。",
+        es: "¿Cuál es más rápido, el autobús o el tren?",
+      },
+      {
+        jp: "{電車|でんしゃ}のほうが{速|はや}いです。",
+        es: "El tren es más rápido.",
+      },
+    ],
+    commonMistakes: [
+      "Añadir もっと antes del adjetivo: × もっと{高|たか}いです → ○ [B]より{高|たか}いです (もっと existe pero no es la estructura de comparación estándar).",
+      "Invertir A y B con より: より marca el punto de comparación, no el ganador. A は B より adj → A gana; B は A より adj → B gana.",
+    ],
+    practicePrompts: [
+      "Compara tu ciudad con otra usando より con tres adjetivos distintos.",
+      "Pregunta a un compañero sus preferencias: [A]と[B]ではどちらのほうが好きですか。",
+    ],
+    relatedGrammarIds: ["adjective-present", "suki-kirai", "naru-suru"],
+    sourceNotes: ["Basado en Genki I L10, Grammar 1 (comparación)"],
+  },
+
+  {
+    id: "naru-suru",
+    lesson: 10,
+    title: "Adj/N + になる・にする",
+    pattern: "[adj/N] に なる / に する",
+    shortMeaning: "なる = llegar a ser / cambiar a; する = hacer que algo sea / decidir que sea.",
+    explanation: [
+      "なる expresa cambio natural o gradual hacia un nuevo estado. Dependiendo del tipo de adj/sustantivo, la forma varía: い-adj → く + なる; な-adj/N → に + なる.",
+      "する expresa que el sujeto provoca o decide el cambio (transitivo): い-adj → く + する; な-adj/N → に + する.",
+      "Regla visual: に siempre precede a なる/する cuando el estado es sustantivo o na-adjetivo. Los い-adjetivos pierden el い y agregan く.",
+    ],
+    formation: [
+      "い-adj:   [stem]く + なる/する   →  volverse [adj] / hacer que sea [adj]",
+      "な-adj/N: [adj/N] に + なる/する →  volverse [adj/N] / convertirse en / hacer que sea",
+    ],
+    examples: [
+      {
+        jp: "{寒|さむ}くなりました。",
+        es: "Se puso frío. / Se volvió frío.",
+        note: "寒い → 寒く + なる. Cambio de temperatura.",
+      },
+      {
+        jp: "{日本語|にほんご}が{上手|じょうず}になりたいです。",
+        es: "Quiero mejorar en japonés.",
+        note: "上手 (na-adj) → 上手に + なる.",
+      },
+      {
+        jp: "テレビのボリュームを{小|ちい}さくしてください。",
+        es: "Por favor baja el volumen del televisor.",
+        note: "小さい → 小さく + する (cambio provocado por alguien).",
+      },
+      {
+        jp: "{医者|いしゃ}になりたいです。",
+        es: "Quiero ser médico.",
+        note: "医者 (sustantivo) → 医者に + なる.",
+      },
+    ],
+    commonMistakes: [
+      "Usar に con い-adjetivos: × {寒|さむ}いになる → ○ {寒|さむ}くなる.",
+      "Confundir なる (cambio natural, intransitivo) con する (cambio causado, transitivo): 部屋が{暖|あたた}かくなった (la habitación se calentó sola) vs. 部屋を{暖|あたた}かくした (yo la calenté).",
+    ],
+    practicePrompts: [
+      "Di cómo han cambiado las cosas este año usando になりました: [もの/こと]が[adj]になりました。",
+      "Di qué quieres llegar a ser usando になりたいです.",
+    ],
+    relatedGrammarIds: ["adjective-present", "comparison-two", "tsumori"],
+    sourceNotes: ["Basado en Genki I L10, Grammar 2 (になる/にする)"],
+  },
+
+  {
+    id: "tsumori",
+    lesson: 10,
+    title: "～つもりだ",
+    pattern: "V-plain つもりです / V-ないつもりです",
+    shortMeaning: "Expresar intención o plan firme: «tengo pensado hacer X» / «no pienso hacer X».",
+    explanation: [
+      "つもり expresa una intención ya decidida o un plan personal. Es más fuerte que ましょう y más específico que たい.",
+      "Afirmativo: [V-plain present] つもりです. Negativo (intención de no hacer): [V-ない] つもりです — aquí se usa ない, no ません.",
+      "Diferencia con たい (L11): たい expresa deseo («quiero hacerlo»); つもり expresa intención concreta («pienso hacerlo»). Puedes querer algo sin tener intención de hacerlo y viceversa.",
+    ],
+    formation: [
+      "[V-plain] つもりです         →  Tengo pensado / planeo [V]",
+      "[V-ない] つもりです          →  No planeo / no tengo intención de [V]",
+    ],
+    examples: [
+      {
+        jp: "{夏|なつ}に{日本|にほん}へ{行|い}くつもりです。",
+        es: "Tengo planeado ir a Japón en verano.",
+      },
+      {
+        jp: "{今年|ことし}は{タバコ|たばこ}を{吸|す}わないつもりです。",
+        es: "Este año no pienso fumar.",
+        note: "Intención negativa con ないつもり.",
+      },
+      {
+        jp: "{卒業|そつぎょう}したら、{大学院|だいがくいん}に{行|い}くつもりです。",
+        es: "Cuando me gradue, planeo ir al posgrado.",
+      },
+    ],
+    commonMistakes: [
+      "Usar ますつもりです: × {行|い}きますつもりです → ○ {行|い}くつもりです (plain form antes de つもり).",
+      "Confundir [Vない]つもり (intención negativa) con [Vする]つもりがない (carecer de intención) — en L10, practica la forma básica.",
+    ],
+    practicePrompts: [
+      "Di tres cosas que planeas hacer este mes y una que no piensas hacer.",
+      "Compara: ¿en qué difieren たいです y つもりです? Crea un par de oraciones que lo ilustren.",
+    ],
+    relatedGrammarIds: ["naru-suru", "tai-tagaru", "comparison-two"],
+    sourceNotes: ["Basado en Genki I L10, Grammar 3 (つもり)"],
+  },
+
+  // ═══════════════════════════════════════════════
+  //  LECCIÓN 11 — {放課後|ほうかご}
+  // ═══════════════════════════════════════════════
+
+  {
+    id: "tai-tagaru",
+    lesson: 11,
+    title: "～たい / ～たがる",
+    pattern: "V-stem + たいです / V-stem + たがっています",
+    shortMeaning: "Expresar el deseo de hacer algo (para uno mismo) o el deseo aparente de otro.",
+    explanation: [
+      "たい expresa el deseo del hablante (primera persona) de realizar una acción. Se añade al stem del verbo (misma base que V-masu sin ます): 食べたい, 行きたい, 見たい.",
+      "たい se conjuga como un い-adjetivo: 食べたい (quiero comer), 食べたくない (no quiero comer), 食べたかった (quería comer).",
+      "Para hablar del deseo de otra persona usa たがっています (la tercera persona no puede expresar directamente su estado interno en japonés estándar): {山田|やまだ}さんは{日本|にほん}に{行|い}きたがっています.",
+      "El objeto del deseo puede ir con が (más enfático) o を: {寿司|すし}が食べたい / {寿司|すし}を食べたい — ambos son aceptables.",
+    ],
+    formation: [
+      "V-stem + たいです         →  Quiero [V] (1ª persona)",
+      "V-stem + たくないです     →  No quiero [V]",
+      "V-stem + たかったです     →  Quería [V] (pasado)",
+      "V-stem + たがっています   →  [él/ella] quiere [V] (3ª persona aparente)",
+    ],
+    examples: [
+      {
+        jp: "{日本|にほん}に{行|い}きたいです。",
+        es: "Quiero ir a Japón.",
+      },
+      {
+        jp: "もう{帰|かえ}りたくないです。",
+        es: "Ya no quiero irme a casa.",
+        note: "たくない = negación de たい.",
+      },
+      {
+        jp: "{子供|こども}の{頃|ころ}、{宇宙飛行士|うちゅうひこうし}になりたかったです。",
+        es: "Cuando era niño, quería ser astronauta.",
+        note: "たかった = pasado de たい.",
+      },
+      {
+        jp: "{田中|たなか}さんは{新|あたら}しいゲームを{買|か}いたがっています。",
+        es: "Parece que el señor Tanaka quiere comprar un juego nuevo.",
+        note: "たがっている para deseo de tercera persona.",
+      },
+    ],
+    commonMistakes: [
+      "Usar を con たがる de tercera persona para referirse a la primera: × {私|わたし}は{行|い}きたがっています → ○ {私|わたし}は{行|い}きたいです.",
+      "Conjungar el verbo antes de たい: × {食|た}べますたい → ○ {食|た}べたい (solo el stem va antes de たい).",
+    ],
+    interactions: [
+      "Encuesta de sueños: cada alumno comparte una cosa que siempre quiso hacer con たいです.",
+    ],
+    practicePrompts: [
+      "Di tres cosas que quieres hacer este año y una que NO quieres hacer.",
+      "Describe el deseo de un compañero (que él te dijo): ～さんは～たがっています。",
+    ],
+    relatedGrammarIds: ["tsumori", "nominalization-no", "koto-ga-aru"],
+    sourceNotes: ["Basado en Genki I L11, Grammar 1 (たい/たがる)"],
+  },
+
+  {
+    id: "tari-tari",
+    lesson: 11,
+    title: "～たり～たりする",
+    pattern: "V₁-たり V₂-たり します",
+    shortMeaning: "Enumerar actividades de forma no exhaustiva: «hago cosas como V₁ y V₂».",
+    explanation: [
+      "たり～たりする se usa cuando mencionas algunos ejemplos representativos de un conjunto de actividades, sin listar todo. Es la versión verbal de や para sustantivos.",
+      "La forma たり se construye igual que la forma た (pasado plain) + り: 食べた→食べたり, 飲んだ→飲んだり, した→したり.",
+      "El último たり siempre va seguido de する (conjugado según el tiempo): します (presente/futuro), しました (pasado), している (continuo).",
+    ],
+    formation: [
+      "V₁-たり、V₂-たり します/しました  →  hago/hice cosas como V₁ y V₂ (entre otras)",
+    ],
+    examples: [
+      {
+        jp: "{週末|しゅうまつ}は{映画|えいが}を{見|み}たり、{友達|ともだち}と{話|はな}したりします。",
+        es: "Los fines de semana hago cosas como ver películas y hablar con amigos.",
+      },
+      {
+        jp: "{昨日|きのう}は{買|か}い{物|もの}したり、{本|ほん}を{読|よ}んだりしました。",
+        es: "Ayer hice cosas como ir de compras y leer.",
+        note: "Pasado: したりしました.",
+      },
+      {
+        jp: "{日本語|にほんご}の{勉強|べんきょう}では、{聞|き}いたり、{話|はな}したり、{書|か}いたりします。",
+        es: "En el estudio del japonés hago cosas como escuchar, hablar y escribir.",
+      },
+    ],
+    commonMistakes: [
+      "Olvidar する/します al final: × {食|た}べたり{飲|の}んだり → ○ {食|た}べたり{飲|の}んだりします.",
+      "Usar て-form en lugar de たり: × {食|た}べて{飲|の}んだりします → la forma te encadena en secuencia; たり sugiere ejemplos alternados.",
+    ],
+    practicePrompts: [
+      "Describe tu fin de semana típico con tres actividades usando たり～たりします.",
+      "Cuenta qué hiciste en tus últimas vacaciones con たり～たりしました.",
+    ],
+    relatedGrammarIds: ["particle-ya-listing", "short-form-past", "v1-te-v2-sequence"],
+    sourceNotes: ["Basado en Genki I L11, Grammar 2 (たり～たりする)"],
+  },
+
+  {
+    id: "koto-ga-aru",
+    lesson: 11,
+    title: "～たことがある",
+    pattern: "V-た こと が あります",
+    shortMeaning: "Hablar de experiencias pasadas: «alguna vez he hecho X».",
+    explanation: [
+      "V-たことがある combina la forma た (pasado), こと (cosa/hecho, nominalización abstracta) y がある (existe). Literalmente: «existe el hecho de haber hecho V» = «he tenido la experiencia de V».",
+      "Para la negación: V-たことがありません o V-たことはありません (は añade matiz de contraste).",
+      "Diferencia con て-form + います: ある{国|くに}に行ったことがあります (he ido alguna vez) vs. {日本|にほん}に住んでいます (vivo ahora).",
+    ],
+    formation: [
+      "V-た + ことがあります   →  Alguna vez he [V] / He tenido la experiencia de [V]",
+      "V-た + ことがありません →  Nunca he [V]",
+    ],
+    examples: [
+      {
+        jp: "{京都|きょうと}に{行|い}ったことがあります。",
+        es: "He ido a Kioto alguna vez.",
+      },
+      {
+        jp: "{刺身|さしみ}を{食|た}べたことがありますか。",
+        es: "¿Alguna vez has comido sashimi?",
+      },
+      {
+        jp: "{富士山|ふじさん}に{登|のぼ}ったことはありません。",
+        es: "Nunca he escalado el Monte Fuji.",
+        note: "は añade ligero contraste: «eso específicamente no».",
+      },
+    ],
+    dialogue: [
+      { speaker: "メアリー", jp: "{日本|にほん}に{来|く}たことがありますか。", es: "¿Habías venido a Japón antes?" },
+      { speaker: "アナ", jp: "いいえ、{初|はじ}めてです。{富士山|ふじさん}を{見|み}たいです。", es: "No, es mi primera vez. Quiero ver el Monte Fuji." },
+      { speaker: "メアリー", jp: "{登|のぼ}ったことはありますか。", es: "¿Lo has escalado?" },
+      { speaker: "アナ", jp: "いいえ、まだ{登|のぼ}ったことがありません。", es: "No, todavía no lo he escalado." },
+    ],
+    commonMistakes: [
+      "Usar presente en lugar de た antes de こと: × {行|い}くことがあります (esta estructura existe pero significa algo diferente: «hay veces que voy») → ○ {行|い}ったことがあります para experiencia.",
+      "Confundir ことがある (experiencia pasada) con ことがある con plain present (ocasionalidad habitual).",
+    ],
+    practicePrompts: [
+      "Comparte tres experiencias que has tenido y una que no has tenido usando たことがあります／ありません.",
+      "Pregunta a tres compañeros si han probado algún alimento japonés.",
+    ],
+    relatedGrammarIds: ["short-form-past", "tai-tagaru", "tari-tari"],
+    sourceNotes: ["Basado en Genki I L11, Grammar 3 (たことがある)"],
+  },
+
+  // ═══════════════════════════════════════════════
+  //  LECCIÓN 12 — {奈良|なら}への{旅行|りょこう}
+  // ═══════════════════════════════════════════════
+
+  {
+    id: "nakereba-ikemasen",
+    lesson: 12,
+    title: "～なければいけません",
+    pattern: "V-なければいけません / V-なければなりません",
+    shortMeaning: "Obligación: «tengo que / debo hacer X».",
+    explanation: [
+      "Para expresar que algo es obligatorio o necesario, se usa la estructura negativa del verbo + ければ + いけません (o なりません).",
+      "La lógica subyacente: «si no hago V, no está bien» → es obligatorio. La doble negación implica obligación.",
+      "なければいけません (conversacional) y なければなりません (más formal/escrito) son intercambiables en significado.",
+      "Forma coloquial muy frecuente: [V-ない]と + いけない → 行かないといけない (tengo que ir).",
+    ],
+    formation: [
+      "V-ない → V-なければ + いけません  →  Tengo que [V] / Debo [V]",
+      "例: 行か(ない)→行かなければいけません",
+    ],
+    examples: [
+      {
+        jp: "{明日|あした}{早|はや}く{起|お}きなければいけません。",
+        es: "Mañana tengo que levantarme temprano.",
+      },
+      {
+        jp: "{宿題|しゅくだい}をしなければなりません。",
+        es: "Tengo que hacer la tarea.",
+        note: "なりません = variante más formal.",
+      },
+      {
+        jp: "{薬|くすり}を{飲|の}まなければいけませんか。— いいえ、{飲|の}まなくてもいいです。",
+        es: "¿Tengo que tomar la medicina? — No, no es necesario.",
+        note: "Contraste con なくてもいいです (no es obligatorio).",
+      },
+    ],
+    commonMistakes: [
+      "Confundir ×なければ (solo la condicional) con なければいけません (la estructura completa de obligación).",
+      "Usar el stem incorrecto: 行く → 行かなければ (no ×行きなければ). El stem negativo determina la forma.",
+    ],
+    practicePrompts: [
+      "Di tres cosas que tienes que hacer esta semana usando なければいけません.",
+      "Contrasta obligación y permiso: [V]なければいけません vs. [V]なくてもいいです en la misma situación.",
+    ],
+    relatedGrammarIds: ["short-form-present", "hou-ga-ii", "n-desu"],
+    sourceNotes: ["Basado en Genki I L12, Grammar 1 (なければいけません)"],
+  },
+
+  {
+    id: "n-desu",
+    lesson: 12,
+    title: "～んです / ～んですが",
+    pattern: "[V/adj/N-plain] んです",
+    shortMeaning: "Dar contexto, explicar o pedir una explicación de manera más personal y conectada.",
+    explanation: [
+      "んです (contracción de のです) añade un matiz explicativo o de búsqueda de comprensión mutua. Donde [V]ます da un hecho neutro, [V]んです implica «y hay una razón / te explico el contexto».",
+      "Usos principales: ① explicar algo (「{遅|おそ}かったんです。{電車|でんしゃ}が止まったから」), ② pedir una explicación (「どうしたんですか」= ¿qué pasa?), ③ suavizar una petición o pregunta con んですが al final.",
+      "La plain form va antes de んです: verbos y い-adj sin cambio; な-adj/N + な → なんです.",
+    ],
+    formation: [
+      "[V-plain] んです        →  Es que [V] / [V] (con contexto)",
+      "[い-adj] んです        →  Es que [adj]",
+      "[な-adj] なんです      →  Es que [estado]",
+      "[N] なんです           →  Es que es [N]",
+      "[〜] んですが          →  Es que [〜]… (apertura suave de conversación o petición)",
+    ],
+    examples: [
+      {
+        jp: "{頭|あたま}が{痛|いた}いんです。",
+        es: "Es que me duele la cabeza.",
+        note: "Explica el motivo de algo (por eso llego tarde, pido permiso, etc.).",
+      },
+      {
+        jp: "どうしたんですか。",
+        es: "¿Qué te pasa? / ¿Qué sucede?",
+        note: "Pide una explicación sobre algo que notas.",
+      },
+      {
+        jp: "ちょっと{聞|き}きたいんですが…",
+        es: "Es que quería preguntarte algo…",
+        note: "んですが al final abre la conversación con suavidad.",
+      },
+      {
+        jp: "{実|じつ}は{日本語|にほんご}の{先生|せんせい}なんです。",
+        es: "En realidad soy profesor de japonés.",
+        note: "なんです con sustantivo — revela información sorpresiva.",
+      },
+    ],
+    commonMistakes: [
+      "Usar んです para cada oración — んです implica conexión contextual. No reemplaza ます en conversación sin esa intención.",
+      "Olvidar な con な-adj/N: × {学生|がくせい}んです → ○ {学生|がくせい}なんです.",
+    ],
+    interactions: [
+      "Roleplay: un alumno actúa estar cansado o enfermo; el otro pregunta どうしたんですか y el primero explica con [V]んです.",
+    ],
+    practicePrompts: [
+      "Explica con んです por qué llegaste tarde a clase o por qué no hiciste la tarea.",
+      "Practica んですが para pedir algo con suavidad: tres situaciones distintas.",
+    ],
+    relatedGrammarIds: ["kara-reason", "nakereba-ikemasen", "short-form-present"],
+    sourceNotes: ["Basado en Genki I L12, Grammar 2 (んです)"],
+  },
+
+  {
+    id: "sugiru",
+    lesson: 12,
+    title: "～すぎる",
+    pattern: "V-stem すぎる / い-adj-stem すぎる / な-adj すぎる",
+    shortMeaning: "Indicar exceso: «demasiado [adj/V]».",
+    explanation: [
+      "すぎる (exceder) se añade al stem del verbo, al stem del い-adjetivo (sin い), o directamente al na-adjetivo (sin な). Expresa que algo supera el límite adecuado.",
+      "い-adj: 高い → 高すぎる. な-adj: 静か → 静かすぎる. Verbos: 食べる → 食べすぎる.",
+      "すぎる se conjuga como verbo: すぎます (polite), すぎた (pasado plain), すぎて (te-form para dar razón).",
+    ],
+    formation: [
+      "い-adj:  [stem] + すぎる   (高い → 高すぎる)",
+      "な-adj:  [adj]  + すぎる   (静か → 静かすぎる)",
+      "V:      [V-stem]+ すぎる   (食べる → 食べすぎる)",
+    ],
+    examples: [
+      {
+        jp: "この{宿題|しゅくだい}は{多|おお}すぎます。",
+        es: "Esta tarea es demasiado.",
+        note: "多い (i-adj) → 多すぎる.",
+      },
+      {
+        jp: "{食|た}べすぎて、{気持|きも}ち{悪|わる}いです。",
+        es: "Comí demasiado y me siento mal.",
+        note: "食べすぎて = て-form de すぎる como razón.",
+      },
+      {
+        jp: "この{部屋|へや}は{静|しず}かすぎて、{眠|ねむ}くなります。",
+        es: "Esta habitación es tan silenciosa que me da sueño.",
+      },
+    ],
+    commonMistakes: [
+      "Dejar el い en い-adjetivos: × {高|たか}いすぎる → ○ {高|たか}すぎる.",
+      "Añadir な a na-adjetivos: × {静|しず}かなすぎる → ○ {静|しず}かすぎる.",
+    ],
+    practicePrompts: [
+      "Describe tres cosas excesivas de tu vida o del mundo usando すぎます.",
+      "Usa すぎて para dar razón de un problema: [Vすぎて／adjすぎて]、[resultado]。",
+    ],
+    relatedGrammarIds: ["adjective-present", "hou-ga-ii", "n-desu"],
+    sourceNotes: ["Basado en Genki I L12, Grammar 3 (すぎる)"],
+  },
+
+  {
+    id: "hou-ga-ii",
+    lesson: 12,
+    title: "～ほうがいい",
+    pattern: "V-た／V-ない + ほうがいいです",
+    shortMeaning: "Dar un consejo: «sería mejor que [hicieras / no hicieras] X».",
+    explanation: [
+      "ほうがいいです expresa una recomendación. Para afirmar qué deberías hacer: [V-た] ほうがいいです. Para decir qué NO deberías hacer: [V-ない] ほうがいいです.",
+      "Nota: el afirmativo usa la forma た (pasado), no el presente. Esto puede parecer extraño pero es la forma convencional: {早|はや}く{寝|ね}た ほうがいい (deberías acostarte temprano).",
+      "ほうがいい es más fuerte que たい; expresa que el consejo tiene justificación o urgencia. No se usa para cosas triviales.",
+    ],
+    formation: [
+      "V-た + ほうがいいです          →  Sería mejor que [hicieras V]",
+      "V-ない + ほうがいいです        →  Sería mejor que no [hicieras V]",
+    ],
+    examples: [
+      {
+        jp: "{早|はや}く{病院|びょういん}に{行|い}ったほうがいいです。",
+        es: "Sería mejor que fueras al médico pronto.",
+      },
+      {
+        jp: "{無理|むり}しないほうがいいですよ。",
+        es: "Sería mejor que no te esforzaras demasiado.",
+        note: "V-ない + ほうがいい. よ añade énfasis amistoso.",
+      },
+      {
+        jp: "{試験|しけん}の{前|まえ}はよく{寝|ね}たほうがいいです。",
+        es: "Antes del examen sería mejor que durmieras bien.",
+      },
+    ],
+    dialogue: [
+      { speaker: "メアリー", jp: "かぜを{引|ひ}いたみたいです。", es: "Parece que agarré un resfriado." },
+      { speaker: "たけし", jp: "それは{大変|たいへん}。{早|はや}く{薬|くすり}を{飲|の}んだほうがいいですよ。", es: "Qué pena. Sería mejor que tomaras medicina pronto." },
+      { speaker: "メアリー", jp: "{今日|きょう}、{授業|じゅぎょう}に{出|で}たほうがいいですか。", es: "¿Sería mejor que fuera a clase hoy?" },
+      { speaker: "たけし", jp: "うーん、{休|やす}んだほうがいいと{思|おも}います。", es: "Hmm, creo que sería mejor que descansaras." },
+    ],
+    commonMistakes: [
+      "Usar plain present en lugar de た para el consejo afirmativo: × {行|い}くほうがいい → ○ {行|い}ったほうがいい.",
+      "Usar ほうがいい para deseos propios — es para consejos hacia otra persona (o a uno mismo en reflexión). No es intercambiable con たい.",
+    ],
+    practicePrompts: [
+      "Da consejos a un compañero que está cansado, estresado y come mal: tres recomendaciones con ほうがいいです.",
+      "Roleplay médico-paciente: el médico da tres consejos con たほうがいい y ないほうがいい.",
+    ],
+    relatedGrammarIds: ["nakereba-ikemasen", "n-desu", "sugiru"],
+    sourceNotes: ["Basado en Genki I L12, Grammar 4 (ほうがいい)"],
+  },
+
+  {
+    id: "deshou-darou",
+    lesson: 12,
+    title: "～でしょう / だろう",
+    pattern: "[plain form] でしょう / だろう",
+    shortMeaning: "Conjetura o probabilidad: «probablemente» / «supongo que».",
+    explanation: [
+      "でしょう (polite) / だろう (plain) expresan que el hablante no tiene certeza absoluta pero cree que algo es probable. Equivalen a «debe de ser», «probablemente» o «supongo que».",
+      "Van después de la plain form de verbos y adjetivos, o después de sustantivo/na-adj + だ (plain form de です).",
+      "La entonación importa: でしょう descendente = afirmación con conjetura; でしょう↑ ascendente = pregunta confirmatoria («¿verdad?»).",
+    ],
+    formation: [
+      "[V/adj-plain] でしょう   →  Probablemente [V/adj] (conjetura formal)",
+      "[V/adj-plain] だろう    →  Probablemente [V/adj] (conjetura informal)",
+    ],
+    examples: [
+      {
+        jp: "{明日|あした}は{雨|あめ}でしょう。",
+        es: "Mañana probablemente llueva.",
+        note: "Pronóstico del tiempo — uso clásico de でしょう.",
+      },
+      {
+        jp: "{田中|たなか}さんは{知|し}っているだろう。",
+        es: "El señor Tanaka probablemente lo sabe.",
+        note: "だろう = plain form de でしょう.",
+      },
+      {
+        jp: "{難|むずか}しかったでしょう。",
+        es: "Habrá sido difícil, ¿verdad?",
+        note: "Conjetura sobre experiencia pasada.",
+      },
+    ],
+    commonMistakes: [
+      "Usar でしょう con la forma ます: × {行|い}きますでしょう → ○ {行|い}くでしょう.",
+      "Confundir でしょう (conjetura del hablante) con と思います (opinión del hablante) — でしょう suena más impersonal y objetivo.",
+    ],
+    practicePrompts: [
+      "Haz tres conjeturas sobre el tiempo, los planes de un compañero o el resultado de un examen.",
+      "Practica la entonación ascendente: usa でしょう↑ para buscar confirmación de algo que crees saber.",
+    ],
+    relatedGrammarIds: ["to-omoimasu", "n-desu", "deshou-ka"],
+    sourceNotes: ["Basado en Genki I L12, Grammar 5 (でしょう／だろう)"],
+  },
+
+  {
+    id: "deshou-ka",
+    lesson: 12,
+    title: "～でしょうか",
+    pattern: "[plain form] でしょうか",
+    shortMeaning: "Pregunta muy cortés o pregunta reflexiva con matiz de duda.",
+    explanation: [
+      "でしょうか combina la conjetura (でしょう) con la pregunta (か). Tiene dos usos: ① pregunta muy educada o formal donde ですか sonaría brusco, y ② pregunta abierta al aire, sin esperar respuesta inmediata (pregunta retórica o reflexiva).",
+      "En cartas, correos o situaciones muy formales, でしょうか es más suave que ですか. En conversación cotidiana se usa esporádicamente.",
+    ],
+    formation: [
+      "[plain form] + でしょうか  →  ¿Será que…? / ¿Podría ser que…? (pregunta educada/reflexiva)",
+    ],
+    examples: [
+      {
+        jp: "お{名前|なまえ}は何でしょうか。",
+        es: "¿Podría decirme su nombre?",
+        note: "Más educado que 名前は何ですか en contextos formales.",
+      },
+      {
+        jp: "{田中|たなか}さんはいらっしゃるでしょうか。",
+        es: "¿Estará el señor Tanaka?",
+        note: "Pregunta cortés por teléfono o en recepción.",
+      },
+      {
+        jp: "これでいいでしょうか。",
+        es: "¿Estará bien así? / ¿Esto estará correcto?",
+        note: "Verificación educada.",
+      },
+    ],
+    commonMistakes: [
+      "Usar でしょうか en conversación casual con amigos — suena demasiado formal o distante.",
+      "Confundir でしょうか (pregunta formal/reflexiva) con ますか (pregunta normal polite) — でしょうか añade capa de formalidad o incertidumbre.",
+    ],
+    practicePrompts: [
+      "Escribe tres preguntas que harías en un contexto formal (oficina, aeropuerto, recepción) usando でしょうか.",
+      "Compara: escribe la misma pregunta en ですか y でしょうか. ¿Qué cambia en la situación?",
+    ],
+    relatedGrammarIds: ["deshou-darou", "questions-ka", "n-desu"],
+    sourceNotes: ["Basado en Genki I L12, Grammar 6 (でしょうか)"],
+  },
+
+];

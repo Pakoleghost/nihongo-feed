@@ -2,6 +2,7 @@ import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 import { GENKI_LESSON_NAMES } from "@/lib/genki-lesson-names";
 import { GENKI_VOCAB_BY_LESSON } from "@/lib/genki-vocab-by-lesson";
 import { CURRICULUM_MODULES } from "@/lib/curriculum-modules";
+import { GENKI_I_GRAMMAR_CONTENT } from "@/lib/grammar-content-genki-i";
 import {
   getKanaTableSections,
   type KanaScript,
@@ -138,6 +139,68 @@ export type GrammarLessonCard = {
   count?: number;
   isCurrent?: boolean;
 };
+
+function stripFuriganaNotation(text: string) {
+  return text.replace(/\{([^|{}]+)\|[^{}]+\}/g, "$1");
+}
+
+function getGrammarProgressLabel(lesson: number) {
+  if (lesson < 8) return "Visto";
+  if (lesson === 8) return "Actual";
+  return "Próximo";
+}
+
+function mapGenkiGrammarContentToLessons(): GrammarLessonCard[] {
+  const grouped = new Map<number, GrammarPattern[]>();
+
+  GENKI_I_GRAMMAR_CONTENT.forEach((item) => {
+    const firstExample = item.examples[0];
+    const practicePrompts = [
+      ...item.practicePrompts.slice(1),
+      ...(item.interactions?.map((interaction) => `En clase: ${interaction}`) ??
+        []),
+    ].map(stripFuriganaNotation);
+
+    const pattern: GrammarPattern = {
+      id: item.id,
+      pattern: item.pattern,
+      meaning: item.shortMeaning,
+      example: firstExample ? stripFuriganaNotation(firstExample.jp) : item.pattern,
+      translation: firstExample?.es ?? item.shortMeaning,
+      cue: item.practicePrompts[0] ?? "Crea una frase nueva con este patrón.",
+      explanation: item.explanation,
+      formation: item.formation,
+      examples: item.examples.map((example) => ({
+        jp: stripFuriganaNotation(example.jp),
+        jpFurigana: example.jp,
+        reading: example.reading,
+        es: example.es,
+        note: example.note,
+      })),
+      dialogue: item.dialogue?.map((line) => ({
+        speaker: line.speaker,
+        jp: stripFuriganaNotation(line.jp),
+        jpFurigana: line.jp,
+        es: line.es,
+      })),
+      commonMistakes: item.commonMistakes.map(stripFuriganaNotation),
+      practicePrompts,
+      relatedGrammarIds: item.relatedGrammarIds,
+      sourceNotes: item.sourceNotes,
+    };
+
+    grouped.set(item.lesson, [...(grouped.get(item.lesson) ?? []), pattern]);
+  });
+
+  return Array.from(grouped.entries())
+    .sort(([a], [b]) => a - b)
+    .map(([lesson, patterns]) => ({
+      lesson,
+      title: GENKI_LESSON_NAMES[lesson] ?? `Lección ${lesson}`,
+      progress: getGrammarProgressLabel(lesson),
+      patterns,
+    }));
+}
 
 export const grammarLessons: GrammarLessonCard[] = [
   {
@@ -656,7 +719,7 @@ export const grammarLessons: GrammarLessonCard[] = [
 ];
 
 export function getGrammarLessonCards() {
-  return grammarLessons.map((lesson) => ({
+  return mapGenkiGrammarContentToLessons().map((lesson) => ({
     ...lesson,
     count: lesson.patterns.length,
     isCurrent: lesson.lesson === 8,
