@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AuthShell, { authStyles } from "@/components/auth/AuthShell";
 import { supabase } from "@/lib/supabase";
 
 function getErrorMessage(error: unknown) {
@@ -39,7 +40,7 @@ export default function AuthCallback() {
 
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("is_approved, username")
+          .select("is_approved, is_admin")
           .eq("id", userId)
           .maybeSingle();
 
@@ -50,13 +51,7 @@ export default function AuthCallback() {
           return;
         }
 
-        const approved = Boolean(profile?.is_approved);
-        const username = (profile?.username ?? "").toString().trim();
-
-        if (approved && !username) {
-          router.replace("/pick-username");
-          return;
-        }
+        const approved = Boolean(profile?.is_approved || profile?.is_admin);
 
         // Not approved (or no profile yet) -> pending flow.
         if (!approved) {
@@ -74,8 +69,11 @@ export default function AuthCallback() {
   }, [router]);
 
   return (
-    <main style={{ padding: 24 }}>
-      <p>{msg}</p>
-    </main>
+    <AuthShell
+      title="Entrando"
+      subtitle="Estamos preparando tu sesión."
+    >
+      <div className={authStyles.message}>{msg}</div>
+    </AuthShell>
   );
 }

@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/auth", "/pending", "/pick-username"];
+const PUBLIC_PATHS = ["/login", "/auth", "/pending"];
 
 const LEGACY_STUDENT_REDIRECTS: Array<[string, string]> = [
   ["/kana", "/dashboard/hiragana"],
@@ -82,6 +82,22 @@ export async function proxy(request: NextRequest) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     return NextResponse.redirect(loginUrl);
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_approved,is_admin")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const canEnterStudentApp =
+    profile?.is_admin === true || profile?.is_approved === true;
+
+  if (!canEnterStudentApp) {
+    const pendingUrl = request.nextUrl.clone();
+    pendingUrl.pathname = "/pending";
+    pendingUrl.search = "";
+    return NextResponse.redirect(pendingUrl);
   }
 
   return supabaseResponse;

@@ -1,7 +1,9 @@
 "use client";
-import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import AuthShell, { authStyles } from "@/components/auth/AuthShell";
+import { supabase } from "@/lib/supabase";
 
 function normalizeUsername(value: string): string {
   return value
@@ -14,265 +16,230 @@ function normalizeUsername(value: string): string {
 }
 
 function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Ocurrió un error inesperado. Intenta de nuevo.";
+  return error instanceof Error
+    ? error.message
+    : "Ocurrió un error inesperado. Intenta de nuevo.";
 }
 
-export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
+export default function LoginPage() {
+  const router = useRouter();
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
-  const [gender, setGender] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false);
-  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const isSignUp = mode === "signup";
+
+  async function handleAuth(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setMessage(null);
+    setErrorMessage(null);
+
     try {
       if (isSignUp) {
-        if (!fullName.trim()) return alert("Escribe tu nombre completo.");
         const normalizedUsername = normalizeUsername(username);
-        if (!normalizedUsername || !/^[a-z0-9._-]{3,24}$/.test(normalizedUsername)) {
-          return alert("Username inválido. Usa 3-24 caracteres: letras, números, punto, guion o guion_bajo.");
+
+        if (!fullName.trim()) {
+          setErrorMessage("Escribe tu nombre completo.");
+          return;
         }
-        if (!gender) return alert("Selecciona tu género.");
-        if (!birthDate) return alert("Selecciona tu fecha de nacimiento.");
+
+        if (!/^[a-z0-9._-]{3,24}$/.test(normalizedUsername)) {
+          setErrorMessage("Usa un username de 3 a 24 caracteres: letras, números, punto, guion o guion bajo.");
+          return;
+        }
 
         const { data: usernameTaken } = await supabase
           .from("profiles")
           .select("id")
           .eq("username", normalizedUsername)
           .limit(1);
-        if ((usernameTaken || []).length > 0) {
-          return alert("Ese username ya está en uso.");
+
+        if ((usernameTaken ?? []).length > 0) {
+          setErrorMessage("Ese username ya está en uso.");
+          return;
         }
 
         const { data, error } = await supabase.auth.signUp({
-          email,
+          email: email.trim().toLowerCase(),
           password,
           options: {
             data: {
               full_name: fullName.trim(),
               username: normalizedUsername,
-              gender,
-              birth_date: birthDate,
             },
           },
         });
+
         if (error) {
-          alert(error.message);
+          setErrorMessage(error.message);
           return;
         }
+
         if (data.user) {
-          const profilePayload = {
-            id: data.user.id,
-            username: normalizedUsername,
-            full_name: fullName.trim(),
-            email: email.trim().toLowerCase(),
-            group_name: null,
-            gender,
-            birth_date: birthDate,
-          };
           const { error: profileError } = await supabase
             .from("profiles")
-            .upsert(profilePayload, { onConflict: "id" });
-          if (profileError) {
-            // Fallback if newer research fields are not in the schema yet.
-            const { error: fallbackError } = await supabase
-              .from("profiles")
-              .upsert(
-                {
-                  id: data.user.id,
-                  username: normalizedUsername,
-                  full_name: fullName.trim(),
-                  group_name: null,
-                },
-                { onConflict: "id" },
-              );
-            if (fallbackError) {
-              alert(`Cuenta creada pero no se pudo completar el perfil: ${fallbackError.message}`);
-              return;
-            }
-            alert("¡Cuenta creada! Tu perfil quedó listo (sin género/fecha por esquema actual).");
-          } else {
-            alert("¡Cuenta creada!");
-          }
-          setIsSignUp(false);
-          setFullName("");
-          setUsername("");
-          setGender("");
-          setBirthDate("");
-        }
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) alert(error.message);
-        else {
-          router.push("/dashboard");
-          router.refresh();
-        }
-      }
-    } catch (err: unknown) {
-      console.error("handleAuth fatal:", err);
-      alert(getErrorMessage(err));
-    }
-  };
+            .upsert(
+              {
+                id: data.user.id,
+                username: normalizedUsername,
+                full_name: fullName.trim(),
+                email: email.trim().toLowerCase(),
+                group_name: null,
+              },
+              { onConflict: "id" },
+            );
 
-  const shellStyle: React.CSSProperties = {
-    minHeight: "100vh",
-    background: "var(--color-bg)",
-    padding: "var(--page-padding)",
-    display: "grid",
-    placeItems: "center",
-  };
-  const cardStyle: React.CSSProperties = {
-    width: "100%",
-    maxWidth: 480,
-    background: "var(--color-surface)",
-    border: "1px solid var(--color-border)",
-    borderRadius: "var(--radius-lg)",
-    boxShadow: "var(--shadow-card)",
-    padding: "var(--space-6)",
-    display: "grid",
-    gap: "var(--space-5)",
-  };
-  const headerStyle: React.CSSProperties = {
-    display: "grid",
-    gap: "var(--space-2)",
-  };
-  const eyebrowStyle: React.CSSProperties = {
-    fontSize: "var(--text-label)",
-    color: "var(--color-accent-strong)",
-    fontWeight: 800,
-    letterSpacing: ".08em",
-    textTransform: "uppercase",
-  };
-  const titleStyle: React.CSSProperties = {
-    margin: 0,
-    fontSize: "var(--text-h1)",
-    lineHeight: 0.95,
-    letterSpacing: "-.05em",
-    color: "var(--color-text)",
-  };
-  const copyStyle: React.CSSProperties = {
-    margin: 0,
-    fontSize: "var(--text-body)",
-    color: "var(--color-text-muted)",
-    lineHeight: 1.5,
-  };
-  const formStyle: React.CSSProperties = {
-    display: "grid",
-    gap: "var(--space-3)",
-  };
-  const fieldStyle: React.CSSProperties = {
-    display: "grid",
-    gap: 6,
-  };
-  const labelStyle: React.CSSProperties = {
-    fontSize: "var(--text-label)",
-    color: "var(--color-text-muted)",
-    fontWeight: 700,
-  };
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    border: "1px solid var(--color-border)",
-    borderRadius: "var(--radius-md)",
-    background: "var(--color-surface)",
-    padding: "12px 14px",
-    fontSize: "var(--text-body)",
-    color: "var(--color-text)",
-    outline: "none",
-  };
-  const primaryButtonStyle: React.CSSProperties = {
-    border: 0,
-    borderRadius: "var(--radius-pill)",
-    background: "var(--color-accent-strong)",
-    color: "#fff",
-    padding: "12px 16px",
-    fontWeight: 800,
-    fontSize: "var(--text-body)",
-    cursor: "pointer",
-    boxShadow: "0 10px 20px rgba(230, 57, 70, 0.15)",
-  };
-  const ghostButtonStyle: React.CSSProperties = {
-    border: "1px solid var(--color-border)",
-    background: "transparent",
-    color: "var(--color-text-muted)",
-    borderRadius: "var(--radius-pill)",
-    padding: "10px 14px",
-    fontWeight: 700,
-    fontSize: "var(--text-body-sm)",
-    cursor: "pointer",
-    width: "100%",
-  };
+          if (profileError) {
+            setErrorMessage(`Cuenta creada, pero no pude completar el perfil: ${profileError.message}`);
+            return;
+          }
+        }
+
+        setMessage("Cuenta creada. Tu acceso queda pendiente de aprobación del sensei.");
+        if (data.session) {
+          router.push("/pending");
+        } else {
+          setMode("login");
+        }
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+      if (error) {
+        setErrorMessage(error.message);
+        return;
+      }
+
+      const userId = data.user?.id;
+      if (!userId) {
+        router.push("/pending");
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_approved,is_admin")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (profile?.is_admin || profile?.is_approved) {
+        router.push("/dashboard");
+        router.refresh();
+        return;
+      }
+
+      router.push("/pending");
+      router.refresh();
+    } catch (error: unknown) {
+      console.error("auth failed:", error);
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <div style={shellStyle}>
-      <div style={cardStyle}>
-        <div style={headerStyle}>
-          <div style={eyebrowStyle}>Nihongo</div>
-          <h1 style={titleStyle}>{isSignUp ? "Crear cuenta" : "Entrar"}</h1>
-          <p style={copyStyle}>
-            {isSignUp ? "Tu acceso queda listo aquí mismo." : "Accede a estudio y recursos."}
-          </p>
+    <AuthShell
+      title={isSignUp ? "Crear cuenta" : "Entrar"}
+      subtitle={
+        isSignUp
+          ? "Crea tu cuenta de alumno. El acceso se activa cuando el sensei la aprueba."
+          : "Accede con la cuenta aprobada para tus clases de japonés."
+      }
+      notice="Esta app es privada para alumnos de Pako Nihongo. Las cuentas nuevas no entran hasta estar aprobadas."
+    >
+      <form className={authStyles.form} onSubmit={handleAuth}>
+        {isSignUp && (
+          <>
+            <label className={authStyles.field}>
+              <span className={authStyles.label}>Nombre completo</span>
+              <input
+                className={authStyles.input}
+                type="text"
+                placeholder="Tu nombre"
+                value={fullName}
+                onChange={(event) => setFullName(event.target.value)}
+                required
+              />
+            </label>
+
+            <label className={authStyles.field}>
+              <span className={authStyles.label}>Nombre de usuario</span>
+              <input
+                className={authStyles.input}
+                type="text"
+                placeholder="ej. sakura_01"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                required
+              />
+            </label>
+          </>
+        )}
+
+        <label className={authStyles.field}>
+          <span className={authStyles.label}>Email</span>
+          <input
+            className={authStyles.input}
+            type="email"
+            placeholder="tu@email.com"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+        </label>
+
+        <label className={authStyles.field}>
+          <span className={authStyles.label}>Contraseña</span>
+          <input
+            className={authStyles.input}
+            type="password"
+            placeholder="Contraseña"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
+        </label>
+
+        {message && <div className={authStyles.message}>{message}</div>}
+        {errorMessage && (
+          <div className={`${authStyles.message} ${authStyles.messageError}`}>
+            {errorMessage}
+          </div>
+        )}
+
+        <div className={authStyles.buttonRow}>
+          <button
+            className={authStyles.primaryButton}
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? "Procesando..." : isSignUp ? "Crear cuenta" : "Entrar"}
+          </button>
+          <button
+            className={authStyles.secondaryButton}
+            type="button"
+            onClick={() => {
+              setMode(isSignUp ? "login" : "signup");
+              setMessage(null);
+              setErrorMessage(null);
+            }}
+            disabled={loading}
+          >
+            {isSignUp ? "Ya tengo cuenta" : "Solicitar acceso"}
+          </button>
         </div>
-
-        <form onSubmit={handleAuth} style={formStyle}>
-          {isSignUp && (
-            <>
-              <label style={fieldStyle}>
-                <span style={labelStyle}>Nombre completo</span>
-                <input type="text" placeholder="Nombre completo" value={fullName} onChange={(e) => setFullName(e.target.value)} required style={inputStyle} />
-              </label>
-
-              <label style={fieldStyle}>
-                <span style={labelStyle}>Username</span>
-                <input
-                  type="text"
-                  placeholder="ej. sakura_01"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  style={inputStyle}
-                />
-              </label>
-
-              <label style={fieldStyle}>
-                <span style={labelStyle}>Género</span>
-                <select value={gender} onChange={(e) => setGender(e.target.value)} required style={inputStyle}>
-                  <option value="">Selecciona una opción</option>
-                  <option value="mujer">Mujer</option>
-                  <option value="hombre">Hombre</option>
-                  <option value="no_binario">No binario</option>
-                  <option value="prefiero_no_decir">Prefiero no decir</option>
-                  <option value="otro">Otro</option>
-                </select>
-              </label>
-
-              <label style={fieldStyle}>
-                <span style={labelStyle}>Fecha de nacimiento</span>
-                <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} required style={inputStyle} />
-              </label>
-            </>
-          )}
-
-          <label style={fieldStyle}>
-            <span style={labelStyle}>Email</span>
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={inputStyle} />
-          </label>
-
-          <label style={fieldStyle}>
-            <span style={labelStyle}>Contraseña</span>
-            <input type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required style={inputStyle} />
-          </label>
-
-        <button type="submit" style={primaryButtonStyle}>{isSignUp ? "Crear cuenta" : "Entrar"}</button>
-        </form>
-
-        <button onClick={() => setIsSignUp(!isSignUp)} style={ghostButtonStyle}>
-          {isSignUp ? "Ya tengo cuenta" : "Crear cuenta nueva"}
-        </button>
-      </div>
-    </div>
+      </form>
+    </AuthShell>
   );
 }

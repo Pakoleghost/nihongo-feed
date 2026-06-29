@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import AuthShell, { authStyles } from "@/components/auth/AuthShell";
 import { supabase } from "@/lib/supabase";
 
 type ApplicationStatus = "pending" | "rejected";
@@ -34,6 +35,7 @@ export default function PendingApprovalPage() {
 
       // No session on first load.
       setSessionExpired(true);
+      setAuthReady(true);
 
       const { data: sub } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
         const nextUid = session?.user?.id ?? null;
@@ -66,7 +68,7 @@ export default function PendingApprovalPage() {
 
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("is_approved,is_admin,username")
+        .select("is_approved,is_admin")
         .eq("id", userId)
         .maybeSingle();
 
@@ -74,15 +76,13 @@ export default function PendingApprovalPage() {
         console.error("profiles read failed", profileError);
       }
 
-      const username = (profile?.username ?? "").toString().trim();
-
       if (profile?.is_admin) {
-        window.location.href = "/";
+        window.location.href = "/dashboard";
         return;
       }
 
       if (profile?.is_approved) {
-        window.location.href = username ? "/dashboard" : "/pick-username";
+        window.location.href = "/dashboard";
         return;
       }
 
@@ -103,7 +103,7 @@ export default function PendingApprovalPage() {
       if (app?.status === "approved") {
         // Fallback: if applications is approved but profiles.approved hasn't propagated yet,
         // still move the user forward.
-        window.location.href = username ? "/dashboard" : "/pick-username";
+        window.location.href = "/dashboard";
         return;
       }
 
@@ -115,7 +115,7 @@ export default function PendingApprovalPage() {
     checkStatus();
   }, [authReady, userId]);
 
-  // While pending, poll for approval and then send the user into Study (no re-login).
+  // While pending, poll for approval and then send the user into the dashboard.
   useEffect(() => {
     if (!authReady) return;
     if (!userId) return;
@@ -125,7 +125,7 @@ export default function PendingApprovalPage() {
     const tick = async () => {
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("is_approved,is_admin,username")
+        .select("is_approved,is_admin")
         .eq("id", userId)
         .maybeSingle();
 
@@ -133,18 +133,16 @@ export default function PendingApprovalPage() {
         console.error("profiles read failed", profileError);
       }
 
-      const username = (profile?.username ?? "").toString().trim();
-
       if (!alive) return;
 
       if (profile?.is_admin) {
-        window.location.href = "/";
+        window.location.href = "/dashboard";
         return;
       }
 
       if (profile?.is_approved) {
         // Keep the session. Just move them into the app.
-        window.location.href = username ? "/dashboard" : "/pick-username";
+        window.location.href = "/dashboard";
       }
 
       const { data: app } = await supabase
@@ -156,7 +154,7 @@ export default function PendingApprovalPage() {
         .maybeSingle();
 
       if (app?.status === "approved") {
-        window.location.href = username ? "/dashboard" : "/pick-username";
+        window.location.href = "/dashboard";
       }
     };
 
@@ -177,71 +175,70 @@ export default function PendingApprovalPage() {
 
   if (!authReady || (userId && !checked)) {
     return (
-      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
-        <div style={{ maxWidth: 420, textAlign: "center" }}>
-          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Loading…</h1>
-          <p style={{ opacity: 0.7 }}>Please wait.</p>
-        </div>
-      </main>
+      <AuthShell
+        title="Revisando acceso"
+        subtitle="Estamos confirmando el estado de tu cuenta."
+      >
+        <div className={authStyles.message}>Un momento...</div>
+      </AuthShell>
     );
   }
 
   if (sessionExpired) {
     return (
-      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
-        <div style={{ maxWidth: 420, textAlign: "center" }}>
-          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Session expired</h1>
-          <p style={{ opacity: 0.7 }}>
-            Please log in again to continue.<br />
-            If your application is already approved, you will go straight into Study.
-          </p>
-          <button onClick={goToLogin} style={{ marginTop: 14 }}>
-            Go to login
-          </button>
-        </div>
-      </main>
+      <AuthShell
+        title="Sesión vencida"
+        subtitle="Inicia sesión otra vez para revisar tu acceso."
+      >
+        <button className={authStyles.primaryButton} onClick={goToLogin}>
+          Volver a entrar
+        </button>
+      </AuthShell>
     );
   }
 
   if (status === "pending") {
     return (
-      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
-        <div style={{ maxWidth: 420, textAlign: "center" }}>
-          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Pending approval</h1>
-          <p style={{ opacity: 0.7 }}>
-            Your application is under review.<br />
-            Once an administrator approves your account, you will be sent into Study automatically.
-          </p>
-          <p style={{ marginTop: 14, fontSize: 12, opacity: 0.5 }}>User: {userId}</p>
+      <AuthShell
+        title="Acceso pendiente"
+        subtitle="Tu cuenta ya existe, pero todavía necesita aprobación del sensei."
+        notice="Cuando se apruebe tu cuenta, esta pantalla te mandará automáticamente al dashboard."
+      >
+        <div className={authStyles.message}>
+          Puedes dejar esta ventana abierta o volver más tarde. ID de usuario: {userId}
         </div>
-      </main>
+        <button className={authStyles.secondaryButton} onClick={goToLogin}>
+          Cambiar de cuenta
+        </button>
+      </AuthShell>
     );
   }
 
   if (status === "rejected") {
     return (
-      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
-        <div style={{ maxWidth: 420, textAlign: "center" }}>
-          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Application rejected</h1>
-          <p style={{ opacity: 0.7 }}>
-            Your application was not approved.<br />
-            Please contact an administrator if you believe this is a mistake.
-          </p>
+      <AuthShell
+        title="Acceso no aprobado"
+        subtitle="Esta cuenta no tiene acceso a la app de alumnos."
+      >
+        <div className={`${authStyles.message} ${authStyles.messageError}`}>
+          Si crees que esto es un error, contacta al sensei.
         </div>
-      </main>
+        <button className={authStyles.secondaryButton} onClick={goToLogin}>
+          Usar otra cuenta
+        </button>
+      </AuthShell>
     );
   }
 
   // Default screen (no form here)
   return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
-      <div style={{ maxWidth: 420, textAlign: "center" }}>
-        <h1 style={{ fontSize: 22, marginBottom: 12 }}>Pending approval</h1>
-        <p style={{ opacity: 0.7 }}>
-          Your account is under review.<br />
-          Once an administrator approves your account, you will be sent into the app automatically.
-        </p>
+    <AuthShell
+      title="Acceso pendiente"
+      subtitle="Tu cuenta está en revisión."
+    >
+      <div className={authStyles.message}>
+        Cuando el sensei apruebe la cuenta, entrarás automáticamente.
       </div>
-    </main>
+    </AuthShell>
   );
 }
