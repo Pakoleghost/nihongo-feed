@@ -2461,6 +2461,8 @@
   display: grid;
   gap: 14px;
   overflow: hidden;
+  max-height: calc(100dvh - 96px);
+  overflow-y: auto;
   padding: 20px;
 }
 
@@ -2482,7 +2484,11 @@
 .grammarDetailPattern,
 .grammarDetailMeaning,
 .grammarExampleBox,
-.grammarPracticeBox {
+.grammarPracticeBox,
+.grammarExplanationBlock,
+.grammarFormationBox,
+.grammarInlineInteractions,
+.grammarMistakeBox {
   position: relative;
   z-index: 1;
 }
@@ -2505,7 +2511,10 @@
 }
 
 .grammarExampleBox,
-.grammarPracticeBox {
+.grammarPracticeBox,
+.grammarFormationBox,
+.grammarMistakeBox,
+.grammarInteraction {
   display: grid;
   gap: 7px;
   border: 1px solid rgba(26, 26, 46, 0.08);
@@ -2515,7 +2524,10 @@
 }
 
 .grammarExampleBox span,
-.grammarPracticeBox span {
+.grammarPracticeBox span,
+.grammarFormationBox span,
+.grammarMistakeBox span,
+.grammarInteraction > span {
   color: var(--muted);
   font-size: 10px;
   font-weight: 950;
@@ -2524,23 +2536,259 @@
 }
 
 .grammarExampleBox strong,
-.grammarPracticeBox strong {
+.grammarPracticeBox strong,
+.grammarFormationBox strong {
   color: var(--navy);
   font-weight: 950;
   line-height: 1.25;
 }
 
-.grammarExampleBox strong {
+.grammarExampleItem {
+  display: grid;
+  gap: 4px;
+  border-radius: 12px;
+  background: #fff;
+  padding: 11px;
+}
+
+.grammarExampleItem + .grammarExampleItem {
+  margin-top: 3px;
+}
+
+.grammarExampleItem strong {
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
   font-size: 22px;
 }
 
-.grammarExampleBox em {
+.grammarExampleItem small {
+  color: var(--muted-light);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.grammarExampleItem em {
   color: var(--muted);
   font-size: 13px;
   font-style: normal;
   font-weight: 800;
   line-height: 1.35;
+}
+
+.grammarExampleItem p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.grammarExplanationBlock {
+  display: grid;
+  gap: 9px;
+}
+
+.grammarExplanationBlock p {
+  margin: 0;
+  color: rgba(26, 26, 46, 0.76);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+.grammarFormationBox {
+  border-color: rgba(245, 166, 35, 0.26);
+  background: rgba(245, 166, 35, 0.09);
+}
+
+.grammarFormationBox strong {
+  border-radius: 10px;
+  background: #fff;
+  padding: 9px 10px;
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 14px;
+}
+
+.grammarInlineInteractions {
+  display: grid;
+  gap: 10px;
+}
+
+.grammarInteraction {
+  border-color: rgba(78, 205, 196, 0.28);
+  background:
+    radial-gradient(
+      circle at 96% 12%,
+      rgba(78, 205, 196, 0.16),
+      transparent 32%
+    ),
+    #fff;
+}
+
+.grammarInteraction p {
+  margin: 0;
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.4;
+}
+
+.grammarBuildLine,
+.grammarTokenRow,
+.grammarInteractionActions,
+.grammarChoiceGrid,
+.grammarFillLine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+}
+
+.grammarBuildLine {
+  min-height: 44px;
+  border: 1px dashed rgba(78, 205, 196, 0.45);
+  border-radius: 12px;
+  background: rgba(78, 205, 196, 0.08);
+  padding: 8px;
+}
+
+.grammarBuildLine em {
+  color: var(--muted-light);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.grammarBuildLine button,
+.grammarTokenRow button,
+.grammarChoiceGrid button {
+  min-height: 34px;
+  border: 1px solid rgba(26, 26, 46, 0.1);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--navy);
+  padding: 0 11px;
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 110ms ease;
+}
+
+.grammarBuildLine button {
+  border-color: rgba(78, 205, 196, 0.36);
+  background: rgba(78, 205, 196, 0.16);
+}
+
+.grammarBuildLine button:hover,
+.grammarTokenRow button:hover,
+.grammarChoiceGrid button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(26, 26, 46, 0.08);
+}
+
+.grammarInteractionActions button {
+  min-height: 32px;
+  border: 1px solid rgba(26, 26, 46, 0.1);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--muted);
+  padding: 0 11px;
+  font-size: 12px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.grammarInteractionActions button:first-child {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: var(--navy);
+}
+
+.grammarInteractionActions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.grammarChoiceGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.grammarChoiceCorrect {
+  border-color: rgba(78, 205, 196, 0.75) !important;
+  background: rgba(78, 205, 196, 0.18) !important;
+}
+
+.grammarChoiceWrong {
+  border-color: rgba(230, 57, 70, 0.48) !important;
+  background: rgba(230, 57, 70, 0.08) !important;
+}
+
+.grammarFillLine {
+  flex-wrap: nowrap;
+}
+
+.grammarFillLine strong {
+  color: var(--navy);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.grammarFillLine input {
+  min-width: 110px;
+  flex: 1;
+  min-height: 36px;
+  border: 1px solid rgba(26, 26, 46, 0.12);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--navy);
+  padding: 0 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+  outline: 0;
+}
+
+.grammarFeedbackOk,
+.grammarFeedbackNo {
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.grammarFeedbackOk {
+  background: rgba(78, 205, 196, 0.16);
+  color: var(--navy);
+}
+
+.grammarFeedbackNo {
+  background: rgba(230, 57, 70, 0.09);
+  color: var(--red);
+}
+
+.grammarMistakeBox {
+  border-color: rgba(230, 57, 70, 0.16);
+  background: rgba(230, 57, 70, 0.06);
+}
+
+.grammarMistakeBox ul,
+.grammarPracticeBox ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
 }
 
 .grammarPracticeBox {
@@ -2982,6 +3230,8 @@
   .kanjiDetailSticky,
   .grammarDetailSticky {
     position: static;
+    max-height: none;
+    overflow: visible;
   }
 
   .kanjiQuickActions {

@@ -69,12 +69,53 @@ export function getKanaDashboardSections(script: KanaScript, tab: KanaTabKey) {
 }
 
 export type GrammarPattern = {
+  id?: string;
   pattern: string;
   meaning: string;
   example: string;
   translation: string;
   cue: string;
+  explanation?: string[];
+  formation?: string[];
+  examples?: GrammarExample[];
+  commonMistakes?: string[];
+  practicePrompts?: string[];
+  interactions?: GrammarInteraction[];
+  relatedGrammarIds?: string[];
+  sourceNotes?: string[];
 };
+
+export type GrammarExample = {
+  jp: string;
+  reading?: string;
+  es: string;
+  note?: string;
+};
+
+export type GrammarInteraction =
+  | {
+      type: "word-order";
+      prompt: string;
+      tokens: string[];
+      answer: string[];
+      successMessage?: string;
+    }
+  | {
+      type: "multiple-choice";
+      prompt: string;
+      options: string[];
+      answer: string;
+      successMessage?: string;
+    }
+  | {
+      type: "fill-blank";
+      prompt: string;
+      before: string;
+      after: string;
+      answer: string;
+      placeholder?: string;
+      successMessage?: string;
+    };
 
 export type GrammarLessonCard = {
   lesson: number;
@@ -92,25 +133,157 @@ export const grammarLessons: GrammarLessonCard[] = [
     progress: "Base",
     patterns: [
       {
+        id: "copula-affirmative",
         pattern: "X は Y です",
         meaning: "Presentar o identificar algo de forma básica.",
         example: "私は学生です。",
         translation: "Soy estudiante.",
         cue: "Di quién eres o qué es algo.",
+        explanation: [
+          "Este patrón sirve para decir qué es alguien o algo. La partícula は marca el tema: aquello de lo que vas a hablar.",
+          "です cierra la oración con tono cortés. En español muchas veces usamos 'soy', 'es' o 'son', pero en japonés no cambia según la persona.",
+        ],
+        formation: [
+          "Tema + は + identidad/descripción + です",
+          "私は + 学生 + です",
+        ],
+        examples: [
+          {
+            jp: "私は学生です。",
+            reading: "わたしはがくせいです。",
+            es: "Soy estudiante.",
+            note: "私 es el tema, 学生 es lo que dices sobre ti.",
+          },
+          {
+            jp: "田中さんは先生です。",
+            reading: "たなかさんはせんせいです。",
+            es: "Tanaka es profesor.",
+            note: "さん se usa con nombres de otras personas.",
+          },
+        ],
+        commonMistakes: [
+          "No traduzcas は como 'es'. は solo marca el tema; la parte que equivale a 'es/soy' aquí es です.",
+          "No necesitas cambiar です por persona: 私です, 田中さんです y 学生です usan la misma forma.",
+        ],
+        practicePrompts: [
+          "Di tu nombre y tu ocupación usando 私は〜です。",
+          "Presenta a un compañero usando 〜さんは〜です。",
+        ],
+        interactions: [
+          {
+            type: "word-order",
+            prompt: "Ordena las piezas para decir: 'Soy estudiante'.",
+            tokens: ["学生", "です", "私", "は"],
+            answer: ["私", "は", "学生", "です"],
+            successMessage: "Bien. Primero tema + は, luego lo que dices del tema.",
+          },
+          {
+            type: "multiple-choice",
+            prompt: "En 私は学生です, ¿qué marca は?",
+            options: ["El tema de la oración", "El pasado", "La pregunta"],
+            answer: "El tema de la oración",
+            successMessage: "Exacto. は marca de qué estamos hablando.",
+          },
+        ],
+        relatedGrammarIds: ["questions-ka", "particle-no-modifier"],
+        sourceNotes: ["Genki I L1", "Índice grammar_crossref.json"],
       },
       {
+        id: "copula-negative",
         pattern: "X は Y じゃないです",
         meaning: "Negar una identificación.",
         example: "田中さんは先生じゃないです。",
         translation: "Tanaka no es profesor.",
         cue: "Corrige una idea equivocada.",
+        explanation: [
+          "じゃないです niega una oración con sustantivo o な-adjetivo. En esta etapa úsalo para decir que alguien no es algo.",
+          "La estructura antes de la negación se mantiene igual: tema con は, luego la identidad que vas a negar.",
+        ],
+        formation: [
+          "Tema + は + sustantivo + じゃないです",
+          "田中さんは + 先生 + じゃないです",
+        ],
+        examples: [
+          {
+            jp: "私は先生じゃないです。",
+            reading: "わたしはせんせいじゃないです。",
+            es: "No soy profesor.",
+          },
+          {
+            jp: "メアリーさんは日本人じゃないです。",
+            reading: "メアリーさんはにほんじんじゃないです。",
+            es: "Mary no es japonesa.",
+          },
+        ],
+        commonMistakes: [
+          "No pongas です dos veces: 学生ですじゃないです no funciona.",
+          "じゃないです es natural en clase y conversación cortés. ではありません es más formal.",
+        ],
+        practicePrompts: [
+          "Corrige una suposición: 'No soy profesor/a'.",
+          "Di que una persona no es estudiante.",
+        ],
+        interactions: [
+          {
+            type: "fill-blank",
+            prompt: "Completa la negación.",
+            before: "私は先生",
+            after: "。",
+            answer: "じゃないです",
+            placeholder: "negación",
+            successMessage: "Eso. Sustantivo + じゃないです.",
+          },
+        ],
+        relatedGrammarIds: ["copula-affirmative"],
+        sourceNotes: ["Genki I L1"],
       },
       {
+        id: "particle-no-modifier",
         pattern: "X の Y",
         meaning: "Indicar relación, posesión o categoría.",
         example: "日本語の本です。",
         translation: "Es un libro de japonés.",
         cue: "Une dos sustantivos.",
+        explanation: [
+          "の conecta dos sustantivos. El primero modifica al segundo: dice de quién es, de qué tipo es o con qué está relacionado.",
+          "Piensa en X の Y como 'Y de X' o 'Y relacionado con X', pero el orden japonés va al revés del español.",
+        ],
+        formation: [
+          "Sustantivo 1 + の + Sustantivo 2",
+          "日本語 + の + 本",
+        ],
+        examples: [
+          {
+            jp: "日本語の本です。",
+            reading: "にほんごのほんです。",
+            es: "Es un libro de japonés.",
+          },
+          {
+            jp: "私の先生です。",
+            reading: "わたしのせんせいです。",
+            es: "Es mi profesor/a.",
+            note: "私の marca posesión o relación.",
+          },
+        ],
+        commonMistakes: [
+          "No inviertas el orden desde español. 'Libro de japonés' es 日本語の本, no 本の日本語.",
+          "の no significa solamente posesión; también puede marcar categoría o relación.",
+        ],
+        practicePrompts: [
+          "Di 'mi libro' y 'profesor de japonés'.",
+          "Une dos sustantivos de la lección con の.",
+        ],
+        interactions: [
+          {
+            type: "word-order",
+            prompt: "Ordena: 'libro de japonés'.",
+            tokens: ["本", "日本語", "の"],
+            answer: ["日本語", "の", "本"],
+            successMessage: "Sí. En japonés, el modificador va antes.",
+          },
+        ],
+        relatedGrammarIds: ["copula-affirmative"],
+        sourceNotes: ["Genki I L1"],
       },
     ],
   },

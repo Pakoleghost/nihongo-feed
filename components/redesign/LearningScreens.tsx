@@ -14,6 +14,7 @@ import {
   homeTasks,
   kanaTabs,
   type KanaTabKey,
+  type GrammarInteraction,
   type GrammarPattern,
 } from "./learning-data";
 import {
@@ -131,6 +132,194 @@ function HeroCard({
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return <div className={styles.sectionLabel}>{children}</div>;
+}
+
+function GrammarWordOrderInteraction({
+  interaction,
+}: {
+  interaction: Extract<GrammarInteraction, { type: "word-order" }>;
+}) {
+  const [picked, setPicked] = useState<string[]>([]);
+  const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
+
+  const remaining = interaction.tokens.filter((token, index) => {
+    const tokenUseCount = picked.filter((item) => item === token).length;
+    const seenBefore = interaction.tokens
+      .slice(0, index + 1)
+      .filter((item) => item === token).length;
+    return seenBefore > tokenUseCount;
+  });
+
+  const checkAnswer = () => {
+    const isCorrect =
+      picked.length === interaction.answer.length &&
+      picked.every((token, index) => token === interaction.answer[index]);
+    setStatus(isCorrect ? "correct" : "wrong");
+  };
+
+  const reset = () => {
+    setPicked([]);
+    setStatus("idle");
+  };
+
+  return (
+    <div className={styles.grammarInteraction}>
+      <span>Ordena</span>
+      <p>{interaction.prompt}</p>
+      <div className={styles.grammarBuildLine}>
+        {picked.length === 0 ? (
+          <em>Toca las palabras en orden</em>
+        ) : (
+          picked.map((token, index) => (
+            <button
+              key={`${token}-${index}`}
+              type="button"
+              onClick={() => {
+                setPicked((current) => current.filter((_, i) => i !== index));
+                setStatus("idle");
+              }}
+            >
+              {token}
+            </button>
+          ))
+        )}
+      </div>
+      <div className={styles.grammarTokenRow}>
+        {remaining.map((token, index) => (
+          <button
+            key={`${token}-${index}`}
+            type="button"
+            onClick={() => {
+              setPicked((current) => [...current, token]);
+              setStatus("idle");
+            }}
+          >
+            {token}
+          </button>
+        ))}
+      </div>
+      <div className={styles.grammarInteractionActions}>
+        <button type="button" onClick={checkAnswer} disabled={picked.length === 0}>
+          Revisar
+        </button>
+        <button type="button" onClick={reset}>
+          Reiniciar
+        </button>
+      </div>
+      {status === "correct" && (
+        <div className={styles.grammarFeedbackOk}>
+          {interaction.successMessage ?? "Correcto."}
+        </div>
+      )}
+      {status === "wrong" && (
+        <div className={styles.grammarFeedbackNo}>
+          Casi. Revisa el orden y vuelve a intentar.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GrammarChoiceInteraction({
+  interaction,
+}: {
+  interaction: Extract<GrammarInteraction, { type: "multiple-choice" }>;
+}) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const isCorrect = selected === interaction.answer;
+
+  return (
+    <div className={styles.grammarInteraction}>
+      <span>Elige</span>
+      <p>{interaction.prompt}</p>
+      <div className={styles.grammarChoiceGrid}>
+        {interaction.options.map((option) => (
+          <button
+            key={option}
+            type="button"
+            className={
+              selected === option
+                ? isCorrect
+                  ? styles.grammarChoiceCorrect
+                  : styles.grammarChoiceWrong
+                : ""
+            }
+            onClick={() => setSelected(option)}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+      {selected && isCorrect && (
+        <div className={styles.grammarFeedbackOk}>
+          {interaction.successMessage ?? "Correcto."}
+        </div>
+      )}
+      {selected && !isCorrect && (
+        <div className={styles.grammarFeedbackNo}>
+          Todavía no. Prueba otra opción.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GrammarFillBlankInteraction({
+  interaction,
+}: {
+  interaction: Extract<GrammarInteraction, { type: "fill-blank" }>;
+}) {
+  const [value, setValue] = useState("");
+  const [checked, setChecked] = useState(false);
+  const isCorrect = value.trim() === interaction.answer;
+
+  return (
+    <div className={styles.grammarInteraction}>
+      <span>Completa</span>
+      <p>{interaction.prompt}</p>
+      <div className={styles.grammarFillLine}>
+        <strong>{interaction.before}</strong>
+        <input
+          value={value}
+          onChange={(event) => {
+            setValue(event.target.value);
+            setChecked(false);
+          }}
+          placeholder={interaction.placeholder ?? "respuesta"}
+        />
+        <strong>{interaction.after}</strong>
+      </div>
+      <div className={styles.grammarInteractionActions}>
+        <button type="button" onClick={() => setChecked(true)}>
+          Revisar
+        </button>
+      </div>
+      {checked && isCorrect && (
+        <div className={styles.grammarFeedbackOk}>
+          {interaction.successMessage ?? "Correcto."}
+        </div>
+      )}
+      {checked && !isCorrect && (
+        <div className={styles.grammarFeedbackNo}>
+          Casi. Cuida espacios y forma.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GrammarInteractionBlock({
+  interaction,
+}: {
+  interaction: GrammarInteraction;
+}) {
+  if (interaction.type === "word-order") {
+    return <GrammarWordOrderInteraction interaction={interaction} />;
+  }
+  if (interaction.type === "multiple-choice") {
+    return <GrammarChoiceInteraction interaction={interaction} />;
+  }
+  return <GrammarFillBlankInteraction interaction={interaction} />;
 }
 
 export function StudentHomeScreen() {
@@ -1537,15 +1726,72 @@ export function GrammarLearningScreen() {
               <p className={styles.grammarDetailMeaning}>
                 {selectedPattern.meaning}
               </p>
+              {selectedPattern.explanation?.length ? (
+                <div className={styles.grammarExplanationBlock}>
+                  {selectedPattern.explanation.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </div>
+              ) : null}
+              {selectedPattern.formation?.length ? (
+                <div className={styles.grammarFormationBox}>
+                  <span>Forma</span>
+                  {selectedPattern.formation.map((line) => (
+                    <strong key={line}>{line}</strong>
+                  ))}
+                </div>
+              ) : null}
               <div className={styles.grammarExampleBox}>
-                <span>Ejemplo</span>
-                <strong>{selectedPattern.example}</strong>
-                <em>{selectedPattern.translation}</em>
+                <span>Ejemplos</span>
+                {(selectedPattern.examples?.length
+                  ? selectedPattern.examples
+                  : [
+                      {
+                        jp: selectedPattern.example,
+                        es: selectedPattern.translation,
+                      },
+                    ]
+                ).map((example) => (
+                  <div className={styles.grammarExampleItem} key={`${example.jp}-${example.es}`}>
+                    <strong>{example.jp}</strong>
+                    {example.reading && <small>{example.reading}</small>}
+                    <em>{example.es}</em>
+                    {example.note && <p>{example.note}</p>}
+                  </div>
+                ))}
               </div>
+              {selectedPattern.interactions?.length ? (
+                <div className={styles.grammarInlineInteractions}>
+                  {selectedPattern.interactions.map((interaction, index) => (
+                    <GrammarInteractionBlock
+                      key={`${interaction.type}-${index}`}
+                      interaction={interaction}
+                    />
+                  ))}
+                </div>
+              ) : null}
+              {selectedPattern.commonMistakes?.length ? (
+                <div className={styles.grammarMistakeBox}>
+                  <span>Errores comunes</span>
+                  <ul>
+                    {selectedPattern.commonMistakes.map((mistake) => (
+                      <li key={mistake}>{mistake}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
               <div className={styles.grammarPracticeBox}>
                 <span>Practica</span>
                 <strong>{selectedPattern.cue}</strong>
-                <p>Di una frase nueva usando este patrón.</p>
+                {selectedPattern.practicePrompts?.length ? (
+                  <ul>
+                    {selectedPattern.practicePrompts.map((prompt) => (
+                      <li key={prompt}>{prompt}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>Di una frase nueva usando este patrón.</p>
+                )}
               </div>
             </div>
           </aside>
