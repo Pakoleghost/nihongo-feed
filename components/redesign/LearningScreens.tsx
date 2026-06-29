@@ -33,6 +33,7 @@ import {
   getCurriculumModuleByNumber,
 } from "@/lib/curriculum-modules";
 import { GENKI_LESSON_NAMES } from "@/lib/genki-lesson-names";
+import FuriganaText from "@/components/FuriganaText";
 
 type PageHeaderProps = {
   title: string;
@@ -1466,6 +1467,7 @@ export function GrammarLearningScreen() {
   const [selectedPatternKey, setSelectedPatternKey] = useState<string | null>(
     null,
   );
+  const [showGrammarFurigana, setShowGrammarFurigana] = useState(true);
   const selectedModule =
     modules.find((module) => module.moduleNumber === selectedModuleNumber) ??
     null;
@@ -1524,6 +1526,11 @@ export function GrammarLearningScreen() {
   const backToLessons = () => {
     setActiveLessonNumber(null);
     setSelectedPatternKey(null);
+  };
+
+  const playGrammarAudio = (audioUrl?: string) => {
+    if (!audioUrl) return;
+    void new Audio(audioUrl).play();
   };
 
   if (currentStep === "modules") {
@@ -1658,6 +1665,16 @@ export function GrammarLearningScreen() {
               entender y usar en clase.
             </p>
           </div>
+          <button
+            type="button"
+            className={`${styles.grammarFuriganaToggle} ${
+              showGrammarFurigana ? styles.grammarFuriganaToggleActive : ""
+            }`}
+            onClick={() => setShowGrammarFurigana((current) => !current)}
+            aria-pressed={showGrammarFurigana}
+          >
+            ふりがな
+          </button>
         </div>
 
         <div
@@ -1753,13 +1770,66 @@ export function GrammarLearningScreen() {
                     ]
                 ).map((example) => (
                   <div className={styles.grammarExampleItem} key={`${example.jp}-${example.es}`}>
-                    <strong>{example.jp}</strong>
+                    <strong>
+                      <FuriganaText
+                        text={
+                          showGrammarFurigana
+                            ? example.jpFurigana ?? example.jp
+                            : example.jp
+                        }
+                      />
+                    </strong>
                     {example.reading && <small>{example.reading}</small>}
                     <em>{example.es}</em>
                     {example.note && <p>{example.note}</p>}
                   </div>
                 ))}
               </div>
+              {selectedPattern.dialogue?.length ? (
+                <div className={styles.grammarDialogueBox}>
+                  <span>Conversación</span>
+                  <div className={styles.grammarDialogueList}>
+                    {selectedPattern.dialogue.map((line, index) => {
+                      const isSecondSpeaker = index % 2 === 1;
+
+                      return (
+                        <div
+                          className={`${styles.grammarDialogueLine} ${
+                            isSecondSpeaker
+                              ? styles.grammarDialogueLineAlt
+                              : ""
+                          }`}
+                          key={`${line.speaker}-${line.jp}-${index}`}
+                        >
+                          <div className={styles.grammarDialogueAvatar}>
+                            {line.speaker}
+                          </div>
+                          <div className={styles.grammarDialogueBubble}>
+                            <strong>
+                              <FuriganaText
+                                text={
+                                  showGrammarFurigana
+                                    ? line.jpFurigana ?? line.jp
+                                    : line.jp
+                                }
+                              />
+                            </strong>
+                            <em>{line.es}</em>
+                            <button
+                              type="button"
+                              disabled={!line.audioUrl}
+                              onClick={() => playGrammarAudio(line.audioUrl)}
+                              aria-label={`Reproducir línea de ${line.speaker}`}
+                            >
+                              ▶ Audio
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
               {selectedPattern.interactions?.length ? (
                 <div className={styles.grammarInlineInteractions}>
                   {selectedPattern.interactions.map((interaction, index) => (

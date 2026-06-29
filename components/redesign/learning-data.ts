@@ -78,6 +78,7 @@ export type GrammarPattern = {
   explanation?: string[];
   formation?: string[];
   examples?: GrammarExample[];
+  dialogue?: GrammarDialogueLine[];
   commonMistakes?: string[];
   practicePrompts?: string[];
   interactions?: GrammarInteraction[];
@@ -87,9 +88,21 @@ export type GrammarPattern = {
 
 export type GrammarExample = {
   jp: string;
+  jpFurigana?: string;
   reading?: string;
   es: string;
   note?: string;
+  audioKey?: string;
+  audioUrl?: string;
+};
+
+export type GrammarDialogueLine = {
+  speaker: string;
+  jp: string;
+  jpFurigana?: string;
+  es: string;
+  audioKey?: string;
+  audioUrl?: string;
 };
 
 export type GrammarInteraction =
@@ -150,15 +163,49 @@ export const grammarLessons: GrammarLessonCard[] = [
         examples: [
           {
             jp: "私は学生です。",
+            jpFurigana: "{私|わたし}は{学生|がくせい}です。",
             reading: "わたしはがくせいです。",
             es: "Soy estudiante.",
             note: "私 es el tema, 学生 es lo que dices sobre ti.",
+            audioKey: "genki1-l1-copula-example-1",
           },
           {
             jp: "田中さんは先生です。",
+            jpFurigana: "{田中|たなか}さんは{先生|せんせい}です。",
             reading: "たなかさんはせんせいです。",
             es: "Tanaka es profesor.",
             note: "さん se usa con nombres de otras personas.",
+            audioKey: "genki1-l1-copula-example-2",
+          },
+        ],
+        dialogue: [
+          {
+            speaker: "A",
+            jp: "はじめまして。私はパコです。",
+            jpFurigana: "はじめまして。{私|わたし}はパコです。",
+            es: "Mucho gusto. Soy Pako.",
+            audioKey: "genki1-l1-copula-dialogue-a1",
+          },
+          {
+            speaker: "B",
+            jp: "はじめまして。私は学生です。",
+            jpFurigana: "はじめまして。{私|わたし}は{学生|がくせい}です。",
+            es: "Mucho gusto. Soy estudiante.",
+            audioKey: "genki1-l1-copula-dialogue-b1",
+          },
+          {
+            speaker: "A",
+            jp: "田中さんは先生ですか。",
+            jpFurigana: "{田中|たなか}さんは{先生|せんせい}ですか。",
+            es: "¿Tanaka es profesor?",
+            audioKey: "genki1-l1-copula-dialogue-a2",
+          },
+          {
+            speaker: "B",
+            jp: "はい、田中さんは先生です。",
+            jpFurigana: "はい、{田中|たなか}さんは{先生|せんせい}です。",
+            es: "Sí, Tanaka es profesor.",
+            audioKey: "genki1-l1-copula-dialogue-b2",
           },
         ],
         commonMistakes: [
@@ -206,11 +253,13 @@ export const grammarLessons: GrammarLessonCard[] = [
         examples: [
           {
             jp: "私は先生じゃないです。",
+            jpFurigana: "{私|わたし}は{先生|せんせい}じゃないです。",
             reading: "わたしはせんせいじゃないです。",
             es: "No soy profesor.",
           },
           {
             jp: "メアリーさんは日本人じゃないです。",
+            jpFurigana: "メアリーさんは{日本人|にほんじん}じゃないです。",
             reading: "メアリーさんはにほんじんじゃないです。",
             es: "Mary no es japonesa.",
           },
@@ -255,11 +304,13 @@ export const grammarLessons: GrammarLessonCard[] = [
         examples: [
           {
             jp: "日本語の本です。",
+            jpFurigana: "{日本語|にほんご}の{本|ほん}です。",
             reading: "にほんごのほんです。",
             es: "Es un libro de japonés.",
           },
           {
             jp: "私の先生です。",
+            jpFurigana: "{私|わたし}の{先生|せんせい}です。",
             reading: "わたしのせんせいです。",
             es: "Es mi profesor/a.",
             note: "私の marca posesión o relación.",

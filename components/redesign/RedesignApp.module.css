@@ -2455,6 +2455,37 @@
   min-width: 0;
 }
 
+.grammarFuriganaToggle {
+  min-height: 38px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--muted);
+  padding: 0 14px;
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 13px;
+  font-weight: 950;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease,
+    transform 110ms ease;
+}
+
+.grammarFuriganaToggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(78, 205, 196, 0.42);
+  box-shadow: 0 10px 22px rgba(26, 26, 46, 0.07);
+}
+
+.grammarFuriganaToggleActive {
+  border-color: rgba(78, 205, 196, 0.48);
+  background: rgba(78, 205, 196, 0.16);
+  color: var(--navy);
+}
+
 .grammarDetailSticky {
   position: sticky;
   top: 18px;
@@ -2487,6 +2518,7 @@
 .grammarPracticeBox,
 .grammarExplanationBlock,
 .grammarFormationBox,
+.grammarDialogueBox,
 .grammarInlineInteractions,
 .grammarMistakeBox {
   position: relative;
@@ -2513,6 +2545,7 @@
 .grammarExampleBox,
 .grammarPracticeBox,
 .grammarFormationBox,
+.grammarDialogueBox,
 .grammarMistakeBox,
 .grammarInteraction {
   display: grid;
@@ -2526,6 +2559,7 @@
 .grammarExampleBox span,
 .grammarPracticeBox span,
 .grammarFormationBox span,
+.grammarDialogueBox > span,
 .grammarMistakeBox span,
 .grammarInteraction > span {
   color: var(--muted);
@@ -2581,6 +2615,114 @@
   font-size: 12px;
   font-weight: 750;
   line-height: 1.35;
+}
+
+.grammarExampleItem rt,
+.grammarDialogueBubble rt {
+  color: var(--teal-dark);
+  font-weight: 850;
+}
+
+.grammarDialogueBox {
+  border-color: rgba(78, 205, 196, 0.24);
+  background: rgba(78, 205, 196, 0.08);
+}
+
+.grammarDialogueList {
+  display: grid;
+  gap: 12px;
+}
+
+.grammarDialogueLine {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 9px;
+  align-items: end;
+}
+
+.grammarDialogueLineAlt {
+  grid-template-columns: minmax(0, 1fr) 28px;
+}
+
+.grammarDialogueLineAlt .grammarDialogueAvatar {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.grammarDialogueLineAlt .grammarDialogueBubble {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: end;
+  border-color: rgba(26, 26, 46, 0.1);
+  background: var(--navy);
+  color: #fff;
+}
+
+.grammarDialogueAvatar {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--teal-dark);
+  font-size: 12px;
+  font-weight: 950;
+  box-shadow: 0 8px 18px rgba(26, 26, 46, 0.08);
+}
+
+.grammarDialogueBubble {
+  max-width: 92%;
+  display: grid;
+  gap: 5px;
+  border: 1px solid rgba(78, 205, 196, 0.2);
+  border-radius: 16px 16px 16px 5px;
+  background: #fff;
+  color: var(--navy);
+  padding: 11px;
+}
+
+.grammarDialogueLineAlt .grammarDialogueBubble {
+  border-radius: 16px 16px 5px;
+}
+
+.grammarDialogueBubble strong {
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 18px;
+  font-weight: 950;
+  line-height: 1.35;
+}
+
+.grammarDialogueBubble em {
+  color: inherit;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 750;
+  line-height: 1.35;
+  opacity: 0.72;
+}
+
+.grammarDialogueBubble button {
+  justify-self: start;
+  min-height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(78, 205, 196, 0.16);
+  color: var(--navy);
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.grammarDialogueLineAlt .grammarDialogueBubble button {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.grammarDialogueBubble button:disabled {
+  cursor: not-allowed;
+  opacity: 0.46;
 }
 
 .grammarExplanationBlock {
