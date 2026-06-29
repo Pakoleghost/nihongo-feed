@@ -125,7 +125,7 @@ export default function ScoreboardPage() {
   return (
     <div
       style={{
-        background: "#0D0D1A",
+        background: "#1A1A2E",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -218,7 +218,7 @@ export default function ScoreboardPage() {
         ) : rows.length === 0 ? (
           <div
             style={{
-              background: "#16161F",
+              background: "#242440",
               borderRadius: "1.5rem",
               padding: "32px",
               textAlign: "center",
@@ -238,7 +238,7 @@ export default function ScoreboardPage() {
               <div
                 key={row.user_id}
                 style={{
-                  background: isMe ? "rgba(78,205,196,0.15)" : "#1E2235",
+                  background: isMe ? "rgba(78,205,196,0.15)" : "#252541",
                   borderRadius: "1.5rem",
                   padding: "14px 18px",
                   display: "flex",

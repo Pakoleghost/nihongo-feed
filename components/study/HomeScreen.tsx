@@ -126,7 +126,7 @@ export default function HomeScreen({
                 <div style={{
                   width: `${progressPct}%`, height: "100%",
                   background: hasPending
-                    ? `linear-gradient(to right, ${DS.accent}, #c42b38)`
+                    ? `linear-gradient(to right, ${DS.accent}, #E63946)`
                     : `linear-gradient(to right, ${DS.teal}, ${DS.tealDark})`,
                   borderRadius: 5, transition: "width 0.5s ease",
                   minWidth: stateCounts.fijado > 0 ? 12 : 0,
@@ -139,7 +139,7 @@ export default function HomeScreen({
                 style={{
                   width: "100%", padding: "16px",
                   background: hasPending
-                    ? `linear-gradient(135deg, ${DS.accent} 0%, #c42b38 100%)`
+                    ? `linear-gradient(135deg, ${DS.accent} 0%, #E63946 100%)`
                     : `linear-gradient(135deg, ${DS.teal} 0%, ${DS.tealDark} 100%)`,
                   color: hasPending ? "#ffffff" : DS.dark,
                   border: "none", borderRadius: 999,

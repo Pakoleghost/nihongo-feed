@@ -165,7 +165,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
   const completedStrokes = templates.slice(0, activeStrokeIndex);
   const upcomingStrokes = templates.slice(activeStrokeIndex + 1);
   const statusColor =
-    status.tone === "success" ? "#178A83" : status.tone === "error" ? "#C53340" : "#6E737F";
+    status.tone === "success" ? "#4ECDC4" : status.tone === "error" ? "#E63946" : "#6E737F";
   const statusBg =
     status.tone === "success"
       ? "rgba(78,205,196,0.12)"
@@ -178,7 +178,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
       <div
         style={{
           borderRadius: "24px",
-          background: "#F7F3ED",
+          background: "#F4F5F7",
           padding: "18px",
           display: "grid",
           gap: "10px",
@@ -216,7 +216,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
         <div
           style={{
             borderRadius: "999px",
-            background: "#F7F3ED",
+            background: "#F4F5F7",
             color: "#5E6472",
             padding: "8px 12px",
             fontSize: "12px",
@@ -232,7 +232,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
           style={{
             border: "none",
             borderRadius: "999px",
-            background: "#F7F3ED",
+            background: "#F4F5F7",
             color: "#1A1A2E",
             padding: "8px 12px",
             fontSize: "12px",
@@ -248,7 +248,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
       <div
         style={{
           borderRadius: "28px",
-          background: "#FAF7F1",
+          background: "#F4F5F7",
           padding: "14px",
           boxShadow: "inset 0 0 0 1px rgba(26,26,46,0.05)",
           width: "100%",
@@ -280,7 +280,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
               y1="6"
               x2="54.5"
               y2="103"
-              stroke="#ECE4D9"
+              stroke="#E5E7EB"
               strokeWidth="0.6"
               strokeDasharray="4 4"
             />
@@ -289,7 +289,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
               y1="54.5"
               x2="103"
               y2="54.5"
-              stroke="#ECE4D9"
+              stroke="#E5E7EB"
               strokeWidth="0.6"
               strokeDasharray="4 4"
             />
@@ -311,7 +311,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
                 key={`done-${stroke.d}`}
                 d={stroke.d}
                 fill="none"
-                stroke={isCompletingKana ? "#2DBBB2" : "rgba(78,205,196,0.52)"}
+                stroke={isCompletingKana ? "#4ECDC4" : "rgba(78,205,196,0.52)"}
                 strokeWidth="4.6"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -335,7 +335,7 @@ export default function KanaTraceCanvas({ kana, disabled = false, onKanaComplete
             <path
               d={userPath}
               fill="none"
-              stroke="#178A83"
+              stroke="#4ECDC4"
               strokeWidth="5"
               strokeLinecap="round"
               strokeLinejoin="round"

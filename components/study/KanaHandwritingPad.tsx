@@ -337,7 +337,7 @@ export default function KanaHandwritingPad({ targetKana, onRated }: KanaHandwrit
                     borderRadius: 16,
                     border: "1px solid color-mix(in srgb, #4ECDC4 36%, transparent)",
                     background: "color-mix(in srgb, #4ECDC4 18%, white)",
-                    color: "#117964",
+                    color: "#4ECDC4",
                     fontSize: 13,
                     fontWeight: 800,
                     display: "grid",

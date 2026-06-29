@@ -59,10 +59,7 @@ export default function PendingApprovalPage() {
   // Check status after auth hydration.
   useEffect(() => {
     if (!authReady) return;
-    if (!userId) {
-      setChecked(true);
-      return;
-    }
+    if (!userId) return;
 
     const checkStatus = async () => {
       setChecked(false);
@@ -85,7 +82,7 @@ export default function PendingApprovalPage() {
       }
 
       if (profile?.is_approved) {
-        window.location.href = username ? "/" : "/pick-username";
+        window.location.href = username ? "/dashboard" : "/pick-username";
         return;
       }
 
@@ -106,7 +103,7 @@ export default function PendingApprovalPage() {
       if (app?.status === "approved") {
         // Fallback: if applications is approved but profiles.approved hasn't propagated yet,
         // still move the user forward.
-        window.location.href = username ? "/" : "/pick-username";
+        window.location.href = username ? "/dashboard" : "/pick-username";
         return;
       }
 
@@ -147,7 +144,7 @@ export default function PendingApprovalPage() {
 
       if (profile?.is_approved) {
         // Keep the session. Just move them into the app.
-        window.location.href = username ? "/" : "/pick-username";
+        window.location.href = username ? "/dashboard" : "/pick-username";
       }
 
       const { data: app } = await supabase
@@ -159,7 +156,7 @@ export default function PendingApprovalPage() {
         .maybeSingle();
 
       if (app?.status === "approved") {
-        window.location.href = username ? "/" : "/pick-username";
+        window.location.href = username ? "/dashboard" : "/pick-username";
       }
     };
 

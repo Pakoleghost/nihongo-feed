@@ -75,7 +75,7 @@ export default function StudentViewBanner() {
             style={{
               borderRadius: 999,
               background: "rgba(255,255,255,0.12)",
-              color: "#D9F7F4",
+              color: "#4ECDC4",
               padding: "4px 8px",
               fontSize: 11,
               fontWeight: 900,

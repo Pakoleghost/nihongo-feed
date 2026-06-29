@@ -12,8 +12,8 @@ const HeartIcon = ({ filled }: { filled: boolean }) => (
     width="20"
     height="20"
     viewBox="0 0 24 24"
-    fill={filled ? "#ff2d55" : "none"}
-    stroke={filled ? "#ff2d55" : "#666"}
+    fill={filled ? "#E63946" : "none"}
+    stroke={filled ? "#E63946" : "#666"}
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"

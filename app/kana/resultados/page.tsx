@@ -143,7 +143,7 @@ export default function ResultadosPage() {
       {/* Hero card */}
       <div
         style={{
-          background: "#1E2235",
+          background: "#252541",
           borderRadius: "24px",
           border: "1px solid rgba(255,255,255,0.08)",
           padding: "28px 20px 24px",
@@ -227,7 +227,7 @@ export default function ResultadosPage() {
         <div
           style={{
             marginTop: "16px",
-            background: "#1E2235",
+            background: "#252541",
             borderRadius: "20px",
             border: "1px solid rgba(255,255,255,0.08)",
             padding: "18px 18px 16px",
@@ -282,7 +282,7 @@ export default function ResultadosPage() {
               borderRadius: "14px",
               border: "1px solid rgba(255,255,255,0.10)",
               cursor: "pointer",
-              background: "#1E2235",
+              background: "#252541",
               color: "#FFFFFF",
               fontSize: "16px",
               fontWeight: 800,

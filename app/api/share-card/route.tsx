@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
           style={{
             width: "100%", height: "100%",
             display: "flex", flexDirection: "column",
-            background: "#FFF8E7",
+            background: "#F4F5F7",
             fontFamily,
           }}
         >
@@ -124,7 +124,7 @@ export async function GET(req: NextRequest) {
         style={{
           width: "100%", height: "100%",
           display: "flex", flexDirection: "column",
-          background: "#FFF8E7",
+          background: "#F4F5F7",
           padding: "80px 72px",
           fontFamily,
         }}

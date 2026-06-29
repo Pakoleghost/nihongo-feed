@@ -50,7 +50,7 @@ function AvatarCircle({
         width: size,
         height: size,
         borderRadius: "50%",
-        background: "#2D3148",
+        background: "#252541",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -364,7 +364,7 @@ export default function PerfilPage() {
         <div
           style={{
             flex: 1,
-            background: "#1E2235",
+            background: "#252541",
             borderRadius: "14px",
             boxShadow: "0 2px 10px rgba(0,0,0,0.25)",
             padding: "14px 10px",
@@ -376,7 +376,7 @@ export default function PerfilPage() {
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M12 2C12 2 7 8 7 13a5 5 0 0010 0c0-3-2-6-2-6s-1 2.5-2 3c-.5-2 .5-5-1-8z" fill="#E63946" opacity="0.9"/>
-            <path d="M12 14c0 1.1-.9 2-2 2 0-1.5 1-2.5 2-3v1z" fill="#1E2235"/>
+            <path d="M12 14c0 1.1-.9 2-2 2 0-1.5 1-2.5 2-3v1z" fill="#252541"/>
           </svg>
           <span
             style={{
@@ -398,7 +398,7 @@ export default function PerfilPage() {
         <div
           style={{
             flex: 1,
-            background: "#1E2235",
+            background: "#252541",
             borderRadius: "14px",
             boxShadow: "0 2px 10px rgba(0,0,0,0.25)",
             padding: "14px 10px",
@@ -433,7 +433,7 @@ export default function PerfilPage() {
         <div
           style={{
             flex: 1,
-            background: "#1E2235",
+            background: "#252541",
             borderRadius: "14px",
             boxShadow: "0 2px 10px rgba(0,0,0,0.25)",
             padding: "14px 10px",
@@ -467,7 +467,7 @@ export default function PerfilPage() {
       <div style={{ padding: "0 20px" }}>
         <div
           style={{
-            background: "#1E2235",
+            background: "#252541",
             borderRadius: "16px",
             boxShadow: "0 2px 10px rgba(0,0,0,0.25)",
             overflow: "hidden",
@@ -584,7 +584,7 @@ export default function PerfilPage() {
         {recentPosts.length === 0 ? (
           <div
             style={{
-              background: "#1E2235",
+              background: "#252541",
               borderRadius: "14px",
               boxShadow: "0 2px 10px rgba(0,0,0,0.25)",
               padding: "24px 20px",
@@ -604,7 +604,7 @@ export default function PerfilPage() {
               <div
                 key={post.id}
                 style={{
-                  background: "#1E2235",
+                  background: "#252541",
                   borderRadius: "14px",
                   boxShadow: "0 2px 10px rgba(0,0,0,0.25)",
                   padding: "14px 16px",
@@ -616,7 +616,7 @@ export default function PerfilPage() {
                     {formatDate(post.created_at)}
                   </span>
                   {post.from_tema && (
-                    <span style={{ fontSize: 10, fontWeight: 800, color: "#178A83", background: "rgba(78,205,196,0.10)", borderRadius: 4, padding: "1px 6px", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: "#4ECDC4", background: "rgba(78,205,196,0.10)", borderRadius: 4, padding: "1px 6px", letterSpacing: "0.05em", textTransform: "uppercase" }}>
                       tema
                     </span>
                   )}
@@ -645,7 +645,7 @@ export default function PerfilPage() {
           <h2 style={{ fontSize: 18, fontWeight: 800, color: "#F4F4F8", margin: "0 0 12px", letterSpacing: "-0.03em" }}>
             Admin
           </h2>
-          <div style={{ background: "#1E2235", borderRadius: 16, boxShadow: "0 2px 10px rgba(0,0,0,0.25)", overflow: "hidden" }}>
+          <div style={{ background: "#252541", borderRadius: 16, boxShadow: "0 2px 10px rgba(0,0,0,0.25)", overflow: "hidden" }}>
 
             {/* Student view toggle */}
             <div style={{ padding: "14px 18px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
@@ -683,7 +683,7 @@ export default function PerfilPage() {
                   onChange={(e) => setStudentViewGroupName(e.target.value || null)}
                   style={{
                     marginTop: 10, width: "100%", border: "none",
-                    borderRadius: 10, background: "#12121F", color: "#F4F4F8",
+                    borderRadius: 10, background: "#1A1A2E", color: "#F4F4F8",
                     padding: "9px 12px", fontSize: 13, fontWeight: 700,
                     outline: "none", fontFamily: "inherit",
                   }}

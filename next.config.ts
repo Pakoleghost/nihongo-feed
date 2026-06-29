@@ -28,6 +28,10 @@ const nextConfig: NextConfig = {
   // _next/static is already immutable — this makes it explicit and adds
   // stale-while-revalidate for edge caches.
   async headers() {
+    if (process.env.NODE_ENV !== "production") {
+      return [];
+    }
+
     return [
       {
         source: "/_next/static/:path*",

@@ -5,28 +5,36 @@ import { useRouter } from "next/navigation";
 import { GENKI_KANJI_BY_LESSON } from "@/lib/genki-kanji-by-lesson";
 import type { GenkiKanjiItem } from "@/lib/genki-kanji-by-lesson";
 import { setLastActivity } from "@/lib/streak";
-import { loadKanjiProgress, recordKanjiExposure, saveKanjiProgress, type KanjiProgressMap } from "@/lib/kanji-progress";
+import {
+  loadKanjiProgress,
+  recordKanjiExposure,
+  saveKanjiProgress,
+  type KanjiProgressMap,
+} from "@/lib/kanji-progress";
 import PracticeSessionHeader from "@/components/practicar/PracticeSessionHeader";
 import PracticeSessionLayout from "@/components/practicar/PracticeSessionLayout";
 import { GENKI_LESSON_NAMES } from "@/lib/genki-lesson-names";
 
 const USER_KEY = "anon";
 
-const KANJI_ENTRY_TYPE_PRIORITY: Record<GenkiKanjiItem["entry_type"], number> = {
-  word: 0,
-  verb: 1,
-  adjective_i: 2,
-  na_adjective: 3,
-  suru_verb: 4,
-  single_kanji_word: 5,
-  weekday: 6,
-  phrase: 7,
-  time_expression: 8,
-  proper_name: 9,
-};
+const KANJI_ENTRY_TYPE_PRIORITY: Record<GenkiKanjiItem["entry_type"], number> =
+  {
+    word: 0,
+    verb: 1,
+    adjective_i: 2,
+    na_adjective: 3,
+    suru_verb: 4,
+    single_kanji_word: 5,
+    weekday: 6,
+    phrase: 7,
+    time_expression: 8,
+    proper_name: 9,
+  };
 
 function compareByKanjiPriority(a: GenkiKanjiItem, b: GenkiKanjiItem) {
-  const rankDiff = KANJI_ENTRY_TYPE_PRIORITY[a.entry_type] - KANJI_ENTRY_TYPE_PRIORITY[b.entry_type];
+  const rankDiff =
+    KANJI_ENTRY_TYPE_PRIORITY[a.entry_type] -
+    KANJI_ENTRY_TYPE_PRIORITY[b.entry_type];
   if (rankDiff !== 0) return rankDiff;
 
   const rowDiff = a.source_row - b.source_row;
@@ -50,10 +58,17 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
 
   const lesson = initialLesson;
   const lessonTitle = GENKI_LESSON_NAMES[lesson] ?? `Lección ${lesson}`;
-  const lessonItems = useMemo(() => GENKI_KANJI_BY_LESSON[lesson] ?? [], [lesson]);
-  const studyItems = useMemo(() => [...lessonItems].sort(compareByKanjiPriority), [lessonItems]);
+  const lessonItems = useMemo(
+    () => GENKI_KANJI_BY_LESSON[lesson] ?? [],
+    [lesson],
+  );
+  const studyItems = useMemo(
+    () => [...lessonItems].sort(compareByKanjiPriority),
+    [lessonItems],
+  );
   const currentStudyItem = studyItems[currentStudyIndex];
-  const studyProgressPct = studyItems.length > 0 ? (currentStudyIndex / studyItems.length) * 100 : 0;
+  const studyProgressPct =
+    studyItems.length > 0 ? (currentStudyIndex / studyItems.length) * 100 : 0;
 
   useEffect(() => {
     setLastActivity(`Kanji · Aprender · L${lesson}`, "/practicar/kanji");
@@ -115,11 +130,19 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
         onExit={() => router.push("/practicar")}
       />
 
-      <div style={{ marginTop: "12px", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+      <div
+        style={{
+          marginTop: "12px",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+        }}
+      >
         {studyComplete ? (
           <div
             style={{
-              background: "#16161F",
+              background: "#242440",
               borderRadius: "24px",
               padding: "22px 20px",
               border: "1px solid rgba(255,255,255,0.08)",
@@ -132,11 +155,35 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
               flex: 1,
             }}
           >
-            <p style={{ fontSize: "22px", fontWeight: 800, color: "#FFFFFF", margin: 0 }}>Lección repasada</p>
-            <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.42)", margin: 0, lineHeight: 1.4 }}>
-              Revisaste {studyItems.length} palabras.
+            <p
+              style={{
+                fontSize: "22px",
+                fontWeight: 800,
+                color: "#FFFFFF",
+                margin: 0,
+              }}
+            >
+              Lección repasada
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%", marginTop: "4px" }}>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "rgba(255,255,255,0.42)",
+                margin: 0,
+                lineHeight: 1.4,
+              }}
+            >
+              Revisaste {studyItems.length} kanji.
+            </p>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "10px",
+                width: "100%",
+                marginTop: "4px",
+              }}
+            >
               <button
                 onClick={restartLearnSession}
                 style={{
@@ -153,7 +200,9 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
                 Repetir lección
               </button>
               <button
-                onClick={() => router.push(`/practicar/kanji/practicar?lesson=${lesson}`)}
+                onClick={() =>
+                  router.push(`/practicar/kanji/practicar?lesson=${lesson}`)
+                }
                 style={{
                   padding: "13px 16px",
                   borderRadius: "999px",
@@ -189,7 +238,7 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
           <>
             <div
               style={{
-                background: "#16161F",
+                background: "#242440",
                 borderRadius: 20,
                 padding: "28px 24px",
                 border: "1px solid rgba(255,255,255,0.08)",
@@ -226,25 +275,55 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
               </p>
 
               {/* Divider */}
-              <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.10)", margin: "16px 0" }} />
+              <div
+                style={{
+                  width: 40,
+                  height: 1,
+                  background: "rgba(255,255,255,0.10)",
+                  margin: "16px 0",
+                }}
+              />
 
               {/* Meaning */}
-              <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#FFFFFF", lineHeight: 1.4 }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: "#FFFFFF",
+                  lineHeight: 1.4,
+                }}
+              >
                 {currentStudyItem.es}
               </p>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "12px" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "10px",
+                marginTop: "12px",
+              }}
+            >
               <button
-                onClick={() => setCurrentStudyIndex((value) => Math.max(0, value - 1))}
+                onClick={() =>
+                  setCurrentStudyIndex((value) => Math.max(0, value - 1))
+                }
                 disabled={currentStudyIndex === 0}
                 style={{
                   padding: "14px 12px",
                   borderRadius: "999px",
                   border: "none",
                   cursor: currentStudyIndex === 0 ? "default" : "pointer",
-                  background: currentStudyIndex === 0 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.10)",
-                  color: currentStudyIndex === 0 ? "rgba(255,255,255,0.20)" : "#FFFFFF",
+                  background:
+                    currentStudyIndex === 0
+                      ? "rgba(255,255,255,0.05)"
+                      : "rgba(255,255,255,0.10)",
+                  color:
+                    currentStudyIndex === 0
+                      ? "rgba(255,255,255,0.20)"
+                      : "#FFFFFF",
                   fontWeight: 700,
                   fontSize: "15px",
                 }}
@@ -265,7 +344,9 @@ export default function KanjiLearnSessionScreen({ initialLesson }: Props) {
                   boxShadow: "0 4px 16px rgba(78,205,196,0.28)",
                 }}
               >
-                {currentStudyIndex + 1 >= studyItems.length ? "Terminar" : "Siguiente"}
+                {currentStudyIndex + 1 >= studyItems.length
+                  ? "Terminar"
+                  : "Siguiente"}
               </button>
             </div>
           </>

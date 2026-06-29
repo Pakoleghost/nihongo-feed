@@ -37,7 +37,7 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
     cefr: "A1",
     jlpt: "N5",
     lecciones: [1, 2, 3],
-    canDo: "Puedes presentarte, hablar de tu rutina diaria, decir a qué hora haces las cosas, describir dónde están personas y objetos, e invitar a alguien a hacer algo.",
+    canDo: "Puedes presentarte, hablar de tu rutina diaria, decir a qué hora haces las cosas, e invitar a alguien a hacer algo.",
     vocabTemas: [
       "números y precios",
       "días y horas",
@@ -109,7 +109,7 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
     cefr: "A1",
     jlpt: "N5",
     lecciones: [4, 5, 6],
-    canDo: "Puedes describir personas y cosas con adjetivos, expresar lo que te gusta o no, conectar acciones con la forma て, pedir favores, dar permiso, y explicar lo que está pasando en este momento.",
+    canDo: "Puedes describir dónde están personas y objetos, proponer hacer algo juntos, describir personas y cosas con adjetivos, expresar lo que te gusta o no, conectar acciones con la forma て, pedir favores, dar permiso, y explicar lo que está pasando en este momento.",
     vocabTemas: [
       "adjetivos de tamaño, color, forma y personalidad",
       "pasatiempos y deportes",

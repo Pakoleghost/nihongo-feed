@@ -128,7 +128,7 @@ export default function PublicProfilePage() {
 
   if (loading) {
     return (
-      <div style={{ background: "#FFF8E7", minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ background: "#F4F5F7", minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <span style={{ fontSize: 13, color: "#9CA3AF", fontWeight: 600 }}>Cargando…</span>
       </div>
     );
@@ -136,10 +136,10 @@ export default function PublicProfilePage() {
 
   if (notFound) {
     return (
-      <div style={{ background: "#FFF8E7", minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
+      <div style={{ background: "#F4F5F7", minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
-          <circle cx="11" cy="11" r="8" stroke="#C4BAB0" strokeWidth="2"/>
-          <path d="M21 21l-4.35-4.35" stroke="#C4BAB0" strokeWidth="2" strokeLinecap="round"/>
+          <circle cx="11" cy="11" r="8" stroke="#9CA3AF" strokeWidth="2"/>
+          <path d="M21 21l-4.35-4.35" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round"/>
         </svg>
         <p style={{ fontSize: 16, color: "#9CA3AF", margin: 0, fontWeight: 600 }}>Usuario no encontrado</p>
       </div>
@@ -149,7 +149,7 @@ export default function PublicProfilePage() {
   return (
     <div
       style={{
-        background: "#FFF8E7",
+        background: "#F4F5F7",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",

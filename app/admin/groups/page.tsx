@@ -194,7 +194,7 @@ export default function AdminGroupsPage() {
 
   return (
     <>
-    <div style={{ background: "#FFF8E7", minHeight: "100dvh", display: "flex", flexDirection: "column", paddingBottom: "calc(140px + env(safe-area-inset-bottom, 0px))" }}>
+    <div style={{ background: "#F4F5F7", minHeight: "100dvh", display: "flex", flexDirection: "column", paddingBottom: "calc(140px + env(safe-area-inset-bottom, 0px))" }}>
       <div style={{ maxWidth: "760px", margin: "0 auto", width: "100%", padding: "0 16px" }}>
 
         <header style={{ padding: "20px 0 16px" }}>
@@ -218,7 +218,7 @@ export default function AdminGroupsPage() {
                 </p>
                 <h2 style={{ margin: "8px 0 0", color: "#1A1A2E", fontSize: 22, fontWeight: 900 }}>Solicitudes</h2>
               </div>
-              <span style={{ borderRadius: 999, background: pendingUsers.length ? "rgba(230,57,70,0.12)" : "rgba(78,205,196,0.14)", color: pendingUsers.length ? "#C53340" : "#178A83", padding: "7px 10px", fontSize: 13, fontWeight: 900 }}>
+              <span style={{ borderRadius: 999, background: pendingUsers.length ? "rgba(230,57,70,0.12)" : "rgba(78,205,196,0.14)", color: pendingUsers.length ? "#E63946" : "#4ECDC4", padding: "7px 10px", fontSize: 13, fontWeight: 900 }}>
                 {pendingUsers.length}
               </span>
             </div>
@@ -270,7 +270,7 @@ export default function AdminGroupsPage() {
                   width: "100%",
                   border: "none",
                   borderRadius: 14,
-                  background: "#F8F4EE",
+                  background: "#F4F5F7",
                   color: "#1A1A2E",
                   padding: "10px 12px",
                   fontSize: 13,
@@ -319,7 +319,7 @@ export default function AdminGroupsPage() {
               </p>
               <h2 style={{ margin: "6px 0 0", color: "#1A1A2E", fontSize: 22, fontWeight: 900 }}>Anuncio del maestro</h2>
             </div>
-            <span style={{ borderRadius: 999, background: announcementActive ? "rgba(78,205,196,0.16)" : "rgba(26,26,46,0.06)", color: announcementActive ? "#178A83" : "#9CA3AF", padding: "6px 12px", fontSize: 12, fontWeight: 900 }}>
+            <span style={{ borderRadius: 999, background: announcementActive ? "rgba(78,205,196,0.16)" : "rgba(26,26,46,0.06)", color: announcementActive ? "#4ECDC4" : "#9CA3AF", padding: "6px 12px", fontSize: 12, fontWeight: 900 }}>
               {announcementActive ? "Visible" : "Oculto"}
             </span>
           </div>
@@ -331,7 +331,7 @@ export default function AdminGroupsPage() {
             onChange={e => setAnnouncementText(e.target.value)}
             placeholder="Ej. 今週は家族について書いてね！ (Esta semana escriban sobre la familia)"
             rows={2}
-            style={{ width: "100%", boxSizing: "border-box", border: "1px solid rgba(26,26,46,0.12)", borderRadius: 12, background: "#F8F4EE", padding: "12px 14px", fontSize: 14, color: "#1A1A2E", resize: "vertical", outline: "none", fontFamily: "var(--font-noto-sans-jp), inherit", lineHeight: 1.5 }}
+            style={{ width: "100%", boxSizing: "border-box", border: "1px solid rgba(26,26,46,0.12)", borderRadius: 12, background: "#F4F5F7", padding: "12px 14px", fontSize: 14, color: "#1A1A2E", resize: "vertical", outline: "none", fontFamily: "var(--font-noto-sans-jp), inherit", lineHeight: 1.5 }}
           />
           <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
             <button
@@ -347,7 +347,7 @@ export default function AdminGroupsPage() {
                 type="button"
                 disabled={savingAnnouncement}
                 onClick={() => handleSaveAnnouncement(false)}
-                style={{ ...pillButtonStyle, background: "#FFFFFF", color: "#C53340", boxShadow: "inset 0 0 0 1px rgba(230,57,70,0.25)" }}
+                style={{ ...pillButtonStyle, background: "#FFFFFF", color: "#E63946", boxShadow: "inset 0 0 0 1px rgba(230,57,70,0.25)" }}
               >
                 Quitar
               </button>
@@ -365,7 +365,7 @@ export default function AdminGroupsPage() {
             </h2>
           </div>
 
-          <nav style={{ display: "flex", gap: 8, padding: 14, background: "#F8F4EE", overflowX: "auto" }}>
+          <nav style={{ display: "flex", gap: 8, padding: 14, background: "#F4F5F7", overflowX: "auto" }}>
             <button
               type="button"
               onClick={() => setActiveTab("groups")}
@@ -397,13 +397,13 @@ export default function AdminGroupsPage() {
                         <select
                           value={pendingGroupByUser[u.id] || ""}
                           onChange={(e) => setPendingGroupByUser((prev) => ({ ...prev, [u.id]: e.target.value }))}
-                          style={{ padding: "9px 10px", borderRadius: "12px", border: "none", background: "#F8F4EE", width: "auto" }}
+                          style={{ padding: "9px 10px", borderRadius: "12px", border: "none", background: "#F4F5F7", width: "auto" }}
                         >
                           <option value="">Elegir grupo…</option>
                           {groups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
                         </select>
                         <button onClick={() => handleApprove(u.id)} style={{ ...pillButtonStyle, background: "#4ECDC4", color: "#1A1A2E" }}>Aprobar</button>
-                        <button onClick={() => handleDeleteUser(u.id)} style={{ ...pillButtonStyle, background: "rgba(230,57,70,0.10)", color: "#C53340" }}>Borrar</button>
+                        <button onClick={() => handleDeleteUser(u.id)} style={{ ...pillButtonStyle, background: "rgba(230,57,70,0.10)", color: "#E63946" }}>Borrar</button>
                       </div>
                     </div>
                   ))
@@ -422,7 +422,7 @@ export default function AdminGroupsPage() {
                             {u.username && <div style={{ fontSize: "12px", color: "#888" }}>@{u.username}</div>}
                             {u.email && <div style={{ fontSize: "12px", color: "#888" }}>{u.email}</div>}
                           </div>
-                          <button onClick={() => handleDeleteUser(u.id)} style={{ ...pillButtonStyle, background: "rgba(230,57,70,0.10)", color: "#C53340", height: "fit-content" }}>Borrar</button>
+                          <button onClick={() => handleDeleteUser(u.id)} style={{ ...pillButtonStyle, background: "rgba(230,57,70,0.10)", color: "#E63946", height: "fit-content" }}>Borrar</button>
                         </div>
                       ))}
                     </div>
@@ -431,7 +431,7 @@ export default function AdminGroupsPage() {
               </div>
             ) : (
               <div>
-                <div style={{ backgroundColor: "#F8F4EE", padding: "14px", borderRadius: "18px", marginBottom: "16px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <div style={{ backgroundColor: "#F4F5F7", padding: "14px", borderRadius: "18px", marginBottom: "16px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
                   <input
                     type="text"
                     placeholder="Nombre del nuevo grupo..."
@@ -449,7 +449,7 @@ export default function AdminGroupsPage() {
                   </p>
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     {groups.map(g => (
-                      <div key={g.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 12px", borderRadius: 12, background: "#F8F4EE" }}>
+                      <div key={g.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 12px", borderRadius: 12, background: "#F4F5F7" }}>
                         <span style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E" }}>{g.name}</span>
                         <button
                           type="button"
@@ -473,7 +473,7 @@ export default function AdminGroupsPage() {
                   </div>
                 </div>
 
-                <select value={selectedGroup} onChange={e => setSelectedGroup(e.target.value)} style={{ marginBottom: "16px", padding: "11px 12px", borderRadius: "14px", width: "100%", border: "none", background: "#F8F4EE" }}>
+                <select value={selectedGroup} onChange={e => setSelectedGroup(e.target.value)} style={{ marginBottom: "16px", padding: "11px 12px", borderRadius: "14px", width: "100%", border: "none", background: "#F4F5F7" }}>
                   <option value="Todos">Ver todos los alumnos</option>
                   {groups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
                 </select>
@@ -488,11 +488,11 @@ export default function AdminGroupsPage() {
                         {s.username && <div style={{ fontSize: "12px", color: "#888" }}>@{s.username}</div>}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                        <select value={s.group_name || ""} onChange={e => handleUpdateGroup(s.id, e.target.value)} style={{ padding: "8px 10px", borderRadius: "12px", border: "none", background: "#F8F4EE", width: "auto" }}>
+                        <select value={s.group_name || ""} onChange={e => handleUpdateGroup(s.id, e.target.value)} style={{ padding: "8px 10px", borderRadius: "12px", border: "none", background: "#F4F5F7", width: "auto" }}>
                           <option value="">Sin grupo</option>
                           {groups.map(g => <option key={g.name} value={g.name}>{g.name}</option>)}
                         </select>
-                        <button onClick={() => handleDeleteUser(s.id)} style={{ ...pillButtonStyle, background: "rgba(230,57,70,0.10)", color: "#C53340" }}>
+                        <button onClick={() => handleDeleteUser(s.id)} style={{ ...pillButtonStyle, background: "rgba(230,57,70,0.10)", color: "#E63946" }}>
                           Borrar
                         </button>
                       </div>

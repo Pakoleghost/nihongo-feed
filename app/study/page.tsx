@@ -946,9 +946,9 @@ function buildFlashLearnOptions(
 }
 
 function rankBadgeStyles(index: number) {
-  if (index === 0) return { bg: "#f4c95d", border: "#e2b648", color: "#111114" };
-  if (index === 1) return { bg: "#d7dce3", border: "#bdc4ce", color: "#111114" };
-  if (index === 2) return { bg: "#d59a62", border: "#c48141", color: "#fff" };
+  if (index === 0) return { bg: "#F5A623", border: "#F5A623", color: "#1A1A2E" };
+  if (index === 1) return { bg: "#d7dce3", border: "#bdc4ce", color: "#1A1A2E" };
+  if (index === 2) return { bg: "#F5A623", border: "#F5A623", color: "#fff" };
   return { bg: "#fff", border: "#d1d5db", color: "#6b7280" };
 }
 
@@ -6882,8 +6882,8 @@ function StudyContent() {
   const toolCards = [
     { key: "learnkana", href: "/study?view=learnkana", title: "Aprender Kana", accent: "var(--color-accent-strong)", surface: "var(--color-highlight-soft)" },
     { key: "kana", href: "/study?view=kana", title: "Kana Sprint", accent: "var(--color-accent)", surface: "var(--color-accent-soft)" },
-    { key: "sprint", href: "/study?view=sprint", title: "Kanji", accent: "#457B9D", surface: "rgba(69, 123, 157, 0.1)" },
-    { key: "flashcards", href: "/study?view=flashcards", title: "Vocabulario", accent: "#F4A261", surface: "rgba(244, 162, 97, 0.12)" },
+    { key: "sprint", href: "/study?view=sprint", title: "Kanji", accent: "#4ECDC4", surface: "rgba(69, 123, 157, 0.1)" },
+    { key: "flashcards", href: "/study?view=flashcards", title: "Vocabulario", accent: "#F5A623", surface: "rgba(244, 162, 97, 0.12)" },
   ];
   const renderToolPill = (tool: { key: string; href: string; title: string; accent: string; surface: string }) => {
     const selected = activeTab === tool.key;
@@ -7091,7 +7091,7 @@ function StudyContent() {
               ))}
             </div>
             {kanaPenalty > 0 ? (
-              <div style={{ textAlign: "center", color: "#b42318", fontWeight: 800, fontSize: 13 }}>
+              <div style={{ textAlign: "center", color: "#E63946", fontWeight: 800, fontSize: 13 }}>
                 Penalización: espera {kanaPenalty}s
               </div>
             ) : null}
@@ -7137,7 +7137,7 @@ function StudyContent() {
               ))}
             </div>
             {vkPenalty > 0 ? (
-              <div style={{ textAlign: "center", color: "#b42318", fontWeight: 800, fontSize: 13 }}>
+              <div style={{ textAlign: "center", color: "#E63946", fontWeight: 800, fontSize: 13 }}>
                 Penalización: espera {vkPenalty}s
               </div>
             ) : null}
@@ -7477,7 +7477,7 @@ function StudyContent() {
                           <div style={{ width: `${flashLearnProgressPct}%`, height: "100%", background: "var(--color-accent)" }} />
                         </div>
                         <div style={{ ...sectionKickerStyle, marginTop: 10 }}>Definición</div>
-                        <div style={{ marginTop: 6, fontSize: 30, fontWeight: 800, color: "#111114", wordBreak: "break-word" }}>{currentFlashLearnQ.prompt}</div>
+                        <div style={{ marginTop: 6, fontSize: 30, fontWeight: 800, color: "#1A1A2E", wordBreak: "break-word" }}>{currentFlashLearnQ.prompt}</div>
                         <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 8 }}>
                           {currentFlashLearnQ.options.map((option) => {
                             const isSelected = flashLearnChoice === option;
@@ -7766,7 +7766,7 @@ function StudyContent() {
 
               {examFeedback ? (
                 <div style={{ display: "grid", gap: 10, justifyItems: "center", textAlign: "center" }}>
-                  <div style={{ fontSize: "var(--text-body)", color: examFeedback.status === "correct" ? "#117964" : "var(--color-text)", fontWeight: 800 }}>
+                  <div style={{ fontSize: "var(--text-body)", color: examFeedback.status === "correct" ? "#4ECDC4" : "var(--color-text)", fontWeight: 800 }}>
                     {examFeedback.status === "correct" ? "Correcto" : `Respuesta: ${examFeedback.answer}`}
                   </div>
                   {examFeedback.explanation ? (
@@ -7916,7 +7916,7 @@ function StudyContent() {
                 value={flashDeckName}
                 onChange={(event) => setFlashDeckName(event.target.value)}
                 placeholder="Ej. L3-L5 vocab + kanji"
-                style={{ border: "1px solid rgba(17,17,20,.12)", borderRadius: 16, background: "#fff", padding: "12px 14px", fontSize: 16, fontWeight: 700, color: "#111114" }}
+                style={{ border: "1px solid rgba(17,17,20,.12)", borderRadius: 16, background: "#fff", padding: "12px 14px", fontSize: 16, fontWeight: 700, color: "#1A1A2E" }}
               />
 
               <div style={{ display: "grid", gap: 12 }}>

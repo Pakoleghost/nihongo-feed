@@ -125,7 +125,7 @@ export default function KanaPage() {
       {/* ── Smart CTA ── */}
       <Link
         href={smartHref}
-        style={{ background: "#1E2235", borderRadius: 16, padding: "20px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, textDecoration: "none", border: "1px solid rgba(255,255,255,0.10)", marginTop: 8 }}
+        style={{ background: "#252541", borderRadius: 16, padding: "20px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, textDecoration: "none", border: "1px solid rgba(255,255,255,0.10)", marginTop: 8 }}
       >
         <div style={{ minWidth: 0, flex: 1 }}>
           <p style={{ fontSize: 22, fontWeight: 800, color: "#FFFFFF", margin: "0 0 6px", letterSpacing: "-0.02em", lineHeight: 1 }}>
@@ -147,7 +147,7 @@ export default function KanaPage() {
         {/* Modo libre */}
         <Link
           href="/kana/configurar?mode=libre"
-          style={{ position: "relative", background: "#1E2235", borderRadius: 14, padding: "16px 16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden", minHeight: 80 }}
+          style={{ position: "relative", background: "#252541", borderRadius: 14, padding: "16px 16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden", minHeight: 80 }}
         >
           <div style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, background: "#4ECDC4", borderBottomLeftRadius: 28 }} />
           <p style={{ fontSize: 15, fontWeight: 700, color: "#FFFFFF", margin: 0 }}>Modo libre</p>
@@ -156,7 +156,7 @@ export default function KanaPage() {
         {/* Leer palabras */}
         <Link
           href="/kana/palabras"
-          style={{ position: "relative", background: "#1E2235", borderRadius: 14, padding: "16px 16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden", minHeight: 80 }}
+          style={{ position: "relative", background: "#252541", borderRadius: 14, padding: "16px 16px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", border: "1px solid rgba(255,255,255,0.06)", overflow: "hidden", minHeight: 80 }}
         >
           <div style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, background: "#E63946", borderBottomLeftRadius: 28 }} />
           <p style={{ fontSize: 15, fontWeight: 700, color: "#FFFFFF", margin: 0 }}>Leer palabras</p>
@@ -166,7 +166,7 @@ export default function KanaPage() {
 
       {/* ── Progress breakdown ── */}
       <div
-        style={{ background: "#1E2235", borderRadius: 16, padding: "18px 18px 14px", border: "1px solid rgba(255,255,255,0.06)", marginTop: 16 }}
+        style={{ background: "#252541", borderRadius: 16, padding: "18px 18px 14px", border: "1px solid rgba(255,255,255,0.06)", marginTop: 16 }}
       >
         {/* Section header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>

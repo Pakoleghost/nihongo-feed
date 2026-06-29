@@ -31,7 +31,7 @@ function ActionCard({
       style={{
         position: "relative",
         overflow: "hidden",
-        background: isRecommended ? "#252B3F" : "#1E2235",
+        background: isRecommended ? "#252541" : "#252541",
         borderRadius: "2rem",
         padding: "14px",
         minHeight: "118px",

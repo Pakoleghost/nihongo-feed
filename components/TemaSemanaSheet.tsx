@@ -72,7 +72,7 @@ function PatternLine({ jp }: { jp: string }) {
 
 function NextBtn({ label, onClick, disabled }: { label: string; onClick: () => void; disabled?: boolean }) {
   return (
-    <button type="button" onClick={onClick} disabled={disabled} style={{ width: "100%", padding: "15px 0", borderRadius: 13, border: "none", cursor: disabled ? "not-allowed" : "pointer", fontSize: 15, fontWeight: 800, background: disabled ? "rgba(255,255,255,0.07)" : TEAL, color: disabled ? "rgba(255,255,255,0.28)" : "#12121F", transition: "background 180ms ease, color 180ms ease", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+    <button type="button" onClick={onClick} disabled={disabled} style={{ width: "100%", padding: "15px 0", borderRadius: 13, border: "none", cursor: disabled ? "not-allowed" : "pointer", fontSize: 15, fontWeight: 800, background: disabled ? "rgba(255,255,255,0.07)" : TEAL, color: disabled ? "rgba(255,255,255,0.28)" : "#1A1A2E", transition: "background 180ms ease, color 180ms ease", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
       {label}
     </button>
   );
@@ -108,7 +108,7 @@ function SlotChips({ slot, selected, onSelect }: { slot: SlotPlantilla; selected
           const active = op.jp === selected?.jp;
           return (
             <button key={op.jp} type="button" onClick={() => { navigator.vibrate?.(8); onSelect(op); }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, background: active ? TEAL : "rgba(255,255,255,0.07)", border: active ? "none" : "1px solid rgba(255,255,255,0.10)", borderRadius: 11, padding: "8px 14px", cursor: "pointer", transition: "background 140ms ease, transform 100ms ease", transform: active ? "scale(1.04)" : "scale(1)" }}>
-              <span style={{ fontFamily: "var(--font-noto-sans-jp), sans-serif", fontSize: 16, fontWeight: 700, color: active ? "#12121F" : "#FFFFFF", lineHeight: 1.3 }}>{op.jp}</span>
+              <span style={{ fontFamily: "var(--font-noto-sans-jp), sans-serif", fontSize: 16, fontWeight: 700, color: active ? "#1A1A2E" : "#FFFFFF", lineHeight: 1.3 }}>{op.jp}</span>
               <span style={{ fontSize: 11, fontWeight: 600, color: active ? "rgba(18,18,31,0.65)" : "rgba(255,255,255,0.4)", lineHeight: 1.2 }}>{op.es}</span>
             </button>
           );
@@ -133,7 +133,7 @@ function ExtensionChips({ extensiones, selected, onToggle }: { extensiones: Fras
               <div style={{ width: 20, height: 20, borderRadius: "50%", border: `2px solid ${active ? TEAL : "rgba(255,255,255,0.2)"}`, background: active ? TEAL : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 150ms ease", marginTop: 2 }}>
                 {active && (
                   <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                    <path d="M1 4l3 3 5-6" stroke="#12121F" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M1 4l3 3 5-6" stroke="#1A1A2E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 )}
               </div>
@@ -426,7 +426,7 @@ export default function TemaSemanaSheet({ onClose, onUseSentence, tema, fallback
         exit={{ y: "100%", transition: { duration: 0.22, ease: [0.4, 0, 1, 1] } }}
         transition={{ type: "spring", damping: 30, stiffness: 300, mass: 0.85 }}
         onClick={e => e.stopPropagation()}
-        style={{ position: "fixed", bottom: "calc(92px + env(safe-area-inset-bottom, 0px))", left: 0, right: 0, zIndex: 501, background: "#12121F", borderRadius: "22px 22px 0 0", maxHeight: "calc(92dvh - 92px - env(safe-area-inset-bottom, 0px))", display: "flex", flexDirection: "column", overflow: "hidden" }}
+        style={{ position: "fixed", bottom: "calc(92px + env(safe-area-inset-bottom, 0px))", left: 0, right: 0, zIndex: 501, background: "#1A1A2E", borderRadius: "22px 22px 0 0", maxHeight: "calc(92dvh - 92px - env(safe-area-inset-bottom, 0px))", display: "flex", flexDirection: "column", overflow: "hidden" }}
       >
         {/* Header: back · dots · close */}
         <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px 12px" }}>

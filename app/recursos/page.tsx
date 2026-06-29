@@ -290,7 +290,7 @@ export default function RecursosPage() {
           <form
             onSubmit={handleAdminSubmit}
             style={{
-              background: "#16161F",
+              background: "#242440",
               borderRadius: "24px",
               padding: "16px",
               border: "1px solid rgba(255,255,255,0.10)",
@@ -392,7 +392,7 @@ export default function RecursosPage() {
             )}
 
             {errorMessage ? (
-              <div style={{ borderRadius: "16px", background: "rgba(230,57,70,0.12)", color: "#FF6470", padding: "10px 12px", fontSize: "13px", fontWeight: 700 }}>
+              <div style={{ borderRadius: "16px", background: "rgba(230,57,70,0.12)", color: "#E63946", padding: "10px 12px", fontSize: "13px", fontWeight: 700 }}>
                 {errorMessage}
               </div>
             ) : null}
@@ -420,7 +420,7 @@ export default function RecursosPage() {
             </button>
           </form>
         ) : errorMessage && !loading ? (
-          <div style={{ borderRadius: "18px", background: "rgba(230,57,70,0.12)", color: "#FF6470", padding: "12px 14px", fontSize: "14px", fontWeight: 700 }}>
+          <div style={{ borderRadius: "18px", background: "rgba(230,57,70,0.12)", color: "#E63946", padding: "12px 14px", fontSize: "14px", fontWeight: 700 }}>
             {errorMessage}
           </div>
         ) : null}
@@ -430,8 +430,8 @@ export default function RecursosPage() {
             Cargando…
           </div>
         ) : grouped.length === 0 ? (
-          <div style={{ background: "#16161F", borderRadius: "16px", padding: "40px 24px", textAlign: "center", border: "1px solid rgba(255,255,255,0.07)" }}>
-            <div style={{ width: 84, height: 84, borderRadius: 24, background: "#1C1C28", border: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "rgba(244,244,248,0.3)" }}>
+          <div style={{ background: "#242440", borderRadius: "16px", padding: "40px 24px", textAlign: "center", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div style={{ width: 84, height: 84, borderRadius: 24, background: "#252541", border: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "rgba(244,244,248,0.3)" }}>
               <svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
             <p style={{ fontSize: "19px", fontWeight: 800, color: "#F4F4F8", margin: "0 0 8px" }}>Sin material aún</p>
@@ -454,7 +454,7 @@ export default function RecursosPage() {
               >
                 <div style={{
                   display: "flex", alignItems: "center", gap: "7px", flex: 1,
-                  background: isOpen ? "#F4F4F8" : "#16161F",
+                  background: isOpen ? "#F4F4F8" : "#242440",
                   borderRadius: "999px",
                   padding: "0 12px 0 10px", height: 38,
                   border: `1.5px solid ${isOpen ? "#F4F4F8" : "rgba(255,255,255,0.07)"}`,
@@ -462,10 +462,10 @@ export default function RecursosPage() {
                 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                     <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"
-                      stroke={isOpen ? "#0D0D1A" : "rgba(244,244,248,0.45)"}
+                      stroke={isOpen ? "#1A1A2E" : "rgba(244,244,248,0.45)"}
                       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span style={{ fontSize: "14px", fontWeight: 700, color: isOpen ? "#0D0D1A" : "rgba(244,244,248,0.5)", flex: 1, transition: "color 140ms ease" }}>
+                  <span style={{ fontSize: "14px", fontWeight: 700, color: isOpen ? "#1A1A2E" : "rgba(244,244,248,0.5)", flex: 1, transition: "color 140ms ease" }}>
                     {folder}
                   </span>
                   <span style={{ fontSize: "11px", fontWeight: 600, color: isOpen ? "rgba(13,13,26,0.4)" : "rgba(244,244,248,0.28)" }}>
@@ -495,7 +495,7 @@ export default function RecursosPage() {
                   style={{ overflow: "hidden" }}
                 >
               {items.length === 0 ? (
-                <div style={{ background: "#1C1C28", borderRadius: "12px", padding: "16px", color: "rgba(255,255,255,0.25)", fontSize: "13px", fontWeight: 600, textAlign: "center", marginBottom: 12 }}>
+                <div style={{ background: "#252541", borderRadius: "12px", padding: "16px", color: "rgba(255,255,255,0.25)", fontSize: "13px", fontWeight: 600, textAlign: "center", marginBottom: 12 }}>
                   Carpeta vacía
                 </div>
               ) : (
@@ -513,7 +513,7 @@ export default function RecursosPage() {
                         onClick={() => openResource(item.url)}
                         disabled={!item.url}
                         style={{
-                          background: "#16161F",
+                          background: "#242440",
                           borderRadius: "16px",
                           padding: "13px 14px",
                           display: "flex",
@@ -529,7 +529,7 @@ export default function RecursosPage() {
                         {/* Icon */}
                         <div style={{
                           width: 44, height: 44, borderRadius: "12px", flexShrink: 0,
-                          background: "#1C1C28", border: "1px solid rgba(255,255,255,0.07)",
+                          background: "#252541", border: "1px solid rgba(255,255,255,0.07)",
                           display: "flex", alignItems: "center", justifyContent: "center",
                           color: fileResource ? "#E63946" : "#4ECDC4",
                         }}>
@@ -546,7 +546,7 @@ export default function RecursosPage() {
                               display: "inline-flex", alignItems: "center", height: 20, padding: "0 8px",
                               borderRadius: 6, fontSize: "10.5px", fontWeight: 800, letterSpacing: "0.4px",
                               background: fileResource ? "rgba(230,57,70,0.14)" : "rgba(78,205,196,0.12)",
-                              color: fileResource ? "#FF9CA3" : "#4ECDC4",
+                              color: fileResource ? "#E63946" : "#4ECDC4",
                             }}>
                               {fileResource ? (ext || "PDF") : "LINK"}
                             </span>

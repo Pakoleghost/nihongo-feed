@@ -68,7 +68,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
     <div
       style={{
         minHeight: "100dvh",
-        background: "#0D0D1A",
+        background: "#1A1A2E",
         padding: "24px 20px calc(100px + env(safe-area-inset-bottom, 0px))",
       }}
     >
@@ -139,7 +139,7 @@ export default function VocabularioModuleScreen({ initialLesson }: VocabularioMo
         <button
           onClick={goToFlashcards}
           style={{
-            background: "#16161F",
+            background: "#242440",
             borderRadius: 14,
             border: "1px solid rgba(255,255,255,0.10)",
             cursor: "pointer",

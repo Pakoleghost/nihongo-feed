@@ -1,0 +1,601 @@
+.learnHero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 20px;
+  background:
+    radial-gradient(
+      circle at 96% 42%,
+      rgba(78, 205, 196, 0.14),
+      transparent 26%
+    ),
+    #fff;
+  box-shadow: 0 16px 42px rgba(17, 24, 39, 0.075);
+  padding: 26px;
+}
+
+.learnHeroLeft {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+
+.learnGlyph,
+.learnModeIcon {
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #4ecdc4;
+  color: #1a1a2e;
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  box-shadow: 0 12px 26px rgba(78, 205, 196, 0.24);
+}
+
+.learnGlyph {
+  width: 62px;
+  height: 62px;
+  flex: 0 0 62px;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.learnHeroLeft h1 {
+  margin: 0;
+  color: #1a1a2e;
+  font-size: 31px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.learnHeroLeft p {
+  margin: 8px 0 0;
+  color: #72798a;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.learnHeroStats {
+  display: flex;
+  gap: 12px;
+}
+
+.learnHeroStats div {
+  min-width: 104px;
+  border: 1px solid rgba(78, 205, 196, 0.18);
+  border-radius: 14px;
+  background: rgba(78, 205, 196, 0.12);
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.learnHeroStats div:nth-child(2) {
+  border-color: rgba(78, 205, 196, 0.18);
+  background: rgba(78, 205, 196, 0.12);
+}
+
+.learnHeroStats strong {
+  display: block;
+  color: #1a1a2e;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.learnHeroStats div:nth-child(2) strong {
+  color: #1a1a2e;
+}
+
+.learnHeroStats span {
+  display: block;
+  margin-top: 5px;
+  color: #7b8190;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.learnModeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.learnModeCard {
+  min-height: 132px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 18px;
+  background: #fff;
+  color: #1a1a2e;
+  padding: 24px;
+  text-decoration: none;
+  box-shadow: 0 12px 30px rgba(17, 24, 39, 0.055);
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.learnModeCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(78, 205, 196, 0.28);
+  box-shadow: 0 18px 42px rgba(26, 26, 46, 0.09);
+}
+
+.learnModeCardActive {
+  background:
+    radial-gradient(
+      circle at 92% 18%,
+      rgba(245, 166, 35, 0.34),
+      transparent 34%
+    ),
+    #4ecdc4;
+  color: #1a1a2e;
+  box-shadow: 0 18px 42px rgba(78, 205, 196, 0.2);
+}
+
+.learnModeIcon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  font-size: 22px;
+}
+
+.learnModeCard:not(.learnModeCardActive) .learnModeIcon {
+  background: rgba(78, 205, 196, 0.14);
+  color: #1a1a2e;
+  box-shadow: none;
+}
+
+.learnModeCard strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+.learnModeCard em {
+  display: block;
+  margin-top: 8px;
+  color: rgba(26, 26, 46, 0.55);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.learnModeCardActive em {
+  color: rgba(26, 26, 46, 0.6);
+}
+
+.kanaLearnPanel {
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 16px 42px rgba(17, 24, 39, 0.07);
+  padding: 28px;
+}
+
+.kanaLearnHeader,
+.kanaChartTitleRow,
+.kanaStrokeHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.kanaLearnHeader h2,
+.kanaChartTitleRow h3 {
+  margin: 0;
+  color: #1a1a2e;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.05;
+}
+
+.kanaLearnHeader p,
+.kanaChartTitleRow p {
+  margin: 5px 0 0;
+  color: #737a89;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.kanaGuideBox {
+  display: grid;
+  gap: 8px;
+  margin-top: 24px;
+  border: 1px solid rgba(78, 205, 196, 0.2);
+  border-radius: 14px;
+  background:
+    radial-gradient(
+      circle at 96% 0%,
+      rgba(245, 166, 35, 0.16),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(78, 205, 196, 0.07),
+      rgba(245, 166, 35, 0.055)
+    ),
+    #fff;
+  padding: 18px 20px;
+}
+
+.kanaGuideBox strong {
+  color: #1a1a2e;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.kanaGuideBox span {
+  color: #535b6b;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.kanaQuizRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.kanaQuizCard {
+  min-height: 82px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 14px;
+  background: #fff;
+  padding: 18px;
+  text-decoration: none;
+}
+
+.kanaQuizCard span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(78, 205, 196, 0.12);
+  color: #1a1a2e;
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.kanaQuizCard strong {
+  display: block;
+  color: #1a1a2e;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.kanaQuizCard em {
+  display: block;
+  margin-top: 4px;
+  color: #8a91a0;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.kanaLearnTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.kanaLearnTab {
+  min-width: 142px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 14px;
+  background: #fff;
+  color: #1a1a2e;
+  padding: 12px 14px;
+  cursor: default;
+}
+
+.kanaLearnTab span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #f5f7fb;
+  color: #1a1a2e;
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.kanaLearnTab strong,
+.kanaLearnTab em {
+  display: block;
+  text-align: left;
+}
+
+.kanaLearnTab strong {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.kanaLearnTab em {
+  margin-top: 2px;
+  color: #8a91a0;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.kanaLearnTabActive {
+  border-color: rgba(78, 205, 196, 0.34);
+  background:
+    radial-gradient(
+      circle at 88% 16%,
+      rgba(245, 166, 35, 0.28),
+      transparent 34%
+    ),
+    #4ecdc4;
+  color: #1a1a2e;
+  box-shadow: 0 12px 26px rgba(78, 205, 196, 0.18);
+}
+
+.kanaLearnTabActive span {
+  background: rgba(255, 255, 255, 0.45);
+  color: #1a1a2e;
+}
+
+.kanaLearnTabActive em {
+  color: rgba(26, 26, 46, 0.6);
+}
+
+.kanaChartLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 282px;
+  gap: 22px;
+  align-items: start;
+  margin-top: 28px;
+}
+
+.kanaChartCard,
+.kanaStrokePanel {
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.kanaChartCard {
+  padding: 24px;
+}
+
+.kanaChartSection {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.kanaChartSectionTitle {
+  color: #8a91a0;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kanaChartRow {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.kanaRowLabel {
+  color: #8a91a0;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.kanaChartGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.kanaChartCell,
+.kanaChartEmptyCell {
+  min-height: 82px;
+  border-radius: 14px;
+}
+
+.kanaChartCell {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  background: #fff;
+  color: #1a1a2e;
+  cursor: default;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.kanaChartCell:hover {
+  transform: translateY(-1px);
+  border-color: rgba(78, 205, 196, 0.3);
+  box-shadow: 0 12px 24px rgba(26, 26, 46, 0.07);
+}
+
+.kanaChartCellSelected {
+  border-color: rgba(78, 205, 196, 0.38);
+  background: rgba(78, 205, 196, 0.11);
+  box-shadow: inset 0 0 0 2px rgba(78, 205, 196, 0.18);
+}
+
+.kanaChartCell span {
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.kanaChartCell em {
+  color: #8a91a0;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.kanaChartEmptyCell {
+  background: #f8f9fb;
+}
+
+.kanaStrokePanel {
+  padding: 18px;
+}
+
+.kanaStrokeSticky {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+.kanaStrokeHeader {
+  width: 100%;
+}
+
+.kanaStrokeHeader > span {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(78, 205, 196, 0.16);
+  color: #1a1a2e;
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.kanaStrokeHeader strong,
+.kanaStrokeHeader em {
+  display: block;
+}
+
+.kanaStrokeHeader strong {
+  color: #1a1a2e;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.kanaStrokeHeader em {
+  margin-top: 2px;
+  color: #8a91a0;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.kanaStrokePanel p {
+  margin: 0;
+  color: #5e6677;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.quizOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  place-items: center;
+  background: rgba(17, 24, 39, 0.58);
+  padding: 24px;
+}
+
+.quizModal {
+  width: min(100%, 640px);
+  max-height: min(860px, 92dvh);
+  overflow: auto;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 28px 80px rgba(17, 24, 39, 0.28);
+}
+
+@media (max-width: 620px) {
+  .learnHero,
+  .learnHeroLeft,
+  .learnHeroStats {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .learnHeroStats {
+    width: 100%;
+  }
+
+  .learnHeroStats div {
+    width: 100%;
+  }
+
+  .learnModeGrid,
+  .kanaQuizRow,
+  .kanaChartLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .kanaLearnPanel {
+    padding: 18px;
+  }
+
+  .kanaChartCard {
+    padding: 16px;
+  }
+
+  .kanaChartRow {
+    grid-template-columns: 1fr;
+  }
+
+  .kanaRowLabel {
+    text-align: left;
+  }
+
+  .kanaStrokeSticky {
+    position: static;
+  }
+
+  .quizOverlay {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .quizModal {
+    max-height: 92dvh;
+    border-radius: 24px;
+  }
+}

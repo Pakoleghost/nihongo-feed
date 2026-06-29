@@ -13,6 +13,10 @@ function normalizeUsername(value: string): string {
     .slice(0, 24);
 }
 
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Ocurrió un error inesperado. Intenta de nuevo.";
+}
+
 export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -104,13 +108,13 @@ export default function LoginPage() { // <--- ESTO ES LO QUE BUSCA VERCEL
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) alert(error.message);
         else {
-          router.push("/");
+          router.push("/dashboard");
           router.refresh();
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("handleAuth fatal:", err);
-      alert(err?.message || "Ocurrió un error inesperado. Intenta de nuevo.");
+      alert(getErrorMessage(err));
     }
   };
 

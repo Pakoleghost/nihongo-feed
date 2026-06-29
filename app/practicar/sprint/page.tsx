@@ -114,7 +114,7 @@ export default function SprintPage() {
   return (
     <div
       style={{
-        background: "#0D0D1A",
+        background: "#1A1A2E",
         height: "100dvh",
         display: "flex",
         flexDirection: "column",
@@ -133,7 +133,7 @@ export default function SprintPage() {
               position: "absolute",
               inset: 0,
               zIndex: 20,
-              background: "#0D0D1A",
+              background: "#1A1A2E",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

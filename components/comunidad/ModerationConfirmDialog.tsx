@@ -63,7 +63,7 @@ export default function ModerationConfirmDialog({
         style={{
           width: "min(100%, 390px)",
           borderRadius: 28,
-          background: "#16161F",
+          background: "#242440",
           border: "1px solid rgba(255,255,255,0.09)",
           boxShadow: "0 16px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.09)",
           padding: 20,
@@ -105,7 +105,7 @@ export default function ModerationConfirmDialog({
             style={{
               border: "none",
               borderRadius: 999,
-              background: busy ? "#C4BAB0" : confirmColor,
+              background: busy ? "#9CA3AF" : confirmColor,
               color: "#FFFFFF",
               padding: "12px 14px",
               fontSize: 14,

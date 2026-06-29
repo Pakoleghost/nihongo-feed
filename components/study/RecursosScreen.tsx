@@ -58,7 +58,7 @@ export default function RecursosScreen({ onTabChange }: RecursosScreenProps) {
             style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
               padding: "18px 22px", borderRadius: 24,
-              background: `linear-gradient(135deg, ${DS.accent} 0%, #c42b38 100%)`,
+              background: `linear-gradient(135deg, ${DS.accent} 0%, #E63946 100%)`,
               textDecoration: "none",
               boxShadow: "0 8px 24px rgba(230,57,70,0.25)",
             }}

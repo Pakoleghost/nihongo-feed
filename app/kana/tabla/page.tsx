@@ -172,7 +172,7 @@ function KanaCell({
             top: "4px",
             right: "5px",
             fontSize: "8px",
-            color: "#D97706",
+            color: "#F5A623",
             lineHeight: 1,
           }}
         >
@@ -294,7 +294,7 @@ function CollapsibleSection({
   return (
     <div
       style={{
-        background: "#1E2235",
+        background: "#252541",
         borderRadius: "1.5rem",
         overflow: "hidden",
         border: "1px solid rgba(255,255,255,0.08)",
@@ -369,7 +369,7 @@ export default function TablaPage() {
   return (
     <div
       style={{
-        background: "#0D0D1A",
+        background: "#1A1A2E",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -460,7 +460,7 @@ export default function TablaPage() {
       <div style={{ padding: "20px 16px 0" }}>
         <div
           style={{
-            background: "#1E2235",
+            background: "#252541",
             borderRadius: "14px",
             padding: "14px",
             border: "1px solid rgba(255,255,255,0.08)",
@@ -533,7 +533,7 @@ export default function TablaPage() {
           <div key={label} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
             <span style={{ display: "inline-flex", width: 14, height: 14, alignItems: "center", justifyContent: "center" }}>
               {badge
-                ? <span style={{ fontSize: "10px", color: "#D97706", lineHeight: 1 }}>{badge}</span>
+                ? <span style={{ fontSize: "10px", color: "#F5A623", lineHeight: 1 }}>{badge}</span>
                 : <span style={{ width: 6, height: 6, borderRadius: "50%", background: dot ?? "#ccc", display: "inline-block" }} />
               }
             </span>
@@ -603,7 +603,7 @@ export default function TablaPage() {
             aprendiendo:{ text: "Practicando",   color: "#E63946" },
             en_repaso:  { text: "Aprendido",     color: "#4ECDC4" },
             fijado:     { text: "Bien aprendido",color: "#4ECDC4" },
-            quemado:    { text: "★ Dominado",    color: "#F59E0B" },
+            quemado:    { text: "★ Dominado",    color: "#F5A623" },
           };
           return (
             <motion.div
@@ -632,7 +632,7 @@ export default function TablaPage() {
                 transition={{ duration: 0.22, ease: [0.34, 1.2, 0.64, 1] }}
                 onClick={(e) => e.stopPropagation()}
                 style={{
-                  background: "#1E2235",
+                  background: "#252541",
                   borderRadius: "20px",
                   padding: "24px 20px 20px",
                   width: "100%",

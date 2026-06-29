@@ -541,7 +541,7 @@ export default function HomePage() {
   return (
     <div
       style={{
-        background: "#0D0D1A",
+        background: "#1A1A2E",
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
@@ -647,7 +647,7 @@ export default function HomePage() {
               </p>
               <span style={{
                 display: "inline-flex", alignItems: "center", gap: 7,
-                background: "#4ECDC4", color: "#06231f",
+                background: "#4ECDC4", color: "#1A1A2E",
                 borderRadius: "999px", padding: "9px 16px",
                 fontSize: 13.5, fontWeight: 700,
               }}>
@@ -673,7 +673,7 @@ export default function HomePage() {
               style={{ textDecoration: "none", display: "block" }}
             >
               <div style={{
-                background: "linear-gradient(135deg, #0E1829 0%, #1A2B3C 55%, #0E1829 100%)",
+                background: "linear-gradient(135deg, #1A1A2E 0%, #252541 55%, #1A1A2E 100%)",
                 borderRadius: 16,
                 padding: "14px 16px 14px 14px",
                 display: "flex",
@@ -708,7 +708,7 @@ export default function HomePage() {
                       </span>
                       <span style={{
                         fontSize: 9, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase",
-                        color: "#0E1829", background: "#4ECDC4",
+                        color: "#1A1A2E", background: "#4ECDC4",
                         padding: "2px 6px", borderRadius: 5, lineHeight: 1.6,
                       }}>
                         NUEVO
@@ -784,7 +784,7 @@ export default function HomePage() {
                 </div>
               )}
               {publishError && (
-                <p style={{ color: "#C53340", fontSize: 13, fontWeight: 700, margin: "8px 0 0", lineHeight: 1.35 }}>{publishError}</p>
+                <p style={{ color: "#E63946", fontSize: 13, fontWeight: 700, margin: "8px 0 0", lineHeight: 1.35 }}>{publishError}</p>
               )}
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 16, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.07)" }}>
                 <button onClick={() => fileInputRef.current?.click()} aria-label="Agregar imagen"
@@ -838,7 +838,7 @@ export default function HomePage() {
           /* Skeleton cards */
           <>
             {[0, 1, 2].map((i) => (
-              <div key={i} style={{ background: "#16161F", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div key={i} style={{ background: "#242440", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" }}>
                 {/* Shimmer image placeholder */}
                 {i < 2 && <div style={{ width: "100%", height: 200, background: "linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 75%)", backgroundSize: "400% 100%", animation: "shimmer 1.4s ease-in-out infinite" }} />}
                 <div style={{ padding: "14px 16px" }}>
@@ -859,15 +859,15 @@ export default function HomePage() {
             <style>{`@keyframes shimmer { 0%{background-position:100% 50%} 100%{background-position:-100% 50%} }`}</style>
           </>
         ) : feedError && posts.length === 0 ? (
-          <div style={{ background: "#16161F", borderRadius: "14px", padding: "28px", textAlign: "center", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <p style={{ fontSize: 15, color: "#FF6470", fontWeight: 700, margin: "0 0 14px" }}>{feedError}</p>
+          <div style={{ background: "#242440", borderRadius: "14px", padding: "28px", textAlign: "center", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <p style={{ fontSize: 15, color: "#E63946", fontWeight: 700, margin: "0 0 14px" }}>{feedError}</p>
             <button onClick={reloadFeed}
               style={{ border: "none", borderRadius: "8px", background: "#4ECDC4", color: "#1A1A2E", padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
               Reintentar
             </button>
           </div>
         ) : posts.length === 0 ? (
-          <div style={{ background: "#16161F", borderRadius: "14px", padding: "32px 20px", textAlign: "center", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ background: "#242440", borderRadius: "14px", padding: "32px 20px", textAlign: "center", border: "1px solid rgba(255,255,255,0.06)" }}>
             <p style={{ fontSize: 15, fontWeight: 700, color: "#FFFFFF", margin: "0 0 6px" }}>Sé el primero en publicar</p>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.42)", margin: 0 }}>Usa el tema de esta semana como inspiración.</p>
           </div>
@@ -918,13 +918,13 @@ export default function HomePage() {
                           aria-label="Opciones"
                         >···</button>
                         {openMenuId === post.id && (
-                          <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 10, background: "#1C1C28", borderRadius: "12px", boxShadow: "0 4px 24px rgba(0,0,0,0.4)", overflow: "hidden", minWidth: 130, border: "1px solid rgba(255,255,255,0.08)" }}>
+                          <div style={{ position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 10, background: "#252541", borderRadius: "12px", boxShadow: "0 4px 24px rgba(0,0,0,0.4)", overflow: "hidden", minWidth: 130, border: "1px solid rgba(255,255,255,0.08)" }}>
                             <button onClick={() => startEdit(post)}
                               style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#FFFFFF" }}>
                               Editar
                             </button>
                             <button onClick={() => { setConfirmDeleteId(post.id); setOpenMenuId(null); }}
-                              style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#FF6470", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+                              style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#E63946", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
                               Eliminar
                             </button>
                           </div>
@@ -941,7 +941,7 @@ export default function HomePage() {
                           autoFocus value={editContent}
                           onChange={(e) => setEditContent(e.target.value)}
                           onKeyDown={(e) => { if (e.key === "Escape") { setEditingPostId(null); setEditContent(""); } }}
-                          style={{ width: "100%", border: "none", borderBottom: "2px solid #4ECDC4", background: "#16161F", borderRadius: "8px 8px 0 0", padding: "8px 10px", fontSize: 15, fontFamily: "var(--font-noto-sans-jp), inherit", color: "#FFFFFF", resize: "none", outline: "none", lineHeight: 1.5, boxSizing: "border-box", minHeight: 72 }}
+                          style={{ width: "100%", border: "none", borderBottom: "2px solid #4ECDC4", background: "#242440", borderRadius: "8px 8px 0 0", padding: "8px 10px", fontSize: 15, fontFamily: "var(--font-noto-sans-jp), inherit", color: "#FFFFFF", resize: "none", outline: "none", lineHeight: 1.5, boxSizing: "border-box", minHeight: 72 }}
                         />
                         <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                           <button onClick={() => handleSaveEdit(post.id)} disabled={savingEdit || !editContent.trim()}
@@ -959,7 +959,7 @@ export default function HomePage() {
                         <p style={{ fontSize: 14, fontWeight: 600, color: "#FFFFFF", margin: "0 0 10px" }}>¿Eliminar esta publicación?</p>
                         <div style={{ display: "flex", gap: 8 }}>
                           <button onClick={() => handleDelete(post.id)} disabled={deletingPostId === post.id}
-                            style={{ background: deletingPostId === post.id ? "#C4BAB0" : "#E63946", color: "#FFFFFF", borderRadius: "8px", padding: "7px 14px", border: "none", cursor: deletingPostId === post.id ? "not-allowed" : "pointer", fontSize: 13, fontWeight: 700 }}>
+                            style={{ background: deletingPostId === post.id ? "#9CA3AF" : "#E63946", color: "#FFFFFF", borderRadius: "8px", padding: "7px 14px", border: "none", cursor: deletingPostId === post.id ? "not-allowed" : "pointer", fontSize: 13, fontWeight: 700 }}>
                             {deletingPostId === post.id ? "Eliminando…" : "Sí, eliminar"}
                           </button>
                           <button onClick={() => setConfirmDeleteId(null)}
@@ -1057,7 +1057,7 @@ export default function HomePage() {
             })}
 
             {feedError && (
-              <div style={{ borderRadius: 12, background: "rgba(230,57,70,0.10)", color: "#FF6470", padding: 14, fontSize: 13, fontWeight: 700, textAlign: "center" }}>
+              <div style={{ borderRadius: 12, background: "rgba(230,57,70,0.10)", color: "#E63946", padding: 14, fontSize: 13, fontWeight: 700, textAlign: "center" }}>
                 {feedError}
               </div>
             )}

@@ -145,7 +145,7 @@ export default function PalabrasPage() {
     return (
       <div
         style={{
-          background: "#0D0D1A",
+          background: "#1A1A2E",
           minHeight: "100dvh",
           display: "flex",
           flexDirection: "column",
@@ -247,7 +247,7 @@ export default function PalabrasPage() {
           position: "fixed",
           inset: 0,
           zIndex: 600,
-          background: "#0D0D1A",
+          background: "#1A1A2E",
           height: "100dvh",
           display: "flex",
           flexDirection: "column",
@@ -340,7 +340,7 @@ export default function PalabrasPage() {
           style={{
             padding: "8px 16px calc(20px + env(safe-area-inset-bottom, 0px))",
             borderTop: "1px solid rgba(255,255,255,0.07)",
-            background: "#0D0D1A",
+            background: "#1A1A2E",
             flexShrink: 0,
           }}
         >
@@ -404,7 +404,7 @@ export default function PalabrasPage() {
     return (
       <div
         style={{
-          background: "#0D0D1A",
+          background: "#1A1A2E",
           minHeight: "100dvh",
           display: "flex",
           flexDirection: "column",
@@ -439,7 +439,7 @@ export default function PalabrasPage() {
             { label: "Correctas", value: correct, color: "#4ECDC4" },
             { label: "Tiempo", value: durationLabel, color: "#FFFFFF" },
           ].map((s) => (
-            <div key={s.label} style={{ background: "#16161F", borderRadius: 16, padding: "14px 10px", textAlign: "center", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div key={s.label} style={{ background: "#242440", borderRadius: 16, padding: "14px 10px", textAlign: "center", border: "1px solid rgba(255,255,255,0.07)" }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>{s.label}</div>
               <div style={{ fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</div>
             </div>
@@ -448,7 +448,7 @@ export default function PalabrasPage() {
 
         {/* Missed words */}
         {missedItems.length > 0 && (
-          <div style={{ background: "#16161F", borderRadius: 16, padding: "16px", marginBottom: 20, border: "1px solid rgba(255,255,255,0.07)" }}>
+          <div style={{ background: "#242440", borderRadius: 16, padding: "16px", marginBottom: 20, border: "1px solid rgba(255,255,255,0.07)" }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 12px" }}>
               Por repasar · {missedItems.length}
             </p>

@@ -293,7 +293,7 @@ function ConfigurarContent() {
       </div>
 
       {/* Bottom button */}
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 20px", paddingBottom: "max(20px, env(safe-area-inset-bottom, 20px))", background: "linear-gradient(to top, #0D0D1A 70%, transparent)" }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 20px", paddingBottom: "max(20px, env(safe-area-inset-bottom, 20px))", background: "linear-gradient(to top, #1A1A2E 70%, transparent)" }}>
         <button onClick={handleStart} className="sesh-btn sesh-btn-red">
           Empezar · {questionCount} ítems
         </button>

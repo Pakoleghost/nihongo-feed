@@ -1,5 +1,11 @@
 import "./globals.css";
-import { Noto_Sans_JP, Noto_Serif_JP, Plus_Jakarta_Sans, Poppins, Zen_Kaku_Gothic_New } from "next/font/google";
+import {
+  Noto_Sans_JP,
+  Noto_Serif_JP,
+  Plus_Jakarta_Sans,
+  Sora,
+  Zen_Kaku_Gothic_New,
+} from "next/font/google";
 import type { Viewport } from "next";
 import Script from "next/script";
 import PushInit from "@/components/PushInit";
@@ -21,23 +27,23 @@ const notoSerif = Noto_Serif_JP({
   variable: "--font-noto-serif-jp",
 });
 
-const poppins = Poppins({
+const sora = Sora({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["500", "600", "700", "800"],
   display: "swap",
-  variable: "--font-latin",
+  variable: "--font-sora",
 });
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
   variable: "--font-study",
 });
 
 const zenKaku = Zen_Kaku_Gothic_New({
   subsets: ["latin"],
-  weight: ["500", "700", "900"],
+  weight: ["400", "500", "700", "900"],
   display: "swap",
   variable: "--font-zen-kaku",
 });
@@ -58,12 +64,22 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="ja" className={`${poppins.variable} ${jakarta.variable} ${noto.variable} ${notoSerif.variable} ${zenKaku.variable}`}>
+    <html
+      lang="ja"
+      className={`${sora.variable} ${jakarta.variable} ${noto.variable} ${notoSerif.variable} ${zenKaku.variable}`}
+    >
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
         <meta name="apple-mobile-web-app-title" content="フィード" />
         <meta name="theme-color" content="#1A1A2E" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

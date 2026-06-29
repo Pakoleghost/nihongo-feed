@@ -141,7 +141,7 @@ export default function KanjiQuizScreen({
   return (
     <div
       style={{
-        background: "#0D0D1A",
+        background: "#1A1A2E",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -251,7 +251,7 @@ export default function KanjiQuizScreen({
           <div
             style={{
               margin: "16px 20px 0",
-              background: "#16161F",
+              background: "#242440",
               borderRadius: "24px",
               padding: "32px 24px",
               display: "flex",

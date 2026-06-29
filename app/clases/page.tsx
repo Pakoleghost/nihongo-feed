@@ -69,7 +69,7 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
   return (
     <div
       style={{
-        background: "#16161F",
+        background: "#242440",
         borderRadius: "16px",
         padding: "13px 14px",
         border: "1px solid rgba(255,255,255,0.07)",
@@ -81,7 +81,7 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
       {/* Play icon box */}
       <div style={{
         width: 46, height: 46, flexShrink: 0, borderRadius: 13,
-        background: "#1C1C28", border: "1px solid rgba(255,255,255,0.07)",
+        background: "#252541", border: "1px solid rgba(255,255,255,0.07)",
         display: "flex", alignItems: "center", justifyContent: "center",
         color: "#4ECDC4",
       }}>
@@ -102,7 +102,7 @@ function EntradaCard({ entrada }: { entrada: Entrada }) {
             <button type="button" onClick={copyPassword} style={{
               border: "none", background: "transparent", cursor: "pointer",
               padding: "1px 5px", borderRadius: 4, fontSize: "11px", fontWeight: 700,
-              color: copied ? "#178A83" : "#4ECDC4", transition: "color 140ms",
+              color: copied ? "#4ECDC4" : "#4ECDC4", transition: "color 140ms",
             }}>
               {copied ? "✓" : "Copiar"}
             </button>
@@ -157,7 +157,7 @@ function TareaSection({ notas }: { notas: NotaClase[] }) {
       {/* Card */}
       <div
         style={{
-          background: "#16161F",
+          background: "#242440",
           borderRadius: "14px",
           padding: "14px 16px",
           border: "1px solid rgba(255,255,255,0.07)",
@@ -204,7 +204,7 @@ function ColeccionView({ coleccion }: { coleccion: Coleccion }) {
     return (
       <div
         style={{
-          background: "#16161F",
+          background: "#242440",
           borderRadius: "16px",
           padding: "40px 24px",
           textAlign: "center",
@@ -236,7 +236,7 @@ function NoGroupCard({ message }: { message?: string }) {
   return (
     <div
       style={{
-        background: "#16161F",
+        background: "#242440",
         borderRadius: "16px",
         padding: "40px 24px",
         textAlign: "center",
@@ -400,7 +400,7 @@ export default function ClasesPage() {
         style={{
           borderRadius: "16px",
           background: "rgba(230,57,70,0.12)",
-          color: "#FF6470",
+          color: "#E63946",
           padding: "14px 16px",
           fontSize: "14px",
           fontWeight: 700,
@@ -431,8 +431,8 @@ export default function ClasesPage() {
                   style={{
                     flexShrink: 0, border: `1.5px solid ${active ? "#F4F4F8" : "rgba(255,255,255,0.07)"}`,
                     borderRadius: "999px",
-                    background: active ? "#F4F4F8" : "#16161F",
-                    color: active ? "#0D0D1A" : "rgba(244,244,248,0.5)",
+                    background: active ? "#F4F4F8" : "#242440",
+                    color: active ? "#1A1A2E" : "rgba(244,244,248,0.5)",
                     padding: "0 16px", height: 38,
                     fontSize: "14px", fontWeight: 700,
                     cursor: "pointer", whiteSpace: "nowrap",
@@ -475,7 +475,7 @@ export default function ClasesPage() {
             <div style={{ marginBottom: "16px" }}>
               <div style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "1.6px", textTransform: "uppercase", color: "rgba(244,244,248,0.3)", marginBottom: 11 }}>Grupo</div>
               <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#F4F4F8", borderRadius: "999px", padding: "0 16px", height: 38, border: "1.5px solid #F4F4F8" }}>
-                <span style={{ fontSize: "14px", fontWeight: 700, color: "#0D0D1A" }}>{coleccion.nombre}</span>
+                <span style={{ fontSize: "14px", fontWeight: 700, color: "#1A1A2E" }}>{coleccion.nombre}</span>
               </div>
             </div>
             <ColeccionView coleccion={coleccion} />

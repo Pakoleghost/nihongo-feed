@@ -32,7 +32,7 @@ function AvatarBubble({ url, name }: { url: string | null; name: string | null }
         justifyContent: "center",
         fontSize: 13,
         fontWeight: 900,
-        color: "#0D0D1A",
+        color: "#1A1A2E",
       }}
     >
       {letter}

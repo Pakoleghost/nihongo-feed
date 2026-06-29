@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { kanaStrokes } from "@/lib/kana-stroke-data";
 
@@ -17,14 +17,16 @@ const SPEED_TIMINGS = {
   fast: { duration: 0.28, stagger: 0.38 },
 } as const;
 
-export default function KanaStrokeAnimation({ kana, size = 200, autoPlay = true, speed = "normal" }: Props) {
+export default function KanaStrokeAnimation({
+  kana,
+  size = 200,
+  autoPlay = true,
+  speed = "normal",
+}: Props) {
   const paths = kanaStrokes[kana] ?? [];
   const [animKey, setAnimKey] = useState(0);
   const timing = SPEED_TIMINGS[speed];
-
-  useEffect(() => {
-    setAnimKey(0);
-  }, [kana]);
+  const isCompoundKana = Array.from(kana).length > 1;
 
   if (paths.length === 0) {
     return (
@@ -32,7 +34,8 @@ export default function KanaStrokeAnimation({ kana, size = 200, autoPlay = true,
         style={{
           width: size,
           height: size,
-          background: "#0D0D1A",
+          background: "#F8FAFC",
+          border: "1px solid rgba(26,26,46,0.08)",
           borderRadius: "1rem",
           display: "flex",
           flexDirection: "column",
@@ -43,15 +46,26 @@ export default function KanaStrokeAnimation({ kana, size = 200, autoPlay = true,
       >
         <span
           style={{
-            fontSize: size * 0.45,
+            fontSize: size * (isCompoundKana ? 0.32 : 0.45),
             fontFamily: "var(--font-noto-sans-jp), sans-serif",
-            color: "#F4F4F8",
+            color: "#1A1A2E",
             lineHeight: 1,
+            letterSpacing: isCompoundKana ? "-0.08em" : 0,
+            overflowWrap: "normal",
+            whiteSpace: "nowrap",
+            wordBreak: "keep-all",
+            writingMode: "horizontal-tb",
           }}
         >
           {kana}
         </span>
-        <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", fontWeight: 600 }}>
+        <span
+          style={{
+            fontSize: "11px",
+            color: "rgba(26,26,46,0.42)",
+            fontWeight: 600,
+          }}
+        >
           Sin datos de trazos
         </span>
       </div>
@@ -64,18 +78,40 @@ export default function KanaStrokeAnimation({ kana, size = 200, autoPlay = true,
         viewBox="0 0 109 109"
         width={size}
         height={size}
-        style={{ background: "#0D0D1A", borderRadius: "1rem", display: "block" }}
+        style={{
+          background: "#F8FAFC",
+          border: "1px solid rgba(26,26,46,0.08)",
+          borderRadius: "1rem",
+          display: "block",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.82)",
+        }}
       >
         {/* Reference crosshair */}
-        <line x1="54.5" y1="4" x2="54.5" y2="105" stroke="rgba(255,255,255,0.07)" strokeWidth="0.6" strokeDasharray="4 3" />
-        <line x1="4" y1="54.5" x2="105" y2="54.5" stroke="rgba(255,255,255,0.07)" strokeWidth="0.6" strokeDasharray="4 3" />
+        <line
+          x1="54.5"
+          y1="4"
+          x2="54.5"
+          y2="105"
+          stroke="rgba(26,26,46,0.09)"
+          strokeWidth="0.6"
+          strokeDasharray="4 3"
+        />
+        <line
+          x1="4"
+          y1="54.5"
+          x2="105"
+          y2="54.5"
+          stroke="rgba(26,26,46,0.09)"
+          strokeWidth="0.6"
+          strokeDasharray="4 3"
+        />
 
         {paths.map((d, index) => (
           <motion.path
-            key={`${animKey}-${index}`}
+            key={`${kana}-${animKey}-${index}`}
             d={d}
             fill="none"
-            stroke="#F4F4F8"
+            stroke="#1A1A2E"
             strokeWidth="3.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -103,7 +139,7 @@ export default function KanaStrokeAnimation({ kana, size = 200, autoPlay = true,
           bottom: 7,
           left: 9,
           fontSize: "10px",
-          color: "rgba(255,255,255,0.3)",
+          color: "rgba(26,26,46,0.42)",
           fontWeight: 600,
           pointerEvents: "none",
         }}
@@ -130,9 +166,22 @@ export default function KanaStrokeAnimation({ kana, size = 200, autoPlay = true,
           fontSize: "15px",
           color: "#1A1A2E",
         }}
-        aria-label="Repetir animación"
+        aria-label="Reproducir animación"
       >
-        ↺
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M3.4 2.3v7.4L9 6 3.4 2.3Z"
+            fill="currentColor"
+            stroke="currentColor"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
     </div>
   );

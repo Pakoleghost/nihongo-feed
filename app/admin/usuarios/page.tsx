@@ -27,7 +27,7 @@ type ColeccionesMap = Record<string, { nombre: string }>;
 // ─── Avatar ────────────────────────────────────────────────────────────────────
 
 function Avatar({ url, name, size = 44 }: { url: string | null; name: string | null; size?: number }) {
-  const COLORS = ["#E63946", "#4ECDC4", "#A8DADC", "#F4A261", "#8338EC", "#3A86FF"];
+  const COLORS = ["#E63946", "#4ECDC4", "#4ECDC4", "#F5A623", "#F5A623", "#F5A623"];
   const idx = (name ?? "?").charCodeAt(0) % COLORS.length;
   if (url) {
     return (
@@ -283,7 +283,7 @@ export default function AdminUsuariosPage() {
   return (
     <>
       <div style={{
-        background: "#FFF8E7", minHeight: "100dvh", display: "flex",
+        background: "#F4F5F7", minHeight: "100dvh", display: "flex",
         flexDirection: "column", paddingBottom: "calc(140px + env(safe-area-inset-bottom, 0px))",
       }}>
         {/* Header */}
@@ -368,7 +368,7 @@ export default function AdminUsuariosPage() {
                       </span>
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
                         <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
-                          stroke="#C4BAB0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </button>
                     {/* Coleccion mapping (only when migration ran) */}
@@ -401,8 +401,8 @@ export default function AdminUsuariosPage() {
                         title="Grabaciones Zoom"
                         style={{
                           border: "none", borderRadius: 10,
-                          background: g.coleccion_slug ? "rgba(78,205,196,0.12)" : "#F7F3ED",
-                          color: g.coleccion_slug ? "#178A83" : "#9CA3AF",
+                          background: g.coleccion_slug ? "rgba(78,205,196,0.12)" : "#F4F5F7",
+                          color: g.coleccion_slug ? "#4ECDC4" : "#9CA3AF",
                           padding: "7px 10px", fontSize: 12, fontWeight: 700,
                           outline: "none", flexShrink: 0, maxWidth: 140, fontFamily: "inherit",
                         }}
@@ -429,7 +429,7 @@ export default function AdminUsuariosPage() {
                       {savingRename ? "…" : "✓"}
                     </button>
                     <button type="button" onClick={() => setRenaming(null)}
-                      style={{ ...btnSmall, background: "#F7F3ED", color: "#9CA3AF" }}>✕</button>
+                      style={{ ...btnSmall, background: "#F4F5F7", color: "#9CA3AF" }}>✕</button>
                   </div>
                 )}
 
@@ -458,7 +458,7 @@ export default function AdminUsuariosPage() {
               <p style={sectionLabel}>
                 Solicitudes
                 {pending.length > 0 && (
-                  <span style={{ marginLeft: 8, background: "rgba(230,57,70,0.12)", color: "#C53340", borderRadius: 999, padding: "2px 8px", fontSize: 11, fontWeight: 800 }}>
+                  <span style={{ marginLeft: 8, background: "rgba(230,57,70,0.12)", color: "#E63946", borderRadius: 999, padding: "2px 8px", fontSize: 11, fontWeight: 800 }}>
                     {pending.length}
                   </span>
                 )}
@@ -504,7 +504,7 @@ export default function AdminUsuariosPage() {
               <section>
                 <p style={sectionLabel}>
                   Sin grupo
-                  <span style={{ marginLeft: 6, fontSize: 11, color: "#C4BAB0", fontWeight: 600 }}>{ungrouped.length}</span>
+                  <span style={{ marginLeft: 6, fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>{ungrouped.length}</span>
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {ungrouped.map((user) => (
@@ -520,7 +520,7 @@ export default function AdminUsuariosPage() {
               <section key={group.name}>
                 <p style={sectionLabel}>
                   {group.name}
-                  <span style={{ marginLeft: 6, fontSize: 11, color: "#C4BAB0", fontWeight: 600 }}>
+                  <span style={{ marginLeft: 6, fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>
                     {users.length} {users.length === 1 ? "alumno" : "alumnos"}
                   </span>
                   {group.coleccion_slug && (
@@ -566,7 +566,7 @@ export default function AdminUsuariosPage() {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                     <button type="button"
                       onClick={() => setNotifGroups([])}
-                      style={{ ...btnSmall, background: notifGroups.length === 0 ? "#1A1A2E" : "#F7F3ED", color: notifGroups.length === 0 ? "#FFFFFF" : "#53596B" }}>
+                      style={{ ...btnSmall, background: notifGroups.length === 0 ? "#1A1A2E" : "#F4F5F7", color: notifGroups.length === 0 ? "#FFFFFF" : "#53596B" }}>
                       Todos
                     </button>
                     {groupNames.map((g) => {
@@ -574,7 +574,7 @@ export default function AdminUsuariosPage() {
                       return (
                         <button type="button" key={g}
                           onClick={() => setNotifGroups((prev) => sel ? prev.filter((x) => x !== g) : [...prev, g])}
-                          style={{ ...btnSmall, background: sel ? "#1A1A2E" : "#F7F3ED", color: sel ? "#FFFFFF" : "#53596B" }}>
+                          style={{ ...btnSmall, background: sel ? "#1A1A2E" : "#F4F5F7", color: sel ? "#FFFFFF" : "#53596B" }}>
                           {g}
                         </button>
                       );
@@ -589,13 +589,13 @@ export default function AdminUsuariosPage() {
                   {notifSending ? "Enviando…" : "Enviar notificación"}
                 </button>
                 {notifResult && (
-                  <p style={{ fontSize: 13, color: "#178A83", fontWeight: 700, margin: 0 }}>
+                  <p style={{ fontSize: 13, color: "#4ECDC4", fontWeight: 700, margin: 0 }}>
                     ✓ Enviada a {notifResult.sent} {notifResult.sent === 1 ? "dispositivo" : "dispositivos"}
                     {notifResult.failed > 0 ? ` · ${notifResult.failed} fallaron` : ""}
                   </p>
                 )}
                 {notifError && (
-                  <p style={{ fontSize: 13, color: "#C53340", fontWeight: 700, margin: 0 }}>
+                  <p style={{ fontSize: 13, color: "#E63946", fontWeight: 700, margin: 0 }}>
                     Error: {notifError}
                   </p>
                 )}
@@ -638,7 +638,7 @@ function ApprovedUserRow({ user, groups, onChangeGroup, onDelete }: {
       </select>
       <button type="button" onClick={() => onDelete(user)} style={iconBtn("rgba(230,57,70,0.10)")} aria-label="Eliminar">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="#C53340" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="#E63946" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
     </div>
@@ -660,8 +660,8 @@ const userCardStyle: React.CSSProperties = {
 const userName: React.CSSProperties = { fontSize: 14, fontWeight: 700, color: "#1A1A2E", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" };
 const userSub: React.CSSProperties = { fontSize: 11, color: "#9CA3AF", margin: "2px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" };
 const emptyCard: React.CSSProperties = { background: "#FFFFFF", borderRadius: 16, padding: 20, textAlign: "center", boxShadow: "0 2px 10px rgba(26,26,46,0.07)", color: "#9CA3AF", fontSize: 14 };
-const groupSelect: React.CSSProperties = { border: "none", borderRadius: 10, background: "#F7F3ED", color: "#1A1A2E", padding: "8px 10px", fontSize: 13, fontWeight: 700, outline: "none", flexShrink: 0, maxWidth: 110, fontFamily: "inherit" };
-const fieldStyle: React.CSSProperties = { border: "none", borderRadius: 12, background: "#F7F3ED", color: "#1A1A2E", padding: "10px 13px", fontSize: 14, fontWeight: 600, outline: "none", fontFamily: "inherit" };
+const groupSelect: React.CSSProperties = { border: "none", borderRadius: 10, background: "#F4F5F7", color: "#1A1A2E", padding: "8px 10px", fontSize: 13, fontWeight: 700, outline: "none", flexShrink: 0, maxWidth: 110, fontFamily: "inherit" };
+const fieldStyle: React.CSSProperties = { border: "none", borderRadius: 12, background: "#F4F5F7", color: "#1A1A2E", padding: "10px 13px", fontSize: 14, fontWeight: 600, outline: "none", fontFamily: "inherit" };
 const btnSmall: React.CSSProperties = { border: "none", borderRadius: 8, padding: "8px 12px", fontSize: 13, fontWeight: 700, cursor: "pointer", flexShrink: 0 };
 function iconBtn(bg: string): React.CSSProperties {
   return { width: 36, height: 36, borderRadius: "50%", background: bg, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 };

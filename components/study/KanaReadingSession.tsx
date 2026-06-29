@@ -79,7 +79,7 @@ function SummaryScreen({
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 610,
-      background: "#FFF8E7",
+      background: "#F4F5F7",
       display: "flex", flexDirection: "column",
       fontFamily: DS.fontHead,
     }}>
@@ -94,13 +94,13 @@ function SummaryScreen({
             onClick={onClose}
             style={{
               width: 38, height: 38, borderRadius: 999,
-              background: "#FAF3E2", border: "none",
+              background: "#F4F5F7", border: "none",
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer",
             }}
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M1 1l10 10M11 1L1 11" stroke="#1E1C12" strokeWidth="1.8" strokeLinecap="round" />
+              <path d="M1 1l10 10M11 1L1 11" stroke="#1A1A2E" strokeWidth="1.8" strokeLinecap="round" />
             </svg>
           </button>
         </div>
@@ -110,11 +110,11 @@ function SummaryScreen({
           <div style={{ marginBottom: 28 }}>
             <div style={{
               fontSize: "clamp(36px, 11vw, 48px)", fontWeight: 800,
-              color: "#1E1C12", letterSpacing: -1, lineHeight: 1.0,
+              color: "#1A1A2E", letterSpacing: -1, lineHeight: 1.0,
             }}>{headline}</div>
             <div style={{
               fontSize: "clamp(17px, 5vw, 20px)", fontWeight: 400,
-              color: "#5B403F", marginTop: 6, lineHeight: 1.3,
+              color: "#4F5668", marginTop: 6, lineHeight: 1.3,
             }}>{sub}</div>
           </div>
 
@@ -136,10 +136,10 @@ function SummaryScreen({
               }}>
                 <div style={{
                   fontSize: 10, fontWeight: 600, letterSpacing: "0.18em",
-                  textTransform: "uppercase", color: "#5B403F", marginBottom: 6,
+                  textTransform: "uppercase", color: "#4F5668", marginBottom: 6,
                 }}>{x.l}</div>
                 <div style={{
-                  fontSize: 24, fontWeight: 800, color: "#1E1C12", letterSpacing: -0.5,
+                  fontSize: 24, fontWeight: 800, color: "#1A1A2E", letterSpacing: -0.5,
                 }}>{x.v}</div>
               </div>
             ))}
@@ -150,7 +150,7 @@ function SummaryScreen({
             <div style={{ marginBottom: 24 }}>
               <div style={{
                 fontSize: 10.5, fontWeight: 600, letterSpacing: "0.2em",
-                textTransform: "uppercase", color: "#5B403F", marginBottom: 12,
+                textTransform: "uppercase", color: "#4F5668", marginBottom: 12,
               }}>Dominados hoy</div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 {summary.newlySet.map((item) => (
@@ -174,19 +174,19 @@ function SummaryScreen({
             <div style={{
               display: "flex", alignItems: "center", gap: 16,
               padding: "18px 20px", borderRadius: 24,
-              background: "#FAF3E2",
+              background: "#F4F5F7",
               marginBottom: 28,
             }}>
               <div style={{ flex: 1 }}>
                 <div style={{
                   fontSize: 10, fontWeight: 600, letterSpacing: "0.2em",
-                  textTransform: "uppercase", color: "#5B403F", marginBottom: 4,
+                  textTransform: "uppercase", color: "#4F5668", marginBottom: 4,
                 }}>Próximo</div>
                 <div style={{
-                  fontFamily: DS.fontKana, fontSize: 22, color: "#1E1C12", letterSpacing: 2,
+                  fontFamily: DS.fontKana, fontSize: 22, color: "#1A1A2E", letterSpacing: 2,
                 }}>{summary.upNextKana}</div>
                 <div style={{
-                  fontFamily: DS.fontBody, fontSize: 12, color: "#5B403F", marginTop: 2,
+                  fontFamily: DS.fontBody, fontSize: 12, color: "#4F5668", marginTop: 2,
                 }}>{summary.upNextLabel}</div>
               </div>
               <button
@@ -216,7 +216,7 @@ function SummaryScreen({
           onClick={onClose}
           style={{
             width: "100%", padding: "18px 22px",
-            background: "linear-gradient(135deg, #E63946 0%, #c42b38 100%)",
+            background: "linear-gradient(135deg, #E63946 0%, #1A1A2E 100%)",
             color: "#fff",
             border: "none", borderRadius: 999, cursor: "pointer",
             fontFamily: DS.fontHead, fontSize: 15, fontWeight: 700,
@@ -369,7 +369,7 @@ export default function KanaReadingSession({
             fontSize: "clamp(120px, 38vw, 200px)",
             lineHeight: 0.9,
             color: feedback
-              ? isCorrect ? "oklch(0.48 0.14 150)" : "oklch(0.55 0.16 25)"
+              ? isCorrect ? "#4ECDC4" : "#E63946"
               : DS.ink,
             transition: "color 150ms ease",
             userSelect: "none",
@@ -385,7 +385,7 @@ export default function KanaReadingSession({
             <div style={{
               fontSize: 11, fontWeight: 700, letterSpacing: "0.18em",
               textTransform: "uppercase",
-              color: isCorrect ? "oklch(0.48 0.14 150)" : "oklch(0.55 0.16 25)",
+              color: isCorrect ? "#4ECDC4" : "#E63946",
             }}>
               {isCorrect ? "Correcto" : "No era eso"}
             </div>
@@ -407,7 +407,7 @@ export default function KanaReadingSession({
               }}>TÚ</span>
               <span style={{
                 fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
-                color: isCorrect ? "oklch(0.48 0.14 150)" : "oklch(0.55 0.16 25)",
+                color: isCorrect ? "#4ECDC4" : "#E63946",
               }}>
                 {feedback.userAnswer.toUpperCase()}
               </span>

@@ -124,7 +124,7 @@ export default function RepliesSheet({ postId, postContent, postAuthorName, user
         onClick={e => e.stopPropagation()}
         style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 401,
-          background: "#12121F",
+          background: "#1A1A2E",
           borderRadius: "20px 20px 0 0",
           maxHeight: "88dvh",
           display: "flex",
@@ -242,7 +242,7 @@ export default function RepliesSheet({ postId, postContent, postAuthorName, user
               flex: 1,
               border: "1px solid rgba(255,255,255,0.10)",
               borderRadius: 12,
-              background: "#16161F",
+              background: "#242440",
               padding: "10px 13px",
               fontSize: 14,
               fontFamily: "var(--font-noto-sans-jp), inherit",

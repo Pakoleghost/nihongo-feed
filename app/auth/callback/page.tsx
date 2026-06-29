@@ -4,9 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Error desconocido";
+}
+
 export default function AuthCallback() {
   const router = useRouter();
-  const [msg, setMsg] = useState("Entrando…");
+  const [msg] = useState("Entrando…");
 
   useEffect(() => {
     (async () => {
@@ -61,9 +65,9 @@ export default function AuthCallback() {
         }
 
         // Approved + username set.
-        router.replace("/");
-      } catch (e: any) {
-        console.error("auth callback fatal:", e);
+        router.replace("/dashboard");
+      } catch (e: unknown) {
+        console.error("auth callback fatal:", getErrorMessage(e));
         router.replace("/login");
       }
     })();

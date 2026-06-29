@@ -1,0 +1,2710 @@
+.app {
+  --navy: #1a1a2e;
+  --navy-soft: #252541;
+  --brand-red: #e63946;
+  --amber: #f5a623;
+  --amber-soft: #fff3d8;
+  --teal: #4ecdc4;
+  --teal-dark: #1a1a2e;
+  --red: #e63946;
+  --red-dark: #e63946;
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --border: rgba(17, 24, 39, 0.1);
+  --border-strong: rgba(17, 24, 39, 0.18);
+  --muted: #6b7280;
+  --muted-light: #9ca3af;
+  --sidebar-w: 248px;
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--navy);
+  font-family:
+    var(--font-study), var(--font-zen-kaku), ui-sans-serif, system-ui,
+    sans-serif;
+  letter-spacing: 0;
+}
+
+.app * {
+  box-sizing: border-box;
+}
+
+.app button {
+  cursor: default;
+  font-family: inherit;
+}
+
+.app a {
+  cursor: default;
+}
+
+.sidebar {
+  position: relative;
+  width: var(--sidebar-w);
+  flex: 0 0 var(--sidebar-w);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  border-right: 1px solid rgba(26, 26, 46, 0.08);
+  background: #fff;
+  color: var(--navy);
+}
+
+.sidebar::before {
+  content: "";
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 4px;
+  flex: 0 0 4px;
+  background: linear-gradient(90deg, var(--red), var(--amber), var(--teal));
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 18px 18px;
+  border-bottom: 1px solid rgba(26, 26, 46, 0.07);
+}
+
+.brandMark {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--red);
+  color: #fff;
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: 0 8px 18px rgba(230, 57, 70, 0.18);
+}
+
+.brandText {
+  display: grid;
+  gap: 1px;
+  color: var(--navy);
+  line-height: 1;
+}
+
+.brandText strong {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.brandText span {
+  color: rgba(26, 26, 46, 0.46);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav {
+  padding: 16px 10px 0;
+}
+
+.navGroup {
+  padding: 0 0 12px;
+}
+
+.navLabel {
+  padding: 8px 8px;
+  color: rgba(26, 26, 46, 0.4);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.navItem {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(26, 26, 46, 0.68);
+  font-size: 14px;
+  font-weight: 800;
+  text-align: left;
+  text-decoration: none;
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+  transition:
+    background-color 140ms ease,
+    box-shadow 140ms ease,
+    color 140ms ease,
+    outline-color 140ms ease,
+    transform 110ms ease;
+}
+
+.navItem:hover {
+  background: rgba(245, 166, 35, 0.11);
+  color: var(--navy);
+  transform: translateX(1px);
+}
+
+.navItemActive {
+  background: rgba(78, 205, 196, 0.16);
+  outline-color: rgba(78, 205, 196, 0.5);
+  color: var(--navy);
+  box-shadow: 0 10px 22px rgba(78, 205, 196, 0.12);
+  transform: translateX(1px);
+}
+
+.navIcon {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  color: currentColor;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.navIconBox {
+  background: rgba(26, 26, 46, 0.06);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+}
+
+.navItemActive .navIconBox {
+  background: rgba(78, 205, 196, 0.22);
+}
+
+.navItem:active {
+  transform: translateX(1px) scale(0.985);
+}
+
+.profileLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding: 12px 10px;
+  border-top: 1px solid rgba(26, 26, 46, 0.07);
+  color: rgba(26, 26, 46, 0.82);
+  text-decoration: none;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(78, 205, 196, 0.2);
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.avatarImage {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatarImageLarge {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  object-fit: cover;
+  box-shadow: 0 16px 32px rgba(26, 26, 46, 0.16);
+}
+
+.profileText {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.profileText strong {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileText span {
+  color: rgba(26, 26, 46, 0.44);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.main {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topbar,
+.mobileTopbar {
+  flex: 0 0 auto;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 24px;
+}
+
+.mobileTopbar {
+  display: none;
+  height: 54px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.mobileTopbar .brandText {
+  color: var(--navy);
+  text-decoration: none;
+}
+
+.mobileTopbar .brandText span {
+  color: var(--muted);
+}
+
+.topbarStats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.topbarStats strong {
+  color: var(--navy);
+}
+
+.topbarActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ghostButton,
+.primaryButton,
+.lightButton,
+.dangerButton,
+.tealButton {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 8px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    transform 140ms ease;
+}
+
+.ghostButton,
+.lightButton {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--muted);
+}
+
+.ghostButton:hover,
+.lightButton:hover {
+  border-color: var(--border-strong);
+  background: var(--bg);
+  color: var(--navy);
+}
+
+.primaryButton,
+.tealButton {
+  border: 1px solid var(--teal);
+  background: var(--teal);
+  color: var(--navy);
+}
+
+.dangerButton {
+  border: 1px solid var(--red);
+  background: var(--red);
+  color: #fff;
+}
+
+.primaryButton:active,
+.dangerButton:active,
+.tealButton:active {
+  transform: translateY(1px);
+}
+
+.page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 28px 28px 48px;
+}
+
+.pageInner {
+  width: min(100%, 1220px);
+  margin: 0 auto;
+}
+
+.pageHeader {
+  margin-bottom: 22px;
+}
+
+.pageTitle {
+  margin: 0;
+  color: var(--navy);
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.pageSub {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.card,
+.lessonRow,
+.heroCard,
+.noteCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(26, 26, 46, 0.06);
+}
+
+.sectionLabel {
+  margin: 20px 0 10px;
+  color: var(--muted-light);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.homeGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.greetingCard {
+  margin-bottom: 16px;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(245, 166, 35, 0.32);
+  background:
+    radial-gradient(
+      circle at 92% 16%,
+      rgba(78, 205, 196, 0.28),
+      transparent 26%
+    ),
+    linear-gradient(135deg, rgba(245, 166, 35, 0.2), rgba(78, 205, 196, 0.1)),
+    #fff;
+  color: var(--navy);
+  padding: 22px;
+}
+
+.greetingJa {
+  margin-bottom: 5px;
+  color: var(--navy);
+  font-family: var(--font-noto-sans-jp), sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.greetingName {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.05;
+}
+
+.greetingSub {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.statTile {
+  border-radius: 10px;
+  border: 1px solid rgba(26, 26, 46, 0.06);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 12px 10px;
+}
+
+.statTile strong {
+  display: block;
+  color: var(--navy);
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.statTile span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.noteCard {
+  margin-bottom: 16px;
+  padding: 13px 15px;
+  box-shadow: none;
+}
+
+.noteLabel {
+  margin-bottom: 5px;
+  color: var(--teal-dark);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.noteText {
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.rowList {
+  overflow: hidden;
+}
+
+.rowItem,
+.taskRow,
+.vocabWord,
+.grammarItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.rowItem {
+  min-height: 68px;
+  padding: 13px 18px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.rowItem:last-child,
+.taskRow:last-child,
+.vocabWord:last-child,
+.grammarItem:last-child {
+  border-bottom: 0;
+}
+
+.rowIcon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(78, 205, 196, 0.12);
+  color: var(--teal-dark);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.rowIconRed {
+  background: rgba(245, 166, 35, 0.16);
+  color: var(--navy);
+}
+
+.rowIconNavy {
+  background: rgba(26, 26, 46, 0.08);
+  color: var(--navy);
+}
+
+.rowCopy {
+  min-width: 0;
+  flex: 1;
+}
+
+.rowTitle {
+  display: block;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.rowSub {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rowRight {
+  margin-left: auto;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 21px;
+  border-radius: 5px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.badgeTeal {
+  background: rgba(78, 205, 196, 0.12);
+  color: var(--teal-dark);
+}
+
+.badgeRed {
+  background: rgba(230, 57, 70, 0.1);
+  color: var(--red-dark);
+}
+
+.badgeGray {
+  background: var(--bg);
+  color: var(--muted);
+}
+
+.badgeNavy {
+  background: rgba(26, 26, 46, 0.08);
+  color: var(--navy);
+}
+
+.progressBar {
+  width: 82px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: var(--bg);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--teal);
+}
+
+.taskRow {
+  padding: 13px 18px;
+}
+
+.taskCheck {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+}
+
+.taskCheckDone {
+  border-color: var(--teal);
+  background: var(--teal);
+}
+
+.heroCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+  border: 0;
+  background:
+    radial-gradient(
+      circle at 94% 16%,
+      rgba(78, 205, 196, 0.22),
+      transparent 28%
+    ),
+    linear-gradient(135deg, rgba(245, 166, 35, 0.18), rgba(78, 205, 196, 0.1)),
+    #fff;
+  color: var(--navy);
+  padding: 22px;
+  box-shadow: none;
+}
+
+.heroLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.heroGlyph {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--teal);
+  color: var(--navy);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 35px;
+  line-height: 1;
+}
+
+.heroTitle {
+  color: var(--navy);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+.heroSub {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.heroMetric {
+  text-align: right;
+}
+
+.heroMetric strong {
+  display: block;
+  color: var(--navy);
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.heroMetric span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.learnHero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 18px;
+  background:
+    radial-gradient(
+      circle at 96% 42%,
+      rgba(78, 205, 196, 0.13),
+      transparent 26%
+    ),
+    #fff;
+  box-shadow: 0 18px 45px rgba(26, 26, 46, 0.08);
+  padding: 26px;
+}
+
+.learnHeroLeft {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+
+.learnGlyph,
+.learnModeIcon {
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--teal);
+  color: var(--navy);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  box-shadow: 0 10px 24px rgba(78, 205, 196, 0.24);
+}
+
+.learnGlyph {
+  width: 62px;
+  height: 62px;
+  flex: 0 0 62px;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.learnHeroLeft h1 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 31px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.learnHeroLeft p {
+  margin: 8px 0 0;
+  color: #72798a;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.learnHeroStats {
+  display: flex;
+  gap: 12px;
+}
+
+.learnHeroStats div {
+  min-width: 104px;
+  border: 1px solid rgba(78, 205, 196, 0.18);
+  border-radius: 14px;
+  background: rgba(78, 205, 196, 0.12);
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.learnHeroStats div:nth-child(2) {
+  border-color: rgba(78, 205, 196, 0.18);
+  background: rgba(78, 205, 196, 0.12);
+}
+
+.learnHeroStats strong {
+  display: block;
+  color: var(--navy);
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.learnHeroStats div:nth-child(2) strong {
+  color: #1a1a2e;
+}
+
+.learnHeroStats span {
+  display: block;
+  margin-top: 5px;
+  color: #7b8190;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.learnModeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.learnModeCard {
+  min-height: 132px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--navy);
+  padding: 24px;
+  text-decoration: none;
+  box-shadow: 0 14px 34px rgba(26, 26, 46, 0.05);
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.learnModeCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(78, 205, 196, 0.28);
+  box-shadow: 0 18px 42px rgba(26, 26, 46, 0.09);
+}
+
+.learnModeCardActive {
+  background:
+    radial-gradient(
+      circle at 92% 18%,
+      rgba(245, 166, 35, 0.34),
+      transparent 34%
+    ),
+    var(--teal);
+  color: var(--navy);
+  box-shadow: 0 18px 42px rgba(78, 205, 196, 0.2);
+}
+
+.learnModeIcon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  font-size: 22px;
+}
+
+.learnModeCard:not(.learnModeCardActive) .learnModeIcon {
+  background: rgba(78, 205, 196, 0.12);
+  color: #1a1a2e;
+  box-shadow: none;
+}
+
+.learnModeCard strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+.learnModeCard em {
+  display: block;
+  margin-top: 8px;
+  color: rgba(26, 26, 46, 0.55);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.learnModeCardActive em {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.kanaLearnPanel {
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 18px 45px rgba(26, 26, 46, 0.08);
+  padding: 28px;
+}
+
+.kanaLearnHeader,
+.kanaChartTitleRow,
+.kanaStrokeHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.kanaLearnHeader h2,
+.kanaChartTitleRow h3 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.05;
+}
+
+.kanaLearnHeader p,
+.kanaChartTitleRow p {
+  margin: 5px 0 0;
+  color: #737a89;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.kanaGuideBox {
+  display: grid;
+  gap: 8px;
+  margin-top: 24px;
+  border: 1px solid rgba(78, 205, 196, 0.2);
+  border-radius: 14px;
+  background:
+    radial-gradient(
+      circle at 96% 0%,
+      rgba(245, 166, 35, 0.16),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(78, 205, 196, 0.07),
+      rgba(245, 166, 35, 0.055)
+    ),
+    #fff;
+  padding: 18px 20px;
+}
+
+.kanaGuideBox strong {
+  color: var(--navy);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.kanaGuideBox span {
+  color: #535b6b;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.kanaQuizRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.kanaQuizCard {
+  min-height: 82px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 14px;
+  background: #fff;
+  padding: 18px;
+  text-decoration: none;
+}
+
+.kanaQuizCard span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(78, 205, 196, 0.12);
+  color: #1a1a2e;
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.kanaQuizCard strong {
+  display: block;
+  color: var(--navy);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.kanaQuizCard em {
+  display: block;
+  margin-top: 4px;
+  color: #8a91a0;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.kanaLearnTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.kanaLearnTab {
+  min-width: 184px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--navy);
+  padding: 12px 14px;
+  cursor: default;
+}
+
+.kanaLearnTab span {
+  width: 38px;
+  height: 34px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #f5f7fb;
+  color: var(--navy);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-align: center;
+  text-wrap: nowrap;
+  white-space: nowrap;
+  word-break: keep-all;
+  writing-mode: horizontal-tb;
+}
+
+.kanaLearnTab .kanaComboIcon {
+  width: 42px;
+  flex-basis: 42px;
+  font-size: 14px;
+  letter-spacing: -0.1em;
+}
+
+.kanaLearnTab strong,
+.kanaLearnTab em {
+  display: block;
+  text-align: left;
+}
+
+.kanaLearnTab strong {
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.kanaLearnTab em {
+  margin-top: 2px;
+  color: #8a91a0;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.kanaLearnTabActive {
+  border-color: rgba(78, 205, 196, 0.34);
+  background:
+    radial-gradient(
+      circle at 88% 16%,
+      rgba(245, 166, 35, 0.28),
+      transparent 34%
+    ),
+    var(--teal);
+  color: var(--navy);
+  box-shadow: 0 12px 26px rgba(78, 205, 196, 0.18);
+}
+
+.kanaLearnTabActive span {
+  background: rgba(255, 255, 255, 0.45);
+  color: var(--navy);
+}
+
+.kanaLearnTabActive em {
+  color: rgba(26, 26, 46, 0.6);
+}
+
+.kanaChartLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 282px;
+  gap: 22px;
+  align-items: start;
+  margin-top: 28px;
+}
+
+.kanaChartCard,
+.kanaStrokePanel {
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.kanaChartCard {
+  padding: 24px;
+}
+
+.kanaChartSection {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.kanaChartSectionTitle {
+  color: #8a91a0;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kanaChartRow {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.kanaRowLabel {
+  color: #8a91a0;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.kanaChartGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.kanaChartCell,
+.kanaChartEmptyCell {
+  min-height: 82px;
+  border-radius: 14px;
+}
+
+.kanaChartCell {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  background: #fff;
+  color: var(--navy);
+  cursor: default;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.kanaChartCell:hover {
+  transform: translateY(-1px);
+  border-color: rgba(78, 205, 196, 0.3);
+  box-shadow: 0 12px 24px rgba(26, 26, 46, 0.07);
+}
+
+.kanaChartCellSelected {
+  border-color: rgba(78, 205, 196, 0.38);
+  background: rgba(78, 205, 196, 0.11);
+  box-shadow: inset 0 0 0 2px rgba(78, 205, 196, 0.18);
+}
+
+.kanaChartCell span {
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.kanaChartCell em {
+  color: #8a91a0;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.kanaChartEmptyCell {
+  background: #f8f9fb;
+}
+
+.kanaStrokePanel {
+  padding: 18px;
+}
+
+.kanaStrokeSticky {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+.kanaStrokeHeader {
+  width: 100%;
+}
+
+.kanaStrokeHeader > span {
+  width: 52px;
+  height: 48px;
+  flex: 0 0 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(78, 205, 196, 0.16);
+  color: var(--navy);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-align: center;
+  text-wrap: nowrap;
+  white-space: nowrap;
+  word-break: keep-all;
+  writing-mode: horizontal-tb;
+}
+
+.kanaStrokeHeader > .kanaComboIcon {
+  width: 58px;
+  flex-basis: 58px;
+  font-size: 20px;
+  letter-spacing: -0.1em;
+}
+
+.kanaStrokeHeader strong,
+.kanaStrokeHeader em {
+  display: block;
+}
+
+.kanaStrokeHeader strong {
+  color: var(--navy);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.kanaStrokeHeader em {
+  margin-top: 2px;
+  color: #8a91a0;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.kanaStrokePanel p {
+  margin: 0;
+  color: #5e6677;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.ctaRow .dangerButton,
+.ctaRow .tealButton,
+.ctaRow .lightButton {
+  min-height: 38px;
+  flex: 0 0 auto;
+}
+
+.tabBar {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.tabButton {
+  flex: 1;
+  min-height: 34px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  cursor: default;
+}
+
+.tabButtonActive {
+  background: var(--teal);
+  color: var(--navy);
+}
+
+.kanaSection {
+  margin-bottom: 14px;
+}
+
+.kanaGridWrap {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.kanaGrid {
+  display: grid;
+  gap: 1px;
+  background: var(--border);
+}
+
+.kanaCell {
+  min-height: 76px;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  border: 0;
+  background: #fff;
+  color: var(--navy);
+}
+
+.kanaCellDone {
+  background: rgba(78, 205, 196, 0.08);
+}
+
+.kanaCellEmpty {
+  background: #fafafa;
+}
+
+.kanaChar {
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 32px;
+  line-height: 1;
+}
+
+.kanaRoman {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.lessonRow {
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.lessonHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.lessonNum {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.lessonNumDone {
+  background: rgba(78, 205, 196, 0.16);
+  color: var(--teal-dark);
+}
+
+.lessonNumCurrent {
+  background: rgba(245, 166, 35, 0.18);
+  color: var(--navy);
+}
+
+.lessonInfo {
+  min-width: 0;
+  flex: 1;
+}
+
+.lessonTitle {
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.lessonSub {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.lessonRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.kanjiLearnPanel {
+  display: grid;
+  gap: 16px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 18px 45px rgba(26, 26, 46, 0.08);
+  padding: 24px;
+}
+
+.kanjiWorkspaceTop {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+}
+
+.kanjiWorkspaceTop h2,
+.kanjiListHeader h3 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.05;
+}
+
+.kanjiWorkspaceTop p,
+.kanjiListHeader p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.kanjiQuickActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.kanjiBackButton {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(78, 205, 196, 0.12);
+  color: var(--navy);
+  padding: 0 12px;
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 950;
+  cursor: default;
+}
+
+.kanjiModuleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.kanjiModuleCard {
+  position: relative;
+  min-height: 196px;
+  display: grid;
+  align-content: end;
+  gap: 7px;
+  overflow: hidden;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 20px;
+  background:
+    radial-gradient(
+      circle at 86% 10%,
+      rgba(78, 205, 196, 0.2),
+      transparent 30%
+    ),
+    #fff;
+  color: var(--navy);
+  padding: 18px;
+  text-align: left;
+  cursor: default;
+  box-shadow: 0 16px 34px rgba(26, 26, 46, 0.06);
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.kanjiModuleCard:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: rgba(78, 205, 196, 0.36);
+  box-shadow: 0 22px 42px rgba(26, 26, 46, 0.09);
+}
+
+.kanjiModuleCardCurrent {
+  border-color: rgba(78, 205, 196, 0.35);
+  background:
+    radial-gradient(
+      circle at 84% 12%,
+      rgba(245, 166, 35, 0.18),
+      transparent 32%
+    ),
+    rgba(78, 205, 196, 0.08);
+}
+
+.kanjiModuleCardDisabled {
+  opacity: 0.48;
+  filter: saturate(0.35);
+}
+
+.kanjiModuleBadge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--navy);
+  padding: 0 11px;
+  font-size: 12px;
+  font-weight: 950;
+  box-shadow: 0 10px 20px rgba(26, 26, 46, 0.08);
+}
+
+.kanjiModuleGlyph {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  color: rgba(26, 26, 46, 0.08);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 76px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.kanjiModuleCard strong {
+  position: relative;
+  color: var(--navy);
+  font-size: 22px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.kanjiModuleCard em {
+  position: relative;
+  color: var(--muted);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.kanjiModuleCard > span:last-child {
+  position: relative;
+  color: var(--teal-dark);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.kanjiLessonChoiceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.kanjiLessonChoiceCard {
+  min-height: 150px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--navy);
+  padding: 18px;
+  text-align: left;
+  cursor: default;
+  box-shadow: 0 14px 30px rgba(26, 26, 46, 0.05);
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.kanjiLessonChoiceCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(78, 205, 196, 0.36);
+  box-shadow: 0 20px 40px rgba(26, 26, 46, 0.08);
+}
+
+.kanjiLessonChoiceCard span {
+  width: fit-content;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(78, 205, 196, 0.14);
+  color: var(--navy);
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.kanjiLessonChoiceCard strong {
+  color: var(--navy);
+  font-size: 20px;
+  font-weight: 950;
+  line-height: 1.05;
+}
+
+.kanjiLessonChoiceCard em {
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.kanjiLessonTabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: 8px;
+}
+
+.kanjiLessonTab {
+  min-height: 76px;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--navy);
+  padding: 11px 12px;
+  text-align: left;
+  cursor: default;
+  box-shadow: 0 10px 25px rgba(26, 26, 46, 0.04);
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.kanjiLessonTab:hover {
+  transform: translateY(-1px);
+  border-color: rgba(78, 205, 196, 0.28);
+  box-shadow: 0 14px 30px rgba(26, 26, 46, 0.07);
+}
+
+.kanjiLessonTab strong {
+  color: var(--navy);
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.kanjiLessonTab span {
+  overflow: hidden;
+  color: var(--navy);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.kanjiLessonTab em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.kanjiLessonTabActive {
+  border-color: rgba(78, 205, 196, 0.32);
+  background: var(--teal);
+  color: var(--navy);
+  box-shadow: 0 14px 30px rgba(78, 205, 196, 0.2);
+}
+
+.kanjiLessonTabActive strong,
+.kanjiLessonTabActive span,
+.kanjiLessonTabActive em {
+  color: var(--navy);
+}
+
+.kanjiStudyLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(310px, 360px);
+  gap: 16px;
+  align-items: start;
+}
+
+.kanjiListCard,
+.kanjiDetailSticky {
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(26, 26, 46, 0.05);
+}
+
+.kanjiListCard {
+  overflow: hidden;
+}
+
+.kanjiListHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 18px 0;
+}
+
+.kanjiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 9px;
+  padding: 18px;
+}
+
+.kanjiCard {
+  min-height: 108px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--navy);
+  padding: 13px 10px;
+  text-align: center;
+  cursor: default;
+  box-shadow: 0 10px 24px rgba(26, 26, 46, 0.04);
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.kanjiCard:hover {
+  transform: translateY(-1px);
+  border-color: rgba(78, 205, 196, 0.38);
+  box-shadow: 0 15px 30px rgba(26, 26, 46, 0.08);
+}
+
+.kanjiCardSelected {
+  border-color: rgba(78, 205, 196, 0.4);
+  background: rgba(78, 205, 196, 0.09);
+  box-shadow: 0 16px 34px rgba(78, 205, 196, 0.13);
+}
+
+.kanjiChar,
+.vocabJa,
+.grammarExample {
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+}
+
+.kanjiChar {
+  color: var(--navy);
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.kanjiRead {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.kanjiMean {
+  color: var(--navy);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.kanjiDetailPanel {
+  min-width: 0;
+}
+
+.kanjiDetailSticky {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  overflow: hidden;
+  padding: 20px;
+  text-align: center;
+}
+
+.kanjiDetailSticky::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 120px;
+  background:
+    radial-gradient(
+      circle at 18% 18%,
+      rgba(78, 205, 196, 0.16),
+      transparent 30%
+    ),
+    linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(245, 166, 35, 0.06));
+  pointer-events: none;
+}
+
+.kanjiDetailBadge {
+  position: relative;
+  z-index: 1;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--navy);
+  padding: 0 11px;
+  font-size: 12px;
+  font-weight: 900;
+  box-shadow: 0 8px 20px rgba(26, 26, 46, 0.08);
+}
+
+.kanjiStrokePreview {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+
+.kanjiStrokeTitle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.kanjiStrokeTitle span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(78, 205, 196, 0.14);
+  color: var(--navy);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.kanjiStrokeTitle strong {
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: -0.01em;
+}
+
+.kanjiStrokeControls {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+}
+
+.kanjiSpeedGroup {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  border-radius: 14px;
+  background: var(--bg);
+  padding: 5px;
+}
+
+.kanjiSpeedGroup button,
+.kanjiGridToggle {
+  min-height: 34px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  cursor: default;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.kanjiGridToggle {
+  width: 100%;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  background: #fff;
+}
+
+.activePill {
+  background: var(--teal) !important;
+  color: var(--navy) !important;
+  box-shadow: 0 8px 18px rgba(78, 205, 196, 0.22);
+}
+
+.kanjiDetailReading {
+  margin-top: 0;
+  color: var(--navy);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.kanjiDetailMeaning {
+  color: var(--navy);
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.kanjiFactGrid {
+  width: 100%;
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.kanjiFactGrid div {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 14px;
+  background: var(--bg);
+  padding: 12px;
+  text-align: left;
+}
+
+.kanjiFactGrid strong {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kanjiFactGrid span {
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.3;
+}
+
+.kanjiDetailActions,
+.kanjiQuizActions {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.kanjiDetailActions .dangerButton,
+.kanjiDetailActions .lightButton {
+  flex: 1;
+  min-width: 132px;
+}
+
+.grammarStudyLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(310px, 360px);
+  gap: 16px;
+  align-items: start;
+}
+
+.grammarPatternList,
+.grammarDetailSticky {
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(26, 26, 46, 0.05);
+}
+
+.grammarPatternList {
+  overflow: hidden;
+}
+
+.grammarPatternGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  padding: 18px;
+}
+
+.grammarPatternCard {
+  min-height: 128px;
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--navy);
+  padding: 16px;
+  text-align: left;
+  cursor: default;
+  box-shadow: 0 10px 24px rgba(26, 26, 46, 0.04);
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.grammarPatternCard:hover {
+  transform: translateY(-1px);
+  border-color: rgba(78, 205, 196, 0.38);
+  box-shadow: 0 15px 30px rgba(26, 26, 46, 0.08);
+}
+
+.grammarPatternCardSelected {
+  border-color: rgba(78, 205, 196, 0.42);
+  background:
+    radial-gradient(
+      circle at 92% 16%,
+      rgba(245, 166, 35, 0.16),
+      transparent 28%
+    ),
+    rgba(78, 205, 196, 0.09);
+  box-shadow: 0 16px 34px rgba(78, 205, 196, 0.13);
+}
+
+.grammarPatternCard strong {
+  color: var(--navy);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 22px;
+  font-weight: 950;
+  line-height: 1.15;
+}
+
+.grammarPatternCard span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.grammarDetailPanel {
+  min-width: 0;
+}
+
+.grammarDetailSticky {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  gap: 14px;
+  overflow: hidden;
+  padding: 20px;
+}
+
+.grammarDetailSticky::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 116px;
+  background:
+    radial-gradient(
+      circle at 18% 18%,
+      rgba(78, 205, 196, 0.18),
+      transparent 30%
+    ),
+    linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(245, 166, 35, 0.07));
+  pointer-events: none;
+}
+
+.grammarDetailPattern,
+.grammarDetailMeaning,
+.grammarExampleBox,
+.grammarPracticeBox {
+  position: relative;
+  z-index: 1;
+}
+
+.grammarDetailPattern {
+  color: var(--navy);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 32px;
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 1.08;
+}
+
+.grammarDetailMeaning {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.grammarExampleBox,
+.grammarPracticeBox {
+  display: grid;
+  gap: 7px;
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 16px;
+  background: var(--bg);
+  padding: 14px;
+}
+
+.grammarExampleBox span,
+.grammarPracticeBox span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.grammarExampleBox strong,
+.grammarPracticeBox strong {
+  color: var(--navy);
+  font-weight: 950;
+  line-height: 1.25;
+}
+
+.grammarExampleBox strong {
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 22px;
+}
+
+.grammarExampleBox em {
+  color: var(--muted);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.grammarPracticeBox {
+  border-color: rgba(78, 205, 196, 0.22);
+  background: rgba(78, 205, 196, 0.09);
+}
+
+.grammarPracticeBox p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.kanjiQuizShell {
+  display: grid;
+  gap: 18px;
+  padding: 28px 40px 36px;
+}
+
+.kanjiQuizTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.kanjiQuizTitle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.kanjiQuizTitle > span {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--teal);
+  color: var(--navy);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 23px;
+  font-weight: 900;
+  box-shadow: 0 10px 24px rgba(78, 205, 196, 0.22);
+}
+
+.kanjiQuizTitle h2 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.05;
+}
+
+.kanjiQuizTitle p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.kanjiQuizClose {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 24px;
+  line-height: 1;
+  cursor: default;
+}
+
+.kanjiQuizProgress {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf0f5;
+}
+
+.kanjiQuizProgress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--teal), var(--amber));
+  transition: width 220ms ease;
+}
+
+.kanjiQuizPrompt {
+  min-height: 210px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  border-radius: 22px;
+  background:
+    radial-gradient(
+      circle at 20% 15%,
+      rgba(245, 166, 35, 0.15),
+      transparent 28%
+    ),
+    linear-gradient(135deg, rgba(245, 166, 35, 0.08), rgba(78, 205, 196, 0.09)),
+    #fff;
+  padding: 24px;
+  text-align: center;
+}
+
+.kanjiQuizPrompt span {
+  color: var(--navy);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 86px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.kanjiQuizPrompt em {
+  color: var(--muted);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.kanjiQuizOptions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.kanjiQuizOption {
+  min-height: 78px;
+  border: 1px solid rgba(26, 26, 46, 0.09);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--navy);
+  padding: 14px;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.25;
+  cursor: default;
+  box-shadow: 0 10px 28px rgba(26, 26, 46, 0.04);
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background-color 140ms ease;
+}
+
+.kanjiQuizOption:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(78, 205, 196, 0.3);
+}
+
+.kanjiQuizOption:disabled {
+  cursor: default;
+}
+
+.kanjiQuizOptionCorrect {
+  border-color: rgba(78, 205, 196, 0.52);
+  background: rgba(78, 205, 196, 0.18);
+}
+
+.kanjiQuizOptionWrong {
+  border-color: rgba(230, 57, 70, 0.45);
+  background: rgba(230, 57, 70, 0.12);
+  color: var(--red);
+}
+
+.kanjiQuizFooter {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--muted);
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.kanjiQuizResult {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  padding: 18px 0 6px;
+  text-align: center;
+}
+
+.kanjiQuizResult > strong {
+  width: 132px;
+  height: 132px;
+  display: grid;
+  place-items: center;
+  border-radius: 30px;
+  background:
+    radial-gradient(
+      circle at 76% 20%,
+      rgba(245, 166, 35, 0.46),
+      transparent 30%
+    ),
+    var(--teal);
+  color: var(--navy);
+  font-size: 38px;
+  font-weight: 900;
+  box-shadow: 0 18px 40px rgba(78, 205, 196, 0.2);
+}
+
+.kanjiQuizResult h3 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.kanjiQuizResult p {
+  max-width: 480px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.grammarItem {
+  align-items: flex-start;
+  padding: 16px 18px;
+}
+
+.grammarMain {
+  min-width: 0;
+  flex: 1;
+}
+
+.grammarPattern {
+  color: var(--navy);
+  font-family: var(--font-noto-sans-jp), sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.grammarMeaning {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.grammarExample {
+  margin-top: 10px;
+  color: var(--navy);
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.grammarTranslation {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.vocabWord {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(120px, 1.2fr) auto;
+  padding: 12px 16px;
+}
+
+.vocabJa {
+  color: var(--navy);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.vocabRead,
+.vocabEs {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.vocabEs {
+  color: var(--navy);
+  font-size: 13px;
+}
+
+.bottomNav {
+  display: none;
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 80;
+  height: calc(60px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border);
+  background: #fff;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.bottomNavInner {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  height: 60px;
+}
+
+.bottomNavItem {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 3px;
+  color: var(--muted-light);
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease,
+    outline-color 140ms ease,
+    transform 110ms ease;
+}
+
+.bottomNavActive {
+  background: rgba(78, 205, 196, 0.14);
+  outline-color: rgba(78, 205, 196, 0.42);
+  color: var(--teal-dark);
+  transform: translateY(-1px);
+}
+
+.bottomNavIcon {
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 17px;
+  line-height: 1;
+}
+
+@media (max-width: 900px) {
+  .sidebar,
+  .topbar {
+    display: none;
+  }
+
+  .app {
+    display: block;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .main {
+    height: 100dvh;
+  }
+
+  .mobileTopbar {
+    display: flex;
+  }
+
+  .page {
+    padding: 16px 16px calc(86px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .pageInner {
+    width: 100%;
+  }
+
+  .bottomNav {
+    display: block;
+  }
+
+  .homeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .kanjiWorkspaceTop,
+  .kanjiStudyLayout,
+  .grammarStudyLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .kanjiDetailSticky,
+  .grammarDetailSticky {
+    position: static;
+  }
+
+  .kanjiQuickActions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 620px) {
+  .pageTitle {
+    font-size: 22px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .heroCard {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .heroMetric {
+    text-align: left;
+  }
+
+  .learnHero,
+  .learnHeroLeft,
+  .learnHeroStats {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .learnHeroStats {
+    width: 100%;
+  }
+
+  .learnHeroStats div {
+    width: 100%;
+  }
+
+  .learnModeGrid,
+  .kanaQuizRow,
+  .kanaChartLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .kanaLearnPanel {
+    padding: 18px;
+  }
+
+  .kanjiLearnPanel {
+    padding: 18px;
+  }
+
+  .kanjiLessonTabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kanjiQuickActions .tealButton,
+  .kanjiQuickActions .lightButton {
+    flex: 1;
+    min-width: 132px;
+  }
+
+  .kanjiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 14px;
+  }
+
+  .grammarPatternGrid {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .kanaChartCard {
+    padding: 16px;
+  }
+
+  .kanaChartRow {
+    grid-template-columns: 1fr;
+  }
+
+  .kanaRowLabel {
+    text-align: left;
+  }
+
+  .kanaStrokeSticky {
+    position: static;
+  }
+
+  .tabBar {
+    overflow-x: auto;
+  }
+
+  .tabButton {
+    min-width: 110px;
+  }
+
+  .kanaCell {
+    min-height: 66px;
+  }
+
+  .kanaChar {
+    font-size: 28px;
+  }
+
+  .lessonHeader {
+    align-items: flex-start;
+  }
+
+  .lessonRight {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .vocabWord {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .vocabEs {
+    grid-column: 1 / -1;
+  }
+}

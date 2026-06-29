@@ -118,7 +118,7 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
         {cardsDone ? (
           <div
             style={{
-              background: "#16161F",
+              background: "#242440",
               borderRadius: "24px",
               padding: "22px 20px",
               border: "1px solid rgba(255,255,255,0.08)",
@@ -218,7 +218,7 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                     position: "absolute",
                     inset: 0,
                     backfaceVisibility: "hidden",
-                    background: "#16161F",
+                    background: "#242440",
                     borderRadius: "24px",
                     border: "1px solid rgba(255,255,255,0.08)",
                     display: "flex",
@@ -263,7 +263,7 @@ export default function VocabularioLearnSessionScreen({ initialLesson }: Props) 
                     inset: 0,
                     backfaceVisibility: "hidden",
                     transform: "rotateY(180deg)",
-                    background: "#1C1C28",
+                    background: "#252541",
                     borderRadius: "24px",
                     border: "1px solid rgba(255,255,255,0.12)",
                     display: "flex",

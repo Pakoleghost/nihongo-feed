@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Variants } from "framer-motion";
@@ -55,6 +55,7 @@ type MatchSelection = {
 type Phase = "question" | "traceReview" | "feedback";
 type KanaAnim = "idle" | "bounce" | "shake";
 type TraceCompletion = { retries: number; strokes: number };
+type KanaQuizTaskMode = KanaSessionMode | "reading" | "writing";
 // Smart mode weights — priority: recognise kana (show kana → pick romaji / match pairs)
 // romaji_to_kana_choice is kept minimal; romaji_to_kana_trace is secondary
 const MIXED_TASK_WEIGHTS: Array<{ type: KanaQuestionType; weight: number }> = [
@@ -254,7 +255,8 @@ function takeMatchPairs(deck: MatchPair[], cursor: number) {
   return { pairs, cursor: nextCursor };
 }
 
-function getLegacyTaskMode(rawDifficulty: string | null): KanaSessionMode {
+function getLegacyTaskMode(rawDifficulty: string | null): KanaQuizTaskMode {
+  if (rawDifficulty === "reading" || rawDifficulty === "writing") return rawDifficulty;
   if (!rawDifficulty) return "mixed";
   return "mixed";
 }
@@ -338,7 +340,7 @@ function getLibreDistractorPool(item: KanaItem, selectedPool: KanaItem[]): KanaI
 function buildQuiz(
   mode: string,
   sets: string[],
-  taskMode: KanaSessionMode,
+  taskMode: KanaQuizTaskMode,
   count: number,
   itemIds: string[],
   focusItemIds: string[],
@@ -373,16 +375,25 @@ function buildQuiz(
   // ── Smart / repeat modes: full mixed task set ─────────────────────────────────
   const traceItems = items.filter((item) => hasKanaTraceData(item.kana));
   const matchDeck = shuffle(getIntroducedBasicPairs(progress, effectivePool, mode));
-  const availableTaskTypes: KanaQuestionType[] = [
-    "kana_to_romaji_choice",
-    "romaji_to_kana_choice",
-  ];
+  let availableTaskTypes: KanaQuestionType[] =
+    taskMode === "reading"
+      ? ["kana_to_romaji_choice"]
+      : taskMode === "writing"
+        ? []
+        : [
+          "kana_to_romaji_choice",
+          "romaji_to_kana_choice",
+        ];
 
   if (traceItems.length > 0) {
     availableTaskTypes.push("romaji_to_kana_trace");
   }
 
-  if (matchDeck.length >= 4) {
+  if (taskMode === "writing" && availableTaskTypes.length === 0) {
+    availableTaskTypes = ["romaji_to_kana_choice"];
+  }
+
+  if (taskMode === "mixed" && matchDeck.length >= 4) {
     availableTaskTypes.push("hiragana_katakana_match");
   }
 
@@ -456,7 +467,7 @@ function QuizContent() {
 
   const mode = searchParams.get("mode") ?? "smart";
   const sets = (searchParams.get("sets") ?? "hiragana").split(",");
-  const taskMode: KanaSessionMode = getLegacyTaskMode(
+  const taskMode: KanaQuizTaskMode = getLegacyTaskMode(
     searchParams.get("taskMode") ?? searchParams.get("difficulty"),
   );
   const count = parseInt(searchParams.get("count") ?? "20", 10);
@@ -465,7 +476,11 @@ function QuizContent() {
   const contextPrimary = searchParams.get("contextPrimary") ?? "";
   const contextSecondary = searchParams.get("contextSecondary") ?? "";
 
-  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [progressMap, setProgressMap] = useState<KanaProgressMap>(() => loadKanaProgress("anon"));
+  const [questions] = useState<QuizQuestion[]>(() => {
+    const prog = loadKanaProgress("anon");
+    return buildQuiz(mode, sets, taskMode, count, itemIds, focusItemIds, prog);
+  });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [kanaKey, setKanaKey] = useState(0); // trigger re-mount for entrance animation
   const [phase, setPhase] = useState<Phase>("question");
@@ -473,14 +488,12 @@ function QuizContent() {
   const [scaledOption, setScaledOption] = useState<string | null>(null); // for correct-button scale
   const [kanaAnim, setKanaAnim] = useState<KanaAnim>("idle");
   const [results, setResults] = useState<QuestionResult[]>([]);
-  const [progressMap, setProgressMap] = useState<KanaProgressMap>({});
   const [traceCompletion, setTraceCompletion] = useState<TraceCompletion | null>(null);
   const [matchSelection, setMatchSelection] = useState<MatchSelection | null>(null);
   const [matchedPairKeys, setMatchedPairKeys] = useState<string[]>([]);
   const [matchMistakes, setMatchMistakes] = useState(0);
   const [matchWrongPairKey, setMatchWrongPairKey] = useState<string | null>(null);
   const [matchMistakePairKeys, setMatchMistakePairKeys] = useState<string[]>([]);
-  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -505,21 +518,13 @@ function QuizContent() {
     };
   }, []);
 
-  useEffect(() => {
-    const prog = loadKanaProgress("anon");
-    setProgressMap(prog);
-    const quiz = buildQuiz(mode, sets, taskMode, count, itemIds, focusItemIds, prog);
-    setQuestions(quiz);
-    setIsReady(true);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   const currentQ = questions[currentIndex];
   const isTraceQuestion = currentQ?.taskType === "romaji_to_kana_trace";
   const isMatchQuestion = currentQ?.taskType === "hiragana_katakana_match";
   const progressPct = questions.length > 0 ? (currentIndex / questions.length) * 100 : 0;
 
   const advance = useCallback(
-    (result: QuestionResult, updatedProgress: KanaProgressMap) => {
+    (result: QuestionResult) => {
       const newResults = [...results, result];
       setResults(newResults);
 
@@ -579,10 +584,10 @@ function QuizContent() {
     if (correct) {
       setScaledOption(option);
       setKanaAnim("bounce");
-      setTimeout(() => advance({ item: currentQ.item, correct, userAnswer: option }, updated), 800);
+      setTimeout(() => advance({ item: currentQ.item, correct, userAnswer: option }), 800);
     } else {
       setKanaAnim("shake");
-      setTimeout(() => advance({ item: currentQ.item, correct, userAnswer: option }, updated), 1200);
+      setTimeout(() => advance({ item: currentQ.item, correct, userAnswer: option }), 1200);
     }
   }
 
@@ -609,7 +614,7 @@ function QuizContent() {
     if (correct) setScaledOption(option);
 
     setTimeout(
-      () => advance({ item: currentQ.item, correct, userAnswer: option }, updated),
+      () => advance({ item: currentQ.item, correct, userAnswer: option }),
       correct ? 720 : 1050,
     );
   }
@@ -647,9 +652,7 @@ function QuizContent() {
               { kana: pair.hiragana.kana, romaji: pair.hiragana.romaji, id: pair.hiragana.id },
               { kana: pair.katakana.kana, romaji: pair.katakana.romaji, id: pair.katakana.id },
             ]),
-          },
-          updated,
-        ),
+          }),
       nextMistakes === 0 ? 850 : 1050,
     );
   }
@@ -693,11 +696,11 @@ function QuizContent() {
     router.push("/practicar");
   }
 
-  if (!isReady && questions.length === 0) {
+  if (questions.length === 0) {
     return (
       <div
         style={{
-          background: "#0D0D1A",
+          background: "#1A1A2E",
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
@@ -713,7 +716,7 @@ function QuizContent() {
     return (
       <div
         style={{
-          background: "#0D0D1A",
+          background: "#1A1A2E",
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
@@ -749,10 +752,10 @@ function QuizContent() {
     : feedbackNeedsSoftReview
       ? "rgba(245,158,11,0.14)"
       : "rgba(230,57,70,0.12)";
-  const feedbackColor = feedbackIsCorrect ? "#4ECDC4" : feedbackNeedsSoftReview ? "#F59E0B" : "#E63946";
+  const feedbackColor = feedbackIsCorrect ? "#4ECDC4" : feedbackNeedsSoftReview ? "#F5A623" : "#E63946";
   const matchReviewCount = new Set(matchMistakePairKeys).size;
   const sharedCardStyle = {
-    background: "#16161F",
+    background: "#242440",
     borderRadius: "28px",
     border: "1px solid rgba(255,255,255,0.07)",
   } as const;
@@ -761,7 +764,7 @@ function QuizContent() {
     return (
       <div
         style={{
-          background: "#0D0D1A",
+          background: "#1A1A2E",
           height: "100dvh",
           display: "flex",
           flexDirection: "column",
@@ -866,7 +869,7 @@ function QuizContent() {
             <div
               style={{
                 borderRadius: "999px",
-                background: "#1C1C28",
+                background: "#252541",
                 color: "rgba(255,255,255,0.65)",
                 fontSize: "12px",
                 fontWeight: 700,
@@ -1067,7 +1070,7 @@ function QuizContent() {
   return (
     <div
       style={{
-        background: "#0D0D1A",
+        background: "#1A1A2E",
         height: "100dvh",
         display: "flex",
         flexDirection: "column",
@@ -1172,7 +1175,7 @@ function QuizContent() {
           <div
             style={{
               borderRadius: "999px",
-              background: "#1C1C28",
+              background: "#252541",
               color: "rgba(255,255,255,0.65)",
               fontSize: "12px",
               fontWeight: 700,
@@ -1420,7 +1423,7 @@ function QuizContent() {
             {currentQ.options.map((option) => {
               const isSelected = selectedOption === option;
               const isCorrectOpt = option === correctChoiceValue;
-              let bg = "#1C1C28";
+              let bg = "#252541";
               let color = "#FFFFFF";
               let borderColor = "rgba(255,255,255,0.07)";
 

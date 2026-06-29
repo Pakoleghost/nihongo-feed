@@ -61,7 +61,7 @@ function ProyectarOverlay({
       style={{
         position: "fixed",
         inset: 0,
-        background: "#0D0D1A",
+        background: "#1A1A2E",
         zIndex: 300,
         display: "flex",
         flexDirection: "column",
@@ -227,7 +227,7 @@ export default function VocabularioFlashcardsScreen({
   const pct = total > 0 ? Math.round((known / total) * 100) : 0;
 
   return (
-    <div style={{ background: "#0D0D1A", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ background: "#1A1A2E", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {/* Header — ichigo session style */}
       <div style={{ padding: "max(18px, env(safe-area-inset-top, 18px)) 18px 0" }}>
         <div className="sesh-head-row">
@@ -317,7 +317,7 @@ export default function VocabularioFlashcardsScreen({
               {missed.length > 0 && (
                 <button
                   onClick={restartWithMissed}
-                  style={{ width: "100%", padding: "16px", borderRadius: 14, border: "1px solid rgba(255,255,255,0.10)", cursor: "pointer", background: "#16161F", color: "#FFFFFF", fontSize: 16, fontWeight: 800 }}
+                  style={{ width: "100%", padding: "16px", borderRadius: 14, border: "1px solid rgba(255,255,255,0.10)", cursor: "pointer", background: "#242440", color: "#FFFFFF", fontSize: 16, fontWeight: 800 }}
                 >
                   Repasar {missed.length} falladas
                 </button>
@@ -342,7 +342,7 @@ export default function VocabularioFlashcardsScreen({
               }}
             >
               {/* Front — flat ichigo */}
-              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", background: "#16161F", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: 28, overflow: "hidden", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", background: "#242440", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: 28, overflow: "hidden", border: "1px solid rgba(255,255,255,0.07)" }}>
                 <p style={{ fontSize: "clamp(48px, 16vw, 80px)", fontWeight: 600, color: "#F4F4F8", margin: 0, fontFamily: "var(--font-noto-serif-jp, var(--font-noto-sans-jp)), serif", lineHeight: 1.1, textAlign: "center", wordBreak: "break-word" }}>
                   {card.kanji || card.hira}
                 </p>
@@ -357,7 +357,7 @@ export default function VocabularioFlashcardsScreen({
               </div>
 
               {/* Back — flat ichigo */}
-              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", background: "#1C1C28", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 28, overflow: "hidden", border: "1px solid rgba(78,205,196,0.18)" }}>
+              <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", background: "#252541", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 28, overflow: "hidden", border: "1px solid rgba(78,205,196,0.18)" }}>
                 <p style={{ fontSize: "clamp(24px, 8vw, 36px)", fontWeight: 800, color: "#F4F4F8", margin: 0, textAlign: "center", lineHeight: 1.3 }}>
                   {card.es}
                 </p>

@@ -238,7 +238,7 @@ export default function EditProfilePage() {
           font-size: 24px;
           line-height: 1;
           letter-spacing: -.02em;
-          color: #111114;
+          color: #1A1A2E;
         }
         .editGrid {
           display: grid;
@@ -301,7 +301,7 @@ export default function EditProfilePage() {
         .primaryBtn {
           border: 0;
           color: #fff;
-          background: linear-gradient(135deg, #34c5a6, #25a98f);
+          background: linear-gradient(135deg, #4ECDC4, #4ECDC4);
           box-shadow: 0 8px 18px rgba(44,182,150,.2);
         }
         .secondaryBtn {
@@ -313,7 +313,7 @@ export default function EditProfilePage() {
         .sideHeader strong {
           display: block;
           margin-top: 4px;
-          color: #111114;
+          color: #1A1A2E;
           font-size: 16px;
         }
         .avatarPreviewWrap {

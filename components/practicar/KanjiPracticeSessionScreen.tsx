@@ -194,7 +194,7 @@ export default function KanjiPracticeSessionScreen({ initialLesson, initialFocus
   // Results screen
   if (result) {
     const pctCorrect = total > 0 ? Math.round((result.correct / total) * 100) : 0;
-    const ringColor = pctCorrect >= 70 ? "#34D399" : pctCorrect >= 40 ? "#4ECDC4" : "#E63946";
+    const ringColor = pctCorrect >= 70 ? "#4ECDC4" : pctCorrect >= 40 ? "#4ECDC4" : "#E63946";
     const headline = pctCorrect >= 80 ? "¡Excelente!" : pctCorrect >= 50 ? "¡Buen trabajo!" : "A seguir practicando";
     const r = 72;
     const circ = 2 * Math.PI * r;

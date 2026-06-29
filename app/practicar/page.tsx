@@ -69,7 +69,7 @@ export default function PracticarPage() {
     : LESSON_FILTERS.map((f) => ({ key: f, label: f }));
 
   return (
-    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", overflowY: "auto", background: "#0D0D1A" }}>
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", overflowY: "auto", background: "#1A1A2E" }}>
       <div style={{ flex: 1, paddingBottom: 120, maxWidth: 760, width: "100%", margin: "0 auto", padding: "20px 20px 120px" }}>
 
         {/* Type cards 2×2 */}
@@ -83,7 +83,7 @@ export default function PracticarPage() {
               return (
                 <button key={t.id} onClick={() => pickType(t.id)} style={{
                   cursor: "pointer", borderRadius: 16, padding: "14px", textAlign: "left",
-                  background: active ? "rgba(78,205,196,0.12)" : "#16161F",
+                  background: active ? "rgba(78,205,196,0.12)" : "#242440",
                   border: `1.5px solid ${active ? "#4ECDC4" : "rgba(255,255,255,0.07)"}`,
                   display: "flex", flexDirection: "column", gap: 8, minHeight: 78,
                   justifyContent: "space-between",
@@ -125,9 +125,9 @@ export default function PracticarPage() {
                   flexShrink: 0, cursor: "pointer", borderRadius: 999, padding: "0 16px",
                   height: 38, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", fontFamily: "inherit",
                   display: "flex", alignItems: "center",
-                  background: active ? "#F4F4F8" : "#16161F",
+                  background: active ? "#F4F4F8" : "#242440",
                   border: `1.5px solid ${active ? "#F4F4F8" : "rgba(255,255,255,0.07)"}`,
-                  color: active ? "#0D0D1A" : "rgba(244,244,248,0.5)",
+                  color: active ? "#1A1A2E" : "rgba(244,244,248,0.5)",
                   transition: "background .15s, border-color .15s, color .15s",
                 }}>
                   {label}
@@ -145,7 +145,7 @@ export default function PracticarPage() {
           <div style={{
             display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14,
             borderRadius: 22, padding: "18px",
-            background: "#16161F", border: "1px solid rgba(255,255,255,0.07)",
+            background: "#242440", border: "1px solid rgba(255,255,255,0.07)",
           }}>
             <button onClick={() => setCount((c) => Math.max(3, c - 1))} disabled={count <= 3} style={{
               width: 52, height: 52, flexShrink: 0, borderRadius: "50%",
@@ -183,7 +183,7 @@ export default function PracticarPage() {
       <div style={{
         position: "fixed", bottom: "calc(92px + env(safe-area-inset-bottom, 0px))", left: 0, right: 0,
         padding: "16px 20px 0",
-        background: "linear-gradient(to top, #0D0D1A 65%, transparent)",
+        background: "linear-gradient(to top, #1A1A2E 65%, transparent)",
         pointerEvents: "none",
       }}>
         <button

@@ -356,7 +356,7 @@ export default function CurriculumRoadmap({ currentLesson, currentModuleNumber }
           overflow-x: hidden;
           font-family: var(--font-plus-jakarta), system-ui, sans-serif;
           color: #ffffff;
-          background: #0D0D1A;
+          background: #1A1A2E;
           padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px));
         }
 
@@ -370,7 +370,7 @@ export default function CurriculumRoadmap({ currentLesson, currentModuleNumber }
         .roadmap-base {
           position: absolute;
           inset: 0;
-          background: #0D0D1A;
+          background: #1A1A2E;
         }
 
         .roadmap-glow {
@@ -481,7 +481,7 @@ export default function CurriculumRoadmap({ currentLesson, currentModuleNumber }
           color: #1a1a2e;
           border: 0;
           border-radius: 18px;
-          background: linear-gradient(155deg, #6fe3db 0%, #4ecdc4 52%, #34a7a0 100%);
+          background: linear-gradient(155deg, #4ECDC4 0%, #4ecdc4 52%, #4ECDC4 100%);
           box-shadow: 0 14px 28px rgba(0, 0, 0, 0.32), inset 0 -5px 0 rgba(0, 0, 0, 0.14);
         }
 
@@ -555,7 +555,7 @@ export default function CurriculumRoadmap({ currentLesson, currentModuleNumber }
         .roadmap-progress-track div {
           height: 100%;
           border-radius: inherit;
-          background: linear-gradient(90deg, #4ECDC4, #38B0A7);
+          background: linear-gradient(90deg, #4ECDC4, #4ECDC4);
           box-shadow: 0 0 8px rgba(78,205,196,0.4);
         }
 
@@ -605,7 +605,7 @@ export default function CurriculumRoadmap({ currentLesson, currentModuleNumber }
         }
 
         .roadmap-track-label-a2 strong {
-          color: #818cf8;
+          color: #E63946;
         }
 
         .roadmap-track-label small {
@@ -723,12 +723,12 @@ export default function CurriculumRoadmap({ currentLesson, currentModuleNumber }
         }
 
         .roadmap-node-a1 {
-          background: linear-gradient(150deg, #5fe0d6 0%, #2ba59c 100%);
+          background: linear-gradient(150deg, #4ECDC4 0%, #4ECDC4 100%);
         }
 
         .roadmap-node-a2 {
           color: #ffffff;
-          background: linear-gradient(150deg, #8ea0ff 0%, #6677f5 100%);
+          background: linear-gradient(150deg, #E63946 0%, #1A1A2E 100%);
         }
 
         .roadmap-node-current {
@@ -837,7 +837,7 @@ export default function CurriculumRoadmap({ currentLesson, currentModuleNumber }
           padding: 8px 18px calc(22px + env(safe-area-inset-bottom, 0px));
           border: 1px solid rgba(255, 255, 255, 0.14);
           border-radius: 26px 26px 20px 20px;
-          background: #16161F;
+          background: #242440;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25);
           animation: roadmapSheetUp 210ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
         }
@@ -949,7 +949,7 @@ export default function CurriculumRoadmap({ currentLesson, currentModuleNumber }
         .roadmap-project {
           border: 1px solid rgba(255,255,255,0.10);
           border-radius: 18px;
-          background: #16161F;
+          background: #242440;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.25);
           overflow: hidden;
         }

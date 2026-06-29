@@ -512,25 +512,25 @@ function getScriptLearnContext(
 
 // ─── Kana System design tokens (light theme) ─────────────────────────────────
 const DS = {
-  bg: "#FFF8E7",
-  surface: "#FDFCF5",
-  surfaceAlt: "#FAF3E2",
+  bg: "#F4F5F7",
+  surface: "#FFFFFF",
+  surfaceAlt: "#F4F5F7",
   card: "#FFFFFF",
   dark: "#1A1A2E",
-  ink: "#1E1C12",
-  inkSoft: "#5B403F",
-  inkFaint: "#C4BAB0",
-  line: "rgba(30,28,18,0.06)",
-  lineStrong: "rgba(30,28,18,0.12)",
+  ink: "#1A1A2E",
+  inkSoft: "#4F5668",
+  inkFaint: "#9CA3AF",
+  line: "rgba(26,26,46,0.06)",
+  lineStrong: "rgba(26,26,46,0.12)",
   accent: "#E63946",
   accentSoft: "rgba(230,57,70,0.10)",
   accentInk: "#ffffff",
   teal: "#4ECDC4",
-  tealDark: "#2BA99F",
-  correct: "oklch(0.48 0.12 150)",
-  correctSoft: "oklch(0.48 0.12 150 / 0.10)",
-  wrong: "oklch(0.55 0.16 25)",
-  wrongSoft: "oklch(0.55 0.16 25 / 0.10)",
+  tealDark: "#4ECDC4",
+  correct: "#4ECDC4",
+  correctSoft: "rgba(78,205,196,0.10)",
+  wrong: "#E63946",
+  wrongSoft: "rgba(230,57,70,0.10)",
   fontHead: "var(--font-study), 'Plus Jakarta Sans', 'Manrope', system-ui, sans-serif",
   fontBody: "'Inter', system-ui, sans-serif",
   fontKana: "var(--font-noto-serif-jp), 'Noto Serif JP', var(--font-noto-sans-jp), 'Noto Sans JP', serif",
@@ -1118,7 +1118,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                     const hasDue = groupItems.some((item) => { const e = progress[item.id]; return e && e.timesSeen > 0 && isDueReview(e.nextReview, e.next_due_at); });
                     const isNew = clearedCount === 0 && groupItems.every((item) => !progress[item.id] || progress[item.id].timesSeen === 0);
                     const ctaBg = hasDue
-                      ? `linear-gradient(135deg, ${DS.accent} 0%, #c42b38 100%)`
+                      ? `linear-gradient(135deg, ${DS.accent} 0%, #E63946 100%)`
                       : `linear-gradient(135deg, ${DS.teal} 0%, ${DS.tealDark} 100%)`;
                     const ctaColor = hasDue ? "#ffffff" : DS.dark;
                     const ctaShadow = hasDue ? "0 8px 20px rgba(230,57,70,0.35)" : "0 8px 20px rgba(78,205,196,0.35)";
@@ -1404,7 +1404,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                                 : "color-mix(in srgb, var(--color-surface) 82%, white)",
                           color:
                             showAnswer && isCorrect
-                              ? "#117964"
+                              ? "#4ECDC4"
                               : showAnswer && isChosen && !isCorrect
                                 ? "#E63946"
                                 : "var(--color-text)",
@@ -1427,7 +1427,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                         style={{
                           textAlign: "center",
                           fontSize: "var(--text-body)",
-                          color: "#117964",
+                          color: "#4ECDC4",
                           fontWeight: 800,
                         }}
                       >
@@ -1519,7 +1519,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
                   <div
                     style={{
                       fontSize: "var(--text-body)",
-                      color: romajiFeedback.correct ? "#117964" : "var(--color-text-muted)",
+                      color: romajiFeedback.correct ? "#4ECDC4" : "var(--color-text-muted)",
                       fontWeight: 800,
                       textAlign: "center",
                     }}
@@ -1610,7 +1610,7 @@ export default function AprenderKanaModule({ userKey, onRecordActivity, initialM
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
-                <div style={{ ...subtlePillStyle, textAlign: "center", color: summary.correct > 0 ? "#117964" : "var(--color-text-muted)" }}>
+                <div style={{ ...subtlePillStyle, textAlign: "center", color: summary.correct > 0 ? "#4ECDC4" : "var(--color-text-muted)" }}>
                   ✓ {summary.correct}
                 </div>
                 <div style={{ ...subtlePillStyle, textAlign: "center" }}>～ {summary.almost}</div>

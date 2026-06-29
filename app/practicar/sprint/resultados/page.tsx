@@ -43,7 +43,7 @@ export default function SprintResultadosPage() {
   return (
     <div
       style={{
-        background: "#0D0D1A",
+        background: "#1A1A2E",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
