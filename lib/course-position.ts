@@ -7,16 +7,79 @@ export type CoursePosition = {
 };
 
 type CollectionMap = Record<string, { nombre?: string }>;
-type ModuleMap = Record<string, { numero?: number }>;
-type ClassNote = { tema?: string | null };
+type ModuleInfo = {
+  numero?: number;
+  lecciones?: number[];
+};
+type ModuleMap = Record<string, ModuleInfo>;
+type ClassNote = {
+  tema?: string | null;
+  modulo_actual_numero?: number | null;
+  modulo?: {
+    numero?: number | null;
+    lecciones?: number[] | null;
+  } | null;
+};
 
-function resolveFlaskGroupName(groupName: string, collections: CollectionMap) {
-  const groupLower = groupName.toLowerCase();
-  const match = Object.values(collections).find((collection) =>
-    collection.nombre?.toLowerCase().includes(groupLower),
+function emptyCoursePosition(
+  groupName: string | null,
+  source: CoursePosition["source"] = "fallback",
+): CoursePosition {
+  return {
+    groupName,
+    resolvedGroupName: groupName,
+    currentLesson: null,
+    currentModuleNumber: null,
+    source,
+  };
+}
+
+function normalizeGroupName(value: string) {
+  return value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/日本語/g, "")
+    .replace(/nihongo/g, "")
+    .replace(/japonés/g, "")
+    .replace(/japones/g, "")
+    .replace(/[\s・·._-]+/g, "")
+    .trim();
+}
+
+function namesMatch(a: string, b: string) {
+  const left = normalizeGroupName(a);
+  const right = normalizeGroupName(b);
+  if (!left || !right) return false;
+  return left === right || left.includes(right) || right.includes(left);
+}
+
+function getGroupCandidates(
+  groupName: string,
+  collections: CollectionMap,
+  modules: ModuleMap,
+) {
+  const candidates = new Set<string>([groupName]);
+
+  Object.keys(modules).forEach((moduleGroupName) => {
+    if (namesMatch(moduleGroupName, groupName)) candidates.add(moduleGroupName);
+  });
+
+  Object.values(collections).forEach((collection) => {
+    const collectionName = collection.nombre?.trim();
+    if (collectionName && namesMatch(collectionName, groupName)) {
+      candidates.add(collectionName);
+    }
+  });
+
+  return [...candidates];
+}
+
+function getModuleInfo(groupName: string, modules: ModuleMap) {
+  if (modules[groupName]) return modules[groupName];
+  const match = Object.entries(modules).find(([moduleGroupName]) =>
+    namesMatch(moduleGroupName, groupName),
   );
-
-  return match?.nombre ?? groupName;
+  return match?.[1] ?? null;
 }
 
 function getLatestLesson(notes: ClassNote[]) {
@@ -33,19 +96,53 @@ function getLatestLesson(notes: ClassNote[]) {
   return latestLesson > 0 ? latestLesson : null;
 }
 
+function getModuleNumberFromNotes(notes: ClassNote[]) {
+  for (const note of notes) {
+    if (typeof note.modulo_actual_numero === "number") return note.modulo_actual_numero;
+    if (typeof note.modulo?.numero === "number") return note.modulo.numero;
+  }
+
+  return null;
+}
+
+function getFallbackLesson(moduleInfo: ModuleInfo | null, notes: ClassNote[]) {
+  const latestLesson = getLatestLesson(notes);
+  if (latestLesson) return latestLesson;
+
+  const noteLesson = notes.find((note) => note.modulo?.lecciones?.length)
+    ?.modulo?.lecciones?.[0];
+  if (typeof noteLesson === "number") return noteLesson;
+
+  return moduleInfo?.lecciones?.[0] ?? null;
+}
+
+async function fetchNotesForCandidates(candidates: string[]) {
+  for (const candidate of candidates) {
+    const notesResponse = await fetch(
+      `/api/clase-notas?grupo=${encodeURIComponent(candidate)}`,
+    );
+    const notes = notesResponse.ok
+      ? ((await notesResponse.json()) as ClassNote[])
+      : [];
+
+    if (notes.length > 0) {
+      return { notes, resolvedGroupName: candidate };
+    }
+  }
+
+  return {
+    notes: [] as ClassNote[],
+    resolvedGroupName: candidates[0] ?? null,
+  };
+}
+
 export async function fetchCoursePosition(
   groupName: string | null | undefined,
 ): Promise<CoursePosition> {
   const cleanGroupName = groupName?.trim() || null;
 
   if (!cleanGroupName) {
-    return {
-      groupName: null,
-      resolvedGroupName: null,
-      currentLesson: null,
-      currentModuleNumber: null,
-      source: "fallback",
-    };
+    return emptyCoursePosition(null);
   }
 
   try {
@@ -60,32 +157,21 @@ export async function fetchCoursePosition(
     const modules = modulesResponse.ok
       ? ((await modulesResponse.json()) as ModuleMap)
       : {};
-    const resolvedGroupName = resolveFlaskGroupName(cleanGroupName, collections);
-    const moduleInfo = modules[resolvedGroupName] ?? modules[cleanGroupName];
+    const candidates = getGroupCandidates(cleanGroupName, collections, modules);
+    const moduleInfo = getModuleInfo(cleanGroupName, modules);
+    const { notes, resolvedGroupName } = await fetchNotesForCandidates(candidates);
     const currentModuleNumber =
-      typeof moduleInfo?.numero === "number" ? moduleInfo.numero : null;
-
-    const notesResponse = await fetch(
-      `/api/clase-notas?grupo=${encodeURIComponent(resolvedGroupName)}`,
-    );
-    const notes = notesResponse.ok
-      ? ((await notesResponse.json()) as ClassNote[])
-      : [];
+      getModuleNumberFromNotes(notes) ??
+      (typeof moduleInfo?.numero === "number" ? moduleInfo.numero : null);
 
     return {
       groupName: cleanGroupName,
       resolvedGroupName,
-      currentLesson: getLatestLesson(notes),
+      currentLesson: getFallbackLesson(moduleInfo, notes),
       currentModuleNumber,
       source: "teacher-backend",
     };
   } catch {
-    return {
-      groupName: cleanGroupName,
-      resolvedGroupName: cleanGroupName,
-      currentLesson: null,
-      currentModuleNumber: null,
-      source: "fallback",
-    };
+    return emptyCoursePosition(cleanGroupName);
   }
 }

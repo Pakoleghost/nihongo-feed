@@ -122,6 +122,20 @@
   gap: 8px;
 }
 
+.viewControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.helperText {
+  margin: 0 0 12px;
+  color: #687082;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
 .input,
 .select {
   min-height: 38px;

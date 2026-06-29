@@ -201,8 +201,9 @@ export function StudentDashboardDataProvider({ children }: { children: React.Rea
           .eq("id", session.user.id)
           .maybeSingle();
         const isAdmin = data?.is_admin === true;
+        const studentViewActive = isAdmin && readStudentViewPreference();
         const studentViewGroup =
-          isAdmin && readStudentViewPreference() ? readStudentViewGroup() : null;
+          studentViewActive ? readStudentViewGroup() : null;
 
         profile = {
           userId,
@@ -210,7 +211,7 @@ export function StudentDashboardDataProvider({ children }: { children: React.Rea
           avatarUrl: data?.avatar_url ?? null,
           groupName: studentViewGroup ?? data?.group_name ?? null,
           isAdmin,
-          roleLabel: isAdmin ? "Sensei" : "Alumno",
+          roleLabel: studentViewActive ? "Alumno" : isAdmin ? "Sensei" : "Alumno",
         };
       }
 

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { useStudentViewMode } from "@/lib/use-student-view-mode";
 import { supabase } from "@/lib/supabase";
 import styles from "./AdminDashboardScreen.module.css";
 
@@ -107,6 +108,12 @@ export function AdminDashboardScreen() {
   const [message, setMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<UserRow | null>(null);
+  const {
+    studentViewActive,
+    studentViewGroupName,
+    setStudentViewActive,
+    setStudentViewGroupName,
+  } = useStudentViewMode(true);
 
   const groupNames = useMemo(() => new Set(groups.map((group) => group.name)), [groups]);
   const ungrouped = useMemo(
@@ -466,6 +473,40 @@ export function AdminDashboardScreen() {
         </div>
 
         <aside className={styles.column}>
+          <section className={styles.card}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>Vista de estudiante</h2>
+              <span className={styles.sectionMeta}>
+                {studentViewActive ? "Activa" : "Admin"}
+              </span>
+            </div>
+            <p className={styles.helperText}>
+              Elige un grupo para revisar Inicio, Gramática, Vocabulario y progreso como lo vería un alumno.
+            </p>
+            <div className={styles.viewControls}>
+              <select
+                className={styles.select}
+                value={studentViewGroupName ?? ""}
+                onChange={(event) => setStudentViewGroupName(event.target.value || null)}
+              >
+                <option value="">Elegir grupo</option>
+                {groups.map((group) => (
+                  <option key={group.name} value={group.name}>
+                    {group.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                className={studentViewActive ? styles.ghostButton : styles.button}
+                type="button"
+                disabled={!studentViewActive && !studentViewGroupName}
+                onClick={() => setStudentViewActive(!studentViewActive)}
+              >
+                {studentViewActive ? "Salir" : "Activar"}
+              </button>
+            </div>
+          </section>
+
           <section className={styles.card}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>Grupos</h2>
