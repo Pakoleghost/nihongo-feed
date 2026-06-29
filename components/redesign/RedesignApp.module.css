@@ -5,15 +5,18 @@
   --amber: #f5a623;
   --amber-soft: #fff3d8;
   --teal: #4ecdc4;
-  --teal-dark: #1a1a2e;
+  --teal-dark: #13847d;
   --red: #e63946;
   --red-dark: #e63946;
-  --bg: #f6f7fb;
+  --bg: #f5f6fa;
   --surface: #ffffff;
-  --border: rgba(17, 24, 39, 0.1);
-  --border-strong: rgba(17, 24, 39, 0.18);
-  --muted: #6b7280;
-  --muted-light: #9ca3af;
+  --border: rgba(26, 26, 46, 0.08);
+  --border-strong: rgba(26, 26, 46, 0.15);
+  --muted: #667085;
+  --muted-light: #98a2b3;
+  --shadow-card: 0 1px 2px rgba(26, 26, 46, 0.04), 0 18px 44px rgba(26, 26, 46, 0.06);
+  --shadow-lift: 0 1px 2px rgba(26, 26, 46, 0.05), 0 24px 58px rgba(26, 26, 46, 0.1);
+  --font-display: var(--font-sora), var(--font-study), sans-serif;
   --sidebar-w: 248px;
   display: flex;
   height: 100dvh;
@@ -21,8 +24,7 @@
   background: var(--bg);
   color: var(--navy);
   font-family:
-    var(--font-study), var(--font-zen-kaku), ui-sans-serif, system-ui,
-    sans-serif;
+    var(--font-study), ui-sans-serif, system-ui, sans-serif;
   letter-spacing: 0;
 }
 
@@ -52,7 +54,7 @@
   flex-direction: column;
   height: 100%;
   overflow-y: auto;
-  border-right: 1px solid rgba(26, 26, 46, 0.08);
+  border-right: 1px solid rgba(26, 26, 46, 0.07);
   background: #fff;
   color: var(--navy);
 }
@@ -64,9 +66,9 @@
   z-index: 2;
   display: block;
   width: 100%;
-  height: 4px;
-  flex: 0 0 4px;
-  background: linear-gradient(90deg, var(--red), var(--amber), var(--teal));
+  height: 3px;
+  flex: 0 0 3px;
+  background: var(--teal);
 }
 
 .brand {
@@ -101,7 +103,7 @@
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
   font-size: 15px;
   font-weight: 800;
-  box-shadow: 0 8px 18px rgba(230, 57, 70, 0.18);
+  box-shadow: 0 10px 22px rgba(230, 57, 70, 0.16);
 }
 
 .brandAvatarImage {
@@ -180,7 +182,7 @@
   background: transparent;
   color: rgba(26, 26, 46, 0.68);
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
   text-align: left;
   text-decoration: none;
   outline: 1px solid transparent;
@@ -194,16 +196,16 @@
 }
 
 .navItem:hover {
-  background: rgba(245, 166, 35, 0.11);
+  background: rgba(78, 205, 196, 0.09);
   color: var(--navy);
   transform: translateX(1px);
 }
 
 .navItemActive {
-  background: rgba(78, 205, 196, 0.16);
-  outline-color: rgba(78, 205, 196, 0.5);
+  background: rgba(78, 205, 196, 0.14);
+  outline-color: rgba(78, 205, 196, 0.72);
   color: var(--navy);
-  box-shadow: 0 10px 22px rgba(78, 205, 196, 0.12);
+  box-shadow: 0 10px 24px rgba(78, 205, 196, 0.14);
   transform: translateX(1px);
 }
 
@@ -519,11 +521,11 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 28px 28px 48px;
+  padding: 30px 32px 56px;
 }
 
 .pageInner {
-  width: min(100%, 1220px);
+  width: min(100%, 1180px);
   margin: 0 auto;
 }
 
@@ -553,8 +555,8 @@
 .noteCard {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(26, 26, 46, 0.06);
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
 }
 
 .sectionLabel {
@@ -811,18 +813,11 @@
   justify-content: space-between;
   gap: 20px;
   margin-bottom: 18px;
-  border: 0;
-  background:
-    radial-gradient(
-      circle at 94% 16%,
-      rgba(78, 205, 196, 0.22),
-      transparent 28%
-    ),
-    linear-gradient(135deg, rgba(245, 166, 35, 0.18), rgba(78, 205, 196, 0.1)),
-    #fff;
+  border: 1px solid rgba(26, 26, 46, 0.07);
+  background: #fff;
   color: var(--navy);
   padding: 22px;
-  box-shadow: none;
+  box-shadow: var(--shadow-card);
 }
 
 .heroLeft {
@@ -930,7 +925,7 @@
   color: var(--navy);
   font: inherit;
   font-size: 14px;
-  font-weight: 750;
+  font-weight: 700;
   padding: 0 12px;
   outline: 0;
 }
@@ -992,7 +987,7 @@
 .profilePostFooter {
   color: var(--muted);
   font-size: 11px;
-  font-weight: 850;
+  font-weight: 800;
 }
 
 .profilePostCard strong {
@@ -1000,7 +995,7 @@
   overflow: hidden;
   color: var(--navy);
   font-size: 14px;
-  font-weight: 850;
+  font-weight: 800;
   line-height: 1.35;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
@@ -1077,7 +1072,7 @@
   margin: 16px 0;
   color: var(--navy);
   font-size: 16px;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.55;
   white-space: pre-wrap;
 }
@@ -1090,16 +1085,10 @@
   margin-bottom: 18px;
   overflow: hidden;
   position: relative;
-  border: 1px solid rgba(26, 26, 46, 0.08);
+  border: 1px solid rgba(26, 26, 46, 0.07);
   border-radius: 18px;
-  background:
-    radial-gradient(
-      circle at 96% 42%,
-      rgba(78, 205, 196, 0.13),
-      transparent 26%
-    ),
-    #fff;
-  box-shadow: 0 18px 45px rgba(26, 26, 46, 0.08);
+  background: #fff;
+  box-shadow: var(--shadow-card);
   padding: 26px;
 }
 
@@ -1114,11 +1103,11 @@
 .learnModeIcon {
   display: grid;
   place-items: center;
-  border-radius: 14px;
+  border-radius: 13px;
   background: var(--teal);
   color: var(--navy);
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
-  box-shadow: 0 10px 24px rgba(78, 205, 196, 0.24);
+  box-shadow: 0 14px 28px rgba(78, 205, 196, 0.26);
 }
 
 .learnGlyph {
@@ -1132,17 +1121,17 @@
 .learnHeroLeft h1 {
   margin: 0;
   color: var(--navy);
-  font-size: 31px;
-  font-weight: 900;
+  font-size: 33px;
+  font-weight: 800;
   letter-spacing: 0;
   line-height: 1;
 }
 
 .learnHeroLeft p {
   margin: 8px 0 0;
-  color: #72798a;
+  color: var(--muted);
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .learnHeroStats {
@@ -1152,16 +1141,16 @@
 
 .learnHeroStats div {
   min-width: 104px;
-  border: 1px solid rgba(78, 205, 196, 0.18);
+  border: 1px solid rgba(78, 205, 196, 0.26);
   border-radius: 14px;
-  background: rgba(78, 205, 196, 0.12);
+  background: rgba(78, 205, 196, 0.1);
   padding: 14px 16px;
   text-align: center;
 }
 
 .learnHeroStats div:nth-child(2) {
-  border-color: rgba(78, 205, 196, 0.18);
-  background: rgba(78, 205, 196, 0.12);
+  border-color: rgba(26, 26, 46, 0.08);
+  background: #fff;
 }
 
 .learnHeroStats strong {
@@ -1805,10 +1794,10 @@
 .kanjiLearnPanel {
   display: grid;
   gap: 16px;
-  border: 1px solid rgba(26, 26, 46, 0.08);
-  border-radius: 22px;
+  border: 1px solid rgba(26, 26, 46, 0.07);
+  border-radius: 18px;
   background: #fff;
-  box-shadow: 0 18px 45px rgba(26, 26, 46, 0.08);
+  box-shadow: var(--shadow-card);
   padding: 24px;
 }
 
@@ -1824,7 +1813,7 @@
   margin: 0;
   color: var(--navy);
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: 0;
   line-height: 1.05;
 }
@@ -1834,7 +1823,7 @@
   margin: 5px 0 0;
   color: var(--muted);
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 600;
 }
 
 .kanjiQuickActions {
@@ -1855,37 +1844,31 @@
   padding: 0 12px;
   margin: 0 0 10px;
   font-size: 12px;
-  font-weight: 950;
+  font-weight: 800;
   cursor: pointer;
 }
 
 .kanjiModuleGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
 }
 
 .kanjiModuleCard {
   position: relative;
-  min-height: 196px;
+  min-height: 154px;
   display: grid;
-  align-content: end;
-  gap: 7px;
+  align-content: start;
+  gap: 8px;
   overflow: hidden;
-  border: 1px solid rgba(26, 26, 46, 0.08);
-  border-radius: 20px;
-  background:
-    radial-gradient(
-      circle at 86% 10%,
-      rgba(78, 205, 196, 0.2),
-      transparent 30%
-    ),
-    #fff;
+  border: 1px solid rgba(26, 26, 46, 0.07);
+  border-radius: 16px;
+  background: #fff;
   color: var(--navy);
-  padding: 18px;
+  padding: 16px;
   text-align: left;
   cursor: pointer;
-  box-shadow: 0 16px 34px rgba(26, 26, 46, 0.06);
+  box-shadow: 0 1px 2px rgba(26, 26, 46, 0.04), 0 12px 28px rgba(26, 26, 46, 0.045);
   transition:
     transform 140ms ease,
     border-color 140ms ease,
@@ -1895,18 +1878,12 @@
 .kanjiModuleCard:hover:not(:disabled) {
   transform: translateY(-2px);
   border-color: rgba(78, 205, 196, 0.36);
-  box-shadow: 0 22px 42px rgba(26, 26, 46, 0.09);
+  box-shadow: var(--shadow-lift);
 }
 
 .kanjiModuleCardCurrent {
-  border-color: rgba(78, 205, 196, 0.35);
-  background:
-    radial-gradient(
-      circle at 84% 12%,
-      rgba(245, 166, 35, 0.18),
-      transparent 32%
-    ),
-    rgba(78, 205, 196, 0.08);
+  border-color: rgba(78, 205, 196, 0.55);
+  background: rgba(78, 205, 196, 0.1);
 }
 
 .kanjiModuleCardDisabled {
@@ -1915,38 +1892,31 @@
 }
 
 .kanjiModuleBadge {
-  position: absolute;
-  top: 14px;
-  left: 14px;
+  position: relative;
+  width: fit-content;
   min-height: 30px;
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  background: #fff;
-  color: var(--navy);
+  background: var(--navy);
+  color: #fff;
   padding: 0 11px;
   font-size: 12px;
-  font-weight: 950;
-  box-shadow: 0 10px 20px rgba(26, 26, 46, 0.08);
+  font-weight: 800;
+  box-shadow: none;
 }
 
 .kanjiModuleGlyph {
-  position: absolute;
-  top: 16px;
-  right: 18px;
-  color: rgba(26, 26, 46, 0.08);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
-  font-size: 76px;
-  font-weight: 900;
-  line-height: 1;
+  display: none;
 }
 
 .kanjiModuleCard strong {
   position: relative;
+  max-width: 100%;
   color: var(--navy);
-  font-size: 22px;
-  font-weight: 950;
-  line-height: 1;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.08;
 }
 
 .kanjiModuleCard em {
@@ -1955,14 +1925,14 @@
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
   font-size: 14px;
   font-style: normal;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .kanjiModuleCard > span:last-child {
   position: relative;
   color: var(--teal-dark);
   font-size: 12px;
-  font-weight: 950;
+  font-weight: 800;
 }
 
 .kanjiLessonChoiceGrid {
@@ -1976,14 +1946,14 @@
   display: grid;
   align-content: center;
   gap: 8px;
-  border: 1px solid rgba(26, 26, 46, 0.08);
-  border-radius: 18px;
+  border: 1px solid rgba(26, 26, 46, 0.07);
+  border-radius: 16px;
   background: #fff;
   color: var(--navy);
   padding: 18px;
   text-align: left;
   cursor: pointer;
-  box-shadow: 0 14px 30px rgba(26, 26, 46, 0.05);
+  box-shadow: 0 1px 2px rgba(26, 26, 46, 0.04), 0 12px 28px rgba(26, 26, 46, 0.045);
   transition:
     transform 140ms ease,
     border-color 140ms ease,
@@ -1993,7 +1963,7 @@
 .kanjiLessonChoiceCard:hover {
   transform: translateY(-2px);
   border-color: rgba(78, 205, 196, 0.36);
-  box-shadow: 0 20px 40px rgba(26, 26, 46, 0.08);
+  box-shadow: var(--shadow-lift);
 }
 
 .kanjiLessonChoiceCard span {
@@ -2002,17 +1972,17 @@
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  background: rgba(78, 205, 196, 0.14);
-  color: var(--navy);
+  background: var(--navy);
+  color: #fff;
   padding: 0 12px;
   font-size: 13px;
-  font-weight: 950;
+  font-weight: 800;
 }
 
 .kanjiLessonChoiceCard strong {
   color: var(--navy);
   font-size: 20px;
-  font-weight: 950;
+  font-weight: 800;
   line-height: 1.05;
 }
 
@@ -2262,7 +2232,7 @@
 .kanjiStrokeTitle strong {
   color: var(--navy);
   font-size: 13px;
-  font-weight: 950;
+  font-weight: 800;
   letter-spacing: -0.01em;
 }
 
@@ -2353,7 +2323,7 @@
 .kanjiFactGrid span {
   color: var(--navy);
   font-size: 13px;
-  font-weight: 850;
+  font-weight: 800;
   line-height: 1.3;
 }
 
@@ -2374,45 +2344,43 @@
 
 .grammarStudyLayout {
   display: grid;
-  grid-template-columns: minmax(244px, 320px) minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
   align-items: start;
 }
 
 .grammarPatternList,
 .grammarReader {
-  border: 1px solid rgba(26, 26, 46, 0.08);
-  border-radius: 22px;
+  border: 1px solid rgba(26, 26, 46, 0.07);
+  border-radius: 18px;
   background: #fff;
-  box-shadow: 0 12px 30px rgba(26, 26, 46, 0.05);
+  box-shadow: var(--shadow-card);
 }
 
 .grammarPatternList {
   overflow: hidden;
-  position: sticky;
-  top: 18px;
 }
 
 .grammarPatternGrid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 8px;
   padding: 14px;
 }
 
 .grammarPatternCard {
-  min-height: 92px;
+  min-height: 104px;
   display: grid;
   align-content: center;
   gap: 8px;
-  border: 1px solid rgba(26, 26, 46, 0.08);
-  border-radius: 14px;
+  border: 1px solid rgba(26, 26, 46, 0.07);
+  border-radius: 12px;
   background: #fff;
   color: var(--navy);
   padding: 14px;
   text-align: left;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(26, 26, 46, 0.04);
+  box-shadow: none;
   transition:
     transform 140ms ease,
     border-color 140ms ease,
@@ -2423,45 +2391,41 @@
 .grammarPatternCard:hover {
   transform: translateY(-1px);
   border-color: rgba(78, 205, 196, 0.38);
-  box-shadow: 0 15px 30px rgba(26, 26, 46, 0.08);
+  box-shadow: 0 12px 24px rgba(26, 26, 46, 0.06);
 }
 
 .grammarPatternCardSelected {
-  border-color: rgba(78, 205, 196, 0.42);
-  background:
-    radial-gradient(
-      circle at 92% 16%,
-      rgba(245, 166, 35, 0.16),
-      transparent 28%
-    ),
-    rgba(78, 205, 196, 0.09);
-  box-shadow: 0 16px 34px rgba(78, 205, 196, 0.13);
+  border-color: rgba(78, 205, 196, 0.7);
+  background: rgba(78, 205, 196, 0.12);
+  box-shadow: none;
 }
 
 .grammarPatternCard strong {
   color: var(--navy);
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
   font-size: 20px;
-  font-weight: 950;
+  font-weight: 900;
   line-height: 1.15;
 }
 
 .grammarPatternCard span {
   color: var(--muted);
   font-size: 12px;
-  font-weight: 760;
+  font-weight: 700;
   line-height: 1.35;
 }
 
 .grammarDetailPanel {
+  width: min(100%, 900px);
+  margin: 0 auto;
   min-width: 0;
 }
 
 .grammarReader {
   display: grid;
-  gap: 16px;
+  gap: 18px;
   overflow: hidden;
-  padding: 18px;
+  padding: 16px;
 }
 
 .grammarFuriganaToggle {
@@ -2473,7 +2437,7 @@
   padding: 0 14px;
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
   font-size: 13px;
-  font-weight: 950;
+  font-weight: 800;
   cursor: pointer;
   transition:
     background-color 140ms ease,
@@ -2500,16 +2464,12 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 18px;
   align-items: start;
-  border: 1px solid rgba(78, 205, 196, 0.32);
-  border-radius: 18px;
-  background:
-    radial-gradient(
-      circle at 92% 14%,
-      rgba(245, 166, 35, 0.14),
-      transparent 28%
-    ),
-    linear-gradient(135deg, rgba(78, 205, 196, 0.16), #fff 62%);
-  padding: 22px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--teal);
+  color: var(--navy);
+  padding: 26px;
+  box-shadow: 0 18px 42px rgba(78, 205, 196, 0.22);
 }
 
 .grammarReaderKicker {
@@ -2517,11 +2477,11 @@
   width: fit-content;
   margin-bottom: 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  color: var(--teal-dark);
+  background: rgba(255, 255, 255, 0.64);
+  color: rgba(26, 26, 46, 0.72);
   padding: 6px 10px;
   font-size: 11px;
-  font-weight: 950;
+  font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -2541,7 +2501,7 @@
   border-radius: 999px;
   padding: 0 12px;
   font-size: 12px;
-  font-weight: 950;
+  font-weight: 800;
   white-space: nowrap;
 }
 
@@ -2551,9 +2511,9 @@
 }
 
 .grammarReaderAudioPill {
-  border: 1px solid rgba(26, 26, 46, 0.08);
-  background: rgba(255, 255, 255, 0.76);
-  color: var(--muted);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.5);
+  color: rgba(26, 26, 46, 0.72);
 }
 
 .grammarDetailPattern,
@@ -2573,18 +2533,18 @@
 .grammarDetailPattern {
   color: var(--navy);
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
-  font-size: clamp(32px, 4vw, 48px);
-  font-weight: 950;
+  font-size: clamp(38px, 4.7vw, 58px);
+  font-weight: 900;
   letter-spacing: 0;
   line-height: 1.02;
 }
 
 .grammarDetailMeaning {
   margin: 0;
-  color: var(--muted);
+  color: rgba(26, 26, 46, 0.76);
   max-width: 760px;
   font-size: 16px;
-  font-weight: 760;
+  font-weight: 700;
   line-height: 1.45;
 }
 
@@ -2596,27 +2556,86 @@
 .grammarInteraction {
   display: grid;
   gap: 10px;
-  border: 1px solid rgba(26, 26, 46, 0.08);
-  border-radius: 16px;
+  border: 1px solid rgba(26, 26, 46, 0.07);
+  border-radius: 14px;
   background: var(--bg);
-  padding: 16px;
+  padding: 0 16px 16px;
 }
 
 .grammarExampleBox {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  counter-reset: grammar-example;
 }
 
-.grammarExampleBox span,
-.grammarPracticeBox span,
-.grammarFormationBox span,
+.grammarExampleBox > span,
+.grammarPracticeBox > span,
+.grammarFormationBox > span,
 .grammarDialogueBox > span,
-.grammarMistakeBox span,
+.grammarMistakeBox > span,
 .grammarInteraction > span {
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 950;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  margin: 0 -16px 2px;
+  border-bottom: 1px solid rgba(26, 26, 46, 0.06);
+  border-radius: 14px 14px 0 0;
+  background: rgba(255, 255, 255, 0.78);
+  padding: 0 16px;
+  color: rgba(26, 26, 46, 0.56);
+  font-size: 11px;
+  font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.grammarExampleBox > span::before,
+.grammarPracticeBox > span::before,
+.grammarFormationBox > span::before,
+.grammarDialogueBox > span::before,
+.grammarMistakeBox > span::before,
+.grammarInteraction > span::before {
+  width: 26px;
+  height: 26px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 26px;
+  margin-right: 9px;
+  border-radius: 8px;
+  background: rgba(78, 205, 196, 0.16);
+  color: var(--teal-dark);
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.grammarExampleBox > span::before {
+  content: "例";
+}
+
+.grammarPracticeBox > span::before {
+  content: "練";
+}
+
+.grammarFormationBox > span::before {
+  content: "型";
+  background: rgba(245, 166, 35, 0.18);
+  color: #9a5f00;
+}
+
+.grammarDialogueBox > span::before {
+  content: "話";
+}
+
+.grammarMistakeBox > span::before {
+  content: "注";
+  background: rgba(230, 57, 70, 0.12);
+  color: var(--red);
+}
+
+.grammarInteraction > span::before {
+  content: "試";
 }
 
 .grammarExampleBox > span {
@@ -2627,19 +2646,37 @@
 .grammarPracticeBox strong,
 .grammarFormationBox strong {
   color: var(--navy);
-  font-weight: 950;
+  font-weight: 800;
   line-height: 1.25;
 }
 
 .grammarExampleItem {
+  position: relative;
+  counter-increment: grammar-example;
   display: grid;
   align-content: start;
   gap: 5px;
   min-height: 120px;
-  border: 1px solid rgba(26, 26, 46, 0.05);
-  border-radius: 12px;
+  border: 1px solid rgba(26, 26, 46, 0.06);
+  border-radius: 10px;
   background: #fff;
-  padding: 14px;
+  padding: 16px 14px 14px;
+}
+
+.grammarExampleItem::after {
+  content: counter(grammar-example);
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(78, 205, 196, 0.16);
+  color: var(--teal-dark);
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .grammarExampleItem + .grammarExampleItem {
@@ -2649,6 +2686,7 @@
 .grammarExampleItem strong {
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
   font-size: 24px;
+  font-weight: 900;
   line-height: 1.25;
 }
 
@@ -2663,7 +2701,7 @@
   color: var(--muted);
   font-size: 13px;
   font-style: normal;
-  font-weight: 720;
+  font-weight: 700;
   line-height: 1.35;
 }
 
@@ -2678,14 +2716,12 @@
 .grammarExampleItem rt,
 .grammarDialogueBubble rt {
   color: var(--teal-dark);
-  font-weight: 850;
+  font-weight: 800;
 }
 
 .grammarDialogueBox {
-  border-color: rgba(78, 205, 196, 0.24);
-  background:
-    linear-gradient(180deg, rgba(78, 205, 196, 0.1), rgba(78, 205, 196, 0.04)),
-    #fff;
+  border-color: rgba(78, 205, 196, 0.28);
+  background: rgba(78, 205, 196, 0.08);
 }
 
 .grammarDialogueList {
@@ -2724,34 +2760,34 @@
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.82);
   color: var(--teal-dark);
   padding: 0 8px;
   font-size: 11px;
-  font-weight: 950;
+  font-weight: 800;
   white-space: nowrap;
-  box-shadow: 0 8px 18px rgba(26, 26, 46, 0.08);
+  box-shadow: none;
 }
 
 .grammarDialogueBubble {
   max-width: min(620px, 88%);
   display: grid;
   gap: 6px;
-  border: 1px solid rgba(78, 205, 196, 0.2);
-  border-radius: 16px 16px 16px 5px;
+  border: 1px solid rgba(26, 26, 46, 0.06);
+  border-radius: 14px 14px 14px 5px;
   background: #fff;
   color: var(--navy);
   padding: 14px;
 }
 
 .grammarDialogueLineAlt .grammarDialogueBubble {
-  border-radius: 16px 16px 5px;
+  border-radius: 14px 14px 5px;
 }
 
 .grammarDialogueBubble strong {
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
   font-size: 20px;
-  font-weight: 950;
+  font-weight: 900;
   line-height: 1.35;
 }
 
@@ -2759,7 +2795,7 @@
   color: inherit;
   font-size: 13px;
   font-style: normal;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.35;
   opacity: 0.72;
 }
@@ -2773,7 +2809,7 @@
   color: var(--navy);
   padding: 0 10px;
   font-size: 11px;
-  font-weight: 950;
+  font-weight: 800;
   cursor: pointer;
 }
 
@@ -2790,30 +2826,30 @@
 .grammarExplanationBlock {
   display: grid;
   gap: 12px;
-  border-left: 4px solid var(--teal);
-  padding: 2px 0 2px 16px;
+  border-left: 3px solid var(--teal);
+  padding: 2px 0 2px 18px;
 }
 
 .grammarExplanationBlock p {
   margin: 0;
   color: rgba(26, 26, 46, 0.76);
   font-size: 16px;
-  font-weight: 680;
+  font-weight: 600;
   line-height: 1.65;
 }
 
 .grammarFormationBox {
-  border-color: rgba(245, 166, 35, 0.26);
-  background: rgba(245, 166, 35, 0.09);
+  border-color: rgba(245, 166, 35, 0.24);
+  background: rgba(245, 166, 35, 0.08);
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 }
 
-.grammarFormationBox span {
+.grammarFormationBox > span {
   grid-column: 1 / -1;
 }
 
 .grammarFormationBox strong {
-  border-radius: 10px;
+  border-radius: 9px;
   background: #fff;
   padding: 11px 12px;
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
@@ -2827,20 +2863,14 @@
 
 .grammarInteraction {
   border-color: rgba(78, 205, 196, 0.28);
-  background:
-    radial-gradient(
-      circle at 96% 12%,
-      rgba(78, 205, 196, 0.16),
-      transparent 32%
-    ),
-    #fff;
+  background: #fff;
 }
 
 .grammarInteraction p {
   margin: 0;
   color: var(--navy);
   font-size: 13px;
-  font-weight: 850;
+  font-weight: 800;
   line-height: 1.4;
 }
 
@@ -2910,7 +2940,7 @@
   color: var(--muted);
   padding: 0 11px;
   font-size: 12px;
-  font-weight: 950;
+  font-weight: 800;
   cursor: pointer;
 }
 
@@ -2962,7 +2992,7 @@
   padding: 0 10px;
   font: inherit;
   font-size: 13px;
-  font-weight: 850;
+  font-weight: 800;
   outline: 0;
 }
 
@@ -3004,7 +3034,7 @@
   padding-left: 18px;
   color: var(--muted);
   font-size: 13px;
-  font-weight: 720;
+  font-weight: 700;
   line-height: 1.4;
 }
 
@@ -3017,7 +3047,7 @@
   margin: 0;
   color: var(--muted);
   font-size: 13px;
-  font-weight: 720;
+  font-weight: 700;
   line-height: 1.4;
 }
 
@@ -3069,7 +3099,7 @@
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .kanjiQuizClose {
@@ -3274,7 +3304,7 @@
   margin: 0;
   color: var(--muted);
   font-size: 14px;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.45;
 }
 
