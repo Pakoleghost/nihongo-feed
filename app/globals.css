@@ -91,6 +91,44 @@ body {
   line-height: 1.55;
 }
 
+.jp-ruby {
+  font-family:
+    var(--font-noto-sans-jp),
+    "BIZ UDPGothic",
+    "Hiragino Sans",
+    "Yu Gothic",
+    "Meiryo",
+    sans-serif;
+  font-kerning: normal;
+  font-feature-settings: "palt" 0;
+  letter-spacing: 0;
+  line-height: 1.75;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  text-spacing-trim: trim-start;
+}
+
+.jp-ruby ruby {
+  ruby-position: over;
+  ruby-align: center;
+  line-height: 1;
+}
+
+.jp-ruby rt {
+  font-family:
+    var(--font-noto-sans-jp),
+    "BIZ UDPGothic",
+    "Hiragino Sans",
+    "Yu Gothic",
+    "Meiryo",
+    sans-serif;
+  font-size: 0.5em;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  text-align: center;
+}
+
 a {
   color: inherit;
   text-decoration: none;

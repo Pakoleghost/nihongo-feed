@@ -2430,6 +2430,14 @@
   background: transparent;
   box-shadow: none;
   padding: 0;
+  font-family:
+    var(--font-noto-sans-jp),
+    "BIZ UDPGothic",
+    "Hiragino Sans",
+    "Yu Gothic",
+    "Meiryo",
+    sans-serif;
+  letter-spacing: 0;
 }
 
 .grammarFuriganaToggle {
@@ -2790,14 +2798,17 @@
 
 .grammarReader ruby {
   ruby-position: over;
+  ruby-align: center;
+  line-height: 1;
 }
 
 .grammarReader rt {
   color: var(--teal);
-  font-size: 0.52em;
-  font-weight: 600;
+  font-size: 0.5em;
+  font-weight: 700;
   letter-spacing: 0;
-  line-height: 1.1;
+  line-height: 1;
+  text-align: center;
 }
 
 .grammarExampleBox strong,
@@ -2856,10 +2867,19 @@
 }
 
 .grammarExampleItem strong {
-  font-family: var(--font-noto-sans-jp), sans-serif;
+  font-family:
+    var(--font-noto-sans-jp),
+    "BIZ UDPGothic",
+    "Hiragino Sans",
+    "Yu Gothic",
+    "Meiryo",
+    sans-serif;
   font-size: 19px;
   font-weight: 500;
-  line-height: 1.25;
+  letter-spacing: 0;
+  line-height: 1.75;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
 
 .grammarExampleItem small {
@@ -2888,7 +2908,7 @@
 .grammarExampleItem rt,
 .grammarDialogueBubble rt {
   color: var(--teal-dark);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .grammarDialogueBox {
@@ -2958,10 +2978,19 @@
 }
 
 .grammarDialogueBubble strong {
-  font-family: var(--font-noto-sans-jp), sans-serif;
+  font-family:
+    var(--font-noto-sans-jp),
+    "BIZ UDPGothic",
+    "Hiragino Sans",
+    "Yu Gothic",
+    "Meiryo",
+    sans-serif;
   font-size: 17px;
   font-weight: 500;
-  line-height: 1.6;
+  letter-spacing: 0;
+  line-height: 1.75;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
 
 .grammarDialogueBubble em {

@@ -36,11 +36,12 @@ export default function FuriganaText({ text, style, rtColor }: Props) {
             {s.text}
             <rt
               style={{
-                fontSize: "0.52em",
-                lineHeight: 1.1,
+                fontSize: "0.5em",
+                lineHeight: 1,
                 color: rtColor ?? "inherit",
                 opacity: rtColor ? 1 : 0.65,
                 letterSpacing: 0,
+                textAlign: "center",
               }}
             >
               {s.reading}
