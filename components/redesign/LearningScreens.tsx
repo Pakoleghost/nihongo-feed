@@ -1683,33 +1683,24 @@ export function GrammarLearningScreen() {
   const compactMistake = selectedPattern.commonMistakes?.[0];
 
   return (
-    <>
-      <GrammarHero
-        subtitle={heroSubtitle}
-        primaryMetric={activeLesson.count ?? activeLesson.patterns.length}
-        primaryLabel="Patrones"
-        secondaryMetric={`M${selectedModule.moduleNumber}`}
-        secondaryLabel="Módulo"
-      />
-
-      <section className={styles.kanjiLearnPanel}>
-        <div className={styles.kanjiWorkspaceTop}>
-          <div>
-            <button
-              type="button"
-              className={styles.kanjiBackButton}
-              onClick={backToLessons}
-            >
-              ← Lecciones
-            </button>
-            <h2>
-              Lección {activeLesson.lesson} · {activeLesson.title}
-            </h2>
-            <p>
-              {activeLesson.count ?? activeLesson.patterns.length} patrones para
-              entender y usar en clase.
-            </p>
-          </div>
+    <section className={styles.grammarPremiumPage}>
+      <div className={styles.grammarPremiumHeader}>
+        <div>
+          <div className={styles.pageEyebrow}>Aprender</div>
+          <h1>Gramática</h1>
+          <p>
+            Patrón {String(selectedIndex + 1).padStart(2, "0")} de{" "}
+            {activeLesson.patterns.length}
+          </p>
+        </div>
+        <div className={styles.grammarHeaderActions}>
+          <button
+            type="button"
+            className={styles.grammarBackButton}
+            onClick={backToLessons}
+          >
+            ← Lecciones
+          </button>
           <button
             type="button"
             className={`${styles.grammarFuriganaToggle} ${
@@ -1720,70 +1711,17 @@ export function GrammarLearningScreen() {
           >
             ふりがな
           </button>
+          <span className={styles.grammarStreakPill}>🔥 1 día de racha</span>
         </div>
+      </div>
 
-        <div
-          className={styles.kanjiLessonTabs}
-          role="tablist"
-          aria-label="Lecciones de gramática"
-        >
-          {moduleLessons.map((lesson) => (
-            <button
-              key={lesson.lesson}
-              type="button"
-              className={`${styles.kanjiLessonTab} ${
-                activeLesson.lesson === lesson.lesson
-                  ? styles.kanjiLessonTabActive
-                  : ""
-              }`}
-              onClick={() => openLesson(lesson.lesson)}
-            >
-              <strong>L{lesson.lesson}</strong>
-              <span>{lesson.title}</span>
-              <em>{lesson.count ?? lesson.patterns.length} patrones</em>
-            </button>
-          ))}
-        </div>
-
-        <div className={styles.grammarStudyLayout}>
-          <div className={styles.grammarPatternList}>
-            <div className={styles.kanjiListHeader}>
-              <div>
-                <h3>Patrones de la lección</h3>
-                <p>Selecciona un patrón para ver ejemplo y uso.</p>
-              </div>
-              {activeLesson.isCurrent && <Badge tone="teal">Actual</Badge>}
-            </div>
-
-            <div className={styles.grammarPatternGrid}>
-              {activeLesson.patterns.map((pattern) => {
-                const key = patternKey(pattern);
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    className={`${styles.grammarPatternCard} ${
-                      key === patternKey(selectedPattern)
-                        ? styles.grammarPatternCardSelected
-                        : ""
-                    }`}
-                    onClick={() => setSelectedPatternKey(key)}
-                  >
-                    <strong>{pattern.pattern}</strong>
-                    <span>{pattern.meaning}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className={styles.grammarDetailPanel}>
-            <article className={styles.grammarReader}>
+      <article className={styles.grammarReader}>
               <header className={styles.grammarReaderHero}>
                 <div>
-                  <span className={styles.grammarReaderKicker}>
-                    Patrón {selectedIndex + 1} de {activeLesson.patterns.length}
-                  </span>
+                  <div className={styles.grammarReaderBadges}>
+                    <span>JLPT N5</span>
+                    <span>40% completado</span>
+                  </div>
                   <div className={styles.grammarDetailPattern}>
                     {selectedPattern.pattern}
                   </div>
@@ -1791,14 +1729,13 @@ export function GrammarLearningScreen() {
                     {selectedPattern.meaning}
                   </p>
                 </div>
-                <div className={styles.grammarReaderActions}>
-                  <span className={styles.grammarReaderMeta}>
-                    L{activeLesson.lesson}
-                  </span>
-                  <span className={styles.grammarReaderAudioPill}>
-                    Audio próximamente
-                  </span>
-                </div>
+                <button
+                  type="button"
+                  className={styles.grammarHeroPlay}
+                  aria-label="Reproducir ejemplo del patrón"
+                >
+                  ▶
+                </button>
               </header>
               {formationLines.length ? (
                 <div className={styles.grammarFormationBox}>
@@ -1899,11 +1836,8 @@ export function GrammarLearningScreen() {
                   </div>
                 </div>
               ) : null}
-            </article>
-          </div>
-        </div>
-      </section>
-    </>
+      </article>
+    </section>
   );
 }
 

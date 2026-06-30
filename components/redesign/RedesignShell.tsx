@@ -167,6 +167,26 @@ function Sidebar({ pathname }: { pathname: string }) {
           </section>
         ))}
       </nav>
+
+      <Link
+        href="/dashboard/perfil"
+        className={styles.profileLink}
+        aria-label="Abrir tu perfil"
+      >
+        {profile.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className={styles.avatarImage} src={profile.avatarUrl} alt="" />
+        ) : (
+          <span className={styles.avatar}>{initial}</span>
+        )}
+        <span className={styles.profileText}>
+          <strong>{profile.displayName || "Alumno"}</strong>
+          <span>N5 · {roleLabel}</span>
+        </span>
+        <span className={styles.profileMenuDots} aria-hidden="true">
+          ⋯
+        </span>
+      </Link>
     </aside>
   );
 }

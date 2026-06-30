@@ -4,20 +4,20 @@
   --brand-red: #e63946;
   --amber: #f5a623;
   --amber-soft: #fff3d8;
-  --teal: #16b5a3;
+  --teal: #11a597;
   --teal-dark: #0e8276;
   --red: #e63946;
   --red-dark: #e63946;
-  --bg: #eef4f1;
+  --bg: #eef1ef;
   --surface: #ffffff;
-  --border: rgba(20, 32, 28, 0.09);
+  --border: #e7ece9;
   --border-strong: rgba(20, 32, 28, 0.16);
   --muted: #7b8884;
   --muted-light: #9aa6a1;
-  --shadow-card: 0 10px 26px -16px rgba(20, 40, 35, 0.34);
+  --shadow-card: 0 1px 2px rgba(20, 40, 35, 0.05), 0 14px 30px -20px rgba(20, 40, 35, 0.3);
   --shadow-lift: 0 12px 30px -16px rgba(20, 40, 35, 0.35);
   --font-display: var(--font-study), sans-serif;
-  --sidebar-w: 248px;
+  --sidebar-w: 250px;
   display: flex;
   height: 100dvh;
   overflow: hidden;
@@ -53,18 +53,20 @@
   flex-direction: column;
   height: 100%;
   overflow-y: auto;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  background: #14201c;
-  color: #cdd6d2;
+  border-right: 1px solid #e3e8e5;
+  background: #fff;
+  color: #48534f;
+  padding: 18px 14px;
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 14px 8px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  color: #fff;
+  padding: 6px 8px 18px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #edf1ef;
+  color: var(--navy);
   text-decoration: none;
   transition:
     background-color 140ms ease,
@@ -72,7 +74,7 @@
 }
 
 .brand:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: #f4f7f5;
 }
 
 .brand:active {
@@ -85,8 +87,8 @@
   flex: 0 0 38px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0e8276, #36d6bf);
+  border-radius: 11px;
+  background: #4ecdc4;
   color: #fff;
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 15px;
@@ -106,7 +108,7 @@
   display: grid;
   gap: 1px;
   min-width: 0;
-  color: #fff;
+  color: var(--navy);
   line-height: 1;
 }
 
@@ -115,11 +117,11 @@
   font-size: 14px;
   font-weight: 800;
   letter-spacing: 0;
-  color: #fff;
+  color: var(--navy);
 }
 
 .brandText span {
-  color: #5fe3cf;
+  color: #11a597;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -134,15 +136,15 @@
   place-items: center;
   margin-left: auto;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.36);
+  background: #e6f7f3;
+  color: #9aa6a1;
   font-size: 20px;
   font-weight: 900;
   line-height: 1;
 }
 
 .nav {
-  padding: 8px 4px 0;
+  padding: 8px 0 0;
 }
 
 .navGroup {
@@ -151,10 +153,10 @@
 
 .navLabel {
   padding: 8px 11px;
-  color: #5f7068;
-  font-size: 10.5px;
+  color: #9aa6a1;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
@@ -168,7 +170,7 @@
   border: 0;
   border-radius: 11px;
   background: transparent;
-  color: #cdd6d2;
+  color: #48534f;
   font-size: 14px;
   font-weight: 500;
   text-align: left;
@@ -182,35 +184,35 @@
 }
 
 .navItem:hover {
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
+  background: #f4f7f5;
+  color: var(--navy);
   transform: translateX(1px);
 }
 
 .navItemActive {
-  background: linear-gradient(135deg, #0e8276, #16b5a3);
-  outline-color: transparent;
-  color: #ffffff;
+  background: #dff5f1;
+  outline: 1px solid rgba(17, 165, 151, 0.24);
+  color: #0e8276;
   font-weight: 700;
-  box-shadow: 0 6px 14px -6px rgba(14, 130, 118, 0.7);
+  box-shadow: none;
   transform: none;
 }
 
 .navItemDisabled {
-  color: #6f807a;
+  color: #9aa6a1;
 }
 
 .navItemDisabled:hover {
   background: transparent;
-  color: #6f807a;
+  color: #9aa6a1;
   transform: none;
 }
 
 .navItemDisabled em {
   margin-left: auto;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #5f7068;
+  background: #eef2f0;
+  color: #9aa6a1;
   padding: 4px 7px;
   font-size: 10px;
   font-style: normal;
@@ -231,16 +233,16 @@
 }
 
 .navIconBox {
-  background: rgba(255, 255, 255, 0.06);
-  color: #9fb0aa;
+  background: #eef2f0;
+  color: #7b8884;
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 14px;
   font-weight: 600;
 }
 
 .navItemActive .navIconBox {
-  background: rgba(255, 255, 255, 0.22);
-  color: #ffffff;
+  background: #4ecdc4;
+  color: #0b3a34;
 }
 
 .navItem:active {
@@ -253,8 +255,8 @@
   gap: 10px;
   margin-top: auto;
   padding: 12px 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.68);
+  border-top: 1px solid #edf1ef;
+  color: var(--muted);
   text-decoration: none;
 }
 
@@ -299,13 +301,20 @@
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--navy);
 }
 
 .profileText span {
-  color: rgba(255, 255, 255, 0.32);
+  color: var(--muted-light);
   font-size: 11px;
   font-weight: 600;
+}
+
+.profileMenuDots {
+  margin-left: auto;
+  color: #9aa6a1;
+  font-size: 16px;
+  line-height: 1;
 }
 
 .main {
@@ -521,6 +530,16 @@
 .pageInner {
   width: min(100%, 1180px);
   margin: 0 auto;
+}
+
+.pageEyebrow {
+  margin-bottom: 9px;
+  color: #9aa6a1;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .pageHeader {
@@ -2444,6 +2463,63 @@
   color: var(--navy);
 }
 
+.grammarPremiumPage {
+  width: min(100%, 760px);
+  display: grid;
+  gap: 16px;
+  margin: 0 auto;
+}
+
+.grammarPremiumHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 6px;
+}
+
+.grammarPremiumHeader h1 {
+  margin: 0 0 6px;
+  color: var(--navy);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.05;
+}
+
+.grammarPremiumHeader p {
+  margin: 0;
+  color: #6f7b76;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.grammarHeaderActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.grammarBackButton,
+.grammarStreakPill {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #e7ece9;
+  border-radius: 11px;
+  background: #fff;
+  color: #6f7b76;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.grammarBackButton {
+  cursor: pointer;
+}
+
 .grammarReaderHero {
   position: relative;
   display: grid;
@@ -2452,21 +2528,21 @@
   align-items: start;
   overflow: hidden;
   border: 0;
-  border-radius: 24px;
-  background: linear-gradient(120deg, #0e8276, #16b5a3 70%, #36d6bf);
+  border-radius: 18px;
+  background: linear-gradient(120deg, #16211d, #0e8276 56%, #36d6bf);
   color: #fff;
-  padding: 32px;
-  box-shadow: 0 16px 40px -16px rgba(20, 40, 35, 0.3);
+  padding: 26px 28px;
+  box-shadow: var(--shadow-card);
 }
 
 .grammarReaderHero::after {
   content: "問";
   position: absolute;
-  right: -12px;
-  top: -34px;
-  color: rgba(255, 255, 255, 0.13);
+  right: 14px;
+  top: -26px;
+  color: rgba(255, 255, 255, 0.1);
   font-family: var(--font-noto-sans-jp), sans-serif;
-  font-size: 188px;
+  font-size: 150px;
   font-weight: 900;
   line-height: 1;
   pointer-events: none;
@@ -2484,6 +2560,51 @@
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.grammarReaderBadges {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.grammarReaderBadges span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: 999px;
+  padding: 0 11px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.grammarReaderBadges span:first-child {
+  background: #4ecdc4;
+  color: #06302b;
+}
+
+.grammarReaderBadges span:nth-child(2) {
+  background: #f5a623;
+  color: #16211d;
+}
+
+.grammarHeroPlay {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  width: 50px;
+  height: 50px;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  color: #0e8276;
+  font-size: 19px;
+  font-weight: 900;
+  box-shadow: 0 16px 30px -18px rgba(20, 40, 35, 0.42);
 }
 
 .grammarReaderActions {
@@ -2533,7 +2654,7 @@
 .grammarDetailPattern {
   color: #fff;
   font-family: var(--font-noto-sans-jp), sans-serif;
-  font-size: clamp(42px, 4.9vw, 62px);
+  font-size: 40px;
   font-weight: 900;
   letter-spacing: 0;
   line-height: 1.02;
@@ -2543,8 +2664,8 @@
   margin: 0;
   color: rgba(255, 255, 255, 0.92);
   max-width: 760px;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 600;
   line-height: 1.45;
 }
 
@@ -2555,17 +2676,20 @@
 .grammarMistakeBox,
 .grammarInteraction {
   display: grid;
-  gap: 16px;
-  border: 1px solid #e7ece9;
-  border-radius: 24px;
+  gap: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 16px;
   background: #fff;
-  padding: 24px 26px;
-  box-shadow: 0 18px 44px -30px rgba(20, 40, 35, 0.42);
+  padding: 0;
+  box-shadow: var(--shadow-card);
 }
 
 .grammarExampleBox {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   counter-reset: grammar-example;
+  gap: 11px;
+  padding: 0 20px 16px;
 }
 
 .grammarExampleBox > span,
@@ -2580,12 +2704,13 @@
   align-items: center;
   margin: 0;
   border: 0;
+  border-bottom: 1px solid #edf1ef;
   border-radius: 0;
   background: transparent;
-  padding: 0;
+  padding: 15px 20px;
   color: #16211d;
-  font-size: 18px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 700;
   letter-spacing: 0;
   text-transform: none;
 }
@@ -2604,8 +2729,8 @@
   flex: 0 0 26px;
   margin-right: 9px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #16b5a3, #36d6bf);
-  color: #fff;
+  background: #edf8f4;
+  color: #0b6e63;
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 14px;
   font-weight: 800;
@@ -2644,7 +2769,8 @@
 
 .grammarDialogueBox > span::before {
   content: "話";
-  background: linear-gradient(135deg, #ff8a66, #ffac8f);
+  background: #edf8f4;
+  color: #0b6e63;
 }
 
 .grammarMistakeBox > span::before {
@@ -2659,6 +2785,19 @@
 
 .grammarExampleBox > span {
   grid-column: 1 / -1;
+  margin: 0 -20px 3px;
+}
+
+.grammarReader ruby {
+  ruby-position: over;
+}
+
+.grammarReader rt {
+  color: var(--teal);
+  font-size: 0.52em;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.1;
 }
 
 .grammarExampleBox strong,
@@ -2675,52 +2814,41 @@
   display: grid;
   align-content: start;
   gap: 5px;
-  min-height: 112px;
+  min-height: 84px;
   border: 0;
-  border-radius: 18px;
-  background: #f3f8f6;
-  padding: 20px 50px 20px 76px;
+  border-radius: 12px;
+  background: #f7faf9;
+  padding: 14px 16px 14px 58px;
 }
 
-.grammarExampleItem:nth-child(2n + 1) {
-  background: rgba(255, 138, 102, 0.11);
+.grammarExampleItem:nth-of-type(n + 3) {
+  background: #fff6ea;
 }
 
 .grammarExampleItem::before {
   content: "▶";
   position: absolute;
   top: 50%;
-  left: 22px;
-  width: 42px;
-  height: 42px;
+  left: 16px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: linear-gradient(135deg, #16b5a3, #36d6bf);
+  background: #4ecdc4;
   color: #fff;
   font-size: 13px;
   transform: translateY(-50%);
   box-shadow: 0 8px 18px -8px rgba(14, 130, 118, 0.55);
 }
 
-.grammarExampleItem:nth-child(2n + 1)::before {
-  background: linear-gradient(135deg, #ff8a66, #ffac8f);
+.grammarExampleItem:nth-of-type(n + 3)::before {
+  background: #f5a623;
+  color: #16211d;
 }
 
 .grammarExampleItem::after {
-  content: counter(grammar-example);
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: rgba(22, 181, 163, 0.16);
-  color: var(--teal-dark);
-  font-size: 11px;
-  font-weight: 800;
+  content: none;
 }
 
 .grammarExampleItem + .grammarExampleItem {
@@ -2729,8 +2857,8 @@
 
 .grammarExampleItem strong {
   font-family: var(--font-noto-sans-jp), sans-serif;
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 19px;
+  font-weight: 500;
   line-height: 1.25;
 }
 
@@ -2743,9 +2871,9 @@
 
 .grammarExampleItem em {
   color: var(--muted);
-  font-size: 15px;
+  font-size: 13px;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.35;
 }
 
@@ -2764,24 +2892,26 @@
 }
 
 .grammarDialogueBox {
-  border-color: #e7ece9;
   background: #fff;
 }
 
 .grammarDialogueList {
-  display: grid;
-  gap: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 18px 20px;
 }
 
 .grammarDialogueLine {
+  max-width: 76%;
   display: flex;
-  flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 11px;
 }
 
 .grammarDialogueLineAlt {
-  align-items: flex-end;
+  align-self: flex-end;
+  flex-direction: row-reverse;
 }
 
 .grammarDialogueLineAlt .grammarDialogueAvatar {
@@ -2793,51 +2923,50 @@
   grid-column: auto;
   grid-row: auto;
   border-color: transparent;
-  background: linear-gradient(135deg, #16b5a3, #36d6bf);
+  background: #16211d;
   color: #fff;
 }
 
 .grammarDialogueAvatar {
-  min-width: 58px;
-  width: fit-content;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: #e6f7f3;
+  background: #cdeee6;
   color: var(--teal-dark);
-  padding: 0 8px;
-  font-size: 11px;
+  padding: 0;
+  font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
   box-shadow: none;
 }
 
 .grammarDialogueBubble {
-  max-width: min(620px, 88%);
+  max-width: 100%;
   display: grid;
   gap: 6px;
   border: 0;
-  border-radius: 8px 20px 20px 20px;
-  background: #f4f9f7;
+  border-radius: 5px 15px 15px 15px;
+  background: #f4f7f5;
   color: var(--navy);
-  padding: 16px 18px;
+  padding: 12px 15px;
 }
 
 .grammarDialogueLineAlt .grammarDialogueBubble {
-  border-radius: 20px 8px 20px 20px;
+  border-radius: 15px 5px 15px 15px;
 }
 
 .grammarDialogueBubble strong {
   font-family: var(--font-noto-sans-jp), sans-serif;
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1.35;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 .grammarDialogueBubble em {
   color: inherit;
-  font-size: 15px;
+  font-size: 12.5px;
   font-style: normal;
   font-weight: 700;
   line-height: 1.35;
@@ -2846,7 +2975,7 @@
 
 .grammarDialogueBubble button {
   justify-self: start;
-  min-height: 28px;
+  min-height: 24px;
   border: 0;
   border-radius: 999px;
   background: rgba(22, 181, 163, 0.16);
@@ -2862,6 +2991,10 @@
   color: #fff;
 }
 
+.grammarDialogueLineAlt .grammarDialogueBubble rt {
+  color: #5fe3cf;
+}
+
 .grammarDialogueBubble button:disabled {
   cursor: not-allowed;
   opacity: 0.46;
@@ -2869,29 +3002,30 @@
 
 .grammarExplanationBlock {
   display: grid;
-  gap: 12px;
-  border: 1px solid #d6eee8;
-  border-radius: 24px;
+  gap: 0;
+  border: 0;
+  border-radius: 16px;
+  overflow: hidden;
   background: #fff;
-  padding: 24px 26px;
-  box-shadow: 0 18px 44px -30px rgba(20, 40, 35, 0.42);
+  padding: 0;
+  box-shadow: var(--shadow-card);
 }
 
 .grammarExplanationBlock ul {
   display: grid;
-  gap: 13px;
+  gap: 10px;
   margin: 0;
-  padding: 0;
+  padding: 16px 20px;
   list-style: none;
 }
 
 .grammarExplanationBlock li {
   position: relative;
   margin: 0;
-  color: rgba(22, 33, 29, 0.78);
-  padding-left: 22px;
-  font-size: 18px;
-  font-weight: 500;
+  color: #3a4742;
+  padding-left: 18px;
+  font-size: 14.5px;
+  font-weight: 400;
   line-height: 1.55;
 }
 
@@ -2908,6 +3042,7 @@
 
 .grammarExplanationBlock p,
 .grammarTinyNote {
+  margin: 0 20px 16px;
   margin: 0;
   color: rgba(26, 26, 46, 0.76);
   font-size: 14px;
@@ -2923,8 +3058,7 @@
 }
 
 .grammarFormationBox {
-  border-color: #d6eee8;
-  background: #edf8f4;
+  background: #fff;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -2933,12 +3067,18 @@
 }
 
 .grammarFormationBox strong {
-  border-radius: 18px;
+  border-right: 1px solid #edf1ef;
+  border-radius: 0;
   background: #fff;
-  padding: 20px 22px;
+  padding: 18px 20px;
   font-family: var(--font-noto-sans-jp), sans-serif;
-  font-size: 22px;
-  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.grammarFormationBox strong:last-child {
+  border-right: 0;
 }
 
 .grammarInlineInteractions {
@@ -2947,8 +3087,13 @@
 }
 
 .grammarInteraction {
-  border-color: #d6eee8;
-  background: #edf8f4;
+  background: #fff;
+  padding: 0 20px 16px;
+  gap: 12px;
+}
+
+.grammarInteraction > span {
+  margin: 0 -20px;
 }
 
 .grammarInteraction p {
