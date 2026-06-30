@@ -7,7 +7,7 @@
   overflow: hidden;
   position: relative;
   border-radius: 20px;
-  background: linear-gradient(120deg, #0e8276, #16b5a3 70%, #36d6bf);
+  background: linear-gradient(120deg, #1a1a2e 0%, #1f6f6a 62%, #4ecdc4 120%);
   box-shadow: 0 12px 30px -16px rgba(20, 40, 35, 0.35);
   padding: 26px;
 }
@@ -108,7 +108,7 @@
   border: 1px solid rgba(26, 26, 46, 0.08);
   border-radius: 18px;
   background: #fff;
-  color: #16211d;
+  color: #1a1a2e;
   padding: 24px;
   text-decoration: none;
   cursor: pointer;
@@ -121,7 +121,7 @@
 
 .learnModeCard:hover {
   transform: translateY(-2px);
-  border-color: rgba(22, 181, 163, 0.28);
+  border-color: rgba(78, 205, 196, 0.28);
   box-shadow: 0 18px 42px rgba(26, 26, 46, 0.09);
 }
 
@@ -131,14 +131,14 @@
 
 .learnModeCard:focus-visible,
 .kanaQuizCard:focus-visible {
-  outline: 3px solid rgba(22, 181, 163, 0.42);
+  outline: 3px solid rgba(78, 205, 196, 0.42);
   outline-offset: 3px;
 }
 
 .learnModeCardActive {
-  background: linear-gradient(135deg, #0e8276, #16b5a3);
+  background: linear-gradient(135deg, #3bbcb3, #2ba89f);
   color: #fff;
-  box-shadow: 0 8px 18px -8px rgba(14, 130, 118, 0.55);
+  box-shadow: 0 8px 18px -8px rgba(43, 168, 159, 0.55);
 }
 
 .learnModeIcon {
@@ -149,8 +149,8 @@
 }
 
 .learnModeCard:not(.learnModeCardActive) .learnModeIcon {
-  background: rgba(22, 181, 163, 0.14);
-  color: #16211d;
+  background: rgba(78, 205, 196, 0.14);
+  color: #1a1a2e;
   box-shadow: none;
 }
 
@@ -196,7 +196,7 @@
 .kanaLearnHeader h2,
 .kanaChartTitleRow h3 {
   margin: 0;
-  color: #16211d;
+  color: #1a1a2e;
   font-size: 24px;
   font-weight: 900;
   letter-spacing: 0;
@@ -215,15 +215,15 @@
   display: grid;
   gap: 8px;
   margin-top: 24px;
-  border: 1px solid rgba(22, 181, 163, 0.18);
-  border-left: 3px solid rgba(22, 181, 163, 0.6);
+  border: 1px solid rgba(78, 205, 196, 0.18);
+  border-left: 3px solid rgba(78, 205, 196, 0.6);
   border-radius: 14px;
-  background: rgba(22, 181, 163, 0.05);
+  background: rgba(78, 205, 196, 0.05);
   padding: 18px 20px;
 }
 
 .kanaGuideBox strong {
-  color: #16211d;
+  color: #1a1a2e;
   font-size: 15px;
   font-weight: 900;
 }
@@ -260,7 +260,7 @@
 }
 
 .kanaQuizCard:hover {
-  border-color: rgba(22, 181, 163, 0.3);
+  border-color: rgba(78, 205, 196, 0.3);
   box-shadow: 0 14px 30px rgba(26, 26, 46, 0.08);
   transform: translateY(-1px);
 }
@@ -276,8 +276,8 @@
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: rgba(22, 181, 163, 0.12);
-  color: #16211d;
+  background: rgba(78, 205, 196, 0.12);
+  color: #1a1a2e;
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 20px;
   font-weight: 900;
@@ -285,7 +285,7 @@
 
 .kanaQuizCard strong {
   display: block;
-  color: #16211d;
+  color: #1a1a2e;
   font-size: 16px;
   font-weight: 900;
 }
@@ -314,7 +314,7 @@
   border: 1px solid rgba(26, 26, 46, 0.08);
   border-radius: 14px;
   background: #fff;
-  color: #16211d;
+  color: #1a1a2e;
   padding: 12px 14px;
   cursor: pointer;
 }
@@ -326,7 +326,7 @@
   place-items: center;
   border-radius: 10px;
   background: #f5f7fb;
-  color: #16211d;
+  color: #1a1a2e;
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 18px;
   font-weight: 900;
@@ -353,9 +353,9 @@
 
 .kanaLearnTabActive {
   border-color: transparent;
-  background: linear-gradient(120deg, #0e8276, #16b5a3);
+  background: linear-gradient(120deg, #3bbcb3, #2ba89f);
   color: #fff;
-  box-shadow: 0 8px 18px -8px rgba(14, 130, 118, 0.55);
+  box-shadow: 0 8px 18px -8px rgba(43, 168, 159, 0.55);
 }
 
 .kanaLearnTabActive span {
@@ -431,7 +431,7 @@
   gap: 4px;
   border: 1px solid rgba(26, 26, 46, 0.08);
   background: #fff;
-  color: #16211d;
+  color: #1a1a2e;
   cursor: pointer;
   transition:
     transform 140ms ease,
@@ -441,14 +441,14 @@
 
 .kanaChartCell:hover {
   transform: translateY(-1px);
-  border-color: rgba(22, 181, 163, 0.3);
+  border-color: rgba(78, 205, 196, 0.3);
   box-shadow: 0 12px 24px rgba(26, 26, 46, 0.07);
 }
 
 .kanaChartCellSelected {
-  border-color: rgba(22, 181, 163, 0.38);
-  background: rgba(22, 181, 163, 0.11);
-  box-shadow: inset 0 0 0 2px rgba(22, 181, 163, 0.18);
+  border-color: rgba(78, 205, 196, 0.38);
+  background: rgba(78, 205, 196, 0.11);
+  box-shadow: inset 0 0 0 2px rgba(78, 205, 196, 0.18);
 }
 
 .kanaChartCell span {
@@ -491,8 +491,8 @@
   display: grid;
   place-items: center;
   border-radius: 14px;
-  background: rgba(22, 181, 163, 0.16);
-  color: #16211d;
+  background: rgba(78, 205, 196, 0.16);
+  color: #1a1a2e;
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 28px;
   font-weight: 800;
@@ -504,7 +504,7 @@
 }
 
 .kanaStrokeHeader strong {
-  color: #16211d;
+  color: #1a1a2e;
   font-size: 18px;
   font-weight: 900;
 }

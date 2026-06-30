@@ -1,11 +1,11 @@
 .app {
-  --navy: #16211d;
-  --navy-soft: #1e2e28;
+  --navy: #1a1a2e;
+  --navy-soft: #232342;
   --brand-red: #e63946;
   --amber: #f5a623;
   --amber-soft: #fff3d8;
-  --teal: #11a597;
-  --teal-dark: #0e8276;
+  --teal: #4ecdc4;
+  --teal-dark: #0f7d74;
   --red: #e63946;
   --red-dark: #e63946;
   --bg: #eef1ef;
@@ -88,8 +88,8 @@
   display: grid;
   place-items: center;
   border-radius: 11px;
-  background: #4ecdc4;
-  color: #fff;
+  background: linear-gradient(135deg, #4ecdc4, #2ba89f);
+  color: #0e3b37;
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 15px;
   font-weight: 800;
@@ -121,7 +121,7 @@
 }
 
 .brandText span {
-  color: #11a597;
+  color: #16a89d;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -190,9 +190,9 @@
 }
 
 .navItemActive {
-  background: #dff5f1;
-  outline: 1px solid rgba(17, 165, 151, 0.24);
-  color: #0e8276;
+  background: #e6f8f5;
+  outline: none;
+  color: #0f7d74;
   font-weight: 700;
   box-shadow: none;
   transform: none;
@@ -241,8 +241,8 @@
 }
 
 .navItemActive .navIconBox {
-  background: #4ecdc4;
-  color: #0b3a34;
+  background: linear-gradient(135deg, #4ecdc4, #2ba89f);
+  color: #0e3b37;
 }
 
 .navItem:active {
@@ -267,7 +267,7 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: rgba(22, 181, 163, 0.2);
+  background: rgba(78, 205, 196, 0.2);
   color: var(--navy);
   font-size: 12px;
   font-weight: 900;
@@ -374,7 +374,7 @@
   display: grid;
   place-items: center;
   border-radius: 10px;
-  background: rgba(22, 181, 163, 0.18);
+  background: rgba(78, 205, 196, 0.18);
   color: var(--teal);
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 17px;
@@ -446,16 +446,16 @@
 .primaryButton,
 .tealButton {
   border: none;
-  background: linear-gradient(135deg, #16b5a3, #36d6bf);
-  color: #06302b;
+  background: linear-gradient(135deg, #4ecdc4, #3bbcb3);
+  color: #0e3b37;
   font-weight: 800;
-  box-shadow: none;
+  box-shadow: 0 12px 24px -14px rgba(78, 205, 196, 0.8);
 }
 
 .primaryButton:hover,
 .tealButton:hover {
-  background: linear-gradient(135deg, #11a597, #2fcfba);
-  box-shadow: 0 8px 18px -8px rgba(14, 130, 118, 0.55);
+  background: linear-gradient(135deg, #3bbcb3, #2ba89f);
+  box-shadow: 0 14px 28px -14px rgba(78, 205, 196, 0.9);
   transform: translateY(-1px);
 }
 
@@ -496,7 +496,7 @@
 .kanaQuizCard:focus-visible,
 .tabButton:focus-visible,
 .kanjiBackButton:focus-visible {
-  outline: 3px solid rgba(22, 181, 163, 0.42);
+  outline: 3px solid rgba(78, 205, 196, 0.42);
   outline-offset: 3px;
 }
 
@@ -592,7 +592,7 @@
   margin-bottom: 16px;
   overflow: hidden;
   border-radius: 14px;
-  border: 1px solid rgba(22, 181, 163, 0.16);
+  border: 1px solid rgba(78, 205, 196, 0.16);
   background: linear-gradient(135deg, #1a1a2e 0%, #1e2545 100%);
   color: #fff;
   padding: 22px;
@@ -710,7 +710,7 @@
   display: grid;
   place-items: center;
   border-radius: 10px;
-  background: rgba(22, 181, 163, 0.12);
+  background: rgba(78, 205, 196, 0.12);
   color: var(--teal-dark);
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 18px;
@@ -763,7 +763,7 @@
 }
 
 .badgeTeal {
-  background: rgba(22, 181, 163, 0.12);
+  background: rgba(78, 205, 196, 0.12);
   color: var(--teal-dark);
 }
 
@@ -939,8 +939,8 @@
 }
 
 .textInput:focus {
-  border-color: rgba(22, 181, 163, 0.7);
-  box-shadow: 0 0 0 3px rgba(22, 181, 163, 0.16);
+  border-color: rgba(78, 205, 196, 0.7);
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.16);
 }
 
 .formStatus {
@@ -974,7 +974,7 @@
 }
 
 .profilePostCard:hover {
-  border-color: rgba(22, 181, 163, 0.38);
+  border-color: rgba(78, 205, 196, 0.38);
   box-shadow: 0 14px 30px rgba(26, 26, 46, 0.08);
   transform: translateY(-1px);
 }
@@ -1115,7 +1115,7 @@
   background: var(--teal);
   color: var(--navy);
   font-family: var(--font-noto-sans-jp), sans-serif;
-  box-shadow: 0 14px 28px rgba(22, 181, 163, 0.26);
+  box-shadow: 0 14px 28px rgba(78, 205, 196, 0.26);
 }
 
 .learnGlyph {
@@ -1149,9 +1149,9 @@
 
 .learnHeroStats div {
   min-width: 104px;
-  border: 1px solid rgba(22, 181, 163, 0.26);
+  border: 1px solid rgba(78, 205, 196, 0.26);
   border-radius: 14px;
-  background: rgba(22, 181, 163, 0.1);
+  background: rgba(78, 205, 196, 0.1);
   padding: 14px 16px;
   text-align: center;
 }
@@ -1208,7 +1208,7 @@
 
 .learnModeCard:hover {
   transform: translateY(-2px);
-  border-color: rgba(22, 181, 163, 0.28);
+  border-color: rgba(78, 205, 196, 0.28);
   box-shadow: 0 18px 42px rgba(26, 26, 46, 0.09);
 }
 
@@ -1216,7 +1216,7 @@
   background: var(--teal);
   color: var(--navy);
   border-color: var(--teal);
-  box-shadow: 0 10px 28px -4px rgba(22, 181, 163, 0.35);
+  box-shadow: 0 10px 28px -4px rgba(78, 205, 196, 0.35);
 }
 
 .learnModeIcon {
@@ -1227,7 +1227,7 @@
 }
 
 .learnModeCard:not(.learnModeCardActive) .learnModeIcon {
-  background: rgba(22, 181, 163, 0.12);
+  background: rgba(78, 205, 196, 0.12);
   color: #1a1a2e;
   box-shadow: none;
 }
@@ -1293,7 +1293,7 @@
   display: grid;
   gap: 8px;
   margin-top: 24px;
-  border: 1px solid rgba(22, 181, 163, 0.2);
+  border: 1px solid rgba(78, 205, 196, 0.2);
   border-radius: 14px;
   background:
     radial-gradient(
@@ -1303,7 +1303,7 @@
     ),
     linear-gradient(
       135deg,
-      rgba(22, 181, 163, 0.07),
+      rgba(78, 205, 196, 0.07),
       rgba(245, 166, 35, 0.055)
     ),
     #fff;
@@ -1348,7 +1348,7 @@
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: rgba(22, 181, 163, 0.12);
+  background: rgba(78, 205, 196, 0.12);
   color: #1a1a2e;
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 20px;
@@ -1443,7 +1443,7 @@
 }
 
 .kanaLearnTabActive {
-  border-color: rgba(22, 181, 163, 0.34);
+  border-color: rgba(78, 205, 196, 0.34);
   background:
     radial-gradient(
       circle at 88% 16%,
@@ -1452,7 +1452,7 @@
     ),
     var(--teal);
   color: var(--navy);
-  box-shadow: 0 12px 26px rgba(22, 181, 163, 0.18);
+  box-shadow: 0 12px 26px rgba(78, 205, 196, 0.18);
 }
 
 .kanaLearnTabActive span {
@@ -1538,14 +1538,14 @@
 
 .kanaChartCell:hover {
   transform: translateY(-1px);
-  border-color: rgba(22, 181, 163, 0.3);
+  border-color: rgba(78, 205, 196, 0.3);
   box-shadow: 0 12px 24px rgba(26, 26, 46, 0.07);
 }
 
 .kanaChartCellSelected {
-  border-color: rgba(22, 181, 163, 0.38);
-  background: rgba(22, 181, 163, 0.11);
-  box-shadow: inset 0 0 0 2px rgba(22, 181, 163, 0.18);
+  border-color: rgba(78, 205, 196, 0.38);
+  background: rgba(78, 205, 196, 0.11);
+  box-shadow: inset 0 0 0 2px rgba(78, 205, 196, 0.18);
 }
 
 .kanaChartCell span {
@@ -1589,7 +1589,7 @@
   display: grid;
   place-items: center;
   border-radius: 14px;
-  background: rgba(22, 181, 163, 0.16);
+  background: rgba(78, 205, 196, 0.16);
   color: var(--navy);
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 24px;
@@ -1709,7 +1709,7 @@
 }
 
 .kanaCellDone {
-  background: rgba(22, 181, 163, 0.08);
+  background: rgba(78, 205, 196, 0.08);
 }
 
 .kanaCellEmpty {
@@ -1755,7 +1755,7 @@
 }
 
 .lessonNumDone {
-  background: rgba(22, 181, 163, 0.16);
+  background: rgba(78, 205, 196, 0.16);
   color: var(--teal-dark);
 }
 
@@ -1842,7 +1842,7 @@
   align-items: center;
   border: 0;
   border-radius: 999px;
-  background: rgba(22, 181, 163, 0.12);
+  background: rgba(78, 205, 196, 0.12);
   color: var(--navy);
   padding: 0 12px;
   margin: 0 0 10px;
@@ -1880,13 +1880,13 @@
 
 .kanjiModuleCard:hover:not(:disabled) {
   transform: translateY(-2px);
-  border-color: rgba(22, 181, 163, 0.36);
+  border-color: rgba(78, 205, 196, 0.36);
   box-shadow: var(--shadow-lift);
 }
 
 .kanjiModuleCardCurrent {
-  border-color: rgba(22, 181, 163, 0.55);
-  background: rgba(22, 181, 163, 0.1);
+  border-color: rgba(78, 205, 196, 0.55);
+  background: rgba(78, 205, 196, 0.1);
 }
 
 .kanjiModuleCardDisabled {
@@ -1965,7 +1965,7 @@
 
 .kanjiLessonChoiceCard:hover {
   transform: translateY(-2px);
-  border-color: rgba(22, 181, 163, 0.36);
+  border-color: rgba(78, 205, 196, 0.36);
   box-shadow: var(--shadow-lift);
 }
 
@@ -2023,7 +2023,7 @@
 
 .kanjiLessonTab:hover {
   transform: translateY(-1px);
-  border-color: rgba(22, 181, 163, 0.28);
+  border-color: rgba(78, 205, 196, 0.28);
   box-shadow: 0 14px 30px rgba(26, 26, 46, 0.07);
 }
 
@@ -2051,10 +2051,10 @@
 }
 
 .kanjiLessonTabActive {
-  border-color: rgba(22, 181, 163, 0.32);
+  border-color: rgba(78, 205, 196, 0.32);
   background: var(--teal);
   color: var(--navy);
-  box-shadow: 0 14px 30px rgba(22, 181, 163, 0.2);
+  box-shadow: 0 14px 30px rgba(78, 205, 196, 0.2);
 }
 
 .kanjiLessonTabActive strong,
@@ -2119,14 +2119,14 @@
 
 .kanjiCard:hover {
   transform: translateY(-1px);
-  border-color: rgba(22, 181, 163, 0.38);
+  border-color: rgba(78, 205, 196, 0.38);
   box-shadow: 0 15px 30px rgba(26, 26, 46, 0.08);
 }
 
 .kanjiCardSelected {
-  border-color: rgba(22, 181, 163, 0.4);
-  background: rgba(22, 181, 163, 0.09);
-  box-shadow: 0 16px 34px rgba(22, 181, 163, 0.13);
+  border-color: rgba(78, 205, 196, 0.4);
+  background: rgba(78, 205, 196, 0.09);
+  box-shadow: 0 16px 34px rgba(78, 205, 196, 0.13);
 }
 
 .kanjiChar,
@@ -2179,10 +2179,10 @@
   background:
     radial-gradient(
       circle at 18% 18%,
-      rgba(22, 181, 163, 0.16),
+      rgba(78, 205, 196, 0.16),
       transparent 30%
     ),
-    linear-gradient(135deg, rgba(22, 181, 163, 0.1), rgba(245, 166, 35, 0.06));
+    linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(245, 166, 35, 0.06));
   pointer-events: none;
 }
 
@@ -2224,7 +2224,7 @@
   display: grid;
   place-items: center;
   border-radius: 14px;
-  background: rgba(22, 181, 163, 0.14);
+  background: rgba(78, 205, 196, 0.14);
   color: var(--navy);
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 26px;
@@ -2279,7 +2279,7 @@
 .activePill {
   background: var(--teal) !important;
   color: var(--navy) !important;
-  box-shadow: 0 8px 18px rgba(22, 181, 163, 0.22);
+  box-shadow: 0 8px 18px rgba(78, 205, 196, 0.22);
 }
 
 .kanjiDetailReading {
@@ -2389,16 +2389,16 @@
 
 .grammarPatternCard:hover {
   transform: translateY(-1px);
-  border-color: rgba(22, 181, 163, 0.38);
+  border-color: rgba(78, 205, 196, 0.38);
   box-shadow: 0 18px 36px -24px rgba(20, 40, 35, 0.46);
 }
 
 .grammarPatternCardSelected {
-  border-color: rgba(22, 181, 163, 0.7);
+  border-color: rgba(78, 205, 196, 0.7);
   background:
     radial-gradient(circle at 88% 20%, rgba(255, 138, 102, 0.1), transparent 34%),
     #eaf8f4;
-  box-shadow: inset 0 0 0 1px rgba(22, 181, 163, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(78, 205, 196, 0.1);
 }
 
 .grammarPatternCard strong {
@@ -2506,7 +2506,7 @@
   overflow: hidden;
   border: 0;
   border-radius: 18px;
-  background: linear-gradient(120deg, #16211d, #0e8276 56%, #36d6bf);
+  background: linear-gradient(120deg, #1a1a2e 0%, #1f6f6a 62%, #4ecdc4 120%);
   color: #fff;
   padding: 26px 28px;
   box-shadow: var(--shadow-card);
@@ -2531,7 +2531,7 @@
   margin-bottom: 12px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.88);
-  color: #0e8276;
+  color: #0f7d74;
   padding: 6px 10px;
   font-size: 11px;
   font-weight: 800;
@@ -2561,12 +2561,12 @@
 
 .grammarReaderBadges span:first-child {
   background: #4ecdc4;
-  color: #06302b;
+  color: #0e3b37;
 }
 
 .grammarReaderBadges span:nth-child(2) {
   background: #f5a623;
-  color: #16211d;
+  color: #3a2606;
 }
 
 .grammarHeroPlay {
@@ -2578,7 +2578,7 @@
   border: 0;
   border-radius: 16px;
   background: #fff;
-  color: #0e8276;
+  color: #0f7d74;
   font-size: 19px;
   font-weight: 900;
   box-shadow: 0 16px 30px -18px rgba(20, 40, 35, 0.42);
@@ -2685,7 +2685,7 @@
   border-radius: 0;
   background: transparent;
   padding: 15px 20px;
-  color: #16211d;
+  color: #1a1a2e;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0;
@@ -2707,7 +2707,7 @@
   margin-right: 9px;
   border-radius: 8px;
   background: #edf8f4;
-  color: #0b6e63;
+  color: #0f7d74;
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 14px;
   font-weight: 800;
@@ -2740,14 +2740,12 @@
 
 .grammarFormationBox > span::before {
   content: "型";
-  background: linear-gradient(135deg, #16b5a3, #36d6bf);
-  color: #fff;
 }
 
 .grammarDialogueBox > span::before {
   content: "話";
   background: #edf8f4;
-  color: #0b6e63;
+  color: #0f7d74;
 }
 
 .grammarMistakeBox > span::before {
@@ -2824,7 +2822,7 @@
 
 .grammarExampleItem:nth-of-type(n + 3)::before {
   background: #f5a623;
-  color: #16211d;
+  color: #3a2606;
 }
 
 .grammarExampleItem::after {
@@ -2912,7 +2910,7 @@
   grid-column: auto;
   grid-row: auto;
   border-color: transparent;
-  background: #16211d;
+  background: #1a1a2e;
   color: #fff;
 }
 
@@ -2976,7 +2974,7 @@
   min-height: 24px;
   border: 0;
   border-radius: 999px;
-  background: rgba(22, 181, 163, 0.16);
+  background: rgba(78, 205, 196, 0.16);
   color: var(--navy);
   padding: 0 10px;
   font-size: 11px;
@@ -3115,9 +3113,9 @@
 
 .grammarBuildLine {
   min-height: 44px;
-  border: 1px dashed rgba(22, 181, 163, 0.45);
+  border: 1px dashed rgba(78, 205, 196, 0.45);
   border-radius: 12px;
-  background: rgba(22, 181, 163, 0.08);
+  background: rgba(78, 205, 196, 0.08);
   padding: 8px;
 }
 
@@ -3149,8 +3147,8 @@
 }
 
 .grammarBuildLine button {
-  border-color: rgba(22, 181, 163, 0.36);
-  background: rgba(22, 181, 163, 0.16);
+  border-color: rgba(78, 205, 196, 0.36);
+  background: rgba(78, 205, 196, 0.16);
 }
 
 .grammarBuildLine button:hover,
@@ -3189,8 +3187,8 @@
 }
 
 .grammarChoiceCorrect {
-  border-color: rgba(22, 181, 163, 0.75) !important;
-  background: rgba(22, 181, 163, 0.18) !important;
+  border-color: rgba(78, 205, 196, 0.75) !important;
+  background: rgba(78, 205, 196, 0.18) !important;
 }
 
 .grammarChoiceWrong {
@@ -3234,7 +3232,7 @@
 }
 
 .grammarFeedbackOk {
-  background: rgba(22, 181, 163, 0.16);
+  background: rgba(78, 205, 196, 0.16);
   color: var(--navy);
 }
 
@@ -3267,7 +3265,7 @@
 }
 
 .grammarPracticeBox {
-  border-color: rgba(22, 181, 163, 0.22);
+  border-color: rgba(78, 205, 196, 0.22);
   background: #edf8f4;
 }
 
@@ -3311,7 +3309,7 @@
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 23px;
   font-weight: 900;
-  box-shadow: 0 10px 24px rgba(22, 181, 163, 0.22);
+  box-shadow: 0 10px 24px rgba(78, 205, 196, 0.22);
 }
 
 .kanjiQuizTitle h2 {
@@ -3372,7 +3370,7 @@
       rgba(245, 166, 35, 0.15),
       transparent 28%
     ),
-    linear-gradient(135deg, rgba(245, 166, 35, 0.08), rgba(22, 181, 163, 0.09)),
+    linear-gradient(135deg, rgba(245, 166, 35, 0.08), rgba(78, 205, 196, 0.09)),
     #fff;
   padding: 24px;
   text-align: center;
@@ -3419,7 +3417,7 @@
 
 .kanjiQuizOption:hover:not(:disabled) {
   transform: translateY(-1px);
-  border-color: rgba(22, 181, 163, 0.3);
+  border-color: rgba(78, 205, 196, 0.3);
   box-shadow: 0 14px 30px rgba(26, 26, 46, 0.08);
 }
 
@@ -3432,8 +3430,8 @@
 }
 
 .kanjiQuizOptionCorrect {
-  border-color: rgba(22, 181, 163, 0.52);
-  background: rgba(22, 181, 163, 0.18);
+  border-color: rgba(78, 205, 196, 0.52);
+  background: rgba(78, 205, 196, 0.18);
 }
 
 .kanjiQuizOptionWrong {
@@ -3474,7 +3472,7 @@
 .kanjiGridToggle:focus-visible,
 .kanjiQuizClose:focus-visible,
 .kanjiQuizOption:focus-visible {
-  outline: 3px solid rgba(22, 181, 163, 0.42);
+  outline: 3px solid rgba(78, 205, 196, 0.42);
   outline-offset: 3px;
 }
 
@@ -3516,7 +3514,7 @@
   color: var(--navy);
   font-size: 38px;
   font-weight: 900;
-  box-shadow: 0 18px 40px rgba(22, 181, 163, 0.2);
+  box-shadow: 0 18px 40px rgba(78, 205, 196, 0.2);
 }
 
 .kanjiQuizResult h3 {
@@ -3648,8 +3646,8 @@
 }
 
 .bottomNavActive {
-  background: rgba(22, 181, 163, 0.14);
-  outline-color: rgba(22, 181, 163, 0.42);
+  background: rgba(78, 205, 196, 0.14);
+  outline-color: rgba(78, 205, 196, 0.42);
   color: var(--teal-dark);
   transform: translateY(-1px);
 }
