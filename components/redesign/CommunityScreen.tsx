@@ -6,11 +6,6 @@ import {
   optimizeImageFile,
   validateImageFile,
 } from "@/lib/client-image-upload";
-import {
-  CURRICULUM_MODULES,
-  getCurrentCurriculumModule,
-  getCurriculumModuleByNumber,
-} from "@/lib/curriculum-modules";
 import { supabase } from "@/lib/supabase";
 import {
   TEMAS_SEMANA,
@@ -24,7 +19,6 @@ import {
   type WeeklyTopic,
 } from "@/lib/weekly-topics";
 import { KanaSprintWidget } from "./KanaSprintWidget";
-import { useStudentDashboardData } from "./student-dashboard-state";
 import styles from "./CommunityScreen.module.css";
 
 type Post = {
@@ -170,93 +164,11 @@ function buildTopicTranslation(template: string, selections: TopicSelections) {
   );
 }
 
-function CurrentCourseCard({
-  groupName,
-  currentLesson,
-  currentModuleNumber,
-  loading,
-}: {
-  groupName: string | null;
-  currentLesson: number | null;
-  currentModuleNumber: number | null;
-  loading?: boolean;
-}) {
-  const courseModule =
-    getCurriculumModuleByNumber(currentModuleNumber) ??
-    getCurrentCurriculumModule(currentLesson);
-  const lessonLabel = currentLesson
-    ? `Lección ${currentLesson}`
-    : loading
-      ? "Sincronizando..."
-      : "Lección actual";
-  const totalModules = CURRICULUM_MODULES.length;
-  const currentModule = Math.min(courseModule.numero, totalModules);
-  const progressPercent =
-    totalModules > 1 ? ((currentModule - 1) / (totalModules - 1)) * 100 : 0;
-
-  return (
-    <section className={styles.courseCard}>
-      <div className={styles.courseTopLine}>
-        <span className={styles.courseLabel}>Mi progreso</span>
-        <span className={styles.courseGroup}>
-          {groupName || (loading ? "Sincronizando grupo" : "Tu grupo")}
-        </span>
-      </div>
-
-      <div className={styles.courseMain}>
-        <div className={styles.courseIcon}>道</div>
-        <div className={styles.courseCopy}>
-          <h1>
-            Módulo {courseModule.numero} · {courseModule.nombre}
-          </h1>
-          <p>
-            {courseModule.nombreJa} · {lessonLabel} · {courseModule.jlpt}
-          </p>
-        </div>
-        <div className={styles.courseBadge}>
-          {currentModule}/{totalModules}
-        </div>
-      </div>
-
-      <div
-        className={styles.moduleProgress}
-        aria-label={`Progreso del curso: módulo ${currentModule} de ${totalModules}`}
-      >
-        <div className={styles.moduleTrack}>
-          <span style={{ width: `${progressPercent}%` }} />
-        </div>
-        <div className={styles.moduleCheckpoints}>
-          {CURRICULUM_MODULES.map((module) => {
-            const isDone = module.numero < currentModule;
-            const isCurrent = module.numero === currentModule;
-            return (
-              <span
-                key={module.numero}
-                className={`${styles.moduleDot} ${
-                  isDone ? styles.moduleDotDone : ""
-                } ${isCurrent ? styles.moduleDotCurrent : ""}`}
-                title={`Módulo ${module.numero}`}
-              >
-                {module.numero}
-              </span>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export function CommunityScreen({ home = false }: { home?: boolean }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingMoreRef = useRef(false);
-  const {
-    loaded: dashboardLoaded,
-    profile: dashboardProfile,
-    course,
-  } = useStudentDashboardData();
 
   const [topic, setTopic] = useState<WeeklyTopic>(getWeeklyTopic());
   const [announcement, setAnnouncement] = useState<string | null>(null);
@@ -268,7 +180,6 @@ export function CommunityScreen({ home = false }: { home?: boolean }) {
   );
   const [userId, setUserId] = useState<string | null>(null);
   const [myProfile, setMyProfile] = useState<Profile | null>(null);
-  const [groupName, setGroupName] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -409,7 +320,6 @@ export function CommunityScreen({ home = false }: { home?: boolean }) {
         if (profile) {
           setMyProfile(profile);
           setIsAdmin(profile.is_admin === true);
-          setGroupName(profile.group_name ?? null);
           setProfiles((current) => ({ ...current, [profile.id]: profile }));
         }
       }
@@ -689,12 +599,10 @@ export function CommunityScreen({ home = false }: { home?: boolean }) {
   return (
     <div className={styles.communityPage}>
       {home ? (
-        <CurrentCourseCard
-          groupName={groupName ?? dashboardProfile.groupName ?? course.groupName}
-          currentLesson={course.currentLesson}
-          currentModuleNumber={course.currentModuleNumber}
-          loading={!dashboardLoaded}
-        />
+        <header className={styles.communityHeader}>
+          <h1>Comunidad</h1>
+          <p>Lo que practica la clase hoy</p>
+        </header>
       ) : (
         <section className={styles.hero}>
           <div className={styles.heroLeft}>
@@ -712,23 +620,25 @@ export function CommunityScreen({ home = false }: { home?: boolean }) {
 
       <div className={styles.layout}>
         <main className={styles.mainColumn}>
-          <section className={`${styles.card} ${styles.topicCard}`}>
-            <div className={styles.labelRow}>
-              <span className={styles.eyebrow}>
-                <span className={styles.dot} />
-                Tema de la semana
-              </span>
-              <button
-                type="button"
-                className={styles.topicHelpButton}
-                onClick={() => setTopicHelpOpen(true)}
-              >
-                Te ayudo
-              </button>
-            </div>
-            <p className={styles.topicKana}>{topic.kana}</p>
-            <p className={styles.topicPrompt}>{topic.prompt}</p>
-          </section>
+          {!home && (
+            <section className={`${styles.card} ${styles.topicCard}`}>
+              <div className={styles.labelRow}>
+                <span className={styles.eyebrow}>
+                  <span className={styles.dot} />
+                  Tema de la semana
+                </span>
+                <button
+                  type="button"
+                  className={styles.topicHelpButton}
+                  onClick={() => setTopicHelpOpen(true)}
+                >
+                  Te ayudo
+                </button>
+              </div>
+              <p className={styles.topicKana}>{topic.kana}</p>
+              <p className={styles.topicPrompt}>{topic.prompt}</p>
+            </section>
+          )}
 
           {announcement && (
             <section className={`${styles.card} ${styles.sideCard}`}>
@@ -1049,9 +959,9 @@ export function CommunityScreen({ home = false }: { home?: boolean }) {
         </main>
 
         <aside className={styles.sideColumn}>
-          <KanaSprintWidget />
-          <section className={`${styles.card} ${styles.sideCard}`}>
-            <h2>Prompts útiles</h2>
+          {!home && <KanaSprintWidget />}
+          <section className={`${styles.card} ${styles.sideCard} ${home ? styles.patternsCard : ""}`}>
+            <h2>{home ? "Patrones de hoy" : "Prompts útiles"}</h2>
             <div className={styles.quickIdea}>
               <strong>〜がすきです。</strong>
               <span>Para hablar de algo que te gusta.</span>

@@ -2329,42 +2329,38 @@
 .grammarStudyLayout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
+  gap: 22px;
   align-items: start;
-}
-
-.grammarPatternList,
-.grammarReader {
-  border: 1px solid rgba(26, 26, 46, 0.07);
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: var(--shadow-card);
 }
 
 .grammarPatternList {
   overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .grammarPatternGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 8px;
-  padding: 14px;
+  gap: 12px;
+  padding: 0;
 }
 
 .grammarPatternCard {
-  min-height: 104px;
+  min-height: 92px;
   display: grid;
   align-content: center;
   gap: 8px;
-  border: 1px solid rgba(26, 26, 46, 0.07);
-  border-radius: 12px;
+  border: 1px solid #e7ece9;
+  border-radius: 18px;
   background: #fff;
   color: var(--navy);
-  padding: 14px;
+  padding: 16px 18px;
   text-align: left;
   cursor: pointer;
-  box-shadow: none;
+  box-shadow: 0 14px 34px -28px rgba(20, 40, 35, 0.42);
   transition:
     transform 140ms ease,
     border-color 140ms ease,
@@ -2375,41 +2371,46 @@
 .grammarPatternCard:hover {
   transform: translateY(-1px);
   border-color: rgba(22, 181, 163, 0.38);
-  box-shadow: 0 12px 24px rgba(26, 26, 46, 0.06);
+  box-shadow: 0 18px 36px -24px rgba(20, 40, 35, 0.46);
 }
 
 .grammarPatternCardSelected {
   border-color: rgba(22, 181, 163, 0.7);
-  background: rgba(22, 181, 163, 0.12);
-  box-shadow: none;
+  background:
+    radial-gradient(circle at 88% 20%, rgba(255, 138, 102, 0.1), transparent 34%),
+    #eaf8f4;
+  box-shadow: inset 0 0 0 1px rgba(22, 181, 163, 0.1);
 }
 
 .grammarPatternCard strong {
   color: var(--navy);
   font-family: var(--font-noto-sans-jp), sans-serif;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 900;
   line-height: 1.15;
 }
 
 .grammarPatternCard span {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   line-height: 1.35;
 }
 
 .grammarDetailPanel {
-  width: min(100%, 900px);
+  width: min(100%, 1080px);
   margin: 0 auto;
   min-width: 0;
 }
 
 .grammarReader {
   display: grid;
-  gap: 18px;
+  gap: 24px;
   overflow: hidden;
-  padding: 16px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
 }
 
 .grammarFuriganaToggle {
@@ -2444,16 +2445,31 @@
 }
 
 .grammarReaderHero {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 18px;
   align-items: start;
+  overflow: hidden;
   border: 0;
   border-radius: 24px;
-  background: linear-gradient(135deg, #16b5a3, #36d6bf);
+  background: linear-gradient(120deg, #0e8276, #16b5a3 70%, #36d6bf);
   color: #fff;
-  padding: 28px 32px;
-  box-shadow: 0 12px 30px -16px rgba(20, 40, 35, 0.35);
+  padding: 32px;
+  box-shadow: 0 16px 40px -16px rgba(20, 40, 35, 0.3);
+}
+
+.grammarReaderHero::after {
+  content: "問";
+  position: absolute;
+  right: -12px;
+  top: -34px;
+  color: rgba(255, 255, 255, 0.13);
+  font-family: var(--font-noto-sans-jp), sans-serif;
+  font-size: 188px;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .grammarReaderKicker {
@@ -2461,8 +2477,8 @@
   width: fit-content;
   margin-bottom: 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.64);
-  color: rgba(26, 26, 46, 0.72);
+  background: rgba(255, 255, 255, 0.88);
+  color: #0e8276;
   padding: 6px 10px;
   font-size: 11px;
   font-weight: 800;
@@ -2490,14 +2506,14 @@
 }
 
 .grammarReaderMeta {
-  background: rgba(0, 0, 0, 0.22);
+  background: rgba(255, 255, 255, 0.18);
   color: #fff;
 }
 
 .grammarReaderAudioPill {
   border: 1px solid rgba(255, 255, 255, 0.32);
-  background: rgba(255, 255, 255, 0.5);
-  color: rgba(26, 26, 46, 0.72);
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
 }
 
 .grammarDetailPattern,
@@ -2515,9 +2531,9 @@
 }
 
 .grammarDetailPattern {
-  color: var(--navy);
+  color: #fff;
   font-family: var(--font-noto-sans-jp), sans-serif;
-  font-size: clamp(38px, 4.7vw, 58px);
+  font-size: clamp(42px, 4.9vw, 62px);
   font-weight: 900;
   letter-spacing: 0;
   line-height: 1.02;
@@ -2525,7 +2541,7 @@
 
 .grammarDetailMeaning {
   margin: 0;
-  color: rgba(26, 26, 46, 0.76);
+  color: rgba(255, 255, 255, 0.92);
   max-width: 760px;
   font-size: 16px;
   font-weight: 700;
@@ -2539,11 +2555,12 @@
 .grammarMistakeBox,
 .grammarInteraction {
   display: grid;
-  gap: 10px;
-  border: 1px solid rgba(26, 26, 46, 0.07);
-  border-radius: 14px;
-  background: var(--bg);
-  padding: 0 16px 16px;
+  gap: 16px;
+  border: 1px solid #e7ece9;
+  border-radius: 24px;
+  background: #fff;
+  padding: 24px 26px;
+  box-shadow: 0 18px 44px -30px rgba(20, 40, 35, 0.42);
 }
 
 .grammarExampleBox {
@@ -2560,16 +2577,16 @@
   min-height: 42px;
   display: flex;
   align-items: center;
-  margin: 0 -16px 2px;
-  border-bottom: 1px solid rgba(26, 26, 46, 0.06);
-  border-radius: 14px 14px 0 0;
-  background: rgba(255, 255, 255, 0.78);
-  padding: 0 16px;
-  color: rgba(26, 26, 46, 0.56);
-  font-size: 11px;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  color: #16211d;
+  font-size: 18px;
   font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .grammarExampleBox > span::before,
@@ -2585,8 +2602,8 @@
   flex: 0 0 26px;
   margin-right: 9px;
   border-radius: 8px;
-  background: rgba(22, 181, 163, 0.16);
-  color: var(--teal-dark);
+  background: linear-gradient(135deg, #16b5a3, #36d6bf);
+  color: #fff;
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 14px;
   font-weight: 800;
@@ -2604,12 +2621,13 @@
 
 .grammarFormationBox > span::before {
   content: "型";
-  background: rgba(245, 166, 35, 0.18);
-  color: #9a5f00;
+  background: linear-gradient(135deg, #16b5a3, #36d6bf);
+  color: #fff;
 }
 
 .grammarDialogueBox > span::before {
   content: "話";
+  background: linear-gradient(135deg, #ff8a66, #ffac8f);
 }
 
 .grammarMistakeBox > span::before {
@@ -2640,11 +2658,36 @@
   display: grid;
   align-content: start;
   gap: 5px;
-  min-height: 120px;
-  border: 1px solid rgba(26, 26, 46, 0.06);
-  border-radius: 10px;
-  background: #fff;
-  padding: 16px 14px 14px;
+  min-height: 112px;
+  border: 0;
+  border-radius: 18px;
+  background: #f3f8f6;
+  padding: 20px 50px 20px 76px;
+}
+
+.grammarExampleItem:nth-child(2n + 1) {
+  background: rgba(255, 138, 102, 0.11);
+}
+
+.grammarExampleItem::before {
+  content: "▶";
+  position: absolute;
+  top: 50%;
+  left: 22px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #16b5a3, #36d6bf);
+  color: #fff;
+  font-size: 13px;
+  transform: translateY(-50%);
+  box-shadow: 0 8px 18px -8px rgba(14, 130, 118, 0.55);
+}
+
+.grammarExampleItem:nth-child(2n + 1)::before {
+  background: linear-gradient(135deg, #ff8a66, #ffac8f);
 }
 
 .grammarExampleItem::after {
@@ -2670,7 +2713,7 @@
 .grammarExampleItem strong {
   font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.25;
 }
 
@@ -2683,7 +2726,7 @@
 
 .grammarExampleItem em {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 15px;
   font-style: normal;
   font-weight: 700;
   line-height: 1.35;
@@ -2704,13 +2747,13 @@
 }
 
 .grammarDialogueBox {
-  border-color: rgba(22, 181, 163, 0.28);
-  background: rgba(22, 181, 163, 0.08);
+  border-color: #e7ece9;
+  background: #fff;
 }
 
 .grammarDialogueList {
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 
 .grammarDialogueLine {
@@ -2732,8 +2775,8 @@
 .grammarDialogueLineAlt .grammarDialogueBubble {
   grid-column: auto;
   grid-row: auto;
-  border-color: rgba(26, 26, 46, 0.1);
-  background: var(--navy);
+  border-color: transparent;
+  background: linear-gradient(135deg, #16b5a3, #36d6bf);
   color: #fff;
 }
 
@@ -2744,7 +2787,7 @@
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
+  background: #e6f7f3;
   color: var(--teal-dark);
   padding: 0 8px;
   font-size: 11px;
@@ -2757,27 +2800,27 @@
   max-width: min(620px, 88%);
   display: grid;
   gap: 6px;
-  border: 1px solid rgba(26, 26, 46, 0.06);
-  border-radius: 14px 14px 14px 5px;
-  background: #fff;
+  border: 0;
+  border-radius: 8px 20px 20px 20px;
+  background: #f4f9f7;
   color: var(--navy);
-  padding: 14px;
+  padding: 16px 18px;
 }
 
 .grammarDialogueLineAlt .grammarDialogueBubble {
-  border-radius: 14px 14px 5px;
+  border-radius: 20px 8px 20px 20px;
 }
 
 .grammarDialogueBubble strong {
   font-family: var(--font-noto-sans-jp), sans-serif;
-  font-size: 20px;
-  font-weight: 900;
+  font-size: 22px;
+  font-weight: 700;
   line-height: 1.35;
 }
 
 .grammarDialogueBubble em {
   color: inherit;
-  font-size: 13px;
+  font-size: 15px;
   font-style: normal;
   font-weight: 700;
   line-height: 1.35;
@@ -2810,22 +2853,25 @@
 .grammarExplanationBlock {
   display: grid;
   gap: 12px;
-  border-left: 3px solid var(--teal);
-  padding: 2px 0 2px 18px;
+  border: 1px solid #d6eee8;
+  border-radius: 20px;
+  background: #fff;
+  padding: 22px 24px;
+  box-shadow: 0 18px 44px -30px rgba(20, 40, 35, 0.42);
 }
 
 .grammarExplanationBlock p {
   margin: 0;
   color: rgba(26, 26, 46, 0.76);
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   line-height: 1.65;
 }
 
 .grammarFormationBox {
-  border-color: rgba(245, 166, 35, 0.24);
-  background: rgba(245, 166, 35, 0.08);
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  border-color: #d6eee8;
+  background: #edf8f4;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .grammarFormationBox > span {
@@ -2833,11 +2879,12 @@
 }
 
 .grammarFormationBox strong {
-  border-radius: 9px;
+  border-radius: 18px;
   background: #fff;
-  padding: 11px 12px;
+  padding: 20px 22px;
   font-family: var(--font-noto-sans-jp), sans-serif;
-  font-size: 15px;
+  font-size: 22px;
+  text-align: center;
 }
 
 .grammarInlineInteractions {
@@ -3001,7 +3048,7 @@
 
 .grammarMistakeBox {
   border-color: rgba(230, 57, 70, 0.16);
-  background: rgba(230, 57, 70, 0.06);
+  background: rgba(255, 138, 102, 0.08);
 }
 
 .grammarSupportGrid {
@@ -3024,7 +3071,7 @@
 
 .grammarPracticeBox {
   border-color: rgba(22, 181, 163, 0.22);
-  background: rgba(22, 181, 163, 0.09);
+  background: #edf8f4;
 }
 
 .grammarPracticeBox p {
@@ -3478,6 +3525,7 @@
   }
 
   .grammarExampleBox,
+  .grammarFormationBox,
   .grammarSupportGrid {
     grid-template-columns: 1fr;
   }

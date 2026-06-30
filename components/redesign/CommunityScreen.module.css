@@ -3,6 +3,27 @@
   gap: 20px;
 }
 
+.communityHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.communityHeader h1 {
+  margin: 0;
+  color: #16211d;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.communityHeader p {
+  margin: 0;
+  color: #9aa6a1;
+  font-size: 18px;
+  font-weight: 600;
+}
+
 .hero {
   overflow: hidden;
   position: relative;
@@ -58,7 +79,7 @@
   margin: 0;
   color: #1a1a2e;
   font-size: 32px;
-  font-weight: 950;
+  font-weight: 800;
   letter-spacing: 0;
   line-height: 1;
 }
@@ -68,7 +89,7 @@
   margin: 8px 0 0;
   color: #72798a;
   font-size: 15px;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.4;
 }
 
@@ -96,7 +117,7 @@
   display: block;
   color: #1a1a2e;
   font-size: 25px;
-  font-weight: 950;
+  font-weight: 800;
   line-height: 1;
 }
 
@@ -115,9 +136,10 @@
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 24px;
+  grid-template-columns: minmax(0, 680px) 300px;
+  gap: 26px;
   align-items: start;
+  justify-content: center;
 }
 
 .mainColumn,
@@ -127,10 +149,10 @@
 }
 
 .card {
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  border-radius: 18px;
+  border: 1px solid #e7ece9;
+  border-radius: 22px;
   background: #fff;
-  box-shadow: 0 14px 34px rgba(17, 24, 39, 0.05);
+  box-shadow: 0 18px 44px -30px rgba(20, 40, 35, 0.42);
 }
 
 .courseCard {
@@ -166,7 +188,7 @@
 .courseLabel {
   color: #1a1a2e;
   font-size: 14px;
-  font-weight: 950;
+  font-weight: 800;
   letter-spacing: 0;
 }
 
@@ -223,7 +245,7 @@
   margin: 7px 0 0;
   color: #737a89;
   font-size: 14px;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .courseBadge {
@@ -278,7 +300,7 @@
   background: #fff;
   color: #8a91a0;
   font-size: 10px;
-  font-weight: 950;
+  font-weight: 800;
   line-height: 1;
   box-shadow: 0 5px 12px rgba(26, 26, 46, 0.05);
 }
@@ -315,7 +337,7 @@
   gap: 7px;
   color: #1a1a2e;
   font-size: 11px;
-  font-weight: 950;
+  font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -341,14 +363,14 @@
   margin: 0;
   color: #656d7d;
   font-size: 14px;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.45;
 }
 
 .composer {
   display: grid;
-  gap: 15px;
-  padding: 20px;
+  gap: 10px;
+  padding: 18px 20px;
 }
 
 .composerTop,
@@ -373,7 +395,7 @@
   background: linear-gradient(135deg, #4ecdc4, rgba(78, 205, 196, 0.62));
   color: #1a1a2e;
   font-size: 17px;
-  font-weight: 950;
+  font-weight: 800;
 }
 
 .avatarImage {
@@ -382,16 +404,16 @@
 
 .composerText {
   width: 100%;
-  min-height: 96px;
-  border: 1px solid rgba(26, 26, 46, 0.09);
-  border-radius: 16px;
-  background: #f9fafb;
-  color: #1a1a2e;
+  min-height: 52px;
+  border: 0;
+  border-radius: 14px;
+  background: #f2f5f3;
+  color: #16211d;
   padding: 14px 16px;
   font-family: var(--font-noto-sans-jp), inherit;
-  font-size: 16px;
-  font-weight: 650;
-  line-height: 1.55;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.35;
   outline: none;
   resize: vertical;
 }
@@ -412,6 +434,7 @@
 
 .composerFooter {
   justify-content: space-between;
+  padding-left: 54px;
 }
 
 .previewWrap {
@@ -451,7 +474,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 12px;
+  border-radius: 13px;
   padding: 0 14px;
   font-size: 13px;
   font-weight: 900;
@@ -467,21 +490,21 @@
 }
 
 .ghostButton {
-  border: 1px solid rgba(26, 26, 46, 0.1);
+  border: 1px solid #e7ece9;
   background: #fff;
-  color: #5e6677;
+  color: #6f7d78;
 }
 
 .primaryButton {
-  border: 1px solid #4ecdc4;
-  background: #4ecdc4;
-  color: #1a1a2e;
-  box-shadow: 0 10px 22px rgba(78, 205, 196, 0.18);
+  border: 0;
+  background: linear-gradient(135deg, #16b5a3, #36d6bf);
+  color: #083b35;
+  box-shadow: none;
 }
 
 .primaryButton:hover {
-  background: #5ad8d0;
-  box-shadow: 0 14px 28px rgba(78, 205, 196, 0.26);
+  background: linear-gradient(135deg, #11a597, #36d6bf);
+  box-shadow: 0 12px 24px -14px rgba(14, 130, 118, 0.7);
   transform: translateY(-1px);
 }
 
@@ -571,7 +594,7 @@
 
 .feed {
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 
 .postCard {
@@ -580,8 +603,8 @@
 
 .postInner {
   display: grid;
-  gap: 14px;
-  padding: 18px;
+  gap: 16px;
+  padding: 22px 24px;
 }
 
 .postHeader {
@@ -596,9 +619,9 @@
 .postAuthor strong {
   display: block;
   overflow: hidden;
-  color: #1a1a2e;
+  color: #16211d;
   font-size: 15px;
-  font-weight: 950;
+  font-weight: 800;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -607,19 +630,19 @@
 .postAuthor span {
   display: block;
   margin-top: 3px;
-  color: #8a91a0;
-  font-size: 12px;
-  font-weight: 800;
+  color: #9aa6a1;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .topicBadge {
   flex-shrink: 0;
-  border-radius: 999px;
-  background: rgba(78, 205, 196, 0.14);
-  color: #1a1a2e;
-  padding: 6px 9px;
-  font-size: 10px;
-  font-weight: 950;
+  border-radius: 8px;
+  background: #dff7f2;
+  color: #16b5a3;
+  padding: 6px 11px;
+  font-size: 13px;
+  font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -632,8 +655,8 @@
   width: 38px;
   min-height: 34px;
   border: none;
-  background: #f4f5f7;
-  color: #7b8190;
+  background: transparent;
+  color: #9aa6a1;
   padding: 0;
 }
 
@@ -658,7 +681,7 @@
   padding: 12px 14px;
   text-align: left;
   font-size: 13px;
-  font-weight: 850;
+  font-weight: 800;
   cursor: pointer;
 }
 
@@ -670,11 +693,11 @@
 .postText,
 .editText,
 .commentText {
-  color: #2e3442;
+  color: #16211d;
   font-family: var(--font-noto-sans-jp), inherit;
-  font-size: 15px;
-  font-weight: 650;
-  line-height: 1.7;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.65;
   white-space: pre-wrap;
 }
 
@@ -695,7 +718,8 @@
 
 .postImage {
   width: 100%;
-  max-height: 420px;
+  max-height: none;
+  height: 340px;
   border: none;
   border-radius: 16px;
   background: #f4f5f7;
@@ -704,15 +728,18 @@
 }
 
 .postActions {
-  padding-top: 2px;
+  border-top: 1px solid #eef2f0;
+  padding-top: 14px;
 }
 
 .actionButton {
   min-height: 36px;
   border: none;
-  background: #f4f5f7;
-  color: #737a89;
-  padding: 0 12px;
+  background: transparent;
+  color: #7b8884;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .actionButton:hover {
@@ -721,8 +748,8 @@
 }
 
 .actionButtonActive {
-  background: rgba(78, 205, 196, 0.14);
-  color: #1a1a2e;
+  background: transparent;
+  color: #ff8a66;
 }
 
 .shareButton {
@@ -741,7 +768,7 @@
   display: block;
   color: #1a1a2e;
   font-size: 16px;
-  font-weight: 950;
+  font-weight: 800;
 }
 
 .empty span,
@@ -750,7 +777,7 @@
   margin-top: 6px;
   color: #7b8190;
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .error strong {
@@ -761,53 +788,70 @@
   margin: 0;
   color: #e63946;
   font-size: 13px;
-  font-weight: 850;
+  font-weight: 800;
   line-height: 1.4;
 }
 
 .sideCard {
   display: grid;
-  gap: 12px;
-  padding: 20px;
+  gap: 0;
+  padding: 24px;
 }
 
 .sideCard h2 {
   margin: 0;
-  color: #1a1a2e;
-  font-size: 18px;
-  font-weight: 950;
+  color: #16211d;
+  font-size: 20px;
+  font-weight: 800;
   letter-spacing: 0;
+}
+
+.patternsCard h2::before {
+  content: "文";
+  width: 28px;
+  height: 28px;
+  display: inline-grid;
+  place-items: center;
+  margin-right: 10px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #16b5a3, #36d6bf);
+  color: #fff;
+  font-family: var(--font-noto-sans-jp), sans-serif;
+  font-size: 15px;
+  vertical-align: middle;
 }
 
 .sideCard p {
   margin: 0;
   color: #737a89;
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.45;
 }
 
 .quickIdea {
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  border-radius: 14px;
-  background: #f9fafb;
-  padding: 12px;
+  border: 0;
+  border-top: 1px solid #eef2f0;
+  border-radius: 0;
+  background: transparent;
+  padding: 19px 0;
 }
 
 .quickIdea strong {
   display: block;
-  color: #1a1a2e;
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
-  font-size: 17px;
+  color: #16211d;
+  font-family: var(--font-noto-sans-jp), sans-serif;
+  font-size: 19px;
+  font-weight: 700;
   line-height: 1.4;
 }
 
 .quickIdea span {
   display: block;
   margin-top: 4px;
-  color: #7b8190;
-  font-size: 12px;
-  font-weight: 750;
+  color: #7b8884;
+  font-size: 15px;
+  font-weight: 500;
 }
 
 .overlay {
@@ -844,7 +888,7 @@
   margin: 0;
   color: #1a1a2e;
   font-size: 22px;
-  font-weight: 950;
+  font-weight: 800;
   letter-spacing: 0;
 }
 
@@ -852,7 +896,7 @@
   margin: 5px 0 0;
   color: #737a89;
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 700;
   line-height: 1.45;
 }
 
@@ -908,7 +952,7 @@
 .commentMeta strong {
   color: #1a1a2e;
   font-size: 13px;
-  font-weight: 950;
+  font-weight: 800;
 }
 
 .commentMeta span {
@@ -939,7 +983,7 @@
   padding: 12px 13px;
   font-family: var(--font-noto-sans-jp), inherit;
   font-size: 14px;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.4;
   outline: none;
   resize: none;
@@ -982,7 +1026,7 @@
   margin-bottom: 8px;
   color: #1a1a2e;
   font-size: 11px;
-  font-weight: 950;
+  font-weight: 800;
   letter-spacing: 0.13em;
   text-transform: uppercase;
 }
@@ -1001,7 +1045,7 @@
   margin: 7px 0 0;
   color: #6b7280;
   font-size: 14px;
-  font-weight: 760;
+  font-weight: 700;
 }
 
 .stepTrack {
@@ -1032,7 +1076,7 @@
   margin: 0;
   color: #1a1a2e;
   font-size: 12px;
-  font-weight: 950;
+  font-weight: 800;
   letter-spacing: 0.11em;
   text-transform: uppercase;
 }
@@ -1060,7 +1104,7 @@
   color: #1a1a2e;
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
   font-size: 26px;
-  font-weight: 850;
+  font-weight: 800;
   line-height: 1.45;
 }
 
@@ -1069,7 +1113,7 @@
 .stepNote {
   color: #6b7280;
   font-size: 14px;
-  font-weight: 760;
+  font-weight: 700;
   line-height: 1.45;
 }
 
@@ -1115,7 +1159,7 @@
 .extraList button strong {
   font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
   font-size: 16px;
-  font-weight: 850;
+  font-weight: 800;
   line-height: 1.25;
 }
 
@@ -1123,7 +1167,7 @@
 .extraList button span {
   color: #7b8190;
   font-size: 11px;
-  font-weight: 760;
+  font-weight: 700;
 }
 
 .slotGroup .slotChipActive,
