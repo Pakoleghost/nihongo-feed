@@ -185,6 +185,7 @@ function mapGenkiGrammarContentToLessons(): GrammarLessonCard[] {
       })),
       commonMistakes: item.commonMistakes.map(stripFuriganaNotation),
       practicePrompts,
+      interactions: item.exercise ? [item.exercise] : undefined,
       relatedGrammarIds: item.relatedGrammarIds,
       sourceNotes: item.sourceNotes,
     };

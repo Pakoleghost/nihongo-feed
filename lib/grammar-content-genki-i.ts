@@ -15,6 +15,32 @@ export type GrammarDialogueLine = {
   es: string;
 };
 
+// Lightweight, gradeless mini-exercise — solvable in 10-20 seconds.
+export type GrammarMiniExercise =
+  | {
+      type: "word-order";
+      prompt: string;
+      tokens: string[];
+      answer: string[];
+      successMessage?: string;
+    }
+  | {
+      type: "multiple-choice";
+      prompt: string;
+      options: string[];
+      answer: string;
+      successMessage?: string;
+    }
+  | {
+      type: "fill-blank";
+      prompt: string;
+      before: string;
+      after: string;
+      answer: string;
+      placeholder?: string;
+      successMessage?: string;
+    };
+
 export type GrammarContentItem = {
   id: string;
   lesson: number;
@@ -25,6 +51,7 @@ export type GrammarContentItem = {
   formation: string[];
   examples: GrammarExample[];
   dialogue?: GrammarDialogueLine[];
+  exercise?: GrammarMiniExercise;
   commonMistakes: string[];
   interactions?: string[];   // classroom interaction ideas
   practicePrompts: string[];
@@ -45,50 +72,51 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "X は Y です",
     shortMeaning: "\"X es Y\" — identifica o describe el tema de la oración.",
     explanation: [
-      "です es el equivalente japonés de «es/soy/eres». Siempre va al final de la oración, no en el medio.",
-      "は (se pronuncia «wa» cuando es partícula) marca el tema: aquello de lo que hablamos. No confundas tema con sujeto gramatical; は dice «en cuanto a X…», no necesariamente «X hace algo».",
-      "El orden básico es Tema は + Información です. Al contrario del español, el verbo — aquí です — cierra la oración.",
-      "Para negar se usa じゃないです (forma coloquial natural) o ではありません (forma más formal, adecuada para escritura o contextos serios).",
+      "です va siempre al final — equivale a «es/soy/eres».",
+      "は marca el tema («en cuanto a X…») y se pronuncia «wa».",
+      "Para negar usa じゃないです; para preguntar, agrega か.",
     ],
     formation: [
-      "N₁ は N₂ です          →  X es Y",
-      "N₁ は N₂ じゃないです  →  X no es Y",
-      "N₁ は N₂ ですか        →  ¿X es Y?  (la partícula か al final indica pregunta)",
+      "N₁ は N₂ です",
+      "N₁ は N₂ じゃないです",
+      "N₁ は N₂ ですか",
     ],
     examples: [
       {
         jp: "{私|わたし}は{学生|がくせい}です。",
         es: "Soy estudiante.",
-        note: "私 es el tema; 学生 es la información que lo describe.",
       },
       {
         jp: "{山田|やまだ}さんは{先生|せんせい}じゃないです。",
         es: "La señora Yamada no es profesora.",
-        note: "じゃないです niega la identificación de forma natural.",
       },
       {
         jp: "{田中|たなか}さんは{日本人|にほんじん}ですか。",
         es: "¿El señor Tanaka es japonés?",
-        note: "か convierte cualquier oración en pregunta. No se eleva la voz al final como en español.",
       },
       {
-        jp: "いいえ、{田中|たなか}さんは{日本人|にほんじん}じゃないです。{韓国人|かんこくじん}です。",
-        es: "No, el señor Tanaka no es japonés. Es coreano.",
-        note: "La respuesta negativa completa: primero niegas, luego das la información correcta.",
+        jp: "いいえ、{韓国人|かんこくじん}です。",
+        es: "No, es coreano.",
+        note: "Respuesta corta a la pregunta anterior.",
       },
     ],
     dialogue: [
       { speaker: "メアリー", jp: "はじめまして。{私|わたし}はメアリーです。{学生|がくせい}です。", es: "Mucho gusto. Soy Mary. Soy estudiante." },
       { speaker: "たけし",   jp: "はじめまして。{僕|ぼく}はたけしです。{日本人|にほんじん}です。", es: "Mucho gusto. Soy Takeshi. Soy japonés." },
       { speaker: "メアリー", jp: "{田中|たなか}さんも{学生|がくせい}ですか。", es: "¿El señor Tanaka también es estudiante?" },
-      { speaker: "たけし",   jp: "いいえ、{田中|たなか}さんは{学生|がくせい}じゃないです。{先生|せんせい}です。", es: "No, el señor Tanaka no es estudiante. Es profesor." },
+      { speaker: "たけし",   jp: "いいえ、{先生|せんせい}です。", es: "No, es profesor." },
     ],
+    exercise: {
+      type: "multiple-choice",
+      prompt: "私___学生です。",
+      options: ["は", "を", "に"],
+      answer: "は",
+      successMessage: "Exacto — は marca el tema.",
+    },
     commonMistakes: [
       "Poner です en el medio: ×{私|わたし}です{学生|がくせい} → ○{私|わたし}は{学生|がくせい}です",
-      "Leer は como «ha» cuando es partícula — siempre se pronuncia «wa».",
-      "Confundir です (cópula: «es») con あります/います (existencia: «hay/existe»).",
-      "Usar ×じゃないです en una carta formal o correo de trabajo — mejor ではありません.",
-      "Olvidar か al final de las preguntas. Sin か el japonés no sabe que es pregunta.",
+      "Leer は como «ha» — siempre se pronuncia «wa».",
+      "Olvidar か al final de las preguntas.",
     ],
     interactions: [
       "Ronda de presentaciones: cada alumno dice nombre, rol y origen con X は Y です.",
@@ -110,14 +138,12 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "〜ですか",
     shortMeaning: "Agrega か al final de cualquier oración para convertirla en pregunta.",
     explanation: [
-      "En japonés no se cambia el orden de las palabras para preguntar. Solo añades か al final: es como poner un signo de interrogación audible.",
-      "La entonación no sube al final como en español. Se mantiene plana o baja ligeramente — la partícula か ya indica que es pregunta.",
-      "Para responder afirmativamente: はい (sí). Para negar: いいえ (no). Estas son las formas formales y recomendadas en clase.",
-      "El signo 「？」 en japonés escrito es opcional; muchos textos solo usan 「か。」",
+      "Solo añades か al final — no cambia el orden de las palabras.",
+      "La voz no sube como en español; queda plana o baja.",
+      "Responde con はい (sí) o いいえ (no) + la información.",
     ],
     formation: [
       "[oración] + か  →  ¿[oración]?",
-      "N は N ですか     →  ¿X es Y?",
       "はい、N は N です →  Sí, X es Y.",
       "いいえ、N は N じゃないです → No, X no es Y.",
     ],
@@ -125,26 +151,32 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
       {
         jp: "これは{教科書|きょうかしょ}ですか。",
         es: "¿Esto es el libro de texto?",
-        note: "Solo か al final — no se mueve nada más.",
       },
       {
         jp: "はい、{教科書|きょうかしょ}です。",
         es: "Sí, es el libro de texto.",
-        note: "En respuestas cortas puedes omitir el tema si es obvio del contexto.",
       },
       {
         jp: "{山田|やまだ}さんは{先生|せんせい}ですか。",
         es: "¿El señor Yamada es profesor?",
       },
       {
-        jp: "いいえ、{先生|せんせい}じゃないです。{医者|いしゃ}です。",
-        es: "No, no es profesor. Es médico.",
+        jp: "いいえ、{医者|いしゃ}です。",
+        es: "No, es médico.",
       },
     ],
+    exercise: {
+      type: "fill-blank",
+      prompt: "Convierte la afirmación en pregunta.",
+      before: "これは本です",
+      after: "。",
+      answer: "か",
+      placeholder: "partícula",
+      successMessage: "Bien — か convierte la oración en pregunta.",
+    },
     commonMistakes: [
-      "Subir la voz al final como en español — en japonés formal la entonación baja o queda plana.",
+      "Subir la voz al final como en español.",
       "Invertir el orden de palabras: × ですか{先生|せんせい}は{田中|たなか}さん → ○ {田中|たなか}さんは{先生|せんせい}ですか",
-      "Responder solo «はい» o «いいえ» sin completar — está bien en conversación rápida, pero en clase es bueno repetir la información: «はい、{先生|せんせい}です».",
     ],
     interactions: [
       "Juego de adivinanzas: un alumno piensa en una profesión y el grupo pregunta con ですか hasta adivinar.",
@@ -164,41 +196,41 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "N₁ の N₂",
     shortMeaning: "の conecta dos sustantivos: posesión, categoría o descripción (N₁ modifica a N₂).",
     explanation: [
-      "の es la partícula genitiva del japonés. Conecta dos sustantivos y casi siempre se traduce como «de» en español, aunque el orden es inverso: N₁ の N₂ = «N₂ de N₁».",
-      "Tiene tres usos principales en L1: posesión (mi libro), categoría (libro de japonés) y afiliación (estudiante de la Universidad de Tokio).",
-      "の puede encadenarse: {私|わたし}の{大学|だいがく}の{先生|せんせい} = «el profesor de mi universidad».",
-      "Cuando el segundo sustantivo es obvio en el contexto, se puede omitir y の actúa como pronombre: これは{私|わたし}のです = «Esto es mío».",
+      "の conecta dos sustantivos: «N2 de N1» (el orden se invierte).",
+      "Sirve para posesión, categoría y afiliación.",
+      "Si el segundo sustantivo es obvio, se puede omitir: これは私のです。",
     ],
     formation: [
-      "N₁ の N₂   →  «N₂ de N₁»  (N₁ modifica a N₂)",
-      "{私|わたし} の N     →  mi N / el N de yo",
-      "N₁ の N₂ の N₃  →  encadenado (de derecha a izquierda para el español)",
+      "N₁ の N₂   →  «N₂ de N₁»",
+      "{私|わたし} の N     →  mi N",
     ],
     examples: [
       {
         jp: "{日本語|にほんご}の{本|ほん}です。",
         es: "Es un libro de japonés.",
-        note: "日本語 (japonés) describe la categoría de 本 (libro).",
       },
       {
         jp: "{私|わたし}の{名前|なまえ}はパコです。",
         es: "Mi nombre es Pako.",
-        note: "Posesión: の indica que el nombre pertenece a «yo».",
       },
       {
-        jp: "{田中|たなか}さんは{東京大学|とうきょうだいがく}の{学生|がくせい}です。",
-        es: "El señor Tanaka es estudiante de la Universidad de Tokio.",
-        note: "Afiliación: の indica dónde estudia.",
+        jp: "{田中|たなか}さんは{大学|だいがく}の{学生|がくせい}です。",
+        es: "El señor Tanaka es estudiante de la universidad.",
       },
       {
         jp: "これは{山田|やまだ}さんの{傘|かさ}ですか。",
         es: "¿Este es el paraguas del señor Yamada?",
-        note: "Pregunta de posesión combinando の con か.",
       },
     ],
+    exercise: {
+      type: "word-order",
+      prompt: "Ordena la frase: «Es un libro de japonés».",
+      tokens: ["です", "本", "の", "日本語"],
+      answer: ["日本語", "の", "本", "です"],
+      successMessage: "¡Bien! N₁の N₂ — el modificador va primero.",
+    },
     commonMistakes: [
-      "Invertir el orden al traducir al japonés: × {本|ほん}の{日本語|にほんご} («libro de japonés» en español → japonés va primero en japonés).",
-      "Usar の entre verbo y sustantivo — の solo conecta sustantivos (y pronombres). Para modificar con verbos se usa la forma plain + N (se estudia en L9).",
+      "Invertir el orden: × {本|ほん}の{日本語|にほんご} → ○ {日本語|にほんご}の{本|ほん}",
       "Omitir の entre dos sustantivos: × {私|わたし}{本|ほん} → ○ {私|わたし}の{本|ほん}.",
     ],
     interactions: [
@@ -219,10 +251,9 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "N₁ と N₂",
     shortMeaning: "\"N₁ y N₂\" — enumeración exhaustiva de sustantivos.",
     explanation: [
-      "と conecta dos o más sustantivos con el significado de «y». Es una lista cerrada: implica que se mencionan TODOS los elementos relevantes.",
-      "A diferencia de や (L3), que deja la lista abierta («entre otras cosas»), と dice exactamente qué se incluye.",
-      "と puede encadenarse para listas más largas: A と B と C. En conversación informal a veces se omite el último と.",
-      "と también tiene otro uso muy distinto (compañía: «ir con alguien»), que se estudia en L4. Por ahora, enfócate en と para listas de sustantivos.",
+      "と significa «y» y enlaza una lista completa de sustantivos.",
+      "Se puede encadenar: A と B と C.",
+      "No confundir con も (también) — と solo enumera.",
     ],
     formation: [
       "N₁ と N₂       →  N₁ y N₂  (lista completa)",
@@ -232,28 +263,34 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
       {
         jp: "{私|わたし}は{日本語|にほんご}と{英語|えいご}を{話|はな}します。",
         es: "Hablo japonés e inglés.",
-        note: "と une exactamente dos lenguas — son todas las que se mencionan.",
       },
       {
-        jp: "{机|つくえ}の{上|うえ}に{本|ほん}とペンがあります。",
-        es: "Sobre el escritorio hay un libro y un bolígrafo.",
-        note: "Lista exacta de dos objetos (あります = hay/existe, se estudia en L4).",
+        jp: "{本|ほん}とペンがあります。",
+        es: "Hay un libro y un bolígrafo.",
       },
       {
         jp: "{山田|やまだ}さんと{田中|たなか}さんは{学生|がくせい}です。",
         es: "Los señores Yamada y Tanaka son estudiantes.",
-        note: "と puede enlazar personas como sujetos de una misma oración.",
+      },
+      {
+        jp: "{水|みず}とコーヒーを{飲|の}みます。",
+        es: "Tomo agua y café.",
       },
     ],
+    exercise: {
+      type: "word-order",
+      prompt: "Ordena: «Hablo japonés e inglés».",
+      tokens: ["話します", "を", "私は", "英語", "と", "日本語"],
+      answer: ["私は", "日本語", "と", "英語", "を", "話します"],
+      successMessage: "¡Perfecto!",
+    },
     commonMistakes: [
-      "Confundir と (lista: «y») con も (también): × {本|ほん}も{ペン|ぺん}もあります puede ser correcto pero transmite un matiz diferente («tanto el libro como el bolígrafo»). と simplemente los une.",
-      "Usar と entre frases o verbos — と para listas solo funciona con sustantivos. Para conectar acciones se usa la forma て (L6).",
-      "Creer que と = «con (compañía)». Ese uso también existe pero se introduce en L4; por ahora と en L1 es solo «y» entre sustantivos.",
+      "Usar と entre verbos — solo conecta sustantivos. Para acciones se usa la forma て (L6).",
+      "Creer que と siempre significa «con (compañía)» — ese uso se ve en L4.",
     ],
     practicePrompts: [
       "Nombra dos cosas que tienes en tu mochila usando N と N があります。",
       "Presenta a dos personas de tu familia usando Aと B は ～ です。",
-      "Compara: describe tres idiomas que hablas. ¿Cuándo usarías と y cuándo ya no alcanza?",
     ],
     relatedGrammarIds: ["particle-no-modifier", "particle-ya-listing", "particle-mo-similarity"],
     sourceNotes: ["Basado en Genki I L1, Grammar 4 (partícula と — enumeración)"],
@@ -270,10 +307,9 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "N も",
     shortMeaning: "\"N también\" — agrega un elemento que comparte la misma descripción.",
     explanation: [
-      "も reemplaza a は cuando quieres decir que algo comparte la misma característica que lo ya mencionado. Nunca aparece junto a は en la misma posición.",
-      "Si ya dijiste «A は X です» y quieres añadir «B también es X», dices «B も X です». No repitas は.",
-      "も puede combinarse con otras partículas de objeto (を→も, に→にも, で→でも) pero en L2 el foco es sustituir は.",
-      "En negación, も mantiene el sentido de «tampoco»: A は X じゃないです → B も X じゃないです (B tampoco es X).",
+      "も sustituye a は cuando algo comparte la misma descripción.",
+      "Nunca aparece junto a は en la misma posición.",
+      "En negación, も significa «tampoco».",
     ],
     formation: [
       "A は Y です。B も Y です。  →  A es Y. B también es Y.",
@@ -283,29 +319,38 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
       {
         jp: "{私|わたし}は{学生|がくせい}です。{山田|やまだ}さんも{学生|がくせい}です。",
         es: "Soy estudiante. El señor Yamada también es estudiante.",
-        note: "も reemplaza は para el segundo elemento.",
       },
       {
-        jp: "これはいくらですか。それも{同|おな}じ{値段|ねだん}ですか。",
-        es: "¿Cuánto cuesta esto? ¿Aquello también tiene el mismo precio?",
-        note: "も en preguntas: «¿también?»",
+        jp: "{田中|たなか}さんは{日本人|にほんじん}じゃないです。{鈴木|すずき}さんも{日本人|にほんじん}じゃないです。",
+        es: "El señor Tanaka no es japonés. El señor Suzuki tampoco es japonés.",
       },
       {
-        jp: "{田中|たなか}さんは{中国人|ちゅうごくじん}じゃないです。{鈴木|すずき}さんも{中国人|ちゅうごくじん}じゃないです。",
-        es: "El señor Tanaka no es chino. El señor Suzuki tampoco es chino.",
-        note: "も en negación = «tampoco».",
+        jp: "{私|わたし}は{日本語|にほんご}を{勉強|べんきょう}します。{山田|やまだ}さんも{勉強|べんきょう}します。",
+        es: "Estudio japonés. El señor Yamada también estudia.",
+      },
+      {
+        jp: "それも{同|おな}じ{値段|ねだん}ですか。",
+        es: "¿Aquello también tiene el mismo precio?",
       },
     ],
     dialogue: [
       { speaker: "メアリー", jp: "{私|わたし}はアメリカ{人|じん}です。", es: "Soy estadounidense." },
       { speaker: "アナ",     jp: "そうですか。{私|わたし}もアメリカ{人|じん}です。", es: "¿De verdad? Yo también soy estadounidense." },
-      { speaker: "メアリー", jp: "えっ、{山田|やまだ}さんもアメリカ{人|じん}ですか。", es: "¿En serio? ¿El señor Yamada también es estadounidense?" },
+      { speaker: "メアリー", jp: "{山田|やまだ}さんもアメリカ{人|じん}ですか。", es: "¿El señor Yamada también es estadounidense?" },
       { speaker: "アナ",     jp: "いいえ、{山田|やまだ}さんはアメリカ{人|じん}じゃないです。", es: "No, el señor Yamada no es estadounidense." },
     ],
+    exercise: {
+      type: "fill-blank",
+      prompt: "Yamada también es estudiante. Completa la partícula.",
+      before: "山田さん",
+      after: "学生です。",
+      answer: "も",
+      placeholder: "partícula",
+      successMessage: "も — comparte la misma descripción.",
+    },
     commonMistakes: [
-      "Usar は y も juntos en la misma posición: × {私|わたし}はも{学生|がくせい}です → ○ {私|わたし}も{学生|がくせい}です",
-      "Olvidar も y repetir は: × {山田|やまだ}さんは{学生|がくせい}です (sin も) cuando la intención es «también».",
-      "Confundir も (también/tampoco) con と (y): も dice que el elemento nuevo comparte algo; と solo lo enumera junto a otro.",
+      "Usar は y も juntos: × {私|わたし}はも{学生|がくせい}です → ○ {私|わたし}も{学生|がくせい}です",
+      "Confundir も (también/tampoco) con と (y).",
     ],
     interactions: [
       "Cadena de presentaciones: el primero se presenta, el siguiente dice 「～さんは～です。私も～です」 si comparte algo, o lo contradice.",
@@ -325,53 +370,49 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "これ／それ／あれ　/　この／その／あの + N",
     shortMeaning: "Señalar cosas según la distancia: esto/eso/aquello y sus formas adjetivales.",
     explanation: [
-      "El japonés tiene dos series de demostrativos. La serie これ/それ/あれ se usa sola (sin sustantivo): «¿Qué es esto?». La serie この/その/あの siempre va seguida de un sustantivo: «este libro», «ese cuaderno».",
-      "La distancia es desde la perspectiva del hablante y del oyente: これ/この = cerca del hablante · それ/その = cerca del oyente o en un contexto compartido · あれ/あの = lejos de ambos.",
-      "En conversación, それ/その también se usa para referencias abstractas o información que el oyente acaba de mencionar: «Eso que dijiste…»",
-      "Para preguntar: どれ (¿cuál?, de una lista) · どの + N (¿qué/cuál N?). No confundir con どこ (¿dónde?), que es ubicación.",
+      "これ/それ/あれ van solos; この/その/あの necesitan un sustantivo después.",
+      "これ/この = cerca de mí · それ/その = cerca de ti · あれ/あの = lejos de ambos.",
+      "Para preguntar: どれ (solo) o どの + N.",
     ],
     formation: [
-      "これ／それ／あれ は N です   →  Esto/Eso/Aquello es N  (pronombre, sin sustantivo siguiente)",
-      "この／その／あの + N は〜   →  este/ese/aquel N es〜  (adjetivo, seguido de sustantivo)",
-      "どれ／どの + N は〜         →  ¿cuál / qué N?",
+      "これ／それ／あれ は N です",
+      "この／その／あの + N は〜",
+      "どれ／どの + N は〜",
     ],
     examples: [
       {
         jp: "これは{何|なん}ですか。",
         es: "¿Qué es esto?",
-        note: "これ sola, sin sustantivo. 何 = qué.",
       },
       {
         jp: "あれは{私|わたし}の{傘|かさ}です。",
         es: "Aquello es mi paraguas.",
-        note: "あれ = lejos de los dos interlocutores.",
       },
       {
         jp: "この{時計|とけい}はいくらですか。",
         es: "¿Cuánto cuesta este reloj?",
-        note: "この va directamente antes del sustantivo 時計.",
-      },
-      {
-        jp: "その{財布|さいふ}は{田中|たなか}さんのですか。",
-        es: "¿Esa cartera es del señor Tanaka?",
-        note: "その = cerca del oyente.",
       },
       {
         jp: "あの{人|ひと}は{先生|せんせい}ですか。",
         es: "¿Aquella persona es profesora?",
-        note: "あの + persona para señalar a alguien lejano de forma educada.",
       },
     ],
     dialogue: [
       { speaker: "メアリー", jp: "すみません、これはいくらですか。", es: "Disculpa, ¿cuánto cuesta esto?" },
       { speaker: "てんいん",  jp: "それは{千|せん}{円|えん}です。", es: "Eso cuesta mil yenes." },
-      { speaker: "メアリー", jp: "じゃあ、あの{黒|くろ}いのは？", es: "Y entonces, ¿aquél negro?" },
-      { speaker: "てんいん",  jp: "あれは{二千|にせん}{円|えん}です。", es: "Aquél cuesta dos mil yenes." },
+      { speaker: "メアリー", jp: "じゃあ、あれは？", es: "Y entonces, ¿aquello?" },
+      { speaker: "てんいん",  jp: "あれは{二千|にせん}{円|えん}です。", es: "Aquello cuesta dos mil yenes." },
     ],
+    exercise: {
+      type: "multiple-choice",
+      prompt: "«Este reloj, ¿cuánto cuesta?» — ___時計はいくらですか。",
+      options: ["これ", "この", "それ"],
+      answer: "この",
+      successMessage: "この + sustantivo — correcto.",
+    },
     commonMistakes: [
-      "Usar これ donde debería ir この: × これ{本|ほん}は → ○ この{本|ほん}は (この va antes de sustantivo, これ va sola).",
-      "Ignorar la perspectiva del oyente: それ no siempre es «eso lejos» — si está cerca de la persona con quien hablas, ese objeto es それ aunque tú lo veas cerca.",
-      "Confundir どれ y どの: どれ va solo («¿cuál de ellos?»); どの necesita sustantivo («¿qué libro?»).",
+      "Usar これ donde debería ir この: × これ{本|ほん}は → ○ この{本|ほん}は",
+      "Confundir どれ (solo) y どの (necesita sustantivo).",
     ],
     interactions: [
       "El profesor señala objetos del salón o imágenes y los alumnos practican las dos series: primero pronombre (これは何ですか) luego adjetival (この〇〇は何ですか).",
@@ -380,7 +421,6 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     practicePrompts: [
       "Señala cinco objetos a tu alrededor usando la serie correcta (これ/それ/あれ) y descríbelos con です.",
       "Practica la versión adjetival: escoge tres objetos y dí この/その/あの + sustantivo + は + descripción.",
-      "Haz una mini-conversación de tienda: pregunta precios con これ y responde con それ.",
     ],
     relatedGrammarIds: ["copula-affirmative", "questions-ka", "location-words-koko"],
     sourceNotes: ["Basado en Genki I L2, Grammar 2-3 (demostrativos)"],
@@ -393,56 +433,55 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "ここ／そこ／あそこ／どこ",
     shortMeaning: "Palabras para señalar o preguntar por la ubicación de un lugar.",
     explanation: [
-      "Son el equivalente locativo de la serie これ/それ/あれ, pero en lugar de señalar cosas señalan lugares: ここ (aquí, cerca del hablante) · そこ (ahí, cerca del oyente) · あそこ (allá, lejos de ambos) · どこ (¿dónde?).",
-      "Se usan con la partícula は como tema o con に/で para indicar destino o lugar de acción (esas partículas se estudian en L3-L4; por ahora practica con は y です).",
-      "Una estructura muy útil en L2: 〜は どこですか = ¿Dónde está/es ~? — sirve para preguntar dónde está algo o dónde se puede encontrar algo.",
-      "ここ/そこ/あそこ pueden funcionar como respuesta directa a どこ: 「どこですか」→「あそこです」.",
+      "Igual que これ/それ/あれ pero para lugares, no cosas.",
+      "どこ pregunta «¿dónde?»; nunca se usa para personas.",
+      "〜は どこですか es la pregunta de ubicación más útil.",
     ],
     formation: [
-      "ここ／そこ／あそこ は N です  →  Aquí/Ahí/Allá es/está N",
-      "N は どこ ですか             →  ¿Dónde está/es N?",
-      "N は ここ／そこ／あそこ です  →  N está aquí/ahí/allá",
+      "ここ／そこ／あそこ は N です",
+      "N は どこ ですか",
     ],
     examples: [
       {
         jp: "トイレは どこですか。",
         es: "¿Dónde está el baño?",
-        note: "Pregunta de ubicación más común en la vida real.",
       },
       {
         jp: "トイレは あそこです。",
         es: "El baño está allá.",
-        note: "Respuesta directa señalando con あそこ.",
       },
       {
         jp: "ここは{図書館|としょかん}ですか。",
         es: "¿Aquí es la biblioteca?",
-        note: "ここ como tema: «este lugar, ¿es la biblioteca?»",
       },
       {
-        jp: "{駅|えき}は どこですか。— そこです。",
-        es: "¿Dónde está la estación? — Está ahí.",
-        note: "Mini-diálogo de orientación.",
+        jp: "{駅|えき}は どこですか。",
+        es: "¿Dónde está la estación?",
       },
     ],
     dialogue: [
       { speaker: "メアリー", jp: "すみません、{郵便局|ゆうびんきょく}は どこですか。", es: "Disculpe, ¿dónde está la oficina de correos?" },
-      { speaker: "つうこうにん", jp: "あそこです。あの{建物|たてもの}の{中|なか}です。", es: "Está allá. Dentro de aquel edificio." },
-      { speaker: "メアリー", jp: "ここは どこですか。{地図|ちず}で{見|み}ると…", es: "¿Dónde estamos? Si miro el mapa…" },
+      { speaker: "つうこうにん", jp: "あそこです。", es: "Está allá." },
     ],
+    exercise: {
+      type: "fill-blank",
+      prompt: "Pregunta dónde está la biblioteca.",
+      before: "図書館は",
+      after: "ですか。",
+      answer: "どこ",
+      placeholder: "lugar",
+      successMessage: "どこ — pregunta de ubicación.",
+    },
     commonMistakes: [
-      "Confundir ここ con この: ここ es un lugar («aquí»), この es un adjetivo que modifica un sustantivo («este»).",
-      "Usar どこ cuando se pregunta por una persona: para personas se usa だれ (¿quién?). どこ es solo para lugares.",
-      "Olvidar は en preguntas: × {駅|えき}どこですか → ○ {駅|えき}は どこですか",
+      "Confundir ここ (lugar, «aquí») con この (adjetivo, «este»).",
+      "Usar どこ para personas — para eso se usa だれ (¿quién?).",
     ],
     interactions: [
       "Mapa del aula: el profesor pregunta 〇〇はどこですか y los alumnos señalan y responden con ここ/そこ/あそこ.",
-      "Juego de orientación con mapa sencillo de una ciudad japonesa.",
     ],
     practicePrompts: [
       "Pregunta dónde están tres lugares de tu ciudad o campus usando ～は どこですか.",
       "Responde con ここ/そこ/あそこ según la distancia real en el salón.",
-      "Mini-diálogo: pide indicaciones para llegar al トイレ、{食堂|しょくどう}、{図書館|としょかん}.",
     ],
     relatedGrammarIds: ["demonstratives", "particle-ni-destination-time", "location-ni-arimasu"],
     sourceNotes: ["Basado en Genki I L2, Grammar 4 (ここ・そこ・あそこ・どこ)"],
@@ -457,45 +496,45 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     lesson: 3,
     title: "Verbos en forma ます",
     pattern: "Vます / Vません / Vますか",
-    shortMeaning: "Forma polite de los verbos para hablar de acciones presentes o futuras.",
+    shortMeaning: "Forma cortés de los verbos para hablar de acciones presentes o futuras.",
     explanation: [
-      "Los verbos japoneses en forma de diccionario (食べる、飲む…) suenan muy informales. En clase y con personas que no conoces bien se usa la forma ます, que es cortés sin ser rígida.",
-      "La forma ます tiene cuatro conjugaciones básicas: afirmación presente/futuro (ます), negación (ません), pregunta (ますか), y negación en pregunta (ませんか — que tiene un uso especial como invitación, ver más abajo).",
-      "El tiempo no siempre es claro por el verbo solo; depende del contexto o de palabras de tiempo como 毎日、明日、今。",
-      "Los verbos en japonés van siempre al final de la oración. Si hay objeto, va antes del verbo marcado con を.",
+      "ます es la forma cortés de los verbos; siempre va al final.",
+      "ません niega; ますか pregunta.",
+      "El objeto (si existe) va antes del verbo, marcado con を.",
     ],
     formation: [
-      "V-ます       →  [acción] (presente / futuro habitual)",
+      "V-ます       →  [acción]",
       "V-ません     →  no [acción]",
       "V-ますか     →  ¿[acción]?",
-      "V-ませんでした →  no [accionó] (pasado negativo — se estudia en L4)",
     ],
     examples: [
       {
         jp: "{毎日|まいにち}{日本語|にほんご}を{勉強|べんきょう}します。",
         es: "Estudio japonés todos los días.",
-        note: "します = forma ます de する (hacer).",
       },
       {
         jp: "{朝|あさ}、コーヒーを{飲|の}みます。",
         es: "Por la mañana tomo café.",
-        note: "飲みます = forma ます de 飲む.",
       },
       {
         jp: "{週末|しゅうまつ}、{映画|えいが}を{見|み}ますか。",
         es: "¿Ves películas el fin de semana?",
-        note: "Pregunta con ますか.",
       },
       {
-        jp: "{テレビ|てれび}は{見|み}ません。{本|ほん}を{読|よ}みます。",
-        es: "No veo televisión. Leo libros.",
-        note: "Contraste entre ません y ます.",
+        jp: "{テレビ|てれび}は{見|み}ません。",
+        es: "No veo televisión.",
       },
     ],
+    exercise: {
+      type: "word-order",
+      prompt: "Ordena: «Estudio japonés todos los días».",
+      tokens: ["します", "を", "毎日", "勉強", "日本語"],
+      answer: ["毎日", "日本語", "を", "勉強", "します"],
+      successMessage: "¡Bien! El verbo siempre cierra la oración.",
+    },
     commonMistakes: [
       "Colocar el verbo en el medio: × {食|た}べます{ごはん|ごはん}を → ○ ごはんを{食|た}べます",
-      "Confundir ます (presente/futuro) con ました (pasado) — son distintos; ます nunca marca pasado.",
-      "Usar la forma de diccionario (食べる) en situaciones formales — en clase siempre usa ます.",
+      "Confundir ます (presente/futuro) con ました (pasado).",
     ],
     interactions: [
       "Ronda «¿Qué haces cada día?»: cada alumno dice una rutina con ます y el siguiente hace una pregunta con ますか.",
@@ -515,9 +554,9 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "N を V",
     shortMeaning: "を marca el objeto directo: lo que recibe la acción del verbo.",
     explanation: [
-      "を (pronunciado «o») es la partícula que señala qué cosa se ve afectada por la acción del verbo. Equivale al objeto directo en español, pero en japonés siempre se marca explícitamente.",
-      "を nunca aparece con verbos de estado como です, あります o います — solo con verbos de acción.",
-      "Cuando el objeto es obvio en el contexto, a veces se omite en conversación informal. Pero en producción escrita o formal siempre inclúyelo.",
+      "を marca el objeto directo: lo que recibe la acción.",
+      "Solo se usa con verbos de acción, nunca con です.",
+      "En clase y producción escrita, siempre se escribe.",
     ],
     formation: [
       "N を V-ます  →  [hacer la acción] sobre N",
@@ -526,23 +565,30 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
       {
         jp: "{音楽|おんがく}を{聞|き}きます。",
         es: "Escucho música.",
-        note: "音楽 (música) recibe la acción de 聞く (escuchar).",
       },
       {
-        jp: "{昨日|きのう}、{手紙|てがみ}を{書|か}きました。",
-        es: "Ayer escribí una carta.",
-        note: "を + verbo en pasado (ました, L4).",
+        jp: "{本|ほん}を{読|よ}みます。",
+        es: "Leo un libro.",
       },
       {
         jp: "{水|みず}を{飲|の}みますか。",
         es: "¿Tomas agua?",
-        note: "Pregunta con を.",
+      },
+      {
+        jp: "{毎日|まいにち}{日本語|にほんご}を{勉強|べんきょう}します。",
+        es: "Estudio japonés todos los días.",
       },
     ],
+    exercise: {
+      type: "multiple-choice",
+      prompt: "音楽___聞きます。",
+      options: ["を", "が", "に"],
+      answer: "を",
+      successMessage: "を — marca el objeto directo.",
+    },
     commonMistakes: [
-      "Usar が en lugar de を para el objeto: × {映画|えいが}が{見|み}ます → ○ {映画|えいが}を{見|み}ます (が es para sujeto, no objeto).",
-      "Omitir を en escritura formal cuando el objeto está claro: en producción escrita siempre ponlo.",
-      "Usar を con です: × {学生|がくせい}をです → ○ {学生|がくせい}です (を solo con verbos de acción).",
+      "Usar が en lugar de を para el objeto: × {映画|えいが}が{見|み}ます → ○ {映画|えいが}を{見|み}ます",
+      "Usar を con です — を solo va con verbos de acción.",
     ],
     practicePrompts: [
       "Escribe tres oraciones sobre lo que haces en clase: 〜を〜ます.",
@@ -559,40 +605,44 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "N に V / 時間 に V",
     shortMeaning: "に marca destino de movimiento y momentos de tiempo específicos.",
     explanation: [
-      "に tiene dos usos clave en L3: destino («voy A algún lugar») y tiempo específico («a las tres»). Ambos indican un punto de llegada — sea un lugar o un momento.",
-      "Como destino se usa con verbos de movimiento: 行く (ir), 来る (venir), 帰る (regresar). La pregunta correspondiente es どこに行きますか.",
-      "Como marcador de tiempo, に indica momentos precisos: horas, días de la semana, meses, años. NO se usa に con palabras de tiempo relativo como 今日、明日、毎日、今 — esas van sin partícula.",
+      "に marca el destino con verbos de movimiento: 行く/来る/帰る.",
+      "También marca un momento exacto: hora, día, fecha.",
+      "No se usa に con 今日/明日/毎日 — esas van solas.",
     ],
     formation: [
-      "場所 に 行く／来る／帰る  →  ir / venir / regresar A un lugar",
-      "時間 に V-ます           →  [hacer algo] a las [hora]  (hora específica)",
+      "場所 に 行く／来る／帰る",
+      "時間 に V-ます",
     ],
     examples: [
       {
         jp: "{明日|あした}{図書館|としょかん}に{行|い}きます。",
         es: "Mañana voy a la biblioteca.",
-        note: "図書館 = destino; 明日 va sin に porque es tiempo relativo.",
       },
       {
         jp: "{日曜日|にちようび}に{映画|えいが}を{見|み}ます。",
         es: "El domingo veo una película.",
-        note: "日曜日 = día específico → lleva に.",
       },
       {
         jp: "{七時|しちじ}に{起|お}きます。",
         es: "Me levanto a las siete.",
-        note: "Hora exacta → に obligatorio.",
       },
       {
         jp: "{毎日|まいにち}{学校|がっこう}に{来|き}ます。",
         es: "Vengo a la escuela todos los días.",
-        note: "毎日 sin に; 学校 (destino) con に.",
       },
     ],
+    exercise: {
+      type: "fill-blank",
+      prompt: "Mañana voy a la biblioteca.",
+      before: "明日図書館",
+      after: "行きます。",
+      answer: "に",
+      placeholder: "partícula",
+      successMessage: "に — marca el destino.",
+    },
     commonMistakes: [
       "Usar に con 今日/明日/毎日: × 今日に{行|い}きます → ○ 今日{行|い}きます",
-      "Confundir に (destino/punto) con で (lugar donde pasa la acción): に es adónde vas, で es dónde lo haces.",
-      "Omitir に después del destino: × {大学|だいがく}{行|い}きます → ○ {大学|だいがく}に{行|い}きます",
+      "Confundir に (destino) con で (lugar donde haces la acción).",
     ],
     practicePrompts: [
       "Di a qué lugar vas esta semana y cuándo exactamente: [lugar]に[時間]に行きます。",
@@ -609,39 +659,42 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "場所 で V / 手段 で V",
     shortMeaning: "で marca dónde ocurre una acción o con qué medio se realiza.",
     explanation: [
-      "で tiene dos usos en L3: lugar donde ocurre una acción (distinto de に, que es el destino de movimiento) y medio o instrumento con el que se hace algo.",
-      "Clave para no confundir に y で: に es el punto al que llegas (「図書館に行く」= voy a la biblioteca). で es dónde haces algo ya estando ahí (「図書館で勉強する」= estudio EN la biblioteca).",
-      "Como medio: バスで (en autobús), 日本語で (en japonés), はしで (con palillos). Responde a la pregunta どうやって (¿cómo?).",
+      "で marca dónde ocurre la acción (no el destino — eso es に).",
+      "También marca el medio: バスで, 日本語で.",
+      "Compara: 図書館に行く (destino) vs 図書館で勉強する (acción).",
     ],
     formation: [
-      "場所 で V-ます     →  [hacer V] en [lugar]",
-      "手段／方法 で V   →  [hacer V] con/en [medio]",
+      "場所 で V-ます",
+      "手段 で V",
     ],
     examples: [
       {
         jp: "{図書館|としょかん}で{勉強|べんきょう}します。",
         es: "Estudio en la biblioteca.",
-        note: "で = lugar donde ocurre la acción de estudiar.",
       },
       {
         jp: "{カフェ|かふぇ}でコーヒーを{飲|の}みます。",
         es: "Tomo café en el café.",
-        note: "La acción de beber ocurre en el café.",
       },
       {
         jp: "{電車|でんしゃ}で{大学|だいがく}に{行|い}きます。",
         es: "Voy a la universidad en tren.",
-        note: "電車で = medio de transporte; 大学に = destino (に).",
       },
       {
         jp: "{日本語|にほんご}で{話|はな}しましょう。",
         es: "Hablemos en japonés.",
-        note: "で = idioma como medio de comunicación.",
       },
     ],
+    exercise: {
+      type: "multiple-choice",
+      prompt: "図書館___勉強します。",
+      options: ["で", "に", "を"],
+      answer: "で",
+      successMessage: "で — dónde ocurre la acción.",
+    },
     commonMistakes: [
       "Usar に en lugar de で para el lugar de acción: × {図書館|としょかん}に{勉強|べんきょう}します → ○ {図書館|としょかん}で{勉強|べんきょう}します",
-      "Olvidar で con el medio de transporte: × {バス|ばす}{行|い}きます → ○ {バス|ばす}で{行|い}きます",
+      "Olvidar で con el medio de transporte.",
     ],
     practicePrompts: [
       "Di dónde haces tres actividades distintas: [場所]で[V]ます。",
@@ -658,32 +711,46 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "A は〜。B は〜。",
     shortMeaning: "は también marca contraste: «en cuanto a A… en cuanto a B…».",
     explanation: [
-      "Ya conoces は como marcador de tema. En L3 aparece su función de contraste: cuando repites は en dos partes de una oración o en dos oraciones seguidas, implica que estás comparando o contrastando.",
-      "Este uso aparece especialmente cuando niegas algo con ません y después afirmas algo alternativo: 「コーヒーは飲みません。お茶は飲みます」(Café no tomo. Té sí tomo).",
-      "El contraste no siempre es negativo; simplemente resalta que algo es distinto para A vs. B.",
+      "Repetir は en dos partes contrasta: «en cuanto a A… en cuanto a B…».",
+      "Muy común al negar algo y afirmar otra cosa.",
+      "No siempre es negativo, solo resalta una diferencia.",
     ],
     formation: [
-      "N₁ は V-ません。N₂ は V-ます。  →  N₁ no, pero N₂ sí.",
-      "A は adj₁ です。B は adj₂ です。  →  A es X, B es Y (contraste implícito).",
+      "N₁ は V-ません。N₂ は V-ます。",
     ],
     examples: [
       {
         jp: "コーヒーは{飲|の}みません。{水|みず}は{飲|の}みます。",
         es: "Café no tomo. Agua sí tomo.",
-        note: "Contraste claro entre dos objetos con la misma acción.",
       },
       {
         jp: "{週末|しゅうまつ}は{勉強|べんきょう}しません。{映画|えいが}は{見|み}ます。",
         es: "El fin de semana no estudio. Películas sí veo.",
-        note: "は en ambas cláusulas marca el contraste.",
+      },
+      {
+        jp: "{日本語|にほんご}は{話|はな}します。{英語|えいご}は{話|はな}しません。",
+        es: "Japonés sí hablo. Inglés no hablo.",
+      },
+      {
+        jp: "{本|ほん}は{読|よ}みます。{テレビ|てれび}は{見|み}ません。",
+        es: "Libros sí leo. Televisión no veo.",
       },
     ],
+    exercise: {
+      type: "fill-blank",
+      prompt: "Café no tomo. Agua sí tomo.",
+      before: "コーヒー",
+      after: "飲みません。水は飲みます。",
+      answer: "は",
+      placeholder: "partícula",
+      successMessage: "は repetido marca el contraste.",
+    },
     commonMistakes: [
-      "Pensar que は siempre es «sujeto» — は marca tema/contraste, no acción. El sujeto agente suele ir con が.",
-      "Usar が cuando la intención es contraste: が introduce el sujeto por primera vez o marca énfasis; は marca lo conocido y contrastado.",
+      "Pensar que は siempre es «sujeto» — は marca tema/contraste; el sujeto agente suele ir con が.",
+      "Usar が cuando la intención es contraste.",
     ],
     practicePrompts: [
-      "Di qué no haces entre semana pero sí haces el fin de semana: [tiempo]は～ません。[time]は～ます。",
+      "Di qué no haces entre semana pero sí haces el fin de semana: [tiempo]は～ません。[tiempo]は～ます。",
       "Compara dos amigos o miembros de la familia con は en contraste.",
     ],
     relatedGrammarIds: ["particle-ga-subject", "verb-masu-present", "copula-affirmative"],
@@ -697,37 +764,45 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "N が V / N が あります",
     shortMeaning: "が marca el sujeto cuando se introduce información nueva o se responde a ¿quién/qué?",
     explanation: [
-      "が es la partícula de sujeto gramatical y aparece cuando la información es nueva en la conversación, cuando se responde a «¿quién?» o «¿qué?», o cuando el sujeto no es el tema principal.",
-      "Comparado con は: は dice «en cuanto a X (ya mencionado)»; が dice «X (nuevo o enfatizado) es quien hace esto».",
-      "En L3, が aparece con oraciones de existencia (あります/います — L4), con gustos (好きです — L5) y con habilidades. Por ahora practica responder a 「だれが」y「何が」.",
+      "が introduce sujetos nuevos o responde a «¿quién?/¿qué?».",
+      "は dice «en cuanto a X (conocido)»; が dice «X (nuevo) hace esto».",
+      "Aparece mucho en respuestas a だれが／何が.",
     ],
     formation: [
-      "N が V-ます         →  N (sujeto nuevo/enfático) hace V",
-      "だれが V-ますか → N が V-ます  →  ¿Quién hace V? — N lo hace.",
+      "N が V-ます",
+      "だれが V-ますか → N が V-ます",
     ],
     examples: [
       {
-        jp: "だれが{日本語|にほんご}を{勉強|べんきょう}しますか。{田中|たなか}さんが{勉強|べんきょう}します。",
-        es: "¿Quién estudia japonés? El señor Tanaka lo estudia.",
-        note: "が en la respuesta porque 田中 es la información nueva buscada.",
+        jp: "だれが{日本語|にほんご}を{勉強|べんきょう}しますか。",
+        es: "¿Quién estudia japonés?",
+      },
+      {
+        jp: "{田中|たなか}さんが{勉強|べんきょう}します。",
+        es: "El señor Tanaka lo estudia.",
       },
       {
         jp: "{電話|でんわ}が{鳴|な}っています。",
         es: "El teléfono está sonando.",
-        note: "が porque el teléfono es información que surge espontáneamente.",
       },
       {
-        jp: "A: {誰|だれ}が{来|き}ましたか。B: メアリーさんが{来|き}ました。",
-        es: "A: ¿Quién vino? B: Vino Mary.",
-        note: "だれが en pregunta → respuesta con が.",
+        jp: "{誰|だれ}が{来|き}ましたか。メアリーさんが{来|き}ました。",
+        es: "¿Quién vino? Vino Mary.",
       },
     ],
+    exercise: {
+      type: "multiple-choice",
+      prompt: "だれ___来ましたか。",
+      options: ["が", "は", "を"],
+      answer: "が",
+      successMessage: "が — pregunta por sujeto nuevo.",
+    },
     commonMistakes: [
-      "Sustituir は por が en presentaciones: × {私|わたし}が{学生|がくせい}です (suena como «YO SOY el estudiante», con énfasis exclusivo) vs. ○ {私|わたし}は{学生|がくせい}です (presentación normal).",
-      "Usar を para el sujeto: × {田中|たなか}さんを{来|き}ました → ○ {田中|たなか}さんが{来|き}ました",
+      "Sustituir は por が en presentaciones: × {私|わたし}が{学生|がくせい}です → ○ {私|わたし}は{学生|がくせい}です",
+      "Usar を para el sujeto.",
     ],
     practicePrompts: [
-      "Responde: だれが先生ですか / 何が好きですか con が en la respuesta.",
+      "Responde: だれが先生ですか con が en la respuesta.",
       "Crea tres oraciones donde se introduce algo nuevo con が.",
     ],
     relatedGrammarIds: ["particle-wa-contrast", "particle-wo", "arimasu-imasu"],
@@ -741,14 +816,13 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "いつも／よく／時々／あまり～ない／全然～ない",
     shortMeaning: "Palabras que indican con qué frecuencia haces algo.",
     explanation: [
-      "Los adverbios de frecuencia van antes del verbo y no llevan partícula. Se ordenan de mayor a menor frecuencia: いつも (siempre) → よく (frecuentemente) → 時々 (a veces) → あまり (no mucho) → 全然 (nunca/para nada).",
-      "Clave: あまり y 全然 requieren negación obligatoria al final. Es un error muy común olvidarla: × あまり行きます → ○ あまり行きません.",
-      "たいてい (generalmente/casi siempre) cabe entre いつも y よく en la escala.",
+      "Van antes del verbo, sin partícula, de mayor a menor frecuencia.",
+      "あまり y 全然 siempre necesitan ません al final.",
+      "Orden: いつも → よく → 時々 → あまり → 全然.",
     ],
     formation: [
-      "いつも／よく／時々 + V-ます   →  [frecuencia positiva]",
-      "あまり + V-ません             →  no [V] mucho",
-      "全然 + V-ません               →  no [V] para nada / nunca",
+      "いつも／よく／時々 + V-ます",
+      "あまり／全然 + V-ません",
     ],
     examples: [
       {
@@ -756,27 +830,27 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
         es: "Siempre desayuno.",
       },
       {
-        jp: "{週末|しゅうまつ}はよく{友達|ともだち}と{映画|えいが}を{見|み}ます。",
-        es: "El fin de semana frecuentemente veo películas con amigos.",
-      },
-      {
-        jp: "{時々|ときどき}{図書館|としょかん}で{勉強|べんきょう}します。",
-        es: "A veces estudio en la biblioteca.",
+        jp: "{週末|しゅうまつ}はよく{映画|えいが}を{見|み}ます。",
+        es: "El fin de semana frecuentemente veo películas.",
       },
       {
         jp: "{野菜|やさい}はあまり{食|た}べません。",
         es: "No como mucha verdura.",
-        note: "あまり siempre con ません.",
       },
       {
         jp: "{お酒|おさけ}は{全然|ぜんぜん}{飲|の}みません。",
         es: "No tomo nada de alcohol.",
-        note: "全然 siempre con ません.",
       },
     ],
+    exercise: {
+      type: "multiple-choice",
+      prompt: "野菜はあまり___。",
+      options: ["食べます", "食べません"],
+      answer: "食べません",
+      successMessage: "あまり siempre va con ません.",
+    },
     commonMistakes: [
       "あまり con verbo afirmativo: × あまり{飲|の}みます → ○ あまり{飲|の}みません",
-      "全然 con verbo afirmativo: × 全然します → ○ 全然しません",
       "Colocar el adverbio después del verbo: × {食|た}べますいつも → ○ いつも{食|た}べます",
     ],
     practicePrompts: [
