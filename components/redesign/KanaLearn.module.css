@@ -26,7 +26,7 @@
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   box-shadow: none;
 }
 
@@ -278,7 +278,7 @@
   border-radius: 12px;
   background: rgba(22, 181, 163, 0.12);
   color: #16211d;
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 20px;
   font-weight: 900;
 }
@@ -327,7 +327,7 @@
   border-radius: 10px;
   background: #f5f7fb;
   color: #16211d;
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 18px;
   font-weight: 900;
 }
@@ -452,7 +452,7 @@
 }
 
 .kanaChartCell span {
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 34px;
   font-weight: 700;
   line-height: 1;
@@ -493,7 +493,7 @@
   border-radius: 14px;
   background: rgba(22, 181, 163, 0.16);
   color: #16211d;
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 28px;
   font-weight: 800;
 }

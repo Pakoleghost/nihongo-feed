@@ -14,7 +14,7 @@ import LegacyChromeGate from "@/components/LegacyChromeGate";
 
 const noto = Noto_Sans_JP({
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  weight: ["400", "500", "600", "700", "900"],
   display: "swap",
   variable: "--font-noto-sans-jp",
 });

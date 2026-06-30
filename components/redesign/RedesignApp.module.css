@@ -16,15 +16,14 @@
   --muted-light: #9aa6a1;
   --shadow-card: 0 10px 26px -16px rgba(20, 40, 35, 0.34);
   --shadow-lift: 0 12px 30px -16px rgba(20, 40, 35, 0.35);
-  --font-display: var(--font-sora), var(--font-study), sans-serif;
+  --font-display: var(--font-study), sans-serif;
   --sidebar-w: 248px;
   display: flex;
   height: 100dvh;
   overflow: hidden;
   background: var(--bg);
   color: var(--navy);
-  font-family:
-    var(--font-study), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-study), ui-sans-serif, system-ui, sans-serif;
   letter-spacing: 0;
 }
 
@@ -89,7 +88,7 @@
   border-radius: 50%;
   background: linear-gradient(135deg, #0e8276, #36d6bf);
   color: #fff;
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 15px;
   font-weight: 800;
 }
@@ -234,7 +233,7 @@
 .navIconBox {
   background: rgba(255, 255, 255, 0.06);
   color: #9fb0aa;
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 14px;
   font-weight: 600;
 }
@@ -368,7 +367,7 @@
   border-radius: 10px;
   background: rgba(22, 181, 163, 0.18);
   color: var(--teal);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 17px;
   font-weight: 900;
   text-decoration: none;
@@ -694,7 +693,7 @@
   border-radius: 10px;
   background: rgba(22, 181, 163, 0.12);
   color: var(--teal-dark);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 18px;
   font-weight: 800;
 }
@@ -826,7 +825,7 @@
   border-radius: 14px;
   background: var(--teal);
   color: var(--navy);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 35px;
   line-height: 1;
 }
@@ -1096,7 +1095,7 @@
   border-radius: 13px;
   background: var(--teal);
   color: var(--navy);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   box-shadow: 0 14px 28px rgba(22, 181, 163, 0.26);
 }
 
@@ -1332,7 +1331,7 @@
   border-radius: 12px;
   background: rgba(22, 181, 163, 0.12);
   color: #1a1a2e;
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 20px;
   font-weight: 900;
 }
@@ -1382,7 +1381,7 @@
   border-radius: 10px;
   background: #f5f7fb;
   color: var(--navy);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 17px;
   font-weight: 900;
   letter-spacing: -0.04em;
@@ -1531,7 +1530,7 @@
 }
 
 .kanaChartCell span {
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 34px;
   font-weight: 700;
   line-height: 1;
@@ -1573,7 +1572,7 @@
   border-radius: 14px;
   background: rgba(22, 181, 163, 0.16);
   color: var(--navy);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -1699,7 +1698,7 @@
 }
 
 .kanaChar {
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 32px;
   line-height: 1;
 }
@@ -1907,7 +1906,7 @@
 .kanjiModuleCard em {
   position: relative;
   color: var(--muted);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 14px;
   font-style: normal;
   font-weight: 700;
@@ -2114,7 +2113,7 @@
 .kanjiChar,
 .vocabJa,
 .grammarExample {
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
 }
 
 .kanjiChar {
@@ -2208,7 +2207,7 @@
   border-radius: 14px;
   background: rgba(22, 181, 163, 0.14);
   color: var(--navy);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 26px;
   font-weight: 900;
   line-height: 1;
@@ -2267,7 +2266,7 @@
 .kanjiDetailReading {
   margin-top: 0;
   color: var(--navy);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 24px;
   font-weight: 800;
   line-height: 1.1;
@@ -2387,7 +2386,7 @@
 
 .grammarPatternCard strong {
   color: var(--navy);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 20px;
   font-weight: 900;
   line-height: 1.15;
@@ -2420,7 +2419,7 @@
   background: #fff;
   color: var(--muted);
   padding: 0 14px;
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
@@ -2517,7 +2516,7 @@
 
 .grammarDetailPattern {
   color: var(--navy);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: clamp(38px, 4.7vw, 58px);
   font-weight: 900;
   letter-spacing: 0;
@@ -2588,7 +2587,7 @@
   border-radius: 8px;
   background: rgba(22, 181, 163, 0.16);
   color: var(--teal-dark);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 14px;
   font-weight: 800;
   letter-spacing: 0;
@@ -2669,7 +2668,7 @@
 }
 
 .grammarExampleItem strong {
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 24px;
   font-weight: 900;
   line-height: 1.25;
@@ -2677,7 +2676,7 @@
 
 .grammarExampleItem small {
   color: var(--muted-light);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 12px;
   font-weight: 800;
 }
@@ -2770,7 +2769,7 @@
 }
 
 .grammarDialogueBubble strong {
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 20px;
   font-weight: 900;
   line-height: 1.35;
@@ -2837,7 +2836,7 @@
   border-radius: 9px;
   background: #fff;
   padding: 11px 12px;
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 15px;
 }
 
@@ -2894,7 +2893,7 @@
   background: #fff;
   color: var(--navy);
   padding: 0 11px;
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 14px;
   font-weight: 900;
   cursor: pointer;
@@ -2961,7 +2960,7 @@
 
 .grammarFillLine strong {
   color: var(--navy);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 15px;
   font-weight: 900;
 }
@@ -3065,7 +3064,7 @@
   border-radius: 14px;
   background: var(--teal);
   color: var(--navy);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 23px;
   font-weight: 900;
   box-shadow: 0 10px 24px rgba(22, 181, 163, 0.22);
@@ -3137,7 +3136,7 @@
 
 .kanjiQuizPrompt span {
   color: var(--navy);
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 86px;
   font-weight: 800;
   line-height: 1;
@@ -3412,7 +3411,7 @@
 }
 
 .bottomNavIcon {
-  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  font-family: var(--font-noto-sans-jp), sans-serif;
   font-size: 17px;
   line-height: 1;
 }
