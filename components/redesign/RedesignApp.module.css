@@ -2572,6 +2572,7 @@
 .grammarPracticeBox > span,
 .grammarFormationBox > span,
 .grammarDialogueBox > span,
+.grammarExplanationBlock > span,
 .grammarMistakeBox > span,
 .grammarInteraction > span {
   min-height: 42px;
@@ -2593,6 +2594,7 @@
 .grammarPracticeBox > span::before,
 .grammarFormationBox > span::before,
 .grammarDialogueBox > span::before,
+.grammarExplanationBlock > span::before,
 .grammarMistakeBox > span::before,
 .grammarInteraction > span::before {
   width: 26px;
@@ -2615,8 +2617,23 @@
   content: "例";
 }
 
+.grammarExampleBox > span em {
+  margin-left: auto;
+  border-radius: 999px;
+  background: #e6f7f3;
+  color: var(--teal-dark);
+  padding: 6px 11px;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 800;
+}
+
 .grammarPracticeBox > span::before {
   content: "練";
+}
+
+.grammarExplanationBlock > span::before {
+  content: "説";
 }
 
 .grammarFormationBox > span::before {
@@ -2637,7 +2654,7 @@
 }
 
 .grammarInteraction > span::before {
-  content: "試";
+  content: "練";
 }
 
 .grammarExampleBox > span {
@@ -2854,18 +2871,55 @@
   display: grid;
   gap: 12px;
   border: 1px solid #d6eee8;
-  border-radius: 20px;
+  border-radius: 24px;
   background: #fff;
-  padding: 22px 24px;
+  padding: 24px 26px;
   box-shadow: 0 18px 44px -30px rgba(20, 40, 35, 0.42);
 }
 
-.grammarExplanationBlock p {
+.grammarExplanationBlock ul {
+  display: grid;
+  gap: 13px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grammarExplanationBlock li {
+  position: relative;
+  margin: 0;
+  color: rgba(22, 33, 29, 0.78);
+  padding-left: 22px;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.grammarExplanationBlock li::before {
+  content: "";
+  position: absolute;
+  top: 0.72em;
+  left: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--teal);
+}
+
+.grammarExplanationBlock p,
+.grammarTinyNote {
   margin: 0;
   color: rgba(26, 26, 46, 0.76);
-  font-size: 17px;
-  font-weight: 600;
-  line-height: 1.65;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.grammarTinyNote {
+  border-radius: 14px;
+  background: rgba(255, 138, 102, 0.1);
+  color: rgba(22, 33, 29, 0.72);
+  padding: 12px 14px;
 }
 
 .grammarFormationBox {
@@ -2889,18 +2943,18 @@
 
 .grammarInlineInteractions {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .grammarInteraction {
-  border-color: rgba(22, 181, 163, 0.28);
-  background: #fff;
+  border-color: #d6eee8;
+  background: #edf8f4;
 }
 
 .grammarInteraction p {
   margin: 0;
   color: var(--navy);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 800;
   line-height: 1.4;
 }

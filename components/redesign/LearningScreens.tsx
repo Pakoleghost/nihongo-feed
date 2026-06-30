@@ -323,6 +323,28 @@ function GrammarInteractionBlock({
   return <GrammarFillBlankInteraction interaction={interaction} />;
 }
 
+function buildFallbackGrammarInteraction(
+  pattern: GrammarPattern,
+): GrammarInteraction | null {
+  const formationSource = pattern.formation?.[0]?.split("→")[0]?.trim();
+  const base = formationSource || pattern.pattern;
+  const tokens = base
+    .replace(/[。？?]/g, "")
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter(Boolean);
+
+  if (tokens.length < 2) return null;
+
+  return {
+    type: "word-order",
+    prompt: "Acomoda la estructura base del patrón.",
+    tokens: [...tokens].reverse(),
+    answer: tokens,
+    successMessage: "Bien. Esa es la estructura.",
+  };
+}
+
 export function StudentHomeScreen() {
   const { profile, course, streak, kana, vocab, reviewTotal, lastActivity } =
     useStudentDashboardData();
@@ -1637,6 +1659,29 @@ export function GrammarLearningScreen() {
     return null;
   }
 
+  const conciseExplanation = (selectedPattern.explanation ?? []).slice(0, 3);
+  const formationLines = (selectedPattern.formation ?? []).slice(0, 3);
+  const examples = (
+    selectedPattern.examples?.length
+      ? selectedPattern.examples
+      : [
+          {
+            jp: selectedPattern.example,
+            es: selectedPattern.translation,
+          },
+        ]
+  ).slice(0, 4);
+  const dialogueLines = (selectedPattern.dialogue ?? []).slice(0, 4);
+  const fallbackInteraction = buildFallbackGrammarInteraction(selectedPattern);
+  const interactions = (
+    selectedPattern.interactions?.length
+      ? selectedPattern.interactions
+      : fallbackInteraction
+        ? [fallbackInteraction]
+        : []
+  ).slice(0, 1);
+  const compactMistake = selectedPattern.commonMistakes?.[0];
+
   return (
     <>
       <GrammarHero
@@ -1755,32 +1800,34 @@ export function GrammarLearningScreen() {
                   </span>
                 </div>
               </header>
-              {selectedPattern.explanation?.length ? (
-                <div className={styles.grammarExplanationBlock}>
-                  {selectedPattern.explanation.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
-                </div>
-              ) : null}
-              {selectedPattern.formation?.length ? (
+              {formationLines.length ? (
                 <div className={styles.grammarFormationBox}>
-                  <span>Forma</span>
-                  {selectedPattern.formation.map((line) => (
+                  <span>Estructura de la oración</span>
+                  {formationLines.map((line) => (
                     <strong key={line}>{line}</strong>
                   ))}
                 </div>
               ) : null}
+              {conciseExplanation.length ? (
+                <div className={styles.grammarExplanationBlock}>
+                  <span>Explicación</span>
+                  <ul>
+                    {conciseExplanation.map((paragraph) => (
+                      <li key={paragraph}>{paragraph}</li>
+                    ))}
+                  </ul>
+                  {compactMistake ? (
+                    <p className={styles.grammarTinyNote}>
+                      Cuidado: {compactMistake}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
               <div className={styles.grammarExampleBox}>
-                <span>Ejemplos</span>
-                {(selectedPattern.examples?.length
-                  ? selectedPattern.examples
-                  : [
-                      {
-                        jp: selectedPattern.example,
-                        es: selectedPattern.translation,
-                      },
-                    ]
-                ).map((example) => (
+                <span>
+                  Ejemplos <em>{examples.length} frases</em>
+                </span>
+                {examples.map((example) => (
                   <div className={styles.grammarExampleItem} key={`${example.jp}-${example.es}`}>
                     <strong>
                       <FuriganaText
@@ -1797,11 +1844,21 @@ export function GrammarLearningScreen() {
                   </div>
                 ))}
               </div>
-              {selectedPattern.dialogue?.length ? (
+              {interactions.length ? (
+                <div className={styles.grammarInlineInteractions}>
+                  {interactions.map((interaction, index) => (
+                    <GrammarInteractionBlock
+                      key={`${interaction.type}-${index}`}
+                      interaction={interaction}
+                    />
+                  ))}
+                </div>
+              ) : null}
+              {dialogueLines.length ? (
                 <div className={styles.grammarDialogueBox}>
                   <span>Conversación</span>
                   <div className={styles.grammarDialogueList}>
-                    {selectedPattern.dialogue.map((line, index) => {
+                    {dialogueLines.map((line, index) => {
                       const isSecondSpeaker = index % 2 === 1;
 
                       return (
@@ -1842,41 +1899,6 @@ export function GrammarLearningScreen() {
                   </div>
                 </div>
               ) : null}
-              {selectedPattern.interactions?.length ? (
-                <div className={styles.grammarInlineInteractions}>
-                  {selectedPattern.interactions.map((interaction, index) => (
-                    <GrammarInteractionBlock
-                      key={`${interaction.type}-${index}`}
-                      interaction={interaction}
-                    />
-                  ))}
-                </div>
-              ) : null}
-              <div className={styles.grammarSupportGrid}>
-                {selectedPattern.commonMistakes?.length ? (
-                  <div className={styles.grammarMistakeBox}>
-                    <span>Errores comunes</span>
-                    <ul>
-                      {selectedPattern.commonMistakes.map((mistake) => (
-                        <li key={mistake}>{mistake}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-                <div className={styles.grammarPracticeBox}>
-                  <span>Practica</span>
-                  <strong>{selectedPattern.cue}</strong>
-                  {selectedPattern.practicePrompts?.length ? (
-                    <ul>
-                      {selectedPattern.practicePrompts.map((prompt) => (
-                        <li key={prompt}>{prompt}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>Di una frase nueva usando este patrón.</p>
-                  )}
-                </div>
-              </div>
             </article>
           </div>
         </div>
