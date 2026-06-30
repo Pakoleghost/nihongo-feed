@@ -1949,47 +1949,51 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "V-ている",
     shortMeaning: "Acción en progreso, estado resultante de una acción, o hábito continuo.",
     explanation: [
-      "V-ている tiene tres usos principales que dependen del tipo de verbo:",
-      "① Acción en progreso (verbos de actividad): {食|た}べている = está comiendo. Equivale al gerundio español.",
-      "② Estado resultante (verbos de cambio puntual): 結婚している = está casado (resultado de haberse casado). {死|し}んでいる = está muerto (resultado de haber muerto).",
-      "③ Hábito continuo o ocupación: {大学|だいがく}で{教|おし}えている = enseña en la universidad (habitualmente).",
-      "En habla cotidiana, いる a veces se contrae: {食|た}べてる, {見|み}てる.",
+      "Acción en progreso: 食べている = está comiendo.",
+      "Estado resultante de un cambio: 結婚している = está casado.",
+      "También expresa hábito u ocupación continua.",
     ],
     formation: [
-      "V-て + います  →  está V-ando / V-ido (estado) / V habitualmente",
-      "V-て + いません →  no está V-ando / no está en ese estado",
+      "V-て + います",
+      "V-て + いません",
     ],
     examples: [
       {
         jp: "{父|ちち}は{テレビ|てれび}を{見|み}ています。",
         es: "Mi papá está viendo televisión.",
-        note: "Acción en progreso.",
       },
       {
         jp: "{山田|やまだ}さんは{結婚|けっこん}しています。",
         es: "El señor Yamada está casado.",
-        note: "Estado resultante: se casó y sigue casado.",
       },
       {
         jp: "{姉|あね}は{東京|とうきょう}に{住|す}んでいます。",
         es: "Mi hermana mayor vive en Tokio.",
-        note: "住む = cambio de estado → ている = estado actual de residencia.",
       },
       {
-        jp: "何をしていますか。",
+        jp: "{何|なに}をしていますか。",
         es: "¿Qué estás haciendo?",
       },
     ],
+    exercise: {
+      type: "fill-blank",
+      prompt: "Mi papá está viendo televisión.",
+      before: "父はテレビを見",
+      after: "。",
+      answer: "ています",
+      placeholder: "estado/acción en curso",
+      successMessage: "ています — acción en progreso.",
+    },
     commonMistakes: [
-      "Usar ている con verbos de estado como ある, いる, 分かる — estos verbos ya expresan estado, no necesitan ている.",
-      "Confundir el uso con verbos puntuales: × {来|き}ています (como «está viniendo») tiene sentido diferente — significa que ya llegó y está aquí. En español esto es «ha llegado».",
+      "Usar ている con verbos de estado como ある, いる, 分かる.",
+      "Confundir 来ています (ya llegó y está aquí) con «está viniendo».",
     ],
     interactions: [
       "Mímicas: un alumno actúa una acción y el resto adivina: 「何をしていますか」→「〜をしています」.",
     ],
     practicePrompts: [
       "Describe qué están haciendo ahora mismo tres personas de tu familia.",
-      "Di tres hábitos o estados permanentes tuyos usando ている: {住|す}んでいます, {勉強|べんきょう}しています…",
+      "Di tres hábitos o estados permanentes tuyos usando ている: 住んでいます, 勉強しています…",
     ],
     relatedGrammarIds: ["te-form-verbs", "v1-te-v2-sequence", "x-wa-y-ga-z"],
     sourceNotes: ["Basado en Genki I L7, Grammar 1 (～ている)"],
@@ -2002,15 +2006,13 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "い-adj くて / な-adj で",
     shortMeaning: "Conectar dos descripciones con adjetivos en una sola oración.",
     explanation: [
-      "Al igual que los verbos usan て para encadenar acciones, los adjetivos tienen su propia forma て para unir dos características: «es A y también es B».",
-      "い-adjetivos: い → くて. Ejemplo: {大|おお}きい → 大きくて.",
-      "な-adjetivos (y sustantivos con です): な-adj/N → で. Ejemplo: きれい → きれいで; {学生|がくせい} → 学生で.",
-      "La forma て de adjetivos también puede expresar razón de forma más suave que から.",
+      "い-adjetivos: い → くて (大きい → 大きくて).",
+      "な-adjetivos y sustantivos con です: → で (きれい → きれいで).",
+      "Excepción: いい → よくて.",
     ],
     formation: [
-      "い-adj:  [stem]い → [stem]くて",
-      "な-adj:  [adj] → [adj] で",
-      "いい → よくて  (excepción)",
+      "い-adj: [raíz]い → [raíz]くて",
+      "な-adj: [adj] → [adj] で",
     ],
     examples: [
       {
@@ -2020,17 +2022,28 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
       {
         jp: "{田中|たなか}さんは{親切|しんせつ}で{面白|おもしろ}いです。",
         es: "El señor Tanaka es amable e interesante.",
-        note: "親切 (na-adj) → 親切で; 面白い (i-adj) al final en forma normal.",
       },
       {
         jp: "{今日|きょう}は{寒|さむ}くて、{雨|あめ}が{降|ふ}っています。",
         es: "Hoy hace frío y está lloviendo.",
-        note: "くて como conector de situaciones.",
+      },
+      {
+        jp: "{先生|せんせい}は{優|やさ}しくて{有名|ゆうめい}です。",
+        es: "El profesor es amable y famoso.",
       },
     ],
+    exercise: {
+      type: "fill-blank",
+      prompt: "Esta habitación es amplia y bonita.",
+      before: "この部屋は広",
+      after: "きれいです。",
+      answer: "くて",
+      placeholder: "conector",
+      successMessage: "くて conecta dos descripciones い-adj.",
+    },
     commonMistakes: [
-      "Usar て de verbo para adjetivos: × {大|おお}きくて → bien (este es el correcto), pero cuidado con いい → ×いくて → ○ よくて.",
-      "Poner な antes de で con na-adjetivos: × {親切|しんせつ}なで → ○ {親切|しんせつ}で.",
+      "いい como くて: × いくて → ○ よくて",
+      "Poner な antes de で con na-adjetivos: × 親切なで → ○ 親切で",
     ],
     practicePrompts: [
       "Describe a un miembro de tu familia con dos adjetivos conectados con て.",
@@ -2047,35 +2060,41 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "X は Y が Z (adj/V)",
     shortMeaning: "Describir una característica de X donde Y es el punto específico de referencia.",
     explanation: [
-      "Esta estructura expresa características, habilidades, preferencias y partes del cuerpo. X (el tema general) tiene una propiedad Y que se describe con Z.",
-      "Ejemplos de uso: habilidades (X は Y が 上手／下手), preferencias (X は Y が 好き／嫌い — ya visto en L5), características físicas (X は Y が 長い).",
-      "上手 (habilidoso) y 下手 (torpe) son na-adjetivos. Nota cultural: no uses 上手 para hablar de tus propias habilidades (suena presumido); usa まあまあです o un adverbio modesto.",
+      "X (tema general) tiene una propiedad Y descrita por Z.",
+      "Uso típico: habilidades (上手／下手), características físicas.",
+      "Evita 上手 para tus propias habilidades — suena presumido.",
     ],
     formation: [
-      "X は Y が {上手|じょうず}です       →  X es bueno en Y",
-      "X は Y が {下手|へた}です          →  X es malo en Y",
-      "X は Y が [adj] です             →  X tiene Y que es [adj]",
+      "X は Y が {上手|じょうず}です",
+      "X は Y が [adj] です",
     ],
     examples: [
       {
         jp: "{妹|いもうと}は{料理|りょうり}が{上手|じょうず}です。",
         es: "Mi hermana menor es buena cocinando.",
-        note: "料理 = lo que hace bien; 妹 = tema general.",
       },
       {
         jp: "{私|わたし}はスポーツが{苦手|にがて}です。",
         es: "No se me da bien el deporte.",
-        note: "苦手 (na-adj) = no ser hábil, con matiz más suave que 下手.",
       },
       {
         jp: "{象|ぞう}は{鼻|はな}が{長|なが}いです。",
         es: "El elefante tiene la nariz larga.",
-        note: "Característica física: Y が [adj].",
+      },
+      {
+        jp: "{田中|たなか}さんは{歌|うた}が{上手|じょうず}です。",
+        es: "El señor Tanaka canta bien.",
       },
     ],
+    exercise: {
+      type: "multiple-choice",
+      prompt: "妹は料理___上手です。",
+      options: ["が", "を", "は"],
+      answer: "が",
+      successMessage: "が marca el punto de referencia (Y).",
+    },
     commonMistakes: [
-      "Usar を en lugar de が: × {料理|りょうり}を{上手|じょうず}です → ○ {料理|りょうり}が{上手|じょうず}です.",
-      "Hablar de tus propias habilidades con 上手 de forma directa — culturalmente es más apropiado ser modesto.",
+      "Usar を en lugar de が: × 料理を上手です → ○ 料理が上手です",
     ],
     practicePrompts: [
       "Describe las habilidades de tres personas de tu familia con Y が 上手/下手/苦手.",
@@ -2092,36 +2111,46 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "場所 に V-masu に 行く／来る／帰る",
     shortMeaning: "Expresar el propósito de un movimiento: «ir/venir/regresar A hacer X».",
     explanation: [
-      "Para decir el motivo por el que te desplazas, usas la forma ます del verbo (sin ます) seguida de に antes del verbo de movimiento. Esta construcción responde a «¿para qué vas?».",
-      "La forma sin ます se llama «stem» o base verbal: 食べます→食べ、見ます→見、買います→買い.",
-      "El lugar puede aparecer antes o puede omitirse si es obvio del contexto.",
+      "Usa el stem del verbo (sin ます) + に + verbo de movimiento.",
+      "Stem: 食べます→食べ, 買います→買い.",
+      "Responde a «¿para qué vas?».",
     ],
     formation: [
       "場所 に [V-stem] に {行|い}く／{来|く}る／{帰|かえ}る",
-      "→  ir / venir / regresar a [lugar] para [hacer V]",
     ],
     examples: [
       {
         jp: "{図書館|としょかん}に{本|ほん}を{借|か}りに{行|い}きます。",
         es: "Voy a la biblioteca a pedir prestado un libro.",
-        note: "借り = stem de 借りる.",
       },
       {
         jp: "{友達|ともだち}の{家|いえ}に{遊|あそ}びに{来|き}ました。",
         es: "Vine a la casa de mi amigo a pasar el rato.",
-        note: "遊び = stem de 遊ぶ.",
       },
       {
         jp: "{スーパー|すーぱー}に{野菜|やさい}を{買|か}いに{行|い}きましょう。",
         es: "¡Vayamos al supermercado a comprar verduras!",
       },
+      {
+        jp: "{図書館|としょかん}に{勉強|べんきょう}しに{行|い}きます。",
+        es: "Voy a la biblioteca a estudiar.",
+      },
     ],
+    exercise: {
+      type: "fill-blank",
+      prompt: "Voy a la biblioteca a pedir prestado un libro.",
+      before: "図書館に本を借り",
+      after: "行きます。",
+      answer: "に",
+      placeholder: "partícula",
+      successMessage: "に + verbo de movimiento marca el propósito.",
+    },
     commonMistakes: [
-      "Usar la forma て en lugar del stem: × {食|た}べてに{行|い}く → ○ {食|た}べに{行|い}く.",
-      "Omitir el に de propósito: × {図書館|としょかん}に{勉強|べんきょう}{行|い}く → ○ {図書館|としょかん}に{勉強|べんきょう}しに{行|い}く.",
+      "Usar la forma て en lugar del stem: × 食べてに行く → ○ 食べに行く",
+      "Omitir el に de propósito.",
     ],
     practicePrompts: [
-      "Di a dónde fuiste esta semana y para qué: [場所]に[V-stem]に行きました。",
+      "Di a dónde fuiste esta semana y para qué: [lugar]に[V-stem]に行きました。",
       "Invita a un compañero a ir a algún lado con ましょう y agrega el propósito.",
     ],
     relatedGrammarIds: ["particle-ni-destination-time", "verb-masu-present", "mashou-mashouka"],
@@ -2139,40 +2168,43 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "Forma corta / plain form",
     shortMeaning: "Forma informal de los verbos, adjetivos y cópula usada en conversación casual y en cláusulas subordinadas.",
     explanation: [
-      "La forma corta (también llamada «forma plain» o «forma de diccionario») es la base informal del japonés. No es menos correcta que la forma ます — es simplemente informal y se usa en distintos contextos.",
-      "Verbos: afirmativo = forma de diccionario (食べる, 飲む, する); negativo = ない-form (食べない, 飲まない, しない).",
-      "Adjetivos: い-adj no cambia (高い, 高くない); な-adj: だ/じゃない (きれいだ, きれいじゃない).",
-      "Cópula: だ (afirmativo informal) / じゃない (negativo informal). Excepción: en conversación femenina o neutral a veces se omite だ al final.",
-      "Importante: la forma corta es obligatoria dentro de cláusulas subordinadas, antes de と思います, から, ので, etc., sin importar si el nivel de habla es formal o informal.",
+      "Verbos: afirmativo = forma de diccionario; negativo = ない-form.",
+      "い-adj no cambia; な-adj/cópula: だ (afirmativo) / じゃない (negativo).",
+      "Obligatoria antes de と思います, から, etc., sea formal o no.",
     ],
     formation: [
-      "Verbos G1 negativo:  [stem] + ない  (飲む→飲まない, 書く→書かない)",
-      "Verbos G2 negativo:  [stem] + ない  (食べる→食べない, 見る→見ない)",
-      "Irregulares:         する→しない / くる→こない",
-      "い-adj negativo:     [stem]くない   (高い→高くない)",
-      "な-adj:              [adj]だ / [adj]じゃない",
+      "V-stem + ない  (飲む→飲まない, 食べる→食べない)",
+      "い-adj: [raíz]くない",
+      "な-adj: だ / じゃない",
     ],
     examples: [
       {
         jp: "A: {明日|あした}{来|く}る？　B: うん、{行|い}く。",
         es: "A: ¿Vienes mañana? B: Sí, voy.",
-        note: "Conversación casual entre amigos — plain form en ambos.",
       },
       {
         jp: "この{映画|えいが}は{面白|おもしろ}くない。",
         es: "Esta película no es interesante.",
-        note: "い-adj en plain form negativo.",
       },
       {
         jp: "あの{人|ひと}は{先生|せんせい}じゃない。",
         es: "Esa persona no es profesora.",
-        note: "Cópula plain form negativa.",
+      },
+      {
+        jp: "{私|わたし}は{学生|がくせい}だ。",
+        es: "Soy estudiante.",
       },
     ],
+    exercise: {
+      type: "multiple-choice",
+      prompt: "Forma corta negativa de 飲む:",
+      options: ["飲みない", "飲まない", "飲んない"],
+      answer: "飲まない",
+      successMessage: "む → まない en grupo 1.",
+    },
     commonMistakes: [
-      "Usar ない-form de verbos grupo 1 como si fueran grupo 2: × 飲みない → ○ 飲まない (stem cambia: 飲む→飲ま+ない).",
-      "Usar la forma corta en situaciones formales cuando acabas de conocer a alguien — puede sonar brusco.",
-      "Confundir ない (negativo de verbo) con ない (inexistencia de あります: ない = ありません informal).",
+      "Usar ない-form de grupo 1 como grupo 2: × 飲みない → ○ 飲まない",
+      "Usar la forma corta con alguien que acabas de conocer — puede sonar brusco.",
     ],
     interactions: [
       "Conversación informal: el profesor establece pares y los alumnos hacen preguntas cotidianas en plain form.",
@@ -2192,35 +2224,41 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "[plain form] と思います",
     shortMeaning: "Expresar una opinión o suposición: «creo que…» / «pienso que…».",
     explanation: [
-      "と思います reporta el contenido de tu pensamiento. El verbo o adjetivo antes de と siempre va en plain form, sin importar que el nivel de habla general sea formal.",
-      "Para opiniones en curso (lo que sigues pensando): と思っています.",
-      "Para preguntar la opinión: どう思いますか (¿Qué piensas?).",
-      "Nivel de certeza: con plain form present afirmativo = opinión o suposición. Con かもしれないと思います = posibilidad más dudosa.",
+      "と思います reporta tu pensamiento; lo antes de と va en plain form.",
+      "Para preguntar la opinión: どう思いますか.",
+      "と思います = lo que YO pienso (distinto de と言っていました, L8).",
     ],
     formation: [
-      "[V/adj/N-plain] と{思|おも}います  →  Creo que [...]",
-      "[V/adj/N-plain] と{思|おも}っています →  Pienso (actualmente) que [...]",
+      "[plain form] と{思|おも}います",
     ],
     examples: [
       {
         jp: "この{映画|えいが}はおもしろいと{思|おも}います。",
         es: "Creo que esta película es interesante.",
-        note: "おもしろい = plain form de い-adj.",
       },
       {
         jp: "{明日|あした}は{雨|あめ}だと{思|おも}います。",
         es: "Creo que mañana lloverá.",
-        note: "雨だ = cópula plain form.",
       },
       {
         jp: "{田中|たなか}さんは{来|こ}ないと{思|おも}います。",
         es: "Creo que el señor Tanaka no vendrá.",
-        note: "来ない = plain form negativo.",
+      },
+      {
+        jp: "この{本|ほん}はいいと{思|おも}います。",
+        es: "Creo que este libro es bueno.",
       },
     ],
+    exercise: {
+      type: "multiple-choice",
+      prompt: "この映画はおもしろい___思います。",
+      options: ["と", "を", "に"],
+      answer: "と",
+      successMessage: "と introduce el contenido de la opinión.",
+    },
     commonMistakes: [
-      "Usar forma ます antes de と: × {行|い}きますと{思|おも}います → ○ {行|い}くと{思|おも}います.",
-      "Confundir と思います (opinión) con と言っていました (cita) — と思います es lo que YO pienso; と言っていました es lo que OTRO dijo.",
+      "Usar forma ます antes de と: × 行きますと思います → ○ 行くと思います",
+      "Confundir と思います (mi opinión) con と言っていました (lo que otro dijo).",
     ],
     practicePrompts: [
       "Da tu opinión sobre tres temas: la clase, el tiempo, la comida de la cafetería.",
@@ -2237,12 +2275,12 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "[plain form] と言っていました",
     shortMeaning: "Reportar lo que alguien dijo (cita indirecta).",
     explanation: [
-      "言っていました combina 言う (decir) + ている (estado) + ました (pasado): literalmente «estaba diciendo». Es la forma natural de reportar en japonés lo que otra persona dijo.",
-      "El contenido citado siempre va en plain form antes de と, igual que en と思います.",
-      "Nota: es cita indirecta (paráfrasis), no directa. Para citas directas el japonés usa 「」(comillas angulares).",
+      "言っていました = «estaba diciendo» — reporta lo que otro dijo.",
+      "El contenido va en plain form antes de と, igual que と思います.",
+      "Es cita indirecta (paráfrasis), no cita textual.",
     ],
     formation: [
-      "[contenido en plain form] と{言|い}っていました  →  Dijo que [...]",
+      "[plain form] と{言|い}っていました",
     ],
     examples: [
       {
@@ -2257,9 +2295,20 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
         jp: "メアリーさんはこの{映画|えいが}はおもしろいと{言|い}っていました。",
         es: "Mary dijo que esta película era interesante.",
       },
+      {
+        jp: "{田中|たなか}さんは{忙|いそが}しいと{言|い}っていました。",
+        es: "El señor Tanaka dijo que estaba ocupado.",
+      },
     ],
+    exercise: {
+      type: "multiple-choice",
+      prompt: "先生は明日テストがある___言っていました。",
+      options: ["と", "を", "が"],
+      answer: "と",
+      successMessage: "と introduce lo que dijo.",
+    },
     commonMistakes: [
-      "Usar forma ます antes de と: × {来|き}ますと{言|い}っていました → ○ {来|く}ると{言|い}っていました.",
+      "Usar forma ます antes de と: × 来ますと言っていました → ○ 来ると言っていました",
       "Confundir と言っていました (lo que alguien dijo) con と思います (lo que YO pienso).",
     ],
     practicePrompts: [
@@ -2277,12 +2326,12 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "V-ないでください",
     shortMeaning: "Petición educada de que NO hagas algo: «por favor no hagas X».",
     explanation: [
-      "ないでください usa la forma ない (plain form negativo) del verbo + でください. Es la contraparte negativa de てください.",
-      "Es una petición directa a una persona; no es una regla general (eso sería てはいけません). Por eso ないでください suena más personal y educado que una prohibición.",
-      "En conversación informal entre amigos: ないで (sin ください).",
+      "ないでください es el opuesto negativo de てください.",
+      "Es una petición personal, no una regla general (eso es てはいけません).",
+      "Informal: ないで, sin ください.",
     ],
     formation: [
-      "V-ない + でください  →  Por favor no [hagas V]",
+      "V-ない + でください",
     ],
     examples: [
       {
@@ -2297,10 +2346,23 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
         jp: "{授業中|じゅぎょうちゅう}にスマホを{使|つか}わないでください。",
         es: "Por favor no uses el teléfono durante la clase.",
       },
+      {
+        jp: "ここで{食|た}べないでください。",
+        es: "Por favor no comas aquí.",
+      },
     ],
+    exercise: {
+      type: "fill-blank",
+      prompt: "Por favor no tome fotos aquí.",
+      before: "ここで写真を撮ら",
+      after: "。",
+      answer: "ないでください",
+      placeholder: "petición negativa",
+      successMessage: "ないでください — petición de que no hagas algo.",
+    },
     commonMistakes: [
-      "Usar ないでください para reglas generales — las reglas generales usan てはいけません.",
-      "Confundir el stem negativo: × {飲|の}みないで → ○ {飲|の}まないで (el stem negativo del grupo 1 cambia la vocal).",
+      "Usar ないでください para reglas generales — eso es てはいけません.",
+      "Confundir el stem negativo: × 飲みないで → ○ 飲まないで",
     ],
     practicePrompts: [
       "Escribe tres peticiones que harías a un compañero de cuarto ruidoso usando ないでください.",
@@ -2317,33 +2379,40 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "V-plain の は / の が / の を",
     shortMeaning: "Convertir una acción verbal en «cosa» o «concepto» para usarlo como sustantivo.",
     explanation: [
-      "Al añadir の después de un verbo (o cláusula) en plain form, toda esa frase se convierte en un sustantivo: 「{料理|りょうり}するの」= «el cocinar» / «cocinar».",
-      "Se usa principalmente con は (tema) y が (sujeto/objeto de adjetivos como 好き, 上手, etc.): {料理|りょうり}するのが{好|す}きです = Me gusta cocinar.",
-      "Diferencia con こと (L12 area): の es más coloquial y sensorialmente concreto; こと es más abstracto y formal. En L8, practica の.",
+      "の después de un verbo en plain form lo convierte en sustantivo.",
+      "Se usa con は (tema) o が (sujeto de 好き, 上手, etc.).",
+      "El verbo antes de の siempre va en plain form, nunca en ます.",
     ],
     formation: [
-      "[V/oración en plain form] の + は／が／を + [predicado]",
+      "[V-plain] の + は／が",
     ],
     examples: [
       {
         jp: "{音楽|おんがく}を{聞|き}くのが{好|す}きです。",
         es: "Me gusta escuchar música.",
-        note: "聞くの = «el escuchar» → sujeto de 好き.",
       },
       {
         jp: "{日本語|にほんご}を{話|はな}すのは{難|むずか}しいです。",
         es: "Hablar japonés es difícil.",
-        note: "話すの = «el hablar» → tema de 難しい.",
       },
       {
         jp: "{泳|およ}ぐのが{得意|とくい}です。",
         es: "Soy bueno nadando.",
-        note: "泳ぐの = «el nadar» → sujeto de 得意.",
+      },
+      {
+        jp: "{本|ほん}を{読|よ}むのが{好|す}きです。",
+        es: "Me gusta leer libros.",
       },
     ],
+    exercise: {
+      type: "multiple-choice",
+      prompt: "音楽を聞く___が好きです。",
+      options: ["の", "こと", "もの"],
+      answer: "の",
+      successMessage: "の convierte el verbo en sustantivo.",
+    },
     commonMistakes: [
-      "Usar の después de forma ます: × {食|た}べますの → ○ {食|た}べるの (plain form obligatorio).",
-      "Confundir の (nominalización) con の (partícula posesiva, L1): el contexto aclara; nominalización siempre lleva un verbo antes.",
+      "Usar の después de forma ます: × 食べますの → ○ 食べるの",
     ],
     practicePrompts: [
       "Di tres actividades que te gustan usando のが好きです.",
@@ -2364,37 +2433,42 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "V-た / V-なかった / adj-かった / adj-じゃなかった",
     shortMeaning: "Plain form pasada de verbos y adjetivos para habla informal y cláusulas subordinadas.",
     explanation: [
-      "La forma た es la plain form pasada de los verbos. Se forma igual que la forma て pero con た en lugar de て (y だ en lugar de で): 食べて→食べた, 飲んで→飲んだ, 行って→行った.",
-      "Negativo pasado: ない → なかった (igual para todos los verbos): 食べない→食べなかった, 飲まない→飲まなかった.",
-      "い-adjetivos pasados: い→かった / くない→くなかった. な-adjetivos pasados: だった / じゃなかった.",
-      "Como la plain form presente, la pasada es obligatoria en cláusulas subordinadas antes de と思います, から, 時, etc.",
+      "た-form: igual que て pero con た (飲んで→飲んだ, 行って→行った).",
+      "Negativo pasado: ない → なかった para todos los verbos.",
+      "い-adj: かった／くなかった. な-adj: だった／じゃなかった.",
     ],
     formation: [
-      "V:     た-form (positivo) / なかった-form (negativo)",
-      "い-adj: [stem]かった / [stem]くなかった",
-      "な-adj: [adj]だった / [adj]じゃなかった",
-      "いい:  よかった / よくなかった",
+      "V-て → V-た (afirmativo)",
+      "V-ない → V-なかった (negativo)",
     ],
     examples: [
       {
         jp: "{昨日|きのう}{友達|ともだち}と{映画|えいが}を{見|み}た。",
         es: "Ayer vi una película con un amigo.",
-        note: "Forma た informal; equivale a 見ました en registro formal.",
       },
       {
         jp: "{宿題|しゅくだい}をしなかった。",
         es: "No hice la tarea.",
-        note: "しない → しなかった.",
       },
       {
-        jp: "パーティーは{楽|たの}しかったね！",
-        es: "¡La fiesta fue divertida, ¿verdad?!",
-        note: "楽しい → 楽しかった + ね (partícula de acuerdo).",
+        jp: "パーティーは{楽|たの}しかった。",
+        es: "La fiesta fue divertida.",
+      },
+      {
+        jp: "あの{部屋|へや}は{静|しず}かじゃなかった。",
+        es: "Esa habitación no estaba tranquila.",
       },
     ],
+    exercise: {
+      type: "multiple-choice",
+      prompt: "Forma corta pasada negativa de する:",
+      options: ["しなかった", "しませんでした", "しないだった"],
+      answer: "しなかった",
+      successMessage: "する → しない → しなかった.",
+    },
     commonMistakes: [
-      "Confundir la formación de た con て: 飲む→飲んだ (た-form), 飲んで (て-form). Mismo patrón, distinta terminación.",
-      "Usar ×なかったです como plain form — なかったです ya es un poco formal. Plain form pura es なかった.",
+      "Confundir た-form con て-form: 飲んだ (pasado) vs. 飲んで (conector).",
+      "Usar なかったです como plain form pura — la forma corta es solo なかった.",
     ],
     practicePrompts: [
       "Cuenta en registro informal qué hiciste el fin de semana: verbos en た-form.",
@@ -2411,37 +2485,42 @@ export const GENKI_I_GRAMMAR_CONTENT: GrammarContentItem[] = [
     pattern: "[V/adj en plain form] + N",
     shortMeaning: "Colocar una oración en plain form directamente antes de un sustantivo para describirlo.",
     explanation: [
-      "En japonés no existe «que» relativo como en español. Para decir «el libro que compré» o «la persona que habla japonés», simplemente pones la cláusula en plain form antes del sustantivo: {買|か}った{本|ほん} / {日本語|にほんご}を{話|はな}す{人|ひと}.",
-      "El tiempo y la polaridad de la cláusula modificadora se expresan en plain form (presente o pasado, afirmativo o negativo).",
-      "No se añade ninguna partícula extra entre la cláusula y el sustantivo — el sustantivo va directamente después.",
-      "El sujeto dentro de la cláusula relativa va con が (no は) porque no es el tema del enunciado principal.",
+      "No hay «que» relativo: la cláusula en plain form va directo antes del sustantivo.",
+      "Sin partícula extra entre la cláusula y el sustantivo.",
+      "El sujeto dentro de la cláusula lleva が, no は.",
     ],
     formation: [
-      "[V-plain] N          →  N que [hace/hizo V]",
-      "[V-plain-neg] N      →  N que no [hace/hizo V]",
-      "[い-adj] N           →  N que es [adj]  (mismo que adjetivo atributivo, L5)",
-      "[な-adj な] N        →  N que es [adj]",
+      "[V-plain] N",
+      "[い-adj] N",
     ],
     examples: [
       {
         jp: "これは{私|わたし}が{好|す}きな{歌|うた}です。",
         es: "Esta es una canción que me gusta.",
-        note: "好きな + 歌: の/が de sujeto dentro de la cláusula relativa.",
       },
       {
         jp: "{昨日|きのう}{食|た}べた{ケーキ|けーき}はおいしかったです。",
         es: "El pastel que comí ayer estaba delicioso.",
-        note: "食べた (pasado) + ケーキ = modificador en plain form pasado.",
       },
       {
         jp: "{日本語|にほんご}を{話|はな}す{人|ひと}はどこですか。",
         es: "¿Dónde está la persona que habla japonés?",
-        note: "Cláusula presente modificando 人.",
+      },
+      {
+        jp: "{私|わたし}が{書|か}いた{本|ほん}です。",
+        es: "Es el libro que escribí.",
       },
     ],
+    exercise: {
+      type: "word-order",
+      prompt: "Ordena: «El pastel que comí ayer estaba delicioso».",
+      tokens: ["おいしかったです", "ケーキは", "食べた", "昨日"],
+      answer: ["昨日", "食べた", "ケーキは", "おいしかったです"],
+      successMessage: "¡Bien! La cláusula va antes del sustantivo.",
+    },
     commonMistakes: [
-      "Colocar の entre cláusula y sustantivo: × {食|た}べたの{ケーキ|けーき} → ○ {食|た}べた{ケーキ|けーき} (no se pone の aquí).",
-      "Usar は para el sujeto dentro de la cláusula: × {私|わたし}は{書|か}いた{本|ほん} → ○ {私|わたし}が{書|か}いた{本|ほん}.",
+      "Colocar の entre cláusula y sustantivo: × 食べたのケーキ → ○ 食べたケーキ",
+      "Usar は para el sujeto dentro de la cláusula: × 私は書いた本 → ○ 私が書いた本",
     ],
     practicePrompts: [
       "Describe tres cosas que buscas en una pareja o amigo usando [adj/V]人.",
