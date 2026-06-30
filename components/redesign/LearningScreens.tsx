@@ -1489,7 +1489,6 @@ export function GrammarLearningScreen() {
   const [selectedPatternKey, setSelectedPatternKey] = useState<string | null>(
     null,
   );
-  const [showGrammarFurigana, setShowGrammarFurigana] = useState(true);
   const selectedModule =
     modules.find((module) => module.moduleNumber === selectedModuleNumber) ??
     null;
@@ -1659,8 +1658,25 @@ export function GrammarLearningScreen() {
     return null;
   }
 
-  const conciseExplanation = (selectedPattern.explanation ?? []).slice(0, 3);
-  const formationLines = (selectedPattern.formation ?? []).slice(0, 3);
+  const compactSentence = (value: string, limit = 118) => {
+    const cleaned = value.replace(/\s+/g, " ").trim();
+    if (cleaned.length <= limit) return cleaned;
+    const sentenceEnd = cleaned.search(/[.!?。！？]/);
+    if (sentenceEnd > 38 && sentenceEnd < limit) {
+      return cleaned.slice(0, sentenceEnd + 1);
+    }
+    return `${cleaned.slice(0, limit).trim()}...`;
+  };
+  const compactFormula = (value: string) => {
+    const [beforeArrow] = value.split("→");
+    return beforeArrow.trim() || value;
+  };
+  const conciseExplanation = (selectedPattern.explanation ?? [])
+    .slice(0, 3)
+    .map((paragraph) => compactSentence(paragraph));
+  const formationLines = (selectedPattern.formation ?? [])
+    .slice(0, 3)
+    .map((line) => compactFormula(line));
   const examples = (
     selectedPattern.examples?.length
       ? selectedPattern.examples
@@ -1680,8 +1696,6 @@ export function GrammarLearningScreen() {
         ? [fallbackInteraction]
         : []
   ).slice(0, 1);
-  const compactMistake = selectedPattern.commonMistakes?.[0];
-
   return (
     <section className={styles.grammarPremiumPage}>
       <div className={styles.grammarPremiumHeader}>
@@ -1700,16 +1714,6 @@ export function GrammarLearningScreen() {
             onClick={backToLessons}
           >
             ← Lecciones
-          </button>
-          <button
-            type="button"
-            className={`${styles.grammarFuriganaToggle} ${
-              showGrammarFurigana ? styles.grammarFuriganaToggleActive : ""
-            }`}
-            onClick={() => setShowGrammarFurigana((current) => !current)}
-            aria-pressed={showGrammarFurigana}
-          >
-            ふりがな
           </button>
           <span className={styles.grammarStreakPill}>🔥 1 día de racha</span>
         </div>
@@ -1753,11 +1757,6 @@ export function GrammarLearningScreen() {
                       <li key={paragraph}>{paragraph}</li>
                     ))}
                   </ul>
-                  {compactMistake ? (
-                    <p className={styles.grammarTinyNote}>
-                      Cuidado: {compactMistake}
-                    </p>
-                  ) : null}
                 </div>
               ) : null}
               <div className={styles.grammarExampleBox}>
@@ -1768,16 +1767,10 @@ export function GrammarLearningScreen() {
                   <div className={styles.grammarExampleItem} key={`${example.jp}-${example.es}`}>
                     <strong>
                       <FuriganaText
-                        text={
-                          showGrammarFurigana
-                            ? example.jpFurigana ?? example.jp
-                            : example.jp
-                        }
+                        text={example.jpFurigana ?? example.jp}
                       />
                     </strong>
-                    {example.reading && <small>{example.reading}</small>}
                     <em>{example.es}</em>
-                    {example.note && <p>{example.note}</p>}
                   </div>
                 ))}
               </div>
@@ -1808,16 +1801,12 @@ export function GrammarLearningScreen() {
                           key={`${line.speaker}-${line.jp}-${index}`}
                         >
                           <div className={styles.grammarDialogueAvatar}>
-                            {line.speaker}
+                            {line.speaker.slice(0, 1)}
                           </div>
                           <div className={styles.grammarDialogueBubble}>
                             <strong>
                               <FuriganaText
-                                text={
-                                  showGrammarFurigana
-                                    ? line.jpFurigana ?? line.jp
-                                    : line.jp
-                                }
+                                text={line.jpFurigana ?? line.jp}
                               />
                             </strong>
                             <em>{line.es}</em>
