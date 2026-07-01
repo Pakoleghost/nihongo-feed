@@ -1769,6 +1769,13 @@ export function GrammarLearningScreen() {
         ? [fallbackInteraction]
         : []
   ).slice(0, 1);
+  const previousPattern =
+    selectedIndex > 0 ? activeLesson.patterns[selectedIndex - 1] : null;
+  const nextPattern =
+    selectedIndex < activeLesson.patterns.length - 1
+      ? activeLesson.patterns[selectedIndex + 1]
+      : null;
+
   return (
     <section className={styles.grammarPremiumPage}>
       <div className={styles.grammarPremiumHeader}>
@@ -1814,6 +1821,63 @@ export function GrammarLearningScreen() {
                   ▶
                 </button>
               </header>
+              <nav
+                className={styles.grammarPatternRail}
+                aria-label="Patrones de esta lección"
+              >
+                <div className={styles.grammarPatternRailHeader}>
+                  <div>
+                    <span>Lección {activeLesson.lesson}</span>
+                    <strong>{activeLesson.title}</strong>
+                  </div>
+                  <div className={styles.grammarPatternRailActions}>
+                    <button
+                      type="button"
+                      disabled={!previousPattern}
+                      onClick={() => {
+                        if (previousPattern) {
+                          setSelectedPatternKey(patternKey(previousPattern));
+                        }
+                      }}
+                    >
+                      Anterior
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!nextPattern}
+                      onClick={() => {
+                        if (nextPattern) {
+                          setSelectedPatternKey(patternKey(nextPattern));
+                        }
+                      }}
+                    >
+                      Siguiente
+                    </button>
+                  </div>
+                </div>
+                <div className={styles.grammarPatternRailGrid}>
+                  {activeLesson.patterns.map((pattern, index) => {
+                    const key = patternKey(pattern);
+                    const isActive = key === patternKey(selectedPattern);
+
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        className={`${styles.grammarPatternRailItem} ${
+                          isActive ? styles.grammarPatternRailItemActive : ""
+                        }`}
+                        onClick={() => setSelectedPatternKey(key)}
+                        aria-current={isActive ? "true" : undefined}
+                      >
+                        <span>{String(index + 1).padStart(2, "0")}</span>
+                        <strong>{pattern.pattern}</strong>
+                        <em>{pattern.meaning}</em>
+                      </button>
+                    );
+                  })}
+                </div>
+              </nav>
               {formationLines.length ? (
                 <div className={styles.grammarFormationBox}>
                   <span>Estructura de la oración</span>
@@ -1851,7 +1915,7 @@ export function GrammarLearningScreen() {
                 <div className={styles.grammarInlineInteractions}>
                   {interactions.map((interaction, index) => (
                     <GrammarInteractionBlock
-                      key={`${interaction.type}-${index}`}
+                      key={`${patternKey(selectedPattern)}-${interaction.type}-${index}`}
                       interaction={interaction}
                     />
                   ))}
