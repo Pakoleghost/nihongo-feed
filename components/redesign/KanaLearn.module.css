@@ -369,8 +369,8 @@
 
 .kanaChartLayout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 282px;
-  gap: 22px;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 340px);
+  gap: 26px;
   align-items: start;
   margin-top: 28px;
 }
@@ -421,7 +421,7 @@
 
 .kanaChartCell,
 .kanaChartEmptyCell {
-  min-height: 82px;
+  min-height: clamp(82px, 5vw, 104px);
   border-radius: 14px;
 }
 
