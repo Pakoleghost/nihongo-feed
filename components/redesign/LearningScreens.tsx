@@ -135,6 +135,69 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return <div className={styles.sectionLabel}>{children}</div>;
 }
 
+const GRAMMAR_FURIGANA_REPLACEMENTS: Array<[string, string]> = [
+  ["日本語", "{日本語|にほんご}"],
+  ["韓国人", "{韓国人|かんこくじん}"],
+  ["日本人", "{日本人|にほんじん}"],
+  ["図書館", "{図書館|としょかん}"],
+  ["山田", "{山田|やまだ}"],
+  ["田中", "{田中|たなか}"],
+  ["学生", "{学生|がくせい}"],
+  ["先生", "{先生|せんせい}"],
+  ["時計", "{時計|とけい}"],
+  ["音楽", "{音楽|おんがく}"],
+  ["明日", "{明日|あした}"],
+  ["野菜", "{野菜|やさい}"],
+  ["昨日", "{昨日|きのう}"],
+  ["授業", "{授業|じゅぎょう}"],
+  ["九時", "{九時|くじ}"],
+  ["十時", "{十時|じゅうじ}"],
+  ["友達", "{友達|ともだち}"],
+  ["公園", "{公園|こうえん}"],
+  ["子供", "{子供|こども}"],
+  ["椅子", "{椅子|いす}"],
+  ["猫", "{猫|ねこ}"],
+  ["車", "{車|くるま}"],
+  ["教室", "{教室|きょうしつ}"],
+  ["映画", "{映画|えいが}"],
+  ["天気", "{天気|てんき}"],
+  ["有名", "{有名|ゆうめい}"],
+  ["寿司", "{寿司|すし}"],
+  ["名前", "{名前|なまえ}"],
+  ["辞書", "{辞書|じしょ}"],
+  ["父", "{父|ちち}"],
+  ["部屋", "{部屋|へや}"],
+  ["妹", "{妹|いもうと}"],
+  ["料理", "{料理|りょうり}"],
+  ["飲", "{飲|の}"],
+  ["勉強", "{勉強|べんきょう}"],
+  ["来", "{来|き}"],
+  ["食", "{食|た}"],
+  ["見", "{見|み}"],
+  ["持", "{持|も}"],
+  ["書", "{書|か}"],
+  ["使", "{使|つか}"],
+  ["借", "{借|か}"],
+  ["読", "{読|よ}"],
+  ["行", "{行|い}"],
+  ["私", "{私|わたし}"],
+  ["本", "{本|ほん}"],
+  ["人", "{人|ひと}"],
+  ["水", "{水|みず}"],
+  ["下", "{下|した}"],
+];
+
+function withGrammarFurigana(text: string) {
+  return GRAMMAR_FURIGANA_REPLACEMENTS.reduce((current, [source, replacement]) => {
+    const segments = current.split(/(\{[^}]+\})/g);
+    return segments
+      .map((segment) =>
+        segment.startsWith("{") ? segment : segment.replaceAll(source, replacement),
+      )
+      .join("");
+  }, text);
+}
+
 function GrammarWordOrderInteraction({
   interaction,
 }: {
@@ -166,7 +229,9 @@ function GrammarWordOrderInteraction({
   return (
     <div className={styles.grammarInteraction}>
       <span>Ordena</span>
-      <p>{interaction.prompt}</p>
+      <p>
+        <FuriganaText text={withGrammarFurigana(interaction.prompt)} />
+      </p>
       <div className={styles.grammarBuildLine}>
         {picked.length === 0 ? (
           <em>Toca las palabras en orden</em>
@@ -180,7 +245,7 @@ function GrammarWordOrderInteraction({
                 setStatus("idle");
               }}
             >
-              {token}
+              <FuriganaText text={withGrammarFurigana(token)} />
             </button>
           ))
         )}
@@ -195,7 +260,7 @@ function GrammarWordOrderInteraction({
               setStatus("idle");
             }}
           >
-            {token}
+            <FuriganaText text={withGrammarFurigana(token)} />
           </button>
         ))}
       </div>
@@ -232,7 +297,9 @@ function GrammarChoiceInteraction({
   return (
     <div className={styles.grammarInteraction}>
       <span>Elige</span>
-      <p>{interaction.prompt}</p>
+      <p>
+        <FuriganaText text={withGrammarFurigana(interaction.prompt)} />
+      </p>
       <div className={styles.grammarChoiceGrid}>
         {interaction.options.map((option) => (
           <button
@@ -247,7 +314,7 @@ function GrammarChoiceInteraction({
             }
             onClick={() => setSelected(option)}
           >
-            {option}
+            <FuriganaText text={withGrammarFurigana(option)} />
           </button>
         ))}
       </div>
@@ -277,9 +344,13 @@ function GrammarFillBlankInteraction({
   return (
     <div className={styles.grammarInteraction}>
       <span>Completa</span>
-      <p>{interaction.prompt}</p>
+      <p>
+        <FuriganaText text={withGrammarFurigana(interaction.prompt)} />
+      </p>
       <div className={styles.grammarFillLine}>
-        <strong>{interaction.before}</strong>
+        <strong>
+          <FuriganaText text={withGrammarFurigana(interaction.before)} />
+        </strong>
         <input
           value={value}
           onChange={(event) => {
@@ -288,7 +359,9 @@ function GrammarFillBlankInteraction({
           }}
           placeholder={interaction.placeholder ?? "respuesta"}
         />
-        <strong>{interaction.after}</strong>
+        <strong>
+          <FuriganaText text={withGrammarFurigana(interaction.after)} />
+        </strong>
       </div>
       <div className={styles.grammarInteractionActions}>
         <button type="button" onClick={() => setChecked(true)}>
